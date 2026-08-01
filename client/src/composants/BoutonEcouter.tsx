@@ -51,6 +51,15 @@ export function BoutonEcouter({
     <button
       type="button"
       className="cible cible-appel bouton-ecouter"
+      // `data-action="ecouter"` — ajouté à l'intégration de la campagne v2.
+      //
+      // C'est la prise mécanique de R15 (« aucune consigne n'existe uniquement à l'écrit »),
+      // et les onze moteurs de L2-E la portent déjà sur leur propre bouton. Ce bouton-ci est
+      // celui de la COQUILLE — le seul que voient les nœuds `colorie`, `place` et `trace`, qui
+      // n'en rendent pas d'autre. Sans l'attribut, `parcours-variete` mesurait zéro réécoute
+      // sur ces trois moteurs alors que le bouton était bien à l'écran : le défaut n'était pas
+      // l'absence du bouton, c'était l'absence de la marque.
+      data-action="ecouter"
       onClick={ecouter}
       aria-label={libelle}
       // JAMAIS `disabled` : réécouter pendant la lecture relance, ça ne bloque pas.

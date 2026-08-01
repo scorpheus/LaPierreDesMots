@@ -3,7 +3,25 @@
 // « Grille de cartes-profils avec avatar, UN TAP SUFFIT, AUCUN MOT DE PASSE. »
 // Aucun champ caché, aucune confirmation, aucune saisie pour entrer dans le jeu : un enfant de
 // 7 ans doit pouvoir démarrer sans qu'un adulte lui explique quoi que ce soit (R18).
-// La zone parent et son code à 4 chiffres ne sont PAS de ce lot (v2 § 11, hors périmètre D1).
+//
+// ─────────────────────────────────────────────────────────────────────────────────────────
+// PLACEHOLDER — à valider : L'EMPLACEMENT DE LA PORTE DE LA ZONE PARENT.
+//
+// L2-H a livré les deux écrans parent et L2-F leurs deux routes, mais **aucun lot n'avait le
+// droit de poser la porte** : le contrat gelé § 3.8 ne nomme aucun attribut pour elle, et le
+// § 7 n'en décrit que les écrans. `tests/e2e/parcours-parent.spec.ts` et
+// `tests/qualite/a11y-parent.spec.ts` attendaient donc un déclencheur `data-acces-parent` que
+// personne ne pouvait écrire — 7 cas rouges. La porte est posée ici, à l'intégration.
+//
+// Défaut retenu : **l'écran de choix de profil**, en pied de page. C'est le seul écran que
+// l'adulte traverse de toute façon (il pose la tablette, l'enfant tape son avatar), et c'est
+// celui où l'enfant passe le moins de temps. La v2 § 11 ne tranche pas l'emplacement ; la
+// question est consignée dans `Docs/questions-en-attente.md`. La déplacer ne demandera que de
+// changer le composant qui rend `<PorteParent>` : le chemin, lui, vit dans `routeur.tsx`.
+//
+// Ce que la porte n'est PAS : un cadenas, un avertissement, un écran d'échec. Elle ne bloque
+// rien pour l'enfant — le code protège le dashboard, pas le jeu (R14).
+// ─────────────────────────────────────────────────────────────────────────────────────────
 import { useCallback, useState } from 'react';
 import type { FormEvent, ReactElement } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -103,7 +121,16 @@ function CarteProfil({ profil, surChoix, surReglages }: ProprietesCarteProfil): 
   );
 }
 
-export function EcranProfils(): ReactElement {
+export interface ProprietesEcranProfils {
+  /**
+   * Ouvre la zone parent. Fournie par `routeur.tsx`, seul endroit du client qui connaisse les
+   * chemins — `EtatMagasin.ecran` ne porte que les cinq codes du contrat v1 § 7.1, et les deux
+   * écrans parent n'en font pas partie (défaut du contrat gelé, signalé par L2-F et L2-H).
+   */
+  readonly surAccesParent?: () => void;
+}
+
+export function EcranProfils({ surAccesParent }: ProprietesEcranProfils = {}): ReactElement {
   const magasin = useMagasin();
   const fileDAttente = useQueryClient();
   const [creationOuverte, fixerCreationOuverte] = useState(false);
@@ -296,6 +323,21 @@ export function EcranProfils(): ReactElement {
           ) : null}
         </form>
       ) : null}
+
+      {/* La porte de la zone parent. Discrète, en pied de page, et jamais présentée comme
+          une interdiction : c'est un endroit pour l'adulte, pas un mur pour l'enfant. */}
+      <footer style={{ marginBlockStart: 'auto', paddingBlockStart: '1rem' }}>
+        <button
+          type="button"
+          className="cible"
+          data-acces-parent="oui"
+          onClick={() => surAccesParent?.()}
+          aria-label="Ouvrir l’espace des parents"
+        >
+          <span aria-hidden="true">🔑</span>
+          <span>Espace des parents</span>
+        </button>
+      </footer>
     </main>
   );
 }

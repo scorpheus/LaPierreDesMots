@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600">
+  <!--
+    Décor BOUCHON (D2, § 8 n° 10) : trait noir sur blanc, régions fermées par construction.
+
+    SECOND habillage du moteur `trace`, écrit à l'intégration de la campagne v2. Motif : R13
+    — « une sortie complète ne rejoue jamais deux fois le même habillage » (v2 § 15). Les deux
+    nœuds `trace` livrés, `galeries-01` et `galeries-02`, pointaient tous deux sur
+    `galeries.tracer-cristal`, seul habillage `trace` du § 3.3. Mesuré, sortie citée :
+
+      Error: habillages joués dans l'ordre : clairiere.ecole, galeries.tracer-cristal,
+             galeries.tracer-cristal
+      Expected: 3   Received: 2
+
+    Ajouter un habillage ne coûte AUCUNE ligne de code (v2 § 7) : ce fichier et son JSON
+    suffisent, `registre-rendu.ts` n'est pas touché. C'est la promesse de variété vérifiée
+    en acte.
+
+    Même scène que l'ardoise de cristal, autre matière : la PAROI DE SABLE, sur laquelle on
+    grave au doigt. Une seule région coloriable, la paroi, au même endroit et de surface
+    équivalente — la prise du geste ne dépend pas du décor.
+
+    LE DÉCOR NE S'AGITE PAS ICI : « le décor s'agite, le texte jamais » (CLAUDE.md). Une
+    lettre à tracer est du déchiffrage ; le fond reste calme.
+  -->
+  <g id="calque-fond">
+    <path d="M 0 0 L 800 0 L 800 600 L 0 600 Z" fill="#FFFFFF" stroke="none"/>
+  </g>
+
+  <g id="calque-decor">
+    <!-- Strates de sable, à gauche. -->
+    <path d="M 40 180 L 200 172 L 200 196 L 40 204 Z" fill="none" stroke="#1B2440" stroke-width="3"/>
+    <path d="M 40 250 L 200 242 L 200 266 L 40 274 Z" fill="none" stroke="#1B2440" stroke-width="3"/>
+    <!-- Strates de sable, à droite. -->
+    <path d="M 600 200 L 760 192 L 760 216 L 600 224 Z" fill="none" stroke="#1B2440" stroke-width="3"/>
+    <path d="M 600 300 L 760 292 L 760 316 L 600 324 Z" fill="none" stroke="#1B2440" stroke-width="3"/>
+    <!-- Un tas de sable au pied de la paroi. -->
+    <path d="M 320 520 L 400 470 L 480 520 Z" fill="none" stroke="#1B2440" stroke-width="3"/>
+    <!-- Le sol de la galerie. -->
+    <path d="M 0 520 L 800 520 L 800 524 L 0 524 Z" fill="none" stroke="#1B2440" stroke-width="2"/>
+  </g>
+
+  <g id="calque-zones">
+    <path id="paroi" d="M 235 90 L 565 90 L 565 490 L 235 490 Z" fill="none" stroke="#1B2440" stroke-width="4"/>
+  </g>
+
+  <g id="calque-trait">
+    <path d="M 2 2 L 798 2 L 798 598 L 2 598 Z" fill="none" stroke="#1B2440" stroke-width="2"/>
+  </g>
+</svg>

@@ -82,7 +82,17 @@ function EcranChargement(): ReactElement {
 /** Racine : le choix de profil, précédé de l'attente tant que rien n'est chargé. */
 function RacineOuProfils(): ReactElement {
   const ecran = useEtatJeu((etat) => etat.ecran);
-  return ecran === 'chargement' ? <EcranChargement /> : <EcranProfils />;
+  const naviguer = useNavigate();
+  if (ecran === 'chargement') return <EcranChargement />;
+  return (
+    <EcranProfils
+      // La porte de la zone parent. L'écran ne connaît aucun chemin ; il reçoit un rappel,
+      // exactement comme les cinq autres hôtes de ce fichier.
+      surAccesParent={() => {
+        void naviguer({ to: CHEMINS.parent });
+      }}
+    />
+  );
 }
 
 // ─────────────────────────────────────────────── les hôtes qui câblent la navigation

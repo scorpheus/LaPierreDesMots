@@ -76,7 +76,41 @@ function extraireEtapes(contenu: unknown): readonly EtapeAffichable[] {
   if (typeof contenu !== 'object' || contenu === null) {
     return [];
   }
-  const consignes = (contenu as Record<string, unknown>)['consignes'];
+  const racine = contenu as Record<string, unknown>;
+
+  // ───────────────────────────────────────────────────────────────────────────────────────
+  // LA CONSIGNE UNIQUE — le moteur `trace` (L2-C) et lui seul.
+  //
+  // Son `jeu.contenu` porte `consigne: string` au singulier, pas `consignes: […]` : une lettre
+  // se trace sous UNE consigne. Cette fonction ne connaissait que la forme au pluriel, si bien
+  // que `etapes` restait vide, que `etapeCourante` valait `null`, et que **le bouton
+  // « Écouter » n'était pas rendu du tout** sur les nœuds `trace`.
+  //
+  // C'est une violation directe d'une règle non négociable — « aucune consigne n'existe
+  // uniquement à l'écrit, tout est audible en un tap » (R15, v2 § 5.4) — sur le moteur qui
+  // répond justement au besoin nommé de l'enfant (D23). Mesuré par `parcours-variete`, sortie
+  // citée :
+  //
+  //   expect(locator('[data-action="ecouter"]')).toHaveCount(1) failed
+  //     Expected: 1     Received: 0
+  //
+  // On lit donc les deux formes. Aucune n'est devinée : `consigne` et `consigneId` sont les
+  // noms du schéma de contenu de `trace` (contrat des features v2 § 4.3.3).
+  // ───────────────────────────────────────────────────────────────────────────────────────
+  const consigneUnique = racine['consigne'];
+  if (typeof consigneUnique === 'string' && consigneUnique.length > 0) {
+    const audioUnique = racine['audio'];
+    const idUnique = racine['consigneId'];
+    return [
+      {
+        id: typeof idUnique === 'string' ? idUnique : 'c1',
+        texte: consigneUnique,
+        audio: typeof audioUnique === 'string' ? audioUnique : null
+      }
+    ];
+  }
+
+  const consignes = racine['consignes'];
   if (!Array.isArray(consignes)) {
     return [];
   }

@@ -163,19 +163,46 @@ test.describe('parcours trace', () => {
     expect(await page.locator('[data-etat="echec"]').count()).toBe(0);
 
     // ── PUIS ON GRAVE JUSTE, lettre après lettre, trait après trait.
+    //
+    // ─────────────────────────────────────────────────────────────────────────────────────
+    // CORRECTION D'INTÉGRATION — le sondage ci-dessous ne pouvait pas aboutir sur le DERNIER
+    // trait d'une lettre, et il échouait donc systématiquement dès `b-panse`.
+    //
+    // `MoteurTrace` ne rend QUE la lettre courante — ce fichier l'affirme lui-même vingt
+    // lignes plus haut (`expect(nbTraits).toBe(contenu.lettres[0]?.traits.length)`). Quand le
+    // dernier trait d'une lettre est gravé, la lettre suivante prend la scène et le
+    // `[data-trait]` que l'on interrogeait DISPARAÎT. Mesuré au diagnostic, sortie citée :
+    //
+    //   locator.getAttribute: Test timeout exceeded.
+    //     - waiting for locator('[data-trait="b-panse"]')
+    //
+    // Le trait était bel et bien gravé : la page montrait déjà « Trace la lettre d ». C'est
+    // l'observation qui était impossible, pas le comportement qui était faux. On ajoute donc
+    // le seul état manquant — « la lettre a été quittée » —, et **uniquement pour le dernier
+    // trait d'une lettre**, là où il est le seul observable. Pour tous les autres traits,
+    // l'exigence reste `data-trait-etat="trace"`, inchangée.
+    // ─────────────────────────────────────────────────────────────────────────────────────
     for (const lettre of contenu.lettres) {
-      for (const trait of lettre.traits) {
+      for (const [rang, trait] of lettre.traits.entries()) {
         if ((await page.locator('[data-ecran="recompense"]').count()) > 0) break;
+        const dernierDeLaLettre = rang === lettre.traits.length - 1;
         await tracer(page, trait.points);
-        // On attend un ÉTAT : soit le trait est gravé, soit la récompense est déjà là.
+        // On attend un ÉTAT : le trait est gravé, la lettre est passée, ou la récompense est là.
         await expect
-          .poll(async () =>
-            (await page.locator('[data-ecran="recompense"]').count()) > 0
-              ? 'recompense'
-              : ((await page.locator(`[data-trait="${trait.id}"]`).getAttribute('data-trait-etat')) ??
-                'absent'),
-          )
-          .toMatch(/^(trace|recompense)$/);
+          .poll(async () => {
+            if ((await page.locator('[data-ecran="recompense"]').count()) > 0) return 'recompense';
+            if ((await page.locator(`[data-trait="${trait.id}"]`).count()) > 0) {
+              return (
+                (await page.locator(`[data-trait="${trait.id}"]`).getAttribute('data-trait-etat')) ??
+                'absent'
+              );
+            }
+            const affichee = await page
+              .locator('[data-moteur="trace"]')
+              .getAttribute('data-lettre');
+            return dernierDeLaLettre && affichee !== lettre.lettre ? 'lettre-suivante' : 'absent';
+          })
+          .toMatch(/^(trace|recompense|lettre-suivante)$/);
         expect(await page.locator('[data-etat="echec"]').count()).toBe(0);
       }
     }

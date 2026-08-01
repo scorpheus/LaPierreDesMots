@@ -137,8 +137,20 @@ export function PaletteConsigne(proprietes: ProprietesPaletteConsigne): ReactEle
 
   return (
     <div
+      // `data-moteur` a été RETIRÉ d'ici à l'intégration de la campagne v2.
+      //
+      // Le contrat v1 § 10, repris par le contrat des features v2 § 7, réserve cet attribut à
+      // « la racine de CHAQUE moteur » — une racine par écran. Cette palette est un composant
+      // interne du moteur `colorie`, pas sa racine : `MoteurColorie` le porte déjà. Le doublon
+      // n'a longtemps rien cassé parce qu'aucun test ne comptait ; `parcours-variete` (L2-E)
+      // compte, et il a mesuré la vérité — sortie citée :
+      //
+      //   expect(locator('[data-moteur]')).toHaveCount(1) failed
+      //     Expected: 1     Received: 2
+      //
+      // Aucun style ni aucun test ne le sélectionnait : la mise en forme passe par la classe
+      // `pierre-palette`, et les seuls sélecteurs `[data-moteur=…]` du dépôt visent une racine.
       className={`pierre-palette${animationsDesactivees ? ' pierre-palette--calme' : ''}`}
-      data-moteur="colorie"
     >
       <style>{STYLES_PALETTE}</style>
 

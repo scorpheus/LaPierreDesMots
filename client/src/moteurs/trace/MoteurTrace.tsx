@@ -145,7 +145,28 @@ export function MoteurTrace(
 
   const auContact = useCallback(
     (evenement: PointerEventReact<SVGSVGElement>) => {
-      evenement.currentTarget.setPointerCapture?.(evenement.pointerId);
+      // ─────────────────────────────────────────────────────────────────────────────────
+      // La capture de pointeur est un CONFORT — elle garde les `pointermove` sur le SVG même
+      // si le doigt en sort. Elle n'est jamais une condition pour tracer.
+      //
+      // `setPointerCapture` LÈVE `NotFoundError` quand l'identifiant de pointeur n'est plus
+      // actif : deux doigts posés puis relâchés dans le désordre, un `pointerdown` rejoué,
+      // un évènement synthétique. Le `?.` ne protégeait que de l'absence de la méthode, pas
+      // de son exception. Mesuré par `tests/e2e/singe.spec.ts` — sortie citée :
+      //
+      //   Error: aucune exception non capturée après 1200 taps (graine 20260801)
+      //   + "NotFoundError: Failed to execute 'setPointerCapture' on 'Element': No active
+      //      pointer with the given id is found."  (× 14)
+      //
+      // Une exception non capturée pendant un tracé, c'est l'écran blanc devant l'enfant :
+      // le pire défaut possible sur cette application (annexe T § 5, suite « singe »). On
+      // avale l'échec de capture et on trace quand même.
+      // ─────────────────────────────────────────────────────────────────────────────────
+      try {
+        evenement.currentTarget.setPointerCapture?.(evenement.pointerId);
+      } catch {
+        // Sans capture, le geste reste jouable : c'est le seul comportement acceptable.
+      }
       emettre({ type: 'commencerGeste', echantillon: echantillonner(evenement) });
     },
     [echantillonner, emettre],

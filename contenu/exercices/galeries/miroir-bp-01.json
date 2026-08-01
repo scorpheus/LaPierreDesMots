@@ -8,7 +8,7 @@
   "difficulte": 2,
   "jeu": {
     "moteur": "trace",
-    "habillage": "galeries.tracer-cristal",
+    "habillage": "galeries.tracer-paroi",
     "noeud": "galeries-02",
     "etoiles": {
       "sansAide": true,
