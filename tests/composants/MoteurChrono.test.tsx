@@ -23,7 +23,6 @@ import { moteurChrono } from '@partage/moteurs/chrono/moteur';
 import { MoteurChrono } from '@client/moteurs/chrono/MoteurChrono';
 import type {
   ActionChrono,
-  ContenuChrono,
   EtatChrono,
 } from '@partage/moteurs/chrono/types';
 import type { Habillage } from '@pierre/partage';
@@ -61,25 +60,7 @@ function servicesJeuDeTest(): ServicesJeu {
 
 const services = servicesJeuDeTest();
 
-const contenu: ContenuChrono = {
-  consignes: [
-    {
-      id: 'c1',
-      texte: 'Numérote les images dans l’ordre.',
-      forme: 'imperative',
-      audio: null,
-      recit: 'Le loup se réveille, puis il sort, puis il regarde la lune.',
-      ordre: ['vig-reveil', 'vig-sortie', 'vig-lune'],
-      motsCles: ['numérote', 'images', 'ordre'],
-    },
-  ],
-  vignettes: [
-    { id: 'vig-reveil', libelle: 'il se réveille', asset: null, taille: [200, 160] },
-    { id: 'vig-sortie', libelle: 'il sort', asset: null, taille: [200, 160] },
-    { id: 'vig-lune', libelle: 'il regarde la lune', asset: null, taille: [200, 160] },
-  ],
-  competence: 'comp.chronologie',
-};
+import { contenuChrono as contenu } from '../fixtures/moteurs/chrono.js';
 
 /**
  * Le harnais expose le résumé et la progression en `data-*`. C'est volontaire : les

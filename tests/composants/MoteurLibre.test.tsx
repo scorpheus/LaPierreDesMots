@@ -23,7 +23,6 @@ import { moteurLibre } from '@partage/moteurs/libre/moteur';
 import { MoteurLibre } from '@client/moteurs/libre/MoteurLibre';
 import type {
   ActionLibre,
-  ContenuLibre,
   EtatLibre,
 } from '@partage/moteurs/libre/types';
 import type { Habillage } from '@pierre/partage';
@@ -61,11 +60,7 @@ function servicesJeuDeTest(): ServicesJeu {
 
 const services = servicesJeuDeTest();
 
-const contenu: ContenuLibre = {
-  regions: ['chaudron-ventre', 'anse', 'flamme'],
-  nuancierAutorise: ['rouge', 'orange', 'jaune'],
-  competence: 'libre.aucune',
-};
+import { contenuLibre as contenu } from '../fixtures/moteurs/libre.js';
 
 /**
  * Le harnais expose le résumé et la progression en `data-*`. C'est volontaire : les

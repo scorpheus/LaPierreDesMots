@@ -40,7 +40,7 @@ function Barre({
 }): ReactElement {
   return (
     <div style={{ display: 'grid', gap: '0.25rem' }}>
-      <span style={{ fontSize: '0.875rem', color: 'var(--grisaille)' }}>
+      <span style={{ fontSize: '0.875rem', color: 'var(--texte-secondaire)' }}>
         {libelle} — {pourcent(valeur)}
       </span>
       <div

@@ -61,7 +61,7 @@ export function BoutonExport({ profil }: ProprietesBoutonExport): ReactElement {
       <h2 className="titre" style={{ fontSize: '1.5rem', margin: 0 }}>
         Exports
       </h2>
-      <p style={{ margin: 0, color: 'var(--grisaille)' }}>
+      <p style={{ margin: 0, color: 'var(--texte-secondaire)' }}>
         Fichiers CSV, prêts pour un tableur. Ce sont les données brutes, sans arrondi.
       </p>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>

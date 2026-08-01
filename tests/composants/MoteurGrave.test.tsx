@@ -23,7 +23,6 @@ import { moteurGrave } from '@partage/moteurs/grave/moteur';
 import { MoteurGrave } from '@client/moteurs/grave/MoteurGrave';
 import type {
   ActionGrave,
-  ContenuGrave,
   EtatGrave,
 } from '@partage/moteurs/grave/types';
 import type { Habillage } from '@pierre/partage';
@@ -61,21 +60,7 @@ function servicesJeuDeTest(): ServicesJeu {
 
 const services = servicesJeuDeTest();
 
-const contenu: ContenuGrave = {
-  consignes: [
-    {
-      id: 'c1',
-      texte: 'Grave la lettre qui manque.',
-      forme: 'imperative',
-      audio: null,
-      mot: 'bal',
-      trous: [{ id: 'trou-un', position: 0, attendu: 'b' }],
-      motsCles: ['grave', 'lettre'],
-    },
-  ],
-  clavier: ['b', 'd', 'p'],
-  competence: 'gph.b.d',
-};
+import { contenuGrave as contenu } from '../fixtures/moteurs/grave.js';
 
 /**
  * Le harnais expose le résumé et la progression en `data-*`. C'est volontaire : les

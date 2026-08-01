@@ -87,7 +87,7 @@ export function CourbeLatence({ points }: ProprietesCourbeLatence): ReactElement
       <h2 className="titre" style={{ fontSize: '1.5rem', margin: 0 }}>
         Vitesse de reconnaissance
       </h2>
-      <p style={{ margin: 0, color: 'var(--grisaille)' }}>
+      <p style={{ margin: 0, color: 'var(--texte-secondaire)' }}>
         Médiane et écart habituel, par jour. Ce qui compte est le sens de la pente, pas la valeur.
       </p>
 
@@ -106,10 +106,10 @@ export function CourbeLatence({ points }: ProprietesCourbeLatence): ReactElement
           stroke="var(--grisaille)"
           strokeWidth={2}
         />
-        <text x={4} y={MARGE.haut + 10} fontSize={12} fill="var(--grisaille)">
+        <text x={4} y={MARGE.haut + 10} fontSize={12} fill="var(--texte-secondaire)">
           {`${String(Math.round(maxMs))} ms`}
         </text>
-        <text x={4} y={HAUTEUR - MARGE.bas} fontSize={12} fill="var(--grisaille)">
+        <text x={4} y={HAUTEUR - MARGE.bas} fontSize={12} fill="var(--texte-secondaire)">
           0 ms
         </text>
 

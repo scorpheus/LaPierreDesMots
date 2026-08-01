@@ -23,7 +23,6 @@ import { moteurTri } from '@partage/moteurs/tri/moteur';
 import { MoteurTri } from '@client/moteurs/tri/MoteurTri';
 import type {
   ActionTri,
-  ContenuTri,
   EtatTri,
 } from '@partage/moteurs/tri/types';
 import type { Habillage } from '@pierre/partage';
@@ -61,61 +60,7 @@ function servicesJeuDeTest(): ServicesJeu {
 
 const services = servicesJeuDeTest();
 
-const contenu: ContenuTri = {
-  consignes: [
-    {
-      id: 'c1',
-      texte: 'Range les mots dans le bon panier.',
-      forme: 'imperative',
-      audio: null,
-      aRanger: ['mot-loup'],
-      motsCles: ['range', 'mots', 'panier'],
-    },
-  ],
-  receptacles: [
-    {
-      id: 'panier-ou',
-      libelle: 'le panier « ou »',
-      critere: 'j’entends [u]',
-      zone: [
-        [40, 300],
-        [400, 300],
-        [400, 560],
-        [40, 560],
-      ],
-    },
-    {
-      id: 'panier-on',
-      libelle: 'le panier « on »',
-      critere: 'j’entends [ɔ̃]',
-      zone: [
-        [520, 300],
-        [900, 300],
-        [900, 560],
-        [520, 560],
-      ],
-    },
-  ],
-  elements: [
-    {
-      id: 'mot-loup',
-      libelle: 'loup',
-      asset: null,
-      receptacleAttendu: 'panier-ou',
-      confusionAvec: 'long',
-    },
-    // Le schéma exige au moins deux éléments, et il a raison : un tri à un seul élément
-    // n'oppose aucun choix, donc n'exerce aucune lecture.
-    {
-      id: 'mot-long',
-      libelle: 'long',
-      asset: null,
-      receptacleAttendu: 'panier-on',
-      confusionAvec: 'loup',
-    },
-  ],
-  competence: 'gph.ou',
-};
+import { contenuTri as contenu } from '../fixtures/moteurs/tri.js';
 
 /**
  * Le harnais expose le résumé et la progression en `data-*`. C'est volontaire : les

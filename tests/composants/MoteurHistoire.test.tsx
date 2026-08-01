@@ -23,7 +23,6 @@ import { moteurHistoire } from '@partage/moteurs/histoire/moteur';
 import { MoteurHistoire } from '@client/moteurs/histoire/MoteurHistoire';
 import type {
   ActionHistoire,
-  ContenuHistoire,
   EtatHistoire,
 } from '@partage/moteurs/histoire/types';
 import type { Habillage } from '@pierre/partage';
@@ -61,28 +60,7 @@ function servicesJeuDeTest(): ServicesJeu {
 
 const services = servicesJeuDeTest();
 
-const contenu: ContenuHistoire = {
-  titre: 'Le loup et la lune',
-  recit:
-    'Le loup sort la nuit. Il regarde la lune. Il n’a pas peur du noir, mais il ' +
-    'préfère rentrer avant le jour.',
-  audioRecit: null,
-  questions: [
-    {
-      id: 'c1',
-      texte: 'Le loup sort la nuit.',
-      audio: null,
-      options: ['opt-vrai', 'opt-faux'],
-      reponse: 'opt-vrai',
-      motsCles: ['loup', 'nuit'],
-    },
-  ],
-  options: [
-    { id: 'opt-vrai', libelle: 'vrai', confusionAvec: null },
-    { id: 'opt-faux', libelle: 'faux', confusionAvec: 'vrai' },
-  ],
-  competence: 'comp.texte.court',
-};
+import { contenuHistoire as contenu } from '../fixtures/moteurs/histoire.js';
 
 /**
  * Le harnais expose le résumé et la progression en `data-*`. C'est volontaire : les

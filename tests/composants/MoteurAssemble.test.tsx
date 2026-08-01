@@ -23,7 +23,6 @@ import { moteurAssemble } from '@partage/moteurs/assemble/moteur';
 import { MoteurAssemble } from '@client/moteurs/assemble/MoteurAssemble';
 import type {
   ActionAssemble,
-  ContenuAssemble,
   EtatAssemble,
 } from '@partage/moteurs/assemble/types';
 import type { Habillage } from '@pierre/partage';
@@ -61,25 +60,7 @@ function servicesJeuDeTest(): ServicesJeu {
 
 const services = servicesJeuDeTest();
 
-const contenu: ContenuAssemble = {
-  consignes: [
-    {
-      id: 'c1',
-      texte: 'Assemble le mot « tapis ».',
-      forme: 'imperative',
-      audio: null,
-      mot: 'tapis',
-      solution: ['bloc-ta', 'bloc-pis'],
-      motsCles: ['assemble', 'mot'],
-    },
-  ],
-  blocs: [
-    { id: 'bloc-ta', libelle: 'ta', intrus: false, confusionAvec: null },
-    { id: 'bloc-pis', libelle: 'pis', intrus: false, confusionAvec: null },
-    { id: 'bloc-bis', libelle: 'bis', intrus: true, confusionAvec: 'pis' },
-  ],
-  competence: 'syl.simple',
-};
+import { contenuAssemble as contenu } from '../fixtures/moteurs/assemble.js';
 
 /**
  * Le harnais expose le résumé et la progression en `data-*`. C'est volontaire : les

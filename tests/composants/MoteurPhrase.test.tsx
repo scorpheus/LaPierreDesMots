@@ -23,7 +23,6 @@ import { moteurPhrase } from '@partage/moteurs/phrase/moteur';
 import { MoteurPhrase } from '@client/moteurs/phrase/MoteurPhrase';
 import type {
   ActionPhrase,
-  ContenuPhrase,
   EtatPhrase,
 } from '@partage/moteurs/phrase/types';
 import type { Habillage } from '@pierre/partage';
@@ -61,25 +60,7 @@ function servicesJeuDeTest(): ServicesJeu {
 
 const services = servicesJeuDeTest();
 
-const contenu: ContenuPhrase = {
-  consignes: [
-    {
-      id: 'c1',
-      texte: 'Remets les mots dans l’ordre.',
-      forme: 'imperative',
-      audio: null,
-      phrase: 'Le loup dort.',
-      ordre: ['etiq-le', 'etiq-loup', 'etiq-dort'],
-      motsCles: ['remets', 'mots', 'ordre'],
-    },
-  ],
-  etiquettes: [
-    { id: 'etiq-le', mot: 'Le', intrus: false },
-    { id: 'etiq-loup', mot: 'loup', intrus: false },
-    { id: 'etiq-dort', mot: 'dort.', intrus: false },
-  ],
-  competence: 'comp.phrase.ordre',
-};
+import { contenuPhrase as contenu } from '../fixtures/moteurs/phrase.js';
 
 /**
  * Le harnais expose le résumé et la progression en `data-*`. C'est volontaire : les

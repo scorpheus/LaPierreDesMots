@@ -34,7 +34,7 @@ export function FileRelecture({ entrees, surDecision }: ProprietesFileRelecture)
       <h2 className="titre" style={{ fontSize: '1.5rem', margin: 0 }}>
         Contenus à relire
       </h2>
-      <p style={{ margin: 0, color: 'var(--grisaille)' }}>
+      <p style={{ margin: 0, color: 'var(--texte-secondaire)' }}>
         Rien de ce qui est listé ici n’a encore été proposé à l’enfant.
       </p>
 
@@ -55,7 +55,7 @@ export function FileRelecture({ entrees, surDecision }: ProprietesFileRelecture)
               }}
             >
               <strong>{entree.exercice}</strong>
-              <code style={{ fontSize: '0.875rem', color: 'var(--grisaille)' }}>
+              <code style={{ fontSize: '0.875rem', color: 'var(--texte-secondaire)' }}>
                 {entree.chemin}
               </code>
               <label style={{ display: 'grid', gap: '0.25rem' }}>

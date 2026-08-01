@@ -36,7 +36,19 @@ export function Parchemin({
     >
       <svg
         viewBox={viewBox}
-        role="img"
+        // `role="group"` et non `role="img"` — corrigé à l'intégration de la campagne v2.
+        //
+        // Ce parchemin ACCUEILLE des enfants interactifs : les six prises de région d'
+        // `EcranCarte` sont des `role="button"` focalisables. Or un `role="img"` déclare un
+        // contenu graphique atomique : ses descendants sortent de l'arbre d'accessibilité, et
+        // le lecteur d'écran ne peut plus atteindre les six régions. axe-core le nomme, et
+        // c'est une violation `serious`. Mesuré, sortie citée :
+        //
+        //   Error: axe-core sur l'écran « carte »
+        //   + "nested-interactive (serious) — 1 nœud(s)"
+        //
+        // `group` garde le nom accessible du parchemin ET laisse les prises accessibles.
+        role="group"
         aria-label={titre}
         style={{
           inlineSize: '100%',

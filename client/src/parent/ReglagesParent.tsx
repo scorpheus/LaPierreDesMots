@@ -142,7 +142,7 @@ export function ReglagesParent({ surChangement }: ProprietesReglagesParent): Rea
         Animations calmes
       </label>
 
-      <p style={{ margin: 0, color: 'var(--grisaille)' }}>
+      <p style={{ margin: 0, color: 'var(--texte-secondaire)' }}>
         Ces trois réglages sont gardés sur cet appareil. La sauvegarde des données de jeu se
         fait par les exports ci-dessus.
       </p>

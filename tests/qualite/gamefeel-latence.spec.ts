@@ -125,6 +125,24 @@ test.describe('game feel — la règle des 100 ms', () => {
     for (let appui = 0; appui < APPUIS; appui += 1) {
       const x = boite!.x + boite!.width * (0.2 + 0.03 * (appui % 20));
       const y = boite!.y + boite!.height * 0.6;
+      // ─────────────────────────────────────────────────────────────────────────────────
+      // ON ATTEND QUE LA MARQUE SOIT RETOMBÉE AVANT DE RAPPUYER.
+      //
+      // `data-appui` retombe à `non` 120 ms après l'appui (`DUREE_APPUI_MS`). Le sondage
+      // ci-dessous ne repartait que sur le COMPTE des mesures : dès qu'une mesure était
+      // enregistrée, l'appui suivant partait — souvent dans la fenêtre des 120 ms, alors que
+      // l'attribut valait encore `oui`. React n'écrit alors aucune valeur nouvelle, le
+      // `MutationObserver` ne voit rien, et le sondage attendait une mesure qui ne viendrait
+      // jamais. Mesuré, sortie citée :
+      //
+      //   Error: page.waitForFunction: Test timeout of 90000ms exceeded.
+      //
+      // Ce n'est pas une attente arbitraire (annexe T § 6, `waitForTimeout` interdit) : on
+      // attend un ÉTAT du DOM, celui qui rend l'appui suivant mesurable. La mesure en sort
+      // plus juste, pas plus indulgente — chaque latence part d'une marque retombée.
+      // ─────────────────────────────────────────────────────────────────────────────────
+      await expect(page.locator('[data-ecran="noeud"][data-appui="non"]')).toHaveCount(1);
+
       await page.mouse.click(x, y);
       // On attend un ÉTAT — la mesure enregistrée — jamais une durée (annexe T § 6).
       await page.waitForFunction(

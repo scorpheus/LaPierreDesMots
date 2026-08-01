@@ -23,7 +23,6 @@ import { moteurPaires } from '@partage/moteurs/paires/moteur';
 import { MoteurPaires } from '@client/moteurs/paires/MoteurPaires';
 import type {
   ActionPaires,
-  ContenuPaires,
   EtatPaires,
 } from '@partage/moteurs/paires/types';
 import type { Habillage } from '@pierre/partage';
@@ -61,25 +60,7 @@ function servicesJeuDeTest(): ServicesJeu {
 
 const services = servicesJeuDeTest();
 
-const contenu: ContenuPaires = {
-  consignes: [
-    {
-      id: 'c1',
-      texte: 'Retrouve le mot et son image.',
-      forme: 'imperative',
-      audio: null,
-      aApparier: ['paire-loup'],
-      motsCles: ['retrouve', 'mot', 'image'],
-    },
-  ],
-  cartes: [
-    { id: 'carte-mot-loup', libelle: 'loup', face: 'mot', asset: null, paire: 'paire-loup' },
-    { id: 'carte-img-loup', libelle: 'un loup', face: 'image', asset: null, paire: 'paire-loup' },
-    { id: 'carte-mot-roue', libelle: 'roue', face: 'mot', asset: null, paire: 'paire-roue' },
-    { id: 'carte-img-roue', libelle: 'une roue', face: 'image', asset: null, paire: 'paire-roue' },
-  ],
-  competence: 'lex.mot.image',
-};
+import { contenuPaires as contenu } from '../fixtures/moteurs/paires.js';
 
 /**
  * Le harnais expose le résumé et la progression en `data-*`. C'est volontaire : les

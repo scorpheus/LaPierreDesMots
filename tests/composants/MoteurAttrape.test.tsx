@@ -23,7 +23,6 @@ import { moteurAttrape } from '@partage/moteurs/attrape/moteur';
 import { MoteurAttrape } from '@client/moteurs/attrape/MoteurAttrape';
 import type {
   ActionAttrape,
-  ContenuAttrape,
   EtatAttrape,
 } from '@partage/moteurs/attrape/types';
 import type { Habillage } from '@pierre/partage';
@@ -61,56 +60,7 @@ function servicesJeuDeTest(): ServicesJeu {
 
 const services = servicesJeuDeTest();
 
-const contenu: ContenuAttrape = {
-  consignes: [
-    {
-      id: 'c1',
-      texte: 'Attrape la lettre « b ».',
-      forme: 'imperative',
-      audio: null,
-      aAttraper: ['lettre-b'],
-      motsCles: ['attrape', 'lettre'],
-    },
-    {
-      id: 'c2',
-      texte: 'Attrape la lettre « p ».',
-      forme: 'imperative',
-      audio: null,
-      aAttraper: ['lettre-p'],
-      motsCles: ['attrape', 'lettre'],
-    },
-  ],
-  cibles: [
-    {
-      id: 'lettre-b',
-      libelle: 'b',
-      bonne: true,
-      asset: null,
-      depart: [100, 100],
-      taille: [140, 140],
-      confusionAvec: null,
-    },
-    {
-      id: 'lettre-p',
-      libelle: 'p',
-      bonne: true,
-      asset: null,
-      depart: [400, 100],
-      taille: [140, 140],
-      confusionAvec: null,
-    },
-    {
-      id: 'lettre-d',
-      libelle: 'd',
-      bonne: false,
-      asset: null,
-      depart: [700, 100],
-      taille: [140, 140],
-      confusionAvec: 'b',
-    },
-  ],
-  competence: 'gph.b.d',
-};
+import { contenuAttrape as contenu } from '../fixtures/moteurs/attrape.js';
 
 /**
  * Le harnais expose le résumé et la progression en `data-*`. C'est volontaire : les

@@ -23,7 +23,6 @@ import { moteurChemin } from '@partage/moteurs/chemin/moteur';
 import { MoteurChemin } from '@client/moteurs/chemin/MoteurChemin';
 import type {
   ActionChemin,
-  ContenuChemin,
   EtatChemin,
 } from '@partage/moteurs/chemin/types';
 import type { Habillage } from '@pierre/partage';
@@ -61,50 +60,7 @@ function servicesJeuDeTest(): ServicesJeu {
 
 const services = servicesJeuDeTest();
 
-const contenu: ContenuChemin = {
-  consignes: [
-    {
-      id: 'c1',
-      texte: 'Suis les cases où tu entends [u].',
-      forme: 'imperative',
-      audio: null,
-      depart: 'case-depart',
-      parcours: ['case-loup', 'case-roue'],
-      motsCles: ['suis', 'cases'],
-    },
-  ],
-  cases: [
-    {
-      id: 'case-depart',
-      libelle: 'départ',
-      position: [80, 300],
-      voisines: ['case-loup', 'case-long'],
-      confusionAvec: null,
-    },
-    {
-      id: 'case-loup',
-      libelle: 'loup',
-      position: [300, 200],
-      voisines: ['case-depart', 'case-roue'],
-      confusionAvec: null,
-    },
-    {
-      id: 'case-long',
-      libelle: 'long',
-      position: [300, 420],
-      voisines: ['case-depart'],
-      confusionAvec: 'loup',
-    },
-    {
-      id: 'case-roue',
-      libelle: 'roue',
-      position: [560, 200],
-      voisines: ['case-loup'],
-      confusionAvec: null,
-    },
-  ],
-  competence: 'gph.ou',
-};
+import { contenuChemin as contenu } from '../fixtures/moteurs/chemin.js';
 
 /**
  * Le harnais expose le résumé et la progression en `data-*`. C'est volontaire : les

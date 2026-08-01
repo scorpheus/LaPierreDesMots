@@ -77,6 +77,22 @@
   --lagon: #2FA8E0;
   --grisaille: #8E97A8;
 
+  /* ── Texte secondaire — AJOUTÉ à l'intégration de la campagne v2, à côté de la palette.
+     La palette v2 § 9.2 n'est pas touchée : ses sept jetons gardent leur valeur au bit près.
+
+     `--grisaille` (#8E97A8) est le jeton du VOILE : ce qui n'est pas encore rallumé. Ce n'est
+     pas une couleur de texte, et les écrans parent l'employaient comme telle. Mesuré sur le
+     parchemin #FFF6E3 :
+
+         #8E97A8 sur #FFF6E3  →  2,74:1     WCAG AA exige 4,5:1
+         #5F6371 sur #FFF6E3  →  5,57:1
+
+     axe-core comptait 32 nœuds en violation `serious` sur le seul écran du dashboard. La
+     valeur retenue est celle que `PaletteConsigne` avait déjà calculée et justifiée pour les
+     consignes estompées : même fond, même calcul, une seule valeur dans le dépôt.
+     Toucher à ce nombre sans refaire le calcul rouvre le défaut. */
+  --texte-secondaire: #5F6371;
+
   /* Nuancier de coloriage — 11 couleurs, écart assumé n° 2 du contrat § 12. Il est AJOUTÉ à
      côté de la palette, il ne la modifie pas. Six valeurs reprennent exactement un jeton ;
      les quatre autres (rouge, orange, vert, violet) sont des aplats francs de registre BD,

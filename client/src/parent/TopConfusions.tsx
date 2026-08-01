@@ -53,7 +53,7 @@ export function TopConfusions({
       <h2 className="titre" style={{ fontSize: '1.5rem', margin: 0 }}>
         Lettres confondues
       </h2>
-      <p style={{ margin: 0, color: 'var(--grisaille)' }}>
+      <p style={{ margin: 0, color: 'var(--texte-secondaire)' }}>
         Les inversions touchent plus de 80&nbsp;% des enfants en CP&nbsp;: c’est une étape
         normale. Ce qui se suit ici, c’est le sens de la courbe, axe par axe.
       </p>
@@ -109,7 +109,7 @@ export function TopConfusions({
       ))}
 
       {/* Le chiffre qui empêche un tableau vide de mentir. Il est visible, pas caché en note. */}
-      <p data-confusions-ecartees={String(ecartees)} style={{ margin: 0, color: 'var(--grisaille)' }}>
+      <p data-confusions-ecartees={String(ecartees)} style={{ margin: 0, color: 'var(--texte-secondaire)' }}>
         {ecartees === 0
           ? 'Toutes les confusions observées portent un axe.'
           : `${String(ecartees)} confusion(s) observée(s) sans axe identifiable : elles ne sont pas comptées ci-dessus.`}

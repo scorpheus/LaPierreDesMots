@@ -23,7 +23,6 @@ import { moteurEclair } from '@partage/moteurs/eclair/moteur';
 import { MoteurEclair } from '@client/moteurs/eclair/MoteurEclair';
 import type {
   ActionEclair,
-  ContenuEclair,
   EtatEclair,
 } from '@partage/moteurs/eclair/types';
 import type { Habillage } from '@pierre/partage';
@@ -61,26 +60,7 @@ function servicesJeuDeTest(): ServicesJeu {
 
 const services = servicesJeuDeTest();
 
-const contenu: ContenuEclair = {
-  consignes: [
-    {
-      id: 'c1',
-      texte: 'Quel mot as-tu vu ?',
-      mot: 'roue',
-      forme: 'imperative',
-      audio: null,
-      expositionMs: 400,
-      options: ['opt-roue', 'opt-rue'],
-      reponse: 'opt-roue',
-      motsCles: ['quel', 'mot'],
-    },
-  ],
-  options: [
-    { id: 'opt-roue', libelle: 'roue', bonne: true, confusionAvec: null },
-    { id: 'opt-rue', libelle: 'rue', bonne: false, confusionAvec: 'roue' },
-  ],
-  competence: 'gph.ou',
-};
+import { contenuEclair as contenu } from '../fixtures/moteurs/eclair.js';
 
 /**
  * Le harnais expose le résumé et la progression en `data-*`. C'est volontaire : les
