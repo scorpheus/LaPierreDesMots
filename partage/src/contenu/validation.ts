@@ -276,3 +276,134 @@ export function validerBlocJeu(exercice: Exercice, habillage: Habillage): Rappor
 
   return rapport(problemes);
 }
+
+// ═══════════════════════════════════════════════════ l'étape bloquante : les régions fermées
+//
+// « Un trait interrompu d'un pixel fait fuiter le remplissage sur toute l'image »
+// (CLAUDE.md, annexe P § 3.2). C'est LA vérification bloquante de la chaîne image, et elle
+// n'avait aucun contrôle automatique : `estCheminFerme` vivait dans le composant de rendu
+// `client/src/moteurs/colorie/SceneSvg.tsx`, exporté « destiné à L-G », et n'était appelé
+// nulle part — un script Node ne sait pas importer un `.tsx`.
+//
+// Elle vit ici parce que c'est le seul module que `scripts/test-contenu.mjs` (Node pur, via
+// `dist/`) ET les tests TypeScript peuvent atteindre. Elle ne dépend pas d'Ajv, et le client
+// ne l'importe pas : aucun coût de bundle.
+//
+// ÉCART AU CONTRAT GELÉ, assumé et déclaré : le § 11.2 fige la surface de
+// `@pierre/partage/validation` sur quatre symboles, et le § 9.8 fige les 6 contrôles de
+// `test:contenu`. Ce contrôle est un SEPTIÈME, qui vient de l'annexe P § 3.2 et non de
+// l'annexe T § T1 — il n'en contredit aucun, il comble un trou que la revue a mesuré.
+
+/**
+ * Un chemin est fermé si chacune de ses sous-courbes commence par `M`/`m` et se termine par
+ * `Z`/`z`. Une seule sous-courbe ouverte suffit à faire fuiter la couleur : le `evenodd` d'un
+ * trou non refermé peint alors tout ce qui l'entoure.
+ */
+export function estCheminFerme(d: string): boolean {
+  const nettoye = d.trim();
+  if (nettoye.length === 0) return false;
+  if (!/^[Mm]/.test(nettoye)) return false;
+  const sousChemins = nettoye
+    .split(/(?=[Mm])/)
+    .map((morceau) => morceau.trim())
+    .filter((morceau) => morceau.length > 0);
+  return sousChemins.length > 0 && sousChemins.every((morceau) => /[Zz]$/.test(morceau));
+}
+
+/** Valeur d'un attribut sur un fragment de balise ouvrante. `null` s'il est absent. */
+function attribut(balise: string, nom: string): string | null {
+  const trouve = new RegExp(`\\b${nom}\\s*=\\s*"([^"]*)"`).exec(balise);
+  return trouve?.[1] ?? null;
+}
+
+/**
+ * Corps de chaque `<g id="…">` du SVG, indexé par `id`.
+ *
+ * Analyse par jetons plutôt que par expression rationnelle globale : les `<g>` peuvent
+ * s'imbriquer, et une expression gloutonne rattacherait alors le contenu du mauvais calque.
+ * On tient une pile ; un `<g/>` auto-fermant n'entre pas dedans.
+ */
+function calquesDuSvg(texteSvg: string): Map<string, string> {
+  const corps = new Map<string, string>();
+  const jetons = /<g\b([^>]*)>|<\/g\s*>/g;
+  const pile: Array<{ id: string | null; debut: number }> = [];
+  let jeton: RegExpExecArray | null;
+  while ((jeton = jetons.exec(texteSvg)) !== null) {
+    const attributs = jeton[1];
+    if (attributs !== undefined) {
+      if (attributs.trimEnd().endsWith('/')) continue;
+      pile.push({ id: attribut(jeton[0], 'id'), debut: jeton.index + jeton[0].length });
+      continue;
+    }
+    const ouvert = pile.pop();
+    if (ouvert?.id != null && !corps.has(ouvert.id)) {
+      corps.set(ouvert.id, texteSvg.slice(ouvert.debut, jeton.index));
+    }
+  }
+  return corps;
+}
+
+/**
+ * Contrôle un SVG de scène contre l'habillage qui le déclare. Trois règles :
+ *
+ * - `svg-calque-absent` — un calque déclaré n'a pas son `<g id>` dans le fichier ;
+ * - `svg-region-absente` — une région déclarée n'a pas son élément dans le calque ;
+ * - `svg-chemin-ouvert` — un `<path>` d'un calque **coloriable** n'est pas refermé.
+ *
+ * Les calques `trait` et `fond` ne sont PAS jugés sur la fermeture : le trait est fait de
+ * segments ouverts par construction, et c'est correct — il n'est jamais rempli.
+ *
+ * Le pointeur d'un problème est `#idCalque/idRegion`, la seule adresse qui permette de
+ * retrouver la forme fautive dans le fichier.
+ */
+export function validerSceneSvg(texteSvg: string, habillage: Habillage): RapportValidation {
+  const problemes: ProblemeValidation[] = [];
+  const calques = calquesDuSvg(texteSvg);
+
+  for (const calque of habillage.scene.calques) {
+    const corps = calques.get(calque.id);
+    if (corps === undefined) {
+      problemes.push({
+        chemin: `#${calque.id}`,
+        message: `Calque « ${calque.id} » déclaré par « ${habillage.id} » et absent du SVG.`,
+        regle: 'svg-calque-absent',
+      });
+      continue;
+    }
+
+    const presents = new Set<string>();
+    if (calque.role === 'coloriable') {
+      for (const balise of corps.match(/<path\b[^>]*>/g) ?? []) {
+        const id = attribut(balise, 'id');
+        const d = attribut(balise, 'd');
+        if (id !== null) presents.add(id);
+        if (d !== null && !estCheminFerme(d)) {
+          problemes.push({
+            chemin: `#${calque.id}/${id ?? '(sans id)'}`,
+            message:
+              'Chemin non refermé : un trait interrompu fait fuiter le remplissage sur ' +
+              'toute l’image (annexe P § 3.2).',
+            regle: 'svg-chemin-ouvert',
+          });
+        }
+      }
+      // Une région peut être une forme primitive (`<circle>`, `<rect>`…), fermée d'office.
+      for (const balise of corps.match(/<(?:circle|rect|ellipse|polygon)\b[^>]*>/g) ?? []) {
+        const id = attribut(balise, 'id');
+        if (id !== null) presents.add(id);
+      }
+    }
+
+    for (const region of calque.regions) {
+      if (!presents.has(region.id)) {
+        problemes.push({
+          chemin: `#${calque.id}/${region.id}`,
+          message: `Région « ${region.id} » déclarée par « ${habillage.id} » et absente du SVG.`,
+          regle: 'svg-region-absente',
+        });
+      }
+    }
+  }
+
+  return rapport(problemes);
+}

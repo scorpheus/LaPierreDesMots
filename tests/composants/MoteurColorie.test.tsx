@@ -10,13 +10,15 @@
  * l'annexe T § 2.3 — un test ne parle jamais au réseau réel.
  */
 import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { useCallback, useState } from 'react';
-import { cleanup, render, screen, within } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { moteurColorie } from '@partage/moteurs/colorie/moteur';
-import { renduColorie } from '@client/moteurs/colorie/index';
+import { renduColorie, SceneSvg } from '@client/moteurs/colorie/index';
+import { regionSousLeDoigt } from '@pierre/partage';
 
 import type { ActionColorie, ContenuColorie, EtatColorie } from '@partage/moteurs/colorie/types';
 import type { Exercice, Habillage } from '@pierre/partage';
@@ -26,6 +28,7 @@ import {
   RACINE_DEPOT,
   habillageEcole,
   lireJson,
+  lireTexte,
   servicesDeTest
 } from '../configuration/preparation.js';
 
@@ -37,6 +40,17 @@ const habillage: Habillage = habillageEcole();
  * Sert `contenu/**` depuis le disque, quelle que soit la forme d'URL choisie par L-E
  * (`/api/contenu/assets/…` ou chemin relatif). Toute autre URL est un appel sortant : on la
  * refuse bruyamment plutôt que de la laisser passer (R10).
+ *
+ * ⚠ CE STUB A LONGTEMPS ÉTÉ MUET, ET IL A RENDU DEUX DÉFAUTS INVISIBLES.
+ * Il lisait `new URL(\`contenu/${apres}\`, RACINE_DEPOT)`. Or `RACINE_DEPOT` est un CHEMIN
+ * SYSTÈME depuis sa correction (`preparation.ts` le dit en toutes lettres), pas une URL
+ * `file:` — mesuré :
+ *   `new URL('contenu/habillages/clairiere/ecole.svg', 'C:\\…\\LaPierreDesMots\\')`
+ *   → `TypeError [ERR_INVALID_URL]: Invalid URL`
+ * Le `.catch()` de `MoteurColorie` avalait l'exception en silence — c'est sa règle, l'asset
+ * peut manquer et le jeu doit rester jouable — et TOUTE la suite composant jouait donc le
+ * décor de repli. Le décor réel, seul à atteindre l'enfant, n'était testé par personne.
+ * `join` et non `new URL` : c'est exactement la correction déjà faite dans `lireJson`.
  */
 function installerFetchLocal(): void {
   vi.stubGlobal(
@@ -49,7 +63,7 @@ function installerFetchLocal(): void {
       if (apres === undefined) {
         throw new Error(`appel sortant interdit en test : ${url}`);
       }
-      const corps = readFileSync(new URL(`contenu/${apres}`, RACINE_DEPOT), 'utf8');
+      const corps = readFileSync(join(RACINE_DEPOT, 'contenu', ...apres.split('/')), 'utf8');
       return new Response(corps, {
         status: 200,
         headers: { 'content-type': apres.endsWith('.svg') ? 'image/svg+xml' : 'application/json' }
@@ -141,14 +155,21 @@ describe('MoteurColorie — rendu', () => {
   it('rend une région par région coloriable de l’habillage, toutes non peintes', async () => {
     render(<Harnais />);
     await screen.findByText(contenu.consignes[0]!.texte);
-    const regions = document.querySelectorAll('[data-region-svg]');
     const coloriables = habillage.scene.calques
       .filter((calque) => calque.role === 'coloriable')
       .flatMap((calque) => calque.regions);
-    expect(regions.length).toBe(coloriables.length);
-    for (const element of regions) {
-      expect(element.getAttribute('data-peinte')).toBe('non');
-    }
+
+    // Le décor déclaratif arrive par `fetch` : ses `data-*` sont posés par un effet, donc
+    // APRÈS le commit du markup. On attend l'ÉTAT, jamais une durée (CLAUDE.md). Cette
+    // attente était absente parce que le stub `fetch` était muet et que la suite jouait le
+    // repli, dont les attributs sont posés au rendu.
+    await vi.waitFor(() => {
+      const regions = document.querySelectorAll('[data-region-svg]');
+      expect(regions.length).toBe(coloriables.length);
+      for (const element of regions) {
+        expect(element.getAttribute('data-peinte')).toBe('non');
+      }
+    });
   });
 
   it('n’émet JAMAIS `data-etat="echec"` — R14', async () => {
@@ -328,6 +349,194 @@ describe('MoteurColorie — désordre de rendu', () => {
         within(element).queryByText(/\S/)?.textContent ??
         '';
       expect(libelle.trim().length).toBeGreaterThan(0);
+    }
+  });
+});
+
+/**
+ * ════════════════════════════════════════════════════════════════════════════════════════
+ * LE DÉCOR RÉEL — celui que l'enfant verra.
+ *
+ * Le harnais ci-dessus sert `contenu/habillages/clairiere/ecole.svg` : `MoteurColorie` le
+ * charge et `SceneSvg` bascule sur sa branche `svgMarkup !== null`. Tous les cas au-dessus
+ * traversaient déjà ce chemin, mais aucun ne vérifiait ce que cette branche pose sur les
+ * nœuds injectés — d'où deux comportements du contrat vivants sur le repli et MORTS sur le
+ * décor réel. Les deux cas suivants les gardent.
+ * ════════════════════════════════════════════════════════════════════════════════════════
+ */
+/** Attend que le décor déclaratif ait remplacé le repli. Un état, jamais une durée. */
+async function attendreDecorReel(): Promise<void> {
+  await vi.waitFor(() => {
+    const scene = document.querySelector('[data-decor]');
+    expect(scene?.getAttribute('data-decor')).toBe('habillage');
+  });
+}
+
+describe('MoteurColorie — le décor réel', () => {
+  it('monte bien le décor déclaratif, et non le repli', async () => {
+    render(<Harnais />);
+    await screen.findByText(contenu.consignes[0]!.texte);
+    await attendreDecorReel();
+  });
+
+  it('l’erreur fait osciller la région SUR LE DÉCOR RÉEL — D16, contrat § 5.6', async () => {
+    const utilisateur = userEvent.setup();
+    render(<Harnais />);
+    await screen.findByText(contenu.consignes[0]!.texte);
+    await attendreDecorReel();
+
+    await utilisateur.click(godet(couleurFausse));
+    await utilisateur.click(region(premiereCible.region));
+
+    // Le seul retour d'erreur du jeu (v2 § 8) : 6 px d'oscillation, pas de rouge, pas de
+    // son négatif. Sans cette classe, l'enfant qui se trompe ne reçoit RIEN.
+    expect(region(premiereCible.region).classList.contains('pierre-region--refus')).toBe(true);
+    expect(region(premiereCible.region).getAttribute('data-peinte')).toBe('non');
+    expect(document.querySelector('[data-etat="echec"]')).toBeNull();
+  });
+
+  it('le décor réel s’annonce actionnable au clavier ET répond à Entrée', async () => {
+    const utilisateur = userEvent.setup();
+    render(<Harnais />);
+    await screen.findByText(contenu.consignes[0]!.texte);
+    await attendreDecorReel();
+
+    await utilisateur.click(godet(premiereCible.couleur));
+    const cible = region(premiereCible.region);
+    // `role` et `tabindex` sont ce qu'axe-core voit ; le gestionnaire est ce qu'il ne voit pas.
+    expect(cible.getAttribute('role')).toBe('button');
+    expect(cible.getAttribute('tabindex')).toBe('0');
+
+    fireEvent.keyDown(cible, { key: 'Enter' });
+
+    expect(region(premiereCible.region).getAttribute('data-peinte')).toBe('oui');
+    expect(region(premiereCible.region).getAttribute('data-couleur')).toBe(premiereCible.couleur);
+  });
+
+  it('la barre d’espace peint aussi, et l’événement est consommé', async () => {
+    const utilisateur = userEvent.setup();
+    render(<Harnais />);
+    await screen.findByText(contenu.consignes[0]!.texte);
+    await attendreDecorReel();
+
+    await utilisateur.click(godet(premiereCible.couleur));
+    const evenement = fireEvent.keyDown(region(premiereCible.region), { key: ' ' });
+
+    // `false` = `preventDefault()` a été appelé : la page ne défile pas sous le doigt.
+    expect(evenement).toBe(false);
+    expect(region(premiereCible.region).getAttribute('data-peinte')).toBe('oui');
+  });
+});
+
+/**
+ * ════════════════════════════════════════════════════════════════════════════════════════
+ * UNE SEULE GÉOMÉTRIE FAIT AUTORITÉ — l'habillage.
+ *
+ * Le repli (asset absent, premier rendu) portait sa PROPRE géométrie, codée en dur dans le
+ * moteur : mêmes 30 `id`, aucune coordonnée commune avec l'habillage. `regionSousLeDoigt`
+ * lisant toujours les centroïdes de l'habillage, un doigt posé sur le trait peignait une
+ * région située ailleurs dans l'image, silencieusement, et le comptait comme une erreur.
+ *
+ * L'invariant gardé ici est le seul qui referme la faille : CE QUI EST DESSINÉ SOUS UN
+ * POINT EST CE QUE `regionSousLeDoigt` NOMME EN CE POINT.
+ * ════════════════════════════════════════════════════════════════════════════════════════
+ */
+const habillageEssai: Habillage = {
+  ...habillage,
+  id: 'clairiere.essai',
+  libelle: 'Un décor d’essai',
+  scene: {
+    ...habillage.scene,
+    viewBox: '0 0 200 200',
+    calques: [
+      { id: 'calque-fond', role: 'fond', regions: [] },
+      {
+        id: 'calque-zones',
+        role: 'coloriable',
+        regions: [
+          { id: 'zone-nord', libelle: 'la zone du nord', centroide: [50, 40], surface: 1256.6 },
+          { id: 'zone-sud', libelle: 'la zone du sud', centroide: [150, 160], surface: 1256.6 }
+        ]
+      },
+      { id: 'calque-trait', role: 'trait', regions: [] }
+    ]
+  }
+};
+
+function rendreRepli(): void {
+  render(
+    <SceneSvg
+      habillage={habillageEssai}
+      remplissages={{}}
+      regionEnDemonstration={null}
+      regionEnRefus={null}
+      marqueRefus={0}
+      animationsDesactivees
+      svgMarkup={null}
+      onPeindre={() => undefined}
+    />
+  );
+}
+
+describe('SceneSvg — le décor de repli est DÉRIVÉ de l’habillage', () => {
+  it('ne dessine que les régions déclarées par l’habillage, ni une de plus', () => {
+    rendreRepli();
+    const rendues = [...document.querySelectorAll('[data-region-svg]')].map((e) =>
+      e.getAttribute('data-region-svg')
+    );
+    expect(rendues.sort()).toEqual(['zone-nord', 'zone-sud']);
+  });
+
+  it('prend ses libellés de l’habillage, jamais d’une table interne au moteur', () => {
+    rendreRepli();
+    expect(region('zone-nord').getAttribute('aria-label')).toBe('la zone du nord');
+    expect(region('zone-sud').getAttribute('aria-label')).toBe('la zone du sud');
+  });
+
+  it('dessine chaque région là où `regionSousLeDoigt` la nomme — une seule géométrie', () => {
+    rendreRepli();
+    for (const element of document.querySelectorAll('[data-region-svg]')) {
+      const id = element.getAttribute('data-region-svg')!;
+      const point: readonly [number, number] = [
+        Number(element.getAttribute('cx')),
+        Number(element.getAttribute('cy'))
+      ];
+      expect(Number.isFinite(point[0]) && Number.isFinite(point[1])).toBe(true);
+      expect(regionSousLeDoigt(habillageEssai, point)).toBe(id);
+    }
+  });
+
+  it('reprend le `viewBox` de l’habillage, pas celui d’une scène codée en dur', () => {
+    rendreRepli();
+    expect(document.querySelector('svg')?.getAttribute('viewBox')).toBe('0 0 200 200');
+  });
+
+  it('reste tapable au clavier, comme le décor réel', () => {
+    let peinte: string | null = null;
+    render(
+      <SceneSvg
+        habillage={habillageEssai}
+        remplissages={{}}
+        regionEnDemonstration={null}
+        regionEnRefus={null}
+        marqueRefus={0}
+        animationsDesactivees
+        svgMarkup={null}
+        onPeindre={(id) => (peinte = id)}
+      />
+    );
+    fireEvent.keyDown(region('zone-sud'), { key: 'Enter' });
+    expect(peinte).toBe('zone-sud');
+  });
+});
+
+describe('« zéro ligne de code par habillage » — v2 § 7', () => {
+  it('le moteur ne code en dur aucune cour d’école', () => {
+    const source = lireTexte('client/src/moteurs/colorie/SceneSvg.tsx').toLowerCase();
+    // Un moteur qui nomme le mobilier d'un décor ne pourra pas en accueillir un second sans
+    // qu'on y retouche : la promesse de variété (R12, R13) tombe avec lui.
+    for (const mot of ['école', 'ecole', 'maîtresse', 'garçon', 'ballon', 'tee-shirt', 'jupe']) {
+      expect(source).not.toContain(mot);
     }
   });
 });

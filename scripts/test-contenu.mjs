@@ -5,6 +5,11 @@
  * l'annexe T § T1 sont désactivés, chacun avec sa raison écrite, et le rapport les nomme au
  * lieu de les taire.
  *
+ * S'y ajoute le contrôle **P3.2**, qui ne vient pas de l'annexe T mais de l'annexe P § 3.2 :
+ * les **régions fermées**. C'est l'étape BLOQUANTE de la chaîne image — « un trait
+ * interrompu d'un pixel fait fuiter le remplissage sur toute l'image » (CLAUDE.md) — et elle
+ * n'avait aucun contrôle automatique : ce script n'ouvrait pas un seul fichier `.svg`.
+ *
  * C'est aussi la commande que l'agent générateur de contenu doit exécuter avant de déposer un
  * brouillon (annexe T § T1). Elle ne modifie jamais rien : elle lit et elle juge.
  */
@@ -54,13 +59,17 @@ function lireJson(chemin) {
   return JSON.parse(readFileSync(chemin, 'utf8'));
 }
 
-function fichiersJson(dossier, filtre = () => true) {
+function fichiers(dossier, extension, filtre = () => true) {
   if (!existsSync(dossier)) return [];
   return readdirSync(dossier, { recursive: true, withFileTypes: true })
-    .filter((e) => e.isFile() && e.name.endsWith('.json'))
+    .filter((e) => e.isFile() && e.name.endsWith(extension))
     .map((e) => join(e.parentPath ?? e.path ?? dossier, e.name))
     .filter(filtre)
     .sort();
+}
+
+function fichiersJson(dossier, filtre = () => true) {
+  return fichiers(dossier, '.json', filtre);
 }
 
 function terminer(statut, note) {
@@ -94,6 +103,18 @@ try {
     'environnement',
     '`@pierre/partage` est introuvable ou non construit. Lancer `npm install` puis ' +
       '`npm run typescript` (qui émet `partage/dist/`). Détail : ' +
+      (erreur instanceof Error ? erreur.message : String(erreur))
+  );
+}
+
+let validerSceneSvg;
+try {
+  ({ validerSceneSvg } = await import('@pierre/partage/validation'));
+} catch (erreur) {
+  terminer(
+    'environnement',
+    '`@pierre/partage/validation` est introuvable ou non construit — le contrôle P3.2 des ' +
+      'régions fermées ne peut pas s’exécuter. Lancer `npm run typescript`. Détail : ' +
       (erreur instanceof Error ? erreur.message : String(erreur))
   );
 }
@@ -272,6 +293,46 @@ for (const { chemin, donnees } of exercices) {
   }
 }
 
+// ────────────────────────────── contrôle P3.2 — régions fermées, sur TOUS les SVG de contenu/
+//
+// L'étape bloquante de l'annexe P § 3.2. Un `<path>` coloriable qui a perdu son `Z` fait
+// fuiter le remplissage sur toute l'image ; rien ne le voyait avant l'enfant.
+//
+// Le contrôle part des SVG PRÉSENTS SUR DISQUE, pas des habillages : recenser les fichiers
+// déclarés ne dirait rien d'un fichier qui traîne sans déclaration — et un `.svg` qu'aucun
+// habillage ne réclame est soit du contenu mort, soit une déclaration manquante. Les deux
+// méritent d'être dits.
+
+const svgParChemin = new Map();
+for (const { chemin, donnees } of habillages.values()) {
+  const fichier = donnees.scene?.fichier;
+  if (typeof fichier !== 'string' || fichier.length === 0) continue;
+  svgParChemin.set(join(DOSSIER_CONTENU, ...fichier.split('/')), { chemin, donnees });
+}
+
+const tousLesSvg = fichiers(DOSSIER_CONTENU, '.svg');
+let nbSvgControles = 0;
+
+for (const cheminSvg of tousLesSvg) {
+  nbControles += 1;
+  const ou = relatif(cheminSvg);
+  const habillage = svgParChemin.get(cheminSvg);
+  if (!habillage) {
+    signaler(
+      ou,
+      'aucun habillage ne déclare ce SVG : ses régions ne peuvent être ni contrôlées, ni ' +
+        'jouées. Contenu mort, ou `scene.fichier` manquant.',
+      'P3.2'
+    );
+    continue;
+  }
+  nbSvgControles += 1;
+  const rapportSvg = validerSceneSvg(readFileSync(cheminSvg, 'utf8'), habillage.donnees);
+  for (const probleme of rapportSvg.problemes) {
+    signaler(ou, `${probleme.chemin} : ${probleme.message} [${probleme.regle}]`, 'P3.2');
+  }
+}
+
 // ─────────────────────────────────────────────────────── contrôle 2 — unicité des `id`
 
 nbControles += 1;
@@ -308,7 +369,8 @@ function surfaceMinimaleViewBox(viewBox) {
 // ────────────────────────────────────────────────────────────────────────────── verdict
 
 const note =
-  `${exercices.length} exercice(s), ${habillages.size} habillage(s). ` +
+  `${exercices.length} exercice(s), ${habillages.size} habillage(s), ` +
+  `${nbSvgControles}/${tousLesSvg.length} SVG contrôlés en régions fermées (annexe P § 3.2). ` +
   `Contrôles désactivés en v1, avec leur raison (contrat § 9.8) : ` +
   controlesDesactives.map(([n, quoi, pourquoi]) => `#${n} ${quoi} — ${pourquoi}`).join(' ; ') +
   '.';

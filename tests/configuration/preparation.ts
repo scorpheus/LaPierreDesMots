@@ -97,16 +97,22 @@ export function servicesDeTest(): {
   };
 }
 
+/** Lit un fichier du dépôt, en texte brut, depuis un chemin relatif à la racine. */
+export function lireTexte(cheminRelatif: string): string {
+  // `join` et non `new URL` : RACINE_DEPOT est désormais un chemin système, pas une URL.
+  return readFileSync(join(RACINE_DEPOT, cheminRelatif), 'utf8');
+}
+
 /** Lit un fichier du dépôt, en JSON, depuis un chemin relatif à la racine. */
 export function lireJson<T = unknown>(cheminRelatif: string): T {
-  // `join` et non `new URL` : RACINE_DEPOT est désormais un chemin système, pas une URL.
-  return JSON.parse(readFileSync(join(RACINE_DEPOT, cheminRelatif), 'utf8')) as T;
+  return JSON.parse(lireTexte(cheminRelatif)) as T;
 }
 
 // ───────────────────────────────────────────── chemins des données de la v1 (lot L-F)
 
 export const CHEMIN_EXERCICE_ECOLE = 'contenu/exercices/clairiere/ecole-01.json';
 export const CHEMIN_HABILLAGE_ECOLE = 'contenu/habillages/clairiere/ecole.habillage.json';
+export const CHEMIN_SVG_ECOLE = 'contenu/habillages/clairiere/ecole.svg';
 export const CHEMIN_NOEUD_CLAIRIERE = 'contenu/noeuds/clairiere-01.json';
 export const CHEMIN_COMPETENCES = 'contenu/referentiel/competences.json';
 export const CHEMIN_SCHEMA_EXERCICE = 'contenu/schemas/exercice.schema.json';

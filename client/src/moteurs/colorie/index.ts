@@ -18,8 +18,13 @@ export const renduColorie: MoteurRendu<ContenuColorie, EtatColorie, ActionColori
 export { jouerRecoloration, COURBE_RECOLORATION, PARTICULES_MAX } from './recoloration.js';
 export type { OptionsRecoloration } from './recoloration.js';
 
-export { SCENE_BOUCHON, VIEWBOX_BOUCHON, estCheminFerme, SceneSvg } from './SceneSvg.js';
-export type { RegionBouchon, ProprietesSceneSvg } from './SceneSvg.js';
+// `SCENE_BOUCHON`, `VIEWBOX_BOUCHON` et `RegionBouchon` ont disparu avec la cour d'école
+// codée en dur dans le moteur ; `estCheminFerme` a rejoint `@pierre/partage/validation`,
+// seul endroit d'où `scripts/test-contenu.mjs` peut l'appeler. Aucun de ces quatre symboles
+// ne figurait au contrat § 11.2, qui n'ouvre ici que `renduColorie` et `jouerRecoloration` :
+// ce retrait rapproche le fichier de sa surface gelée.
+export { VIEWBOX_PAR_DEFAUT, SceneSvg } from './SceneSvg.js';
+export type { ProprietesSceneSvg } from './SceneSvg.js';
 
 export { PaletteConsigne } from './PaletteConsigne.js';
 export type { ProprietesPaletteConsigne } from './PaletteConsigne.js';
