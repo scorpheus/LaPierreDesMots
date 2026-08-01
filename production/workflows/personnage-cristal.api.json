@@ -1,0 +1,99 @@
+{
+  "_commentaire": {
+    "usage": "ETAPE (B2) — les 25 declinaisons de grapheme. La fiche de personnage pose que « le corps ne change jamais, seul le cristal change » : ce n'est pas une regle de style, c'est l'enonce exact d'un INPAINTING REGIONAL. On regenere la seule region de la crete, sous masque, et tout le reste est gele.",
+    "mesure": "MESURE du 2026-08-01, canonique flux_A-trait_g4004, masque elliptique couvrant 17,1 % de l'image, deux cretes demandees (Gobi-OU, Gobi-CH), graine 4004. Les deux franchissent la porte technique (fond blanc 100,0 %, 0 fuite, 42 et 49 composantes) en 16,6 s et 9,4 s. HORS MASQUE : ecart moyen 0,43 sur 255 et 0,31 % de pixels modifies de plus de 8 niveaux. DANS LE MASQUE : 21,0 % et 23,0 % de pixels modifies. La crete change, le corps ne change pas.",
+    "correction_a_un_rapport": "L'etat de l'art annoncait que « le corps est litteralement identique au pixel pres » et que « la difference pixel a pixel hors du masque doit etre nulle ». MESURE : elle ne l'est pas — 0,31 % des pixels bougent, parce que le VAE re-encode et re-decode TOUTE l'image, pas seulement la region masquee. Deux consequences operationnelles : (1) le contrat de sortie s'ecrit « au plus 0,5 % de pixels modifies hors masque », pas « zero » ; (2) si l'on veut vraiment zero, il faut RECOMPOSER le resultat avec la canonique en se servant du masque — la difference devient nulle par construction, et c'est la voie recommandee pour les 25 graphemes.",
+    "modele": "flux1-fill-dev.safetensors (UNETLoader) + clip_l + t5xxl_fp8_e4m3fn_scaled (DualCLIPLoader, type flux) + ae.safetensors",
+    "reglages": "20 pas, CFG 1.0, FluxGuidance 30.0, euler / normal, denoise 1.0, DifferentialDiffusion pour adoucir la couture, InpaintModelConditioning avec noise_mask.",
+    "negatif": "STRUCTURELLEMENT ABSENT (noeud 8, ConditioningZeroOut). Flux Fill est distille : il tourne a CFG 1,0 et le parametre FluxGuidance n'est PAS un CFG, c'est une valeur apprise injectee dans le modele. Aucun interdit n'est opposable ici : tout se formule en positif.",
+    "masque": "Le masque de la crete est dessine UNE FOIS sur la canonique, puis reutilise pour les 25 graphemes. Blanc = region regeneree. Il est charge par LoadImageMask sur le canal rouge d'un PNG en niveaux de gris ; GrowMask elargit de quelques pixels pour que la couture tombe dans le trait et non a cote.",
+    "champs_modifiables": [
+      "4.inputs.image  -- la canonique televersee",
+      "5.inputs.image  -- le masque de la crete televerse",
+      "6.inputs.prompt -- substitue a {CRISTAL} : la seule description qui change d'un grapheme a l'autre",
+      "11.inputs.seed"
+    ],
+    "figes": "modele, encodeurs, VAE, pas, CFG, guidance, sampler, ordonnanceur, denoise, expansion du masque, clauses de conservation, topologie"
+  },
+  "1": {
+    "class_type": "UNETLoader",
+    "inputs": { "unet_name": "flux1-fill-dev.safetensors", "weight_dtype": "default" }
+  },
+  "2": {
+    "class_type": "DualCLIPLoader",
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn_scaled.safetensors",
+      "type": "flux"
+    }
+  },
+  "3": {
+    "class_type": "VAELoader",
+    "inputs": { "vae_name": "ae.safetensors" }
+  },
+  "4": {
+    "class_type": "LoadImage",
+    "inputs": { "image": "gobi-canonique.png" }
+  },
+  "5": {
+    "class_type": "LoadImageMask",
+    "inputs": { "image": "gobi-masque-crete.png", "channel": "red" }
+  },
+  "6": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "black and white line art, clean bold black ink outlines of even weight, pure flat white background, no colour, no shading, no grey, no hatching, a crest of faceted crystal shards growing along the head and back of the creature, {CRISTAL}",
+      "clip": ["2", 0]
+    }
+  },
+  "7": {
+    "class_type": "FluxGuidance",
+    "inputs": { "conditioning": ["6", 0], "guidance": 30.0 }
+  },
+  "8": {
+    "class_type": "ConditioningZeroOut",
+    "inputs": { "conditioning": ["7", 0] }
+  },
+  "9": {
+    "class_type": "GrowMask",
+    "inputs": { "mask": ["5", 0], "expand": 6, "tapered_corners": true }
+  },
+  "10": {
+    "class_type": "InpaintModelConditioning",
+    "inputs": {
+      "positive": ["7", 0],
+      "negative": ["8", 0],
+      "vae": ["3", 0],
+      "pixels": ["4", 0],
+      "mask": ["9", 0],
+      "noise_mask": true
+    }
+  },
+  "15": {
+    "class_type": "DifferentialDiffusion",
+    "inputs": { "model": ["1", 0] }
+  },
+  "11": {
+    "class_type": "KSampler",
+    "inputs": {
+      "seed": 1001,
+      "steps": 20,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "normal",
+      "denoise": 1.0,
+      "model": ["15", 0],
+      "positive": ["10", 0],
+      "negative": ["10", 1],
+      "latent_image": ["10", 2]
+    }
+  },
+  "13": {
+    "class_type": "VAEDecode",
+    "inputs": { "samples": ["11", 0], "vae": ["3", 0] }
+  },
+  "14": {
+    "class_type": "SaveImage",
+    "inputs": { "images": ["13", 0], "filename_prefix": "personnage-cristal" }
+  }
+}

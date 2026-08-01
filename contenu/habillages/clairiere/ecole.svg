@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 922 615" width="922" height="615" role="img" aria-label="La cour de l’école">
+  <title>La cour de l’école</title>
+  <g id="calque-fond">
+    <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L922,0 L922,615 L0,615 Z"/>
+  </g>
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round">
+    <path id="ciel" class="zone" data-region-svg="ciel" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L922,0 L922,175 L0,175 Z"/>
+    <path id="herbe" class="zone" data-region-svg="herbe" fill="#8E97A8" fill-rule="evenodd" d="M0,420 L922,420 L922,615 L0,615 Z M250,464 A40,40 0 1 0 330,464 A40,40 0 1 0 250,464 Z M250,504 L330,504 L330,568 L250,568 Z M250,568 L330,568 L364,612 L216,612 Z M380,464 A40,40 0 1 0 460,464 A40,40 0 1 0 380,464 Z M380,504 L460,504 L460,568 L380,568 Z M480,464 A40,40 0 1 0 560,464 A40,40 0 1 0 480,464 Z M480,504 L560,504 L560,568 L480,568 Z M610,464 A40,40 0 1 0 690,464 A40,40 0 1 0 610,464 Z M610,504 L690,504 L690,568 L724,612 L576,612 L610,568 Z M770,464 A40,40 0 1 0 850,464 A40,40 0 1 0 770,464 Z M770,504 L850,504 L850,568 L884,612 L736,612 L770,568 Z M10,470 L180,470 L180,520 L10,520 Z M10,610 L16,570 L46,540 L105,528 L164,540 L194,570 L200,610 L168,610 L163,578 L140,556 L105,548 L70,556 L47,578 L42,610 Z"/>
+    <path id="toit-ecole" class="zone" data-region-svg="toit-ecole" fill="#8E97A8" fill-rule="evenodd" d="M270,175 L460,270 L80,270 Z M230,225 A40,40 0 1 0 310,225 A40,40 0 1 0 230,225 Z"/>
+    <path id="horloge-ecole" class="zone" data-region-svg="horloge-ecole" fill="#8E97A8" fill-rule="evenodd" d="M230,225 A40,40 0 1 0 310,225 A40,40 0 1 0 230,225 Z"/>
+    <path id="mur-ecole" class="zone" data-region-svg="mur-ecole" fill="#8E97A8" fill-rule="evenodd" d="M100,270 L440,270 L440,420 L306.5,420 L306.5,320 L233.5,320 L233.5,420 L100,420 Z M140,295 L220,295 L220,365 L140,365 Z M320,295 L400,295 L400,365 L320,365 Z"/>
+    <path id="porte-ecole" class="zone" data-region-svg="porte-ecole" fill="#8E97A8" fill-rule="evenodd" d="M233.5,320 L306.5,320 L306.5,420 L233.5,420 Z"/>
+    <path id="fenetre-ecole-1" class="zone" data-region-svg="fenetre-ecole-1" fill="#8E97A8" fill-rule="evenodd" d="M140,295 L220,295 L220,365 L140,365 Z"/>
+    <path id="fenetre-ecole-2" class="zone" data-region-svg="fenetre-ecole-2" fill="#8E97A8" fill-rule="evenodd" d="M320,295 L400,295 L400,365 L320,365 Z"/>
+    <path id="feuilles-arbre-1" class="zone" data-region-svg="feuilles-arbre-1" fill="#8E97A8" fill-rule="evenodd" d="M512,250 A48,48 0 1 0 608,250 A48,48 0 1 0 512,250 Z"/>
+    <path id="tronc-arbre-1" class="zone" data-region-svg="tronc-arbre-1" fill="#8E97A8" fill-rule="evenodd" d="M539,298 L581,298 L581,420 L539,420 Z"/>
+    <path id="feuilles-arbre-2" class="zone" data-region-svg="feuilles-arbre-2" fill="#8E97A8" fill-rule="evenodd" d="M617,250 A48,48 0 1 0 713,250 A48,48 0 1 0 617,250 Z"/>
+    <path id="tronc-arbre-2" class="zone" data-region-svg="tronc-arbre-2" fill="#8E97A8" fill-rule="evenodd" d="M644,298 L686,298 L686,420 L644,420 Z"/>
+    <path id="feuilles-arbre-3" class="zone" data-region-svg="feuilles-arbre-3" fill="#8E97A8" fill-rule="evenodd" d="M722,250 A48,48 0 1 0 818,250 A48,48 0 1 0 722,250 Z"/>
+    <path id="tronc-arbre-3" class="zone" data-region-svg="tronc-arbre-3" fill="#8E97A8" fill-rule="evenodd" d="M749,298 L791,298 L791,420 L749,420 Z"/>
+    <path id="feuilles-arbre-4" class="zone" data-region-svg="feuilles-arbre-4" fill="#8E97A8" fill-rule="evenodd" d="M824,250 A48,48 0 1 0 920,250 A48,48 0 1 0 824,250 Z"/>
+    <path id="tronc-arbre-4" class="zone" data-region-svg="tronc-arbre-4" fill="#8E97A8" fill-rule="evenodd" d="M851,298 L893,298 L893,420 L851,420 Z"/>
+    <path id="cheveux-maitresse" class="zone" data-region-svg="cheveux-maitresse" fill="#8E97A8" fill-rule="evenodd" d="M250,464 A40,40 0 1 0 330,464 A40,40 0 1 0 250,464 Z"/>
+    <path id="pull-maitresse" class="zone" data-region-svg="pull-maitresse" fill="#8E97A8" fill-rule="evenodd" d="M250,504 L330,504 L330,568 L250,568 Z"/>
+    <path id="jupe-maitresse" class="zone" data-region-svg="jupe-maitresse" fill="#8E97A8" fill-rule="evenodd" d="M250,568 L330,568 L364,612 L216,612 Z"/>
+    <path id="cheveux-garcon-1" class="zone" data-region-svg="cheveux-garcon-1" fill="#8E97A8" fill-rule="evenodd" d="M380,464 A40,40 0 1 0 460,464 A40,40 0 1 0 380,464 Z"/>
+    <path id="tshirt-garcon-1" class="zone" data-region-svg="tshirt-garcon-1" fill="#8E97A8" fill-rule="evenodd" d="M380,504 L460,504 L460,568 L380,568 Z"/>
+    <path id="cheveux-garcon-2" class="zone" data-region-svg="cheveux-garcon-2" fill="#8E97A8" fill-rule="evenodd" d="M480,464 A40,40 0 1 0 560,464 A40,40 0 1 0 480,464 Z"/>
+    <path id="tshirt-garcon-2" class="zone" data-region-svg="tshirt-garcon-2" fill="#8E97A8" fill-rule="evenodd" d="M480,504 L560,504 L560,568 L480,568 Z"/>
+    <path id="cheveux-fille-1" class="zone" data-region-svg="cheveux-fille-1" fill="#8E97A8" fill-rule="evenodd" d="M610,464 A40,40 0 1 0 690,464 A40,40 0 1 0 610,464 Z"/>
+    <path id="robe-fille-1" class="zone" data-region-svg="robe-fille-1" fill="#8E97A8" fill-rule="evenodd" d="M610,504 L690,504 L690,568 L724,612 L576,612 L610,568 Z"/>
+    <path id="cheveux-fille-2" class="zone" data-region-svg="cheveux-fille-2" fill="#8E97A8" fill-rule="evenodd" d="M770,464 A40,40 0 1 0 850,464 A40,40 0 1 0 770,464 Z"/>
+    <path id="robe-fille-2" class="zone" data-region-svg="robe-fille-2" fill="#8E97A8" fill-rule="evenodd" d="M770,504 L850,504 L850,568 L884,612 L736,612 L770,568 Z"/>
+    <path id="banc" class="zone" data-region-svg="banc" fill="#8E97A8" fill-rule="evenodd" d="M10,470 L180,470 L180,520 L10,520 Z"/>
+    <path id="corde" class="zone" data-region-svg="corde" fill="#8E97A8" fill-rule="evenodd" d="M10,610 L16,570 L46,540 L105,528 L164,540 L194,570 L200,610 L168,610 L163,578 L140,556 L105,548 L70,556 L47,578 L42,610 Z"/>
+    <path id="ballon" class="zone" data-region-svg="ballon" fill="#8E97A8" fill-rule="evenodd" d="M450,375 A40,40 0 1 0 530,375 A40,40 0 1 0 450,375 Z"/>
+  </g>
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round">
+    <path class="trait" d="M223,420 L317,420"/>
+    <path class="trait" d="M228,412 L312,412"/>
+    <path class="trait" d="M180,295 L180,365"/>
+    <path class="trait" d="M140,330 L220,330"/>
+    <path class="trait" d="M360,295 L360,365"/>
+    <path class="trait" d="M320,330 L400,330"/>
+    <path class="trait" d="M296,372 L296,382"/>
+    <path class="trait" d="M270,225 L270,200"/>
+    <path class="trait" d="M270,225 L288,233"/>
+    <path class="trait" d="M539,420 L581,420"/>
+    <path class="trait" d="M644,420 L686,420"/>
+    <path class="trait" d="M749,420 L791,420"/>
+    <path class="trait" d="M851,420 L893,420"/>
+    <path class="trait" d="M274,452 L282,452"/>
+    <path class="trait" d="M298,452 L306,452"/>
+    <path class="trait" d="M280,478 L300,478"/>
+    <path class="trait" d="M404,452 L412,452"/>
+    <path class="trait" d="M428,452 L436,452"/>
+    <path class="trait" d="M410,478 L430,478"/>
+    <path class="trait" d="M504,452 L512,452"/>
+    <path class="trait" d="M528,452 L536,452"/>
+    <path class="trait" d="M510,478 L530,478"/>
+    <path class="trait" d="M634,452 L642,452"/>
+    <path class="trait" d="M658,452 L666,452"/>
+    <path class="trait" d="M640,478 L660,478"/>
+    <path class="trait" d="M794,452 L802,452"/>
+    <path class="trait" d="M818,452 L826,452"/>
+    <path class="trait" d="M800,478 L820,478"/>
+    <path class="trait" d="M398,568 L398,610"/>
+    <path class="trait" d="M442,568 L442,610"/>
+    <path class="trait" d="M498,568 L498,610"/>
+    <path class="trait" d="M542,568 L542,610"/>
+  </g>
+</svg>

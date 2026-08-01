@@ -1,0 +1,59 @@
+{
+  "_commentaire": {
+    "usage": "Pages de coloriage neuves (annexe P 3.1). Meme famille technique que le decor, mais la contrainte dominante n'est pas la ressemblance : c'est le NOMBRE et la TAILLE des regions fermees, parce qu'un enfant de 7 ans colorie au doigt ou a la souris. Cible : 6 a 40 regions coloriables (annexe P 3.5), toutes assez grandes pour etre visees.",
+    "modele": "flux1-schnell-fp8.safetensors (CheckpointLoaderSimple)",
+    "reglages": "8 pas, CFG 1.0, euler / simple, EmptySD3LatentImage 1536x1536, denoise 1.0",
+    "mesure": "Topologie identique a personnage-exploration.api.json, mesuree 6/6 a la porte technique (production/essais/qc-technique.csv). Le nombre de regions y variait de 15 a 28 sur six graines : la fourchette 6-40 de l'annexe P est tenable, mais elle se VERIFIE image par image, elle ne se suppose pas.",
+    "negatif": "STRUCTURELLEMENT ABSENT (noeud 6). A CFG 1,0 le negatif est sans effet — mesure au pixel pres, voir personnage-exploration.api.json.",
+    "mesure_du_jour": "Un escargot et une fleur, graine 1001 : fond blanc 100,0 %, saturation 0,59, 0 fuite, 16 regions, et surtout 2 composantes d'encre seulement contre 23 a 149 pour les autres workflows. C'est le profil exact d'une page a colorier : deux grands traces fermes, aucun grain. C'est le workflow le plus sur des sept.",
+    "champs_modifiables": [
+      "5.inputs.text -- uniquement le SUJET, substitue a {SUJET}",
+      "9.inputs.seed",
+      "7.inputs.width / 7.inputs.height",
+      "11.inputs.filename_prefix"
+    ],
+    "figes": "checkpoint, pas, CFG, sampler, ordonnanceur, denoise, topologie, clause de rendu"
+  },
+  "1": {
+    "class_type": "CheckpointLoaderSimple",
+    "inputs": { "ckpt_name": "flux1-schnell-fp8.safetensors" }
+  },
+  "5": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "black and white coloring book page for a young child, thick heavy black ink outlines of even weight, pure flat white background, no color, no shading, no grey, no hatching, no texture, no drop shadow, every shape is a large closed area easy to fill with a single flat colour, few big simple shapes, no small details, no fine lines, {SUJET}",
+      "clip": ["1", 1]
+    }
+  },
+  "6": {
+    "class_type": "ConditioningZeroOut",
+    "inputs": { "conditioning": ["5", 0] }
+  },
+  "7": {
+    "class_type": "EmptySD3LatentImage",
+    "inputs": { "width": 1536, "height": 1536, "batch_size": 1 }
+  },
+  "9": {
+    "class_type": "KSampler",
+    "inputs": {
+      "seed": 1001,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1.0,
+      "model": ["1", 0],
+      "positive": ["5", 0],
+      "negative": ["6", 0],
+      "latent_image": ["7", 0]
+    }
+  },
+  "10": {
+    "class_type": "VAEDecode",
+    "inputs": { "samples": ["9", 0], "vae": ["1", 2] }
+  },
+  "11": {
+    "class_type": "SaveImage",
+    "inputs": { "images": ["10", 0], "filename_prefix": "coloriage" }
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "_commentaire": {
+    "usage": "Decors de region et calques de recoloration (annexe P 3.1). Trait noir sur blanc a regions fermees, destine a la vectorisation potrace puis a la coloration par les jetons de palette. Aucun personnage dans un decor : les compagnons sont composes par-dessus, par le code.",
+    "modele": "flux1-schnell-fp8.safetensors (CheckpointLoaderSimple)",
+    "reglages": "8 pas, CFG 1.0, euler / simple, EmptySD3LatentImage 1536x1536 (annexe P 3.2), denoise 1.0",
+    "mesure": "Topologie identique a personnage-exploration.api.json, dont la conformite a la porte technique est mesuree 6/6 (production/essais/qc-technique.csv, lignes A-trait/flux). Ce sont bien deux fichiers distincts et non un seul parametre : ce qui differe est FIGE — resolution de reference et clause de rendu propre au decor — et une revision de l'un ne doit pas obliger a regenerer les assets de l'autre (annexe P 3.4).",
+    "negatif": "STRUCTURELLEMENT ABSENT (noeud 6, ConditioningZeroOut). A CFG 1,0 tout conditionnement negatif a un poids nul — mesure au pixel pres, voir personnage-exploration.api.json. Toute contrainte se formule en POSITIF.",
+    "porte_technique_INADAPTEE": "MESURE du 2026-08-01, clairiere en foret, graine 1001 : l'image produite est un bon decor au trait, et elle ECHOUE pourtant la porte technique du depot — fond blanc 97,4 % et fuite declaree. C'est l'INSTRUMENT qui est en cause, pas l'asset. Le test de fuite de l'annexe P 3.2 inonde le blanc depuis les quatre coins et le compare a la boite englobante du SUJET : il suppose un sujet detoure sur fond blanc. Un decor est une scene ouverte qui touche les bords : l'inondation le traverse forcement, et la bordure exterieure porte du dessin. Pour un decor, le critere qui compte n'est pas « le sujet est-il ferme » mais « chaque REGION coloriable est-elle fermee » : compter les regions et verifier qu'aucune n'excede une part fixee de l'image. A trancher par l'orchestrateur avant le lot L1b ; ne pas rejeter des decors corrects sur ce test-la.",
+    "champs_modifiables": [
+      "5.inputs.text -- uniquement le SUJET, substitue a {SUJET}",
+      "9.inputs.seed",
+      "7.inputs.width / 7.inputs.height",
+      "11.inputs.filename_prefix"
+    ],
+    "figes": "checkpoint, pas, CFG, sampler, ordonnanceur, denoise, topologie, clause de rendu"
+  },
+  "1": {
+    "class_type": "CheckpointLoaderSimple",
+    "inputs": { "ckpt_name": "flux1-schnell-fp8.safetensors" }
+  },
+  "5": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "black and white line art, clean bold black ink outlines of even weight, pure flat white background, no color, no shading, no grey, no hatching, no drop shadow, no cross-hatching, coloring book style, closed clean contours, large simple shapes suitable for flat colouring, wide establishing view of an empty place, no characters, no creatures, no people, {SUJET}",
+      "clip": ["1", 1]
+    }
+  },
+  "6": {
+    "class_type": "ConditioningZeroOut",
+    "inputs": { "conditioning": ["5", 0] }
+  },
+  "7": {
+    "class_type": "EmptySD3LatentImage",
+    "inputs": { "width": 1536, "height": 1536, "batch_size": 1 }
+  },
+  "9": {
+    "class_type": "KSampler",
+    "inputs": {
+      "seed": 1001,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1.0,
+      "model": ["1", 0],
+      "positive": ["5", 0],
+      "negative": ["6", 0],
+      "latent_image": ["7", 0]
+    }
+  },
+  "10": {
+    "class_type": "VAEDecode",
+    "inputs": { "samples": ["9", 0], "vae": ["1", 2] }
+  },
+  "11": {
+    "class_type": "SaveImage",
+    "inputs": { "images": ["10", 0], "filename_prefix": "decor" }
+  }
+}

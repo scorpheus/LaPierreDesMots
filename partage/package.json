@@ -1,0 +1,15 @@
+{
+  "name": "@pierre/partage",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": { "types": "./src/index.ts", "default": "./dist/index.js" },
+    "./validation": { "types": "./src/contenu/validation.ts", "default": "./dist/contenu/validation.js" },
+    "./factices": { "types": "./src/fournisseurs/factices.ts", "default": "./dist/fournisseurs/factices.js" }
+  },
+  "scripts": { "construire": "tsc -b" },
+  "dependencies": {
+    "ajv": "^8.17.1"
+  }
+}

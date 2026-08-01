@@ -2,10 +2,17 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+**Langue du projet : français, partout.** Documents, code, noms de variables, messages de commit,
+commentaires, rapports d'agents, et réponses à l'utilisateur. Les specs sont en français et le
+vocabulaire métier l'est aussi (`Alea`, `Horloge`, `FournisseurVoix`, `tentatives`, `noeuds`) — s'y
+tenir évite un dépôt à deux langues. Seules exceptions : les identifiants imposés par un outil
+externe.
+
 ## État du dépôt : spécification seule, phase de brainstorming
 
-**Il n'y a aucun code.** Le dépôt contient uniquement `Docs/` (4 fichiers). Pas de `package.json`,
-pas de `src/`, pas de git, aucune des commandes citées plus bas n'existe encore.
+**Il n'y a aucun code.** Le dépôt contient `Docs/` (4 fichiers) et ce CLAUDE.md. Pas de
+`package.json`, pas de `src/`, aucune des commandes citées plus bas n'existe encore. Git est
+initialisé (`main`, un commit, un `origin` configuré).
 
 Conséquence directe : **ne pas initialiser le projet, ne pas écrire de code, ne pas créer
 d'arborescence de son propre chef.** Tant que la phase de brainstorming dure, le travail porte sur
@@ -30,6 +37,56 @@ ajout de **Docker Compose**, Ollama passé d'optionnel à activable. L'addendum 
 Sur un point technique, lire **v2 puis annexe P puis addendum** : le plus récent gagne. Sur un point
 de conception ou de pédagogie, la v2 fait foi et l'annexe P ne la révise pas (elle le dit
 elle-même : « annexe de production, pas révision de conception »).
+
+## Environnement de travail
+
+Détail mesuré et commandes exactes dans [environnement-et-outillage.md](Docs/environnement-et-outillage.md).
+En résumé : **RTX 5090 (32 Go), 100 Go de RAM, Node 24.13, Docker 29.5, Python 3.13, ffmpeg** —
+tout ce que les specs demandent est là. **ComfyUI 0.29 tourne déjà** sur `127.0.0.1:8188`.
+**llama.cpp** est dans `D:\Projet_perso\llama` (serveur à lancer au besoin sur le port 8001, une
+douzaine de modèles GGUF locaux dont Qwen3.6-27B et gemma-4-31B multimodal). **`potrace` est absent**
+et sera nécessaire à la vectorisation (annexe P § 3.2).
+
+**Projet solo.** Un seul développeur, un seul écrivain par fichier, pas de coordination d'équipe à
+prévoir. Les sous-agents sont autorisés et bienvenus pour paralléliser.
+
+### Le dépôt est auto-contenu — règle dure (décision D9)
+
+**On clone, on lance, ça marche.** Rien ne s'installe hors du dossier du projet, jamais :
+`node_modules/` local et **jamais `npm install -g`** · venv Python dans `.venv/` à la racine, jamais
+de `pip install` global · binaires tiers dans `outils/bin/`, téléchargés par
+`outils/installer-outils.mjs` · base dans `donnees/` · lancement par `demarrer.bat`.
+
+Une dépendance installée globalement est une dépendance invisible : elle marche sur la machine où
+elle a été posée, et nulle part ailleurs. ComfyUI et llama.cpp font exception — ce sont des
+**services** de la machine, pas des dépendances du projet : le dépôt porte les scripts qui les
+pilotent et doit se comporter correctement quand ils sont absents.
+
+**Installations : demander avant.** Le socle npm des specs, `potrace` et `faster-whisper` sont
+autorisés (décision D4). Toute dépendance hors de cette liste se propose et s'attend.
+
+### Campagnes multi-agents (décision D10)
+
+Contrat gelé sur disque → implantation parallèle à fichiers disjoints → revue → **compilation par
+l'orchestrateur uniquement** (jeton unique, aucun agent ne compile ni n'installe). Le plan partagé
+s'écrit **une fois** et on donne son chemin ; le recopier dans N briefs, c'est N occasions de le
+déformer. Un rapport commandé **se lit avant** l'action qu'il devait informer.
+
+## Discipline de fin de tâche — non optionnelle
+
+L'information qui n'est pas écrite dans le dépôt est perdue au changement de conversation.
+Donc, **à la fin de chaque tâche** :
+
+1. **Mettre à jour les documents concernés** dans `Docs/`. Une décision prise, un seuil mesuré, un
+   chemin découvert, un arbitrage rendu : ça va dans les docs, pas seulement dans la réponse.
+   Corollaire de l'addendum § B.8 : ce qui n'est pas écrit n'a pas été décidé.
+2. **Extraire en skill** (`.claude/skills/`) toute procédure qui a été exécutée une fois et le sera
+   à nouveau : lancer llama.cpp, soumettre un workflow ComfyUI, produire un lot de voix, vérifier
+   les régions fermées, régénérer les captures de référence. Une procédure refaite de mémoire à
+   chaque session est une procédure qui dérive.
+3. **Ne jamais modifier les quatre documents de référence sans validation.** Ce sont les documents
+   de l'utilisateur. Les compléments s'écrivent dans de **nouveaux** fichiers `Docs/` ; une
+   modification des quatre originaux se propose et s'attend.
 
 ## Le projet en trois phrases
 

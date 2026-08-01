@@ -1,0 +1,49 @@
+# La Pierre des Mots — ce qui ne part JAMAIS sur git.
+# Liste prescrite par le contrat technique v1 § 1.1, complétée en fin de fichier.
+
+# --- dépendances (décision D9 : tout est local, jamais d'installation globale)
+node_modules/
+.venv/
+outils/
+
+# --- artefacts de compilation
+dist/
+dist-test/
+*.tsbuildinfo
+
+# --- données de jeu (le dossier `donnees/` est suivi par son `.gitkeep`, pas son contenu)
+donnees/*.db
+donnees/*.db-wal
+donnees/*.db-shm
+donnees/*.db-journal
+donnees/*.pid
+
+# --- sorties de test (le `.gitkeep` de `tests/rapports/` reste suivi)
+tests/rapports/
+!tests/rapports/.gitkeep
+playwright-report/
+test-results/
+coverage/
+
+# --- contenu produit par agent, avant relecture parent
+# Règle non négociable : rien n'atteint l'enfant sans validation humaine.
+contenu/brouillons/*
+!contenu/brouillons/.gitkeep
+
+# --- audio : artefacts de build, régénérables depuis `production/voix.lock.json`
+contenu/audio/
+
+# --- environnement local (`.env.exemple` reste suivi, c'est le modèle)
+.env
+.env.local
+
+# --- système et éditeurs
+Thumbs.db
+desktop.ini
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# --- types generes par `tsc -b` (artefacts, jamais versionnes)
+dist-types/

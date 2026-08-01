@@ -1,0 +1,21 @@
+// Paquet `@pierre/client` — contrat technique v1 § 1.4.
+// Le client ne fait QUE de la vérification de types : Vite produit le JavaScript.
+// `composite: true` vient de `tsconfig.base.json` et est exigé par les références de projet
+// de `tsconfig.json` racine ; un projet composite ne peut pas désactiver l'émission, on émet
+// donc les seules déclarations, dans un dossier qui ne croise jamais `dist/` (production)
+// ni `dist-test/` (Playwright), cf. contrat § 7.3.
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "types": ["vite/client", "node"],
+
+    "emitDeclarationOnly": true,
+    "outDir": "./dist-types",
+    "tsBuildInfoFile": "./dist-types/tsconfig.tsbuildinfo",
+    "rootDir": "."
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts", "vite.config.ts"],
+  "references": [{ "path": "../partage" }]
+}

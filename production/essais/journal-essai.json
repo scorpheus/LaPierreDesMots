@@ -1,0 +1,410 @@
+[
+  {
+    "nom": "flux_A-trait_g1001",
+    "modele": "flux",
+    "condition": "A-trait",
+    "graine": 1001,
+    "checkpoint": "flux1-schnell-fp8.safetensors",
+    "pas": 8,
+    "cfg": 1.0,
+    "sampler": "euler",
+    "ordonnanceur": "simple",
+    "resolution": [
+      1024,
+      1024
+    ],
+    "prompt": "black and white line art, clean bold black ink outlines of even weight, pure flat white background, no color, no shading, no grey, no hatching, coloring book style, closed clean contours, a small round companion creature the size of a ball, one continuous rounded body outline covered in very short dense velvet fur, two short sturdy arms with simple round hands, two small round feet, no neck, two large round wide-set eyes with clear round pupils, raised friendly eyebrows, a wide open warm smile, a crest of five faceted crystal shards of uneven sizes growing along its head and back, one glowing faceted crystal shard at the center of its chest, open welcoming posture facing the viewer, full body, single character, centered",
+    "negatif": "text, letters, watermark, signature, logo, frame, border, extra limbs, extra arms, deformed hands, malformed, mutated, disfigured, menacing, sinister, creepy, scary, angry, snarling, sharp fangs, bared teeth, photorealistic, photograph, 3d render, color, colored, colorful, grey shading, gradient, painted"
+  },
+  {
+    "nom": "flux_A-trait_g2002",
+    "modele": "flux",
+    "condition": "A-trait",
+    "graine": 2002,
+    "checkpoint": "flux1-schnell-fp8.safetensors",
+    "pas": 8,
+    "cfg": 1.0,
+    "sampler": "euler",
+    "ordonnanceur": "simple",
+    "resolution": [
+      1024,
+      1024
+    ],
+    "prompt": "black and white line art, clean bold black ink outlines of even weight, pure flat white background, no color, no shading, no grey, no hatching, coloring book style, closed clean contours, a small round companion creature the size of a ball, one continuous rounded body outline covered in very short dense velvet fur, two short sturdy arms with simple round hands, two small round feet, no neck, two large round wide-set eyes with clear round pupils, raised friendly eyebrows, a wide open warm smile, a crest of five faceted crystal shards of uneven sizes growing along its head and back, one glowing faceted crystal shard at the center of its chest, open welcoming posture facing the viewer, full body, single character, centered",
+    "negatif": "text, letters, watermark, signature, logo, frame, border, extra limbs, extra arms, deformed hands, malformed, mutated, disfigured, menacing, sinister, creepy, scary, angry, snarling, sharp fangs, bared teeth, photorealistic, photograph, 3d render, color, colored, colorful, grey shading, gradient, painted"
+  },
+  {
+    "nom": "flux_A-trait_g3003",
+    "modele": "flux",
+    "condition": "A-trait",
+    "graine": 3003,
+    "checkpoint": "flux1-schnell-fp8.safetensors",
+    "pas": 8,
+    "cfg": 1.0,
+    "sampler": "euler",
+    "ordonnanceur": "simple",
+    "resolution": [
+      1024,
+      1024
+    ],
+    "prompt": "black and white line art, clean bold black ink outlines of even weight, pure flat white background, no color, no shading, no grey, no hatching, coloring book style, closed clean contours, a small round companion creature the size of a ball, one continuous rounded body outline covered in very short dense velvet fur, two short sturdy arms with simple round hands, two small round feet, no neck, two large round wide-set eyes with clear round pupils, raised friendly eyebrows, a wide open warm smile, a crest of five faceted crystal shards of uneven sizes growing along its head and back, one glowing faceted crystal shard at the center of its chest, open welcoming posture facing the viewer, full body, single character, centered",
+    "negatif": "text, letters, watermark, signature, logo, frame, border, extra limbs, extra arms, deformed hands, malformed, mutated, disfigured, menacing, sinister, creepy, scary, angry, snarling, sharp fangs, bared teeth, photorealistic, photograph, 3d render, color, colored, colorful, grey shading, gradient, painted"
+  },
+  {
+    "nom": "flux_A-trait_g4004",
+    "modele": "flux",
+    "condition": "A-trait",
+    "graine": 4004,
+    "checkpoint": "flux1-schnell-fp8.safetensors",
+    "pas": 8,
+    "cfg": 1.0,
+    "sampler": "euler",
+    "ordonnanceur": "simple",
+    "resolution": [
+      1024,
+      1024
+    ],
+    "prompt": "black and white line art, clean bold black ink outlines of even weight, pure flat white background, no color, no shading, no grey, no hatching, coloring book style, closed clean contours, a small round companion creature the size of a ball, one continuous rounded body outline covered in very short dense velvet fur, two short sturdy arms with simple round hands, two small round feet, no neck, two large round wide-set eyes with clear round pupils, raised friendly eyebrows, a wide open warm smile, a crest of five faceted crystal shards of uneven sizes growing along its head and back, one glowing faceted crystal shard at the center of its chest, open welcoming posture facing the viewer, full body, single character, centered",
+    "negatif": "text, letters, watermark, signature, logo, frame, border, extra limbs, extra arms, deformed hands, malformed, mutated, disfigured, menacing, sinister, creepy, scary, angry, snarling, sharp fangs, bared teeth, photorealistic, photograph, 3d render, color, colored, colorful, grey shading, gradient, painted"
+  },
+  {
+    "nom": "flux_A-trait_g5005",
+    "modele": "flux",
+    "condition": "A-trait",
+    "graine": 5005,
+    "checkpoint": "flux1-schnell-fp8.safetensors",
+    "pas": 8,
+    "cfg": 1.0,
+    "sampler": "euler",
+    "ordonnanceur": "simple",
+    "resolution": [
+      1024,
+      1024
+    ],
+    "prompt": "black and white line art, clean bold black ink outlines of even weight, pure flat white background, no color, no shading, no grey, no hatching, coloring book style, closed clean contours, a small round companion creature the size of a ball, one continuous rounded body outline covered in very short dense velvet fur, two short sturdy arms with simple round hands, two small round feet, no neck, two large round wide-set eyes with clear round pupils, raised friendly eyebrows, a wide open warm smile, a crest of five faceted crystal shards of uneven sizes growing along its head and back, one glowing faceted crystal shard at the center of its chest, open welcoming posture facing the viewer, full body, single character, centered",
+    "negatif": "text, letters, watermark, signature, logo, frame, border, extra limbs, extra arms, deformed hands, malformed, mutated, disfigured, menacing, sinister, creepy, scary, angry, snarling, sharp fangs, bared teeth, photorealistic, photograph, 3d render, color, colored, colorful, grey shading, gradient, painted"
+  },
+  {
+    "nom": "flux_A-trait_g6006",
+    "modele": "flux",
+    "condition": "A-trait",
+    "graine": 6006,
+    "checkpoint": "flux1-schnell-fp8.safetensors",
+    "pas": 8,
+    "cfg": 1.0,
+    "sampler": "euler",
+    "ordonnanceur": "simple",
+    "resolution": [
+      1024,
+      1024
+    ],
+    "prompt": "black and white line art, clean bold black ink outlines of even weight, pure flat white background, no color, no shading, no grey, no hatching, coloring book style, closed clean contours, a small round companion creature the size of a ball, one continuous rounded body outline covered in very short dense velvet fur, two short sturdy arms with simple round hands, two small round feet, no neck, two large round wide-set eyes with clear round pupils, raised friendly eyebrows, a wide open warm smile, a crest of five faceted crystal shards of uneven sizes growing along its head and back, one glowing faceted crystal shard at the center of its chest, open welcoming posture facing the viewer, full body, single character, centered",
+    "negatif": "text, letters, watermark, signature, logo, frame, border, extra limbs, extra arms, deformed hands, malformed, mutated, disfigured, menacing, sinister, creepy, scary, angry, snarling, sharp fangs, bared teeth, photorealistic, photograph, 3d render, color, colored, colorful, grey shading, gradient, painted"
+  },
+  {
+    "nom": "flux_B-couleur_g1001",
+    "modele": "flux",
+    "condition": "B-couleur",
+    "graine": 1001,
+    "checkpoint": "flux1-schnell-fp8.safetensors",
+    "pas": 8,
+    "cfg": 1.0,
+    "sampler": "euler",
+    "ordonnanceur": "simple",
+    "resolution": [
+      1024,
+      1024
+    ],
+    "prompt": "children's picture book illustration, soft warm colors, clean flat color shapes, gentle friendly modern cartoon style, simple plain pale background, appealing to a seven year old child, a small round companion creature the size of a ball, one continuous rounded body outline covered in very short dense velvet fur, two short sturdy arms with simple round hands, two small round feet, no neck, two large round wide-set eyes with clear round pupils, raised friendly eyebrows, a wide open warm smile, a crest of five faceted crystal shards of uneven sizes growing along its head and back, one glowing faceted crystal shard at the center of its chest, open welcoming posture facing the viewer, full body, single character, centered",
+    "negatif": "text, letters, watermark, signature, logo, frame, border, extra limbs, extra arms, deformed hands, malformed, mutated, disfigured, menacing, sinister, creepy, scary, angry, snarling, sharp fangs, bared teeth, photorealistic, photograph, 3d render"
+  },
+  {
+    "nom": "flux_B-couleur_g2002",
+    "modele": "flux",
+    "condition": "B-couleur",
+    "graine": 2002,
+    "checkpoint": "flux1-schnell-fp8.safetensors",
+    "pas": 8,
+    "cfg": 1.0,
+    "sampler": "euler",
+    "ordonnanceur": "simple",
+    "resolution": [
+      1024,
+      1024
+    ],
+    "prompt": "children's picture book illustration, soft warm colors, clean flat color shapes, gentle friendly modern cartoon style, simple plain pale background, appealing to a seven year old child, a small round companion creature the size of a ball, one continuous rounded body outline covered in very short dense velvet fur, two short sturdy arms with simple round hands, two small round feet, no neck, two large round wide-set eyes with clear round pupils, raised friendly eyebrows, a wide open warm smile, a crest of five faceted crystal shards of uneven sizes growing along its head and back, one glowing faceted crystal shard at the center of its chest, open welcoming posture facing the viewer, full body, single character, centered",
+    "negatif": "text, letters, watermark, signature, logo, frame, border, extra limbs, extra arms, deformed hands, malformed, mutated, disfigured, menacing, sinister, creepy, scary, angry, snarling, sharp fangs, bared teeth, photorealistic, photograph, 3d render"
+  },
+  {
+    "nom": "flux_B-couleur_g3003",
+    "modele": "flux",
+    "condition": "B-couleur",
+    "graine": 3003,
+    "checkpoint": "flux1-schnell-fp8.safetensors",
+    "pas": 8,
+    "cfg": 1.0,
+    "sampler": "euler",
+    "ordonnanceur": "simple",
+    "resolution": [
+      1024,
+      1024
+    ],
+    "prompt": "children's picture book illustration, soft warm colors, clean flat color shapes, gentle friendly modern cartoon style, simple plain pale background, appealing to a seven year old child, a small round companion creature the size of a ball, one continuous rounded body outline covered in very short dense velvet fur, two short sturdy arms with simple round hands, two small round feet, no neck, two large round wide-set eyes with clear round pupils, raised friendly eyebrows, a wide open warm smile, a crest of five faceted crystal shards of uneven sizes growing along its head and back, one glowing faceted crystal shard at the center of its chest, open welcoming posture facing the viewer, full body, single character, centered",
+    "negatif": "text, letters, watermark, signature, logo, frame, border, extra limbs, extra arms, deformed hands, malformed, mutated, disfigured, menacing, sinister, creepy, scary, angry, snarling, sharp fangs, bared teeth, photorealistic, photograph, 3d render"
+  },
+  {
+    "nom": "flux_B-couleur_g4004",
+    "modele": "flux",
+    "condition": "B-couleur",
+    "graine": 4004,
+    "checkpoint": "flux1-schnell-fp8.safetensors",
+    "pas": 8,
+    "cfg": 1.0,
+    "sampler": "euler",
+    "ordonnanceur": "simple",
+    "resolution": [
+      1024,
+      1024
+    ],
+    "prompt": "children's picture book illustration, soft warm colors, clean flat color shapes, gentle friendly modern cartoon style, simple plain pale background, appealing to a seven year old child, a small round companion creature the size of a ball, one continuous rounded body outline covered in very short dense velvet fur, two short sturdy arms with simple round hands, two small round feet, no neck, two large round wide-set eyes with clear round pupils, raised friendly eyebrows, a wide open warm smile, a crest of five faceted crystal shards of uneven sizes growing along its head and back, one glowing faceted crystal shard at the center of its chest, open welcoming posture facing the viewer, full body, single character, centered",
+    "negatif": "text, letters, watermark, signature, logo, frame, border, extra limbs, extra arms, deformed hands, malformed, mutated, disfigured, menacing, sinister, creepy, scary, angry, snarling, sharp fangs, bared teeth, photorealistic, photograph, 3d render"
+  },
+  {
+    "nom": "flux_B-couleur_g5005",
+    "modele": "flux",
+    "condition": "B-couleur",
+    "graine": 5005,
+    "checkpoint": "flux1-schnell-fp8.safetensors",
+    "pas": 8,
+    "cfg": 1.0,
+    "sampler": "euler",
+    "ordonnanceur": "simple",
+    "resolution": [
+      1024,
+      1024
+    ],
+    "prompt": "children's picture book illustration, soft warm colors, clean flat color shapes, gentle friendly modern cartoon style, simple plain pale background, appealing to a seven year old child, a small round companion creature the size of a ball, one continuous rounded body outline covered in very short dense velvet fur, two short sturdy arms with simple round hands, two small round feet, no neck, two large round wide-set eyes with clear round pupils, raised friendly eyebrows, a wide open warm smile, a crest of five faceted crystal shards of uneven sizes growing along its head and back, one glowing faceted crystal shard at the center of its chest, open welcoming posture facing the viewer, full body, single character, centered",
+    "negatif": "text, letters, watermark, signature, logo, frame, border, extra limbs, extra arms, deformed hands, malformed, mutated, disfigured, menacing, sinister, creepy, scary, angry, snarling, sharp fangs, bared teeth, photorealistic, photograph, 3d render"
+  },
+  {
+    "nom": "flux_B-couleur_g6006",
+    "modele": "flux",
+    "condition": "B-couleur",
+    "graine": 6006,
+    "checkpoint": "flux1-schnell-fp8.safetensors",
+    "pas": 8,
+    "cfg": 1.0,
+    "sampler": "euler",
+    "ordonnanceur": "simple",
+    "resolution": [
+      1024,
+      1024
+    ],
+    "prompt": "children's picture book illustration, soft warm colors, clean flat color shapes, gentle friendly modern cartoon style, simple plain pale background, appealing to a seven year old child, a small round companion creature the size of a ball, one continuous rounded body outline covered in very short dense velvet fur, two short sturdy arms with simple round hands, two small round feet, no neck, two large round wide-set eyes with clear round pupils, raised friendly eyebrows, a wide open warm smile, a crest of five faceted crystal shards of uneven sizes growing along its head and back, one glowing faceted crystal shard at the center of its chest, open welcoming posture facing the viewer, full body, single character, centered",
+    "negatif": "text, letters, watermark, signature, logo, frame, border, extra limbs, extra arms, deformed hands, malformed, mutated, disfigured, menacing, sinister, creepy, scary, angry, snarling, sharp fangs, bared teeth, photorealistic, photograph, 3d render"
+  },
+  {
+    "nom": "sdxl_A-trait_g1001",
+    "modele": "sdxl",
+    "condition": "A-trait",
+    "graine": 1001,
+    "checkpoint": "damnPonyIllustrious_rebornIllustrious.safetensors",
+    "pas": 28,
+    "cfg": 6.0,
+    "sampler": "dpmpp_2m",
+    "ordonnanceur": "karras",
+    "resolution": [
+      1024,
+      1024
+    ],
+    "prompt": "black and white line art, clean bold black ink outlines of even weight, pure flat white background, no color, no shading, no grey, no hatching, coloring book style, closed clean contours, a small round companion creature the size of a ball, one continuous rounded body outline covered in very short dense velvet fur, two short sturdy arms with simple round hands, two small round feet, no neck, two large round wide-set eyes with clear round pupils, raised friendly eyebrows, a wide open warm smile, a crest of five faceted crystal shards of uneven sizes growing along its head and back, one glowing faceted crystal shard at the center of its chest, open welcoming posture facing the viewer, full body, single character, centered",
+    "negatif": "text, letters, watermark, signature, logo, frame, border, extra limbs, extra arms, deformed hands, malformed, mutated, disfigured, menacing, sinister, creepy, scary, angry, snarling, sharp fangs, bared teeth, photorealistic, photograph, 3d render, color, colored, colorful, grey shading, gradient, painted"
+  },
+  {
+    "nom": "sdxl_A-trait_g2002",
+    "modele": "sdxl",
+    "condition": "A-trait",
+    "graine": 2002,
+    "checkpoint": "damnPonyIllustrious_rebornIllustrious.safetensors",
+    "pas": 28,
+    "cfg": 6.0,
+    "sampler": "dpmpp_2m",
+    "ordonnanceur": "karras",
+    "resolution": [
+      1024,
+      1024
+    ],
+    "prompt": "black and white line art, clean bold black ink outlines of even weight, pure flat white background, no color, no shading, no grey, no hatching, coloring book style, closed clean contours, a small round companion creature the size of a ball, one continuous rounded body outline covered in very short dense velvet fur, two short sturdy arms with simple round hands, two small round feet, no neck, two large round wide-set eyes with clear round pupils, raised friendly eyebrows, a wide open warm smile, a crest of five faceted crystal shards of uneven sizes growing along its head and back, one glowing faceted crystal shard at the center of its chest, open welcoming posture facing the viewer, full body, single character, centered",
+    "negatif": "text, letters, watermark, signature, logo, frame, border, extra limbs, extra arms, deformed hands, malformed, mutated, disfigured, menacing, sinister, creepy, scary, angry, snarling, sharp fangs, bared teeth, photorealistic, photograph, 3d render, color, colored, colorful, grey shading, gradient, painted"
+  },
+  {
+    "nom": "sdxl_A-trait_g3003",
+    "modele": "sdxl",
+    "condition": "A-trait",
+    "graine": 3003,
+    "checkpoint": "damnPonyIllustrious_rebornIllustrious.safetensors",
+    "pas": 28,
+    "cfg": 6.0,
+    "sampler": "dpmpp_2m",
+    "ordonnanceur": "karras",
+    "resolution": [
+      1024,
+      1024
+    ],
+    "prompt": "black and white line art, clean bold black ink outlines of even weight, pure flat white background, no color, no shading, no grey, no hatching, coloring book style, closed clean contours, a small round companion creature the size of a ball, one continuous rounded body outline covered in very short dense velvet fur, two short sturdy arms with simple round hands, two small round feet, no neck, two large round wide-set eyes with clear round pupils, raised friendly eyebrows, a wide open warm smile, a crest of five faceted crystal shards of uneven sizes growing along its head and back, one glowing faceted crystal shard at the center of its chest, open welcoming posture facing the viewer, full body, single character, centered",
+    "negatif": "text, letters, watermark, signature, logo, frame, border, extra limbs, extra arms, deformed hands, malformed, mutated, disfigured, menacing, sinister, creepy, scary, angry, snarling, sharp fangs, bared teeth, photorealistic, photograph, 3d render, color, colored, colorful, grey shading, gradient, painted"
+  },
+  {
+    "nom": "sdxl_A-trait_g4004",
+    "modele": "sdxl",
+    "condition": "A-trait",
+    "graine": 4004,
+    "checkpoint": "damnPonyIllustrious_rebornIllustrious.safetensors",
+    "pas": 28,
+    "cfg": 6.0,
+    "sampler": "dpmpp_2m",
+    "ordonnanceur": "karras",
+    "resolution": [
+      1024,
+      1024
+    ],
+    "prompt": "black and white line art, clean bold black ink outlines of even weight, pure flat white background, no color, no shading, no grey, no hatching, coloring book style, closed clean contours, a small round companion creature the size of a ball, one continuous rounded body outline covered in very short dense velvet fur, two short sturdy arms with simple round hands, two small round feet, no neck, two large round wide-set eyes with clear round pupils, raised friendly eyebrows, a wide open warm smile, a crest of five faceted crystal shards of uneven sizes growing along its head and back, one glowing faceted crystal shard at the center of its chest, open welcoming posture facing the viewer, full body, single character, centered",
+    "negatif": "text, letters, watermark, signature, logo, frame, border, extra limbs, extra arms, deformed hands, malformed, mutated, disfigured, menacing, sinister, creepy, scary, angry, snarling, sharp fangs, bared teeth, photorealistic, photograph, 3d render, color, colored, colorful, grey shading, gradient, painted"
+  },
+  {
+    "nom": "sdxl_A-trait_g5005",
+    "modele": "sdxl",
+    "condition": "A-trait",
+    "graine": 5005,
+    "checkpoint": "damnPonyIllustrious_rebornIllustrious.safetensors",
+    "pas": 28,
+    "cfg": 6.0,
+    "sampler": "dpmpp_2m",
+    "ordonnanceur": "karras",
+    "resolution": [
+      1024,
+      1024
+    ],
+    "prompt": "black and white line art, clean bold black ink outlines of even weight, pure flat white background, no color, no shading, no grey, no hatching, coloring book style, closed clean contours, a small round companion creature the size of a ball, one continuous rounded body outline covered in very short dense velvet fur, two short sturdy arms with simple round hands, two small round feet, no neck, two large round wide-set eyes with clear round pupils, raised friendly eyebrows, a wide open warm smile, a crest of five faceted crystal shards of uneven sizes growing along its head and back, one glowing faceted crystal shard at the center of its chest, open welcoming posture facing the viewer, full body, single character, centered",
+    "negatif": "text, letters, watermark, signature, logo, frame, border, extra limbs, extra arms, deformed hands, malformed, mutated, disfigured, menacing, sinister, creepy, scary, angry, snarling, sharp fangs, bared teeth, photorealistic, photograph, 3d render, color, colored, colorful, grey shading, gradient, painted"
+  },
+  {
+    "nom": "sdxl_A-trait_g6006",
+    "modele": "sdxl",
+    "condition": "A-trait",
+    "graine": 6006,
+    "checkpoint": "damnPonyIllustrious_rebornIllustrious.safetensors",
+    "pas": 28,
+    "cfg": 6.0,
+    "sampler": "dpmpp_2m",
+    "ordonnanceur": "karras",
+    "resolution": [
+      1024,
+      1024
+    ],
+    "prompt": "black and white line art, clean bold black ink outlines of even weight, pure flat white background, no color, no shading, no grey, no hatching, coloring book style, closed clean contours, a small round companion creature the size of a ball, one continuous rounded body outline covered in very short dense velvet fur, two short sturdy arms with simple round hands, two small round feet, no neck, two large round wide-set eyes with clear round pupils, raised friendly eyebrows, a wide open warm smile, a crest of five faceted crystal shards of uneven sizes growing along its head and back, one glowing faceted crystal shard at the center of its chest, open welcoming posture facing the viewer, full body, single character, centered",
+    "negatif": "text, letters, watermark, signature, logo, frame, border, extra limbs, extra arms, deformed hands, malformed, mutated, disfigured, menacing, sinister, creepy, scary, angry, snarling, sharp fangs, bared teeth, photorealistic, photograph, 3d render, color, colored, colorful, grey shading, gradient, painted"
+  },
+  {
+    "nom": "sdxl_B-couleur_g1001",
+    "modele": "sdxl",
+    "condition": "B-couleur",
+    "graine": 1001,
+    "checkpoint": "damnPonyIllustrious_rebornIllustrious.safetensors",
+    "pas": 28,
+    "cfg": 6.0,
+    "sampler": "dpmpp_2m",
+    "ordonnanceur": "karras",
+    "resolution": [
+      1024,
+      1024
+    ],
+    "prompt": "children's picture book illustration, soft warm colors, clean flat color shapes, gentle friendly modern cartoon style, simple plain pale background, appealing to a seven year old child, a small round companion creature the size of a ball, one continuous rounded body outline covered in very short dense velvet fur, two short sturdy arms with simple round hands, two small round feet, no neck, two large round wide-set eyes with clear round pupils, raised friendly eyebrows, a wide open warm smile, a crest of five faceted crystal shards of uneven sizes growing along its head and back, one glowing faceted crystal shard at the center of its chest, open welcoming posture facing the viewer, full body, single character, centered",
+    "negatif": "text, letters, watermark, signature, logo, frame, border, extra limbs, extra arms, deformed hands, malformed, mutated, disfigured, menacing, sinister, creepy, scary, angry, snarling, sharp fangs, bared teeth, photorealistic, photograph, 3d render"
+  },
+  {
+    "nom": "sdxl_B-couleur_g2002",
+    "modele": "sdxl",
+    "condition": "B-couleur",
+    "graine": 2002,
+    "checkpoint": "damnPonyIllustrious_rebornIllustrious.safetensors",
+    "pas": 28,
+    "cfg": 6.0,
+    "sampler": "dpmpp_2m",
+    "ordonnanceur": "karras",
+    "resolution": [
+      1024,
+      1024
+    ],
+    "prompt": "children's picture book illustration, soft warm colors, clean flat color shapes, gentle friendly modern cartoon style, simple plain pale background, appealing to a seven year old child, a small round companion creature the size of a ball, one continuous rounded body outline covered in very short dense velvet fur, two short sturdy arms with simple round hands, two small round feet, no neck, two large round wide-set eyes with clear round pupils, raised friendly eyebrows, a wide open warm smile, a crest of five faceted crystal shards of uneven sizes growing along its head and back, one glowing faceted crystal shard at the center of its chest, open welcoming posture facing the viewer, full body, single character, centered",
+    "negatif": "text, letters, watermark, signature, logo, frame, border, extra limbs, extra arms, deformed hands, malformed, mutated, disfigured, menacing, sinister, creepy, scary, angry, snarling, sharp fangs, bared teeth, photorealistic, photograph, 3d render"
+  },
+  {
+    "nom": "sdxl_B-couleur_g3003",
+    "modele": "sdxl",
+    "condition": "B-couleur",
+    "graine": 3003,
+    "checkpoint": "damnPonyIllustrious_rebornIllustrious.safetensors",
+    "pas": 28,
+    "cfg": 6.0,
+    "sampler": "dpmpp_2m",
+    "ordonnanceur": "karras",
+    "resolution": [
+      1024,
+      1024
+    ],
+    "prompt": "children's picture book illustration, soft warm colors, clean flat color shapes, gentle friendly modern cartoon style, simple plain pale background, appealing to a seven year old child, a small round companion creature the size of a ball, one continuous rounded body outline covered in very short dense velvet fur, two short sturdy arms with simple round hands, two small round feet, no neck, two large round wide-set eyes with clear round pupils, raised friendly eyebrows, a wide open warm smile, a crest of five faceted crystal shards of uneven sizes growing along its head and back, one glowing faceted crystal shard at the center of its chest, open welcoming posture facing the viewer, full body, single character, centered",
+    "negatif": "text, letters, watermark, signature, logo, frame, border, extra limbs, extra arms, deformed hands, malformed, mutated, disfigured, menacing, sinister, creepy, scary, angry, snarling, sharp fangs, bared teeth, photorealistic, photograph, 3d render"
+  },
+  {
+    "nom": "sdxl_B-couleur_g4004",
+    "modele": "sdxl",
+    "condition": "B-couleur",
+    "graine": 4004,
+    "checkpoint": "damnPonyIllustrious_rebornIllustrious.safetensors",
+    "pas": 28,
+    "cfg": 6.0,
+    "sampler": "dpmpp_2m",
+    "ordonnanceur": "karras",
+    "resolution": [
+      1024,
+      1024
+    ],
+    "prompt": "children's picture book illustration, soft warm colors, clean flat color shapes, gentle friendly modern cartoon style, simple plain pale background, appealing to a seven year old child, a small round companion creature the size of a ball, one continuous rounded body outline covered in very short dense velvet fur, two short sturdy arms with simple round hands, two small round feet, no neck, two large round wide-set eyes with clear round pupils, raised friendly eyebrows, a wide open warm smile, a crest of five faceted crystal shards of uneven sizes growing along its head and back, one glowing faceted crystal shard at the center of its chest, open welcoming posture facing the viewer, full body, single character, centered",
+    "negatif": "text, letters, watermark, signature, logo, frame, border, extra limbs, extra arms, deformed hands, malformed, mutated, disfigured, menacing, sinister, creepy, scary, angry, snarling, sharp fangs, bared teeth, photorealistic, photograph, 3d render"
+  },
+  {
+    "nom": "sdxl_B-couleur_g5005",
+    "modele": "sdxl",
+    "condition": "B-couleur",
+    "graine": 5005,
+    "checkpoint": "damnPonyIllustrious_rebornIllustrious.safetensors",
+    "pas": 28,
+    "cfg": 6.0,
+    "sampler": "dpmpp_2m",
+    "ordonnanceur": "karras",
+    "resolution": [
+      1024,
+      1024
+    ],
+    "prompt": "children's picture book illustration, soft warm colors, clean flat color shapes, gentle friendly modern cartoon style, simple plain pale background, appealing to a seven year old child, a small round companion creature the size of a ball, one continuous rounded body outline covered in very short dense velvet fur, two short sturdy arms with simple round hands, two small round feet, no neck, two large round wide-set eyes with clear round pupils, raised friendly eyebrows, a wide open warm smile, a crest of five faceted crystal shards of uneven sizes growing along its head and back, one glowing faceted crystal shard at the center of its chest, open welcoming posture facing the viewer, full body, single character, centered",
+    "negatif": "text, letters, watermark, signature, logo, frame, border, extra limbs, extra arms, deformed hands, malformed, mutated, disfigured, menacing, sinister, creepy, scary, angry, snarling, sharp fangs, bared teeth, photorealistic, photograph, 3d render"
+  },
+  {
+    "nom": "sdxl_B-couleur_g6006",
+    "modele": "sdxl",
+    "condition": "B-couleur",
+    "graine": 6006,
+    "checkpoint": "damnPonyIllustrious_rebornIllustrious.safetensors",
+    "pas": 28,
+    "cfg": 6.0,
+    "sampler": "dpmpp_2m",
+    "ordonnanceur": "karras",
+    "resolution": [
+      1024,
+      1024
+    ],
+    "prompt": "children's picture book illustration, soft warm colors, clean flat color shapes, gentle friendly modern cartoon style, simple plain pale background, appealing to a seven year old child, a small round companion creature the size of a ball, one continuous rounded body outline covered in very short dense velvet fur, two short sturdy arms with simple round hands, two small round feet, no neck, two large round wide-set eyes with clear round pupils, raised friendly eyebrows, a wide open warm smile, a crest of five faceted crystal shards of uneven sizes growing along its head and back, one glowing faceted crystal shard at the center of its chest, open welcoming posture facing the viewer, full body, single character, centered",
+    "negatif": "text, letters, watermark, signature, logo, frame, border, extra limbs, extra arms, deformed hands, malformed, mutated, disfigured, menacing, sinister, creepy, scary, angry, snarling, sharp fangs, bared teeth, photorealistic, photograph, 3d render"
+  }
+]

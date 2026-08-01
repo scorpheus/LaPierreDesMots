@@ -1,0 +1,2 @@
+Emplacement de `pierre.db` (fichier SQLite + ses `-wal` et `-shm`).
+Le contenu de ce dossier est ignore par git, sauf ce fichier.

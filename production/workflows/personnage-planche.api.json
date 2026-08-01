@@ -1,0 +1,82 @@
+{
+  "_commentaire": {
+    "usage": "ETAPE (B1) — produire LA PLANCHE de reference d'un personnage (face, trois-quarts, profil, dos) a partir de la canonique choisie. Une planche UNIQUE en plusieurs panneaux, jamais quatre vues generees separement puis assemblees : dans une planche unique les vues partagent le meme passage d'attention, en generations separees elles ne partagent qu'un texte. La planche est ensuite decoupee ; ses vignettes forment le socle du jeu d'entrainement d'une LoRA de personnage.",
+    "modele": "qwen_image_edit_2511_bf16.safetensors + qwen_2.5_vl_7b_fp8_scaled + qwen_image_vae",
+    "reglages": "20 pas, CFG 2.5, euler / simple, canevas de sortie LIBRE (EmptySD3LatentImage) car la planche est plus large que la canonique carree. Reference ramenee a 1,0 MP.",
+    "mesure": "MESURE du 2026-08-01, canonique flux_A-trait_g4004, graine 4004, 62,2 s : la planche des quatre vues sort CORRECTE — face, trois-quarts, profil, dos du meme personnage, meme crete, meme corps, meme epaisseur de trait, quatre panneaux sur une seule feuille blanche, sans bordure de panneau. Fond blanc 99,7 %, saturation 2,64, 138 composantes.",
+    "porte_technique_INADAPTEE": "La meme mesure declare pourtant une FUITE, et c'est un artefact d'instrument, pas un defaut : le test de l'annexe P 3.2 prend la boite englobante de TOUTE l'encre — donc les quatre figures ensemble — puis inonde depuis les coins ; le blanc qui separe les figures est evidemment relie a l'exterieur. Le test suppose UN sujet detoure. Sur une planche, il faut DECOUPER d'abord et tester chaque vignette ensuite. Deuxieme cas d'inadaptation du meme test mesure ce jour-la, avec le decor.",
+    "difference_avec_declinaison":"Ici le latent vient d'un canevas VIDE a la taille de la planche, pas d'un VAEEncode de la reference : c'est ce qui permet une sortie 1536x1024 depuis une reference 1024x1024. Et le negatif NE contient PAS « multiple views », puisqu'on en demande justement plusieurs.",
+    "champs_modifiables": [
+      "4.inputs.image  -- nom du fichier canonique televerse",
+      "6.inputs.prompt -- substitue a {INSTRUCTION} (par defaut : les quatre vues)",
+      "12.inputs.seed",
+      "9.inputs.width / 9.inputs.height  -- 1536x1024 par defaut pour quatre panneaux"
+    ],
+    "figes": "modele, encodeur, VAE, pas, CFG, sampler, ordonnanceur, denoise, negatif, clauses de conservation, topologie"
+  },
+  "1": {
+    "class_type": "UNETLoader",
+    "inputs": { "unet_name": "qwen_image_edit_2511_bf16.safetensors", "weight_dtype": "default" }
+  },
+  "2": {
+    "class_type": "CLIPLoader",
+    "inputs": { "clip_name": "qwen_2.5_vl_7b_fp8_scaled.safetensors", "type": "qwen_image" }
+  },
+  "3": {
+    "class_type": "VAELoader",
+    "inputs": { "vae_name": "qwen_image_vae.safetensors" }
+  },
+  "4": {
+    "class_type": "LoadImage",
+    "inputs": { "image": "gobi-canonique.png" }
+  },
+  "5": {
+    "class_type": "ImageScaleToTotalPixels",
+    "inputs": { "image": ["4", 0], "upscale_method": "lanczos", "megapixels": 1.0, "resolution_steps": 1 }
+  },
+  "6": {
+    "class_type": "TextEncodeQwenImageEditPlus",
+    "inputs": {
+      "clip": ["2", 0],
+      "prompt": "Using the character in the reference image, {INSTRUCTION}. Keep the body shape, the proportions, the crest of crystal shards, the outline thickness and the drawing style strictly identical in every panel. Keep it as black and white line art with clean bold black ink outlines on a pure flat white background, no colour, no shading, no grey, no hatching, no drop shadow, no panel borders, no separating lines.",
+      "vae": ["3", 0],
+      "image1": ["5", 0]
+    }
+  },
+  "7": {
+    "class_type": "TextEncodeQwenImageEditPlus",
+    "inputs": {
+      "clip": ["2", 0],
+      "prompt": "colour, coloured, grey shading, gradient, hatching, drop shadow, cast shadow, text, letters, labels, watermark, signature, frame, border, panel lines, extra limbs, deformed hands, photorealistic, 3d render",
+      "vae": ["3", 0],
+      "image1": ["5", 0]
+    }
+  },
+  "9": {
+    "class_type": "EmptySD3LatentImage",
+    "inputs": { "width": 1536, "height": 1024, "batch_size": 1 }
+  },
+  "12": {
+    "class_type": "KSampler",
+    "inputs": {
+      "seed": 1001,
+      "steps": 20,
+      "cfg": 2.5,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1.0,
+      "model": ["1", 0],
+      "positive": ["6", 0],
+      "negative": ["7", 0],
+      "latent_image": ["9", 0]
+    }
+  },
+  "13": {
+    "class_type": "VAEDecode",
+    "inputs": { "samples": ["12", 0], "vae": ["3", 0] }
+  },
+  "14": {
+    "class_type": "SaveImage",
+    "inputs": { "images": ["13", 0], "filename_prefix": "personnage-planche" }
+  }
+}

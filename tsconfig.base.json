@@ -1,0 +1,43 @@
+// Options communes aux 3 paquets (partage, serveur, client).
+// Contrat technique v1 § 0 : ESM strict, nodenext, extension `.js` sur tout import relatif.
+// Fichier au format JSONC — TypeScript accepte les commentaires ici.
+{
+  "compilerOptions": {
+    "target": "ES2023",
+    "lib": ["ES2023"],
+
+    // `nodenext` impose l'extension `.js` sur TOUT import relatif, y compris depuis un `.ts`.
+    // Un lot qui l'oublie ne compile pas : c'est voulu (contrat § 0 et § 14).
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "verbatimModuleSyntax": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+
+    // Exigés nommément par le contrat § 0.
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+
+    // Volontairement désactivé — écart assumé n° 8 du contrat § 12 : il réduit les divergences
+    // de compilation entre les 7 lots écrits en parallèle. Les champs facultatifs sont déclarés
+    // `T | null` plutôt que `T?` partout où c'est possible.
+    "exactOptionalPropertyTypes": false,
+
+    // `noUnusedLocals` / `noUnusedParameters` NE SONT PAS activés : ils feraient échouer la
+    // compilation d'un lot sur un détail cosmétique alors que 7 lots écrivent en parallèle.
+    // À rehausser une fois la v1 compilée et verte.
+
+    // Requis par `tsc -b` et les références de projet de `tsconfig.json`.
+    "composite": true,
+    "incremental": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "useDefineForClassFields": true
+  }
+}

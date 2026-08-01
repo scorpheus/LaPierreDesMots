@@ -1,0 +1,8 @@
+{
+  "id": "clairiere-01",
+  "region": "clairiere",
+  "ordre": 1,
+  "exercice": "clairiere-ecole-01",
+  "prerequis": [],
+  "temps": "presentation"
+}

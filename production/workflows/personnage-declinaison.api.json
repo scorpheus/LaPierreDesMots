@@ -1,0 +1,86 @@
+{
+  "_commentaire": {
+    "usage": "ETAPE (B) — decliner une canonique DEJA CHOISIE : changer la pose, l'expression, l'etat d'animation, ou la crete de cristaux, en gardant le corps identique. C'est le seul workflow qui transporte une identite d'une image a l'autre. Il exige en entree une image canonique validee par un humain.",
+    "modele": "qwen_image_edit_2511_bf16.safetensors (UNETLoader) + qwen_2.5_vl_7b_fp8_scaled (CLIPLoader, type qwen_image) + qwen_image_vae",
+    "reglages": "20 pas, CFG 2.5, euler / simple, entree ramenee a 1,0 megapixel, denoise 1.0. La sortie a la taille de l'entree mise a l'echelle.",
+    "mesure": "MESURE du 2026-08-01, canonique flux_A-trait_g4004, graine 4004. CFG 2,5 et CFG 4,0 franchissent tous deux la porte technique (fond blanc 100,0 %, 0 fuite, 32 a 45 composantes) en 47 a 57 s. IDENTITE TENUE : recouvrement de silhouette avec la canonique = 99,9 % dans les deux cas, alors que le trait demande — reduire les yeux, retirer les ronds de rougissement — est bien applique. CFG 2,5 retenu parce que 4,0 applique l'instruction plus durement et deforme davantage la crete ; sur une chaine dont la consigne est « ne change QUE cela », le reglage le moins agressif est le bon. Le rapport d'etat de l'art annoncait 4,0 et l'inventaire 2,5, aucun des deux sur mesure.",
+    "ce_que_l_edition_fait_et_que_le_prompt_ne_fait_pas": "MESURE : l'ombre au sol pleine de la canonique represente 12 829 px d'aplat noir. Une clause « no drop shadow » ajoutee au prompt de GENERATION la laisse a 13 450 px — elle ne sert a rien. L'instruction d'EDITION « remove the dark shadow ellipse under the feet » la ramene a 94 px, soit -99,3 %. C'est la regle generale : on ne retire pas un element par le prompt, on le retire par l'edition.",
+    "piege_mesure": "Le recouvrement de silhouette n'est un indicateur d'identite que pour les editions qui NE changent PAS la pose. Sur l'instruction « tourne-toi de trois quarts », il tombe a 23,9 % — c'est attendu, la silhouette a effectivement change, et le personnage reste pourtant le meme. Juger une declinaison de pose sur ce chiffre, c'est rejeter un bon asset.",
+    "negatif": "ACTIF. CFG 2,5 > 1, donc le conditionnement negatif a un poids reel. Le noeud 7 est un vrai encodage de texte, contrairement au workflow d'exploration. C'est la difference la plus piegeuse entre les deux workflows : ne pas copier un negatif de l'un vers l'autre.",
+    "profondeur_de_chaine": "1, IMPERATIF. On repart TOUJOURS de la canonique, jamais du resultat d'une edition precedente. Black Forest Labs documente une degradation visible apres six editions en cascade ; sur 25 declinaisons + 5 etats, une chaine en cascade derive silencieusement.",
+    "champs_modifiables": [
+      "4.inputs.image  -- nom du fichier canonique, prealablement televerse par POST /upload/image",
+      "6.inputs.prompt -- l'INSTRUCTION d'edition, substituee a {INSTRUCTION}. Les clauses de conservation qui l'entourent sont figees.",
+      "12.inputs.seed",
+      "5.inputs.megapixels -- 1,0 par defaut ; Qwen Edit se degrade au-dela de ~1 MP",
+      "14.inputs.filename_prefix"
+    ],
+    "figes": "modele, encodeur, VAE, pas, CFG, sampler, ordonnanceur, denoise, prompt negatif, clauses de conservation, topologie",
+    "redaction_de_l_instruction": "Nommer le sujet et la portee du changement, jamais un style vague. « raise the eyelids and open the mouth wide » et non « make it happier ». Avec plusieurs references, designer explicitement « the first image » et « the second image »."
+  },
+  "1": {
+    "class_type": "UNETLoader",
+    "inputs": { "unet_name": "qwen_image_edit_2511_bf16.safetensors", "weight_dtype": "default" }
+  },
+  "2": {
+    "class_type": "CLIPLoader",
+    "inputs": { "clip_name": "qwen_2.5_vl_7b_fp8_scaled.safetensors", "type": "qwen_image" }
+  },
+  "3": {
+    "class_type": "VAELoader",
+    "inputs": { "vae_name": "qwen_image_vae.safetensors" }
+  },
+  "4": {
+    "class_type": "LoadImage",
+    "inputs": { "image": "gobi-canonique.png" }
+  },
+  "5": {
+    "class_type": "ImageScaleToTotalPixels",
+    "inputs": { "image": ["4", 0], "upscale_method": "lanczos", "megapixels": 1.0, "resolution_steps": 1 }
+  },
+  "6": {
+    "class_type": "TextEncodeQwenImageEditPlus",
+    "inputs": {
+      "clip": ["2", 0],
+      "prompt": "Using the character in the reference image, {INSTRUCTION}. Keep the body shape, the proportions, the outline thickness and the drawing style strictly identical to the reference. Keep it as black and white line art with clean bold black ink outlines on a pure flat white background, no colour, no shading, no grey, no hatching, no drop shadow.",
+      "vae": ["3", 0],
+      "image1": ["5", 0]
+    }
+  },
+  "7": {
+    "class_type": "TextEncodeQwenImageEditPlus",
+    "inputs": {
+      "clip": ["2", 0],
+      "prompt": "colour, coloured, grey shading, gradient, hatching, drop shadow, cast shadow, multiple views, several characters, text, letters, watermark, signature, frame, border, extra limbs, deformed hands, photorealistic, 3d render",
+      "vae": ["3", 0],
+      "image1": ["5", 0]
+    }
+  },
+  "8": {
+    "class_type": "VAEEncode",
+    "inputs": { "pixels": ["5", 0], "vae": ["3", 0] }
+  },
+  "12": {
+    "class_type": "KSampler",
+    "inputs": {
+      "seed": 1001,
+      "steps": 20,
+      "cfg": 2.5,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1.0,
+      "model": ["1", 0],
+      "positive": ["6", 0],
+      "negative": ["7", 0],
+      "latent_image": ["8", 0]
+    }
+  },
+  "13": {
+    "class_type": "VAEDecode",
+    "inputs": { "samples": ["12", 0], "vae": ["3", 0] }
+  },
+  "14": {
+    "class_type": "SaveImage",
+    "inputs": { "images": ["13", 0], "filename_prefix": "personnage-declinaison" }
+  }
+}

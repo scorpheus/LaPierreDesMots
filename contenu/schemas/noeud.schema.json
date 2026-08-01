@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "pierre:schemas/noeud",
+  "title": "Noeud",
+  "description": "Un noeud de la carte. Forme derivee du type Noeud du contrat technique v1 et de l'exemple normatif § 9.6.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "region", "ordre", "exercice", "prerequis", "temps"],
+  "properties": {
+    "id":       { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+    "region":   { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+    "ordre":    { "type": "integer", "minimum": 1 },
+    "exercice": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+    "prerequis": {
+      "type": "array", "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" }
+    },
+    "temps": {
+      "type": "string",
+      "pattern": "^[a-z]+$",
+      "description": "Temps de la structure de niveau (v2 § 5.3). Seule valeur fixee par le contrat technique v1 § 9.6 : `presentation`. L'union fermee TempsNoeud vit dans partage/src/contenu/types.ts (L-B) ; ce schema ne la duplique pas pour ne pas creer deux sources de verite."
+    }
+  }
+}

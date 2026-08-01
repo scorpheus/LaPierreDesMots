@@ -1,0 +1,327 @@
+{
+  "id": "clairiere.ecole",
+  "moteurs": [
+    "colorie"
+  ],
+  "libelle": "La cour de l’école",
+  "region": "clairiere",
+  "scene": {
+    "fichier": "habillages/clairiere/ecole.svg",
+    "viewBox": "0 0 922 615",
+    "calques": [
+      {
+        "id": "calque-fond",
+        "role": "fond",
+        "regions": []
+      },
+      {
+        "id": "calque-zones",
+        "role": "coloriable",
+        "regions": [
+          {
+            "id": "ciel",
+            "libelle": "le ciel",
+            "centroide": [
+              461.0,
+              87.5
+            ],
+            "surface": 161350.0
+          },
+          {
+            "id": "herbe",
+            "libelle": "l’herbe de la cour",
+            "centroide": [
+              457.1,
+              513.8
+            ],
+            "surface": 99199.3
+          },
+          {
+            "id": "toit-ecole",
+            "libelle": "le toit de l’école",
+            "centroide": [
+              270.0,
+              243.5
+            ],
+            "surface": 13023.5
+          },
+          {
+            "id": "horloge-ecole",
+            "libelle": "l’horloge de l’école",
+            "centroide": [
+              270.0,
+              225.0
+            ],
+            "surface": 5026.5
+          },
+          {
+            "id": "mur-ecole",
+            "libelle": "le mur de l’école",
+            "centroide": [
+              270.0,
+              344.6
+            ],
+            "surface": 32500.0
+          },
+          {
+            "id": "porte-ecole",
+            "libelle": "la porte de l’école",
+            "centroide": [
+              270.0,
+              370.0
+            ],
+            "surface": 7300.0
+          },
+          {
+            "id": "fenetre-ecole-1",
+            "libelle": "la première fenêtre de l’école",
+            "centroide": [
+              180.0,
+              330.0
+            ],
+            "surface": 5600.0
+          },
+          {
+            "id": "fenetre-ecole-2",
+            "libelle": "la deuxième fenêtre de l’école",
+            "centroide": [
+              360.0,
+              330.0
+            ],
+            "surface": 5600.0
+          },
+          {
+            "id": "feuilles-arbre-1",
+            "libelle": "les feuilles du premier arbre",
+            "centroide": [
+              560.0,
+              250.0
+            ],
+            "surface": 7238.2
+          },
+          {
+            "id": "tronc-arbre-1",
+            "libelle": "le tronc du premier arbre",
+            "centroide": [
+              560.0,
+              359.0
+            ],
+            "surface": 5124.0
+          },
+          {
+            "id": "feuilles-arbre-2",
+            "libelle": "les feuilles du deuxième arbre",
+            "centroide": [
+              665.0,
+              250.0
+            ],
+            "surface": 7238.2
+          },
+          {
+            "id": "tronc-arbre-2",
+            "libelle": "le tronc du deuxième arbre",
+            "centroide": [
+              665.0,
+              359.0
+            ],
+            "surface": 5124.0
+          },
+          {
+            "id": "feuilles-arbre-3",
+            "libelle": "les feuilles du troisième arbre",
+            "centroide": [
+              770.0,
+              250.0
+            ],
+            "surface": 7238.2
+          },
+          {
+            "id": "tronc-arbre-3",
+            "libelle": "le tronc du troisième arbre",
+            "centroide": [
+              770.0,
+              359.0
+            ],
+            "surface": 5124.0
+          },
+          {
+            "id": "feuilles-arbre-4",
+            "libelle": "les feuilles du quatrième arbre",
+            "centroide": [
+              872.0,
+              250.0
+            ],
+            "surface": 7238.2
+          },
+          {
+            "id": "tronc-arbre-4",
+            "libelle": "le tronc du quatrième arbre",
+            "centroide": [
+              872.0,
+              359.0
+            ],
+            "surface": 5124.0
+          },
+          {
+            "id": "cheveux-maitresse",
+            "libelle": "les cheveux de la maîtresse",
+            "centroide": [
+              290.0,
+              464.0
+            ],
+            "surface": 5026.5
+          },
+          {
+            "id": "pull-maitresse",
+            "libelle": "le pull de la maîtresse",
+            "centroide": [
+              290.0,
+              536.0
+            ],
+            "surface": 5120.0
+          },
+          {
+            "id": "jupe-maitresse",
+            "libelle": "la jupe de la maîtresse",
+            "centroide": [
+              290.0,
+              592.2
+            ],
+            "surface": 5016.0
+          },
+          {
+            "id": "cheveux-garcon-1",
+            "libelle": "les cheveux du premier garçon",
+            "centroide": [
+              420.0,
+              464.0
+            ],
+            "surface": 5026.5
+          },
+          {
+            "id": "tshirt-garcon-1",
+            "libelle": "le tee-shirt du premier garçon",
+            "centroide": [
+              420.0,
+              536.0
+            ],
+            "surface": 5120.0
+          },
+          {
+            "id": "cheveux-garcon-2",
+            "libelle": "les cheveux du deuxième garçon",
+            "centroide": [
+              520.0,
+              464.0
+            ],
+            "surface": 5026.5
+          },
+          {
+            "id": "tshirt-garcon-2",
+            "libelle": "le tee-shirt du deuxième garçon",
+            "centroide": [
+              520.0,
+              536.0
+            ],
+            "surface": 5120.0
+          },
+          {
+            "id": "cheveux-fille-1",
+            "libelle": "les cheveux de la première fille",
+            "centroide": [
+              650.0,
+              464.0
+            ],
+            "surface": 5026.5
+          },
+          {
+            "id": "robe-fille-1",
+            "libelle": "la robe de la première fille",
+            "centroide": [
+              650.0,
+              563.8
+            ],
+            "surface": 10136.0
+          },
+          {
+            "id": "cheveux-fille-2",
+            "libelle": "les cheveux de la deuxième fille",
+            "centroide": [
+              810.0,
+              464.0
+            ],
+            "surface": 5026.5
+          },
+          {
+            "id": "robe-fille-2",
+            "libelle": "la robe de la deuxième fille",
+            "centroide": [
+              810.0,
+              563.8
+            ],
+            "surface": 10136.0
+          },
+          {
+            "id": "banc",
+            "libelle": "le banc",
+            "centroide": [
+              95.0,
+              495.0
+            ],
+            "surface": 8500.0
+          },
+          {
+            "id": "corde",
+            "libelle": "la corde à sauter",
+            "centroide": [
+              105.0,
+              566.5
+            ],
+            "surface": 6310.0
+          },
+          {
+            "id": "ballon",
+            "libelle": "le ballon",
+            "centroide": [
+              490.0,
+              375.0
+            ],
+            "surface": 5026.5
+          }
+        ]
+      },
+      {
+        "id": "calque-trait",
+        "role": "trait",
+        "regions": []
+      }
+    ]
+  },
+  "palette": {
+    "jetons": {},
+    "nuancier": [
+      "rouge",
+      "orange",
+      "jaune",
+      "vert",
+      "bleu",
+      "violet",
+      "rose",
+      "brun",
+      "noir",
+      "blanc",
+      "gris"
+    ]
+  },
+  "timings": {
+    "appuiMs": 60,
+    "relachementMs": 120,
+    "refusMs": 180,
+    "recolorationMs": 900,
+    "interEtoilesMs": 180
+  },
+  "sons": {
+    "ambiance": null,
+    "effets": {}
+  }
+}

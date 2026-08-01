@@ -1,0 +1,60 @@
+{
+  "_commentaire": {
+    "usage": "Objets du campement, accessoires, butins, vignettes d'exercices (annexe P 3.1). Un seul objet, detoure, centre, sur fond blanc, destine a la vectorisation puis a l'affichage a petite taille.",
+    "modele": "flux1-schnell-fp8.safetensors (CheckpointLoaderSimple)",
+    "reglages": "8 pas, CFG 1.0, euler / simple, EmptySD3LatentImage 1024x1024, denoise 1.0",
+    "mesure": "Topologie identique a personnage-exploration.api.json, mesuree 6/6 a la porte technique (production/essais/qc-technique.csv). Fichier distinct parce que sa clause de rendu et sa resolution de reference lui sont propres et figees.",
+    "negatif": "STRUCTURELLEMENT ABSENT (noeud 6). A CFG 1,0 le negatif est sans effet — mesure au pixel pres, voir personnage-exploration.api.json. Tout se formule en POSITIF.",
+    "mesure_du_jour": "Un coffre en bois, graine 1001 : fond blanc 100,0 %, saturation 6,53, 0 fuite, 23 composantes, 4,6 s. Porte technique franchie. Note : 42 regions coloriables, soit deux de plus que le plafond de 40 de l'annexe P 3.5 — sur un objet a planches, la fourchette est a verifier image par image, pas a supposer.",
+    "lisibilite": "Un objet doit rester lisible a 96 px de haut, comme le personnage. Peu de regions, contours epais, aucun detail interieur decoratif : c'est la clause de rendu figee qui le porte.",
+    "champs_modifiables": [
+      "5.inputs.text -- uniquement le SUJET, substitue a {SUJET}",
+      "9.inputs.seed",
+      "7.inputs.width / 7.inputs.height",
+      "11.inputs.filename_prefix"
+    ],
+    "figes": "checkpoint, pas, CFG, sampler, ordonnanceur, denoise, topologie, clause de rendu"
+  },
+  "1": {
+    "class_type": "CheckpointLoaderSimple",
+    "inputs": { "ckpt_name": "flux1-schnell-fp8.safetensors" }
+  },
+  "5": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "black and white line art, clean bold black ink outlines of even weight, pure flat white background, no color, no shading, no grey, no hatching, coloring book style, closed clean contours, one single object alone, centered, cut out on plain white, seen from a simple three-quarter angle, few large shapes, readable when small, {SUJET}",
+      "clip": ["1", 1]
+    }
+  },
+  "6": {
+    "class_type": "ConditioningZeroOut",
+    "inputs": { "conditioning": ["5", 0] }
+  },
+  "7": {
+    "class_type": "EmptySD3LatentImage",
+    "inputs": { "width": 1024, "height": 1024, "batch_size": 1 }
+  },
+  "9": {
+    "class_type": "KSampler",
+    "inputs": {
+      "seed": 1001,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1.0,
+      "model": ["1", 0],
+      "positive": ["5", 0],
+      "negative": ["6", 0],
+      "latent_image": ["7", 0]
+    }
+  },
+  "10": {
+    "class_type": "VAEDecode",
+    "inputs": { "samples": ["9", 0], "vae": ["1", 2] }
+  },
+  "11": {
+    "class_type": "SaveImage",
+    "inputs": { "images": ["10", 0], "filename_prefix": "objet" }
+  }
+}

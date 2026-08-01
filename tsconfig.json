@@ -1,0 +1,11 @@
+// Racine des références de projet : `npm run typescript` exécute `tsc -b` sur ce fichier.
+// Il ne compile rien lui-même (`files: []`) et délègue aux 3 paquets, dans l'ordre de leurs
+// dépendances. Contrat technique v1 § 1.1.
+{
+  "files": [],
+  "references": [
+    { "path": "./partage" },
+    { "path": "./serveur" },
+    { "path": "./client" }
+  ]
+}

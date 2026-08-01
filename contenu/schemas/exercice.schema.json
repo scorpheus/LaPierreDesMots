@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "pierre:schemas/exercice",
+  "title": "Exercice",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "version", "titre", "competences", "difficulte", "jeu"],
+  "properties": {
+    "id":          { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+    "version":     { "type": "integer", "minimum": 1 },
+    "titre":       { "type": "string", "minLength": 1, "maxLength": 80 },
+    "origine": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "niveau", "fiche"],
+      "properties": {
+        "source": { "type": "string", "minLength": 1 },
+        "niveau": { "type": "integer", "minimum": 1, "maximum": 7 },
+        "fiche":  { "type": "integer", "minimum": 1, "maximum": 15 }
+      }
+    },
+    "competences": {
+      "type": "array", "minItems": 1, "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^(gph|syl|mot\\.outil|lex|flu|comp|enc)\\.[a-z0-9.\\-]+$" }
+    },
+    "difficulte": { "type": "integer", "minimum": 1, "maximum": 5 },
+    "jeu": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["moteur", "habillage", "noeud", "etoiles", "aideGobi", "contenu"],
+      "properties": {
+        "moteur": {
+          "type": "string",
+          "enum": ["attrape","tri","assemble","chemin","eclair","paires","phrase",
+                   "histoire","chrono","grave","colorie","libre","place"]
+        },
+        "habillage": { "type": "string", "pattern": "^[a-z0-9]+(\\.[a-z0-9\\-]+)+$" },
+        "noeud":     { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+        "etoiles": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["sansAide", "sansErreur"],
+          "properties": { "sansAide": { "type": "boolean" }, "sansErreur": { "type": "boolean" } }
+        },
+        "aideGobi": {
+          "type": "array", "minItems": 1, "uniqueItems": true,
+          "items": { "enum": ["relire-consigne","souffle-syllabe","surligne-graphene",
+                              "montre-cible","montre-couleur"] }
+        },
+        "contenu": true
+      }
+    }
+  }
+}

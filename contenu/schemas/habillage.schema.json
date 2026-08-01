@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "pierre:schemas/habillage",
+  "title": "Habillage",
+  "description": "Un habillage est entierement declaratif : un SVG en calques plus ce JSON. Forme derivee de l'interface Habillage du contrat technique v1 § 4.1 et de l'exemple normatif § 9.4.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "moteurs", "libelle", "region", "scene", "palette", "timings", "sons"],
+  "properties": {
+    "id":      { "type": "string", "pattern": "^[a-z0-9]+(\\.[a-z0-9\\-]+)+$" },
+    "moteurs": {
+      "type": "array", "minItems": 1, "uniqueItems": true,
+      "items": {
+        "enum": ["attrape","tri","assemble","chemin","eclair","paires","phrase",
+                 "histoire","chrono","grave","colorie","libre","place"]
+      }
+    },
+    "libelle": { "type": "string", "minLength": 1, "maxLength": 80 },
+    "region":  { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+    "scene": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fichier", "viewBox", "calques"],
+      "properties": {
+        "fichier": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*(/[a-z0-9]+(-[a-z0-9]+)*)*/[a-z0-9]+(-[a-z0-9]+)*\\.svg$" },
+        "viewBox": { "type": "string", "pattern": "^-?[0-9]+(\\.[0-9]+)? -?[0-9]+(\\.[0-9]+)? [0-9]+(\\.[0-9]+)? [0-9]+(\\.[0-9]+)?$" },
+        "calques": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/calque" } }
+      }
+    },
+    "palette": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["jetons", "nuancier"],
+      "properties": {
+        "jetons": {
+          "type": "object",
+          "description": "Surcharges des jetons v2 § 9.2. `trait` et `parchemin` ne se surchargent jamais : ils sont absents de propertyNames.",
+          "propertyNames": { "enum": ["soleil", "framboise", "menthe", "lagon", "grisaille"] },
+          "additionalProperties": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" }
+        },
+        "nuancier": {
+          "type": "array", "minItems": 1, "maxItems": 11, "uniqueItems": true,
+          "items": { "$ref": "#/$defs/couleurColoriage" }
+        }
+      }
+    },
+    "timings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["appuiMs", "relachementMs", "refusMs", "recolorationMs", "interEtoilesMs"],
+      "properties": {
+        "appuiMs":         { "type": "integer", "minimum": 0, "maximum": 5000 },
+        "relachementMs":   { "type": "integer", "minimum": 0, "maximum": 5000 },
+        "refusMs":         { "type": "integer", "minimum": 0, "maximum": 5000 },
+        "recolorationMs":  { "type": "integer", "minimum": 0, "maximum": 5000 },
+        "interEtoilesMs":  { "type": "integer", "minimum": 0, "maximum": 5000 }
+      }
+    },
+    "sons": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ambiance", "effets"],
+      "properties": {
+        "ambiance": { "type": ["string", "null"] },
+        "effets":   { "type": "object", "additionalProperties": { "type": "string" } }
+      }
+    }
+  },
+  "$defs": {
+    "couleurColoriage": {
+      "enum": ["rouge","orange","jaune","vert","bleu","violet",
+               "rose","brun","noir","blanc","gris"]
+    },
+    "identifiantSvg": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+    "calque": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "role", "regions"],
+      "properties": {
+        "id":   { "$ref": "#/$defs/identifiantSvg" },
+        "role": { "enum": ["fond", "decor", "coloriable", "trait", "animation"] },
+        "regions": {
+          "type": "array", "uniqueItems": true,
+          "items": { "$ref": "#/$defs/regionColoriable" }
+        }
+      }
+    },
+    "regionColoriable": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "libelle", "centroide", "surface"],
+      "properties": {
+        "id":      { "$ref": "#/$defs/identifiantSvg" },
+        "libelle": { "type": "string", "minLength": 1, "maxLength": 60 },
+        "centroide": {
+          "type": "array", "minItems": 2, "maxItems": 2,
+          "items": { "type": "number" }
+        },
+        "surface": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    }
+  }
+}

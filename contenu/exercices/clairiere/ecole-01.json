@@ -1,0 +1,63 @@
+{
+  "id": "clairiere-ecole-01",
+  "version": 1,
+  "titre": "La cour de l’école",
+  "origine": { "source": "fiches-origine/NIVEAU 1.pdf", "niveau": 1, "fiche": 1 },
+  "competences": ["comp.consigne.simple", "comp.consigne.multiple", "lex.couleur"],
+  "difficulte": 1,
+  "jeu": {
+    "moteur": "colorie",
+    "habillage": "clairiere.ecole",
+    "noeud": "clairiere-01",
+    "etoiles": { "sansAide": true, "sansErreur": true },
+    "aideGobi": ["relire-consigne", "souffle-syllabe", "montre-cible", "montre-couleur"],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Le pull de la maîtresse est bleu.",
+          "forme": "affirmative",
+          "audio": null,
+          "cibles": [{ "region": "pull-maitresse", "couleur": "bleu" }],
+          "motsCles": ["pull", "maîtresse", "bleu"]
+        },
+        {
+          "id": "c2",
+          "texte": "Colorie les feuilles des arbres en vert.",
+          "forme": "imperative",
+          "audio": null,
+          "cibles": [
+            { "region": "feuilles-arbre-1", "couleur": "vert" },
+            { "region": "feuilles-arbre-2", "couleur": "vert" },
+            { "region": "feuilles-arbre-3", "couleur": "vert" },
+            { "region": "feuilles-arbre-4", "couleur": "vert" }
+          ],
+          "motsCles": ["feuilles", "arbres", "vert"]
+        },
+        {
+          "id": "c3",
+          "texte": "Les garçons ont les cheveux bruns.",
+          "forme": "affirmative",
+          "audio": null,
+          "cibles": [
+            { "region": "cheveux-garcon-1", "couleur": "brun" },
+            { "region": "cheveux-garcon-2", "couleur": "brun" }
+          ],
+          "motsCles": ["garçons", "cheveux", "bruns"]
+        },
+        {
+          "id": "c4",
+          "texte": "La porte de l’école est jaune et le toit est rouge.",
+          "forme": "affirmative",
+          "audio": null,
+          "cibles": [
+            { "region": "porte-ecole", "couleur": "jaune" },
+            { "region": "toit-ecole",  "couleur": "rouge" }
+          ],
+          "motsCles": ["porte", "jaune", "toit", "rouge"]
+        }
+      ],
+      "nuancierAutorise": ["rouge", "orange", "jaune", "vert", "bleu", "violet", "rose", "brun"]
+    }
+  }
+}

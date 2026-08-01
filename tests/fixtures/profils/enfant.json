@@ -1,0 +1,11 @@
+{
+  "id": "profil-test-enfant",
+  "prenom": "Alma",
+  "avatar": {
+    "forme": "rond",
+    "couleur": "lagon",
+    "accessoire": null
+  },
+  "paletteVariante": "clairiere",
+  "progression": []
+}

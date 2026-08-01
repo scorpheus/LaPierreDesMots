@@ -1,0 +1,41 @@
+# Crochets git — contrat technique v1 § 1.1, CLAUDE.md « Commandes ».
+#
+# Installation, une fois après le premier `npm ci` :
+#     npx lefthook install
+# (aucun script `prepare` n'est déclaré dans package.json : la section `scripts` est
+#  prescrite verbatim par le contrat § 8 et n'en comporte pas. Écart signalé au rapport L-A.)
+#
+# Pour passer outre ponctuellement — à n'utiliser que si on sait pourquoi :
+#     LEFTHOOK=0 git commit ...
+
+pre-commit:
+  parallel: false
+  commands:
+    lint:
+      # `eslint .` et non un filtre sur les fichiers touchés : la règle maison
+      # (Math.random / Date.now) doit voir TOUT le dépôt, sinon un fichier non touché
+      # peut porter l'infraction sans jamais être relu.
+      run: npm run lint
+      fail_text: |
+        Le lint refuse le commit.
+        Si le message parle de `Math.random` ou de `Date.now`, ce n'est pas un detail de style :
+        utilise `Alea` et `Horloge` (@pierre/partage). Voir eslint.config.js pour le motif.
+    test:
+      # T1 + T2 sans watch : quelques secondes, et c'est le filet qui attrape 90 % des regressions.
+      run: npm run test
+      fail_text: |
+        Les tests T1/T2 echouent.
+        Regle non negociable : on corrige le code, jamais le test — et on ne met JAMAIS
+        un test en `skip` pour faire passer une suite.
+
+pre-push:
+  parallel: false
+  commands:
+    verifier:
+      # La chaine complete. Aucune etape n'interrompt les suivantes (contrat § 8.2) :
+      # on voit tous ses defauts d'un coup, pas seulement le premier.
+      run: npm run verifier
+      fail_text: |
+        `npm run verifier` sort en echec.
+        Le rapport consolide est dans tests/rapports/RAPPORT.md — c'est lui qui fait foi,
+        pas la sortie brute ci-dessus.

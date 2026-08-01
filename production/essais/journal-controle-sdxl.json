@@ -1,0 +1,206 @@
+[
+  {
+    "nom": "sdxl_D-trait-tags_g1001",
+    "modele": "sdxl",
+    "condition": "D-trait-tags",
+    "graine": 1001,
+    "checkpoint": "damnPonyIllustrious_rebornIllustrious.safetensors",
+    "pas": 28,
+    "cfg": 6.0,
+    "sampler": "dpmpp_2m",
+    "ordonnanceur": "karras",
+    "resolution": [
+      1024,
+      1024
+    ],
+    "prompt": "masterpiece, best quality, very aesthetic, absurdres, newest, monochrome, greyscale, lineart, thick outlines, white background, no shading, 1other, chibi, round fluffy creature, solo, full body, looking at viewer, short velvet fur, stubby arms, tiny round feet, no neck, large round eyes, clear pupils, raised eyebrows, open smile, happy, crystal crest on head and back, faceted gemstone shards, glowing gem on chest, simple background, centered",
+    "negatif": "text, letters, watermark, signature, logo, frame, border, extra limbs, extra arms, deformed hands, malformed, mutated, disfigured, menacing, sinister, creepy, scary, angry, snarling, sharp fangs, bared teeth, photorealistic, photograph, 3d render, color, colored, colorful, grey shading, gradient, painted"
+  },
+  {
+    "nom": "sdxl_D-trait-tags_g2002",
+    "modele": "sdxl",
+    "condition": "D-trait-tags",
+    "graine": 2002,
+    "checkpoint": "damnPonyIllustrious_rebornIllustrious.safetensors",
+    "pas": 28,
+    "cfg": 6.0,
+    "sampler": "dpmpp_2m",
+    "ordonnanceur": "karras",
+    "resolution": [
+      1024,
+      1024
+    ],
+    "prompt": "masterpiece, best quality, very aesthetic, absurdres, newest, monochrome, greyscale, lineart, thick outlines, white background, no shading, 1other, chibi, round fluffy creature, solo, full body, looking at viewer, short velvet fur, stubby arms, tiny round feet, no neck, large round eyes, clear pupils, raised eyebrows, open smile, happy, crystal crest on head and back, faceted gemstone shards, glowing gem on chest, simple background, centered",
+    "negatif": "text, letters, watermark, signature, logo, frame, border, extra limbs, extra arms, deformed hands, malformed, mutated, disfigured, menacing, sinister, creepy, scary, angry, snarling, sharp fangs, bared teeth, photorealistic, photograph, 3d render, color, colored, colorful, grey shading, gradient, painted"
+  },
+  {
+    "nom": "sdxl_D-trait-tags_g3003",
+    "modele": "sdxl",
+    "condition": "D-trait-tags",
+    "graine": 3003,
+    "checkpoint": "damnPonyIllustrious_rebornIllustrious.safetensors",
+    "pas": 28,
+    "cfg": 6.0,
+    "sampler": "dpmpp_2m",
+    "ordonnanceur": "karras",
+    "resolution": [
+      1024,
+      1024
+    ],
+    "prompt": "masterpiece, best quality, very aesthetic, absurdres, newest, monochrome, greyscale, lineart, thick outlines, white background, no shading, 1other, chibi, round fluffy creature, solo, full body, looking at viewer, short velvet fur, stubby arms, tiny round feet, no neck, large round eyes, clear pupils, raised eyebrows, open smile, happy, crystal crest on head and back, faceted gemstone shards, glowing gem on chest, simple background, centered",
+    "negatif": "text, letters, watermark, signature, logo, frame, border, extra limbs, extra arms, deformed hands, malformed, mutated, disfigured, menacing, sinister, creepy, scary, angry, snarling, sharp fangs, bared teeth, photorealistic, photograph, 3d render, color, colored, colorful, grey shading, gradient, painted"
+  },
+  {
+    "nom": "sdxl_D-trait-tags_g4004",
+    "modele": "sdxl",
+    "condition": "D-trait-tags",
+    "graine": 4004,
+    "checkpoint": "damnPonyIllustrious_rebornIllustrious.safetensors",
+    "pas": 28,
+    "cfg": 6.0,
+    "sampler": "dpmpp_2m",
+    "ordonnanceur": "karras",
+    "resolution": [
+      1024,
+      1024
+    ],
+    "prompt": "masterpiece, best quality, very aesthetic, absurdres, newest, monochrome, greyscale, lineart, thick outlines, white background, no shading, 1other, chibi, round fluffy creature, solo, full body, looking at viewer, short velvet fur, stubby arms, tiny round feet, no neck, large round eyes, clear pupils, raised eyebrows, open smile, happy, crystal crest on head and back, faceted gemstone shards, glowing gem on chest, simple background, centered",
+    "negatif": "text, letters, watermark, signature, logo, frame, border, extra limbs, extra arms, deformed hands, malformed, mutated, disfigured, menacing, sinister, creepy, scary, angry, snarling, sharp fangs, bared teeth, photorealistic, photograph, 3d render, color, colored, colorful, grey shading, gradient, painted"
+  },
+  {
+    "nom": "sdxl_D-trait-tags_g5005",
+    "modele": "sdxl",
+    "condition": "D-trait-tags",
+    "graine": 5005,
+    "checkpoint": "damnPonyIllustrious_rebornIllustrious.safetensors",
+    "pas": 28,
+    "cfg": 6.0,
+    "sampler": "dpmpp_2m",
+    "ordonnanceur": "karras",
+    "resolution": [
+      1024,
+      1024
+    ],
+    "prompt": "masterpiece, best quality, very aesthetic, absurdres, newest, monochrome, greyscale, lineart, thick outlines, white background, no shading, 1other, chibi, round fluffy creature, solo, full body, looking at viewer, short velvet fur, stubby arms, tiny round feet, no neck, large round eyes, clear pupils, raised eyebrows, open smile, happy, crystal crest on head and back, faceted gemstone shards, glowing gem on chest, simple background, centered",
+    "negatif": "text, letters, watermark, signature, logo, frame, border, extra limbs, extra arms, deformed hands, malformed, mutated, disfigured, menacing, sinister, creepy, scary, angry, snarling, sharp fangs, bared teeth, photorealistic, photograph, 3d render, color, colored, colorful, grey shading, gradient, painted"
+  },
+  {
+    "nom": "sdxl_D-trait-tags_g6006",
+    "modele": "sdxl",
+    "condition": "D-trait-tags",
+    "graine": 6006,
+    "checkpoint": "damnPonyIllustrious_rebornIllustrious.safetensors",
+    "pas": 28,
+    "cfg": 6.0,
+    "sampler": "dpmpp_2m",
+    "ordonnanceur": "karras",
+    "resolution": [
+      1024,
+      1024
+    ],
+    "prompt": "masterpiece, best quality, very aesthetic, absurdres, newest, monochrome, greyscale, lineart, thick outlines, white background, no shading, 1other, chibi, round fluffy creature, solo, full body, looking at viewer, short velvet fur, stubby arms, tiny round feet, no neck, large round eyes, clear pupils, raised eyebrows, open smile, happy, crystal crest on head and back, faceted gemstone shards, glowing gem on chest, simple background, centered",
+    "negatif": "text, letters, watermark, signature, logo, frame, border, extra limbs, extra arms, deformed hands, malformed, mutated, disfigured, menacing, sinister, creepy, scary, angry, snarling, sharp fangs, bared teeth, photorealistic, photograph, 3d render, color, colored, colorful, grey shading, gradient, painted"
+  },
+  {
+    "nom": "sdxl_E-couleur-tags_g1001",
+    "modele": "sdxl",
+    "condition": "E-couleur-tags",
+    "graine": 1001,
+    "checkpoint": "damnPonyIllustrious_rebornIllustrious.safetensors",
+    "pas": 28,
+    "cfg": 6.0,
+    "sampler": "dpmpp_2m",
+    "ordonnanceur": "karras",
+    "resolution": [
+      1024,
+      1024
+    ],
+    "prompt": "masterpiece, best quality, very aesthetic, absurdres, newest, colored, soft pastel palette, flat colors, children book illustration, cute, 1other, chibi, round fluffy creature, solo, full body, looking at viewer, short velvet fur, stubby arms, tiny round feet, no neck, large round eyes, clear pupils, raised eyebrows, open smile, happy, crystal crest on head and back, faceted gemstone shards, glowing gem on chest, simple background, centered",
+    "negatif": "text, letters, watermark, signature, logo, frame, border, extra limbs, extra arms, deformed hands, malformed, mutated, disfigured, menacing, sinister, creepy, scary, angry, snarling, sharp fangs, bared teeth, photorealistic, photograph, 3d render"
+  },
+  {
+    "nom": "sdxl_E-couleur-tags_g2002",
+    "modele": "sdxl",
+    "condition": "E-couleur-tags",
+    "graine": 2002,
+    "checkpoint": "damnPonyIllustrious_rebornIllustrious.safetensors",
+    "pas": 28,
+    "cfg": 6.0,
+    "sampler": "dpmpp_2m",
+    "ordonnanceur": "karras",
+    "resolution": [
+      1024,
+      1024
+    ],
+    "prompt": "masterpiece, best quality, very aesthetic, absurdres, newest, colored, soft pastel palette, flat colors, children book illustration, cute, 1other, chibi, round fluffy creature, solo, full body, looking at viewer, short velvet fur, stubby arms, tiny round feet, no neck, large round eyes, clear pupils, raised eyebrows, open smile, happy, crystal crest on head and back, faceted gemstone shards, glowing gem on chest, simple background, centered",
+    "negatif": "text, letters, watermark, signature, logo, frame, border, extra limbs, extra arms, deformed hands, malformed, mutated, disfigured, menacing, sinister, creepy, scary, angry, snarling, sharp fangs, bared teeth, photorealistic, photograph, 3d render"
+  },
+  {
+    "nom": "sdxl_E-couleur-tags_g3003",
+    "modele": "sdxl",
+    "condition": "E-couleur-tags",
+    "graine": 3003,
+    "checkpoint": "damnPonyIllustrious_rebornIllustrious.safetensors",
+    "pas": 28,
+    "cfg": 6.0,
+    "sampler": "dpmpp_2m",
+    "ordonnanceur": "karras",
+    "resolution": [
+      1024,
+      1024
+    ],
+    "prompt": "masterpiece, best quality, very aesthetic, absurdres, newest, colored, soft pastel palette, flat colors, children book illustration, cute, 1other, chibi, round fluffy creature, solo, full body, looking at viewer, short velvet fur, stubby arms, tiny round feet, no neck, large round eyes, clear pupils, raised eyebrows, open smile, happy, crystal crest on head and back, faceted gemstone shards, glowing gem on chest, simple background, centered",
+    "negatif": "text, letters, watermark, signature, logo, frame, border, extra limbs, extra arms, deformed hands, malformed, mutated, disfigured, menacing, sinister, creepy, scary, angry, snarling, sharp fangs, bared teeth, photorealistic, photograph, 3d render"
+  },
+  {
+    "nom": "sdxl_E-couleur-tags_g4004",
+    "modele": "sdxl",
+    "condition": "E-couleur-tags",
+    "graine": 4004,
+    "checkpoint": "damnPonyIllustrious_rebornIllustrious.safetensors",
+    "pas": 28,
+    "cfg": 6.0,
+    "sampler": "dpmpp_2m",
+    "ordonnanceur": "karras",
+    "resolution": [
+      1024,
+      1024
+    ],
+    "prompt": "masterpiece, best quality, very aesthetic, absurdres, newest, colored, soft pastel palette, flat colors, children book illustration, cute, 1other, chibi, round fluffy creature, solo, full body, looking at viewer, short velvet fur, stubby arms, tiny round feet, no neck, large round eyes, clear pupils, raised eyebrows, open smile, happy, crystal crest on head and back, faceted gemstone shards, glowing gem on chest, simple background, centered",
+    "negatif": "text, letters, watermark, signature, logo, frame, border, extra limbs, extra arms, deformed hands, malformed, mutated, disfigured, menacing, sinister, creepy, scary, angry, snarling, sharp fangs, bared teeth, photorealistic, photograph, 3d render"
+  },
+  {
+    "nom": "sdxl_E-couleur-tags_g5005",
+    "modele": "sdxl",
+    "condition": "E-couleur-tags",
+    "graine": 5005,
+    "checkpoint": "damnPonyIllustrious_rebornIllustrious.safetensors",
+    "pas": 28,
+    "cfg": 6.0,
+    "sampler": "dpmpp_2m",
+    "ordonnanceur": "karras",
+    "resolution": [
+      1024,
+      1024
+    ],
+    "prompt": "masterpiece, best quality, very aesthetic, absurdres, newest, colored, soft pastel palette, flat colors, children book illustration, cute, 1other, chibi, round fluffy creature, solo, full body, looking at viewer, short velvet fur, stubby arms, tiny round feet, no neck, large round eyes, clear pupils, raised eyebrows, open smile, happy, crystal crest on head and back, faceted gemstone shards, glowing gem on chest, simple background, centered",
+    "negatif": "text, letters, watermark, signature, logo, frame, border, extra limbs, extra arms, deformed hands, malformed, mutated, disfigured, menacing, sinister, creepy, scary, angry, snarling, sharp fangs, bared teeth, photorealistic, photograph, 3d render"
+  },
+  {
+    "nom": "sdxl_E-couleur-tags_g6006",
+    "modele": "sdxl",
+    "condition": "E-couleur-tags",
+    "graine": 6006,
+    "checkpoint": "damnPonyIllustrious_rebornIllustrious.safetensors",
+    "pas": 28,
+    "cfg": 6.0,
+    "sampler": "dpmpp_2m",
+    "ordonnanceur": "karras",
+    "resolution": [
+      1024,
+      1024
+    ],
+    "prompt": "masterpiece, best quality, very aesthetic, absurdres, newest, colored, soft pastel palette, flat colors, children book illustration, cute, 1other, chibi, round fluffy creature, solo, full body, looking at viewer, short velvet fur, stubby arms, tiny round feet, no neck, large round eyes, clear pupils, raised eyebrows, open smile, happy, crystal crest on head and back, faceted gemstone shards, glowing gem on chest, simple background, centered",
+    "negatif": "text, letters, watermark, signature, logo, frame, border, extra limbs, extra arms, deformed hands, malformed, mutated, disfigured, menacing, sinister, creepy, scary, angry, snarling, sharp fangs, bared teeth, photorealistic, photograph, 3d render"
+  }
+]

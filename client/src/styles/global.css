@@ -1,0 +1,239 @@
+/* ------------------------------------------------------------------------------------------
+   Feuille globale du client — contrat technique v1 § 1.4, v2 § 9.2 et § 9.3.
+
+   DEUX SOURCES DE COULEUR, UNE SEULE FAIT FOI.
+   Les valeurs ci-dessous sont le MIROIR de compilation de `PALETTE` et `NUANCIER`
+   (`partage/src/palette.ts`, lot L-B) : Tailwind v4 a besoin de littéraux au build pour
+   engendrer ses utilitaires. Au démarrage, `appliquerVariablesPalette()`
+   (`src/habillages/chargeur.ts`) réécrit ces mêmes variables depuis le TypeScript, qui reste
+   la seule source de vérité à l'exécution. C'est la parade au risque nommé au contrat § 14
+   (« deux sources de couleur qui divergent »).
+   ------------------------------------------------------------------------------------------ */
+
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------ polices, 100 % locales
+   v2 § 9.3 : aucun appel à Google Fonts, tout est servi en WOFF2 depuis le PC.
+   Dossier attendu : `client/public/polices/` — les binaires ne sont PAS dans le dépôt à ce
+   stade (aucun `client/public/**` n'existe au contrat § 1.4). `local()` en premier et
+   `font-display: swap` font que l'absence du fichier dégrade sans casser : la police système
+   prend le relais et `document.fonts.ready` se résout quand même, donc `data-test-pret`
+   n'attend jamais indéfiniment. */
+@font-face {
+  font-family: "Andika";
+  src: local("Andika"), url("/polices/andika-regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Andika";
+  src: local("Andika Bold"), url("/polices/andika-bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Atkinson Hyperlegible";
+  src: local("Atkinson Hyperlegible"), url("/polices/atkinson-hyperlegible-regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Atkinson Hyperlegible";
+  src: local("Atkinson Hyperlegible Bold"), url("/polices/atkinson-hyperlegible-bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Fredoka";
+  src: local("Fredoka"), url("/polices/fredoka-variable.woff2") format("woff2-variations");
+  font-weight: 300 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ------------------------------------------------------------------ thème Tailwind v4
+   `@theme` engendre les utilitaires (`bg-parchemin`, `text-trait`, `font-lecture`…).
+   Les noms sont ceux des jetons v2 § 9.2, préfixés par l'espace de noms que Tailwind impose. */
+@theme {
+  --color-trait: #1B2440;
+  --color-parchemin: #FFF6E3;
+  --color-soleil: #FFC93C;
+  --color-framboise: #FF5D8F;
+  --color-menthe: #3DDC97;
+  --color-lagon: #2FA8E0;
+  --color-grisaille: #8E97A8;
+
+  --font-titre: "Fredoka", "Atkinson Hyperlegible", system-ui, sans-serif;
+  --font-interface: "Atkinson Hyperlegible", system-ui, sans-serif;
+  --font-lecture: "Andika", "Atkinson Hyperlegible", Verdana, sans-serif;
+}
+
+/* ------------------------------------------------------------------ les 7 jetons v2 § 9.2
+   Écrits SANS préfixe, tels que la v2 les nomme : c'est cette forme que le SVG d'habillage,
+   le moteur `colorie` et les variantes de région manipulent. Sept, ni plus ni moins. */
+:root {
+  --trait: #1B2440;
+  --parchemin: #FFF6E3;
+  --soleil: #FFC93C;
+  --framboise: #FF5D8F;
+  --menthe: #3DDC97;
+  --lagon: #2FA8E0;
+  --grisaille: #8E97A8;
+
+  /* Nuancier de coloriage — 11 couleurs, écart assumé n° 2 du contrat § 12. Il est AJOUTÉ à
+     côté de la palette, il ne la modifie pas. Six valeurs reprennent exactement un jeton ;
+     les quatre autres (rouge, orange, vert, violet) sont des aplats francs de registre BD,
+     et `NUANCIER` (L-B) les écrase au démarrage si elles diffèrent. */
+  --nuancier-rouge: #E4342B;
+  --nuancier-orange: #F5821F;
+  --nuancier-jaune: #FFC93C;
+  --nuancier-vert: #2FAE4E;
+  --nuancier-bleu: #2FA8E0;
+  --nuancier-violet: #8B5CF6;
+  --nuancier-rose: #FF5D8F;
+  --nuancier-brun: #7A5230;
+  --nuancier-noir: #1B2440;
+  --nuancier-blanc: #FFF6E3;
+  --nuancier-gris: #8E97A8;
+
+  /* R16 : aucune cible interactive sous 64 × 64 px CSS. Cette variable est la seule valeur
+     de 64 du client ; les composants s'y réfèrent au lieu de la recopier. */
+  --cible-min: 64px;
+  --rayon-carte: 24px;
+  --epaisseur-trait: 4px;
+
+  color-scheme: light;
+}
+
+/* ------------------------------------------------------------------ socle */
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background-color: var(--parchemin);
+  color: var(--trait);
+  font-family: var(--font-interface);
+  font-size: 20px;
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#racine {
+  min-height: 100%;
+  isolation: isolate;
+}
+
+/* Le déchiffrage se fait toujours sur parchemin, en Andika, au calme (v2 § 9.3). */
+.zone-lecture {
+  background-color: var(--parchemin);
+  color: var(--trait);
+  font-family: var(--font-lecture);
+  letter-spacing: 0.01em;
+  word-spacing: 0.08em;
+}
+
+.titre {
+  font-family: var(--font-titre);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+/* ------------------------------------------------------------------ R16, cibles tapables
+   Toute cible interactive du client porte `.cible`. La règle est déclarée une fois ici pour
+   que `tests/qualite/a11y.spec.ts` ne trouve pas d'exception. */
+.cible {
+  min-inline-size: var(--cible-min);
+  min-block-size: var(--cible-min);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  border: var(--epaisseur-trait) solid var(--trait);
+  border-radius: var(--rayon-carte);
+  background-color: var(--parchemin);
+  color: var(--trait);
+  font: inherit;
+  font-family: var(--font-interface);
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform 120ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cible:active {
+  transform: scale(0.96);
+}
+
+.cible:focus-visible {
+  outline: var(--epaisseur-trait) solid var(--soleil);
+  outline-offset: 3px;
+}
+
+.cible[disabled] {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.cible-appel {
+  background-color: var(--soleil);
+}
+
+.cible-secondaire {
+  background-color: var(--framboise);
+  color: var(--parchemin);
+}
+
+/* ------------------------------------------------------------------ mouvements
+   Un refus est un MOUVEMENT, jamais une teinte (v2 § 8 et § 9.2, contrat § 5.6).
+   Oscillation horizontale de 6 px sur 180 ms, aucune couleur rouge, aucune secousse d'écran. */
+@keyframes pierre-oscillation {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  75% { transform: translateX(6px); }
+}
+
+.oscillation {
+  animation: pierre-oscillation 180ms cubic-bezier(0.16, 1, 0.3, 1) 1;
+}
+
+@keyframes pierre-halo {
+  0%, 100% { filter: drop-shadow(0 0 0 var(--soleil)); }
+  50% { filter: drop-shadow(0 0 12px var(--soleil)); }
+}
+
+.halo-demonstration {
+  animation: pierre-halo 900ms ease-in-out infinite;
+}
+
+/* ------------------------------------------------------------------ animations calmes
+   Deux interrupteurs, une seule règle. `prefers-reduced-motion` vient du système ;
+   `[data-animations="desactivees"]` vient de « animations calmes » et de
+   `window.__test.sauterAnimations()`. L'état final est identique dans les deux cas —
+   c'est ce qui rend les captures T4 stables sans aucune attente de durée (contrat § 5.8). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+:root[data-animations="desactivees"] *,
+:root[data-animations="desactivees"] *::before,
+:root[data-animations="desactivees"] *::after {
+  animation-duration: 1ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 1ms !important;
+  scroll-behavior: auto !important;
+}

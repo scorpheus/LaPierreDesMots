@@ -1,0 +1,61 @@
+{
+  "_commentaire": {
+    "usage": "ETAPE (A) — exploration texte->image pour CHOISIR un design de personnage. Produit N propositions parmi lesquelles un HUMAIN en retient UNE, qui devient la canonique. Ce workflow ne sert JAMAIS a decliner un personnage deja choisi : pour cela, voir personnage-declinaison.api.json.",
+    "modele": "flux1-schnell-fp8.safetensors (CheckpointLoaderSimple, tout-en-un)",
+    "reglages": "8 pas, CFG 1.0, euler / simple, EmptySD3LatentImage 1024x1024, denoise 1.0",
+    "mesure": "Seule configuration MESUREE conforme sur ce depot : 6/6 a la porte technique (fond blanc 100,0 % sur les six, 0/6 fuite, saturation 1,62 a 5,64, 24 a 95 composantes). Source : production/essais/qc-technique.csv, lignes A-trait/flux. Le meme sujet sur damnPonyIllustrious donne 0/24. Le fragment de rendu ci-dessous est mot pour mot celui de cette mesure (production/essais/journal-essai.json, champ RENDU_A) : ce workflow reproduit le temoin a l'identique.",
+    "negatif": "STRUCTURELLEMENT ABSENT. A CFG 1,0 le guidage sans classifieur n'interpole rien : le conditionnement negatif a un poids nul. Le noeud 6 est un ConditioningZeroOut, pas un champ de texte, precisement pour qu'aucune session ne puisse y ecrire un interdit en croyant qu'il s'applique. MESURE du 2026-08-01, graine 4004 : les trois variantes — ConditioningZeroOut, CLIPTextEncode vide, CLIPTextEncode avec 30 interdits — donnent des images PIXEL POUR PIXEL identiques (ecart moyen 0,0000, ecart max 0,0, sha256 des pixels 88c9093a18bd7982 dans les trois cas). Toute contrainte se formule en POSITIF.",
+    "piege_sha256": "Les trois fichiers PNG ci-dessus ont pourtant TROIS sha256 differents : ComfyUI ecrit le graphe dans un bloc de texte du PNG (1568, 1569 et 1873 caracteres). Le sha256 du FICHIER n'est donc PAS l'empreinte de l'image. Pour le champ `empreinte` de assets.lock.json (annexe P 3.6), hacher les PIXELS, sinon deux assets identiques auront deux empreintes.",
+    "clause_ombre_retiree": "Une clause « no drop shadow, no ground shadow » avait ete ajoutee ici puis MESUREE INEFFICACE : sur la graine 4004, la surface d'aplat noir sous les pieds passe de 12 829 px sans la clause a 13 450 px avec. La clause a donc ete retiree plutot que laissee en place a induire en erreur. L'ombre au sol se retire par une passe d'edition (voir personnage-declinaison.api.json), qui la mesure a 94 px.",
+    "champs_modifiables": [
+      "5.inputs.text  -- uniquement le SUJET, substitue a {SUJET}. La clause de rendu qui l'entoure est le fragment de style partage : elle ne se reecrit jamais (annexe P 3.3).",
+      "9.inputs.seed",
+      "7.inputs.width / 7.inputs.height",
+      "11.inputs.filename_prefix"
+    ],
+    "figes": "checkpoint, pas, CFG, sampler, ordonnanceur, denoise, topologie du graphe, clause de rendu (annexe P 3.4)",
+    "resolution": "1024x1024 est la SEULE resolution mesuree conforme pour ce workflow. 1536x1536 est mesure conforme aussi mais deux fois plus lent ; ne pas descendre sous 1024."
+  },
+  "1": {
+    "class_type": "CheckpointLoaderSimple",
+    "inputs": { "ckpt_name": "flux1-schnell-fp8.safetensors" }
+  },
+  "5": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "black and white line art, clean bold black ink outlines of even weight, pure flat white background, no color, no shading, no grey, no hatching, coloring book style, closed clean contours, {SUJET}",
+      "clip": ["1", 1]
+    }
+  },
+  "6": {
+    "class_type": "ConditioningZeroOut",
+    "inputs": { "conditioning": ["5", 0] }
+  },
+  "7": {
+    "class_type": "EmptySD3LatentImage",
+    "inputs": { "width": 1024, "height": 1024, "batch_size": 1 }
+  },
+  "9": {
+    "class_type": "KSampler",
+    "inputs": {
+      "seed": 1001,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1.0,
+      "model": ["1", 0],
+      "positive": ["5", 0],
+      "negative": ["6", 0],
+      "latent_image": ["7", 0]
+    }
+  },
+  "10": {
+    "class_type": "VAEDecode",
+    "inputs": { "samples": ["9", 0], "vae": ["1", 2] }
+  },
+  "11": {
+    "class_type": "SaveImage",
+    "inputs": { "images": ["10", 0], "filename_prefix": "personnage-exploration" }
+  }
+}

@@ -1,0 +1,8 @@
+[
+  { "code": "comp.consigne.simple",   "libelle": "Exécuter une consigne à une cible",
+    "famille": "comp", "prerequis": [] },
+  { "code": "comp.consigne.multiple", "libelle": "Exécuter une consigne à plusieurs cibles",
+    "famille": "comp", "prerequis": ["comp.consigne.simple"] },
+  { "code": "lex.couleur",            "libelle": "Reconnaître le nom écrit d’une couleur",
+    "famille": "lex", "prerequis": [] }
+]
