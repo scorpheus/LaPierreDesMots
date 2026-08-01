@@ -696,3 +696,117 @@ localement, en passant par une variable intermédiaire pour éviter le contrôle
 | Q-E6e | `histoire` : le récit reste-t-il consultable pendant les questions ? | **Oui**, `basculerRecit`, gratuit et sans limite | Champ `recitVisible` |
 | Q-E6f | `grave` : clavier complet ou restreint ? | **Restreint, 12 touches au maximum** (schéma). Un alphabet complet ferait une épreuve de recherche visuelle, que R16 interdit | `maxItems` du schéma |
 | Q-E6g | Le premier segment d'un `IdHabillage` n'admet aucun tiret (motif gelé du schéma) | Préfixes courts : `marais.`, `foret.`, `cite.` — le champ `region` porte, lui, la vraie `CodeRegion` | Un identifiant de données |
+
+---
+
+# Intégration de la campagne v2 — ce qui attend un arbitrage humain
+
+Ajouté par l'agent d'intégration, après réunion des huit lots. Tout le reste de la chaîne est
+vert ; ces trois points ne le sont pas, et aucun ne peut être tranché sans l'utilisateur.
+
+## Q-I1 — BLOQUANT : les trois captures de référence de `test:visuel` sont périmées
+
+**C'est la seule étape rouge de `npm run verifier`, et elle le restera jusqu'à un arbitrage.**
+
+Mesuré, sortie citée :
+
+```
+Expected an image 1920px by 1890px, received 1920px by 1903px.
+238932 pixels (ratio 0.07 of all image pixels) are different.
+Snapshot: noeud-gris.png
+```
+
+Les trois captures concernées sont celles du nœud `colorie` :
+`noeud-gris.png`, `noeud-colorie.png`, `recompense-etoiles.png`.
+
+**L'écart est ATTENDU, et c'est bien pourquoi il demande une validation.** La campagne v2 a
+délibérément changé l'écran du nœud : la jauge du prochain palier entre dans la barre de
+consigne (L2-A, D25 point 3), le compteur de série apparaît, et la typographie de lecture
+change (L2-B, D19). L'écran fait 13 px de plus qu'au socle v1, et tout le contenu se décale
+d'autant — d'où les 7 % de pixels différents, qui ne sont pas 7 % de défaut mais un décalage.
+
+**Ce qui n'a PAS été fait, et pourquoi.** `npm run test:visuel -- --maj` régénérerait les trois
+références en une commande. CLAUDE.md l'interdit en toutes lettres, dans ses règles non
+négociables : « Ne jamais mettre à jour une référence de test visuel ou de rejeu de sa propre
+initiative. » Une référence visuelle est le seul garde-fou contre une régression d'apparence ;
+la régénérer soi-même revient à supprimer le garde-fou en même temps que l'alerte.
+
+**Ce qu'il reste à faire, et c'est deux minutes.** Ouvrir les trois images de différence dans
+`tests/rapports/artefacts/playwright/noeud-colorie-*/`, vérifier de l'œil que le nouvel écran
+est bien celui qu'on veut donner à l'enfant, puis lancer :
+
+```
+npm run test:visuel -- --maj
+```
+
+Si l'écran ne convient pas, c'est un défaut d'apparence à corriger — et la capture aura fait
+exactement son travail.
+
+## Q-I2 — Où vit la porte de la zone parent ?
+
+`tests/e2e/parcours-parent.spec.ts` et `tests/qualite/a11y-parent.spec.ts` attendaient un
+déclencheur `data-acces-parent` que **aucun lot n'avait le droit d'écrire** : le contrat gelé
+§ 3.8 ne nomme aucun attribut pour la porte, et son § 7 ne décrit que les deux écrans. Sept cas
+étaient rouges pour cette seule raison.
+
+**Défaut retenu** : un bouton « Espace des parents », en pied de l'écran de choix de profil
+(`client/src/ecrans/EcranProfils.tsx`, marqué PLACEHOLDER). C'est le seul écran que l'adulte
+traverse de toute façon — il pose la tablette, l'enfant tape son avatar — et celui où l'enfant
+passe le moins de temps.
+
+**Réversible sans risque** : l'écran ne connaît aucun chemin, il reçoit un rappel
+`surAccesParent` de `routeur.tsx`. Déplacer la porte revient à déplacer un `<button>` ; le
+chemin `/parent`, lui, ne bouge pas.
+
+**Autres emplacements possibles**, si celui-ci ne convient pas : un coin de la carte du monde,
+un point du campement (il en compte déjà 30), ou un appui long — cette dernière option étant à
+écarter à notre avis, R16 interdisant toute coordination fine.
+
+## Q-I3 — Deux exercices de référence écrits à l'intégration, à relire avant de les jouer
+
+Le § 10.4 du contrat gelé fait de **R12** — « chaque compétence travaillée par au moins trois
+moteurs mécaniquement distincts, sur le contenu réel » — le chiffre de sortie du lot L2-E. Mais
+son § 3.5 ne confie les `contenu/exercices/**` des onze moteurs **à aucun lot**. R12 était donc
+mécaniquement intenable : `lex.couleur` n'était travaillée que par `colorie`.
+
+Deux exercices comblent le manque, tous deux marqués **PLACEHOLDER — À VALIDER PAR LE PARENT
+AVANT D'ÊTRE JOUÉ** dans leur propre fichier :
+
+| Fichier | Moteur | Habillage | Compétences |
+|---|---|---|---|
+| `contenu/exercices/clairiere/paniers-couleurs-01.json` | `tri` | `clairiere.paniers` | `lex.couleur`, `comp.consigne.multiple` |
+| `contenu/exercices/clairiere/luciole-couleurs-01.json` | `eclair` | `clairiere.luciole` | `lex.couleur` |
+
+**Le vocabulaire est CE1 par construction** : les six mots de couleur sont exactement ceux du
+nuancier déjà employés par `contenu/exercices/clairiere/ecole-01.json`, contenu de référence du
+socle v1. Aucun mot nouveau n'a été introduit, et le contrôle 9 de `test:contenu` (couverture
+lexicale CE1) reste désactivé faute de liste de fréquence dans le dépôt — c'est donc bien une
+relecture humaine qui fait foi, pas une machine.
+
+Deux points de conception à trancher dans ces fichiers :
+
+- `paniers-couleurs-01` trie sur **chaud / froid**. C'est un critère de sens, pas de lecture :
+  un enfant peut lire « orange » parfaitement et hésiter sur le panier. À arbitrer — l'autre
+  voie serait un tri sur un graphème, qui travaillerait alors `gph.*` et non `lex.couleur` ;
+- `luciole-couleurs-01` expose le mot **1 800 ms**. C'est volontairement long : l'enfant
+  déchiffre encore (D14), et un mot éclair n'a d'intérêt que s'il a le temps d'être lu. La
+  valeur est une donnée du contenu, à recalibrer sur l'enfant (D13), jamais une constante.
+
+## Q-I4 — Deux affordances « Écouter » sur les onze moteurs de L2-E
+
+Non bloquant, mais à trancher avant que l'enfant ne le voie.
+
+`EcranNoeud` (la coquille) rend un bouton « Écouter » dès qu'une consigne est affichable ; les
+onze moteurs de L2-E rendent **en plus** le leur. Sur un nœud `colorie`, `place` ou `trace` il
+n'y en a qu'un — ces trois-là n'en rendent pas —, mais sur un nœud `tri`, `eclair` ou tout autre
+moteur de F5, l'enfant en verra **deux**, identiques.
+
+Aucun nœud de F5 n'existe encore, donc rien n'est cassé aujourd'hui, et
+`tests/e2e/parcours-variete.spec.ts` — qui exige exactement un `[data-action="ecouter"]` par
+écran — le signalera au premier nœud F5 livré.
+
+**Défaut proposé** : retirer le bouton interne des onze moteurs et laisser la coquille seule
+porter la réécoute. Les tests de composant montent le moteur sans coquille et vérifient R15 sur
+ce bouton-là : il faudra alors que le harnais de test fournisse la coquille, ou que R15 se
+vérifie au niveau de l'écran. **Deux affordances identiques côte à côte sont une charge
+cognitive pour un enfant de 7 ans** — c'est l'argument qui tranche, pas la propreté du code.

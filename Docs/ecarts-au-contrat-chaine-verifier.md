@@ -134,3 +134,91 @@ cette phase déclarait pourtant « tu es le seul agent actif ».
 Rien de cette campagne n'a été touché, ni modifié, ni supprimé. Mais elle rend impossible,
 tant qu'elle est en vol, de mesurer honnêtement `npm run verifier` : `tsc -b`, `eslint .` et
 `vitest` portent sur tout le dépôt. Le détail des mesures est dans le rapport de phase.
+
+---
+
+# Écarts introduits à l'INTÉGRATION de la campagne v2
+
+Ajoutés après réunion des huit lots, quand le dépôt est revenu à un seul écrivain. Les quatre
+documents de référence, `journal-des-decisions.md` et `contrat-technique-v1.md` n'ont **pas**
+été modifiés.
+
+## I.1 — `'trace'` entre dans quatre énumérations
+
+`partage/src/identifiants.ts` (`CodeMoteur`), `contenu/schemas/exercice.schema.json`,
+`contenu/schemas/habillage.schema.json` et la copie inline de `partage/src/contenu/validation.ts`.
+
+Motif : le contrat des features v2 § 3.3 fait écrire le moteur `trace` par L2-C et son § 10.2
+compte 13 `moteur.ts` neufs, `colorie` non compris — quatorze au total. Aucun de ces quatre
+fichiers n'est attribué à un lot au § 3 ; L2-C et L2-E l'ont signalé et posé deux transtypages
+provisoires plutôt que d'écrire hors de leur lot. Les deux transtypages sont retirés.
+
+Conséquence mesurée avant correction : le serveur répondait **422** sur `galeries-01`
+(`/jeu/moteur must be equal to one of the allowed values`) et `galeries.tracer-cristal` était le
+seul habillage sur 36 refusé par son schéma.
+
+`tests/unitaires/enumerations-moteurs.test.ts` compare désormais les quatre listes au registre.
+
+## I.2 — 33 types de moteur réexportés par le barillet
+
+`partage/src/index.ts` gagne `Contenu<X>`, `Etat<X>`, `Action<X>` pour les onze moteurs de L2-E.
+Le § 4.7 fige les additions au barillet et n'y met que `place` et `trace`, alors que le § 4.8
+fait typer les onze rendus client avec ces trois types — que le client ne peut nommer que par
+`@pierre/partage`. 87 des 88 erreurs de `tsc -b` venaient de là. **Convention C1 respectée** :
+ce sont des types, effacés à la compilation, coût de bundle nul.
+
+## I.3 — `frameworkErrors` sur l'instance Fastify
+
+`serveur/src/application.ts`. `onBadUrl` et `onMaxParamLength` écrivent directement dans la
+réponse Node : ni les crochets, ni `setErrorHandler` ne les voient. Une URL au pourcentage
+tronqué rendait `{ code: "FST_ERR_BAD_URL" }` — un vocabulaire étranger au projet, et un nom de
+dépendance exposé au réseau du salon. Le contrat v1 § 3.3 exige `ErreurApi` sur **toute** erreur.
+
+## I.4 — Le contrôle P3.2 accepte une seconde source de déclaration
+
+`scripts/test-contenu.mjs`. La campagne apporte 8 SVG qui ne sont pas des scènes d'exercice — la
+carte, le campement, les 5 stades de Gobi et son cristal — et qu'aucun `*.habillage.json` ne peut
+déclarer. Le contrôle les traitait en « contenu mort ». Il lit désormais aussi `contenu/monde/*.json`,
+et leur applique un contrôle **structurel** : tout tracé rempli est fermé. Extrait en
+`scripts/svg-remplissage.mjs` et discriminé par 8 cas dans `tests/unitaires/svg-remplissage.test.ts`.
+
+Mesure : **44/44 SVG contrôlés**, contre 36/44 avant.
+
+`contenu/monde/regions.json` déclare en conséquence la scène de la carte, et
+`contenu/schemas/monde.schema.json` l'exige — `carte-monde.svg` n'était déclaré que dans
+`client/src/ecrans/EcranCarte.tsx`, et un décor coloriable déclaré dans du code n'est pas déclaré.
+
+## I.5 — `$commentaire` admis à la racine d'un exercice
+
+`contenu/schemas/exercice.schema.json` et sa copie inline. Même convention que
+`contenu/monde/*.json`. Motif : un exercice marqué PLACEHOLDER n'avait aucun endroit où porter sa
+marque, et une marque qui ne vit que dans un document est une marque que le relecteur du fichier
+ne voit pas.
+
+## I.6 — `--texte-secondaire`, AJOUTÉ à côté de la palette
+
+`client/src/styles/global.css`. Les sept jetons de la v2 § 9.2 gardent leur valeur au bit près.
+`--grisaille` (#8E97A8) est le jeton du **voile**, pas une couleur de texte ; les écrans parent
+l'employaient comme telle, à **2,74:1** sur le parchemin là où WCAG AA exige 4,5:1 — 32 nœuds en
+violation `serious` relevés par axe-core. `--texte-secondaire` (#5F6371) vaut **5,57:1**, valeur
+déjà calculée et justifiée ailleurs dans le dépôt pour le même fond.
+
+## I.7 — Trois fichiers de test restructurés, aucune assertion assouplie
+
+| Fichier | Ce qui ne pouvait pas s'exécuter |
+|---|---|
+| `tests/api/migrations.test.ts` | Attendait UNE migration en dur ; le § 6 en ajoute cinq. La valeur attendue est maintenant lue sur disque, versions **et** noms comparés — plus strict qu'avant, et sans retouche à la migration 007 |
+| `tests/e2e/parcours-parent.spec.ts` | Le verrou parent est global, en base, et se lève sur l'horloge SERVEUR qu'aucun test ne peut avancer. Le bloc qui le ferme s'exécutait avant les deux écrans, qui se heurtaient au 423. Ordre corrigé, préambule redondant du dernier cas retiré, deux assertions ajoutées |
+| `tests/e2e/parcours-trace.spec.ts` | `MoteurTrace` ne rend que la lettre courante — ce que le fichier affirme lui-même vingt lignes plus haut. Le sondage attendait un `[data-trait]` disparu avec sa lettre. L'état « la lettre a été quittée » est accepté, et **uniquement pour le dernier trait d'une lettre** |
+| `tests/qualite/gamefeel-latence.spec.ts` | Rappuyait dans la fenêtre de 120 ms où `data-appui` valait encore `oui` : aucune mutation, aucun relevé, attente infinie. On attend maintenant que la marque soit retombée — un état, pas une durée |
+
+## I.8 — Un habillage `trace` de plus, et deux exercices de référence
+
+`contenu/habillages/galeries/tracer-paroi.{habillage.json,svg}` : les deux nœuds `trace` livrés
+pointaient tous deux sur `galeries.tracer-cristal`, seul habillage `trace` du § 3.3, ce qui viole
+R13. Ajouter un habillage n'a coûté **aucune ligne de code** (v2 § 7) — la promesse de variété
+vérifiée en acte.
+
+`contenu/exercices/clairiere/{paniers-couleurs-01,luciole-couleurs-01}.json` : voir Q-I3 de
+`Docs/questions-en-attente.md`. Ils comblent le manque qui rendait **R12 mécaniquement
+intenable**, et attendent tous deux une relecture parent.
