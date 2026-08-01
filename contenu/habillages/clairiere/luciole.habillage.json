@@ -1,0 +1,106 @@
+{
+  "id": "clairiere.luciole",
+  "moteurs": [
+    "eclair"
+  ],
+  "libelle": "La luciole qui clignote",
+  "region": "clairiere",
+  "scene": {
+    "fichier": "habillages/clairiere/luciole.svg",
+    "viewBox": "0 0 960 600",
+    "calques": [
+      {
+        "id": "calque-fond",
+        "role": "fond",
+        "regions": []
+      },
+      {
+        "id": "calque-zones",
+        "role": "coloriable",
+        "regions": [
+          {
+            "id": "halo",
+            "libelle": "le halo",
+            "centroide": [
+              190.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "feuille-large",
+            "libelle": "la feuille large",
+            "centroide": [
+              480.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "tige",
+            "libelle": "la tige",
+            "centroide": [
+              770.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "nuit",
+            "libelle": "la nuit",
+            "centroide": [
+              190.0,
+              420.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "rocher-plat",
+            "libelle": "le rocher plat",
+            "centroide": [
+              480.0,
+              420.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "herbe-courte",
+            "libelle": "l’herbe courte",
+            "centroide": [
+              770.0,
+              420.0
+            ],
+            "surface": 32000.0
+          }
+        ]
+      },
+      {
+        "id": "calque-trait",
+        "role": "trait",
+        "regions": []
+      }
+    ]
+  },
+  "palette": {
+    "jetons": {},
+    "nuancier": [
+      "vert",
+      "jaune",
+      "bleu",
+      "brun",
+      "rose",
+      "blanc"
+    ]
+  },
+  "timings": {
+    "appuiMs": 40,
+    "relachementMs": 90,
+    "refusMs": 150,
+    "recolorationMs": 600,
+    "interEtoilesMs": 150
+  },
+  "sons": {
+    "ambiance": null,
+    "effets": {}
+  }
+}

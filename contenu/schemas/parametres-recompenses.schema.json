@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "pierre:schemas/parametres-recompenses",
+  "title": "Parametres de la cascade de recompenses",
+  "description": "Les seuils de D25, declares en donnees (convention C2 du contrat des features v2). Le code ne porte AUCUN de ces nombres : partage/src/recompenses/parametres.ts les lit et refuse le fichier plutot que de prendre un defaut silencieux. Le schema et la validation ecrite a la main disent la meme chose ; seule la seconde entre dans le bundle client, parce qu'Ajv pese ~120 Ko sur un budget de 250 Ko.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "etoilesParIntermediaire",
+    "intermediairesParRare",
+    "natureIntermediaire",
+    "natureRare"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "version": { "type": "integer", "minimum": 1 },
+    "commentaire": { "type": "string" },
+    "etoilesParIntermediaire": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Nombre d'etoiles qui donnent un palier intermediaire. ~5 a l'ecole (D25)."
+    },
+    "intermediairesParRare": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Nombre de paliers intermediaires qui donnent un palier rare. ~10 a l'ecole (D25)."
+    },
+    "natureIntermediaire": {
+      "enum": ["etoile", "forme-gobi", "objet-campement", "zone-recoloriee"],
+      "description": "Ce que rapporte le palier intermediaire : une forme de Gobi ou un objet de campement (D25, tableau)."
+    },
+    "natureRare": {
+      "enum": ["forme-gobi", "objet-campement", "zone-recoloriee"],
+      "description": "Ce que rapporte le palier rare. « etoile » est EXCLU par construction : D25 point 2 exige une image ou son equivalent, et une etoile de plus n'en est pas une."
+    }
+  }
+}

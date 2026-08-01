@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "note": "Lexique qui CORRIGE la règle de découpage syllabique de partage/src/lecture/syllabation.ts. Ce n'est pas une liste de mots fréquents : chacune de ses entrées a été OBTENUE en passant la règle sur le lexique réel du corpus — 238 mots distincts, extraits des textes de contenu/exercices/ et des 75 consignes de contenu/brouillons/niveau-1/ — et en relevant les mots où la règle diverge du découpage syllabique enseigné au CP. Les mots que la règle traite correctement n'y figurent PAS, délibérément : une entrée inutile est une entrée qu'on ne saura plus justifier. Toute entrée doit satisfaire concaténation(syllabes) === clé, ce que tests/unitaires/syllabation.test.ts vérifie sur la totalité du fichier.",
+  "referenceRegle": "partage/src/lecture/syllabation.ts",
+  "familles": [
+    {
+      "motif": "ille-mouille",
+      "explication": "Après une voyelle, « ille » note le son [j] et ne se coupe pas : la règle produit fil-le, la lecture demande fille. N'INCLUT PAS ville, mille, tranquille, où « ille » se lit [il] et où la règle a raison — les y ajouter dégraderait le découpage.",
+      "decoupages": {
+        "feuille": ["feuille"],
+        "feuilles": ["feuilles"],
+        "fille": ["fille"],
+        "filles": ["filles"],
+        "bouteille": ["bou", "teille"],
+        "bouteilles": ["bou", "teilles"]
+      }
+    },
+    {
+      "motif": "hiatus-non-marque",
+      "explication": "Deux voyelles qui se lisent en deux temps sans qu'un tréma le signale. La règle fond toute suite de voyelles en un seul noyau — c'est ce qui rend bleu, eau et pluie corrects — et se trompe donc ici. Le tréma, lui, est déjà traité par la règle (ma-ïs, No-ël).",
+      "decoupages": {
+        "bouée": ["bou", "ée"],
+        "bouées": ["bou", "ées"],
+        "lion": ["li", "on"],
+        "lions": ["li", "ons"],
+        "météo": ["mé", "té", "o"],
+        "théâtre": ["thé", "â", "tre"],
+        "théâtres": ["thé", "â", "tres"],
+        "couette": ["cou", "et", "te"],
+        "couettes": ["cou", "et", "tes"]
+      }
+    }
+  ]
+}

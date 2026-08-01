@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200" role="img" aria-label="Gobi, stade 5 : le Gardien">
+  <title>Gobi — stade 5, le Gardien</title>
+  <desc>PLACEHOLDER — forme canonique non validée (D7, D31 étape A). Bouchon écrit à la main (D2). Le stade final de D28 : « le compagnon plus structuré, plus équipé, plus héroïque ». La cape et la crête complète s'ajoutent au corps du stade 2, qui n'a pas bougé. Posture ouverte et tournée vers l'enfant, jamais toisante (D31).</desc>
+  <g id="gobi-cape">
+    <path id="cape" d="M100,72 C142,72 172,112 174,180 L26,180 C28,112 58,72 100,72 Z" fill="#FFC93C" stroke="#1B2440" stroke-width="5" stroke-linejoin="round"/>
+    <path id="cape-doublure" d="M100,84 C132,84 154,114 158,176 L42,176 C46,114 68,84 100,84 Z" fill="#F0A800" stroke="#1B2440" stroke-width="3" stroke-linejoin="round"/>
+  </g>
+  <g id="gobi-corps">
+    <circle id="corps" cx="100" cy="118" r="60" fill="#FF5D8F" stroke="#1B2440" stroke-width="6"/>
+    <path id="ventre" d="M100,100 C122,100 138,118 138,140 C138,160 120,174 100,174 C80,174 62,160 62,140 C62,118 78,100 100,100 Z" fill="#FFC0D6" stroke="#1B2440" stroke-width="4" stroke-linejoin="round"/>
+  </g>
+  <g id="gobi-besace">
+    <path id="bandouliere" d="M64,88 L142,150 L134,160 L56,98 Z" fill="#C98B4B" stroke="#1B2440" stroke-width="4" stroke-linejoin="round"/>
+    <path id="sacoche" d="M126,140 L164,140 L170,176 L120,176 Z" fill="#C98B4B" stroke="#1B2440" stroke-width="5" stroke-linejoin="round"/>
+  </g>
+  <g id="gobi-bras">
+    <path id="bras-gauche" d="M42,110 C24,102 12,110 10,124 C8,138 18,148 32,146 C44,144 48,128 46,118 Z" fill="#FF5D8F" stroke="#1B2440" stroke-width="5" stroke-linejoin="round"/>
+    <path id="bras-droit" d="M158,110 C176,102 188,110 190,124 C192,138 182,148 168,146 C156,144 152,128 154,118 Z" fill="#FF5D8F" stroke="#1B2440" stroke-width="5" stroke-linejoin="round"/>
+    <circle id="main-gauche" cx="20" cy="128" r="12" fill="#FFC0D6" stroke="#1B2440" stroke-width="4"/>
+    <circle id="main-droite" cx="180" cy="128" r="12" fill="#FFC0D6" stroke="#1B2440" stroke-width="4"/>
+  </g>
+  <g id="gobi-visage">
+    <circle id="oeil-gauche" cx="80" cy="106" r="14" fill="#FFF6E3" stroke="#1B2440" stroke-width="4"/>
+    <circle id="oeil-droit" cx="120" cy="106" r="14" fill="#FFF6E3" stroke="#1B2440" stroke-width="4"/>
+    <circle id="pupille-gauche" cx="82" cy="108" r="6" fill="#1B2440"/>
+    <circle id="pupille-droite" cx="122" cy="108" r="6" fill="#1B2440"/>
+    <path id="sourire" d="M80,132 C92,148 108,148 120,132 C114,158 86,158 80,132 Z" fill="#1B2440" stroke="#1B2440" stroke-width="3" stroke-linejoin="round"/>
+  </g>
+  <g id="gobi-cristal">
+    <path id="cristal-gauche-externe" d="M50,46 L60,66 L50,78 L40,66 Z" fill="#2FA8E0" stroke="#1B2440" stroke-width="5" stroke-linejoin="round"/>
+    <path id="cristal-gauche" d="M70,24 L84,54 L70,68 L56,54 Z" fill="#2FA8E0" stroke="#1B2440" stroke-width="5" stroke-linejoin="round"/>
+    <path id="cristal-central" d="M100,0 L122,38 L100,60 L78,38 Z" fill="#2FA8E0" stroke="#1B2440" stroke-width="5" stroke-linejoin="round"/>
+    <path id="cristal-droit" d="M130,24 L144,54 L130,68 L116,54 Z" fill="#2FA8E0" stroke="#1B2440" stroke-width="5" stroke-linejoin="round"/>
+    <path id="cristal-droit-externe" d="M150,46 L160,66 L150,78 L140,66 Z" fill="#2FA8E0" stroke="#1B2440" stroke-width="5" stroke-linejoin="round"/>
+    <path id="cristal-eclat" d="M100,14 L110,36 L100,48 L90,36 Z" fill="#FFF6E3" stroke="none"/>
+  </g>
+</svg>

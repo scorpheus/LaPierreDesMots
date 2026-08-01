@@ -66,9 +66,19 @@ export default defineConfig({
   outputDir: 'tests/rapports/artefacts/playwright',
   reporter: [
     ['list'],
-    // `scripts/verifier.mjs` fixe `PLAYWRIGHT_JSON_OUTPUT_NAME` par étape ; hors chaîne, ce
-    // chemin par défaut évite d'écraser un rapport précédent au hasard.
-    ['json', { outputFile: 'tests/rapports/brut/playwright.json' }],
+    // Chemin du rapport machine, PAR ÉTAPE.
+    //
+    // `PLAYWRIGHT_JSON_OUTPUT_NAME` n'existe plus dans Playwright 1.62 — mesuré :
+    // `grep -rn "PLAYWRIGHT_JSON_OUTPUT" node_modules/` ne rend aucune ligne. `verifier.mjs`
+    // la posait quand même, et les trois campagnes (`test:e2e`, `test:visuel`,
+    // `test:qualite`) écrivaient donc toutes dans le MÊME fichier, chacune écrasant la
+    // précédente : le dépouillement ne trouvait jamais son rapport et l'étape s'affichait
+    // « 1 échec sur 0 cas », sans jamais nommer le scénario fautif.
+    // `PIERRE_RAPPORT_JSON` est à nous, et elle, elle est lue.
+    [
+      'json',
+      { outputFile: process.env['PIERRE_RAPPORT_JSON'] ?? 'tests/rapports/brut/playwright.json' }
+    ],
     ['html', { outputFolder: 'tests/rapports/artefacts/playwright-html', open: 'never' }]
   ],
   use: {
@@ -95,7 +105,26 @@ export default defineConfig({
     {
       name: 'visuel',
       testDir: 'tests/visuel',
-      testMatch: /.*\.spec\.ts$/
+      testMatch: /.*\.spec\.ts$/,
+      // ── LA MATRICE DES 5 POLICES (lot L2-B, contrat des features v2 § 3.2) ──────────────
+      //
+      // Elle est portée par les MÉTADONNÉES du projet `visuel`, et non par cinq projets
+      // `visuel-andika`, `visuel-luciole`… Deux raisons mesurées, aucune n'est esthétique :
+      //
+      //  1. Playwright inscrit le nom du projet dans le chemin des références :
+      //     `noeud-gris-visuel-win32.png`. Découper `visuel` en cinq projets renommerait les
+      //     TROIS références du socle v1 déjà commitées, et « ne jamais mettre à jour une
+      //     référence de sa propre initiative » (CLAUDE.md) l'interdit.
+      //  2. `scripts/test-visuel.mjs` lance `--project=visuel` et n'appartient à aucun lot de
+      //     cette campagne : cinq projets nouveaux ne seraient JAMAIS exécutés par
+      //     `npm run test:visuel`. Une matrice que personne ne lance est une matrice creuse.
+      //
+      // `tests/visuel/polices.spec.ts` lit cette liste et engendre une capture par police.
+      // La liste est ici, et pas dans le spec, pour qu'elle reste une donnée de configuration
+      // opposable : un ajout de police se voit dans le diff de ce fichier.
+      metadata: {
+        polices: ['andika', 'opendyslexic', 'luciole', 'belle-allure', 'verdana']
+      }
     },
     {
       name: 'qualite',

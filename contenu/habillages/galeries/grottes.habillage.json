@@ -1,0 +1,106 @@
+{
+  "id": "galeries.grottes",
+  "moteurs": [
+    "tri"
+  ],
+  "libelle": "Les trois grottes",
+  "region": "galeries",
+  "scene": {
+    "fichier": "habillages/galeries/grottes.svg",
+    "viewBox": "0 0 960 600",
+    "calques": [
+      {
+        "id": "calque-fond",
+        "role": "fond",
+        "regions": []
+      },
+      {
+        "id": "calque-zones",
+        "role": "coloriable",
+        "regions": [
+          {
+            "id": "grotte-un",
+            "libelle": "la première grotte",
+            "centroide": [
+              190.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "grotte-deux",
+            "libelle": "la deuxième grotte",
+            "centroide": [
+              480.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "grotte-trois",
+            "libelle": "la troisième grotte",
+            "centroide": [
+              770.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "stalactite",
+            "libelle": "la stalactite",
+            "centroide": [
+              190.0,
+              420.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "flaque",
+            "libelle": "la flaque",
+            "centroide": [
+              480.0,
+              420.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "voute",
+            "libelle": "la voûte",
+            "centroide": [
+              770.0,
+              420.0
+            ],
+            "surface": 32000.0
+          }
+        ]
+      },
+      {
+        "id": "calque-trait",
+        "role": "trait",
+        "regions": []
+      }
+    ]
+  },
+  "palette": {
+    "jetons": {},
+    "nuancier": [
+      "violet",
+      "bleu",
+      "gris",
+      "blanc",
+      "brun",
+      "noir"
+    ]
+  },
+  "timings": {
+    "appuiMs": 60,
+    "relachementMs": 120,
+    "refusMs": 180,
+    "recolorationMs": 800,
+    "interEtoilesMs": 180
+  },
+  "sons": {
+    "ambiance": null,
+    "effets": {}
+  }
+}

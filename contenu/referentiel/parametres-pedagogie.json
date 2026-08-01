@@ -1,0 +1,38 @@
+{
+  "$commentaire": "Les valeurs pedagogiques de D13 et de la v2 § 12.2, EN DONNEES (convention C2). D13 en toutes lettres : « ces valeurs sont des parametres declares en donnees, pas des constantes dans le code : elles seront recalibrees sur les tentatives reelles, et le test de rejeu doit rendre visible tout changement. » Aucune de ces valeurs n'apparait en dur dans partage/src/pedagogie/. `trace` prend 0,02 comme `colorie` : on ne trace pas une lettre orientee par hasard — proposition mesurable, pas certitude.",
+  "bkt": {
+    "pInit": 0.15,
+    "pTransit": 0.12,
+    "pGlissement": 0.10,
+    "pDevinette": {
+      "vrai-faux": 0.50,
+      "qcm-3": 0.33,
+      "qcm-4": 0.25,
+      "place": 0.05,
+      "colorie": 0.02,
+      "trace": 0.02,
+      "saisie": 0.01,
+      "ordre": null,
+      "appariement": null
+    },
+    "poidsAvecAide": 0.4
+  },
+  "acquis": {
+    "seuilP": 0.90,
+    "tentativesMin": 5,
+    "joursDistinctsMin": 3,
+    "tentativesFaibleDevinetteMin": 2,
+    "seuilFaibleDevinette": 0.10
+  },
+  "leitner": {
+    "delaisJours": [1, 3, 7, 16, 35],
+    "boiteApresEchec": 1
+  },
+  "selecteur": {
+    "nbNoeudsMin": 4,
+    "nbNoeudsMax": 6,
+    "seuilPrerequis": 0.60,
+    "habillageUniqueParSortie": true,
+    "rangRevision": 3
+  }
+}

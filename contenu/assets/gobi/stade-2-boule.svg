@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200" role="img" aria-label="Gobi, stade 2 : la Boule">
+  <title>Gobi — stade 2, la Boule</title>
+  <desc>PLACEHOLDER — forme canonique non validée (D7, D31 étape A). Bouchon écrit à la main (D2). D28 : « la boule ronde n'était pas ratée, c'est le stade 1 » — elle devient ici le stade 2, le corps s'arrondit et le cristal grandit. Le CORPS ne change plus après ce stade ; seul le cristal se décline (D20).</desc>
+  <g id="gobi-corps">
+    <circle id="corps" cx="100" cy="112" r="62" fill="#FF5D8F" stroke="#1B2440" stroke-width="6"/>
+    <path id="ventre" d="M100,92 C124,92 140,112 140,134 C140,156 122,170 100,170 C78,170 60,156 60,134 C60,112 76,92 100,92 Z" fill="#FFC0D6" stroke="#1B2440" stroke-width="4" stroke-linejoin="round"/>
+  </g>
+  <g id="gobi-bras">
+    <path id="bras-gauche" d="M42,114 C26,112 16,122 16,134 C16,146 26,154 40,152 C50,150 52,134 50,124 Z" fill="#FF5D8F" stroke="#1B2440" stroke-width="5" stroke-linejoin="round"/>
+    <path id="bras-droit" d="M158,114 C174,112 184,122 184,134 C184,146 174,154 160,152 C150,150 148,134 150,124 Z" fill="#FF5D8F" stroke="#1B2440" stroke-width="5" stroke-linejoin="round"/>
+    <circle id="main-gauche" cx="26" cy="136" r="11" fill="#FFC0D6" stroke="#1B2440" stroke-width="4"/>
+    <circle id="main-droite" cx="174" cy="136" r="11" fill="#FFC0D6" stroke="#1B2440" stroke-width="4"/>
+  </g>
+  <g id="gobi-visage">
+    <circle id="oeil-gauche" cx="80" cy="98" r="14" fill="#FFF6E3" stroke="#1B2440" stroke-width="4"/>
+    <circle id="oeil-droit" cx="120" cy="98" r="14" fill="#FFF6E3" stroke="#1B2440" stroke-width="4"/>
+    <circle id="pupille-gauche" cx="82" cy="100" r="6" fill="#1B2440"/>
+    <circle id="pupille-droite" cx="122" cy="100" r="6" fill="#1B2440"/>
+    <path id="sourire" d="M82,126 C92,140 108,140 118,126 C112,148 88,148 82,126 Z" fill="#1B2440" stroke="#1B2440" stroke-width="3" stroke-linejoin="round"/>
+  </g>
+  <g id="gobi-cristal">
+    <path id="cristal-central" d="M100,4 L116,34 L100,50 L84,34 Z" fill="#2FA8E0" stroke="#1B2440" stroke-width="5" stroke-linejoin="round"/>
+    <path id="cristal-eclat" d="M100,16 L106,32 L100,38 L94,32 Z" fill="#FFF6E3" stroke="none"/>
+  </g>
+</svg>

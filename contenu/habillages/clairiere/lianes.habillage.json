@@ -1,0 +1,106 @@
+{
+  "id": "clairiere.lianes",
+  "moteurs": [
+    "chemin"
+  ],
+  "libelle": "Les lianes",
+  "region": "clairiere",
+  "scene": {
+    "fichier": "habillages/clairiere/lianes.svg",
+    "viewBox": "0 0 960 600",
+    "calques": [
+      {
+        "id": "calque-fond",
+        "role": "fond",
+        "regions": []
+      },
+      {
+        "id": "calque-zones",
+        "role": "coloriable",
+        "regions": [
+          {
+            "id": "liane-un",
+            "libelle": "la première liane",
+            "centroide": [
+              190.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "liane-deux",
+            "libelle": "la deuxième liane",
+            "centroide": [
+              480.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "liane-trois",
+            "libelle": "la troisième liane",
+            "centroide": [
+              770.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "branche",
+            "libelle": "la branche",
+            "centroide": [
+              190.0,
+              420.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "feuillage",
+            "libelle": "le feuillage",
+            "centroide": [
+              480.0,
+              420.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "clairiere-sol",
+            "libelle": "le sol de la clairière",
+            "centroide": [
+              770.0,
+              420.0
+            ],
+            "surface": 32000.0
+          }
+        ]
+      },
+      {
+        "id": "calque-trait",
+        "role": "trait",
+        "regions": []
+      }
+    ]
+  },
+  "palette": {
+    "jetons": {},
+    "nuancier": [
+      "vert",
+      "jaune",
+      "bleu",
+      "brun",
+      "rose",
+      "blanc"
+    ]
+  },
+  "timings": {
+    "appuiMs": 60,
+    "relachementMs": 110,
+    "refusMs": 170,
+    "recolorationMs": 750,
+    "interEtoilesMs": 170
+  },
+  "sons": {
+    "ambiance": null,
+    "effets": {}
+  }
+}

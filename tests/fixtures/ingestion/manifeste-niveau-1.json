@@ -1,0 +1,116 @@
+{
+  "source": "fiches-origine/NIVEAU 1.pdf",
+  "niveau": 1,
+  "fichesDuPdf": 15,
+  "fichesDemandees": 15,
+  "fichesIngerees": 15,
+  "fichesRefusees": 0,
+  "totalConsignes": 75,
+  "totalAffirmations": 90,
+  "textesNonFiables": 1,
+  "consignesParType": {
+    "colorie": 51,
+    "place": 8,
+    "autre": 16
+  },
+  "reglesDeStructure": {
+    "separationColonnesX": 300.0,
+    "yCorpsAttendu": 575.0,
+    "toleranceLigneY": 3.0,
+    "ecartRepliMax": 18.0,
+    "ecartItemMin": 20.0
+  },
+  "fiches": [
+    {
+      "fiche": 1,
+      "fichier": "contenu/brouillons/niveau-1/fiche-01.json",
+      "consignes": 5,
+      "affirmations": 6
+    },
+    {
+      "fiche": 2,
+      "fichier": "contenu/brouillons/niveau-1/fiche-02.json",
+      "consignes": 5,
+      "affirmations": 6
+    },
+    {
+      "fiche": 3,
+      "fichier": "contenu/brouillons/niveau-1/fiche-03.json",
+      "consignes": 5,
+      "affirmations": 6
+    },
+    {
+      "fiche": 4,
+      "fichier": "contenu/brouillons/niveau-1/fiche-04.json",
+      "consignes": 5,
+      "affirmations": 6
+    },
+    {
+      "fiche": 5,
+      "fichier": "contenu/brouillons/niveau-1/fiche-05.json",
+      "consignes": 5,
+      "affirmations": 6
+    },
+    {
+      "fiche": 6,
+      "fichier": "contenu/brouillons/niveau-1/fiche-06.json",
+      "consignes": 5,
+      "affirmations": 6
+    },
+    {
+      "fiche": 7,
+      "fichier": "contenu/brouillons/niveau-1/fiche-07.json",
+      "consignes": 5,
+      "affirmations": 6
+    },
+    {
+      "fiche": 8,
+      "fichier": "contenu/brouillons/niveau-1/fiche-08.json",
+      "consignes": 5,
+      "affirmations": 6
+    },
+    {
+      "fiche": 9,
+      "fichier": "contenu/brouillons/niveau-1/fiche-09.json",
+      "consignes": 5,
+      "affirmations": 6
+    },
+    {
+      "fiche": 10,
+      "fichier": "contenu/brouillons/niveau-1/fiche-10.json",
+      "consignes": 5,
+      "affirmations": 6
+    },
+    {
+      "fiche": 11,
+      "fichier": "contenu/brouillons/niveau-1/fiche-11.json",
+      "consignes": 5,
+      "affirmations": 6
+    },
+    {
+      "fiche": 12,
+      "fichier": "contenu/brouillons/niveau-1/fiche-12.json",
+      "consignes": 5,
+      "affirmations": 6
+    },
+    {
+      "fiche": 13,
+      "fichier": "contenu/brouillons/niveau-1/fiche-13.json",
+      "consignes": 5,
+      "affirmations": 6
+    },
+    {
+      "fiche": 14,
+      "fichier": "contenu/brouillons/niveau-1/fiche-14.json",
+      "consignes": 5,
+      "affirmations": 6
+    },
+    {
+      "fiche": 15,
+      "fichier": "contenu/brouillons/niveau-1/fiche-15.json",
+      "consignes": 5,
+      "affirmations": 6
+    }
+  ],
+  "refus": []
+}

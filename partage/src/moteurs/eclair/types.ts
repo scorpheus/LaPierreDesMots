@@ -1,0 +1,107 @@
+/**
+ * Types du moteur `eclair` — lot L2-E.
+ *
+ * Un mot apparaît brièvement, puis il faut le retrouver parmi des voisins orthographiques.
+ *
+ * **C'est le moteur qui porte la latence de reconnaissance (D18)** : `premiereActionMs` moins
+ * `finExpositionMs` est le seul chiffre du projet qui mesure la fluidité et non la justesse.
+ * D18 en fait l'indicateur principal du dashboard parent ; il naît ici.
+ *
+ * Ce fichier ne contient QUE des types. Contrat gelé : contrat-features-v2.md § 4.8.
+ */
+
+import type { CheminAsset, IdConsigne } from '../../identifiants.js';
+import type { ConfusionObservee, ModeReponse } from '../../pedagogie/types.js';
+import type { FormeConsigne } from '../colorie/types.js';
+import type { AideProposee, NiveauAide } from '../types.js';
+
+export type IdOptionEclair = string;
+
+export interface OptionEclair {
+  readonly id: IdOptionEclair;
+  readonly libelle: string;
+  readonly bonne: boolean;
+  /** La forme que cette option fait confondre avec la bonne réponse, `null` sinon (D23). */
+  readonly confusionAvec: string | null;
+}
+
+export interface ConsigneEclair {
+  readonly id: IdConsigne;
+  /** Le mot montré en éclair. Il n'est PAS animé : le décor s'agite, le texte jamais. */
+  readonly mot: string;
+  readonly texte: string;
+  readonly forme: FormeConsigne;
+  readonly audio: CheminAsset | null;
+  /**
+   * Durée d'exposition. Elle est **déclarée par le contenu**, jamais en dur : c'est un
+   * paramètre pédagogique, et D13 exige qu'il vive en données pour être recalibré.
+   */
+  readonly expositionMs: number;
+  readonly options: readonly IdOptionEclair[];
+  readonly reponse: IdOptionEclair;
+  readonly motsCles: readonly string[];
+}
+
+export interface ContenuEclair {
+  readonly consignes: readonly ConsigneEclair[];
+  readonly options: readonly OptionEclair[];
+  readonly competence: string;
+}
+
+export type MotifRefusEclair =
+  | 'option-fausse'        // la seule erreur de lecture
+  | 'option-hors-consigne' // l'option n'est pas offerte sur cette étape
+  | 'option-deja-choisie'  // double-tap
+  | 'option-inconnue';
+
+export interface RefusEclair {
+  readonly option: IdOptionEclair | null;
+  readonly motif: MotifRefusEclair;
+  readonly instantMs: number;
+}
+
+export interface EtatEtapeEclair {
+  /** `identifiant`, et non `id` : c'est le nom qu'`EtapeGenerique` (L2-C) impose. */
+  readonly identifiant: IdConsigne;
+  /** Ce qu'il reste à faire sur cette étape. Vide = étape close. */
+  readonly restantes: readonly string[];
+  readonly nbErreurs: number;
+  readonly niveauAide: NiveauAide;
+  readonly nbEcoutes: number;
+  readonly debutMs: number;
+  readonly finMs: number | null;
+  readonly premiereActionMs: number | null;
+  readonly derniereActionMs: number;
+  readonly instantIndiceMs: number | null;
+  readonly modeReponse: ModeReponse;
+  readonly confusion: ConfusionObservee | null;
+}
+
+export interface EtatEclair {
+  readonly indexEtape: number;
+  readonly etapes: readonly EtatEtapeEclair[];
+  readonly options: readonly OptionEclair[];
+  readonly competence: string;
+  /** Clé = `IdOptionEclair`, valeur = `'juste'`. */
+  readonly acquis: Readonly<Record<string, string>>;
+  /**
+   * Instant où l'éclair a cessé d'être visible sur l'étape courante. Origine de la latence
+   * de reconnaissance (D18). `null` tant que le mot est encore affiché.
+   */
+  readonly finExpositionMs: number | null;
+  readonly niveauAide: NiveauAide;
+  readonly aide: AideProposee | null;
+  readonly dernierRefus: RefusEclair | null;
+  readonly demarreMs: number;
+  readonly termineMs: number | null;
+}
+
+export type ActionEclair =
+  | { readonly type: 'repondre'; readonly option: IdOptionEclair }
+  /** Fin de l'exposition, émise par le rendu. Elle FIXE l'origine de la latence. */
+  | { readonly type: 'finExposition' }
+  /** Revoir l'éclair. GRATUIT et sans limite, comme réécouter la consigne (R15). */
+  | { readonly type: 'revoirEclair' }
+  | { readonly type: 'ecouterConsigne' }
+  | { readonly type: 'demanderAide' }
+  | { readonly type: 'battementHorloge' };

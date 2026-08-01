@@ -5,19 +5,24 @@
 // C'est la condition de la promesse « ajouter un moteur ne touche pas la coquille » — et le
 // critère de fin du lot L-D au contrat § 2 : « `EcranNoeud` monte un moteur INCONNU ».
 //
-// Il porte en propre trois choses, et rien d'autre :
+// Il porte en propre six choses, et rien d'autre :
 //   1. la barre de consigne (`data-consigne`, `data-consigne-etat`) ;
 //   2. Gobi et le bouton « écouter » (R15) ;
-//   3. `data-test-pret`, qui remplace toute attente de durée dans les tests T4 (§ 10).
+//   3. `data-test-pret`, qui remplace toute attente de durée dans les tests T4 (§ 10) ;
+//   4. `data-serie`, la longueur de la série de bonnes réponses (contrat features v2 § 7) ;
+//   5. `data-appui`, LA RÉPONSE VISIBLE SOUS 100 ms (v2 § 8) — voir plus bas ;
+//   6. la jauge du palier intermédiaire, qui montre le vide restant (D25, point 3).
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
-import type { CheminAsset, NiveauAide } from '@pierre/partage';
+import type { CheminAsset, JaugePalier as ModeleJauge, NiveauAide } from '@pierre/partage';
+import { jaugesDe } from '@pierre/partage/recompenses';
 import { Gobi } from '../composants/Gobi.js';
 import { BoutonEcouter } from '../composants/BoutonEcouter.js';
+import { JaugePalier } from '../composants/JaugePalier.js';
 import { variablesHabillage } from '../habillages/chargeur.js';
 import { useEtatJeu, useMagasin, useServices } from '../etat/services.js';
 import { obtenirRendu } from '../moteurs/registre-rendu.js';
-import type { ProprietesMoteur } from '../moteurs/types.js';
+import type { ComposantMoteur } from '../moteurs/types.js';
 import { reveillerAudio } from '../services/audio-tone.js';
 
 /**
@@ -34,6 +39,15 @@ const ACTION_ECOUTE = { type: 'ecouterConsigne' } as const;
 
 /** Cadence du battement. Le temps entre dans le moteur par `Horloge`, jamais autrement (§ 5.8). */
 const PERIODE_BATTEMENT_MS = 500;
+
+/**
+ * Durée d'affichage de l'état « appuyé », en millisecondes.
+ *
+ * Elle n'est PAS la latence de réponse — celle-ci est nulle, l'attribut bascule dans le
+ * gestionnaire même. C'est la durée pendant laquelle la marque reste visible, alignée sur
+ * l'anticipation de la v2 § 8 (`scale 0.94` en 60 ms) avec une marge de lecture.
+ */
+const DUREE_APPUI_MS = 120;
 
 /** Une étape affichable dans la barre de consigne. */
 interface EtapeAffichable {
@@ -81,7 +95,9 @@ function extraireEtapes(contenu: unknown): readonly EtapeAffichable[] {
     etapes.push({
       id: String(champs['id'] ?? `c${String(etapes.length + 1)}`),
       texte,
-      audio: typeof audio === 'string' ? (audio as unknown as CheminAsset) : null
+      // `CheminAsset` est un alias de `string` (écart v1 n° 6 : pas de marquage nominal) : la
+      // garde `typeof` suffit, le transtypage défensif de la v1 ne protégeait rien.
+      audio: typeof audio === 'string' ? audio : null
     });
   }
   return etapes;
@@ -97,9 +113,13 @@ export function EcranNoeud(): ReactElement {
   const progression = useEtatJeu((etat) => etat.progression);
   const aide = useEtatJeu((etat) => etat.aide);
   const animationsDesactivees = useEtatJeu((etat) => etat.animationsDesactivees);
+  const serie = useEtatJeu((etat) => etat.serie);
+  const cascade = useEtatJeu((etat) => etat.cascade);
+  const seuils = useEtatJeu((etat) => etat.seuils);
 
   const racine = useRef<HTMLElement | null>(null);
   const [pret, fixerPret] = useState(false);
+  const [appuye, fixerAppuye] = useState(false);
   // `niveauAide` est MONOTONE CROISSANT pour la tentative entière (§ 5.6) : une aide obtenue
   // n'est jamais retirée. `aide` peut redevenir `null` quand le moteur l'a consommée ; le
   // palier atteint, lui, ne redescend pas — c'est ce que `data-aide` doit refléter.
@@ -111,6 +131,46 @@ export function EcranNoeud(): ReactElement {
     },
     [magasin]
   );
+
+  /**
+   * ════════════════════════════════════════════════════════════════════════════════════════
+   * LA RÈGLE DES 100 ms — v2 § 8 : « une réponse visible en moins de 100 ms sur tout appui,
+   * MÊME SI LE TRAITEMENT PREND PLUS LONGTEMPS ».
+   *
+   * C'est ce gestionnaire qui la tient, et c'est la raison pour laquelle il ne fait presque
+   * rien : il bascule un attribut, note le point du doigt, réveille le contexte audio, et
+   * rend la main. Aucune réduction de moteur, aucun rendu de scène, aucun réseau n'est sur ce
+   * chemin. La mutation du DOM part donc dans la même tâche que l'événement.
+   *
+   * `tests/qualite/gamefeel-latence.spec.ts` MESURE ce délai — appui → première mutation du
+   * DOM — sur une vingtaine d'appuis, et échoue au-dessus de 100 ms. C'est le chiffre du
+   * contrat de sortie de L2-A : sans lui, « la réponse est immédiate » resterait une opinion.
+   * ════════════════════════════════════════════════════════════════════════════════════════
+   */
+  const surAppui = useCallback(
+    (evenement: React.PointerEvent<HTMLElement>): void => {
+      fixerAppuye(true);
+      magasin.getState().marquerAppui(evenement.clientX, evenement.clientY);
+      // Le premier geste de l'enfant débloque le contexte audio : sans lui, aucun son ne
+      // sortira jamais (politique d'autoplay des navigateurs).
+      reveillerAudio(services.audio);
+    },
+    [magasin, services]
+  );
+
+  // Retombée de l'état « appuyé ». Une minuterie, pas une animation : l'attribut doit
+  // redescendre même si l'enfant garde le doigt posé et sort de l'écran.
+  useEffect(() => {
+    if (!appuye) {
+      return undefined;
+    }
+    const minuterie = globalThis.setTimeout(() => {
+      fixerAppuye(false);
+    }, DUREE_APPUI_MS);
+    return () => {
+      globalThis.clearTimeout(minuterie);
+    };
+  }, [appuye]);
 
   // --------------------------------------------------------------- battement d'horloge
   // Aucun `setTimeout` ne vit dans la logique pure : c'est cette action régulière qui fait
@@ -209,12 +269,23 @@ export function EcranNoeud(): ReactElement {
   }
 
   const rendu = obtenirRendu(codeMoteur);
-  const ComposantMoteurMonte = rendu.Composant as unknown as (
-    proprietes: ProprietesMoteur<unknown, unknown, unknown>
-  ) => ReactElement | null;
+  // Un SEUL `as`, et non le transtypage aveugle en deux temps de la v1 (défaut 2 du § 1.5).
+  // Il est licite parce que `ComposantMoteur<unknown, unknown, unknown>` EST assignable à
+  // `ComposantMoteur<never, never, never>` — les paramètres sont contravariants, et
+  // `ProprietesMoteur<never,…>` est assignable à `ProprietesMoteur<unknown,…>`. Le
+  // compilateur vérifie donc que les deux types sont COMPARABLES, ce que le détour par
+  // `unknown` l'empêchait précisément de faire.
+  const ComposantMoteurMonte = rendu.Composant as ComposantMoteur<unknown, unknown, unknown>;
 
   const indexCourant = progression?.etapeCourante ?? 0;
   const etapeCourante = etapes[indexCourant] ?? null;
+
+  // La jauge du palier intermédiaire — « trois étoiles sur cinq » (D25, point 3). C'est celle
+  // qui a du sens PENDANT une partie : elle dit ce que ce nœud-ci rapproche.
+  const jaugeIntermediaire: ModeleJauge | null =
+    seuils === null
+      ? null
+      : (jaugesDe(cascade, seuils).find((jauge) => jauge.palier === 'intermediaire') ?? null);
 
   return (
     <main
@@ -222,9 +293,13 @@ export function EcranNoeud(): ReactElement {
       data-ecran="noeud"
       data-test-pret={pret ? 'oui' : 'non'}
       data-aide={niveauAide}
-      // Le premier geste de l'enfant débloque le contexte audio : sans lui, aucun son ne
-      // sortira jamais (politique d'autoplay des navigateurs).
-      onPointerDown={() => reveillerAudio(services.audio)}
+      // Longueur de la série de bonnes réponses en cours — contrat des features v2 § 7.
+      data-serie={String(serie)}
+      // ⚠ `data-appui` — ADDITION au § 7, signalée au rapport de L2-A. Ce n'est pas qu'un
+      // crochet de test : c'est l'IMPLANTATION de la règle des 100 ms de la v2 § 8. La marque
+      // est posée dans le gestionnaire lui-même, donc avant tout traitement.
+      data-appui={appuye ? 'oui' : 'non'}
+      onPointerDown={surAppui}
       style={{
         ...styleHabillage,
         display: 'flex',
@@ -281,6 +356,13 @@ export function EcranNoeud(): ReactElement {
             clip={etapeCourante.audio}
             surEcoute={() => emettre(ACTION_ECOUTE)}
           />
+        )}
+
+        {/* La jauge du prochain cadeau. Elle est DANS la barre de consigne et non sur un côté :
+            « la progression doit être visible avant d'être atteinte » (D25, point 3), donc
+            sous les yeux pendant qu'on joue, pas rangée dans un menu. */}
+        {jaugeIntermediaire === null ? null : (
+          <JaugePalier jauge={jaugeIntermediaire} taille={16} avecLibelle={false} />
         )}
       </header>
 

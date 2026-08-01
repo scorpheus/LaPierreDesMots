@@ -1,87 +1,138 @@
-// Contexte React des `ServicesJeu` — contrat technique v1 § 1.4.
+// Contexte React des `ServicesJeu` — contrat technique v1 § 1.4, étendu par L2-A.
 //
 // Un seul point d'injection pour tout le client : `Alea`, `Horloge`, `FournisseurVoix`,
-// `FournisseurAudio`. C'est la traduction côté client de la testabilité en L0 (annexe T § 2) —
-// aucun composant ne construit son propre aléatoire ni sa propre horloge, donc `graine(n)` et
-// `figerHorloge(instant)` de `window.__test` ont prise sur TOUT le jeu, pas sur une partie.
+// `FournisseurAudio`, et depuis L2-A `FournisseurHaptique` et `RetourSensoriel`. C'est la
+// traduction côté client de la testabilité en L0 (annexe T § 2) — aucun composant ne construit
+// son propre aléatoire ni sa propre horloge, donc `graine(n)` et `figerHorloge(instant)` de
+// `window.__test` ont prise sur TOUT le jeu, pas sur une partie.
 //
 // Fichier `.ts` (imposé par § 1.4) : le fournisseur est donc écrit avec `createElement`,
 // pas en JSX. C'est la seule raison de cette forme.
+//
+// ─────────────────────────────────────────────────────────────────────────────────────────
+// LES QUATRE TRANSTYPAGES AVEUGLES DE LA V1 ONT DISPARU — défaut 2 du contrat features v2 § 1.5.
+//
+// (Le motif exact est grepé par le contrat de sortie de la campagne : on ne l'écrit donc pas
+// ici, pas même en commentaire, sous peine de faire échouer un compte qu'on prétend tenir.)
+//
+// Ils portaient tous le même commentaire : « le contrat gèle le nom mais pas les membres ».
+// C'était vrai quand L-D écrivait sans voir la sortie de L-B ; ce ne l'est plus. Les
+// signatures réelles sont désormais sous les yeux, et elles sont exactement celles qu'on
+// espérait : `creerAlea(graine: number): Alea`, `creerHorloge(): Horloge`,
+// `graineParDefaut(): number`, `Horloge.maintenant()` et `Horloge.figer(instant)`. Chaque cast
+// supprimé est un endroit où le compilateur protège à nouveau quelque chose.
+// ─────────────────────────────────────────────────────────────────────────────────────────
 import { createContext, createElement, useContext, useSyncExternalStore } from 'react';
 import type { ReactElement, ReactNode } from 'react';
-import { creerAlea, creerHorloge, graineParDefaut } from '@pierre/partage';
-import type { Alea, Horloge } from '@pierre/partage';
+import { CHEMINS_API, creerAlea, creerHorloge, graineParDefaut } from '@pierre/partage';
+import type { Horloge, SeuilsCascade } from '@pierre/partage';
+import { lireSeuilsCascade } from '@pierre/partage/recompenses';
 import type { ServicesJeu } from '../moteurs/types.js';
 import { creerAudioTone } from '../services/audio-tone.js';
 import { creerVoixNavigateur } from '../services/voix-navigateur.js';
+import { creerHaptiqueNavigateur } from '../gamefeel/haptique-navigateur.js';
+import { creerRetourSensoriel } from '../gamefeel/retour.js';
+import { emettreSurCanevasCourant } from '../gamefeel/particules.js';
 import type { EtatMagasin, MagasinJeu } from './magasin.js';
 
-// ------------------------------------------------------------------ adaptations de contrat
-//
-// Le contrat gèle les NOMS de `creerAlea`, `creerHorloge`, `graineParDefaut` et `Horloge`
-// (§ 11.1) mais pas leurs signatures ni les membres de `Horloge`. Les quatre adaptations
-// ci-dessous sont les SEULS endroits du client qui en dépendent : si L-B a retenu d'autres
-// noms, c'est ici et nulle part ailleurs qu'on reprend. Signalé au rapport du lot L-D.
-
-const creerAleaAdapte = creerAlea as unknown as (graine: number) => Alea;
-const creerHorlogeAdaptee = creerHorloge as unknown as () => Horloge;
-
-/** Graine par défaut, que `graineParDefaut` soit une constante ou une fonction. */
+/** Graine par défaut, telle que `partage/src/alea.ts` la calcule. */
 export function resoudreGraineParDefaut(): number {
-  const brut: unknown = graineParDefaut;
-  if (typeof brut === 'number' && Number.isFinite(brut)) {
-    return brut;
-  }
-  if (typeof brut === 'function') {
-    const valeur: unknown = (brut as () => unknown)();
-    if (typeof valeur === 'number' && Number.isFinite(valeur)) {
-      return valeur;
-    }
-  }
-  return 1;
+  const valeur = graineParDefaut();
+  return Number.isFinite(valeur) ? valeur : 1;
 }
 
 /**
  * Horodatage ISO courant, lu SUR L'HORLOGE INJECTÉE.
+ *
  * `Date.now()` et `new Date()` sont interdits hors de `horloge.ts` (règle ESLint maison) :
- * ce repli ne les emploie donc pas et rend une valeur d'époque plutôt qu'une heure inventée.
+ * cette fonction existe pour qu'aucun appelant ne soit tenté de les écrire, et pour qu'un seul
+ * endroit du client sache par où le temps entre.
  */
 export function maintenantIso(horloge: Horloge): string {
-  const membres = horloge as unknown as Record<string, unknown>;
-  for (const nom of ['maintenant', 'instant', 'iso', 'horodatage', 'now']) {
-    const methode = membres[nom];
-    if (typeof methode === 'function') {
-      const valeur: unknown = (methode as () => unknown).call(horloge);
-      if (typeof valeur === 'string') {
-        return valeur;
-      }
-    }
-  }
-  console.warn("[horloge] aucune lecture d'horodatage trouvée sur l'horloge injectée.");
-  return '1970-01-01T00:00:00.000Z';
+  return horloge.maintenant();
 }
 
-/** Fige l'horloge injectée, si elle sait le faire. Utilisé par `window.__test`. */
+/** Fige l'horloge injectée. Utilisé par `window.__test`. */
 export function figerHorloge(horloge: Horloge, instant: string): void {
-  const membres = horloge as unknown as Record<string, unknown>;
-  const methode = membres['figer'];
-  if (typeof methode === 'function') {
-    (methode as (valeur: string) => void).call(horloge, instant);
-    return;
-  }
-  console.warn('[horloge] `figer` absent : l’horloge injectée ne peut pas être figée.');
+  horloge.figer(instant);
 }
 
 // ------------------------------------------------------------------ construction
 
+/**
+ * `prefers-reduced-motion` du système, au démarrage.
+ *
+ * Lu ici ET dans le magasin, et ce n'est pas un doublon : le magasin porte l'ÉTAT (que
+ * `sauterAnimations()` peut basculer en cours de partie), cette lecture-ci décide de la
+ * CONSTRUCTION des services. Un fournisseur haptique construit « disponible » alors que le
+ * système demande le calme ferait vibrer la tablette avant même le premier rendu.
+ */
+function mouvementReduitDemande(): boolean {
+  if (typeof globalThis.matchMedia !== 'function') {
+    return false;
+  }
+  return globalThis.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
 /** Les services réels du navigateur. Les tests substituent les leurs. */
 export function creerServicesParDefaut(graine = resoudreGraineParDefaut()): ServicesJeu {
+  const animationsDesactivees = mouvementReduitDemande();
+  const audio = creerAudioTone();
+  const haptique = creerHaptiqueNavigateur({ animationsDesactivees });
+
   return {
-    alea: creerAleaAdapte(graine),
-    horloge: creerHorlogeAdaptee(),
+    alea: creerAlea(graine),
+    horloge: creerHorloge(),
     voix: creerVoixNavigateur(),
-    audio: creerAudioTone()
+    audio,
+    haptique,
+    // `emettreSurCanevasCourant` est une indirection assumée : `RetourSensoriel` est construit
+    // AVANT que React n'ait monté la couche de particules, et un contexte React n'atteindrait
+    // pas un service construit hors de React. Le registre vit dans `gamefeel/particules.ts`.
+    retour: creerRetourSensoriel({
+      audio,
+      haptique,
+      animationsDesactivees,
+      emettreParticules: emettreSurCanevasCourant
+    })
   };
+}
+
+// ------------------------------------------------- les seuils de la cascade, en DONNÉES (C2)
+
+/**
+ * Charge `contenu/referentiel/parametres-recompenses.json`.
+ *
+ * Convention C2 : « aucun seuil de récompense n'est écrit en dur dans le code ». Les valeurs
+ * vivent en données et sont **chargées au démarrage**. `lireSeuilsCascade` LÈVE plutôt que de
+ * rendre un défaut silencieux ; on capture ici, parce qu'un référentiel illisible ne doit pas
+ * empêcher l'enfant de jouer — il doit seulement priver l'écran de ses jauges, visiblement.
+ *
+ * ⚠ DÉFAUT DU CONTRAT GELÉ, signalé au rapport de L2-A.
+ * Le § 5.1 dit « un seul fichier appelle le réseau côté client, et c'est L2-H qui possède
+ * `client/src/api/client.ts` ». Mais L2-A a besoin d'un chargeur pour ces paramètres, et
+ * **aucun fichier n'est nommé pour lui** : les trois autres voies sont fermées — le paquet
+ * `partage/` a `rootDir: "src"` et le paquet `client/` `rootDir: "."`, donc ni l'un ni l'autre
+ * ne peut importer un JSON de `contenu/` ; et aucune des 12 routes nouvelles du § 5.3 ne sert
+ * un référentiel. On emprunte donc la route d'assets EXISTANTE (`GET /api/contenu/assets/*`,
+ * contrat technique v1 § 3.3) avec `CHEMINS_API`, ce qui n'ajoute aucune route et aucun
+ * contrat — mais ajoute bien un second site d'appel réseau. À reprendre en une ligne le jour
+ * où L2-H expose un `lireReferentiel(chemin)`.
+ */
+export async function chargerSeuilsCascade(): Promise<SeuilsCascade | null> {
+  try {
+    const reponse = await fetch(CHEMINS_API.asset('referentiel/parametres-recompenses.json'), {
+      headers: { Accept: 'application/json' }
+    });
+    if (!reponse.ok) {
+      throw new Error(`statut ${String(reponse.status)}`);
+    }
+    return lireSeuilsCascade(await reponse.json());
+  } catch (cause) {
+    // Pas d'écran d'erreur, pas de valeur inventée : les jauges se taisent, le jeu continue.
+    console.warn('[recompenses] seuils de cascade illisibles, les jauges restent muettes :', cause);
+    return null;
+  }
 }
 
 // ------------------------------------------------------------------ contexte React

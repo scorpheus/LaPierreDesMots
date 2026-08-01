@@ -1,0 +1,106 @@
+{
+  "id": "volcan.fresque",
+  "moteurs": [
+    "chrono"
+  ],
+  "libelle": "La fresque du volcan",
+  "region": "volcan",
+  "scene": {
+    "fichier": "habillages/volcan/fresque.svg",
+    "viewBox": "0 0 960 600",
+    "calques": [
+      {
+        "id": "calque-fond",
+        "role": "fond",
+        "regions": []
+      },
+      {
+        "id": "calque-zones",
+        "role": "coloriable",
+        "regions": [
+          {
+            "id": "panneau-un",
+            "libelle": "le premier panneau",
+            "centroide": [
+              190.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "panneau-deux",
+            "libelle": "le deuxième panneau",
+            "centroide": [
+              480.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "panneau-trois",
+            "libelle": "le troisième panneau",
+            "centroide": [
+              770.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "bordure",
+            "libelle": "la bordure",
+            "centroide": [
+              190.0,
+              420.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "roche-noire",
+            "libelle": "la roche noire",
+            "centroide": [
+              480.0,
+              420.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "lueur",
+            "libelle": "la lueur",
+            "centroide": [
+              770.0,
+              420.0
+            ],
+            "surface": 32000.0
+          }
+        ]
+      },
+      {
+        "id": "calque-trait",
+        "role": "trait",
+        "regions": []
+      }
+    ]
+  },
+  "palette": {
+    "jetons": {},
+    "nuancier": [
+      "rouge",
+      "orange",
+      "jaune",
+      "noir",
+      "gris",
+      "brun"
+    ]
+  },
+  "timings": {
+    "appuiMs": 70,
+    "relachementMs": 140,
+    "refusMs": 190,
+    "recolorationMs": 900,
+    "interEtoilesMs": 190
+  },
+  "sons": {
+    "ambiance": null,
+    "effets": {}
+  }
+}

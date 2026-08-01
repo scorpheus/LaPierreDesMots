@@ -1,0 +1,9 @@
+{
+  "$schema": "../schemas/parametres-recompenses.schema.json",
+  "version": 1,
+  "commentaire": "Les seuils de la cascade de D25, repris du systeme de l'ecole qui motive deja l'enfant : un exercice reussi = une etoile, cinq etoiles = un tampon special, dix tampons = une image. Convention C2 : ces valeurs vivent en donnees parce qu'elles seront recalibrees. Les changer ne demande aucune ligne de code.",
+  "etoilesParIntermediaire": 5,
+  "intermediairesParRare": 10,
+  "natureIntermediaire": "forme-gobi",
+  "natureRare": "zone-recoloriee"
+}

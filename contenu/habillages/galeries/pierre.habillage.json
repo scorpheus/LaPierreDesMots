@@ -1,0 +1,106 @@
+{
+  "id": "galeries.pierre",
+  "moteurs": [
+    "grave"
+  ],
+  "libelle": "La pierre à graver",
+  "region": "galeries",
+  "scene": {
+    "fichier": "habillages/galeries/pierre.svg",
+    "viewBox": "0 0 960 600",
+    "calques": [
+      {
+        "id": "calque-fond",
+        "role": "fond",
+        "regions": []
+      },
+      {
+        "id": "calque-zones",
+        "role": "coloriable",
+        "regions": [
+          {
+            "id": "dalle",
+            "libelle": "la dalle",
+            "centroide": [
+              190.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "sillon",
+            "libelle": "le sillon",
+            "centroide": [
+              480.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "burin",
+            "libelle": "le burin",
+            "centroide": [
+              770.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "eclat",
+            "libelle": "l’éclat",
+            "centroide": [
+              190.0,
+              420.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "paroi-seche",
+            "libelle": "la paroi sèche",
+            "centroide": [
+              480.0,
+              420.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "torche",
+            "libelle": "la torche",
+            "centroide": [
+              770.0,
+              420.0
+            ],
+            "surface": 32000.0
+          }
+        ]
+      },
+      {
+        "id": "calque-trait",
+        "role": "trait",
+        "regions": []
+      }
+    ]
+  },
+  "palette": {
+    "jetons": {},
+    "nuancier": [
+      "violet",
+      "bleu",
+      "gris",
+      "blanc",
+      "brun",
+      "noir"
+    ]
+  },
+  "timings": {
+    "appuiMs": 60,
+    "relachementMs": 120,
+    "refusMs": 180,
+    "recolorationMs": 800,
+    "interEtoilesMs": 180
+  },
+  "sons": {
+    "ambiance": null,
+    "effets": {}
+  }
+}

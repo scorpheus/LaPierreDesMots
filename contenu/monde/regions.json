@@ -1,0 +1,64 @@
+{
+  "$commentaire": "Les six régions de la v2 § 3.3, DANS L'ORDRE DE LA PROGRESSION PHONOLOGIQUE — cet ordre est la progression, il ne se réarrange pas. Deux régions restent ouvertes en parallèle dès la troisième. `competences` ne cite que des codes présents dans `contenu/referentiel/competences.json` : le référentiel est un objet protégé (annexe P § 6.4), aucun lot n'y ajoute de code sans validation, et `tests/unitaires/carte.test.ts` échoue si une région en invente un. Les régions dont le référentiel ne porte pas encore les compétences déclarent une liste vide plutôt qu'un code mort. `noeuds` ne cite que des nœuds réellement livrés : c'est lui qui fait le pourcentage de recoloration, et un nœud fantôme rendrait la région à jamais incomplète.",
+  "ouvertesEnParallele": 2,
+  "scene": {
+    "fichier": "habillages/carte/carte-monde.svg",
+    "viewBox": "0 0 1200 800"
+  },
+  "regions": [
+    {
+      "region": "clairiere",
+      "ordre": 1,
+      "libelle": "La Clairière",
+      "domaine": "Voyelles, syllabes simples (CV), premiers mots outils",
+      "ambiance": "Prairie, lucioles, arbre-maison",
+      "competences": ["comp.consigne.simple", "comp.consigne.multiple", "lex.couleur"],
+      "noeuds": ["clairiere-01"]
+    },
+    {
+      "region": "galeries",
+      "ordre": 2,
+      "libelle": "Les Galeries",
+      "domaine": "Syllabes CVC, confusions b/d/p/q, sons proches",
+      "ambiance": "Grottes de cristal, échos",
+      "competences": [],
+      "noeuds": ["galeries-01", "galeries-02"]
+    },
+    {
+      "region": "marais-jumeau",
+      "ordre": 3,
+      "libelle": "Le Marais Jumeau",
+      "domaine": "Nasales on/an/in/ou, digrammes",
+      "ambiance": "Marais brumeux, nénuphars, grenouilles",
+      "competences": [],
+      "noeuds": []
+    },
+    {
+      "region": "foret-muette",
+      "ordre": 4,
+      "libelle": "La Forêt Muette",
+      "domaine": "Lettres finales muettes, pluriels, liaisons",
+      "ambiance": "Forêt d’automne, feuilles qui tombent sur les lettres",
+      "competences": [],
+      "noeuds": []
+    },
+    {
+      "region": "volcan",
+      "ordre": 5,
+      "libelle": "Le Volcan",
+      "domaine": "Graphèmes rares : eau, ill, gn, ph, ch/qu",
+      "ambiance": "Roche, laves, forges",
+      "competences": [],
+      "noeuds": []
+    },
+    {
+      "region": "cite-des-histoires",
+      "ordre": 6,
+      "libelle": "La Cité des Histoires",
+      "domaine": "Compréhension : textes, inférences, chronologie",
+      "ambiance": "Ville-bibliothèque, ponts de livres",
+      "competences": [],
+      "noeuds": []
+    }
+  ]
+}

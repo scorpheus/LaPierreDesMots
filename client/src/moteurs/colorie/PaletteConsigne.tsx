@@ -39,7 +39,16 @@ const STYLES_PALETTE = `
   border-radius: 6px;
   padding: 0 0.15em;
 }
-.pierre-consigne--a-venir, .pierre-consigne--faite { font-size: 1rem; opacity: .55; }
+/* Consignes déjà faites ou encore à venir : plus petites et estompées, pour que la consigne
+   ACTIVE soit la seule qui saute aux yeux.
+
+   L'opacité vaut .7 et non .55 — c'est une contrainte de lisibilité, pas un goût. À .55, le
+   texte encre (#1B2440) composé sur le parchemin (#FFF6E3) donne le gris #818692, mesuré par
+   axe-core à **3,39:1** là où le WCAG AA en exige 4,5:1 sur du texte de 16 px. Trois consignes
+   du seul exercice de la v1 tombaient dessus. À .7 le composé vaut #5F6371, soit 5,57:1 —
+   au-dessus du seuil avec de la marge, et toujours nettement plus pâle que la consigne active.
+   Toucher à cette valeur sans refaire le calcul rouvre le défaut. */
+.pierre-consigne--a-venir, .pierre-consigne--faite { font-size: 1rem; opacity: .7; }
 .pierre-godet {
   inline-size: ${COTE_GODET_PX}px;
   block-size: ${COTE_GODET_PX}px;

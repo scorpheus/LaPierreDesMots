@@ -12,27 +12,20 @@
 
 @import "tailwindcss";
 
-/* ------------------------------------------------------------------ polices, 100 % locales
-   v2 § 9.3 : aucun appel à Google Fonts, tout est servi en WOFF2 depuis le PC.
-   Dossier attendu : `client/public/polices/` — les binaires ne sont PAS dans le dépôt à ce
-   stade (aucun `client/public/**` n'existe au contrat § 1.4). `local()` en premier et
-   `font-display: swap` font que l'absence du fichier dégrade sans casser : la police système
-   prend le relais et `document.fonts.ready` se résout quand même, donc `data-test-pret`
-   n'attend jamais indéfiniment. */
-@font-face {
-  font-family: "Andika";
-  src: local("Andika"), url("/polices/andika-regular.woff2") format("woff2");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Andika";
-  src: local("Andika Bold"), url("/polices/andika-bold.woff2") format("woff2");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
+/* ------------------------------------------------------------------ polices de LECTURE
+   Les cinq polices de la v2 § 9.3 et leurs variables sont déclarées dans `polices.css`
+   (lot L2-B). Les deux `@font-face` d'Andika qui vivaient ici y ont été DÉPLACÉS, pas
+   dupliqués : deux déclarations concurrentes de la même famille, l'une en `font-display: swap`
+   et l'autre en `block`, laisseraient au navigateur le choix du comportement — et « le texte
+   qui change de forme pendant qu'on le déchiffre » n'est pas un choix acceptable ici (D18).
+   Ce fichier ne garde que les polices d'INTERFACE, qui ne servent jamais au déchiffrage. */
+@import "./polices.css";
+
+/* ------------------------------------------------------------------ polices d'interface
+   Titres et boutons : le style BD s'arrête à la porte du texte à lire (v2 § 9.3).
+   `local()` en premier et `font-display: swap` font que l'absence du fichier dégrade sans
+   casser : la police système prend le relais et `document.fonts.ready` se résout quand même,
+   donc `data-test-pret` n'attend jamais indéfiniment. */
 @font-face {
   font-family: "Atkinson Hyperlegible";
   src: local("Atkinson Hyperlegible"), url("/polices/atkinson-hyperlegible-regular.woff2") format("woff2");
@@ -131,13 +124,113 @@ body {
   isolation: isolate;
 }
 
-/* Le déchiffrage se fait toujours sur parchemin, en Andika, au calme (v2 § 9.3). */
+/* ------------------------------------------------------------------ zone de lecture (L2-B)
+   Le déchiffrage se fait toujours sur parchemin, au calme (v2 § 9.3). Les valeurs ci-dessous
+   sont DÉRIVÉES des réglages du profil : `variablesCss()` (partage/src/lecture/defauts.ts) les
+   pose élément par élément sur chaque `ZoneDeLecture`, et les défauts de `polices.css` ne
+   servent qu'aux zones montées avant que le profil ne soit connu. Les trois valeurs en dur du
+   socle v1 — `--font-lecture`, `0.01em`, `0.08em` — ont disparu : un réglage par profil n'a
+   aucun sens si une feuille de style le contredit (D19). */
 .zone-lecture {
-  background-color: var(--parchemin);
-  color: var(--trait);
-  font-family: var(--font-lecture);
-  letter-spacing: 0.01em;
-  word-spacing: 0.08em;
+  background-color: var(--lecture-fond);
+  color: var(--lecture-encre);
+  font-family: var(--lecture-famille);
+  font-size: var(--lecture-corps);
+  letter-spacing: var(--lecture-interlettrage);
+  word-spacing: var(--lecture-espacement-mots);
+  line-height: var(--lecture-interligne);
+}
+
+/* AUCUNE animation dans le champ de lecture : « le décor s'agite, le texte jamais ».
+   La règle est écrite ici, une fois, plutôt que confiée à la discipline de chaque composant. */
+.zone-lecture-v2,
+.zone-lecture-v2 * {
+  animation: none !important;
+}
+
+.zone-lecture-lignes {
+  display: flex;
+  flex-direction: column;
+}
+
+.ligne-lecture {
+  margin: 0;
+  text-align: start;
+  background-color: transparent;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  word-spacing: inherit;
+  line-height: inherit;
+}
+
+/* La ligne devient une cible SEULEMENT quand la règle ou le surlignage sont actifs : une cible
+   interactive sans usage serait une infraction à R16 comptée par `a11y.spec.ts`. */
+.ligne-lecture-tapable {
+  display: block;
+  inline-size: 100%;
+  min-block-size: var(--cible-min);
+  padding: 0.25rem 0.5rem;
+  border: none;
+  border-radius: var(--rayon-carte);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+/* Le surlignage de la ligne courante : un aplat de soleil très dilué. Jamais un cadre, jamais
+   une couleur d'alerte — la ligne courante n'est pas une erreur, c'est un repère. */
+.ligne-lecture-tapable[data-ligne-courante="oui"] {
+  background-color: color-mix(in srgb, var(--soleil) 35%, transparent);
+}
+
+.ligne-lecture-tapable:focus-visible {
+  outline: var(--epaisseur-trait) solid var(--soleil);
+  outline-offset: 2px;
+}
+
+/* Coloration syllabique alternée : deux teintes, et le rang décide (v2 § 9.3).
+   Le rang pair garde l'encre de lecture ; seul le rang impair change. Un texte entièrement
+   bicolore se lirait moins bien qu'un texte d'une seule encre — l'alternance doit se voir,
+   pas s'imposer. PLACEHOLDER : la teinte alternée est à valider avec l'enfant. */
+.zone-lecture-v2[data-syllabes="oui"] .syllabe[data-syllabe="1"] {
+  color: var(--lecture-syllabe-alternee);
+}
+
+/* Sans coloration, les segments existent toujours dans le DOM — c'est ce qui permet de la
+   rallumer sans reconstruire le texte — mais rien ne les distingue à l'œil. */
+.zone-lecture-v2[data-syllabes="non"] .syllabe {
+  color: inherit;
+}
+
+.regle-de-lecture {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 1rem;
+  margin-block-start: 1rem;
+}
+
+.regle-de-lecture-position {
+  margin: 0;
+  font-family: var(--font-interface);
+  font-size: 1rem;
+  letter-spacing: normal;
+  word-spacing: normal;
+}
+
+/* Texte réservé aux lecteurs d'écran. La coloration syllabique découpe visuellement le mot en
+   segments `aria-hidden` ; sans ce doublon, une synthèse vocale épellerait « feuil-les ».
+   La découpe est un appui visuel — elle n'existe pas à l'oreille. */
+.lecture-accessible {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
 }
 
 .titre {
@@ -186,9 +279,13 @@ body {
   background-color: var(--soleil);
 }
 
+/* Le bouton « Gobi ». Encre sur framboise, et non parchemin sur framboise : le second couple
+   ne vaut que **2,7:1** (mesuré par axe-core sur l'écran du nœud), là où le WCAG AA en demande
+   4,5. Le premier vaut 5,25:1 avec les MÊMES jetons — la palette des 7 couleurs (v2 § 9.2)
+   n'est pas touchée, seul le sens de lecture l'est. */
 .cible-secondaire {
   background-color: var(--framboise);
-  color: var(--parchemin);
+  color: var(--trait);
 }
 
 /* ------------------------------------------------------------------ mouvements

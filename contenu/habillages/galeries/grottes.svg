@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600">
+  <g id="calque-fond">
+    <rect id="fond" x="0" y="0" width="960" height="600" fill="#eceaf2"/>
+  </g>
+  <g id="calque-zones">
+    <rect id="grotte-un" x="90" y="110" width="200" height="160" rx="12"/>
+    <rect id="grotte-deux" x="380" y="110" width="200" height="160" rx="12"/>
+    <rect id="grotte-trois" x="670" y="110" width="200" height="160" rx="12"/>
+    <rect id="stalactite" x="90" y="340" width="200" height="160" rx="12"/>
+    <rect id="flaque" x="380" y="340" width="200" height="160" rx="12"/>
+    <rect id="voute" x="670" y="340" width="200" height="160" rx="12"/>
+  </g>
+  <g id="calque-trait">
+    <path id="cadre" d="M20 20 H940 V580 H20 Z" fill="none" stroke="#2b2b2b" stroke-width="4"/>
+  </g>
+</svg>

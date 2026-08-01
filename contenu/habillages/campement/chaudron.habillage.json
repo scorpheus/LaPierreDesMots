@@ -1,0 +1,106 @@
+{
+  "id": "campement.chaudron",
+  "moteurs": [
+    "libre"
+  ],
+  "libelle": "Le chaudron du campement",
+  "region": "clairiere",
+  "scene": {
+    "fichier": "habillages/campement/chaudron.svg",
+    "viewBox": "0 0 960 600",
+    "calques": [
+      {
+        "id": "calque-fond",
+        "role": "fond",
+        "regions": []
+      },
+      {
+        "id": "calque-zones",
+        "role": "coloriable",
+        "regions": [
+          {
+            "id": "chaudron-ventre",
+            "libelle": "le ventre du chaudron",
+            "centroide": [
+              190.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "anse",
+            "libelle": "l’anse",
+            "centroide": [
+              480.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "flamme",
+            "libelle": "la flamme",
+            "centroide": [
+              770.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "trepied",
+            "libelle": "le trépied",
+            "centroide": [
+              190.0,
+              420.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "bulle",
+            "libelle": "la bulle",
+            "centroide": [
+              480.0,
+              420.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "sol-battu",
+            "libelle": "le sol battu",
+            "centroide": [
+              770.0,
+              420.0
+            ],
+            "surface": 32000.0
+          }
+        ]
+      },
+      {
+        "id": "calque-trait",
+        "role": "trait",
+        "regions": []
+      }
+    ]
+  },
+  "palette": {
+    "jetons": {},
+    "nuancier": [
+      "vert",
+      "jaune",
+      "bleu",
+      "brun",
+      "rose",
+      "blanc"
+    ]
+  },
+  "timings": {
+    "appuiMs": 60,
+    "relachementMs": 120,
+    "refusMs": 0,
+    "recolorationMs": 900,
+    "interEtoilesMs": 180
+  },
+  "sons": {
+    "ambiance": null,
+    "effets": {}
+  }
+}

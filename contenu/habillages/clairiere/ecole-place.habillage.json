@@ -1,0 +1,54 @@
+{
+  "id": "clairiere.ecole-place",
+  "moteurs": ["place"],
+  "libelle": "La cour de l’école — à toi de placer",
+  "region": "clairiere",
+  "scene": {
+    "fichier": "habillages/clairiere/ecole-place.svg",
+    "viewBox": "0 0 922 615",
+    "calques": [
+      { "id": "calque-fond", "role": "fond", "regions": [] },
+      { "id": "calque-decor", "role": "decor", "regions": [] },
+      {
+        "id": "calque-zones",
+        "role": "coloriable",
+        "regions": [
+          {
+            "id": "ciel",
+            "libelle": "le ciel",
+            "centroide": [680.0, 100.0],
+            "surface": 19200.0
+          },
+          {
+            "id": "toit-ecole",
+            "libelle": "le toit de l’école",
+            "centroide": [270.0, 229.0],
+            "surface": 8120.0
+          },
+          {
+            "id": "a-cote-du-banc",
+            "libelle": "à côté du banc",
+            "centroide": [235.0, 495.0],
+            "surface": 16900.0
+          }
+        ]
+      },
+      { "id": "calque-trait", "role": "trait", "regions": [] }
+    ]
+  },
+  "palette": {
+    "jetons": {},
+    "nuancier": ["rouge", "orange", "jaune", "vert", "bleu", "violet", "rose", "brun"]
+  },
+  "timings": {
+    "appuiMs": 60,
+    "relachementMs": 120,
+    "refusMs": 180,
+    "recolorationMs": 900,
+    "interEtoilesMs": 180
+  },
+  "sons": {
+    "ambiance": null,
+    "effets": {}
+  }
+}

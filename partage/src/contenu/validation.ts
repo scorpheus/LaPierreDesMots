@@ -57,8 +57,13 @@ const ajv = new Constructeur({ allErrors: true, strict: false });
  * Le contrat n'ouvre ni paramètre de schéma ni chargeur sur `validerExercice`, et `partage/`
  * ne peut pas lire le disque côté navigateur : les deux copies dérivent donc du même texte
  * gelé. À réunir en une seule source dès qu'un fichier pourra être ajouté au contrat.
+ *
+ * En attendant, la duplication n'est plus laissée à la vigilance : elle est **exportée** et
+ * comparée au fichier sur disque par `tests/unitaires/enumerations-moteurs.test.ts`. C'est ce
+ * qui a manqué à `trace` — il manquait ici, et rien ne le disait avant que le serveur ne
+ * réponde 422 en E2E.
  */
-const SCHEMA_EXERCICE: SchemaJson = {
+export const SCHEMA_EXERCICE: SchemaJson = {
   $schema: 'https://json-schema.org/draft/2020-12/schema',
   $id: 'pierre:schemas/exercice',
   title: 'Exercice',
@@ -66,6 +71,8 @@ const SCHEMA_EXERCICE: SchemaJson = {
   additionalProperties: false,
   required: ['id', 'version', 'titre', 'competences', 'difficulte', 'jeu'],
   properties: {
+    // Note libre destinée au relecteur humain — même convention que `contenu/monde/*.json`.
+    $commentaire: { type: 'string' },
     id: { type: 'string', pattern: '^[a-z0-9]+(-[a-z0-9]+)*$' },
     version: { type: 'integer', minimum: 1 },
     titre: { type: 'string', minLength: 1, maxLength: 80 },
@@ -107,6 +114,11 @@ const SCHEMA_EXERCICE: SchemaJson = {
             'colorie',
             'libre',
             'place',
+            // `trace` ajouté à l'intégration, en même temps que dans `CodeMoteur` et dans les
+            // deux schémas sur disque. Les QUATRE énumérations sont désormais comparées entre
+            // elles par `tests/unitaires/enumerations-moteurs.test.ts` : c'est le seul moyen
+            // qu'une copie ne dérive pas des trois autres en silence.
+            'trace',
           ],
         },
         habillage: { type: 'string', pattern: '^[a-z0-9]+(\\.[a-z0-9\\-]+)+$' },

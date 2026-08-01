@@ -10,6 +10,7 @@ import type { Horloge } from '../horloge.js';
 import type { CheminAsset, CodeMoteur, CodeRegion, IdHabillage, IdRegionSvg } from '../identifiants.js';
 import type { CouleurColoriage, JetonCouleur } from '../palette.js';
 import type { CodeEffet } from '../fournisseurs/audio.js';
+import type { ConfusionObservee, ModeReponse } from '../pedagogie/types.js';
 
 /** Un schéma JSON 2020-12, transporté sans être typé plus finement. */
 export type SchemaJson = Record<string, unknown>;
@@ -56,6 +57,30 @@ export interface ResumeEtape {
   readonly aideUtilisee: NiveauAide;
   readonly nbEcoutes: number;
   readonly dureeMs: number;
+  /** Le mode de réponse de cette étape — c'est lui qui fixe `p_devinette` (D13). */
+  readonly modeReponse: ModeReponse;
+  /**
+   * Latence de reconnaissance : de l'apparition de l'item à la bonne réponse.
+   * **C'est l'indicateur principal du dashboard** (D18, v2 § 12.3). `null` quand l'étape n'a
+   * pas de point d'apparition net (un coloriage libre, par exemple).
+   */
+  readonly latenceMs: number | null;
+  /** La confusion observée, avec son AXE quand il y en a un (D23). `null` si aucune. */
+  readonly confusion: ConfusionObservee | null;
+  /**
+   * ─────────────────────────────────────────────────────────────────────────────────────
+   * AJOUT SIGNALÉ AU CONTRAT GELÉ (§ 4.4) — champ FACULTATIF, donc sans effet sur les lots
+   * qui ne le posent pas.
+   *
+   * Les modes `ordre` et `appariement` calculent `p_devinette = 1/n!` depuis le nombre
+   * d'éléments (D13). Ce nombre n'est connu QUE du moteur — `chrono` et `paires` (L2-E) —, et
+   * `ResumeEtape` tel que le contrat le fige ne le transporte pas. Sans lui, `pDevinette`
+   * lève sur ces deux modes et deux moteurs sur treize cessent d'alimenter le BKT, en
+   * silence. Le champ est donc ajouté ici plutôt qu'une valeur par défaut inventée au
+   * serveur — « refuser plutôt qu'émettre du faux ».
+   * ─────────────────────────────────────────────────────────────────────────────────────
+   */
+  readonly nbElements?: number | null;
 }
 
 export interface ResumeTentative {

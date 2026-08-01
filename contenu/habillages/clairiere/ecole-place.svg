@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 922 615" width="922" height="615">
+  <!--
+    Décor BOUCHON (D2, § 8 n° 10) : trait noir sur blanc, écrit à la main, régions fermées
+    PAR CONSTRUCTION. Il n'est pas une esquisse de l'asset final — il est le cas de test
+    permanent de la vraie chaîne ComfyUI, celui qu'un décor généré devra reproduire.
+
+    « La couleur vient du code, pas du modèle » (annexe P § 2) : aucun `fill` coloré ici.
+    Les zones de dépôt sont dessinées en pointillé, sans remplissage : ce qui est tapable est
+    ce qui est visible.
+
+    Les trois `<path>` de `calque-zones` portent les `id` déclarés par
+    `ecole-place.habillage.json`, et chacun se termine par `Z` — un trait interrompu d'un
+    pixel ferait fuiter le remplissage sur toute l'image (annexe P § 3.2).
+  -->
+  <g id="calque-fond">
+    <path d="M 0 0 L 922 0 L 922 400 L 0 400 Z" fill="#FFFFFF" stroke="none"/>
+    <path d="M 0 400 L 922 400 L 922 615 L 0 615 Z" fill="#FFFFFF" stroke="none"/>
+  </g>
+
+  <g id="calque-decor">
+    <!-- L'école : mur, toit, porte. -->
+    <path d="M 190 260 L 350 260 L 350 400 L 190 400 Z" fill="none" stroke="#1B2440" stroke-width="3"/>
+    <path d="M 175 260 L 270 195 L 365 260 Z" fill="none" stroke="#1B2440" stroke-width="3"/>
+    <path d="M 250 330 L 290 330 L 290 400 L 250 400 Z" fill="none" stroke="#1B2440" stroke-width="3"/>
+    <!-- Le banc. -->
+    <path d="M 40 470 L 150 470 L 150 490 L 40 490 Z" fill="none" stroke="#1B2440" stroke-width="3"/>
+    <path d="M 52 490 L 62 490 L 62 540 L 52 540 Z" fill="none" stroke="#1B2440" stroke-width="3"/>
+    <path d="M 128 490 L 138 490 L 138 540 L 128 540 Z" fill="none" stroke="#1B2440" stroke-width="3"/>
+    <!-- La ligne d'horizon. -->
+    <path d="M 0 400 L 922 400 L 922 404 L 0 404 Z" fill="none" stroke="#1B2440" stroke-width="2"/>
+  </g>
+
+  <g id="calque-zones">
+    <path id="ciel" d="M 600 40 L 760 40 L 760 160 L 600 160 Z" fill="none" stroke="#1B2440" stroke-width="2" stroke-dasharray="8 7"/>
+    <path id="toit-ecole" d="M 200 200 L 340 200 L 340 258 L 200 258 Z" fill="none" stroke="#1B2440" stroke-width="2" stroke-dasharray="8 7"/>
+    <path id="a-cote-du-banc" d="M 170 430 L 300 430 L 300 560 L 170 560 Z" fill="none" stroke="#1B2440" stroke-width="2" stroke-dasharray="8 7"/>
+  </g>
+
+  <g id="calque-trait">
+    <path d="M 2 2 L 920 2 L 920 613 L 2 613 Z" fill="none" stroke="#1B2440" stroke-width="2"/>
+  </g>
+</svg>

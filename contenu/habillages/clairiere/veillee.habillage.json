@@ -1,0 +1,106 @@
+{
+  "id": "clairiere.veillee",
+  "moteurs": [
+    "histoire"
+  ],
+  "libelle": "La veillée autour du feu",
+  "region": "clairiere",
+  "scene": {
+    "fichier": "habillages/clairiere/veillee.svg",
+    "viewBox": "0 0 960 600",
+    "calques": [
+      {
+        "id": "calque-fond",
+        "role": "fond",
+        "regions": []
+      },
+      {
+        "id": "calque-zones",
+        "role": "coloriable",
+        "regions": [
+          {
+            "id": "feu",
+            "libelle": "le feu",
+            "centroide": [
+              190.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "buche",
+            "libelle": "la bûche",
+            "centroide": [
+              480.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "couverture",
+            "libelle": "la couverture",
+            "centroide": [
+              770.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "ciel-etoile",
+            "libelle": "le ciel étoilé",
+            "centroide": [
+              190.0,
+              420.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "tente",
+            "libelle": "la tente",
+            "centroide": [
+              480.0,
+              420.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "marmite",
+            "libelle": "la marmite",
+            "centroide": [
+              770.0,
+              420.0
+            ],
+            "surface": 32000.0
+          }
+        ]
+      },
+      {
+        "id": "calque-trait",
+        "role": "trait",
+        "regions": []
+      }
+    ]
+  },
+  "palette": {
+    "jetons": {},
+    "nuancier": [
+      "vert",
+      "jaune",
+      "bleu",
+      "brun",
+      "rose",
+      "blanc"
+    ]
+  },
+  "timings": {
+    "appuiMs": 80,
+    "relachementMs": 150,
+    "refusMs": 200,
+    "recolorationMs": 950,
+    "interEtoilesMs": 200
+  },
+  "sons": {
+    "ambiance": null,
+    "effets": {}
+  }
+}

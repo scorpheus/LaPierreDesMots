@@ -1,0 +1,106 @@
+{
+  "id": "foret.bestiaire",
+  "moteurs": [
+    "paires"
+  ],
+  "libelle": "Le bestiaire de la forêt",
+  "region": "foret-muette",
+  "scene": {
+    "fichier": "habillages/foret-muette/bestiaire.svg",
+    "viewBox": "0 0 960 600",
+    "calques": [
+      {
+        "id": "calque-fond",
+        "role": "fond",
+        "regions": []
+      },
+      {
+        "id": "calque-zones",
+        "role": "coloriable",
+        "regions": [
+          {
+            "id": "renard",
+            "libelle": "le renard",
+            "centroide": [
+              190.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "hibou",
+            "libelle": "le hibou",
+            "centroide": [
+              480.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "ecureuil",
+            "libelle": "l’écureuil",
+            "centroide": [
+              770.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "terrier",
+            "libelle": "le terrier",
+            "centroide": [
+              190.0,
+              420.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "sous-bois",
+            "libelle": "le sous-bois",
+            "centroide": [
+              480.0,
+              420.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "lichen",
+            "libelle": "le lichen",
+            "centroide": [
+              770.0,
+              420.0
+            ],
+            "surface": 32000.0
+          }
+        ]
+      },
+      {
+        "id": "calque-trait",
+        "role": "trait",
+        "regions": []
+      }
+    ]
+  },
+  "palette": {
+    "jetons": {},
+    "nuancier": [
+      "vert",
+      "brun",
+      "gris",
+      "noir",
+      "blanc",
+      "jaune"
+    ]
+  },
+  "timings": {
+    "appuiMs": 60,
+    "relachementMs": 120,
+    "refusMs": 200,
+    "recolorationMs": 850,
+    "interEtoilesMs": 190
+  },
+  "sons": {
+    "ambiance": null,
+    "effets": {}
+  }
+}

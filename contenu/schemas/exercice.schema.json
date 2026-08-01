@@ -6,6 +6,10 @@
   "additionalProperties": false,
   "required": ["id", "version", "titre", "competences", "difficulte", "jeu"],
   "properties": {
+    "$commentaire": {
+      "description": "Note libre destinee au relecteur humain — meme convention que `contenu/monde/*.json`. Ajoutee a l'integration v2 : un exercice marque PLACEHOLDER n'avait aucun endroit ou porter sa marque, et une marque qui ne vit que dans un document est une marque que le relecteur du fichier ne voit pas.",
+      "type": "string"
+    },
     "id":          { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
     "version":     { "type": "integer", "minimum": 1 },
     "titre":       { "type": "string", "minLength": 1, "maxLength": 80 },
@@ -32,7 +36,7 @@
         "moteur": {
           "type": "string",
           "enum": ["attrape","tri","assemble","chemin","eclair","paires","phrase",
-                   "histoire","chrono","grave","colorie","libre","place"]
+                   "histoire","chrono","grave","colorie","libre","place","trace"]
         },
         "habillage": { "type": "string", "pattern": "^[a-z0-9]+(\\.[a-z0-9\\-]+)+$" },
         "noeud":     { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },

@@ -181,6 +181,33 @@ export function SceneSvg(proprietes: ProprietesSceneSvg): ReactElement {
     [calquesColoriables]
   );
 
+  /**
+   * L'OBJET `dangerouslySetInnerHTML`, MÉMORISÉ — et ce n'est pas une micro-optimisation,
+   * c'est ce qui rend le décor réel jouable.
+   *
+   * React 19 ne compare plus le contenu de cette propriété : `updateProperties` ne regarde
+   * que l'identité de l'objet (`lastProp !== nextProp`) et, si elle a changé, ré-applique
+   * `setInnerHTML` sans regarder si la chaîne est la même. Un littéral `{{ __html: … }}`
+   * écrit dans le JSX est un objet NEUF à chaque rendu : le markup était donc réinjecté à
+   * chaque re-rendu, et tout ce que l'effet de décoration avait posé à la main disparaissait.
+   *
+   * Mesuré sur le décor réel (Chromium 151, `client/dist-test`) : 30 régions décorées au
+   * montage, puis **0** une centaine de millisecondes plus tard — au premier re-rendu, celui
+   * que `document.fonts.ready` déclenche en passant `data-test-pret` à `oui`. L'effet, lui,
+   * ne se rejouait pas : ses dépendances n'avaient pas bougé.
+   *
+   * Ce que l'enfant perdait à ce moment précis : `role="button"`, `tabindex`, `aria-label`,
+   * l'écouteur clavier, `data-peinte`, `data-couleur` — et le `fill`, c'est-à-dire **la
+   * couleur qu'il venait de poser**. Le battement d'une seconde suffisait à effacer son
+   * coloriage à l'écran. Trois suites l'ont vu en même temps (T3 parcours, T3 casse-cou,
+   * T4 captures) ; aucune ne pouvait le voir sous happy-dom, où rien ne déclenche ce
+   * re-rendu.
+   */
+  const contenuDecor = useMemo(
+    () => (svgMarkup === null ? null : { __html: svgMarkup }),
+    [svgMarkup]
+  );
+
   const libelles = useMemo(() => {
     const table = new Map<string, string>();
     for (const region of regionsDeclarees) table.set(region.id, region.libelle);
@@ -272,10 +299,39 @@ export function SceneSvg(proprietes: ProprietesSceneSvg): ReactElement {
    *
    * L'écouteur est natif et par nœud, avec son ménage : une délégation sur la racine
    * doublerait le `onKeyDown` React de la branche de repli.
+   *
+   * LES CALQUES NON COLORIABLES SONT RENDUS TRANSPARENTS AU DOIGT — et c'est la moitié la
+   * plus importante de cet effet. Le repli le fait depuis toujours (`pointerEvents: 'none'`
+   * sur tout calque dont le rôle n'est pas `coloriable`) ; le décor réel, lui, ne le faisait
+   * pas. Or le calque de trait est DESSUS : partout où une ligne du dessin traverse une
+   * région — et un décor de coloriage en est fait —, c'était elle qui recevait le doigt.
+   *
+   * Ce que l'enfant perdait, précisément : l'appui `scale(.94)` de la v2 § 8 — le retour en
+   * moins de 100 ms — ne se déclenchait pas, puisque `:active` s'applique à l'élément touché
+   * et à ses ancêtres, et qu'un trait n'est pas l'ancêtre d'une région. Le curseur `pointer`
+   * non plus. La peinture, elle, partait quand même : `surPointerDown` est posé sur la racine
+   * `<svg>` et `designer` se rabat sur `regionSousLeDoigt` — mais sur l'APPROXIMATION en
+   * disques, pas sur la forme réelle, donc au risque de nommer la région voisine.
+   * Un décor où viser juste donne parfois la mauvaise région, sans aucun retour d'appui,
+   * pour un enfant de 7 ans qui croit avoir mal visé : c'est exactement le contraire de R14.
    */
   useEffect(() => {
     const svg = refSvg.current;
     if (svg === null || svgMarkup === null) return undefined;
+
+    // Même vocabulaire que le repli : chaque calque déclaré porte son rôle, et seul le rôle
+    // `coloriable` reçoit le doigt.
+    for (const calque of habillage.scene.calques) {
+      // Même forme de sélecteur que la ligne des régions, plus bas : les `id` de calque
+      // viennent de l'habillage, que `test:contenu` valide avant qu'il n'atteigne l'enfant.
+      const groupe = svg.querySelector(`#${calque.id}`);
+      if (groupe === null) continue;
+      groupe.setAttribute('data-calque', calque.role);
+      if (calque.role !== 'coloriable') {
+        (groupe as SVGGElement).style.pointerEvents = 'none';
+      }
+    }
+
     const selecteur = calquesColoriables.map((calque) => `#${calque.id} > [id]`).join(', ');
     if (selecteur.length === 0) return undefined;
     const noeuds = Array.from(svg.querySelectorAll(selecteur));
@@ -310,6 +366,7 @@ export function SceneSvg(proprietes: ProprietesSceneSvg): ReactElement {
     };
   }, [
     svgMarkup,
+    habillage,
     remplissages,
     libelles,
     regionEnDemonstration,
@@ -356,12 +413,14 @@ export function SceneSvg(proprietes: ProprietesSceneSvg): ReactElement {
     >
       <style>{STYLES_SCENE}</style>
 
-      {svgMarkup !== null ? (
+      {contenuDecor !== null ? (
         <g
           data-calque="habillage"
           // Le SVG de l'habillage est un asset local du dépôt, validé par
           // `test:contenu` avant d'atteindre l'enfant ; il ne vient d'aucun réseau.
-          dangerouslySetInnerHTML={{ __html: svgMarkup }}
+          // `contenuDecor` est MÉMORISÉ — voir son commentaire : un littéral ici
+          // réinjecterait le markup à chaque rendu et effacerait le coloriage.
+          dangerouslySetInnerHTML={contenuDecor}
         />
       ) : (
         habillage.scene.calques.map((calque) => (

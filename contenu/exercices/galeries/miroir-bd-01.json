@@ -1,0 +1,258 @@
+{
+  "id": "galeries-miroir-bd-01",
+  "version": 1,
+  "titre": "Le b et le d — le rond change de cote",
+  "competences": [
+    "comp.consigne.simple"
+  ],
+  "difficulte": 2,
+  "jeu": {
+    "moteur": "trace",
+    "habillage": "galeries.tracer-cristal",
+    "noeud": "galeries-01",
+    "etoiles": {
+      "sansAide": true,
+      "sansErreur": true
+    },
+    "aideGobi": [
+      "relire-consigne",
+      "montre-cible"
+    ],
+    "contenu": {
+      "lettres": [
+        {
+          "lettre": "b",
+          "casse": "minuscule",
+          "viewBox": "0 0 100 160",
+          "traits": [
+            {
+              "id": "b-hampe",
+              "ordre": 1,
+              "chemin": "M 30.0 20.0 L 30.0 30.0 L 30.0 40.0 L 30.0 50.0 L 30.0 60.0 L 30.0 70.0 L 30.0 80.0 L 30.0 90.0 L 30.0 100.0",
+              "points": [
+                [
+                  30.0,
+                  20.0
+                ],
+                [
+                  30.0,
+                  30.0
+                ],
+                [
+                  30.0,
+                  40.0
+                ],
+                [
+                  30.0,
+                  50.0
+                ],
+                [
+                  30.0,
+                  60.0
+                ],
+                [
+                  30.0,
+                  70.0
+                ],
+                [
+                  30.0,
+                  80.0
+                ],
+                [
+                  30.0,
+                  90.0
+                ],
+                [
+                  30.0,
+                  100.0
+                ]
+              ],
+              "depart": [
+                30.0,
+                20.0
+              ],
+              "arrivee": [
+                30.0,
+                100.0
+              ],
+              "libelle": "la grande barre"
+            },
+            {
+              "id": "b-panse",
+              "ordre": 2,
+              "chemin": "M 30.0 100.0 L 42.33 100.0 L 54.24 97.16 L 64.24 90.38 L 70.0 80.0 L 64.24 69.62 L 54.24 62.84 L 42.33 60.0 L 30.0 60.0",
+              "points": [
+                [
+                  30.0,
+                  100.0
+                ],
+                [
+                  42.33,
+                  100.0
+                ],
+                [
+                  54.24,
+                  97.16
+                ],
+                [
+                  64.24,
+                  90.38
+                ],
+                [
+                  70.0,
+                  80.0
+                ],
+                [
+                  64.24,
+                  69.62
+                ],
+                [
+                  54.24,
+                  62.84
+                ],
+                [
+                  42.33,
+                  60.0
+                ],
+                [
+                  30.0,
+                  60.0
+                ]
+              ],
+              "depart": [
+                30.0,
+                100.0
+              ],
+              "arrivee": [
+                30.0,
+                60.0
+              ],
+              "libelle": "le rond"
+            }
+          ],
+          "axeRisque": "gauche-droite"
+        },
+        {
+          "lettre": "d",
+          "casse": "minuscule",
+          "viewBox": "0 0 100 160",
+          "traits": [
+            {
+              "id": "d-panse",
+              "ordre": 1,
+              "chemin": "M 70.0 100.0 L 57.67 100.0 L 45.76 97.16 L 35.76 90.38 L 30.0 80.0 L 35.76 69.62 L 45.76 62.84 L 57.67 60.0 L 70.0 60.0",
+              "points": [
+                [
+                  70.0,
+                  100.0
+                ],
+                [
+                  57.67,
+                  100.0
+                ],
+                [
+                  45.76,
+                  97.16
+                ],
+                [
+                  35.76,
+                  90.38
+                ],
+                [
+                  30.0,
+                  80.0
+                ],
+                [
+                  35.76,
+                  69.62
+                ],
+                [
+                  45.76,
+                  62.84
+                ],
+                [
+                  57.67,
+                  60.0
+                ],
+                [
+                  70.0,
+                  60.0
+                ]
+              ],
+              "depart": [
+                70.0,
+                100.0
+              ],
+              "arrivee": [
+                70.0,
+                60.0
+              ],
+              "libelle": "le rond"
+            },
+            {
+              "id": "d-hampe",
+              "ordre": 2,
+              "chemin": "M 70.0 20.0 L 70.0 30.0 L 70.0 40.0 L 70.0 50.0 L 70.0 60.0 L 70.0 70.0 L 70.0 80.0 L 70.0 90.0 L 70.0 100.0",
+              "points": [
+                [
+                  70.0,
+                  20.0
+                ],
+                [
+                  70.0,
+                  30.0
+                ],
+                [
+                  70.0,
+                  40.0
+                ],
+                [
+                  70.0,
+                  50.0
+                ],
+                [
+                  70.0,
+                  60.0
+                ],
+                [
+                  70.0,
+                  70.0
+                ],
+                [
+                  70.0,
+                  80.0
+                ],
+                [
+                  70.0,
+                  90.0
+                ],
+                [
+                  70.0,
+                  100.0
+                ]
+              ],
+              "depart": [
+                70.0,
+                20.0
+              ],
+              "arrivee": [
+                70.0,
+                100.0
+              ],
+              "libelle": "la grande barre"
+            }
+          ],
+          "axeRisque": "gauche-droite"
+        }
+      ],
+      "paire": {
+        "a": "b",
+        "b": "d",
+        "axe": "gauche-droite"
+      },
+      "consigne": "Grave le b, puis le d. Regarde bien de quel cote part le rond.",
+      "audio": null,
+      "consigneId": "c1"
+    }
+  }
+}

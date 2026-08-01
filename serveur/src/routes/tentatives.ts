@@ -11,17 +11,40 @@
 
 import type { FastifyInstance } from 'fastify';
 
-import type { NiveauAide, ResumeEtape, ResumeTentative } from '@pierre/partage';
+import type {
+  AxeMiroir,
+  ConfusionObservee,
+  ModeReponse,
+  NiveauAide,
+  ResumeEtape,
+  ResumeTentative
+} from '@pierre/partage';
 import type { ProgressionNoeud, ReponseTentative } from '@pierre/partage';
 
 import type { ContexteServeur } from '../configuration.js';
 import { CODES_ERREUR, erreurApi } from '../configuration.js';
+import { chargerParametresPedagogie } from '../depots/maitrise.js';
 import { profilExiste } from '../depots/profils.js';
 import { lireProgressionNoeud } from '../depots/progression.js';
-import type { TentativeValidee } from '../depots/tentatives.js';
+import type { AlimentationPedagogique, TentativeValidee } from '../depots/tentatives.js';
 import { deriverCleIdempotence, enregistrerTentative } from '../depots/tentatives.js';
 
 const NIVEAUX_AIDE: readonly string[] = ['aucune', 'indice', 'demonstration'];
+
+/** Les 9 modes de reponse de D13. Un mode inconnu est un refus, jamais un defaut silencieux. */
+const MODES_REPONSE: readonly string[] = [
+  'vrai-faux',
+  'qcm-3',
+  'qcm-4',
+  'place',
+  'colorie',
+  'trace',
+  'saisie',
+  'ordre',
+  'appariement'
+];
+
+const AXES_MIROIR: readonly string[] = ['gauche-droite', 'haut-bas'];
 
 type Validation =
   | { readonly ok: true; readonly valeur: TentativeValidee }
@@ -38,12 +61,62 @@ function entierPositif(valeur: unknown, defaut: number): number {
   return Math.max(0, Math.trunc(valeur));
 }
 
-function validerEtapes(brut: unknown): readonly ResumeEtape[] {
+/** Entier positif ou `null` — pour `latenceMs` et `nbElements`, ou `null` a un sens. */
+function entierPositifOuNull(valeur: unknown): number | null {
+  if (valeur === null || valeur === undefined) {
+    return null;
+  }
+  if (typeof valeur !== 'number' || !Number.isFinite(valeur)) {
+    return null;
+  }
+  return Math.max(0, Math.trunc(valeur));
+}
+
+/**
+ * La confusion journalisee par le moteur, AVEC son axe (D23).
+ *
+ * L'axe n'est jamais deduit ici : c'est le moteur `trace` (L2-C) qui sait de quel axe releve un
+ * geste, et le deviner au serveur depuis les deux lettres reviendrait a inventer une seconde
+ * autorite a cote de `PAIRES_MIROIR`. Un axe inconnu devient `null` — une confusion sans axe
+ * reste une confusion, elle est simplement ecartee du top 10 (contrat § 6).
+ */
+function validerConfusion(brut: unknown, competenceParDefaut: string): ConfusionObservee | null {
+  if (typeof brut !== 'object' || brut === null) {
+    return null;
+  }
+  const c = brut as { attendu?: unknown; rendu?: unknown; axe?: unknown; competence?: unknown };
+  const attendu = chaineNonVide(c.attendu);
+  const rendu = chaineNonVide(c.rendu);
+  if (attendu === null || rendu === null) {
+    return null;
+  }
+  const axe = AXES_MIROIR.includes(String(c.axe)) ? (String(c.axe) as AxeMiroir) : null;
+  return {
+    attendu,
+    rendu,
+    axe,
+    competence: chaineNonVide(c.competence) ?? competenceParDefaut
+  };
+}
+
+type ValidationEtapes =
+  | { readonly ok: true; readonly etapes: readonly ResumeEtape[] }
+  | { readonly ok: false; readonly message: string };
+
+/**
+ * Valide les etapes du resume.
+ *
+ * `modeReponse` est OBLIGATOIRE des qu'une etape est envoyee : c'est lui, et lui seul, qui fixe
+ * `p_devinette` (D13). Lui donner un defaut ferait monter la maitrise estimee sur des reponses
+ * au hasard — nommement la « regression pedagogique silencieuse » de l'annexe T § 1. On refuse
+ * en 400 plutot que de completer : le client qui l'omet doit le savoir tout de suite.
+ */
+function validerEtapes(brut: unknown, competenceParDefaut: string): ValidationEtapes {
   if (!Array.isArray(brut)) {
-    return [];
+    return { ok: true, etapes: [] };
   }
   const etapes: ResumeEtape[] = [];
-  for (const element of brut as readonly unknown[]) {
+  for (const [rang, element] of (brut as readonly unknown[]).entries()) {
     if (typeof element !== 'object' || element === null) {
       continue;
     }
@@ -53,10 +126,22 @@ function validerEtapes(brut: unknown): readonly ResumeEtape[] {
       aideUtilisee?: unknown;
       nbEcoutes?: unknown;
       dureeMs?: unknown;
+      modeReponse?: unknown;
+      latenceMs?: unknown;
+      nbElements?: unknown;
+      confusion?: unknown;
     };
     const identifiant = chaineNonVide(e.identifiant);
     if (identifiant === null) {
       continue;
+    }
+    if (!MODES_REPONSE.includes(String(e.modeReponse))) {
+      return {
+        ok: false,
+        message:
+          `L'etape ${String(rang)} (« ${identifiant} ») doit declarer un « modeReponse » parmi ` +
+          `${MODES_REPONSE.join(', ')} : c'est lui qui fixe p_devinette (D13).`
+      };
     }
     etapes.push({
       identifiant,
@@ -65,10 +150,14 @@ function validerEtapes(brut: unknown): readonly ResumeEtape[] {
         ? String(e.aideUtilisee)
         : 'aucune') as NiveauAide,
       nbEcoutes: entierPositif(e.nbEcoutes, 0),
-      dureeMs: entierPositif(e.dureeMs, 0)
+      dureeMs: entierPositif(e.dureeMs, 0),
+      modeReponse: String(e.modeReponse) as ModeReponse,
+      latenceMs: entierPositifOuNull(e.latenceMs),
+      nbElements: entierPositifOuNull(e.nbElements),
+      confusion: validerConfusion(e.confusion, competenceParDefaut)
     });
   }
-  return etapes;
+  return { ok: true, etapes };
 }
 
 /**
@@ -79,7 +168,7 @@ function validerEtapes(brut: unknown): readonly ResumeEtape[] {
  * de concatener suffiraient a rendre l'idempotence inoperante. La cle n'est derivee que si elle
  * manque.
  */
-export function validerTentative(corps: unknown): Validation {
+export function validerTentative(corps: unknown, competenceParDefaut = ''): Validation {
   if (typeof corps !== 'object' || corps === null) {
     return { ok: false, message: 'Le corps de la requete doit etre un objet JSON.' };
   }
@@ -123,6 +212,11 @@ export function validerTentative(corps: unknown): Validation {
     etapes?: unknown;
   };
 
+  const etapes = validerEtapes(r.etapes, competenceParDefaut);
+  if (!etapes.ok) {
+    return { ok: false, message: etapes.message };
+  }
+
   // R14 : toute session se termine sur une reussite. `reussi: false` est structurellement
   // inatteignable pour le moteur `colorie` (contrat § 5.6). Le serveur ne CORRIGE pas la valeur
   // — il journalise ce que le client a envoye, sinon le journal cesserait de faire foi.
@@ -133,7 +227,7 @@ export function validerTentative(corps: unknown): Validation {
       ? String(r.aideUtilisee)
       : 'aucune') as NiveauAide,
     dureeMs: entierPositif(r.dureeMs, 0),
-    etapes: validerEtapes(r.etapes)
+    etapes: etapes.etapes
   };
 
   const profil = valeurs.get('profil') ?? '';
@@ -163,8 +257,19 @@ export function enregistrerRoutesTentatives(
   app: FastifyInstance,
   contexte: ContexteServeur
 ): void {
-  app.post('/api/tentatives', (requete, reponse) => {
-    const validation = validerTentative(requete.body);
+  app.post('/api/tentatives', async (requete, reponse) => {
+    // Les competences de l'exercice, lues AVANT la validation : elles servent de competence par
+    // defaut aux etapes qui ne journalisent pas de confusion. Un exercice introuvable n'est pas
+    // une erreur ici — la tentative a ete jouee, elle sera enregistree ; seule l'alimentation
+    // pedagogique est alors sautee, et le journal fin restera vide pour cette tentative.
+    const exerciceId =
+      typeof (requete.body as { exercice?: unknown } | null)?.exercice === 'string'
+        ? String((requete.body as { exercice: string }).exercice)
+        : '';
+    const exercice = exerciceId === '' ? null : await contexte.contenu.chargerExercice(exerciceId);
+    const competences = exercice === null ? [] : [...exercice.competences];
+
+    const validation = validerTentative(requete.body, competences[0] ?? '');
     if (!validation.ok) {
       return reponse.code(400).send(erreurApi(CODES_ERREUR.invalide, validation.message));
     }
@@ -179,7 +284,19 @@ export function enregistrerRoutesTentatives(
         .send(erreurApi(CODES_ERREUR.introuvable, `Profil inconnu : ${validee.profil}`));
     }
 
-    const resultat = enregistrerTentative(contexte.base, validee, contexte.horloge);
+    // BKT, Leitner et journal d'etapes — lot L2-D. Les parametres sont lus depuis les DONNEES
+    // (C2, D13) : aucune valeur pedagogique ne vit dans ce fichier.
+    const pedagogie: AlimentationPedagogique | undefined =
+      competences.length === 0
+        ? undefined
+        : { competences, parametres: chargerParametresPedagogie() };
+
+    const resultat = enregistrerTentative(
+      contexte.base,
+      validee,
+      contexte.horloge,
+      pedagogie
+    );
 
     const progression: ProgressionNoeud | null = lireProgressionNoeud(
       contexte.base,

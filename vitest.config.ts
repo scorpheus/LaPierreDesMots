@@ -20,10 +20,28 @@ import { defineConfig } from 'vitest/config';
 
 const racine = (chemin: string): string => fileURLToPath(new URL(chemin, import.meta.url));
 
+/**
+ * Les 9 sous-chemins de `@pierre/partage`, **du plus spécifique au moins spécifique**.
+ *
+ * L'ordre n'est pas cosmétique : Vite résout les alias par préfixe, dans l'ordre des clés. Si
+ * `@pierre/partage` venait en premier, il capturerait `@pierre/partage/pedagogie` et tous les
+ * imports de sous-chemin partiraient silencieusement vers le barillet — ils compileraient et
+ * rendraient le mauvais module. C'était déjà la règle du contrat v1 § 3.2 ; à 9 entrées elle
+ * devient critique (contrat des features v2 § 4.7 et § 11).
+ *
+ * La même liste, dans le même ordre, est à poser dans `client/vite.config.ts` — possédé par
+ * L2-B. Deux propriétaires distincts : à vérifier des deux côtés.
+ */
 const alias = {
   // Contrat § 3.2 — le plus spécifique d'abord.
   '@pierre/partage/validation': racine('./partage/src/contenu/validation.ts'),
   '@pierre/partage/factices': racine('./partage/src/fournisseurs/factices.ts'),
+  '@pierre/partage/pedagogie': racine('./partage/src/pedagogie/index.ts'),
+  '@pierre/partage/miroir': racine('./partage/src/pedagogie/miroir.ts'),
+  '@pierre/partage/lecture': racine('./partage/src/lecture/index.ts'),
+  '@pierre/partage/recompenses': racine('./partage/src/recompenses/index.ts'),
+  '@pierre/partage/monde': racine('./partage/src/monde/index.ts'),
+  '@pierre/partage/parent': racine('./partage/src/parent/index.ts'),
   '@pierre/partage': racine('./partage/src/index.ts'),
   // Réservés aux tests — contrat § 11.3.
   '@partage': racine('./partage/src'),
@@ -39,12 +57,21 @@ const preparation = racine('./tests/configuration/preparation.ts');
  * Ils ne s'appliquent que lorsque `--coverage` est passé ; `scripts/verifier.mjs` le passe
  * pour l'étape `test`, de sorte que la chaîne complète les mesure vraiment.
  *
- * La zone `pedagogie/` (≥ 90 % dans l'annexe T) n'a **aucun seuil ici, et c'est délibéré** :
- * la décision D1 exclut BKT, Leitner et sélecteur de la v1 ; il n'existe aucun fichier à
- * couvrir. Un seuil sur un dossier vide serait un chiffre qui ne mesure rien. Raison écrite,
- * conformément au principe directeur de l'annexe T.
+ * La zone `pedagogie/` n'avait **aucun seuil en v1, et c'était délibéré** : la décision D1
+ * excluait BKT, Leitner et sélecteur ; un seuil sur un dossier vide est un chiffre qui ne
+ * mesure rien. **Le lot L2-D les livre : le seuil de l'annexe T § 7 — ≥ 90 % — entre donc en
+ * vigueur ici.** C'est la zone où « un ajustement du BKT ou du Leitner ne casse rien
+ * visiblement, et la progression est devenue absurde » (annexe T § 1) : c'est celle où une
+ * ligne non couverte coûte le plus cher.
  */
 const seuilsParZone = {
+  // `pedagogie/` ≥ 90 % — annexe T § 7. Le premier risque du projet vit ici.
+  'partage/src/pedagogie/*.ts': {
+    statements: 90,
+    branches: 90,
+    functions: 90,
+    lines: 90
+  },
   // `validation/` ≥ 95 % — c'est le juge ; un faux négatif décourage l'enfant pour rien.
   'partage/src/contenu/validation.ts': {
     statements: 95,

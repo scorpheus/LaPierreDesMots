@@ -1,0 +1,104 @@
+{
+  "$commentaire": "PLACEHOLDER — À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Écrit à l'intégration de la campagne v2 pour combler un manque du contrat gelé : son § 10.4 fait de R12 (« chaque compétence travaillée par ≥ 3 moteurs distincts, sur le contenu réel ») le chiffre de sortie du lot L2-E, mais son § 3.5 ne confie à AUCUN lot les `contenu/exercices/**` des onze moteurs. Sans cet exercice et son jumeau `luciole-couleurs-01.json`, `lex.couleur` reste travaillée par un seul moteur et R12 est mécaniquement intenable. Le vocabulaire est CE1 par construction : les six mots sont ceux du nuancier déjà employés par `ecole-01.json`, contenu de référence du socle v1. Aucun mot nouveau n'a été introduit.",
+  "id": "clairiere-paniers-couleurs-01",
+  "version": 1,
+  "titre": "Les paniers de couleurs",
+  "competences": ["lex.couleur", "comp.consigne.multiple"],
+  "difficulte": 1,
+  "jeu": {
+    "moteur": "tri",
+    "habillage": "clairiere.paniers",
+    "noeud": "clairiere-01",
+    "etoiles": { "sansAide": true, "sansErreur": true },
+    "aideGobi": ["relire-consigne", "souffle-syllabe", "montre-cible"],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Range les mots chauds dans le panier de gauche.",
+          "forme": "imperative",
+          "audio": null,
+          "aRanger": ["mot-rouge", "mot-jaune", "mot-orange"],
+          "motsCles": ["range", "mots", "panier", "gauche"]
+        },
+        {
+          "id": "c2",
+          "texte": "Range les mots froids dans le panier de droite.",
+          "forme": "imperative",
+          "audio": null,
+          "aRanger": ["mot-bleu", "mot-vert", "mot-violet"],
+          "motsCles": ["range", "mots", "panier", "droite"]
+        }
+      ],
+      "receptacles": [
+        {
+          "id": "panier-chaud",
+          "libelle": "le panier de gauche",
+          "critere": "les couleurs chaudes",
+          "zone": [
+            [60, 300],
+            [420, 300],
+            [420, 560],
+            [60, 560]
+          ]
+        },
+        {
+          "id": "panier-froid",
+          "libelle": "le panier de droite",
+          "critere": "les couleurs froides",
+          "zone": [
+            [540, 300],
+            [900, 300],
+            [900, 560],
+            [540, 560]
+          ]
+        }
+      ],
+      "elements": [
+        {
+          "id": "mot-rouge",
+          "libelle": "rouge",
+          "asset": null,
+          "receptacleAttendu": "panier-chaud",
+          "confusionAvec": "rose"
+        },
+        {
+          "id": "mot-jaune",
+          "libelle": "jaune",
+          "asset": null,
+          "receptacleAttendu": "panier-chaud",
+          "confusionAvec": "jeune"
+        },
+        {
+          "id": "mot-orange",
+          "libelle": "orange",
+          "asset": null,
+          "receptacleAttendu": "panier-chaud",
+          "confusionAvec": "orage"
+        },
+        {
+          "id": "mot-bleu",
+          "libelle": "bleu",
+          "asset": null,
+          "receptacleAttendu": "panier-froid",
+          "confusionAvec": "blé"
+        },
+        {
+          "id": "mot-vert",
+          "libelle": "vert",
+          "asset": null,
+          "receptacleAttendu": "panier-froid",
+          "confusionAvec": "ver"
+        },
+        {
+          "id": "mot-violet",
+          "libelle": "violet",
+          "asset": null,
+          "receptacleAttendu": "panier-froid",
+          "confusionAvec": null
+        }
+      ],
+      "competence": "lex.couleur"
+    }
+  }
+}

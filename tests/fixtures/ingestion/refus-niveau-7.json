@@ -1,0 +1,99 @@
+{
+  "source": "fiches-origine/NIVEAU 7.pdf",
+  "niveau": 7,
+  "fichesDuPdf": 15,
+  "fichesDemandees": 15,
+  "fichesIngerees": 0,
+  "fichesRefusees": 15,
+  "totalQuestions": 0,
+  "totalLignesTexte": 0,
+  "textesNonFiables": 0,
+  "reglesDeStructure": {
+    "repereConsigne": "Réponds aux questions avec une phrase réponse.",
+    "yEnteteAttendu": 486.5,
+    "pointOuvert": "O7 (fiches-origine-analyse.md § 5, F2 ; contrat features v2 § 8, n° 3)",
+    "decision": "refus explicite de toute fiche du niveau 7",
+    "questionsAttendues": [
+      3,
+      6
+    ]
+  },
+  "fiches": [],
+  "refus": [
+    {
+      "fiche": 1,
+      "code": "format-non-tranche",
+      "motif": "4 question(s) à réponse rédigée et 0 amorce(s) imprimée(s) : sans amorce, aucune règle du dépôt ne sait juger une phrase libre. Le point ouvert O7 (fiches-origine-analyse.md § 5, F2 ; contrat features v2 § 8, n° 3) n'est pas tranché (LLM juge local, validation parent différée, ou transformation en phrase à trou façon niveau 6). Produire un brouillon ici serait produire du faux."
+    },
+    {
+      "fiche": 2,
+      "code": "format-non-tranche",
+      "motif": "4 question(s) à réponse rédigée et 0 amorce(s) imprimée(s) : sans amorce, aucune règle du dépôt ne sait juger une phrase libre. Le point ouvert O7 (fiches-origine-analyse.md § 5, F2 ; contrat features v2 § 8, n° 3) n'est pas tranché (LLM juge local, validation parent différée, ou transformation en phrase à trou façon niveau 6). Produire un brouillon ici serait produire du faux."
+    },
+    {
+      "fiche": 3,
+      "code": "format-non-tranche",
+      "motif": "4 question(s) à réponse rédigée et 0 amorce(s) imprimée(s) : sans amorce, aucune règle du dépôt ne sait juger une phrase libre. Le point ouvert O7 (fiches-origine-analyse.md § 5, F2 ; contrat features v2 § 8, n° 3) n'est pas tranché (LLM juge local, validation parent différée, ou transformation en phrase à trou façon niveau 6). Produire un brouillon ici serait produire du faux."
+    },
+    {
+      "fiche": 4,
+      "code": "format-non-tranche",
+      "motif": "4 question(s) à réponse rédigée et 0 amorce(s) imprimée(s) : sans amorce, aucune règle du dépôt ne sait juger une phrase libre. Le point ouvert O7 (fiches-origine-analyse.md § 5, F2 ; contrat features v2 § 8, n° 3) n'est pas tranché (LLM juge local, validation parent différée, ou transformation en phrase à trou façon niveau 6). Produire un brouillon ici serait produire du faux."
+    },
+    {
+      "fiche": 5,
+      "code": "format-non-tranche",
+      "motif": "4 question(s) à réponse rédigée et 0 amorce(s) imprimée(s) : sans amorce, aucune règle du dépôt ne sait juger une phrase libre. Le point ouvert O7 (fiches-origine-analyse.md § 5, F2 ; contrat features v2 § 8, n° 3) n'est pas tranché (LLM juge local, validation parent différée, ou transformation en phrase à trou façon niveau 6). Produire un brouillon ici serait produire du faux."
+    },
+    {
+      "fiche": 6,
+      "code": "format-non-tranche",
+      "motif": "4 question(s) à réponse rédigée et 0 amorce(s) imprimée(s) : sans amorce, aucune règle du dépôt ne sait juger une phrase libre. Le point ouvert O7 (fiches-origine-analyse.md § 5, F2 ; contrat features v2 § 8, n° 3) n'est pas tranché (LLM juge local, validation parent différée, ou transformation en phrase à trou façon niveau 6). Produire un brouillon ici serait produire du faux."
+    },
+    {
+      "fiche": 7,
+      "code": "format-non-tranche",
+      "motif": "4 question(s) à réponse rédigée et 0 amorce(s) imprimée(s) : sans amorce, aucune règle du dépôt ne sait juger une phrase libre. Le point ouvert O7 (fiches-origine-analyse.md § 5, F2 ; contrat features v2 § 8, n° 3) n'est pas tranché (LLM juge local, validation parent différée, ou transformation en phrase à trou façon niveau 6). Produire un brouillon ici serait produire du faux."
+    },
+    {
+      "fiche": 8,
+      "code": "format-non-tranche",
+      "motif": "4 question(s) à réponse rédigée et 0 amorce(s) imprimée(s) : sans amorce, aucune règle du dépôt ne sait juger une phrase libre. Le point ouvert O7 (fiches-origine-analyse.md § 5, F2 ; contrat features v2 § 8, n° 3) n'est pas tranché (LLM juge local, validation parent différée, ou transformation en phrase à trou façon niveau 6). Produire un brouillon ici serait produire du faux."
+    },
+    {
+      "fiche": 9,
+      "code": "format-non-tranche",
+      "motif": "4 question(s) à réponse rédigée et 0 amorce(s) imprimée(s) : sans amorce, aucune règle du dépôt ne sait juger une phrase libre. Le point ouvert O7 (fiches-origine-analyse.md § 5, F2 ; contrat features v2 § 8, n° 3) n'est pas tranché (LLM juge local, validation parent différée, ou transformation en phrase à trou façon niveau 6). Produire un brouillon ici serait produire du faux."
+    },
+    {
+      "fiche": 10,
+      "code": "format-non-tranche",
+      "motif": "4 question(s) à réponse rédigée et 0 amorce(s) imprimée(s) : sans amorce, aucune règle du dépôt ne sait juger une phrase libre. Le point ouvert O7 (fiches-origine-analyse.md § 5, F2 ; contrat features v2 § 8, n° 3) n'est pas tranché (LLM juge local, validation parent différée, ou transformation en phrase à trou façon niveau 6). Produire un brouillon ici serait produire du faux."
+    },
+    {
+      "fiche": 11,
+      "code": "format-non-tranche",
+      "motif": "4 question(s) à réponse rédigée et 0 amorce(s) imprimée(s) : sans amorce, aucune règle du dépôt ne sait juger une phrase libre. Le point ouvert O7 (fiches-origine-analyse.md § 5, F2 ; contrat features v2 § 8, n° 3) n'est pas tranché (LLM juge local, validation parent différée, ou transformation en phrase à trou façon niveau 6). Produire un brouillon ici serait produire du faux."
+    },
+    {
+      "fiche": 12,
+      "code": "format-non-tranche",
+      "motif": "4 question(s) à réponse rédigée et 0 amorce(s) imprimée(s) : sans amorce, aucune règle du dépôt ne sait juger une phrase libre. Le point ouvert O7 (fiches-origine-analyse.md § 5, F2 ; contrat features v2 § 8, n° 3) n'est pas tranché (LLM juge local, validation parent différée, ou transformation en phrase à trou façon niveau 6). Produire un brouillon ici serait produire du faux."
+    },
+    {
+      "fiche": 13,
+      "code": "format-non-tranche",
+      "motif": "4 question(s) à réponse rédigée et 0 amorce(s) imprimée(s) : sans amorce, aucune règle du dépôt ne sait juger une phrase libre. Le point ouvert O7 (fiches-origine-analyse.md § 5, F2 ; contrat features v2 § 8, n° 3) n'est pas tranché (LLM juge local, validation parent différée, ou transformation en phrase à trou façon niveau 6). Produire un brouillon ici serait produire du faux."
+    },
+    {
+      "fiche": 14,
+      "code": "format-non-tranche",
+      "motif": "4 question(s) à réponse rédigée et 0 amorce(s) imprimée(s) : sans amorce, aucune règle du dépôt ne sait juger une phrase libre. Le point ouvert O7 (fiches-origine-analyse.md § 5, F2 ; contrat features v2 § 8, n° 3) n'est pas tranché (LLM juge local, validation parent différée, ou transformation en phrase à trou façon niveau 6). Produire un brouillon ici serait produire du faux."
+    },
+    {
+      "fiche": 15,
+      "code": "format-non-tranche",
+      "motif": "4 question(s) à réponse rédigée et 0 amorce(s) imprimée(s) : sans amorce, aucune règle du dépôt ne sait juger une phrase libre. Le point ouvert O7 (fiches-origine-analyse.md § 5, F2 ; contrat features v2 § 8, n° 3) n'est pas tranché (LLM juge local, validation parent différée, ou transformation en phrase à trou façon niveau 6). Produire un brouillon ici serait produire du faux."
+    }
+  ]
+}

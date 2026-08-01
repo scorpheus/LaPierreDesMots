@@ -1,0 +1,169 @@
+{
+  "statut": "brouillon-non-jouable",
+  "raison": "ni l'ordre correct du récit ni le mot à surligner ne figurent dans le PDF : les cinq étapes y sont imprimées dans le désordre, et c'est l'enfant qui les numérote",
+  "origine": {
+    "source": "fiches-origine/NIVEAU 5.pdf",
+    "niveau": 5,
+    "fiche": 1,
+    "page": 1
+  },
+  "moteurCible": "chrono",
+  "modeReponse": "ordre",
+  "titre": "Le train qui parlait",
+  "consigne": "Numérote de 1 à 5 l’ordre de l’histoire.",
+  "consigneSecondaire": "Cherche et colorie la réponse dans le texte.",
+  "texte": {
+    "lignes": [
+      {
+        "texte": "Un matin, Lila monte dans le train pour aller chez sa grand-mère. Quand elle",
+        "y": 205.9
+      },
+      {
+        "texte": "s’assoit, le train lui parle ! Il lui dit de se préparer pour une aventure",
+        "y": 235.8
+      },
+      {
+        "texte": "magique. Lila est surprise mais décide d’écouter le train. Le wagon se",
+        "y": 265.7
+      },
+      {
+        "texte": "transforme en forêt lumineuse et des animaux colorés apparaissent autour",
+        "y": 295.7
+      },
+      {
+        "texte": "d’elle. Le train lui raconte des histoires d’anciens voyageurs et des trésors",
+        "y": 325.6
+      },
+      {
+        "texte": "cachés. Lila aide un petit renard à retrouver son chemin dans la forêt. Le",
+        "y": 355.6
+      },
+      {
+        "texte": "train l’emmène ensuite sur un pont au-dessus des nuages où elle voit le",
+        "y": 385.5
+      },
+      {
+        "texte": "soleil briller comme jamais. À la fin du voyage, le train redeviendra normal",
+        "y": 415.5
+      },
+      {
+        "texte": "et Lila garde le secret de cette journée extraordinaire. Elle descend du train",
+        "y": 445.4
+      },
+      {
+        "texte": "avec des étoiles dans les yeux et le cœur rempli de joie.",
+        "y": 475.3
+      }
+    ],
+    "contenu": "Un matin, Lila monte dans le train pour aller chez sa grand-mère. Quand elle s’assoit, le train lui parle ! Il lui dit de se préparer pour une aventure magique. Lila est surprise mais décide d’écouter le train. Le wagon se transforme en forêt lumineuse et des animaux colorés apparaissent autour d’elle. Le train lui raconte des histoires d’anciens voyageurs et des trésors cachés. Lila aide un petit renard à retrouver son chemin dans la forêt. Le train l’emmène ensuite sur un pont au-dessus des nuages où elle voit le soleil briller comme jamais. À la fin du voyage, le train redeviendra normal et Lila garde le secret de cette journée extraordinaire. Elle descend du train avec des étoiles dans les yeux et le cœur rempli de joie.",
+    "nbLignes": 10,
+    "texteFiable": true
+  },
+  "etapes": [
+    {
+      "rang": 1,
+      "texte": "Lila descend du train, contente.",
+      "texteFiable": true,
+      "nbLignes": 1,
+      "y": 572.8,
+      "ordreAttendu": null
+    },
+    {
+      "rang": 2,
+      "texte": "Le wagon devient une forêt et Lila aide un renard.",
+      "texteFiable": true,
+      "nbLignes": 2,
+      "y": 610.4,
+      "ordreAttendu": null
+    },
+    {
+      "rang": 3,
+      "texte": "Lila monte dans le train.",
+      "texteFiable": true,
+      "nbLignes": 1,
+      "y": 658.2,
+      "ordreAttendu": null
+    },
+    {
+      "rang": 4,
+      "texte": "Le train passe sur un pont dans le ciel.",
+      "texteFiable": true,
+      "nbLignes": 2,
+      "y": 692.9,
+      "ordreAttendu": null
+    },
+    {
+      "rang": 5,
+      "texte": "Le train parle à Lila.",
+      "texteFiable": true,
+      "nbLignes": 1,
+      "y": 740.8,
+      "ordreAttendu": null
+    }
+  ],
+  "reperages": [
+    {
+      "rang": 1,
+      "texte": "Qui monte dans le train ?",
+      "texteFiable": true,
+      "nbLignes": 1,
+      "y": 564.9,
+      "couleur": "rouge",
+      "yCouleur": 568.9,
+      "passageAttendu": null
+    },
+    {
+      "rang": 2,
+      "texte": "Quel animal Lila aide-t-elle ?",
+      "texteFiable": true,
+      "nbLignes": 1,
+      "y": 608.0,
+      "couleur": "bleu",
+      "yCouleur": 611.8,
+      "passageAttendu": null
+    },
+    {
+      "rang": 3,
+      "texte": "Où le train l’emmène-t-il ensuite ?",
+      "texteFiable": true,
+      "nbLignes": 2,
+      "y": 642.1,
+      "couleur": "jaune",
+      "yCouleur": 650.4,
+      "passageAttendu": null
+    },
+    {
+      "rang": 4,
+      "texte": "Que fait le train à la fin du voyage ?",
+      "texteFiable": true,
+      "nbLignes": 2,
+      "y": 681.7,
+      "couleur": "vert",
+      "yCouleur": 692.2,
+      "passageAttendu": null
+    },
+    {
+      "rang": 5,
+      "texte": "Avec quoi Lila descend-elle du train à la fin ?",
+      "texteFiable": true,
+      "nbLignes": 2,
+      "y": 720.8,
+      "couleur": "rose",
+      "yCouleur": 733.0,
+      "passageAttendu": null
+    }
+  ],
+  "compte": {
+    "lignesTexte": 10,
+    "etapes": 5,
+    "reperages": 5
+  },
+  "aFaireALaMain": [
+    "donner l'ordre correct des étapes du récit",
+    "désigner, pour chaque question coloriée, le passage du texte qui répond",
+    "vérifier la couverture lexicale CE1 du texte support",
+    "choisir les compétences du référentiel et la difficulté",
+    "faire relire et valider par le parent avant de déposer dans contenu/exercices/"
+  ],
+  "avertissements": []
+}

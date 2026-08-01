@@ -1,0 +1,106 @@
+{
+  "id": "clairiere.guirlande",
+  "moteurs": [
+    "phrase"
+  ],
+  "libelle": "La guirlande de fanions",
+  "region": "clairiere",
+  "scene": {
+    "fichier": "habillages/clairiere/guirlande.svg",
+    "viewBox": "0 0 960 600",
+    "calques": [
+      {
+        "id": "calque-fond",
+        "role": "fond",
+        "regions": []
+      },
+      {
+        "id": "calque-zones",
+        "role": "coloriable",
+        "regions": [
+          {
+            "id": "fanion-un",
+            "libelle": "le premier fanion",
+            "centroide": [
+              190.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "fanion-deux",
+            "libelle": "le deuxième fanion",
+            "centroide": [
+              480.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "fanion-trois",
+            "libelle": "le troisième fanion",
+            "centroide": [
+              770.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "corde-tendue",
+            "libelle": "la corde tendue",
+            "centroide": [
+              190.0,
+              420.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "piquet",
+            "libelle": "le piquet",
+            "centroide": [
+              480.0,
+              420.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "pelouse",
+            "libelle": "la pelouse",
+            "centroide": [
+              770.0,
+              420.0
+            ],
+            "surface": 32000.0
+          }
+        ]
+      },
+      {
+        "id": "calque-trait",
+        "role": "trait",
+        "regions": []
+      }
+    ]
+  },
+  "palette": {
+    "jetons": {},
+    "nuancier": [
+      "vert",
+      "jaune",
+      "bleu",
+      "brun",
+      "rose",
+      "blanc"
+    ]
+  },
+  "timings": {
+    "appuiMs": 70,
+    "relachementMs": 130,
+    "refusMs": 190,
+    "recolorationMs": 900,
+    "interEtoilesMs": 190
+  },
+  "sons": {
+    "ambiance": null,
+    "effets": {}
+  }
+}

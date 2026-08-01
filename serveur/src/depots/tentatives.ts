@@ -26,14 +26,20 @@ import type {
   IdTentative,
   NiveauAide,
   NombreEtoiles,
+  ParametresPedagogie,
   ResumeTentative,
   Tentative
 } from '@pierre/partage';
 import { calculerEtoiles } from '@pierre/partage';
 
 import { dansTransaction } from '../base/connexion.js';
+import { journaliserEtapes, listerEtapes } from './etapes.js';
+import { appliquerRevue, revueReussie } from './leitner.js';
+import { appliquerObservation, observationDeLEtape } from './maitrise.js';
 import { toucherProfil } from './profils.js';
 import { appliquerTentativeALaProgression } from './progression.js';
+
+import type { EtapeAJournaliser } from './etapes.js';
 
 /** Les trois paliers de la v2 § 5.4, tels que la contrainte CHECK de la table les accepte. */
 const NIVEAUX_AIDE: readonly string[] = ['aucune', 'indice', 'demonstration'];
@@ -80,6 +86,26 @@ export interface ResultatEnregistrement {
   /** `true` si la tentative etait deja au journal : rien n'a ete insere. */
   readonly deja: boolean;
   readonly tentative: Tentative;
+  /** Nombre d'etapes reellement inscrites au journal fin. `0` sur un rejeu. */
+  readonly etapesJournalisees: number;
+}
+
+/**
+ * Ce qu'il faut, en plus de la tentative, pour alimenter BKT et Leitner — lot L2-D.
+ *
+ * Les competences viennent de l'EXERCICE, jamais de l'etape : `ResumeEtape` ne les porte pas,
+ * et les deviner depuis l'identifiant de l'etape serait exactement le genre de raccourci qui
+ * rend un indicateur faux sans que rien ne le dise. Une etape qui journalise une confusion
+ * porte, elle, sa propre competence : celle-la fait foi (D23).
+ *
+ * Facultatif a l'appel : quand il manque, la tentative est enregistree normalement mais rien
+ * n'alimente la pedagogie. On ne perd jamais une tentative reellement jouee pour un contexte
+ * absent (annexe T § T2, « aucune tentative perdue »).
+ */
+export interface AlimentationPedagogique {
+  /** Les competences de l'exercice, dans l'ordre du referentiel. Peut etre vide. */
+  readonly competences: readonly string[];
+  readonly parametres: ParametresPedagogie;
 }
 
 const CHAMPS = `id, cle_idempotence, profil_id, noeud_id, exercice_id, moteur, habillage, graine,
@@ -177,7 +203,8 @@ export function compterTentatives(base: DatabaseSync, profilId: string): number 
 export function enregistrerTentative(
   base: DatabaseSync,
   validee: TentativeValidee,
-  horloge: Horloge
+  horloge: Horloge,
+  pedagogie?: AlimentationPedagogique
 ): ResultatEnregistrement {
   // Le bareme vit uniquement dans `calculerEtoiles` (contrat § 5.7) : le serveur ne le rejoue
   // pas. Le bornage a [0, 3] n'est pas un second bareme, c'est le respect de la contrainte CHECK
@@ -190,7 +217,7 @@ export function enregistrerTentative(
   return dansTransaction(base, () => {
     const dejaLa = lireParCle(base, validee.cleIdempotence);
     if (dejaLa !== null) {
-      return { deja: true, tentative: dejaLa };
+      return { deja: true, tentative: dejaLa, etapesJournalisees: 0 };
     }
 
     try {
@@ -224,7 +251,7 @@ export function enregistrerTentative(
       // est le doublon que l'idempotence doit absorber — pas une erreur a remonter a l'enfant.
       const concurrente = lireParCle(base, validee.cleIdempotence);
       if (concurrente !== null) {
-        return { deja: true, tentative: concurrente };
+        return { deja: true, tentative: concurrente, etapesJournalisees: 0 };
       }
       throw erreur;
     }
@@ -243,6 +270,86 @@ export function enregistrerTentative(
     if (inseree === null) {
       throw new Error("La tentative vient d'etre inseree et reste introuvable.");
     }
-    return { deja: false, tentative: inseree };
+
+    // Journal fin et projections pedagogiques, DANS LA MEME TRANSACTION que la tentative : il
+    // n'existe aucun instant ou le journal porte une tentative dont les etapes manquent, ni ou
+    // une maitrise refleterait une etape que le journal ignore.
+    const etapesJournalisees = alimenterPedagogie(base, inseree.id, validee, pedagogie);
+
+    return { deja: false, tentative: inseree, etapesJournalisees };
   });
+}
+
+/**
+ * Inscrit les etapes au journal fin, puis avance BKT et Leitner — lot L2-D.
+ *
+ * L'ordre compte : le journal d'abord, les projections ensuite et A PARTIR DE LUI. C'est ce qui
+ * garantit que le chemin incremental et `recalculerMaitrise` voient exactement la meme suite
+ * d'observations ; les faire diverger d'un champ suffirait a rendre le rejeu ininterpretable.
+ *
+ * La competence d'une etape est celle de sa CONFUSION quand elle en journalise une (D23 : la
+ * confusion sait de quelle competence elle releve), sinon la premiere competence de l'exercice.
+ * Une etape sans confusion et sans exercice connu n'est pas journalisee : on prefere une ligne
+ * absente a une ligne rattachee a une competence inventee.
+ */
+function alimenterPedagogie(
+  base: DatabaseSync,
+  tentativeId: string,
+  validee: TentativeValidee,
+  pedagogie: AlimentationPedagogique | undefined
+): number {
+  if (pedagogie === undefined || validee.resume.etapes.length === 0) {
+    return 0;
+  }
+
+  const competenceParDefaut = pedagogie.competences[0] ?? null;
+
+  const aJournaliser: EtapeAJournaliser[] = [];
+  validee.resume.etapes.forEach((etape, rang) => {
+    const competence = etape.confusion?.competence ?? competenceParDefaut;
+    if (competence === null || competence.trim() === '') {
+      return;
+    }
+    aJournaliser.push({
+      tentativeId,
+      profilId: validee.profil,
+      rang,
+      identifiant: etape.identifiant,
+      competence,
+      modeReponse: etape.modeReponse,
+      // R14 : `ResumeTentative.reussi` vaut toujours `true`, une etape finit toujours par
+      // aboutir. Ce qui informe le BKT, c'est de savoir si elle a abouti SANS erreur.
+      reussi: etape.nbErreurs === 0,
+      nbErreurs: etape.nbErreurs,
+      aideUtilisee: etape.aideUtilisee,
+      dureeMs: etape.dureeMs,
+      latenceMs: etape.latenceMs,
+      nbElements: etape.nbElements ?? null,
+      confusion: etape.confusion
+    });
+  });
+
+  const inserees = journaliserEtapes(base, aJournaliser, validee.termineLe);
+  if (inserees === 0) {
+    return 0;
+  }
+
+  // On relit le journal plutot que de reutiliser les objets en memoire : les projections
+  // doivent voir EXACTEMENT ce que le recalcul integral verra, colonnes bornees comprises.
+  for (const etape of listerEtapes(base, validee.profil)) {
+    if (etape.tentativeId !== tentativeId) {
+      continue;
+    }
+    appliquerObservation(base, validee.profil, observationDeLEtape(etape), pedagogie.parametres);
+    appliquerRevue(
+      base,
+      validee.profil,
+      etape.identifiant,
+      revueReussie(etape),
+      pedagogie.parametres,
+      etape.journaliseLe
+    );
+  }
+
+  return inserees;
 }

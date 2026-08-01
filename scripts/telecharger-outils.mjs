@@ -12,6 +12,12 @@
 //     mieux » jamais : un outil à moitié installé se paie trois heures plus tard.
 //
 // Usage :  node scripts/telecharger-outils.mjs [--sans-python] [--forcer]
+//                                              [--epingler <nom>]
+//
+// `--epingler <nom>` télécharge l'archive d'un outil, N'INSTALLE RIEN, et
+// imprime son empreinte sha256 à recopier dans le manifeste ci-dessous. C'est
+// le seul geste qui fait sortir du dépôt sans empreinte connue, et il est
+// explicite : personne ne l'exécute par accident (lot L2-G).
 
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
@@ -36,6 +42,7 @@ const REQUIREMENTS = join(RACINE, 'scripts', 'ingestion', 'requirements.txt');
  * @property {string | null} empreinte sha256 hexadécimal de ce que l'URL renvoie
  * @property {string} temoin          chemin, relatif à `outils/bin/`, prouvant l'installation
  * @property {boolean} archive        vrai si l'URL renvoie une archive à extraire
+ * @property {boolean} [optionnel]    vrai si son absence n'empêche pas de JOUER
  */
 
 /**
@@ -47,31 +54,45 @@ const REQUIREMENTS = join(RACINE, 'scripts', 'ingestion', 'requirements.txt');
  *
  * @type {OutilTiers[]}
  */
-const OUTILS = [];
+const OUTILS = [
+  {
+    nom: 'potrace',
+    libelle: 'Vectorisation du trait noir en SVG (annexe P § 3.2, lot L2-G)',
+    url: 'https://potrace.sourceforge.net/download/1.16/potrace-1.16.win64.zip',
+    empreinte: null,
+    // Forme RÉELLE de l'archive officielle 1.16 : elle se déplie dans un sous-dossier
+    // versionné. On ne l'aplatit pas — le témoin décrit ainsi la vraie forme, et un
+    // changement de forme se voit au lieu de passer inaperçu.
+    // `scripts/ingestion/vectoriser.py` cherche le binaire aux deux endroits.
+    temoin: 'potrace/potrace-1.16.win64/potrace.exe',
+    archive: true,
+    optionnel: true
+  }
+];
 
 /**
- * Ce qui viendra, et pourquoi ce n'est pas encore là.
+ * `potrace` — lot L2-G, et pourquoi son empreinte est encore nulle.
  *
- * `potrace` est autorisé par la décision D4 et nécessaire à l'annexe P § 3.2, mais il n'entre
- * en jeu qu'au lot L1b (vectorisation des planches ComfyUI). Son entrée est écrite ici, non
- * activée, avec `empreinte: null` — le script REFUSE de télécharger un outil sans empreinte
- * plutôt que d'exécuter un binaire qu'il n'a pas pu vérifier.
+ * Il vectorise les illustrations découpées par
+ * `scripts/ingestion/extraire-illustrations.py` (annexe P § 3.2, décision D4). Son entrée
+ * ci-dessus porte son URL officielle, mais **`empreinte: null`** : personne n'a encore épinglé
+ * le sha256 de l'archive sur cette machine, et **inventer une empreinte serait exactement la
+ * faute que ce lot doit éviter** — on n'exécute pas un binaire qu'on n'a pas pu vérifier.
  *
- * Pour l'activer : renseigner `url` et `empreinte` (sha256 de l'archive téléchargée à la main
- * et vérifiée), puis déplacer l'entrée dans `OUTILS`.
+ * Conséquence, voulue : tant que l'empreinte est nulle, `installerOutil` **saute** l'outil
+ * bruyamment au lieu de faire échouer la préparation, parce que potrace est `optionnel` — le
+ * jeu se lance et se joue sans lui, seule la vectorisation en dépend, et `vectoriser.py`
+ * refuse alors en nommant un défaut d'ENVIRONNEMENT (contrat features v2 § 2.2 et § 11).
+ *
+ * Pour l'activer, un seul geste, et il est explicite :
+ *
+ *     npm run preparer -- --epingler potrace   # télécharge, n'installe rien, imprime le sha256
+ *     # recopier l'empreinte imprimée dans `empreinte` ci-dessus
+ *     npm run preparer                         # installe, empreinte vérifiée
  *
  * @type {OutilTiers[]}
  */
-export const OUTILS_A_VENIR = [
-  {
-    nom: 'potrace',
-    libelle: 'Vectorisation du trait noir en SVG (annexe P § 3.2, lot L1b)',
-    url: '',
-    empreinte: null,
-    temoin: 'potrace/potrace.exe',
-    archive: true
-  }
-];
+export const OUTILS_A_VENIR = [];
 
 // ---------------------------------------------------------------- sortie
 
@@ -122,11 +143,18 @@ async function installerOutil(outil, options) {
   }
 
   if (!outil.empreinte) {
-    mal(
+    const explication =
       `${outil.nom} — aucune empreinte sha256 déclarée. Téléchargement REFUSÉ.\n` +
-        "     Un binaire non vérifié est un binaire qu'on exécute en aveugle : renseigner\n" +
-        '     `empreinte` dans scripts/telecharger-outils.mjs avant de réessayer.'
-    );
+      "     Un binaire non vérifié est un binaire qu'on exécute en aveugle. Pour l'épingler :\n" +
+      `       npm run preparer -- --epingler ${outil.nom}\n` +
+      '     puis recopier l’empreinte imprimée dans scripts/telecharger-outils.mjs.';
+    // Un outil OPTIONNEL sans empreinte est sauté, bruyamment, sans faire échouer la
+    // préparation : le jeu se lance sans lui. Un outil requis, lui, reste bloquant.
+    if (outil.optionnel) {
+      console.error('  ⚠ ' + explication + `\n     (${outil.libelle} — sans lui, seule cette chaîne-là s’arrête.)`);
+      return;
+    }
+    mal(explication);
     return;
   }
 
@@ -193,6 +221,52 @@ async function installerOutil(outil, options) {
   }
 
   bien(`${outil.nom} — installé dans outils/bin/${outil.nom}`);
+}
+
+/**
+ * `--epingler <nom>` : télécharge l'archive, N'INSTALLE RIEN, imprime le sha256.
+ *
+ * C'est le seul chemin de ce fichier qui télécharge sans empreinte connue, et il ne s'emprunte
+ * que sur demande explicite. Le fichier reste dans `outils/telechargements/` : on peut le
+ * relire, le comparer à la somme publiée en amont, puis épingler en confiance.
+ *
+ * @param {string} nom
+ * @returns {Promise<void>}
+ */
+async function epinglerOutil(nom) {
+  const outil = [...OUTILS, ...OUTILS_A_VENIR].find((o) => o.nom === nom);
+  if (!outil) {
+    mal(`--epingler ${nom} — outil inconnu du manifeste.`);
+    return;
+  }
+  if (!outil.url.startsWith('https://')) {
+    mal(`${nom} — URL absente ou non HTTPS : « ${outil.url} ».`);
+    return;
+  }
+
+  mkdirSync(DOSSIER_CACHE, { recursive: true });
+  const archive = join(DOSSIER_CACHE, `${outil.nom}${outil.archive ? '.zip' : ''}`);
+  info(`${nom} — téléchargement pour épinglage (aucune installation)…`);
+  try {
+    const reponse = await fetch(outil.url);
+    if (!reponse.ok) {
+      mal(`${nom} — le serveur a répondu ${reponse.status} ${reponse.statusText}.`);
+      return;
+    }
+    writeFileSync(archive, new Uint8Array(await reponse.arrayBuffer()));
+  } catch (erreur) {
+    mal(`${nom} — téléchargement impossible : ${String(erreur)}`);
+    return;
+  }
+
+  const mesuree = empreinteFichier(archive);
+  console.log('');
+  console.log(`  Empreinte sha256 de ${outil.url} :`);
+  console.log(`    ${mesuree}`);
+  console.log('');
+  console.log('  À recopier dans `empreinte` (scripts/telecharger-outils.mjs), APRÈS');
+  console.log("  l'avoir comparée à la somme publiée par l'éditeur. Rien n'a été installé.");
+  console.log('');
 }
 
 // ---------------------------------------------------------------- venv Python
@@ -293,6 +367,7 @@ async function principal() {
     forcer: arguments_.includes('--forcer'),
     sansPython: arguments_.includes('--sans-python') || process.env.PIERRE_SANS_PYTHON === '1'
   };
+  const aEpingler = arguments_[arguments_.indexOf('--epingler') + 1];
 
   console.log('');
   console.log('  Préparation des outils — tout reste dans le dépôt (décision D9).');
@@ -300,8 +375,13 @@ async function principal() {
 
   mkdirSync(DOSSIER_BIN, { recursive: true });
 
+  if (arguments_.includes('--epingler')) {
+    await epinglerOutil(aEpingler ?? '');
+    process.exit(echecs === 0 ? 0 : 1);
+  }
+
   if (OUTILS.length === 0) {
-    info('0 binaire tiers requis en v1 — rien à télécharger.');
+    info('0 binaire tiers requis — rien à télécharger.');
     for (const futur of OUTILS_A_VENIR) {
       info(`  (à venir : ${futur.nom} — ${futur.libelle} ; empreinte à renseigner)`);
     }

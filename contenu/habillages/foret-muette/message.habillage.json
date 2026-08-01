@@ -1,0 +1,106 @@
+{
+  "id": "foret.message",
+  "moteurs": [
+    "phrase"
+  ],
+  "libelle": "Le message dans l’écorce",
+  "region": "foret-muette",
+  "scene": {
+    "fichier": "habillages/foret-muette/message.svg",
+    "viewBox": "0 0 960 600",
+    "calques": [
+      {
+        "id": "calque-fond",
+        "role": "fond",
+        "regions": []
+      },
+      {
+        "id": "calque-zones",
+        "role": "coloriable",
+        "regions": [
+          {
+            "id": "ecorce",
+            "libelle": "l’écorce",
+            "centroide": [
+              190.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "entaille",
+            "libelle": "l’entaille",
+            "centroide": [
+              480.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "mousse-verte",
+            "libelle": "la mousse verte",
+            "centroide": [
+              770.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "racine",
+            "libelle": "la racine",
+            "centroide": [
+              190.0,
+              420.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "canopee",
+            "libelle": "la canopée",
+            "centroide": [
+              480.0,
+              420.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "rayon",
+            "libelle": "le rayon de lumière",
+            "centroide": [
+              770.0,
+              420.0
+            ],
+            "surface": 32000.0
+          }
+        ]
+      },
+      {
+        "id": "calque-trait",
+        "role": "trait",
+        "regions": []
+      }
+    ]
+  },
+  "palette": {
+    "jetons": {},
+    "nuancier": [
+      "vert",
+      "brun",
+      "gris",
+      "noir",
+      "blanc",
+      "jaune"
+    ]
+  },
+  "timings": {
+    "appuiMs": 70,
+    "relachementMs": 130,
+    "refusMs": 190,
+    "recolorationMs": 900,
+    "interEtoilesMs": 190
+  },
+  "sons": {
+    "ambiance": null,
+    "effets": {}
+  }
+}

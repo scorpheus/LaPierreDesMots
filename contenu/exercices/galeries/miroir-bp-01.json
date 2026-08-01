@@ -1,0 +1,258 @@
+{
+  "id": "galeries-miroir-bp-01",
+  "version": 1,
+  "titre": "Le b et le p — le rond change de hauteur",
+  "competences": [
+    "comp.consigne.simple"
+  ],
+  "difficulte": 2,
+  "jeu": {
+    "moteur": "trace",
+    "habillage": "galeries.tracer-cristal",
+    "noeud": "galeries-02",
+    "etoiles": {
+      "sansAide": true,
+      "sansErreur": true
+    },
+    "aideGobi": [
+      "relire-consigne",
+      "montre-cible"
+    ],
+    "contenu": {
+      "lettres": [
+        {
+          "lettre": "b",
+          "casse": "minuscule",
+          "viewBox": "0 0 100 160",
+          "traits": [
+            {
+              "id": "b-hampe",
+              "ordre": 1,
+              "chemin": "M 30.0 20.0 L 30.0 30.0 L 30.0 40.0 L 30.0 50.0 L 30.0 60.0 L 30.0 70.0 L 30.0 80.0 L 30.0 90.0 L 30.0 100.0",
+              "points": [
+                [
+                  30.0,
+                  20.0
+                ],
+                [
+                  30.0,
+                  30.0
+                ],
+                [
+                  30.0,
+                  40.0
+                ],
+                [
+                  30.0,
+                  50.0
+                ],
+                [
+                  30.0,
+                  60.0
+                ],
+                [
+                  30.0,
+                  70.0
+                ],
+                [
+                  30.0,
+                  80.0
+                ],
+                [
+                  30.0,
+                  90.0
+                ],
+                [
+                  30.0,
+                  100.0
+                ]
+              ],
+              "depart": [
+                30.0,
+                20.0
+              ],
+              "arrivee": [
+                30.0,
+                100.0
+              ],
+              "libelle": "la grande barre"
+            },
+            {
+              "id": "b-panse",
+              "ordre": 2,
+              "chemin": "M 30.0 100.0 L 42.33 100.0 L 54.24 97.16 L 64.24 90.38 L 70.0 80.0 L 64.24 69.62 L 54.24 62.84 L 42.33 60.0 L 30.0 60.0",
+              "points": [
+                [
+                  30.0,
+                  100.0
+                ],
+                [
+                  42.33,
+                  100.0
+                ],
+                [
+                  54.24,
+                  97.16
+                ],
+                [
+                  64.24,
+                  90.38
+                ],
+                [
+                  70.0,
+                  80.0
+                ],
+                [
+                  64.24,
+                  69.62
+                ],
+                [
+                  54.24,
+                  62.84
+                ],
+                [
+                  42.33,
+                  60.0
+                ],
+                [
+                  30.0,
+                  60.0
+                ]
+              ],
+              "depart": [
+                30.0,
+                100.0
+              ],
+              "arrivee": [
+                30.0,
+                60.0
+              ],
+              "libelle": "le rond"
+            }
+          ],
+          "axeRisque": "haut-bas"
+        },
+        {
+          "lettre": "p",
+          "casse": "minuscule",
+          "viewBox": "0 0 100 160",
+          "traits": [
+            {
+              "id": "p-hampe",
+              "ordre": 1,
+              "chemin": "M 30.0 140.0 L 30.0 130.0 L 30.0 120.0 L 30.0 110.0 L 30.0 100.0 L 30.0 90.0 L 30.0 80.0 L 30.0 70.0 L 30.0 60.0",
+              "points": [
+                [
+                  30.0,
+                  140.0
+                ],
+                [
+                  30.0,
+                  130.0
+                ],
+                [
+                  30.0,
+                  120.0
+                ],
+                [
+                  30.0,
+                  110.0
+                ],
+                [
+                  30.0,
+                  100.0
+                ],
+                [
+                  30.0,
+                  90.0
+                ],
+                [
+                  30.0,
+                  80.0
+                ],
+                [
+                  30.0,
+                  70.0
+                ],
+                [
+                  30.0,
+                  60.0
+                ]
+              ],
+              "depart": [
+                30.0,
+                140.0
+              ],
+              "arrivee": [
+                30.0,
+                60.0
+              ],
+              "libelle": "la grande barre"
+            },
+            {
+              "id": "p-panse",
+              "ordre": 2,
+              "chemin": "M 30.0 60.0 L 42.33 60.0 L 54.24 62.84 L 64.24 69.62 L 70.0 80.0 L 64.24 90.38 L 54.24 97.16 L 42.33 100.0 L 30.0 100.0",
+              "points": [
+                [
+                  30.0,
+                  60.0
+                ],
+                [
+                  42.33,
+                  60.0
+                ],
+                [
+                  54.24,
+                  62.84
+                ],
+                [
+                  64.24,
+                  69.62
+                ],
+                [
+                  70.0,
+                  80.0
+                ],
+                [
+                  64.24,
+                  90.38
+                ],
+                [
+                  54.24,
+                  97.16
+                ],
+                [
+                  42.33,
+                  100.0
+                ],
+                [
+                  30.0,
+                  100.0
+                ]
+              ],
+              "depart": [
+                30.0,
+                60.0
+              ],
+              "arrivee": [
+                30.0,
+                100.0
+              ],
+              "libelle": "le rond"
+            }
+          ],
+          "axeRisque": "haut-bas"
+        }
+      ],
+      "paire": {
+        "a": "b",
+        "b": "p",
+        "axe": "haut-bas"
+      },
+      "consigne": "Grave le b, puis le p. Regarde bien si la barre monte ou descend.",
+      "audio": null,
+      "consigneId": "c1"
+    }
+  }
+}

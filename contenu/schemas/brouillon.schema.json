@@ -1,0 +1,521 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "pierre:schemas/brouillon",
+  "title": "Brouillon d'ingestion",
+  "description": "Sortie de scripts/ingestion/ — lot L2-G, contrat features v2 § 3.7. Un brouillon n'est JAMAIS un exercice jouable : il vit dans contenu/brouillons/, il porte ce que le PDF dit et rien d'autre, et tout ce qu'un humain doit encore décider y vaut null et figure dans aFaireALaMain (annexe P § 6.4, CLAUDE.md). Un brouillon hors de ce schema est un refus : test:contenu le verifie.",
+  "type": "object",
+  "oneOf": [
+    { "$ref": "#/$defs/brouillonNiveau1" },
+    { "$ref": "#/$defs/brouillonNiveau2" },
+    { "$ref": "#/$defs/brouillonNiveau3" },
+    { "$ref": "#/$defs/brouillonNiveau4" },
+    { "$ref": "#/$defs/brouillonNiveau5" },
+    { "$ref": "#/$defs/brouillonNiveau6" }
+  ],
+  "$defs": {
+    "statut": {
+      "description": "Un seul statut existe, et c'est voulu : aucun brouillon n'est jouable. Le passage a contenu/exercices/ est un geste humain.",
+      "const": "brouillon-non-jouable"
+    },
+    "origine": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "niveau", "fiche", "page"],
+      "properties": {
+        "source": { "type": "string", "minLength": 1 },
+        "niveau": { "type": "integer", "minimum": 1, "maximum": 7 },
+        "fiche": { "type": "integer", "minimum": 1, "maximum": 15 },
+        "page": { "type": "integer", "minimum": 1, "maximum": 15 }
+      }
+    },
+    "modeReponse": {
+      "description": "Le ModeReponse de la pedagogie (L2-D). Il fixe p_devinette : 0,50 en vrai-faux, 0,33 en qcm-3, quasi nul ailleurs (fiches-origine-analyse.md § 6).",
+      "enum": ["coloriage", "vrai-faux", "qcm-3", "ordre", "saisie"]
+    },
+    "moteurCible": {
+      "enum": ["colorie", "place", "histoire", "paires", "chrono", "grave"]
+    },
+    "bbox": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": { "type": "number" }
+    },
+    "illustration": {
+      "description": "La bbox MESUREE de la scene dessinee, et sa taille en pixels. Elle fixe le viewBox de l'habillage ; extraire-illustrations.py la decoupe sans la re-mesurer.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["bboxPt", "pixels", "viewBoxPropose"],
+      "properties": {
+        "bboxPt": { "$ref": "#/$defs/bbox" },
+        "pixels": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": { "type": "integer", "minimum": 1 }
+        },
+        "viewBoxPropose": { "type": "string", "pattern": "^0 0 [0-9]+ [0-9]+$" }
+      }
+    },
+    "texteSupport": {
+      "description": "Le support de lecture des niveaux 2 a 6. Rendu ligne a ligne AVEC son ordonnee : l'interligne mesure (23,9 a 30,0 pt) depasse le seuil d'item, en tirer des items serait inventer un decoupage que la page ne porte pas.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["lignes", "contenu", "nbLignes", "texteFiable"],
+      "properties": {
+        "lignes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["texte", "y"],
+            "properties": {
+              "texte": { "type": "string", "minLength": 1 },
+              "y": { "type": "number" }
+            }
+          }
+        },
+        "contenu": { "type": "string", "minLength": 1 },
+        "nbLignes": { "type": "integer", "minimum": 1 },
+        "texteFiable": { "type": "boolean" }
+      }
+    },
+    "itemProprietes": {
+      "rang": { "type": "integer", "minimum": 1 },
+      "texte": { "type": "string", "minLength": 1 },
+      "texteFiable": { "type": "boolean" },
+      "nbLignes": { "type": "integer", "minimum": 1 },
+      "y": { "type": "number" }
+    },
+    "aFaireALaMain": {
+      "description": "Ce que le PDF ne porte pas et qu'un humain doit decider. JAMAIS vide : un brouillon sans reste a faire serait un exercice, et ce n'en est pas un.",
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "avertissements": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+
+    "brouillonNiveau1": {
+      "title": "Niveau 1 — scene dessinee, consignes d'action et affirmations sur l'image",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "statut", "raison", "origine", "illustration", "consignes",
+        "affirmations", "compte", "aFaireALaMain", "avertissements"
+      ],
+      "properties": {
+        "statut": { "$ref": "#/$defs/statut" },
+        "raison": { "type": "string", "minLength": 1 },
+        "origine": {
+          "allOf": [{ "$ref": "#/$defs/origine" }],
+          "properties": { "niveau": { "const": 1 } }
+        },
+        "illustration": { "$ref": "#/$defs/illustration" },
+        "consignes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "rang", "texte", "type", "mixte", "forme", "couleurs",
+              "verbesPlacement", "verbesColoriage", "couleursImprecises",
+              "texteFiable", "nbLignes", "y"
+            ],
+            "properties": {
+              "rang": { "$ref": "#/$defs/itemProprietes/rang" },
+              "texte": { "$ref": "#/$defs/itemProprietes/texte" },
+              "type": { "enum": ["colorie", "place", "autre"] },
+              "mixte": { "type": "boolean" },
+              "forme": { "enum": ["imperative", "affirmative"] },
+              "couleurs": {
+                "type": "array",
+                "items": {
+                  "enum": ["rouge", "orange", "jaune", "vert", "bleu", "violet",
+                           "rose", "brun", "noir", "blanc", "gris"]
+                }
+              },
+              "verbesPlacement": { "type": "array", "items": { "type": "string" } },
+              "verbesColoriage": { "type": "array", "items": { "type": "string" } },
+              "couleursImprecises": { "type": "array", "items": { "type": "string" } },
+              "texteFiable": { "$ref": "#/$defs/itemProprietes/texteFiable" },
+              "nbLignes": { "$ref": "#/$defs/itemProprietes/nbLignes" },
+              "y": { "$ref": "#/$defs/itemProprietes/y" }
+            }
+          }
+        },
+        "affirmations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["rang", "texte", "texteFiable", "nbLignes", "y"],
+            "properties": {
+              "rang": { "$ref": "#/$defs/itemProprietes/rang" },
+              "texte": { "$ref": "#/$defs/itemProprietes/texte" },
+              "texteFiable": { "$ref": "#/$defs/itemProprietes/texteFiable" },
+              "nbLignes": { "$ref": "#/$defs/itemProprietes/nbLignes" },
+              "y": { "$ref": "#/$defs/itemProprietes/y" }
+            }
+          }
+        },
+        "compte": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["consignes", "affirmations"],
+          "properties": {
+            "consignes": { "type": "integer", "minimum": 1 },
+            "affirmations": { "type": "integer", "minimum": 1 }
+          }
+        },
+        "aFaireALaMain": { "$ref": "#/$defs/aFaireALaMain" },
+        "avertissements": { "$ref": "#/$defs/avertissements" }
+      }
+    },
+
+    "brouillonNiveau2": {
+      "title": "Niveau 2 — texte documentaire et affirmations vrai/faux",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "statut", "raison", "origine", "moteurCible", "modeReponse", "titre",
+        "consigne", "texte", "affirmations", "compte", "aFaireALaMain",
+        "avertissements"
+      ],
+      "properties": {
+        "statut": { "$ref": "#/$defs/statut" },
+        "raison": { "type": "string", "minLength": 1 },
+        "origine": {
+          "allOf": [{ "$ref": "#/$defs/origine" }],
+          "properties": { "niveau": { "const": 2 } }
+        },
+        "moteurCible": { "const": "histoire" },
+        "modeReponse": { "const": "vrai-faux" },
+        "titre": { "type": "string", "minLength": 1 },
+        "consigne": { "type": "string", "minLength": 1 },
+        "texte": { "$ref": "#/$defs/texteSupport" },
+        "affirmations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["rang", "texte", "texteFiable", "nbLignes", "y", "reponseAttendue"],
+            "properties": {
+              "rang": { "$ref": "#/$defs/itemProprietes/rang" },
+              "texte": { "$ref": "#/$defs/itemProprietes/texte" },
+              "texteFiable": { "$ref": "#/$defs/itemProprietes/texteFiable" },
+              "nbLignes": { "$ref": "#/$defs/itemProprietes/nbLignes" },
+              "y": { "$ref": "#/$defs/itemProprietes/y" },
+              "reponseAttendue": {
+                "description": "null tant que le parent n'a pas tranche : le corrige n'est PAS dans le PDF.",
+                "type": ["boolean", "null"]
+              }
+            }
+          }
+        },
+        "compte": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["lignesTexte", "affirmations"],
+          "properties": {
+            "lignesTexte": { "type": "integer", "minimum": 1 },
+            "affirmations": { "type": "integer", "minimum": 1 }
+          }
+        },
+        "aFaireALaMain": { "$ref": "#/$defs/aFaireALaMain" },
+        "avertissements": { "$ref": "#/$defs/avertissements" }
+      }
+    },
+
+    "brouillonNiveau3": {
+      "title": "Niveau 3 — questions a reponses illustrees",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "statut", "raison", "origine", "moteurCible", "modeReponse", "titre",
+        "consigne", "texte", "questions", "compte", "aFaireALaMain",
+        "avertissements"
+      ],
+      "properties": {
+        "statut": { "$ref": "#/$defs/statut" },
+        "raison": { "type": "string", "minLength": 1 },
+        "origine": {
+          "allOf": [{ "$ref": "#/$defs/origine" }],
+          "properties": { "niveau": { "const": 3 } }
+        },
+        "moteurCible": { "const": "paires" },
+        "modeReponse": { "const": "qcm-3" },
+        "titre": { "type": "string", "minLength": 1 },
+        "consigne": { "type": "string", "minLength": 1 },
+        "texte": { "$ref": "#/$defs/texteSupport" },
+        "questions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "rang", "texte", "texteFiable", "nbLignes", "y", "optionsFiables",
+              "optionsAnnoncees", "vignettesMesurees", "zoneReponseBboxPt"
+            ],
+            "properties": {
+              "rang": { "$ref": "#/$defs/itemProprietes/rang" },
+              "texte": { "$ref": "#/$defs/itemProprietes/texte" },
+              "texteFiable": { "$ref": "#/$defs/itemProprietes/texteFiable" },
+              "nbLignes": { "$ref": "#/$defs/itemProprietes/nbLignes" },
+              "y": { "$ref": "#/$defs/itemProprietes/y" },
+              "optionsFiables": {
+                "description": "TOUJOURS false, et c'est le point du format : une partie des images-reponses est dessinee en vectoriel et n'est aucun bloc image. 105 blocs mesures pour 225 options annoncees.",
+                "const": false
+              },
+              "optionsAnnoncees": { "type": "integer", "minimum": 1 },
+              "vignettesMesurees": {
+                "type": "array",
+                "items": { "$ref": "#/$defs/illustration" }
+              },
+              "zoneReponseBboxPt": {
+                "oneOf": [{ "$ref": "#/$defs/bbox" }, { "type": "null" }]
+              }
+            }
+          }
+        },
+        "compte": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["lignesTexte", "questions", "optionsAnnoncees",
+                       "vignettesMesurees", "ecartOptions"],
+          "properties": {
+            "lignesTexte": { "type": "integer", "minimum": 1 },
+            "questions": { "type": "integer", "minimum": 1 },
+            "optionsAnnoncees": { "type": "integer", "minimum": 1 },
+            "vignettesMesurees": { "type": "integer", "minimum": 0 },
+            "ecartOptions": { "type": "integer" }
+          }
+        },
+        "aFaireALaMain": { "$ref": "#/$defs/aFaireALaMain" },
+        "avertissements": { "$ref": "#/$defs/avertissements" }
+      }
+    },
+
+    "brouillonNiveau4": {
+      "title": "Niveau 4 — QCM a trois options ecrites",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "statut", "raison", "origine", "moteurCible", "modeReponse", "titre",
+        "consigne", "texte", "questions", "compte", "aFaireALaMain",
+        "avertissements"
+      ],
+      "properties": {
+        "statut": { "$ref": "#/$defs/statut" },
+        "raison": { "type": "string", "minLength": 1 },
+        "origine": {
+          "allOf": [{ "$ref": "#/$defs/origine" }],
+          "properties": { "niveau": { "const": 4 } }
+        },
+        "moteurCible": { "const": "histoire" },
+        "modeReponse": { "const": "qcm-3" },
+        "titre": { "type": "string", "minLength": 1 },
+        "consigne": { "type": "string", "minLength": 1 },
+        "texte": { "$ref": "#/$defs/texteSupport" },
+        "questions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["rang", "texte", "texteFiable", "nbLignes", "y",
+                         "options", "bonneOption"],
+            "properties": {
+              "rang": { "$ref": "#/$defs/itemProprietes/rang" },
+              "texte": { "$ref": "#/$defs/itemProprietes/texte" },
+              "texteFiable": { "$ref": "#/$defs/itemProprietes/texteFiable" },
+              "nbLignes": { "$ref": "#/$defs/itemProprietes/nbLignes" },
+              "y": { "$ref": "#/$defs/itemProprietes/y" },
+              "options": {
+                "description": "Exactement trois : mesure sur 75 questions sur 75. Un QCM a deux options fausserait p_devinette sans que rien ne le signale.",
+                "type": "array",
+                "minItems": 3,
+                "maxItems": 3,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["rang", "texte", "colonne", "texteFiable"],
+                  "properties": {
+                    "rang": { "type": "integer", "minimum": 1, "maximum": 3 },
+                    "texte": { "type": "string", "minLength": 1 },
+                    "colonne": { "type": "integer", "minimum": 1, "maximum": 3 },
+                    "texteFiable": { "type": "boolean" }
+                  }
+                }
+              },
+              "bonneOption": {
+                "description": "null tant que le parent n'a pas tranche : rien ne distingue par position l'option juste des deux autres.",
+                "type": ["integer", "null"],
+                "minimum": 1,
+                "maximum": 3
+              }
+            }
+          }
+        },
+        "compte": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["lignesTexte", "questions", "options"],
+          "properties": {
+            "lignesTexte": { "type": "integer", "minimum": 1 },
+            "questions": { "type": "integer", "minimum": 1 },
+            "options": { "type": "integer", "minimum": 1 }
+          }
+        },
+        "aFaireALaMain": { "$ref": "#/$defs/aFaireALaMain" },
+        "avertissements": { "$ref": "#/$defs/avertissements" }
+      }
+    },
+
+    "brouillonNiveau5": {
+      "title": "Niveau 5 — remise en ordre du recit, et reperage colorie",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "statut", "raison", "origine", "moteurCible", "modeReponse", "titre",
+        "consigne", "consigneSecondaire", "texte", "etapes", "reperages",
+        "compte", "aFaireALaMain", "avertissements"
+      ],
+      "properties": {
+        "statut": { "$ref": "#/$defs/statut" },
+        "raison": { "type": "string", "minLength": 1 },
+        "origine": {
+          "allOf": [{ "$ref": "#/$defs/origine" }],
+          "properties": { "niveau": { "const": 5 } }
+        },
+        "moteurCible": { "const": "chrono" },
+        "modeReponse": { "const": "ordre" },
+        "titre": { "type": "string", "minLength": 1 },
+        "consigne": { "type": "string", "minLength": 1 },
+        "consigneSecondaire": { "type": "string", "minLength": 1 },
+        "texte": { "$ref": "#/$defs/texteSupport" },
+        "etapes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["rang", "texte", "texteFiable", "nbLignes", "y", "ordreAttendu"],
+            "properties": {
+              "rang": {
+                "description": "Position D'IMPRESSION sur la fiche, jamais la place dans le recit : les etapes sont imprimees dans le desordre, c'est l'exercice.",
+                "type": "integer",
+                "minimum": 1
+              },
+              "texte": { "$ref": "#/$defs/itemProprietes/texte" },
+              "texteFiable": { "$ref": "#/$defs/itemProprietes/texteFiable" },
+              "nbLignes": { "$ref": "#/$defs/itemProprietes/nbLignes" },
+              "y": { "$ref": "#/$defs/itemProprietes/y" },
+              "ordreAttendu": { "type": ["integer", "null"], "minimum": 1 }
+            }
+          }
+        },
+        "reperages": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["rang", "texte", "texteFiable", "nbLignes", "y",
+                         "couleur", "yCouleur", "passageAttendu"],
+            "properties": {
+              "rang": { "$ref": "#/$defs/itemProprietes/rang" },
+              "texte": { "$ref": "#/$defs/itemProprietes/texte" },
+              "texteFiable": { "$ref": "#/$defs/itemProprietes/texteFiable" },
+              "nbLignes": { "$ref": "#/$defs/itemProprietes/nbLignes" },
+              "y": { "$ref": "#/$defs/itemProprietes/y" },
+              "couleur": { "type": "string", "minLength": 1 },
+              "yCouleur": { "type": "number" },
+              "passageAttendu": { "type": ["string", "null"] }
+            }
+          }
+        },
+        "compte": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["lignesTexte", "etapes", "reperages"],
+          "properties": {
+            "lignesTexte": { "type": "integer", "minimum": 1 },
+            "etapes": { "type": "integer", "minimum": 1 },
+            "reperages": { "type": "integer", "minimum": 1 }
+          }
+        },
+        "aFaireALaMain": { "$ref": "#/$defs/aFaireALaMain" },
+        "avertissements": { "$ref": "#/$defs/avertissements" }
+      }
+    },
+
+    "brouillonNiveau6": {
+      "title": "Niveau 6 — phrases a trou amorcees",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "statut", "raison", "origine", "moteurCible", "modeReponse", "titre",
+        "consigne", "texte", "questions", "compte", "aFaireALaMain",
+        "avertissements"
+      ],
+      "properties": {
+        "statut": { "$ref": "#/$defs/statut" },
+        "raison": { "type": "string", "minLength": 1 },
+        "origine": {
+          "allOf": [{ "$ref": "#/$defs/origine" }],
+          "properties": { "niveau": { "const": 6 } }
+        },
+        "moteurCible": { "const": "grave" },
+        "modeReponse": { "const": "saisie" },
+        "titre": { "type": "string", "minLength": 1 },
+        "consigne": { "type": "string", "minLength": 1 },
+        "texte": { "$ref": "#/$defs/texteSupport" },
+        "questions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["rang", "texte", "texteFiable", "nbLignes", "y",
+                         "amorce", "yAmorce", "amorceFiable", "reponseAttendue"],
+            "properties": {
+              "rang": { "$ref": "#/$defs/itemProprietes/rang" },
+              "texte": { "$ref": "#/$defs/itemProprietes/texte" },
+              "texteFiable": { "$ref": "#/$defs/itemProprietes/texteFiable" },
+              "nbLignes": { "$ref": "#/$defs/itemProprietes/nbLignes" },
+              "y": { "$ref": "#/$defs/itemProprietes/y" },
+              "amorce": {
+                "description": "Le debut imprime de la phrase reponse. C'est SA presence qui separe le niveau 6 du niveau 7 : sans amorce, rien ne borne la reponse, et niveau7.py refuse.",
+                "type": "string",
+                "minLength": 1
+              },
+              "yAmorce": { "type": "number" },
+              "amorceFiable": { "type": "boolean" },
+              "reponseAttendue": { "type": ["string", "null"] }
+            }
+          }
+        },
+        "compte": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["lignesTexte", "questions", "amorces"],
+          "properties": {
+            "lignesTexte": { "type": "integer", "minimum": 1 },
+            "questions": { "type": "integer", "minimum": 1 },
+            "amorces": { "type": "integer", "minimum": 1 }
+          }
+        },
+        "aFaireALaMain": { "$ref": "#/$defs/aFaireALaMain" },
+        "avertissements": { "$ref": "#/$defs/avertissements" }
+      }
+    }
+  }
+}

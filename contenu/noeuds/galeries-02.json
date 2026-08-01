@@ -1,0 +1,10 @@
+{
+  "id": "galeries-02",
+  "region": "galeries",
+  "ordre": 2,
+  "exercice": "galeries-miroir-bp-01",
+  "prerequis": [
+    "galeries-01"
+  ],
+  "temps": "developpement"
+}

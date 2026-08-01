@@ -1,0 +1,203 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "pierre:schemas/monde",
+  "title": "Monde",
+  "description": "Le schema des QUATRE fichiers de `contenu/monde/` : regions.json, campement.json, gobi-stades.json, compagnons.json. Un seul fichier de schema parce que le contrat des features v2 § 3.6 n'en accorde qu'un, et qu'un lot n'invente pas un fichier absent de l'arborescence. Chaque document se reconnait a sa cle racine — `regions`, `points`, `stades`, `compagnons` — ce qui rend le `oneOf` deterministe.",
+  "type": "object",
+  "oneOf": [
+    { "$ref": "#/$defs/documentRegions" },
+    { "$ref": "#/$defs/documentCampement" },
+    { "$ref": "#/$defs/documentStades" },
+    { "$ref": "#/$defs/documentCompagnons" }
+  ],
+  "$defs": {
+    "codeRegion": {
+      "enum": ["clairiere", "galeries", "marais-jumeau", "foret-muette", "volcan", "cite-des-histoires"]
+    },
+    "codeMoteur": {
+      "enum": ["attrape", "tri", "assemble", "chemin", "eclair", "paires", "phrase",
+               "histoire", "chrono", "grave", "colorie", "libre", "place", "trace"]
+    },
+    "identifiant": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+    "cheminAsset": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*(/[a-z0-9]+(-[a-z0-9]+)*)*\\.[a-z0-9]+$" },
+    "commentaire": { "type": "string" },
+
+    "documentRegions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ouvertesEnParallele", "scene", "regions"],
+      "properties": {
+        "$commentaire": { "$ref": "#/$defs/commentaire" },
+        "ouvertesEnParallele": { "type": "integer", "minimum": 1, "maximum": 6 },
+        "scene": {
+          "description": "La scene de la carte. Ajoutee a l'integration : `carte-monde.svg` n'etait declare QUE dans `client/src/ecrans/EcranCarte.tsx`, si bien que le controle P3.2 de `test:contenu` le voyait comme du contenu mort. Un decor coloriable declare dans du code n'est pas declare.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["fichier", "viewBox"],
+          "properties": {
+            "fichier": { "$ref": "#/$defs/cheminAsset" },
+            "viewBox": { "type": "string", "pattern": "^-?[0-9]+(\\.[0-9]+)? -?[0-9]+(\\.[0-9]+)? [0-9]+(\\.[0-9]+)? [0-9]+(\\.[0-9]+)?$" }
+          }
+        },
+        "regions": {
+          "type": "array",
+          "minItems": 6,
+          "maxItems": 6,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["region", "ordre", "libelle", "domaine", "ambiance", "competences", "noeuds"],
+            "properties": {
+              "region": { "$ref": "#/$defs/codeRegion" },
+              "ordre": { "type": "integer", "minimum": 1, "maximum": 6 },
+              "libelle": { "type": "string", "minLength": 1, "maxLength": 60 },
+              "domaine": { "type": "string", "minLength": 1, "maxLength": 160 },
+              "ambiance": { "type": "string", "minLength": 1, "maxLength": 160 },
+              "competences": { "type": "array", "uniqueItems": true, "items": { "type": "string" } },
+              "noeuds": {
+                "type": "array",
+                "uniqueItems": true,
+                "items": { "$ref": "#/$defs/identifiant" }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "documentCampement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scene", "points", "objets"],
+      "properties": {
+        "$commentaire": { "$ref": "#/$defs/commentaire" },
+        "scene": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["fichier", "viewBox"],
+          "properties": {
+            "fichier": { "$ref": "#/$defs/cheminAsset" },
+            "viewBox": { "type": "string", "pattern": "^-?[0-9]+(\\.[0-9]+)? -?[0-9]+(\\.[0-9]+)? [0-9]+(\\.[0-9]+)? [0-9]+(\\.[0-9]+)?$" }
+          }
+        },
+        "points": {
+          "description": "R11 : au moins 25 points. Le seuil est ecrit ici ET mesure par `auditerCampement` — le schema attrape le fichier ampute, la fonction attrape le fichier creux (25 points qui ne reagissent a rien).",
+          "type": "array",
+          "minItems": 25,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "libelle", "reaction", "animationUnique", "replique", "zone"],
+            "properties": {
+              "id": { "$ref": "#/$defs/identifiant" },
+              "libelle": { "type": "string", "minLength": 1, "maxLength": 60 },
+              "reaction": { "enum": ["animation", "replique", "son", "aucune"] },
+              "animationUnique": { "type": "boolean" },
+              "replique": {
+                "oneOf": [{ "$ref": "#/$defs/cheminAsset" }, { "type": "null" }]
+              },
+              "zone": {
+                "description": "[x, y, largeur, hauteur] en unites viewBox. Les deux dernieres sont bornees a 64 : R16, aucune cible sous 64 px.",
+                "type": "array",
+                "minItems": 4,
+                "maxItems": 4,
+                "prefixItems": [
+                  { "type": "number" },
+                  { "type": "number" },
+                  { "type": "number", "minimum": 64 },
+                  { "type": "number", "minimum": 64 }
+                ]
+              }
+            }
+          }
+        },
+        "objets": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["code", "libelle", "asset", "region"],
+            "properties": {
+              "code": { "$ref": "#/$defs/identifiant" },
+              "libelle": { "type": "string", "minLength": 1, "maxLength": 60 },
+              "asset": { "$ref": "#/$defs/cheminAsset" },
+              "region": { "$ref": "#/$defs/codeRegion" }
+            }
+          }
+        }
+      }
+    },
+
+    "documentStades": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["stades", "formes"],
+      "properties": {
+        "$commentaire": { "$ref": "#/$defs/commentaire" },
+        "stades": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["code", "rang", "libelle", "formesRequises", "asset"],
+            "properties": {
+              "code": { "enum": ["oeuf", "boule", "crete", "equipe", "gardien"] },
+              "rang": { "type": "integer", "minimum": 1 },
+              "libelle": { "type": "string", "minLength": 1, "maxLength": 60 },
+              "formesRequises": { "type": "integer", "minimum": 0 },
+              "asset": { "$ref": "#/$defs/cheminAsset" }
+            }
+          }
+        },
+        "formes": {
+          "description": "Les declinaisons du CRISTAL, jamais du corps (D20).",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["grapheme", "libelle", "cristal"],
+            "properties": {
+              "grapheme": { "type": "string", "minLength": 1, "maxLength": 6 },
+              "libelle": { "type": "string", "minLength": 1, "maxLength": 40 },
+              "cristal": { "$ref": "#/$defs/cheminAsset" }
+            }
+          }
+        }
+      }
+    },
+
+    "documentCompagnons": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["compagnons"],
+      "properties": {
+        "$commentaire": { "$ref": "#/$defs/commentaire" },
+        "compagnons": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["code", "libelle", "valeur", "domaine", "region", "asset", "moteursFavorises", "replique"],
+            "properties": {
+              "code": { "enum": ["filou", "bulle", "roc", "plume"] },
+              "libelle": { "type": "string", "minLength": 1, "maxLength": 40 },
+              "valeur": { "type": "string", "minLength": 1, "maxLength": 60 },
+              "domaine": { "type": "string", "minLength": 1, "maxLength": 120 },
+              "region": { "$ref": "#/$defs/codeRegion" },
+              "asset": { "$ref": "#/$defs/cheminAsset" },
+              "moteursFavorises": {
+                "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/codeMoteur" }
+              },
+              "replique": {
+                "oneOf": [{ "$ref": "#/$defs/cheminAsset" }, { "type": "null" }]
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

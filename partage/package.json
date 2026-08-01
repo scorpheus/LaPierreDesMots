@@ -6,7 +6,13 @@
   "exports": {
     ".": { "types": "./src/index.ts", "default": "./dist/index.js" },
     "./validation": { "types": "./src/contenu/validation.ts", "default": "./dist/contenu/validation.js" },
-    "./factices": { "types": "./src/fournisseurs/factices.ts", "default": "./dist/fournisseurs/factices.js" }
+    "./factices": { "types": "./src/fournisseurs/factices.ts", "default": "./dist/fournisseurs/factices.js" },
+    "./pedagogie": { "types": "./src/pedagogie/index.ts", "default": "./dist/pedagogie/index.js" },
+    "./miroir": { "types": "./src/pedagogie/miroir.ts", "default": "./dist/pedagogie/miroir.js" },
+    "./lecture": { "types": "./src/lecture/index.ts", "default": "./dist/lecture/index.js" },
+    "./recompenses": { "types": "./src/recompenses/index.ts", "default": "./dist/recompenses/index.js" },
+    "./monde": { "types": "./src/monde/index.ts", "default": "./dist/monde/index.js" },
+    "./parent": { "types": "./src/parent/index.ts", "default": "./dist/parent/index.js" }
   },
   "scripts": { "construire": "tsc -b" },
   "dependencies": {

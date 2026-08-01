@@ -1,0 +1,106 @@
+{
+  "id": "clairiere.lucioles",
+  "moteurs": [
+    "attrape"
+  ],
+  "libelle": "La ronde des lucioles",
+  "region": "clairiere",
+  "scene": {
+    "fichier": "habillages/clairiere/lucioles.svg",
+    "viewBox": "0 0 960 600",
+    "calques": [
+      {
+        "id": "calque-fond",
+        "role": "fond",
+        "regions": []
+      },
+      {
+        "id": "calque-zones",
+        "role": "coloriable",
+        "regions": [
+          {
+            "id": "luciole-haute",
+            "libelle": "la luciole du haut",
+            "centroide": [
+              190.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "luciole-basse",
+            "libelle": "la luciole du bas",
+            "centroide": [
+              480.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "buisson",
+            "libelle": "le buisson",
+            "centroide": [
+              770.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "herbe-haute",
+            "libelle": "l’herbe haute",
+            "centroide": [
+              190.0,
+              420.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "lune",
+            "libelle": "la lune",
+            "centroide": [
+              480.0,
+              420.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "sentier",
+            "libelle": "le sentier",
+            "centroide": [
+              770.0,
+              420.0
+            ],
+            "surface": 32000.0
+          }
+        ]
+      },
+      {
+        "id": "calque-trait",
+        "role": "trait",
+        "regions": []
+      }
+    ]
+  },
+  "palette": {
+    "jetons": {},
+    "nuancier": [
+      "vert",
+      "jaune",
+      "bleu",
+      "brun",
+      "rose",
+      "blanc"
+    ]
+  },
+  "timings": {
+    "appuiMs": 50,
+    "relachementMs": 100,
+    "refusMs": 160,
+    "recolorationMs": 700,
+    "interEtoilesMs": 160
+  },
+  "sons": {
+    "ambiance": null,
+    "effets": {}
+  }
+}

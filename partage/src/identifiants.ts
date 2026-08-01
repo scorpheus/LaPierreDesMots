@@ -53,9 +53,26 @@ export type CodeRegion =
   | 'cite-des-histoires';
 
 /**
- * Les treize moteurs de la v2 § 7. L'énumération reprend, dans le même ordre, celle de
+ * Les **quatorze** moteurs. L'énumération reprend, dans le même ordre, celle de
  * `contenu/schemas/exercice.schema.json` (contrat § 9.2).
- * Un seul est implanté en v1 : `colorie` (décision D1).
+ *
+ * ─────────────────────────────────────────────────────────────────────────────────────────
+ * `'trace'` AJOUTÉ À L'INTÉGRATION — défaut du contrat gelé v2, signalé par deux lots.
+ *
+ * Le contrat des features v2 § 3.3 fait écrire le moteur `trace` par L2-C et son § 10.2
+ * compte bien 13 `moteur.ts` neufs, `colorie` non compris : le total est de quatorze, pas de
+ * treize. Mais ni ce fichier ni `contenu/schemas/exercice.schema.json` ne figurent au § 3 —
+ * **aucun lot ne les possédait**, et L2-C comme L2-E ont donc signalé le manque au lieu de
+ * le contourner, en posant deux transtypages provisoires :
+ *
+ *   partage/src/moteurs/trace/moteur.ts:398  code: 'trace' as Moteur<…>['code']
+ *   client/src/moteurs/trace/index.ts:16     code: 'trace' as MoteurRendu<…>['code']
+ *
+ * Les deux sont retirés avec cet ajout. `trace` est le moteur qui répond au besoin nommé de
+ * l'enfant (D23, les confusions miroir) : le laisser hors de l'union le rendait
+ * inexprimable dans un exercice — le schéma de contenu aurait refusé tout
+ * `"moteur": "trace"`, en silence, à la validation.
+ * ─────────────────────────────────────────────────────────────────────────────────────────
  */
 export type CodeMoteur =
   | 'attrape'
@@ -70,4 +87,5 @@ export type CodeMoteur =
   | 'grave'
   | 'colorie'
   | 'libre'
-  | 'place';
+  | 'place'
+  | 'trace';

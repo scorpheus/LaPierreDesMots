@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200" role="img" aria-label="Gobi, stade 3 : la Crête">
+  <title>Gobi — stade 3, la Crête</title>
+  <desc>PLACEHOLDER — forme canonique non validée (D7, D31 étape A). Bouchon écrit à la main (D2). Le corps est celui du stade 2, inchangé : c'est la CRÊTE de cristaux qui pousse (D20, D31 « base retenue : la proposition 06, corps rond, bras, besace, crête de cristaux »).</desc>
+  <g id="gobi-corps">
+    <circle id="corps" cx="100" cy="118" r="62" fill="#FF5D8F" stroke="#1B2440" stroke-width="6"/>
+    <path id="ventre" d="M100,98 C124,98 140,118 140,140 C140,162 122,176 100,176 C78,176 60,162 60,140 C60,118 76,98 100,98 Z" fill="#FFC0D6" stroke="#1B2440" stroke-width="4" stroke-linejoin="round"/>
+  </g>
+  <g id="gobi-bras">
+    <path id="bras-gauche" d="M42,120 C26,118 16,128 16,140 C16,152 26,160 40,158 C50,156 52,140 50,130 Z" fill="#FF5D8F" stroke="#1B2440" stroke-width="5" stroke-linejoin="round"/>
+    <path id="bras-droit" d="M158,120 C174,118 184,128 184,140 C184,152 174,160 160,158 C150,156 148,140 150,130 Z" fill="#FF5D8F" stroke="#1B2440" stroke-width="5" stroke-linejoin="round"/>
+    <circle id="main-gauche" cx="26" cy="142" r="11" fill="#FFC0D6" stroke="#1B2440" stroke-width="4"/>
+    <circle id="main-droite" cx="174" cy="142" r="11" fill="#FFC0D6" stroke="#1B2440" stroke-width="4"/>
+  </g>
+  <g id="gobi-visage">
+    <circle id="oeil-gauche" cx="80" cy="104" r="14" fill="#FFF6E3" stroke="#1B2440" stroke-width="4"/>
+    <circle id="oeil-droit" cx="120" cy="104" r="14" fill="#FFF6E3" stroke="#1B2440" stroke-width="4"/>
+    <circle id="pupille-gauche" cx="82" cy="106" r="6" fill="#1B2440"/>
+    <circle id="pupille-droite" cx="122" cy="106" r="6" fill="#1B2440"/>
+    <path id="sourire" d="M82,132 C92,146 108,146 118,132 C112,154 88,154 82,132 Z" fill="#1B2440" stroke="#1B2440" stroke-width="3" stroke-linejoin="round"/>
+  </g>
+  <g id="gobi-cristal">
+    <path id="cristal-gauche" d="M68,34 L80,58 L68,70 L58,58 Z" fill="#2FA8E0" stroke="#1B2440" stroke-width="5" stroke-linejoin="round"/>
+    <path id="cristal-central" d="M100,6 L118,40 L100,58 L82,40 Z" fill="#2FA8E0" stroke="#1B2440" stroke-width="5" stroke-linejoin="round"/>
+    <path id="cristal-droit" d="M132,34 L142,58 L132,70 L120,58 Z" fill="#2FA8E0" stroke="#1B2440" stroke-width="5" stroke-linejoin="round"/>
+    <path id="cristal-eclat" d="M100,18 L107,38 L100,46 L93,38 Z" fill="#FFF6E3" stroke="none"/>
+  </g>
+</svg>

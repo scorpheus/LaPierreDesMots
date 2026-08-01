@@ -83,6 +83,100 @@ async function etatMoteur(page: Page): Promise<EtatColorieLu> {
   )) as EtatColorieLu;
 }
 
+/**
+ * ════════════════════════════════════════════════════════════════════════════════════════
+ * TAPER UNE RÉGION LÀ OÙ ELLE EST VRAIMENT — et non au centre de sa boîte.
+ *
+ * `locator.click()` vise le centre de la BOÎTE ENGLOBANTE et refuse d'agir si un autre
+ * élément l'occupe. Sur un décor de coloriage, ce point n'appartient très souvent pas à la
+ * région : `toit-ecole` est un triangle PERCÉ par l'horloge (`fill-rule="evenodd"`), et le
+ * centre de sa boîte, (270 ; 222,5), tombe pile dans ce trou — donc sur `horloge-ecole`, qui
+ * est dessinée par-dessus. Le test attendait 90 s puis abandonnait.
+ *
+ * CE N'EST PAS UN DÉFAUT DU PRODUIT, et le contrat gelé le dit à la lettre (§ 5.2) :
+ *   « 1. Si le point tombe dans une région coloriable, c'est elle. »
+ * C'est le POINT qui décide, jamais l'élément qu'on croit viser. Un doigt posé sur l'horloge
+ * peint l'horloge, et c'est exactement ce qu'il doit faire. L'assertion fautive était
+ * l'assertion implicite de `locator.click()` : « cliquer l'élément X agit sur la région X ».
+ *
+ * On demande donc au navigateur un point qui est À LA FOIS dans le remplissage de la région
+ * (`isPointInFill`, qui respecte `fill-rule`) et au-dessus d'elle dans l'empilement
+ * (`elementFromPoint`). C'est le geste réel de l'enfant, et l'assertion en sort RENFORCÉE :
+ * elle vérifie toujours que c'est bien cette région-là qui devient peinte.
+ * ════════════════════════════════════════════════════════════════════════════════════════
+ */
+async function pointDeTap(page: Page, region: string): Promise<{ x: number; y: number }> {
+  const resultat = await page.evaluate((identifiant) => {
+    const element = document.querySelector(
+      `[data-region-svg="${identifiant}"]`
+    ) as SVGGeometryElement | null;
+    if (element === null) return { point: null, diagnostic: 'aucun élément ne porte cet id' };
+    if (typeof element.isPointInFill !== 'function') {
+      return { point: null, diagnostic: 'isPointInFill indisponible sur cet élément' };
+    }
+    const matrice = element.getScreenCTM();
+    if (matrice === null) return { point: null, diagnostic: 'getScreenCTM() est null' };
+
+    const boite = element.getBBox();
+    let dansLeRemplissage = 0;
+    const couvreurs = new Set<string>();
+    // Balayage régulier de la boîte : 21 × 21 pas suffisent pour toute forme de ce décor.
+    const PAS = 21;
+    for (let ligne = 1; ligne <= PAS; ligne += 1) {
+      for (let colonne = 1; colonne <= PAS; colonne += 1) {
+        const dans = new DOMPoint(
+          boite.x + (boite.width * colonne) / (PAS + 1),
+          boite.y + (boite.height * ligne) / (PAS + 1)
+        );
+        if (!element.isPointInFill(dans)) continue;
+        dansLeRemplissage += 1;
+        const ecran = dans.matrixTransform(matrice);
+        const dessus = document.elementFromPoint(ecran.x, ecran.y);
+        if (dessus === element) return { point: { x: ecran.x, y: ecran.y }, diagnostic: '' };
+        couvreurs.add(
+          dessus === null
+            ? 'hors de la fenêtre'
+            : (dessus.getAttribute('data-region-svg') ??
+              `${dessus.tagName}#${dessus.getAttribute('id') ?? '(sans id)'}`)
+        );
+      }
+    }
+    return {
+      point: null,
+      diagnostic:
+        `${String(dansLeRemplissage)} point(s) dans le remplissage, aucun au-dessus ; ` +
+        `recouvert par : ${[...couvreurs].join(', ') || '(rien)'} ; ` +
+        `boîte ${boite.x},${boite.y} ${boite.width}×${boite.height} ; ` +
+        `rect écran ${JSON.stringify(element.getBoundingClientRect())} ; ` +
+        `fenêtre ${String(window.innerWidth)}×${String(window.innerHeight)} ` +
+        `défilement ${String(window.scrollX)},${String(window.scrollY)}`
+    };
+  }, region);
+
+  if (resultat.point === null) {
+    throw new Error(
+      `aucun point de « ${region} » n'est à la fois dans son remplissage et au-dessus d'elle : ` +
+        `aucun doigt ne peut l’atteindre. ${resultat.diagnostic}`
+    );
+  }
+  return resultat.point;
+}
+
+/**
+ * Un tap réel, au doigt, sur un point qui appartient vraiment à la région.
+ *
+ * On amène d'abord la région dans la fenêtre. `locator.click()` le faisait pour nous ;
+ * `page.mouse.click()`, non — il vise des coordonnées de fenêtre, sans rien savoir de la
+ * page. Le godet, cliqué juste avant, est SOUS la scène : le clic y avait fait défiler de
+ * 690 px, et la région visée se retrouvait à `y = −195`, au-dessus du bord haut. Les 169
+ * points du toit étaient bien dans son remplissage, et tous « hors de la fenêtre ».
+ */
+async function taperLaRegion(page: Page, region: string): Promise<void> {
+  await page.locator(`[data-region-svg="${region}"]`).scrollIntoViewIfNeeded();
+  const point = await pointDeTap(page, region);
+  await page.mouse.click(point.x, point.y);
+}
+
 async function entrerDansLeNoeud(page: Page): Promise<void> {
   await page.evaluate(
     async (noeud) => (window as FenetreTest).__test.allerAuNoeud(noeud),
@@ -126,9 +220,27 @@ test.describe('parcours nominal', () => {
       await expect(godet).toHaveAttribute('data-choisie', 'oui');
 
       const region = page.locator(`[data-region-svg="${cible.region}"]`);
-      await region.click();
-      await expect(region).toHaveAttribute('data-peinte', 'oui');
-      await expect(region).toHaveAttribute('data-couleur', cible.couleur);
+      await taperLaRegion(page, cible.region);
+
+      // La DERNIÈRE cible termine l'exercice : le passage à la consigne suivante — et à la
+      // récompense — est automatique (contrat § 5.3, « aucune action valider ni suivant »).
+      // `EcranNoeud` est alors démonté aussitôt et la région disparaît du DOM : exiger
+      // `data-peinte="oui"` sur un élément qui n'existe plus faisait échouer le parcours
+      // *parce qu'il avait réussi*. On attend donc l'un des deux états, et aucun des deux
+      // n'est complaisant : « cette région est peinte », ou « la récompense est là ».
+      // Ce que la dernière cible a produit est vérifié juste après la boucle — récompense,
+      // `data-fin="reussite"`, et les trois étoiles acquises.
+      await expect
+        .poll(async () =>
+          (await page.locator('[data-ecran="recompense"]').count()) > 0
+            ? 'recompense'
+            : ((await region.getAttribute('data-peinte')) ?? 'absente')
+        )
+        .toMatch(/^(oui|recompense)$/);
+
+      if ((await page.locator('[data-ecran="noeud"]').count()) > 0) {
+        await expect(region).toHaveAttribute('data-couleur', cible.couleur);
+      }
       premiereRegionPeinte ??= cible.region;
 
       // Aucun échec n'apparaît jamais, même en jouant juste — R14.

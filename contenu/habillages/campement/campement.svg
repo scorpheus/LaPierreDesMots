@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800" role="img" aria-label="Le campement">
+  <title>Le campement</title>
+  <desc>PLACEHOLDER — decor bouchon ecrit a la main (D2), regions fermees par construction. Chaque region porte l id d un point d interaction de contenu/monde/campement.json et occupe exactement sa zone : le decor et la prise tactile ne peuvent pas deriver l un de l autre. Le campement n est PAS une scene de coloriage — il ne se recolorie jamais — d ou des aplats en couleur plutot que le trait noir sur blanc reserve aux decors coloriables (D29).</desc>
+  <g id="calque-fond">
+    <path id="ciel-campement" d="M0,0 L1200,0 L1200,420 L0,420 Z" fill="#FFF6E3" stroke="none"/>
+    <path id="sol-campement" d="M0,420 L1200,420 L1200,800 L0,800 Z" fill="#E8F5DF" stroke="none"/>
+  </g>
+  <g id="calque-points" stroke="#1B2440" stroke-width="5" stroke-linejoin="round">
+    <path id="tente" d="M28,118 L68,38 L108,118 Z" fill="#3DDC97"/>
+    <circle id="feu" cx="188" cy="78" r="42" fill="#FFC93C"/>
+    <path id="carte" d="M268,38 L348,38 L348,118 L268,118 Z" fill="#2FA8E0"/>
+    <path id="coffre" d="M388,118 L428,38 L468,118 Z" fill="#FF5D8F"/>
+    <circle id="mur-des-noms" cx="548" cy="78" r="42" fill="#C98B4B"/>
+    <path id="chaudron" d="M628,38 L708,38 L708,118 L628,118 Z" fill="#8FD6F2"/>
+    <path id="lunette" d="M748,118 L788,38 L828,118 Z" fill="#3DDC97"/>
+    <circle id="hamac-de-gobi" cx="908" cy="78" r="42" fill="#FFC93C"/>
+    <path id="banniere" d="M988,38 L1068,38 L1068,118 L988,118 Z" fill="#2FA8E0"/>
+    <path id="carillon" d="M1108,118 L1148,38 L1188,118 Z" fill="#FF5D8F"/>
+    <circle id="marmite" cx="68" cy="298" r="42" fill="#C98B4B"/>
+    <path id="tas-de-bois" d="M148,258 L228,258 L228,338 L148,338 Z" fill="#8FD6F2"/>
+    <path id="seau" d="M268,338 L308,258 L348,338 Z" fill="#3DDC97"/>
+    <circle id="lanterne" cx="428" cy="298" r="42" fill="#FFC93C"/>
+    <path id="corde-a-linge" d="M508,258 L588,258 L588,338 L508,338 Z" fill="#2FA8E0"/>
+    <path id="tabouret" d="M628,338 L668,258 L708,338 Z" fill="#FF5D8F"/>
+    <circle id="panier-de-pommes" cx="788" cy="298" r="42" fill="#C98B4B"/>
+    <path id="sac-de-graines" d="M868,258 L948,258 L948,338 L868,338 Z" fill="#8FD6F2"/>
+    <path id="bocal-de-lucioles" d="M988,338 L1028,258 L1068,338 Z" fill="#3DDC97"/>
+    <circle id="livre-ouvert" cx="1148" cy="298" r="42" fill="#FFC93C"/>
+    <path id="plume-et-encrier" d="M28,478 L108,478 L108,558 L28,558 Z" fill="#2FA8E0"/>
+    <path id="galets-empiles" d="M148,558 L188,478 L228,558 Z" fill="#FF5D8F"/>
+    <circle id="champignon" cx="308" cy="518" r="42" fill="#C98B4B"/>
+    <path id="buisson" d="M388,478 L468,478 L468,558 L388,558 Z" fill="#8FD6F2"/>
+    <path id="fleur-bleue" d="M508,558 L548,478 L588,558 Z" fill="#3DDC97"/>
+    <circle id="papillon" cx="668" cy="518" r="42" fill="#FFC93C"/>
+    <path id="escargot" d="M748,478 L828,478 L828,558 L748,558 Z" fill="#2FA8E0"/>
+    <path id="grenouille" d="M868,558 L908,478 L948,558 Z" fill="#FF5D8F"/>
+    <circle id="pierre-gravee" cx="1028" cy="518" r="42" fill="#C98B4B"/>
+    <path id="etoile-filante" d="M1108,478 L1188,478 L1188,558 L1108,558 Z" fill="#8FD6F2"/>
+  </g>
+</svg>

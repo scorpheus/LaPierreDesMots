@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800" role="img" aria-label="La carte du monde">
+  <title>La carte du monde</title>
+  <desc>PLACEHOLDER — decor bouchon ecrit a la main (D2), regions fermees par construction. L element signature de la v2 § 9.4 : carte au tresor sur parchemin, six regions en calques, le chemin qui se dessine a l encre. Les couleurs sont posees ici en aplat ; c est le VOILE DE GRISAILLE du client qui grise une region non ouverte, jamais une teinte differente dans ce fichier — une region grise est l etat par defaut du rendu, pas un second asset.</desc>
+  <g id="calque-parchemin">
+    <path id="parchemin" d="M12,28 L1188,12 L1176,776 L24,788 Z" fill="#FFF6E3" stroke="#C9B48A" stroke-width="8" stroke-linejoin="round"/>
+  </g>
+  <g id="calque-chemin" fill="none" stroke="#1B2440" stroke-width="6" stroke-linecap="round" stroke-dasharray="16 14">
+    <path id="chemin-clairiere-galeries" d="M190,640 Q320,490 450,460"/>
+    <path id="chemin-galeries-marais-jumeau" d="M450,460 Q345,290 240,240"/>
+    <path id="chemin-marais-jumeau-foret-muette" d="M240,240 Q430,135 620,150"/>
+    <path id="chemin-foret-muette-volcan" d="M620,150 Q760,185 900,340"/>
+    <path id="chemin-volcan-cite-des-histoires" d="M900,340 Q960,425 1020,630"/>
+  </g>
+  <g id="calque-regions" stroke="#1B2440" stroke-width="6" stroke-linejoin="round">
+    <path id="clairiere" data-region-svg="clairiere" d="M72,622 L118,548 L236,544 L310,626 L254,728 L138,730 Z" fill="#3DDC97"><title>La Clairiere</title></path>
+    <path id="galeries" data-region-svg="galeries" d="M332,442 L378,368 L496,364 L570,446 L514,548 L398,550 Z" fill="#8FD6F2"><title>Les Galeries</title></path>
+    <path id="marais-jumeau" data-region-svg="marais-jumeau" d="M122,222 L168,148 L286,144 L360,226 L304,328 L188,330 Z" fill="#2FA8E0"><title>Le Marais Jumeau</title></path>
+    <path id="foret-muette" data-region-svg="foret-muette" d="M502,132 L548,58 L666,54 L740,136 L684,238 L568,240 Z" fill="#C98B4B"><title>La Foret Muette</title></path>
+    <path id="volcan" data-region-svg="volcan" d="M782,322 L828,248 L946,244 L1020,326 L964,428 L848,430 Z" fill="#FF5D8F"><title>Le Volcan</title></path>
+    <path id="cite-des-histoires" data-region-svg="cite-des-histoires" d="M902,612 L948,538 L1066,534 L1140,616 L1084,718 L968,720 Z" fill="#FFC93C"><title>La Cite des Histoires</title></path>
+  </g>
+  <g id="calque-marqueurs" stroke="#1B2440" stroke-width="5">
+    <circle id="marqueur-clairiere" cx="190" cy="640" r="22" fill="#FFF6E3"/>
+    <circle id="marqueur-galeries" cx="450" cy="460" r="22" fill="#FFF6E3"/>
+    <circle id="marqueur-marais-jumeau" cx="240" cy="240" r="22" fill="#FFF6E3"/>
+    <circle id="marqueur-foret-muette" cx="620" cy="150" r="22" fill="#FFF6E3"/>
+    <circle id="marqueur-volcan" cx="900" cy="340" r="22" fill="#FFF6E3"/>
+    <circle id="marqueur-cite-des-histoires" cx="1020" cy="630" r="22" fill="#FFF6E3"/>
+  </g>
+</svg>

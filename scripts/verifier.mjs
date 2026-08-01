@@ -83,15 +83,39 @@ const CHAINE = [
   { cle: 'test:rejeu', script: 'test:rejeu', propreRapport: true }
 ];
 
-/** Motifs qui trahissent un environnement incomplet, pas un défaut de code. */
+/**
+ * Motifs qui trahissent un environnement incomplet, pas un défaut de code.
+ *
+ * Le spécificateur de module y est NU (`'fastify'`), jamais relatif : c'est ce qui distingue
+ * « un paquet n'est pas installé » de « un fichier du dépôt n'existe pas ».
+ */
 const MOTIFS_ENVIRONNEMENT = [
   /Executable doesn'?t exist/i,
   /npx playwright install/i,
-  /Cannot find module/i,
-  /ERR_MODULE_NOT_FOUND/,
+  /Cannot find module '(?!\.{1,2}[/\\])[^']+'/,
+  /Cannot find package '[^']+'/,
   /Missing script/i,
   /is not recognized as an internal or external command/i,
   /command not found/i
+];
+
+/**
+ * Motifs qui ANNULENT le verdict « environnement » : ils désignent un fichier SOURCE absent,
+ * donc un défaut de code, quel que soit ce qu'on a lu par ailleurs dans la même sortie.
+ *
+ * Sans cette liste, un import relatif vers un fichier qui n'existe pas — le cas d'un lot en
+ * cours d'écriture — faisait passer cinq étapes sur onze en « défaut d'environnement, pas
+ * défaut de code », c'est-à-dire exactement le contraire de la vérité. Le rapport aurait
+ * envoyé son lecteur relancer `npm install` pour rien.
+ */
+const MOTIFS_DEFAUT_DE_CODE = [
+  // Spécificateur relatif (`'./routes/x.js'`) — tel que TypeScript et Vite le rapportent.
+  /Cannot find module '\.{1,2}[/\\]/,
+  /Failed to load url \.{1,2}[/\\]/,
+  // Spécificateur ABSOLU (`'C:\…\dist\routes\x.js'`, `'/opt/…'`) : Node résout l'import
+  // relatif avant de se plaindre, et le chemin qu'il cite n'a plus rien d'un nom de paquet.
+  /Cannot find module '(?:[A-Za-z]:[/\\]|\/)/,
+  /Cannot find module '@[^']*' or its corresponding type declarations/
 ];
 
 /**
@@ -234,7 +258,11 @@ for (const etape of CHAINE) {
 
   const variables = {};
   if (etape.natif === 'playwright' && etape.brut) {
-    variables['PLAYWRIGHT_JSON_OUTPUT_NAME'] = etape.brut;
+    // `PIERRE_RAPPORT_JSON` et non `PLAYWRIGHT_JSON_OUTPUT_NAME` : cette dernière n'existe
+    // plus dans Playwright 1.62 (vérifié par recherche dans `node_modules/`), et les trois
+    // campagnes Playwright écrivaient toutes dans le même fichier. `playwright.config.ts`
+    // lit la nôtre.
+    variables['PIERRE_RAPPORT_JSON'] = etape.brut;
   }
 
   const resultat = lancerNpm(etape.script, etape.argumentsSupplementaires ?? [], variables);
@@ -245,7 +273,9 @@ for (const etape of CHAINE) {
   writeFileSync(journal, sortie, 'utf8');
 
   const codeSortie = resultat.status ?? 1;
-  const environnement = MOTIFS_ENVIRONNEMENT.some((motif) => motif.test(sortie));
+  const environnement =
+    MOTIFS_ENVIRONNEMENT.some((motif) => motif.test(sortie)) &&
+    !MOTIFS_DEFAUT_DE_CODE.some((motif) => motif.test(sortie));
 
   // Les scripts de L-G écrivent leur propre rapport ; on ne l'écrase que s'il manque.
   const cheminEtape = join(DOSSIER_RAPPORTS, nomDeFichier(etape.cle));
@@ -317,10 +347,21 @@ for (const etape of CHAINE) {
     }
   }
 
-  // Une étape fille non écrite (le script n'a pas été atteint) reste sur son « non exécutée ».
+  // Une étape fille que son script n'a pas atteinte porte encore le rapport « non exécutée »
+  // posé avant la chaîne. Tester `existsSync` ne suffisait pas — le fichier existe TOUJOURS,
+  // puisque la règle 2 l'a écrit — et la fille gardait alors une note générique qui ne disait
+  // pas POURQUOI elle n'avait pas tourné. On teste la marque, pas la présence.
   for (const fille of etape.etapesFilles ?? []) {
     const cheminFille = join(DOSSIER_RAPPORTS, nomDeFichier(fille));
-    if (!existsSync(cheminFille)) {
+    let jamaisAtteinte = true;
+    if (existsSync(cheminFille)) {
+      try {
+        jamaisAtteinte = JSON.parse(readFileSync(cheminFille, 'utf8')).note === NOTE_NON_EXECUTEE;
+      } catch {
+        jamaisAtteinte = true;
+      }
+    }
+    if (jamaisAtteinte) {
       ecrireEtape({
         etape: fille,
         statut: 'echec',
@@ -328,7 +369,10 @@ for (const etape of CHAINE) {
         total: 0,
         echecs: 1,
         details: [],
-        note: `non exécutée : \`${etape.cle}\` s’est arrêtée avant.`
+        note:
+          `non exécutée : \`${etape.cle}\` s’est arrêtée avant de l’atteindre (les deux sont ` +
+          'enchaînées par `&&`). Son verdict est donc inconnu, pas mauvais — corriger ' +
+          `\`${etape.cle}\` et relancer.`
       });
     }
   }

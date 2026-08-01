@@ -3,7 +3,7 @@
  *
  * Trois propriétés du mécanisme, dans l'ordre où elles comptent :
  *
- * 1. Une base vierge reçoit `001_socle.sql` et rien d'autre.
+ * 1. Une base vierge reçoit **toutes** les migrations du dossier, dans l'ordre, et rien d'autre.
  * 2. Ré-appliquer est un non-événement : aucune migration n'est rejouée.
  * 3. **Une migration déjà appliquée dont l'empreinte a changé est une erreur BLOQUANTE**,
  *    pas un avertissement. C'est le point le plus facile à laisser filer et le plus coûteux :
@@ -11,8 +11,29 @@
  *
  * Le troisième cas travaille sur une **copie** du dossier de migrations, dans
  * `tests/rapports/artefacts/` : L-G ne touche jamais aux fichiers de L-C.
+ *
+ * ─────────────────────────────────────────────────────────────────────────────────────────
+ * MODIFICATION DE TEST À L'INTÉGRATION — assumée et motivée (CLAUDE.md, boucle de travail,
+ * point 4 : « corriger le code, jamais le test, SAUF si le test contredit les specs »).
+ *
+ * La version v1 écrivait en dur `expect(rapport.appliquees).toEqual([1])` et
+ * `expect(lignes).toHaveLength(1)` : le dépôt ne portait alors qu'une migration. Le contrat
+ * des features v2 § 6 en ajoute cinq — « Migrations SQL — 002 à 006, à la suite de
+ * `001_socle.sql` » —, écrites par cinq lots distincts. Le nombre 1 est donc devenu une
+ * **contradiction avec le plan gelé**, pas un défaut du code. Mesuré, sortie citée :
+ *
+ *   $ ls -1 serveur/migrations/
+ *   001_socle.sql  002_lecture.sql  003_pedagogie.sql
+ *   004_cascade.sql  005_monde.sql  006_parent.sql
+ *
+ * Aucune assertion n'est assouplie : la valeur attendue est désormais **lue sur disque** au
+ * lieu d'être recopiée. Le test devient du même coup plus strict qu'avant — il exige que
+ * `appliquees` soit exactement la liste des fichiers présents, dans l'ordre croissant, et
+ * que chaque ligne de suivi porte une empreinte sha256 valide. Il n'a plus à être retouché
+ * à la migration 007, et une migration ajoutée sans être appliquée le fait échouer.
+ * ─────────────────────────────────────────────────────────────────────────────────────────
  */
-import { cpSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join, sep } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
@@ -33,6 +54,26 @@ import {
 const DOSSIER_TEMPORAIRE =
   join(RACINE_DEPOT, 'tests', 'rapports', 'artefacts', 'migrations-copie') + sep;
 
+/**
+ * Les versions attendues, **lues sur disque** et jamais recopiées. `001_socle.sql` → 1.
+ * Un dossier vide rendrait le fichier entier trivialement vert : on l'interdit d'emblée.
+ */
+function migrationsSurDisque(
+  dossier: string
+): ReadonlyArray<{ readonly version: number; readonly nom: string }> {
+  const trouvees = readdirSync(dossier)
+    .map((fichier) => /^(\d{3})_([a-z0-9-]+)\.sql$/.exec(fichier))
+    .filter((c): c is RegExpExecArray => c !== null)
+    .map((c) => ({ version: Number.parseInt(c[1]!, 10), nom: c[2]! }))
+    .sort((a, b) => a.version - b.version);
+  if (trouvees.length === 0) throw new Error(`aucune migration dans ${dossier}`);
+  return trouvees;
+}
+
+const MIGRATIONS_ATTENDUES = migrationsSurDisque(DOSSIER_MIGRATIONS);
+const VERSIONS_ATTENDUES = MIGRATIONS_ATTENDUES.map((m) => m.version);
+const DERNIERE_VERSION = VERSIONS_ATTENDUES[VERSIONS_ATTENDUES.length - 1]!;
+
 let base: DatabaseSync;
 
 beforeEach(() => {
@@ -52,11 +93,11 @@ function tables(connexion: DatabaseSync): string[] {
 }
 
 describe('appliquerMigrations', () => {
-  it('crée les trois tables du socle sur une base vierge — contrat § 6.2', () => {
+  it('applique toutes les migrations du dossier et crée les trois tables du socle — contrat § 6.2', () => {
     const rapport = appliquerMigrations(base, DOSSIER_MIGRATIONS, horlogeDeTest());
 
-    expect(rapport.appliquees).toEqual([1]);
-    expect(rapport.versionCourante).toBe(1);
+    expect(rapport.appliquees).toEqual(VERSIONS_ATTENDUES);
+    expect(rapport.versionCourante).toBe(DERNIERE_VERSION);
     for (const table of ['profils', 'tentatives', 'progression_noeud']) {
       expect(tables(base)).toContain(table);
     }
@@ -66,15 +107,24 @@ describe('appliquerMigrations', () => {
     appliquerMigrations(base, DOSSIER_MIGRATIONS, horlogeDeTest());
     expect(tables(base)).toContain('schema_migrations');
 
-    const lignes = base.prepare('SELECT version, nom, empreinte FROM schema_migrations').all() as Array<{
+    const lignes = base
+      .prepare('SELECT version, nom, empreinte FROM schema_migrations ORDER BY version')
+      .all() as Array<{
       version: number;
       nom: string;
       empreinte: string;
     }>;
-    expect(lignes).toHaveLength(1);
-    expect(lignes[0]!.version).toBe(1);
-    // sha256 en hexadécimal : 64 caractères.
-    expect(lignes[0]!.empreinte).toMatch(/^[0-9a-f]{64}$/);
+    // Version ET nom, comparés aux fichiers réellement présents : une migration renommée ou
+    // sautée se voit ici, pas seulement une migration manquante.
+    expect(lignes.map((l) => ({ version: l.version, nom: l.nom }))).toEqual([
+      ...MIGRATIONS_ATTENDUES
+    ]);
+    // sha256 en hexadécimal : 64 caractères — sur CHAQUE ligne, pas seulement la première.
+    for (const ligne of lignes) {
+      expect(ligne.empreinte, `empreinte de la migration ${ligne.version}`).toMatch(
+        /^[0-9a-f]{64}$/
+      );
+    }
   });
 
   it('horodate avec l’horloge injectée, jamais avec l’heure réelle', () => {
@@ -90,7 +140,7 @@ describe('appliquerMigrations', () => {
     const second = appliquerMigrations(base, DOSSIER_MIGRATIONS, horlogeDeTest());
 
     expect(second.appliquees).toEqual([]);
-    expect(second.versionCourante).toBe(1);
+    expect(second.versionCourante).toBe(DERNIERE_VERSION);
   });
 
   it('pose les contraintes du socle : `foreign_keys` refuse une tentative orpheline', () => {
@@ -134,7 +184,7 @@ describe('une migration modifiée après coup est une erreur bloquante — contr
 
     const horloge = horlogeDeTest();
     const premier = appliquerMigrations(base, DOSSIER_TEMPORAIRE, horloge);
-    expect(premier.appliquees).toEqual([1]);
+    expect(premier.appliquees).toEqual(VERSIONS_ATTENDUES);
 
     // On altère la copie : un commentaire suffit, l'empreinte est un sha256 du fichier.
     const fichier = `${DOSSIER_TEMPORAIRE}001_socle.sql`;

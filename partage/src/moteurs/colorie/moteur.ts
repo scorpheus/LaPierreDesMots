@@ -346,7 +346,28 @@ function resume(etat: EtatColorie): ResumeTentative {
     nbErreurs: c.nbErreurs,
     aideUtilisee: c.niveauAide,
     nbEcoutes: c.nbEcoutes,
-    dureeMs: Math.max(0, (c.finMs ?? c.derniereActionMs) - (c.debutMs || etat.demarreMs))
+    dureeMs: Math.max(0, (c.finMs ?? c.derniereActionMs) - (c.debutMs || etat.demarreMs)),
+    // ─────────────────────────────────────────────────────────────────────────────────────
+    // Les trois champs ajoutés à `ResumeEtape` par L2-D (contrat v2 § 4.4). Ce moteur est du
+    // socle v1 et aucun lot ne le possédait : c'est l'intégration qui les renseigne.
+    //
+    // `modeReponse: 'colorie'` — la valeur nommée pour ce moteur dans `ModeReponse`
+    // (`p_devinette = 0,02`, D13). Elle n'est pas choisie ici, elle est LUE de l'union.
+    //
+    // `latenceMs: null` — et `null` n'est pas zéro. `EtatConsigne` ne porte aucun instant de
+    // première action : la latence de reconnaissance (D18) n'est pas mesurable sur un
+    // coloriage, et le contrat le dit lui-même à `ResumeEtape.latenceMs` (« `null` quand
+    // l'étape n'a pas de point d'apparition net, un coloriage libre par exemple »). Inventer
+    // un zéro ferait plonger la médiane du dashboard et raconterait un enfant fulgurant là
+    // où rien n'a été mesuré.
+    //
+    // `confusion: null` — une région peinte à tort n'est pas une confusion de graphème ;
+    // `ConfusionObservee` attend un couple attendu/rendu de graphèmes (D23), que ce moteur
+    // n'a pas. Rien n'est donc affirmé.
+    // ─────────────────────────────────────────────────────────────────────────────────────
+    modeReponse: 'colorie',
+    latenceMs: null,
+    confusion: null
   }));
 
   return {

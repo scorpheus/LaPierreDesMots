@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "pierre:schemas/modele-lettre",
+  "title": "Bibliotheque de modeles de lettres",
+  "description": "Les modeles tracables du moteur `trace` (lot L2-C, point ouvert O11). Un modele n'est PAS un dessin : c'est une suite de traits ORDONNES et ORIENTES. Le champ `points` est ce qui rend le sens d'ecriture mesurable — sans lui, `sensRespecte` n'aurait rien a comparer et le moteur ne distinguerait plus `b` de `d`, c'est-a-dire plus rien de ce pour quoi il existe (D23).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["lettres"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "note": { "type": "string" },
+    "lettres": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 26,
+      "items": { "$ref": "#/$defs/modele" }
+    }
+  },
+  "$defs": {
+    "point": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": { "type": "number" }
+    },
+    "axe": {
+      "enum": ["gauche-droite", "haut-bas"],
+      "description": "Les deux axes de confusion miroir de D23. Ne JAMAIS traiter b/d/p/q en bloc : ce sont deux mecanismes differents, et un enfant peut etre gene par un axe et pas par l'autre."
+    },
+    "trait": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "ordre", "chemin", "points", "depart", "arrivee", "libelle"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+        "ordre": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3,
+          "description": "Ordre d'execution, a partir de 1. Le `d` se trace rond puis hampe, jamais l'inverse."
+        },
+        "chemin": { "type": "string", "minLength": 4 },
+        "points": {
+          "type": "array",
+          "minItems": 8,
+          "maxItems": 64,
+          "items": { "$ref": "#/$defs/point" },
+          "description": "Points echantillonnes le long du chemin, DANS LE SENS D'ECRITURE, au moins 8. C'est le SENS qui distingue `b` de `d` sur un trace, pas la forme finale."
+        },
+        "depart": { "$ref": "#/$defs/point" },
+        "arrivee": { "$ref": "#/$defs/point" },
+        "libelle": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 60,
+          "description": "« la grande barre », « le rond » — dit a voix haute au palier `indice`, jamais affiche seul (R15)."
+        }
+      }
+    },
+    "modele": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["lettre", "casse", "viewBox", "traits", "axeRisque"],
+      "properties": {
+        "lettre": { "type": "string", "minLength": 1, "maxLength": 2 },
+        "casse": { "enum": ["minuscule", "majuscule", "cursive"] },
+        "viewBox": {
+          "type": "string",
+          "pattern": "^-?[0-9]+(\\.[0-9]+)? -?[0-9]+(\\.[0-9]+)? [0-9]+(\\.[0-9]+)? [0-9]+(\\.[0-9]+)?$",
+          "description": "Le CENTRE de ce viewBox est l'axe des deux reflexions. Les quatre lettres a risque y sont images exactes les unes des autres ; `refleterPoints` en depend, et tests/unitaires/trace-validation.test.ts le verifie sur ce fichier."
+        },
+        "traits": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "items": { "$ref": "#/$defs/trait" }
+        },
+        "axeRisque": {
+          "oneOf": [{ "$ref": "#/$defs/axe" }, { "type": "null" }],
+          "description": "L'axe que CETTE lettre risque de confondre, ou null. Il ne DECIDE de rien : il nomme le candidat que `evaluerTrait` confronte a la geometrie du geste."
+        }
+      }
+    }
+  }
+}

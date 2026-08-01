@@ -5,6 +5,19 @@
 #   python -m venv .venv
 #   .venv\Scripts\python.exe -m pip install -r scripts\ingestion\requirements.txt
 #
-# Version epinglee : celle mesuree sur la machine de developpement le 2026-08-01
-# (Docs/environnement-et-outillage.md § 2, Python 3.13.3).
+# Versions epinglees : celles mesurees sur la machine de developpement le
+# 2026-08-01 (Docs/environnement-et-outillage.md § 2, Python 3.13.3).
+#
+#   $ python -c "import fitz; print(fitz.__doc__)"
+#   PyMuPDF 1.26.3: Python bindings for the MuPDF 1.26.3 library
+#   $ python -c "import PIL; print(PIL.__version__)"
+#   12.1.0
+#
+# PyMuPDF : lecture POSITIONNELLE des PDF (extraire-fiches.py). C'est lui qui
+#           donne les (x, y) de chaque fragment ; sans position, l'ingestion
+#           redeviendrait heuristique.
+# Pillow  : decoupe et binarisation des illustrations avant potrace
+#           (extraire-illustrations.py). Ajoute par le lot L2-G, contrat
+#           features v2 § 3.7.
 PyMuPDF==1.26.3
+Pillow==12.1.0

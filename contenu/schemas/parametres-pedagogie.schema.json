@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "pierre:schemas/parametres-pedagogie",
+  "title": "ParametresPedagogie",
+  "description": "Les parametres du BKT, du critere d'acquis, du Leitner et du selecteur — convention C2 du contrat des features v2 : aucune valeur pedagogique n'est ecrite en dur dans le code. Le schema refuse plutot que de completer : un parametre manquant doit se voir au demarrage, pas dans trois semaines dans une courbe (D13).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["bkt", "acquis", "leitner", "selecteur"],
+  "properties": {
+    "$commentaire": { "type": "string" },
+
+    "bkt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["pInit", "pTransit", "pGlissement", "pDevinette", "poidsAvecAide"],
+      "properties": {
+        "pInit":        { "type": "number", "minimum": 0, "maximum": 1 },
+        "pTransit":     { "type": "number", "minimum": 0, "maximum": 1 },
+        "pGlissement":  { "type": "number", "minimum": 0, "maximum": 1 },
+        "poidsAvecAide": {
+          "type": "number", "minimum": 0, "exclusiveMaximum": 1,
+          "description": "Strictement inferieur a 1 : une tentative avec aide doit peser MOINS qu'une tentative sans aide (v2 § 12.2, propriete P3). A 1 elle pesserait autant, et l'aide gratuite de Gobi deviendrait invisible au BKT."
+        },
+        "pDevinette": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Un mode de reponse manquant est un refus, jamais un defaut silencieux (D13). `ordre` et `appariement` valent null : leur valeur est calculee en 1/n! depuis le nombre d'elements.",
+          "required": [
+            "vrai-faux", "qcm-3", "qcm-4", "place", "colorie", "trace", "saisie",
+            "ordre", "appariement"
+          ],
+          "properties": {
+            "vrai-faux":   { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+            "qcm-3":       { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+            "qcm-4":       { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+            "place":       { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+            "colorie":     { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+            "trace":       { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+            "saisie":      { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+            "ordre":       { "type": "null" },
+            "appariement": { "type": "null" }
+          }
+        }
+      }
+    },
+
+    "acquis": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "seuilP", "tentativesMin", "joursDistinctsMin",
+        "tentativesFaibleDevinetteMin", "seuilFaibleDevinette"
+      ],
+      "properties": {
+        "seuilP":                       { "type": "number", "minimum": 0, "maximum": 1 },
+        "tentativesMin":                { "type": "integer", "minimum": 1 },
+        "joursDistinctsMin":            { "type": "integer", "minimum": 1 },
+        "tentativesFaibleDevinetteMin": {
+          "type": "integer", "minimum": 1,
+          "description": "La clause de D13. A 0, une serie de vrai/faux chanceux ferait franchir le seuil : le minimum du schema est donc 1, et la valeur retenue est 2."
+        },
+        "seuilFaibleDevinette":         { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+
+    "leitner": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["delaisJours", "boiteApresEchec"],
+      "properties": {
+        "delaisJours": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "items": { "type": "integer", "minimum": 1 },
+          "description": "J+1 / J+3 / J+7 / J+16 / J+35 (v2 § 12.2). Exactement 5 entrees, strictement croissantes — la croissance stricte est verifiee par lireParametresPedagogie, un schema JSON ne sait pas l'exprimer."
+        },
+        "boiteApresEchec": { "type": "integer", "minimum": 1, "maximum": 5 }
+      }
+    },
+
+    "selecteur": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "nbNoeudsMin", "nbNoeudsMax", "seuilPrerequis",
+        "habillageUniqueParSortie", "rangRevision"
+      ],
+      "properties": {
+        "nbNoeudsMin":              { "type": "integer", "minimum": 2 },
+        "nbNoeudsMax":              { "type": "integer", "minimum": 2 },
+        "seuilPrerequis":           { "type": "number", "minimum": 0, "maximum": 1 },
+        "habillageUniqueParSortie": { "type": "boolean" },
+        "rangRevision": {
+          "type": "integer", "minimum": 2,
+          "description": "Jamais 1 : la revision n'est jamais en ouverture (v2 § 12.2). Qu'elle ne soit jamais en cloture est verifie a la composition, ou la longueur de la sortie est connue."
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200" role="img" aria-label="Gobi, stade 1 : l’Œuf de cristal">
+  <title>Gobi — stade 1, l’Œuf de cristal</title>
+  <desc>PLACEHOLDER — la forme canonique de Gobi n'est PAS validée (D7, D31 étape A) et l'étape A n'est pas automatisable : c'est une validation humaine, qu'aucun lot ne contourne. Bouchon écrit à la main (D2). Il tient les trois règles déjà tranchées : structure cristalline (D20), deux bras courts et robustes (D24), yeux ouverts et sourire franc, posture tournée vers l'enfant (D31). En couleur, et non en trait noir : Gobi n'est pas une zone à recolorier (D29).</desc>
+  <g id="gobi-corps">
+    <path id="corps" d="M100,26 C136,26 158,68 158,110 C158,152 132,176 100,176 C68,176 42,152 42,110 C42,68 64,26 100,26 Z" fill="#FF5D8F" stroke="#1B2440" stroke-width="6" stroke-linejoin="round"/>
+    <path id="ventre" d="M100,96 C122,96 136,114 136,134 C136,154 120,166 100,166 C80,166 64,154 64,134 C64,114 78,96 100,96 Z" fill="#FFC0D6" stroke="#1B2440" stroke-width="4" stroke-linejoin="round"/>
+  </g>
+  <g id="gobi-bras">
+    <path id="bras-gauche" d="M46,112 C32,112 24,122 24,132 C24,142 32,150 44,148 C52,146 54,134 52,124 Z" fill="#FF5D8F" stroke="#1B2440" stroke-width="5" stroke-linejoin="round"/>
+    <path id="bras-droit" d="M154,112 C168,112 176,122 176,132 C176,142 168,150 156,148 C148,146 146,134 148,124 Z" fill="#FF5D8F" stroke="#1B2440" stroke-width="5" stroke-linejoin="round"/>
+  </g>
+  <g id="gobi-visage">
+    <circle id="oeil-gauche" cx="82" cy="92" r="13" fill="#FFF6E3" stroke="#1B2440" stroke-width="4"/>
+    <circle id="oeil-droit" cx="118" cy="92" r="13" fill="#FFF6E3" stroke="#1B2440" stroke-width="4"/>
+    <circle id="pupille-gauche" cx="84" cy="94" r="6" fill="#1B2440"/>
+    <circle id="pupille-droite" cx="120" cy="94" r="6" fill="#1B2440"/>
+    <path id="sourire" d="M84,120 C92,132 108,132 116,120 C110,138 90,138 84,120 Z" fill="#1B2440" stroke="#1B2440" stroke-width="3" stroke-linejoin="round"/>
+  </g>
+  <g id="gobi-cristal">
+    <path id="bourgeon-cristal" d="M100,10 L110,32 L100,42 L90,32 Z" fill="#2FA8E0" stroke="#1B2440" stroke-width="5" stroke-linejoin="round"/>
+  </g>
+</svg>

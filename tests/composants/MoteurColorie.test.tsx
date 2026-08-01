@@ -25,6 +25,7 @@ import type { Exercice, Habillage } from '@pierre/partage';
 
 import {
   CHEMIN_EXERCICE_ECOLE,
+  CHEMIN_SVG_ECOLE,
   RACINE_DEPOT,
   habillageEcole,
   lireJson,
@@ -425,6 +426,84 @@ describe('MoteurColorie — le décor réel', () => {
     // `false` = `preventDefault()` a été appelé : la page ne défile pas sous le doigt.
     expect(evenement).toBe(false);
     expect(region(premiereCible.region).getAttribute('data-peinte')).toBe('oui');
+  });
+});
+
+/**
+ * ════════════════════════════════════════════════════════════════════════════════════════
+ * LE DÉCOR RÉEL DOIT SURVIVRE À UN RE-RENDU QUI NE LE CONCERNE PAS.
+ *
+ * Le défaut qu'ils gardent, mesuré sur Chromium via `client/dist-test` : 30 régions décorées
+ * au montage, puis **0** une centaine de millisecondes plus tard. React 19 ne compare plus le
+ * CONTENU de `dangerouslySetInnerHTML`, seulement l'identité de l'objet ; un littéral
+ * `{{ __html: … }}` dans le JSX en fabrique un neuf à chaque rendu, et React ré-injecte le
+ * markup — effaçant `role`, `tabindex`, `aria-label`, l'écouteur clavier, `data-peinte`,
+ * `data-couleur` et le `fill`, c'est-à-dire la couleur que l'enfant venait de poser. Le
+ * battement d'une seconde suffisait à effacer son coloriage.
+ *
+ * Trois suites l'ont vu (T3 parcours, T3 casse-cou, T4 captures) et aucun test de composant
+ * ne pouvait le voir : le harnais `Harnais` refabrique ses services à chaque rendu, donc
+ * `onPeindre` change, donc l'effet de décoration se rejoue et repose tout. Ces deux cas-ci
+ * gardent des props STABLES au niveau du module — c'est la seule façon d'isoler la
+ * ré-injection de la redécoration qui la masque.
+ * ════════════════════════════════════════════════════════════════════════════════════════
+ */
+describe('MoteurColorie — le décor réel survit aux re-rendus', () => {
+  /** Corps du SVG réel, sans son enveloppe `<svg>` — ce que `MoteurColorie` injecte. */
+  const corpsSvgReel = lireTexte(CHEMIN_SVG_ECOLE)
+    .replace(/^[\s\S]*?<svg[^>]*>/i, '')
+    .replace(/<\/svg>[\s\S]*$/i, '');
+
+  /** Props stables : leur identité ne doit PAS changer d'un rendu à l'autre. */
+  const REMPLISSAGES_STABLES: Readonly<Record<string, never>> = {};
+  const NE_RIEN_PEINDRE = (): void => undefined;
+
+  function CadreStable(): React.ReactElement {
+    const [tour, setTour] = useState(0);
+    return (
+      <>
+        <button type="button" data-tour={tour} onClick={() => setTour((n) => n + 1)}>
+          re-rendre
+        </button>
+        <SceneSvg
+          habillage={habillage}
+          remplissages={REMPLISSAGES_STABLES}
+          regionEnDemonstration={null}
+          regionEnRefus={null}
+          marqueRefus={0}
+          animationsDesactivees
+          svgMarkup={corpsSvgReel}
+          onPeindre={NE_RIEN_PEINDRE}
+        />
+      </>
+    );
+  }
+
+  it('un re-rendu sans changement ne réinjecte pas le markup', () => {
+    render(<CadreStable />);
+    const avant = document.querySelectorAll('[data-region-svg][data-peinte="non"]').length;
+    expect(avant).toBeGreaterThan(0);
+
+    const bouton = screen.getByRole('button', { name: 're-rendre' });
+    fireEvent.click(bouton);
+    fireEvent.click(bouton);
+
+    expect(document.querySelectorAll('[data-region-svg][data-peinte="non"]').length).toBe(avant);
+  });
+
+  it('un re-rendu ne retire ni le rôle, ni le libellé, ni le tabindex des régions', () => {
+    render(<CadreStable />);
+    const cible = region(premiereCible.region);
+    expect(cible.getAttribute('role')).toBe('button');
+    const libelle = cible.getAttribute('aria-label');
+    expect(typeof libelle === 'string' && libelle.length > 0).toBe(true);
+
+    fireEvent.click(screen.getByRole('button', { name: 're-rendre' }));
+
+    const apres = region(premiereCible.region);
+    expect(apres.getAttribute('role')).toBe('button');
+    expect(apres.getAttribute('tabindex')).toBe('0');
+    expect(apres.getAttribute('aria-label')).toBe(libelle);
   });
 });
 

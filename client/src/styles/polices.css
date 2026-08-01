@@ -1,0 +1,99 @@
+/* ------------------------------------------------------------------------------------------
+   Les cinq polices de lecture — lot L2-B, v2 § 9.3 et D19.
+
+   « Aucun appel à Google Fonts : tout est servi en WOFF2 depuis le PC. » Aucune règle de ce
+   fichier ne désigne un domaine tiers ; `tests/visuel/polices.spec.ts` le MESURE en comptant
+   les requêtes sortantes pendant le rendu des cinq polices — le seuil est zéro.
+
+   `font-display: block` et non `swap`, et c'est un écart délibéré au socle v1 :
+   `swap` affiche d'abord la police système puis LA REMPLACE quand le fichier arrive. Sur un
+   enfant qui déchiffre lettre à lettre (D18), le texte qui change de forme au milieu d'un mot
+   est un accident de lecture, pas un détail de performance. `block` fait attendre un court
+   instant, puis n'échange plus rien. La règle du projet est « le décor s'agite, le texte
+   jamais » : elle vaut aussi pour le chargement.
+
+   Les binaires vivent dans `client/public/polices/`, téléchargés par
+   `scripts/telecharger-polices.mjs` à l'installation, empreintes SHA-256 épinglées dans
+   `client/public/polices/LICENCES.md`. Ils ne sont PAS versionnés — leurs licences les
+   autorisent, mais un dépôt n'est pas un miroir de distribution.
+
+   `local()` en premier sur chaque famille : si l'utilisateur a déjà la police sur sa machine,
+   aucun octet n'est chargé, et l'absence du fichier dégrade sans casser.
+   ------------------------------------------------------------------------------------------ */
+
+/* --------------------------------------------------------------- Andika — la police par défaut
+   Conçue pour l'alphabétisation : `a` et `g` à une boucle, comme dans les manuels (v2 § 9.3).
+   C'est la seule famille embarquée en deux graisses — la graisse sert à marquer les mots
+   cibles d'une consigne, jamais à insister. */
+@font-face {
+  font-family: "Andika";
+  src: local("Andika"), url("/polices/andika-regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Andika";
+  src: local("Andika Bold"), url("/polices/andika-bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: block;
+}
+
+/* ------------------------------------------------------------------------------ OpenDyslexic
+   Embarquée pour l'adhésion, JAMAIS présentée comme un remède (D19).
+   Wery & Diliberto 2017 ne mesure aucune amélioration chez l'enfant, et aucun participant n'a
+   déclaré la préférer. Elle est ici parce que la préférence subjective d'un enfant compte, et
+   que ça ne coûte rien — pas parce qu'elle soignerait quoi que ce soit. */
+@font-face {
+  font-family: "OpenDyslexic";
+  src: local("OpenDyslexic"), url("/polices/opendyslexic-regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
+
+/* ------------------------------------------------------------------------------------ Luciole
+   Conçue avec des personnes déficientes visuelles ; formes très différenciées, ce qui en fait
+   une candidate sérieuse pour un enfant qui confond des lettres miroir (D23). */
+@font-face {
+  font-family: "Luciole";
+  src: local("Luciole"), url("/polices/luciole-regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
+
+/* ------------------------------------------------------------------------- Belle Allure GS
+   Cursive scolaire française, graduée « GS ». Elle sert à reconnaître ce qu'il voit sur son
+   cahier, pas à lui faire déchiffrer de la cursive : la coloration syllabique et les réglages
+   d'espacement s'y appliquent exactement comme aux autres. */
+@font-face {
+  font-family: "Belle Allure GS";
+  src: local("Belle Allure GS"), url("/polices/belle-allure-gs.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
+
+/* Verdana n'a PAS de `@font-face`, et ce n'est pas un oubli : police système propriétaire, non
+   redistribuable (écart n° 5 du contrat des features v2 § 8). `polices.ts` la propose et
+   retombe sur Andika si la pile système ne l'a pas. */
+
+/* --------------------------------------------------------------- variables de la zone de lecture
+   Défauts, écrasés élément par élément par `variablesCss()` (partage/src/lecture/defauts.ts),
+   qui est la SEULE autorité à l'exécution. Ces valeurs n'existent que pour qu'une zone de
+   lecture rendue sans réglages chargés reste correcte — jamais pour faire foi. */
+:root {
+  --lecture-corps: 24px;
+  --lecture-interlettrage: 0.06em;
+  --lecture-espacement-mots: 0.08em;
+  --lecture-interligne: 1.6;
+  --lecture-fond: var(--parchemin);
+  --lecture-encre: var(--trait);
+  --lecture-famille: "Andika", "Atkinson Hyperlegible", Verdana, system-ui, sans-serif;
+  /* Teinte de la syllabe de rang impair. Le rang pair garde l'encre — l'alternance doit se
+     voir sans que le texte devienne bicolore au point de désigner une syllabe comme fautive.
+     Le lagon est le seul jeton froid de la palette et n'est associé à aucun refus. */
+  --lecture-syllabe-alternee: var(--lagon);
+}

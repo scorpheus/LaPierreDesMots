@@ -1,15 +1,27 @@
-// Client HTTP typé — contrat technique v1 § 1.4 et § 3.3 (les 7 routes).
+// Client HTTP typé — contrat technique v1 § 3.3 (7 routes) et contrat des features v2 § 5.3
+// (12 de plus). **Un seul fichier du client appelle le réseau, et c'est celui-ci** (contrat
+// v2 § 5.1, frontière « L2-H → tous (client) »).
 //
 // Aucun cache maison : TanStack Query s'en charge au-dessus. Ce module ne fait que parler
 // `fetch` et rendre des types du contrat.
+//
+// ─────────────────────────────────────────────────────────────────────────────────────────
+// CE QUI A CHANGÉ PAR RAPPORT À LA v1, ET POURQUOI
+//
+// La v1 lisait `CHEMINS_API` à travers un transtypage défensif vers un dictionnaire opaque, et
+// retombait sur des chemins littéraux, parce que le contrat gelait le NOM du symbole sans en
+// donner la forme. Ce n'est plus vrai : `partage/src/api/contrats.ts` appartient désormais à ce
+// même lot et sa forme est sous les yeux. **Les deux transtypages de ce fichier sont donc
+// supprimés** — c'est le défaut 2 du contrat v2 § 1.5, soldé pour la part de ce fichier.
+// Conséquence recherchée : renommer un chemin dans `contrats.ts` ne compile plus ici.
+// ─────────────────────────────────────────────────────────────────────────────────────────
 import { CHEMINS_API } from '@pierre/partage';
 import type {
   CreationProfil,
-  Exercice,
-  Habillage,
+  IdExercice,
   IdNoeud,
   IdProfil,
-  Noeud,
+  PaquetNoeud,
   Profil,
   ProgressionNoeud,
   ReponseSante,
@@ -17,55 +29,66 @@ import type {
   TentativeAEnregistrer
 } from '@pierre/partage';
 
-// ------------------------------------------------------------------ adaptation de contrat
-//
-// Le contrat § 11.1 exporte `CHEMINS_API` mais ne donne NULLE PART sa forme (ni ses clés, ni
-// si ses entrées sont des chaînes ou des fabriques). Les chemins littéraux de § 3.3, eux, sont
-// normatifs. On lit donc `CHEMINS_API` quand on l'y retrouve, et on retombe sur le chemin
-// gelé sinon : le client fonctionne quelle que soit la forme retenue par L-B, et un seul
-// fichier est à reprendre si elle diffère. Défaut signalé au rapport du lot L-D.
-const cheminsPartages = CHEMINS_API as unknown as Readonly<Record<string, unknown>>;
-
-function chemin(cle: string, repli: string, ...arguments_: readonly string[]): string {
-  const valeur: unknown = cheminsPartages[cle];
-  if (typeof valeur === 'string' && valeur.startsWith('/')) {
-    return valeur;
-  }
-  if (typeof valeur === 'function') {
-    const rendu: unknown = (valeur as (...a: readonly string[]) => unknown)(...arguments_);
-    if (typeof rendu === 'string' && rendu.startsWith('/')) {
-      return rendu;
-    }
-  }
-  return repli;
-}
+// Les quatre sous-chemins des lots frères. **Imports de TYPE uniquement** : ils sont effacés à
+// la compilation et ne pèsent rien sur le bundle initial (contrat § 4.7).
+import type { ComparaisonTypographie, ReglagesLecture } from '@pierre/partage/lecture';
+import type { CodeCompagnon, EtatMaitrise, ItemLeitner, PlanSortie } from '@pierre/partage/pedagogie';
+import type { CodeObjetCampement, EtatMonde } from '@pierre/partage/monde';
+import type {
+  CodeExport,
+  DecisionRelecture,
+  EntreeRelecture,
+  OuvertureParent,
+  ResumeDashboard
+} from '@pierre/partage/parent';
+import { ENTETE_JETON_PARENT } from '@pierre/partage/parent';
 
 /**
- * Forme ATTENDUE de `PaquetNoeud` (§ 11.1 en gèle le nom, pas les champs). C'est le seul
- * assemblage cohérent avec `GET /api/contenu/noeuds/:id` de § 3.3 : le nœud, son exercice,
- * et l'habillage que l'exercice déclare.
+ * Forme du paquet servi par `GET /api/contenu/noeuds/:id`.
+ * Alias conservé : `magasin.ts` et `testabilite/crochets.ts` l'importent sous ce nom depuis la
+ * v1. Il ne fait plus que pointer sur le type du contrat, qui est désormais gelé pour de bon.
  */
-export interface PaquetNoeudAttendu {
-  readonly noeud: Noeud;
-  readonly exercice: Exercice;
-  readonly habillage: Habillage;
-}
+export type PaquetNoeudAttendu = PaquetNoeud;
 
 // ------------------------------------------------------------------ transport
 
 export class ErreurReseau extends Error {
   readonly statut: number;
   readonly chemin: string;
+  /** Le corps de l'erreur, quand le serveur en a rendu un lisible. `null` sinon. */
+  readonly corps: Readonly<Record<string, unknown>> | null;
 
-  constructor(statut: number, cheminAppele: string, message: string) {
+  constructor(
+    statut: number,
+    cheminAppele: string,
+    message: string,
+    corps: Readonly<Record<string, unknown>> | null = null
+  ) {
     super(message);
     this.name = 'ErreurReseau';
     this.statut = statut;
     this.chemin = cheminAppele;
+    this.corps = corps;
   }
 }
 
-async function demander<T>(cheminAppele: string, options?: RequestInit): Promise<T> {
+/** Le jeton de la zone parent, posé par `ouvrirZoneParent`, vivant en mémoire seulement. */
+let jetonParent: string | null = null;
+
+/** Oublie le jeton : la zone parent se referme. Appelé à la sortie du dashboard. */
+export function fermerZoneParent(): void {
+  jetonParent = null;
+}
+
+export function jetonParentPose(): boolean {
+  return jetonParent !== null;
+}
+
+function entetesParent(): Readonly<Record<string, string>> {
+  return jetonParent === null ? {} : { [ENTETE_JETON_PARENT]: jetonParent };
+}
+
+async function reponseBrute(cheminAppele: string, options?: RequestInit): Promise<Response> {
   const reponse = await fetch(cheminAppele, {
     ...options,
     headers: {
@@ -76,64 +99,177 @@ async function demander<T>(cheminAppele: string, options?: RequestInit): Promise
   });
 
   if (!reponse.ok) {
-    // `ErreurApi` (§ 3.3) transporte un message lisible ; on ne dépend d'aucun de ses champs,
-    // seulement du texte, pour ne pas coupler le client à une forme non gelée.
+    // `ErreurApi` (§ 3.3) transporte un message lisible. On garde AUSSI le corps analysé :
+    // le 423 de la zone parent y met l'échéance du verrou, et l'écran doit pouvoir la dire.
     const texte = await reponse.text().catch(() => '');
+    let corps: Readonly<Record<string, unknown>> | null = null;
+    try {
+      const analyse: unknown = JSON.parse(texte);
+      if (typeof analyse === 'object' && analyse !== null) {
+        corps = analyse as Readonly<Record<string, unknown>>;
+      }
+    } catch {
+      corps = null;
+    }
+    const message = typeof corps?.['message'] === 'string' ? String(corps['message']) : texte;
     throw new ErreurReseau(
       reponse.status,
       cheminAppele,
-      `Réponse ${String(reponse.status)} sur ${cheminAppele}${texte === '' ? '' : ` — ${texte}`}`
+      message === ''
+        ? `Réponse ${String(reponse.status)} sur ${cheminAppele}`
+        : `Réponse ${String(reponse.status)} sur ${cheminAppele} — ${message}`,
+      corps
     );
   }
 
+  return reponse;
+}
+
+async function demander<T>(cheminAppele: string, options?: RequestInit): Promise<T> {
+  const reponse = await reponseBrute(cheminAppele, options);
   return (await reponse.json()) as T;
 }
 
-// ------------------------------------------------------------------ les 7 routes
+function corpsJson(valeur: unknown): RequestInit {
+  return { method: 'POST', body: JSON.stringify(valeur) };
+}
+
+// ------------------------------------------------------------------ les 7 routes de la v1
 
 export function lireSante(): Promise<ReponseSante> {
-  return demander<ReponseSante>(chemin('sante', '/api/sante'));
+  return demander<ReponseSante>(CHEMINS_API.sante);
 }
 
 export function listerProfils(): Promise<readonly Profil[]> {
-  return demander<readonly Profil[]>(chemin('profils', '/api/profils'));
+  return demander<readonly Profil[]>(CHEMINS_API.profils);
 }
 
 export function creerProfil(creation: CreationProfil): Promise<Profil> {
-  return demander<Profil>(chemin('profils', '/api/profils'), {
-    method: 'POST',
-    body: JSON.stringify(creation)
-  });
+  return demander<Profil>(CHEMINS_API.profils, corpsJson(creation));
 }
 
 export function lireProfil(id: IdProfil): Promise<Profil> {
-  return demander<Profil>(chemin('profil', `/api/profils/${String(id)}`, String(id)));
+  return demander<Profil>(CHEMINS_API.profil(id));
 }
 
 export function lireProgression(id: IdProfil): Promise<readonly ProgressionNoeud[]> {
-  return demander<readonly ProgressionNoeud[]>(
-    chemin('progression', `/api/profils/${String(id)}/progression`, String(id))
-  );
+  return demander<readonly ProgressionNoeud[]>(CHEMINS_API.progression(id));
 }
 
 export function lirePaquetNoeud(id: IdNoeud): Promise<PaquetNoeudAttendu> {
-  return demander<PaquetNoeudAttendu>(
-    chemin('noeud', `/api/contenu/noeuds/${String(id)}`, String(id))
-  );
+  return demander<PaquetNoeudAttendu>(CHEMINS_API.noeud(id));
 }
 
 export function enregistrerTentative(
   tentative: TentativeAEnregistrer
 ): Promise<ReponseTentative> {
-  return demander<ReponseTentative>(chemin('tentatives', '/api/tentatives'), {
-    method: 'POST',
-    body: JSON.stringify(tentative)
-  });
+  return demander<ReponseTentative>(CHEMINS_API.tentatives, corpsJson(tentative));
 }
 
 /** URL d'un asset de `contenu/` (SVG, audio). Ce n'est pas une route JSON (§ 3.3). */
 export function urlAsset(cheminRelatif: string): string {
-  return `/api/contenu/assets/${cheminRelatif.replace(/^\/+/u, '')}`;
+  return CHEMINS_API.asset(cheminRelatif.replace(/^\/+/u, ''));
+}
+
+// ------------------------------------------------------------- lecture et typographie (L2-B)
+
+export function lireReglagesLecture(id: IdProfil): Promise<ReglagesLecture> {
+  return demander<ReglagesLecture>(CHEMINS_API.reglages(id));
+}
+
+export function ecrireReglagesLecture(
+  id: IdProfil,
+  reglages: Partial<ReglagesLecture>
+): Promise<ReglagesLecture> {
+  return demander<ReglagesLecture>(CHEMINS_API.reglages(id), {
+    method: 'PUT',
+    body: JSON.stringify(reglages)
+  });
+}
+
+export function lireEssaiTypographie(id: IdProfil): Promise<ComparaisonTypographie | null> {
+  return demander<ComparaisonTypographie | null>(CHEMINS_API.essaiTypographie(id));
+}
+
+// ------------------------------------------------------------------------ pédagogie (L2-D)
+
+export function lireMaitrise(id: IdProfil): Promise<readonly EtatMaitrise[]> {
+  return demander<readonly EtatMaitrise[]>(CHEMINS_API.maitrise(id));
+}
+
+export function lireRevisions(id: IdProfil): Promise<readonly ItemLeitner[]> {
+  return demander<readonly ItemLeitner[]>(CHEMINS_API.revisions(id));
+}
+
+export function composerSortie(
+  id: IdProfil,
+  demande: { readonly region: string; readonly compagnon: CodeCompagnon | null }
+): Promise<PlanSortie> {
+  return demander<PlanSortie>(CHEMINS_API.sortie(id), corpsJson(demande));
+}
+
+// ------------------------------------------------------------------- monde et campement (L2-F)
+
+export function lireMonde(id: IdProfil): Promise<EtatMonde> {
+  return demander<EtatMonde>(CHEMINS_API.monde(id));
+}
+
+export function poserObjetCampement(
+  id: IdProfil,
+  objet: CodeObjetCampement
+): Promise<EtatMonde> {
+  return demander<EtatMonde>(CHEMINS_API.campement(id), corpsJson({ objet }));
+}
+
+// ---------------------------------------------------------------------- zone parent (L2-H)
+
+/**
+ * Le résumé du dashboard, plus le compte des confusions ÉCARTÉES faute d'axe.
+ *
+ * Ce second champ n'est pas décoratif : sans lui, un top 10 vide serait indistinguable d'un
+ * enfant qui ne confond plus rien (D23, contrat § 10.4).
+ */
+export interface DashboardParent extends ResumeDashboard {
+  readonly confusionsEcartees: number;
+}
+
+/**
+ * Ouvre la zone parent et retient le jeton pour les appels suivants.
+ *
+ * Lève une `ErreurReseau` de statut **423** quand le verrou est actif ; son `corps.details`
+ * porte `verrouilleJusqua`. C'est l'écran qui décide quoi en dire — jamais un reproche.
+ */
+export async function ouvrirZoneParent(code: string): Promise<OuvertureParent> {
+  const ouverture = await demander<OuvertureParent>(
+    CHEMINS_API.parentOuvrir,
+    corpsJson({ code })
+  );
+  jetonParent = ouverture.jeton;
+  return ouverture;
+}
+
+export function lireDashboardParent(profil: IdProfil): Promise<DashboardParent> {
+  return demander<DashboardParent>(CHEMINS_API.parentDashboard(profil), {
+    headers: entetesParent()
+  });
+}
+
+/** Le CSV brut, tel que le serveur l'a produit — BOM compris, pour Excel FR. */
+export async function lireExportCsv(profil: IdProfil, code: CodeExport): Promise<string> {
+  const reponse = await reponseBrute(CHEMINS_API.parentExport(profil, code), {
+    headers: { ...entetesParent(), Accept: 'text/csv' }
+  });
+  return reponse.text();
+}
+
+export function trancherRelectureContenu(
+  exercice: IdExercice,
+  decision: DecisionRelecture
+): Promise<EntreeRelecture> {
+  return demander<EntreeRelecture>(CHEMINS_API.parentRelecture(exercice), {
+    ...corpsJson(decision),
+    headers: entetesParent()
+  });
 }
 
 // ------------------------------------------------------------------ clé d'idempotence

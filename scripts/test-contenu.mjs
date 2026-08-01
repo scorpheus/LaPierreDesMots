@@ -17,6 +17,7 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join, posix, relative, sep } from 'node:path';
 
 import { RACINE, ecrireEtape, genererRapport } from './rapport.mjs';
+import { cheminsRemplisNonFermes } from './svg-remplissage.mjs';
 
 const ETAPE = 'test:contenu';
 const debut = Date.now();
@@ -41,7 +42,14 @@ const controlesDesactives = [
   ['7', 'Graphe de prérequis acyclique', 'un seul nœud en v1, aucun prérequis (D1)'],
   ['8', 'Audio pré-rendu par consigne (R15)', 'pas d’audio en v1 (D1) — dette explicite, écart n° 4'],
   ['9', 'Couverture lexicale CE1', 'aucune liste de fréquence dans le dépôt à ce stade'],
-  ['10', '≥ 3 moteurs par compétence (R12)', 'un seul moteur en v1, par construction (D1)']
+  [
+    '10',
+    '≥ 3 moteurs par compétence (R12)',
+    'mesurée ailleurs depuis la campagne v2 : `tests/unitaires/moteurs-couverture.test.ts` ' +
+      'la calcule sur `contenu/exercices/**` réel et échoue si une seule compétence passe ' +
+      'sous 3. La raison v1 — « un seul moteur, par construction (D1) » — est caduque : ' +
+      'le registre en compte 14'
+  ]
 ];
 
 const problemes = [];
@@ -108,8 +116,9 @@ try {
 }
 
 let validerSceneSvg;
+let estCheminFerme;
 try {
-  ({ validerSceneSvg } = await import('@pierre/partage/validation'));
+  ({ validerSceneSvg, estCheminFerme } = await import('@pierre/partage/validation'));
 } catch (erreur) {
   terminer(
     'environnement',
@@ -298,16 +307,63 @@ for (const { chemin, donnees } of exercices) {
 // L'étape bloquante de l'annexe P § 3.2. Un `<path>` coloriable qui a perdu son `Z` fait
 // fuiter le remplissage sur toute l'image ; rien ne le voyait avant l'enfant.
 //
-// Le contrôle part des SVG PRÉSENTS SUR DISQUE, pas des habillages : recenser les fichiers
-// déclarés ne dirait rien d'un fichier qui traîne sans déclaration — et un `.svg` qu'aucun
-// habillage ne réclame est soit du contenu mort, soit une déclaration manquante. Les deux
-// méritent d'être dits.
+// Le contrôle part des SVG PRÉSENTS SUR DISQUE, pas des déclarations : recenser les fichiers
+// déclarés ne dirait rien d'un fichier qui traîne sans déclaration — et un `.svg` que personne
+// ne réclame est soit du contenu mort, soit une déclaration manquante. Les deux méritent
+// d'être dits.
+//
+// ─────────────────────────────────────────────────────────────────────────────────────────
+// ÉLARGI À L'INTÉGRATION DE LA CAMPAGNE v2 — deux sources de déclaration, deux contrôles.
+//
+// La version v1 ne connaissait qu'une source : les `*.habillage.json`. La campagne v2 ajoute
+// **8 SVG qui ne sont pas des scènes d'exercice** et qu'aucun habillage ne peut donc déclarer
+// — la carte du monde, le campement, les 5 stades de Gobi et son cristal (lot L2-F). Mesuré
+// avant correction, sortie citée :
+//
+//   test:contenu — 69 contrôle(s), 8 problème(s)
+//     ✗ contenu/assets/gobi/cristal-base.svg : [contrôle P3.2] aucun habillage ne déclare…
+//     ✗ … 7 autres, tous du même motif
+//
+// Les traiter en « contenu mort » était faux : ils sont déclarés, mais dans `contenu/monde/`.
+// Les faire taire aurait été pire — la carte du monde EST une scène coloriable, c'est même la
+// mécanique signature du projet (v2 § 9.4).
+//
+// D'où deux niveaux, et aucun fichier sans contrôle :
+//   1. SVG déclaré par un habillage → `validerSceneSvg`, contrôle complet (régions déclarées,
+//      présentes, fermées) ;
+//   2. SVG déclaré par `contenu/monde/*.json` → contrôle STRUCTUREL : tout `<path>` qui porte
+//      un remplissage doit être fermé. C'est exactement le risque de l'annexe P § 3.2, et il
+//      ne demande aucune liste de régions ;
+//   3. SVG déclaré nulle part → toujours signalé comme avant.
+// ─────────────────────────────────────────────────────────────────────────────────────────
 
 const svgParChemin = new Map();
 for (const { chemin, donnees } of habillages.values()) {
   const fichier = donnees.scene?.fichier;
   if (typeof fichier !== 'string' || fichier.length === 0) continue;
   svgParChemin.set(join(DOSSIER_CONTENU, ...fichier.split('/')), { chemin, donnees });
+}
+
+/**
+ * Les SVG déclarés par les documents de `contenu/monde/` : `scene.fichier` pour la carte et
+ * le campement, `asset` pour les stades de Gobi et les compagnons. On parcourt le document en
+ * profondeur plutôt que de nommer les clés une à une : une clé nouvelle serait sinon un
+ * fichier redevenu invisible, en silence.
+ */
+const svgDuMonde = new Map();
+for (const cheminDoc of fichiersJson(join(DOSSIER_CONTENU, 'monde'))) {
+  const donnees = lireJson(cheminDoc);
+  const pile = [donnees];
+  while (pile.length > 0) {
+    const noeud = pile.pop();
+    if (Array.isArray(noeud)) {
+      pile.push(...noeud);
+    } else if (noeud && typeof noeud === 'object') {
+      pile.push(...Object.values(noeud));
+    } else if (typeof noeud === 'string' && noeud.endsWith('.svg')) {
+      svgDuMonde.set(join(DOSSIER_CONTENU, ...noeud.split('/')), cheminDoc);
+    }
+  }
 }
 
 const tousLesSvg = fichiers(DOSSIER_CONTENU, '.svg');
@@ -317,19 +373,37 @@ for (const cheminSvg of tousLesSvg) {
   nbControles += 1;
   const ou = relatif(cheminSvg);
   const habillage = svgParChemin.get(cheminSvg);
-  if (!habillage) {
+
+  if (habillage) {
+    nbSvgControles += 1;
+    const rapportSvg = validerSceneSvg(readFileSync(cheminSvg, 'utf8'), habillage.donnees);
+    for (const probleme of rapportSvg.problemes) {
+      signaler(ou, `${probleme.chemin} : ${probleme.message} [${probleme.regle}]`, 'P3.2');
+    }
+    continue;
+  }
+
+  const declarePar = svgDuMonde.get(cheminSvg);
+  if (declarePar === undefined) {
     signaler(
       ou,
-      'aucun habillage ne déclare ce SVG : ses régions ne peuvent être ni contrôlées, ni ' +
-        'jouées. Contenu mort, ou `scene.fichier` manquant.',
+      'aucun habillage ni document de `contenu/monde/` ne déclare ce SVG : ses régions ne ' +
+        'peuvent être ni contrôlées, ni jouées. Contenu mort, ou déclaration manquante.',
       'P3.2'
     );
     continue;
   }
+
   nbSvgControles += 1;
-  const rapportSvg = validerSceneSvg(readFileSync(cheminSvg, 'utf8'), habillage.donnees);
-  for (const probleme of rapportSvg.problemes) {
-    signaler(ou, `${probleme.chemin} : ${probleme.message} [${probleme.regle}]`, 'P3.2');
+  const fautifs = cheminsRemplisNonFermes(readFileSync(cheminSvg, 'utf8'), estCheminFerme);
+  if (fautifs.length > 0) {
+    signaler(
+      ou,
+      `déclaré par ${relatif(declarePar)} — ${fautifs.length} tracé(s) rempli(s) et NON ` +
+        `fermé(s) : ${fautifs.join(', ')}. Le remplissage fuit sur toute l'image ` +
+        '(annexe P § 3.2).',
+      'P3.2'
+    );
   }
 }
 

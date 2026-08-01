@@ -1,0 +1,10 @@
+{
+  "id": "galeries-01",
+  "region": "galeries",
+  "ordre": 1,
+  "exercice": "galeries-miroir-bd-01",
+  "prerequis": [
+    "clairiere-01"
+  ],
+  "temps": "presentation"
+}

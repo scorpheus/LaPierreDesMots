@@ -1,0 +1,51 @@
+{
+  "$commentaire": "Agregats attendus apres rejeu de journal-reference-01.jsonl. NE JAMAIS METTRE A JOUR DE SA PROPRE INITIATIVE (CLAUDE.md, annexe T § 6) : en cas de divergence, expliquer l'ecart pedagogique en clair et attendre l'arbitrage. `scripts/test-rejeu.mjs` n'a volontairement aucun drapeau --maj. `empreinteParametres` change des qu'une valeur de contenu/referentiel/parametres-pedagogie.json bouge : une divergence accompagnee d'un changement d'empreinte est une recalibration, pas une regression du code.",
+  "empreinteParametres": "ef6dfd5a",
+  "nbEtapes": 27,
+  "maitrises": [
+    {
+      "competence": "comp.consigne.multiple",
+      "p": 0.999733,
+      "nbTentatives": 6,
+      "joursDistincts": ["2026-09-02", "2026-09-04", "2026-09-07", "2026-09-09", "2026-09-12"],
+      "nbTentativesFaibleDevinette": 6,
+      "acquise": true
+    },
+    {
+      "competence": "comp.consigne.simple",
+      "p": 1,
+      "nbTentatives": 9,
+      "joursDistincts": ["2026-09-01", "2026-09-02", "2026-09-03", "2026-09-05", "2026-09-12"],
+      "nbTentativesFaibleDevinette": 9,
+      "acquise": true
+    },
+    {
+      "competence": "lex.couleur",
+      "p": 0.999393,
+      "nbTentatives": 12,
+      "joursDistincts": [
+        "2026-09-01", "2026-09-02", "2026-09-03",
+        "2026-09-04", "2026-09-05", "2026-09-06"
+      ],
+      "nbTentativesFaibleDevinette": 0,
+      "acquise": false
+    }
+  ],
+  "leitner": [
+    { "item": "fenetre-ecole", "boite": 2, "echeanceLe": "2026-09-06T08:08:00.000Z", "nbRevues": 2 },
+    { "item": "frise-classe",  "boite": 1, "echeanceLe": "2026-09-10T08:06:00.000Z", "nbRevues": 2 },
+    { "item": "mot-bleu",      "boite": 4, "echeanceLe": "2026-09-21T08:11:00.000Z", "nbRevues": 3 },
+    { "item": "mot-jaune",     "boite": 3, "echeanceLe": "2026-09-12T08:13:00.000Z", "nbRevues": 2 },
+    { "item": "mot-rouge",     "boite": 5, "echeanceLe": "2026-10-11T08:09:00.000Z", "nbRevues": 4 },
+    { "item": "mot-vert",      "boite": 4, "echeanceLe": "2026-09-22T08:11:00.000Z", "nbRevues": 3 },
+    { "item": "porte-ecole",   "boite": 4, "echeanceLe": "2026-09-21T08:07:00.000Z", "nbRevues": 3 },
+    { "item": "toit-ecole",    "boite": 5, "echeanceLe": "2026-10-17T08:05:00.000Z", "nbRevues": 4 },
+    { "item": "volets-ecole",  "boite": 3, "echeanceLe": "2026-09-19T08:07:00.000Z", "nbRevues": 4 }
+  ],
+  "controles": {
+    "$motif": "Les agregats ci-dessus prouvent la STABILITE du moteur. Ces controles-la prouvent ce que le journal est cense DEMONTRER, en termes pedagogiques : ils tiennent independamment des valeurs numeriques, et c'est eux qui rendent cette reference autre chose qu'une empreinte de sa propre implantation.",
+    "acquises": ["comp.consigne.simple", "comp.consigne.multiple"],
+    "nonAcquisesMalgreSeuil": ["lex.couleur"],
+    "$clauseD13": "lex.couleur atteint p = 0,9994 sur 12 tentatives reparties sur 6 jours distincts : les TROIS premieres conditions du critere d'acquis sont franchies. Elle n'est pourtant pas acquise, parce que ses 12 tentatives sont toutes en vrai-faux (p_devinette = 0,50) et qu'aucune n'est a faible devinette. C'est exactement la clause de D13 : « une serie de vrai/faux chanceux fait franchir le seuil » — sans elle, cette competence serait declaree maitrisee et le selecteur cesserait de la proposer."
+  }
+}

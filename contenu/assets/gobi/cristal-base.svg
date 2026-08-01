@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Cristal de Gobi">
+  <title>Cristal de Gobi</title>
+  <desc>PLACEHOLDER — D7 et D31 étape A : la forme canonique de Gobi n'est pas validée, et l'étape A n'est pas automatisable. Ce cristal est un bouchon écrit à la main (D2), remplacé le jour où la validation humaine aura choisi UNE image de référence. C'est LUI qui porte les 25 déclinaisons, jamais le corps (D20).</desc>
+  <g id="cristal">
+    <path id="cristal-face" d="M32,4 L50,26 L40,58 L24,58 L14,26 Z" fill="#2FA8E0" stroke="#1B2440" stroke-width="4" stroke-linejoin="round"/>
+    <path id="cristal-facette" d="M32,4 L40,58 L24,58 Z" fill="#8FD6F2" stroke="#1B2440" stroke-width="3" stroke-linejoin="round"/>
+    <path id="cristal-eclat" d="M32,14 L37,26 L32,30 L27,26 Z" fill="#FFF6E3" stroke="none"/>
+  </g>
+</svg>

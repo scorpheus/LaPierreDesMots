@@ -12,7 +12,7 @@
       "type": "array", "minItems": 1, "uniqueItems": true,
       "items": {
         "enum": ["attrape","tri","assemble","chemin","eclair","paires","phrase",
-                 "histoire","chrono","grave","colorie","libre","place"]
+                 "histoire","chrono","grave","colorie","libre","place","trace"]
       }
     },
     "libelle": { "type": "string", "minLength": 1, "maxLength": 80 },

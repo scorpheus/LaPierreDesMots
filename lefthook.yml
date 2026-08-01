@@ -1,9 +1,15 @@
 # Crochets git — contrat technique v1 § 1.1, CLAUDE.md « Commandes ».
 #
-# Installation, une fois après le premier `npm ci` :
+# Installation : AUTOMATIQUE. Le script `prepare` du package.json racine lance
+# `lefthook install` à chaque `npm install` / `npm ci`.
+#
+# C'est un ajout à la section `scripts` prescrite par le contrat § 8, et il est assumé :
+# sans lui, sur une machine neuve, les crochets ne sont jamais posés et le premier commit
+# passe sans lint ni tests — un filet qu'il faut penser à tendre n'est pas un filet.
+# Écart déclaré dans `Docs/ecarts-au-contrat-chaine-verifier.md`.
+#
+# Pour le poser à la main si besoin :
 #     npx lefthook install
-# (aucun script `prepare` n'est déclaré dans package.json : la section `scripts` est
-#  prescrite verbatim par le contrat § 8 et n'en comporte pas. Écart signalé au rapport L-A.)
 #
 # Pour passer outre ponctuellement — à n'utiliser que si on sait pourquoi :
 #     LEFTHOOK=0 git commit ...

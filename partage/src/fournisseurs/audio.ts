@@ -9,8 +9,19 @@ import type { CheminAsset } from '../identifiants.js';
 export type CanalAudio = 'ambiance' | 'effets' | 'voix';
 
 /**
- * Les effets nommés par la v2 § 8. `depot-refuse` est **neutre et court** : jamais descendant,
- * jamais dissonant — l'erreur n'a pas de son négatif (contrat § 5.6).
+ * Les effets nommés par la v2 § 8, plus les deux paliers de la cascade de D25.
+ *
+ * `depot-refuse` est **neutre et court** : jamais descendant, jamais dissonant — l'erreur n'a
+ * pas de son négatif (contrat technique v1 § 5.6).
+ *
+ * ⚠ CETTE UNION EST LA SEULE AUTORITÉ, et c'est la réparation du défaut 1 du contrat des
+ * features v2 § 1.5 : `client/src/services/audio-tone.ts` déclarait cinq recettes sous
+ * d'autres noms (`depot-accepte`, `consigne-terminee`, `exercice-termine`), dont deux
+ * seulement coïncidaient avec cette liste. `depot-correct` — « le détail le plus rentable de
+ * toute la liste » (v2 § 8) — n'était donc **jamais joué sous son nom**, et le repli « tout
+ * code inconnu est joué comme `depot-accepte` » masquait la divergence au lieu de la
+ * signaler. Les recettes de `audio-tone.ts` sont désormais indexées par `CodeEffet` : un code
+ * ajouté ici et oublié là-bas ne compile plus.
  */
 export type CodeEffet =
   | 'depot-correct'
@@ -19,7 +30,11 @@ export type CodeEffet =
   | 'etoile'
   | 'gobi-parle'
   | 'transition-noeud'
-  | 'fin-noeud';
+  | 'fin-noeud'
+  /** Cascade D25, palier ~5 : le tampon spécial de l'école. */
+  | 'palier-intermediaire'
+  /** Cascade D25, palier ~10 : l'image. Le son le plus rare du jeu, donc le plus désirable. */
+  | 'palier-rare';
 
 export interface FournisseurAudio {
   /**

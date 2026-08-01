@@ -14,18 +14,21 @@
     "client"
   ],
   "scripts": {
+    "prepare": "lefthook install",
     "preparer": "node scripts/telecharger-outils.mjs",
+    "preparer:navigateurs": "node scripts/playwright.mjs install chromium",
     "typescript": "tsc -b",
     "lint": "eslint .",
     "construire": "npm run construire -w @pierre/partage && npm run construire -w @pierre/serveur && npm run construire -w @pierre/client",
     "construire:test": "npm run construire:test -w @pierre/client",
+    "ingerer": "node scripts/ingerer.mjs",
     "dev": "node scripts/demarrer.mjs --dev",
     "demarrer": "node scripts/demarrer.mjs",
     "test": "vitest run --project unitaires --project composants --project api",
     "test:contenu": "node scripts/test-contenu.mjs",
-    "test:e2e": "playwright test --project=parcours --project=robustesse",
+    "test:e2e": "node scripts/playwright.mjs test --project=parcours --project=robustesse",
     "test:visuel": "node scripts/test-visuel.mjs",
-    "test:qualite": "playwright test --project=qualite && node scripts/verifier-bundle.mjs",
+    "test:qualite": "node scripts/playwright.mjs test --project=qualite && node scripts/verifier-bundle.mjs",
     "test:rejeu": "node scripts/test-rejeu.mjs",
     "verifier": "node scripts/verifier.mjs"
   },

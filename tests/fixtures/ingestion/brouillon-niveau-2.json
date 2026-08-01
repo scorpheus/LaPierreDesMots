@@ -1,0 +1,134 @@
+{
+  "statut": "brouillon-non-jouable",
+  "raison": "aucune valeur de vérité n'est déductible du PDF : le corrigé n'y figure pas, et la déduire du texte est un jugement humain, pas une extraction positionnelle",
+  "origine": {
+    "source": "fiches-origine/NIVEAU 2.pdf",
+    "niveau": 2,
+    "fiche": 1,
+    "page": 1
+  },
+  "moteurCible": "histoire",
+  "modeReponse": "vrai-faux",
+  "titre": "LES INCROYABLES DAUPHINS",
+  "consigne": "Réponds par V pour vrai ou F pour faux.",
+  "texte": {
+    "lignes": [
+      {
+        "texte": "Les dauphins vivent dans les océans et parfois dans les grandes rivières. Ce",
+        "y": 217.7
+      },
+      {
+        "texte": "sont des mammifères, comme les humains. Ils doivent remonter à la surface",
+        "y": 241.6
+      },
+      {
+        "texte": "pour respirer.",
+        "y": 265.6
+      },
+      {
+        "texte": "Les dauphins sont très sociaux. Ils vivent en groupes appelés bancs. Ils",
+        "y": 289.5
+      },
+      {
+        "texte": "aiment jouer entre eux et parfois avec les humains.",
+        "y": 313.5
+      },
+      {
+        "texte": "Les dauphins mangent du poisson et des calmars, mais jamais des plantes.",
+        "y": 337.4
+      },
+      {
+        "texte": "Pour communiquer, ils utilisent des sons, des sifflements et des gestes.",
+        "y": 361.4
+      },
+      {
+        "texte": "Ils peuvent aussi sauter très haut hors de l’eau. Les dauphins sont très",
+        "y": 385.3
+      },
+      {
+        "texte": "intelligents et aiment explorer leur environnement.",
+        "y": 409.3
+      }
+    ],
+    "contenu": "Les dauphins vivent dans les océans et parfois dans les grandes rivières. Ce sont des mammifères, comme les humains. Ils doivent remonter à la surface pour respirer. Les dauphins sont très sociaux. Ils vivent en groupes appelés bancs. Ils aiment jouer entre eux et parfois avec les humains. Les dauphins mangent du poisson et des calmars, mais jamais des plantes. Pour communiquer, ils utilisent des sons, des sifflements et des gestes. Ils peuvent aussi sauter très haut hors de l’eau. Les dauphins sont très intelligents et aiment explorer leur environnement.",
+    "nbLignes": 9,
+    "texteFiable": true
+  },
+  "affirmations": [
+    {
+      "rang": 1,
+      "texte": "Les dauphins vivent uniquement dans les océans.",
+      "texteFiable": true,
+      "nbLignes": 1,
+      "y": 505.8,
+      "reponseAttendue": null
+    },
+    {
+      "rang": 2,
+      "texte": "Les dauphins sont des mammifères.",
+      "texteFiable": true,
+      "nbLignes": 1,
+      "y": 543.1,
+      "reponseAttendue": null
+    },
+    {
+      "rang": 3,
+      "texte": "Les dauphins peuvent respirer sous l’eau comme les poissons.",
+      "texteFiable": true,
+      "nbLignes": 1,
+      "y": 580.6,
+      "reponseAttendue": null
+    },
+    {
+      "rang": 4,
+      "texte": "Les dauphins vivent seuls.",
+      "texteFiable": true,
+      "nbLignes": 1,
+      "y": 616.0,
+      "reponseAttendue": null
+    },
+    {
+      "rang": 5,
+      "texte": "Les dauphins mangent du poisson et des calmars.",
+      "texteFiable": true,
+      "nbLignes": 1,
+      "y": 651.4,
+      "reponseAttendue": null
+    },
+    {
+      "rang": 6,
+      "texte": "Les dauphins communiquent avec des sons et des gestes.",
+      "texteFiable": true,
+      "nbLignes": 1,
+      "y": 686.8,
+      "reponseAttendue": null
+    },
+    {
+      "rang": 7,
+      "texte": "Les dauphins peuvent sauter très haut hors de l’eau.",
+      "texteFiable": true,
+      "nbLignes": 1,
+      "y": 722.2,
+      "reponseAttendue": null
+    },
+    {
+      "rang": 8,
+      "texte": "Les dauphins ne jouent jamais entre eux ni avec les humains.",
+      "texteFiable": true,
+      "nbLignes": 1,
+      "y": 757.6,
+      "reponseAttendue": null
+    }
+  ],
+  "compte": {
+    "lignesTexte": 9,
+    "affirmations": 8
+  },
+  "aFaireALaMain": [
+    "décider vrai ou faux pour chaque affirmation, en relisant le texte support",
+    "vérifier la couverture lexicale CE1 du texte support",
+    "choisir les compétences du référentiel et la difficulté",
+    "faire relire et valider par le parent avant de déposer dans contenu/exercices/"
+  ],
+  "avertissements": []
+}

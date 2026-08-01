@@ -1,8 +1,16 @@
-// Étoiles de qualité — v2 § 6.2, contrat technique v1 § 10.
+// Étoiles de qualité — v2 § 6.2, contrat technique v1 § 10, étendu par L2-A.
 //
 // RÈGLE DURE : les étoiles manquantes sont affichées EN CREUX, jamais en rouge (v2 § 6.2).
 // Aucune couleur d'échec n'existe dans ce projet — l'erreur est un mouvement, pas une teinte.
+//
+// AJOUT DE L2-A : les étoiles peuvent porter la jauge du palier qu'elles alimentent. C'est la
+// mise en œuvre de D25 point 3 au plus près de l'endroit où l'enfant regarde — « ce qui motive,
+// c'est de voir la case suivante vide ». Les étoiles disent ce qui vient d'être gagné, la
+// jauge dit ce qu'il reste. Les deux ensemble, ou aucune : `jauge` est facultative pour que
+// l'écran de récompense les compose et que la carte n'ait pas à le faire.
 import type { ReactElement } from 'react';
+import type { JaugePalier as ModeleJauge } from '@pierre/partage';
+import { JaugePalier } from './JaugePalier.js';
 
 /** Chemin d'une étoile à cinq branches, dans un carré de 24. */
 const TRACE_ETOILE =
@@ -19,6 +27,11 @@ export interface ProprietesEtoiles {
   readonly animees?: boolean;
   /** Délai entre deux étoiles, `TimingsHabillage.interEtoilesMs` (§ 4.1). */
   readonly interEtoilesMs?: number;
+  /**
+   * La jauge du palier que ces étoiles alimentent. `null` — le défaut — n'affiche rien de
+   * plus : la carte et le coffre montrent des étoiles sans cascade.
+   */
+  readonly jauge?: ModeleJauge | null;
 }
 
 export function Etoiles({
@@ -26,12 +39,13 @@ export function Etoiles({
   total = 3,
   taille = 64,
   animees = false,
-  interEtoilesMs = 180
+  interEtoilesMs = 180,
+  jauge = null
 }: ProprietesEtoiles): ReactElement {
   const rangs = Array.from({ length: total }, (_, index) => index + 1);
   const nombreAcquises = Math.max(0, Math.min(acquises, total));
 
-  return (
+  const etoiles = (
     <div
       className="etoiles"
       role="img"
@@ -70,6 +84,24 @@ export function Etoiles({
           </svg>
         );
       })}
+    </div>
+  );
+
+  if (jauge === null) {
+    return etoiles;
+  }
+
+  return (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '0.75rem',
+        alignItems: 'center'
+      }}
+    >
+      {etoiles}
+      <JaugePalier jauge={jauge} />
     </div>
   );
 }

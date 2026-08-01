@@ -1,11 +1,12 @@
 // Configuration ESLint « plate » (flat config) de La Pierre des Mots.
 // Contrat technique v1 § 0 et § 1.1 · CLAUDE.md, règles non négociables.
 //
-// LA RÈGLE MAISON DE CE FICHIER — celle qui justifie qu'il existe :
-//   `Math.random`, `Date.now()` et `new Date()` sont INTERDITS partout,
-//   sauf dans les deux fichiers qui les implémentent :
-//     partage/src/alea.ts     → l'aléatoire (mulberry32, graine `ATELIER_GRAINE`)
-//     partage/src/horloge.ts  → le temps (`figer`, `avancer`)
+// LES RÈGLES MAISON DE CE FICHIER — celles qui justifient qu'il existe :
+//   `Math.random`, `Date.now()`, `new Date()` et `navigator.vibrate` sont INTERDITS partout,
+//   sauf dans les trois fichiers qui les implémentent :
+//     partage/src/alea.ts                          → l'aléatoire (mulberry32, `ATELIER_GRAINE`)
+//     partage/src/horloge.ts                       → le temps (`figer`, `avancer`)
+//     client/src/gamefeel/haptique-navigateur.ts   → la vibration (lot L2-A, D26)
 //
 // Motif, écrit ici pour qu'on ne l'assouplisse pas par confort : tout le déterminisme de la
 // suite de tests en dépend. Le rejeu des journaux de référence (annexe T § T2) compare des
@@ -68,9 +69,45 @@ const SYNTAXE_TEMPS = [
 const PROPRIETE_ALEA = { object: 'Math', property: 'random', message: MESSAGE_ALEA };
 const PROPRIETE_TEMPS = { object: 'Date', property: 'now', message: MESSAGE_HORLOGE };
 
-// Les deux seuls fichiers du dépôt autorisés à appeler la primitive qu'ils encapsulent.
+// ---------------------------------------------------------------- la vibration (lot L2-A)
+//
+// Même forme, même motif que les deux règles ci-dessus : une primitive du navigateur enfermée
+// dans le SEUL fichier qui l'encapsule. Ce qui est en jeu ici n'est pas le déterminisme mais
+// la dégradation : `prefers-reduced-motion` et le réglage « animations calmes » doivent
+// pouvoir tout couper EN UN POINT (v2 § 8). Répartie sur les sites d'appel, un seul oubli
+// suffirait à faire vibrer une tablette dont l'enfant a demandé qu'elle se taise — et à faire
+// vibrer la machine qui exécute la suite de tests.
+
+const MESSAGE_VIBRATION =
+  'Vibration interdite ici. Passe par `RetourSensoriel` : `services.retour.depotCorrect(...)`, ' +
+  'ou par `FournisseurHaptique` si le geste n\'est pas un dépôt. `navigator.vibrate` appelé ' +
+  'directement contourne `prefers-reduced-motion` et le réglage « animations calmes » — seul ' +
+  'client/src/gamefeel/haptique-navigateur.ts a le droit de l\'appeler (v2 § 8, D26).';
+
+/** @type {{selector: string, message: string}[]} */
+const SYNTAXE_VIBRATION = [
+  {
+    selector: "MemberExpression[object.name='navigator'][property.name='vibrate']",
+    message: MESSAGE_VIBRATION
+  },
+  {
+    // Attrape `const { vibrate } = navigator;` — le contournement le plus évident.
+    selector:
+      "VariableDeclarator[init.name='navigator'] > ObjectPattern > Property[key.name='vibrate']",
+    message: MESSAGE_VIBRATION
+  }
+];
+
+const PROPRIETE_VIBRATION = {
+  object: 'navigator',
+  property: 'vibrate',
+  message: MESSAGE_VIBRATION
+};
+
+// Les trois seuls fichiers du dépôt autorisés à appeler la primitive qu'ils encapsulent.
 const FICHIER_ALEA = 'partage/src/alea.ts';
 const FICHIER_HORLOGE = 'partage/src/horloge.ts';
+const FICHIER_HAPTIQUE = 'client/src/gamefeel/haptique-navigateur.ts';
 
 export default tseslint.config(
   // ------------------------------------------------------------ ce qui n'est jamais linté
@@ -104,8 +141,8 @@ export default tseslint.config(
       globals: { ...globals.node }
     },
     rules: {
-      'no-restricted-syntax': ['error', ...SYNTAXE_ALEA, ...SYNTAXE_TEMPS],
-      'no-restricted-properties': ['error', PROPRIETE_ALEA, PROPRIETE_TEMPS],
+      'no-restricted-syntax': ['error', ...SYNTAXE_ALEA, ...SYNTAXE_TEMPS, ...SYNTAXE_VIBRATION],
+      'no-restricted-properties': ['error', PROPRIETE_ALEA, PROPRIETE_TEMPS, PROPRIETE_VIBRATION],
 
       // Confort de lecture, pas de dogme.
       'no-console': 'off',
@@ -134,25 +171,39 @@ export default tseslint.config(
     }
   },
 
-  // ------------------------------------------------------------ les deux dérogations, chirurgicales
+  // ------------------------------------------------------------ les trois dérogations, chirurgicales
+  //
+  // Chacune n'ouvre QUE la primitive que le fichier encapsule, et reste soumise aux deux
+  // autres interdictions. Une dérogation qui les lèverait toutes serait une porte, pas une
+  // exception.
   {
     // `alea.ts` implémente l'aléatoire : il peut appeler `Math.random` pour sa graine par
-    // défaut. Il reste soumis à l'interdiction du temps.
+    // défaut. Il reste soumis à l'interdiction du temps et de la vibration.
     name: 'pierre/derogation-alea',
     files: [FICHIER_ALEA],
     rules: {
-      'no-restricted-syntax': ['error', ...SYNTAXE_TEMPS],
-      'no-restricted-properties': ['error', PROPRIETE_TEMPS]
+      'no-restricted-syntax': ['error', ...SYNTAXE_TEMPS, ...SYNTAXE_VIBRATION],
+      'no-restricted-properties': ['error', PROPRIETE_TEMPS, PROPRIETE_VIBRATION]
     }
   },
   {
     // `horloge.ts` implémente le temps : il peut appeler `Date.now()` et `new Date()`.
-    // Il reste soumis à l'interdiction de l'aléatoire.
+    // Il reste soumis à l'interdiction de l'aléatoire et de la vibration.
     name: 'pierre/derogation-horloge',
     files: [FICHIER_HORLOGE],
     rules: {
-      'no-restricted-syntax': ['error', ...SYNTAXE_ALEA],
-      'no-restricted-properties': ['error', PROPRIETE_ALEA]
+      'no-restricted-syntax': ['error', ...SYNTAXE_ALEA, ...SYNTAXE_VIBRATION],
+      'no-restricted-properties': ['error', PROPRIETE_ALEA, PROPRIETE_VIBRATION]
+    }
+  },
+  {
+    // `haptique-navigateur.ts` implémente la vibration : il peut appeler `navigator.vibrate`.
+    // Il reste soumis à l'interdiction de l'aléatoire et du temps.
+    name: 'pierre/derogation-haptique',
+    files: [FICHIER_HAPTIQUE],
+    rules: {
+      'no-restricted-syntax': ['error', ...SYNTAXE_ALEA, ...SYNTAXE_TEMPS],
+      'no-restricted-properties': ['error', PROPRIETE_ALEA, PROPRIETE_TEMPS]
     }
   },
 
@@ -165,8 +216,8 @@ export default tseslint.config(
     name: 'pierre/outillage',
     files: ['scripts/**/*.{js,mjs}', '*.config.{js,mjs,ts}', 'eslint.config.js'],
     rules: {
-      'no-restricted-syntax': ['error', ...SYNTAXE_ALEA],
-      'no-restricted-properties': ['error', PROPRIETE_ALEA]
+      'no-restricted-syntax': ['error', ...SYNTAXE_ALEA, ...SYNTAXE_VIBRATION],
+      'no-restricted-properties': ['error', PROPRIETE_ALEA, PROPRIETE_VIBRATION]
     }
   },
 

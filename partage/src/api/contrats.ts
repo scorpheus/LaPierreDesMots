@@ -14,6 +14,7 @@ import type {
   CodeMoteur,
   CodeRegion,
   Horodatage,
+  IdExercice,
   IdNoeud,
   IdProfil,
 } from '../identifiants.js';
@@ -92,10 +93,16 @@ export interface ErreurApi {
 }
 
 /**
- * Les chemins des sept routes. `motifs` est la forme paramétrée pour l'enregistrement côté
- * serveur ; les fonctions construisent l'URL côté client, en encodant leurs arguments.
+ * Les chemins des **dix-neuf** routes : les 7 de la v1, plus les 12 du contrat des features
+ * v2 § 5.3. `motifs` est la forme paramétrée pour l'enregistrement côté serveur ; les fonctions
+ * construisent l'URL côté client, en encodant leurs arguments.
+ *
+ * **L2-H déclare TOUS les chemins, y compris ceux qu'il n'implante pas** (contrat § 5.1). Un
+ * chemin déclaré ici et implanté ailleurs ne peut pas diverger d'un côté sans cesser de
+ * compiler de l'autre — c'est toute la raison d'être de cette table unique.
  */
 export const CHEMINS_API = {
+  // ── les 7 de la v1 ──────────────────────────────────────────────────────────────────────
   sante: '/api/sante',
   profils: '/api/profils',
   profil: (id: IdProfil): string => `/api/profils/${encodeURIComponent(id)}`,
@@ -104,6 +111,31 @@ export const CHEMINS_API = {
   asset: (chemin: CheminAsset): string =>
     `/api/contenu/assets/${chemin.split('/').map(encodeURIComponent).join('/')}`,
   tentatives: '/api/tentatives',
+
+  // ── lecture et typographie — implantées par L2-B ────────────────────────────────────────
+  reglages: (id: IdProfil): string => `/api/profils/${encodeURIComponent(id)}/reglages`,
+  essaiTypographie: (id: IdProfil): string =>
+    `/api/profils/${encodeURIComponent(id)}/essai-typographie`,
+
+  // ── pédagogie — implantées par L2-D ─────────────────────────────────────────────────────
+  maitrise: (id: IdProfil): string => `/api/profils/${encodeURIComponent(id)}/maitrise`,
+  revisions: (id: IdProfil): string => `/api/profils/${encodeURIComponent(id)}/revisions`,
+  sortie: (id: IdProfil): string => `/api/profils/${encodeURIComponent(id)}/sortie`,
+
+  // ── monde et campement — implantées par L2-F ────────────────────────────────────────────
+  monde: (id: IdProfil): string => `/api/profils/${encodeURIComponent(id)}/monde`,
+  campement: (id: IdProfil): string => `/api/profils/${encodeURIComponent(id)}/campement`,
+
+  // ── zone parent — implantées par L2-H ───────────────────────────────────────────────────
+  parentOuvrir: '/api/parent/ouvrir',
+  parentDashboard: (profil: IdProfil): string =>
+    `/api/parent/${encodeURIComponent(profil)}/dashboard`,
+  /** `code` est un `CodeExport` de `parent/types.ts` ; le type y vit, pas ici (C1). */
+  parentExport: (profil: IdProfil, code: string): string =>
+    `/api/parent/${encodeURIComponent(profil)}/export/${encodeURIComponent(code)}`,
+  parentRelecture: (exercice: IdExercice): string =>
+    `/api/parent/relecture/${encodeURIComponent(exercice)}`,
+
   motifs: {
     sante: '/api/sante',
     profils: '/api/profils',
@@ -112,5 +144,22 @@ export const CHEMINS_API = {
     noeud: '/api/contenu/noeuds/:id',
     asset: '/api/contenu/assets/*',
     tentatives: '/api/tentatives',
+    reglages: '/api/profils/:id/reglages',
+    essaiTypographie: '/api/profils/:id/essai-typographie',
+    maitrise: '/api/profils/:id/maitrise',
+    revisions: '/api/profils/:id/revisions',
+    sortie: '/api/profils/:id/sortie',
+    monde: '/api/profils/:id/monde',
+    campement: '/api/profils/:id/campement',
+    parentOuvrir: '/api/parent/ouvrir',
+    parentDashboard: '/api/parent/:profil/dashboard',
+    parentExport: '/api/parent/:profil/export/:code',
+    parentRelecture: '/api/parent/relecture/:exercice',
   },
 } as const;
+
+// L'en-tête du jeton parent, `OuvertureParent` et `DecisionRelecture` vivent dans
+// `partage/src/parent/types.ts`, atteignable par le seul sous-chemin `@pierre/partage/parent`.
+// Motif : C1 — le barillet racine n'accueille que des types, et `partage/src/index.ts`
+// appartient à L2-D. Les poser ici obligerait un autre lot à les réexporter pour que le client
+// les voie, et une frontière qui dépend d'un lot tiers est une frontière qui casse.

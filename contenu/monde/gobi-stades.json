@@ -1,0 +1,67 @@
+{
+  "$commentaire": "PLACEHOLDER À VALIDER — question Q3 du contrat des features v2 § 9. D28 laisse explicitement ouvert « combien de stades ». Cinq est retenu parce que les cinq séries de production existantes deviennent alors cinq stades et non cinq échecs. Changer ce nombre ne touche AUCUNE ligne de code : la table est lue par `stadesDuDocument`. Les seuils en formes sont eux aussi des paramètres (convention C2), à recalibrer sur l'enfant.",
+  "stades": [
+    {
+      "code": "oeuf",
+      "rang": 1,
+      "libelle": "L’Œuf de cristal",
+      "formesRequises": 0,
+      "asset": "assets/gobi/stade-1-oeuf.svg"
+    },
+    {
+      "code": "boule",
+      "rang": 2,
+      "libelle": "La Boule",
+      "formesRequises": 3,
+      "asset": "assets/gobi/stade-2-boule.svg"
+    },
+    {
+      "code": "crete",
+      "rang": 3,
+      "libelle": "La Crête",
+      "formesRequises": 8,
+      "asset": "assets/gobi/stade-3-crete.svg"
+    },
+    {
+      "code": "equipe",
+      "rang": 4,
+      "libelle": "L’Équipé",
+      "formesRequises": 15,
+      "asset": "assets/gobi/stade-4-equipe.svg"
+    },
+    {
+      "code": "gardien",
+      "rang": 5,
+      "libelle": "Le Gardien",
+      "formesRequises": 25,
+      "asset": "assets/gobi/stade-5-gardien.svg"
+    }
+  ],
+  "formes": [
+    { "grapheme": "a", "libelle": "Gobi-A", "cristal": "assets/gobi/cristal-base.svg" },
+    { "grapheme": "e", "libelle": "Gobi-E", "cristal": "assets/gobi/cristal-base.svg" },
+    { "grapheme": "i", "libelle": "Gobi-I", "cristal": "assets/gobi/cristal-base.svg" },
+    { "grapheme": "o", "libelle": "Gobi-O", "cristal": "assets/gobi/cristal-base.svg" },
+    { "grapheme": "u", "libelle": "Gobi-U", "cristal": "assets/gobi/cristal-base.svg" },
+    { "grapheme": "b", "libelle": "Gobi-B", "cristal": "assets/gobi/cristal-base.svg" },
+    { "grapheme": "d", "libelle": "Gobi-D", "cristal": "assets/gobi/cristal-base.svg" },
+    { "grapheme": "p", "libelle": "Gobi-P", "cristal": "assets/gobi/cristal-base.svg" },
+    { "grapheme": "q", "libelle": "Gobi-Q", "cristal": "assets/gobi/cristal-base.svg" },
+    { "grapheme": "t", "libelle": "Gobi-T", "cristal": "assets/gobi/cristal-base.svg" },
+    { "grapheme": "on", "libelle": "Gobi-ON", "cristal": "assets/gobi/cristal-base.svg" },
+    { "grapheme": "an", "libelle": "Gobi-AN", "cristal": "assets/gobi/cristal-base.svg" },
+    { "grapheme": "in", "libelle": "Gobi-IN", "cristal": "assets/gobi/cristal-base.svg" },
+    { "grapheme": "ou", "libelle": "Gobi-OU", "cristal": "assets/gobi/cristal-base.svg" },
+    { "grapheme": "oi", "libelle": "Gobi-OI", "cristal": "assets/gobi/cristal-base.svg" },
+    { "grapheme": "s", "libelle": "Gobi-S", "cristal": "assets/gobi/cristal-base.svg" },
+    { "grapheme": "x", "libelle": "Gobi-X", "cristal": "assets/gobi/cristal-base.svg" },
+    { "grapheme": "er", "libelle": "Gobi-ER", "cristal": "assets/gobi/cristal-base.svg" },
+    { "grapheme": "ent", "libelle": "Gobi-ENT", "cristal": "assets/gobi/cristal-base.svg" },
+    { "grapheme": "ez", "libelle": "Gobi-EZ", "cristal": "assets/gobi/cristal-base.svg" },
+    { "grapheme": "eau", "libelle": "Gobi-EAU", "cristal": "assets/gobi/cristal-base.svg" },
+    { "grapheme": "ill", "libelle": "Gobi-ILL", "cristal": "assets/gobi/cristal-base.svg" },
+    { "grapheme": "gn", "libelle": "Gobi-GN", "cristal": "assets/gobi/cristal-base.svg" },
+    { "grapheme": "ph", "libelle": "Gobi-PH", "cristal": "assets/gobi/cristal-base.svg" },
+    { "grapheme": "ch", "libelle": "Gobi-CH", "cristal": "assets/gobi/cristal-base.svg" }
+  ]
+}

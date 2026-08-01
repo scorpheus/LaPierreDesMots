@@ -10,6 +10,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { CreationProfil, Profil } from '@pierre/partage';
 import { creerProfil, listerProfils } from '../api/client.js';
 import { useMagasin } from '../etat/services.js';
+import { EcranReglagesLecture } from './EcranReglagesLecture.js';
 
 /** Les couleurs d'avatar, prises au nuancier. Aucune ne signifie « raté ». */
 const TEINTES_AVATAR = [
@@ -40,12 +41,14 @@ function initiale(prenom: string): string {
 interface ProprietesCarteProfil {
   readonly profil: Profil;
   readonly surChoix: (profil: Profil) => void;
+  readonly surReglages: (profil: Profil) => void;
 }
 
-function CarteProfil({ profil, surChoix }: ProprietesCarteProfil): ReactElement {
+function CarteProfil({ profil, surChoix, surReglages }: ProprietesCarteProfil): ReactElement {
   const prenom = String(profil.prenom);
 
   return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
     <button
       type="button"
       className="cible carte-profil"
@@ -81,6 +84,22 @@ function CarteProfil({ profil, surChoix }: ProprietesCarteProfil): ReactElement 
         {prenom}
       </span>
     </button>
+
+    {/* Les réglages de lecture sont PAR PROFIL (D19) : l'accès part donc de la carte de
+        l'enfant, jamais d'un menu général. Un seul tap, aucun mot de passe — la zone parent
+        et son code à 4 chiffres sont un autre écran (v2 § 11). */}
+    <button
+      type="button"
+      className="cible"
+      data-reglages-lecture={String(profil.id)}
+      onClick={() => surReglages(profil)}
+      aria-label={`Régler la lecture de ${prenom}`}
+      style={{ inlineSize: '13rem' }}
+    >
+      <span aria-hidden="true">👓</span>
+      <span>Comment je lis</span>
+    </button>
+    </div>
   );
 }
 
@@ -89,10 +108,26 @@ export function EcranProfils(): ReactElement {
   const fileDAttente = useQueryClient();
   const [creationOuverte, fixerCreationOuverte] = useState(false);
   const [prenomSaisi, fixerPrenomSaisi] = useState('');
+  const [reglagesPour, fixerReglagesPour] = useState<Profil | null>(null);
 
+  /**
+   * La liste des enfants se relit à CHAQUE arrivée sur cet écran.
+   *
+   * Les réglages globaux de TanStack Query (`Application.tsx`) posent `staleTime: 30 s`, ce
+   * qui est juste pour le contenu — un nœud, un exercice, un habillage ne changent pas
+   * pendant une partie. Ce n'est pas juste pour CET écran : c'est la porte d'entrée, et il
+   * doit montrer ce que le serveur a réellement. Un profil créé ailleurs — depuis le portable
+   * du parent, depuis un autre onglet, ou par les crochets de test — restait invisible
+   * pendant trente secondes, et l'enfant se voyait refuser sa propre carte.
+   *
+   * Mesuré : la suite T3 `parcours-nominal` cherchait « Alma » juste après l'avoir créée et ne
+   * la trouvait pas. Ce n'était pas un défaut du test.
+   */
   const profils = useQuery({
     queryKey: ['profils'],
-    queryFn: listerProfils
+    queryFn: listerProfils,
+    staleTime: 0,
+    refetchOnMount: 'always'
   });
 
   const creation = useMutation({
@@ -119,15 +154,31 @@ export function EcranProfils(): ReactElement {
       if (prenom === '') {
         return;
       }
-      // NOTE DE CONTRAT : `ConfigurationAvatar` est gelée par le nom (§ 11.1) sans que ses
-      // champs le soient. Le client n'en invente donc AUCUN et laisse le serveur poser son
-      // avatar par défaut (`avatar_json` est `NOT NULL` au § 6.2). Signalé au rapport L-D.
-      creation.mutate({ prenom, paletteVariante: 'clairiere' } as unknown as CreationProfil);
+      // `CreationProfil` déclare `avatar` et `paletteVariante` facultatifs : le client n'invente
+      // aucun champ d'avatar et laisse le serveur poser le sien par défaut (`avatar_json` est
+      // `NOT NULL` au contrat v1 § 6.2). Le transtypage défensif que L-D avait posé ici —
+      // « le contrat gèle le nom mais pas les membres » — n'a plus lieu d'être : les membres
+      // sont sous les yeux, et le compilateur protège de nouveau ce site d'appel.
+      creation.mutate({ prenom, paletteVariante: 'clairiere' });
     },
     [creation, prenomSaisi]
   );
 
   const liste = profils.data ?? [];
+
+  // Les réglages remplacent la liste plutôt que de s'ouvrir par-dessus : une couche modale
+  // demande de savoir comment en sortir, et ce n'est pas acquis à 7 ans. Un seul écran à la
+  // fois, et un bouton « Retour » de 64 px.
+  if (reglagesPour !== null) {
+    return (
+      <EcranReglagesLecture
+        profil={reglagesPour}
+        surFermeture={() => {
+          fixerReglagesPour(null);
+        }}
+      />
+    );
+  }
 
   return (
     <main
@@ -158,7 +209,12 @@ export function EcranProfils(): ReactElement {
         }}
       >
         {liste.map((profil) => (
-          <CarteProfil key={String(profil.id)} profil={profil} surChoix={choisir} />
+          <CarteProfil
+            key={String(profil.id)}
+            profil={profil}
+            surChoix={choisir}
+            surReglages={fixerReglagesPour}
+          />
         ))}
 
         <button

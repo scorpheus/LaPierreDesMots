@@ -12,6 +12,7 @@ import type { ReactElement } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import type { TentativeAEnregistrer } from '@pierre/partage';
 import { calculerCleIdempotence, enregistrerTentative } from '../api/client.js';
+import { CascadeRecompense } from '../composants/CascadeRecompense.js';
 import { Etoiles } from '../composants/Etoiles.js';
 import { useEtatJeu, useMagasin, useServices } from '../etat/services.js';
 import { jouerEffet } from '../services/audio-tone.js';
@@ -37,6 +38,7 @@ export function EcranRecompense(): ReactElement {
   const demarreLe = useEtatJeu((etat) => etat.demarreLe);
   const termineLe = useEtatJeu((etat) => etat.termineLe);
   const dejaEnvoyee = useEtatJeu((etat) => etat.tentativeEnvoyee);
+  const dernierGain = useEtatJeu((etat) => etat.dernierGain);
 
   // Garde locale EN PLUS du drapeau du magasin : `StrictMode` monte deux fois en
   // développement, et le POST partirait deux fois avant que le premier n'ait répondu.
@@ -44,8 +46,12 @@ export function EcranRecompense(): ReactElement {
 
   const nombreEtoiles = etoiles ?? 1;
 
+  // `fin-noeud`, et non plus `exercice-termine` : ce code-là n'appartenait pas à `CodeEffet` et
+  // n'était donc jamais joué sous son nom — c'est le défaut 1 du contrat des features v2 § 1.5,
+  // réparé ici et dans `audio-tone.ts`. Les sons des PALIERS, eux, sont déclenchés par le
+  // magasin au moment où la cascade s'applique : un seul endroit décide, un seul endroit joue.
   useEffect(() => {
-    jouerEffet(services.audio, 'exercice-termine');
+    jouerEffet(services.audio, 'fin-noeud');
   }, [services]);
 
   useEffect(() => {
@@ -67,27 +73,38 @@ export function EcranRecompense(): ReactElement {
       try {
         const cle = await calculerCleIdempotence(profilId, noeudId, demarreLe, graine);
 
-        // NOTE DE CONTRAT : `TentativeAEnregistrer` est gelée par le nom (§ 11.1) sans que ses
-        // champs le soient. La charge ci-dessous reprend EXACTEMENT les colonnes de la table
-        // `tentatives` (§ 6.2), en camelCase. Seul point à reprendre si L-B a nommé autrement.
-        const charge = {
+        // LA CHARGE EST CELLE DE `TentativeAEnregistrer`, CHAMP POUR CHAMP.
+        //
+        // Elle ne l'était pas, et c'était le défaut le plus coûteux du client : l'ancienne
+        // version envoyait `profilId`, `noeudId`, `exerciceId`, `detail`, et dupliquait à plat
+        // `reussi` / `nbErreurs` / `aideUtilisee` / `dureeMs` au lieu de les grouper sous
+        // `resume`. Or `serveur/src/routes/tentatives.ts` exige `profil`, `noeud`, `exercice`,
+        // `moteur`, `habillage`, `graine`, `demarreLe`, `termineLe` et un OBJET `resume` :
+        // **chaque envoi repartait en 400**. Le `catch` plus bas — qui est une bonne règle, une
+        // écriture perdue ne doit jamais gâcher la fin de partie — l'avalait dans un
+        // `console.warn`. L'enfant voyait ses trois étoiles, et rien n'était jamais journalisé.
+        // Le tableau de bord du parent aurait été vide indéfiniment.
+        //
+        // Le type est gelé et ses champs le sont avec lui : ils sont écrits dans
+        // `partage/src/journal/types.ts`, que § 11.1 réexporte. Il n'y avait aucune latitude.
+        // Le parcours T3 garde désormais ce risque : il rejoue le nœud, recharge la page et
+        // exige que la progression soit là.
+        //
+        // `etoiles` n'est volontairement PAS envoyé — « dérivée du résumé par
+        // `calculerEtoiles`, jamais envoyée par le client ». Un client qui choisit ses propres
+        // étoiles peut s'en attribuer trois sans rien réussir.
+        const charge: TentativeAEnregistrer = {
           cleIdempotence: cle,
-          profilId,
-          noeudId,
-          exerciceId: String(paquet.exercice.id),
+          profil: profil.id,
+          noeud: paquet.noeud.id,
+          exercice: paquet.exercice.id,
           moteur: paquet.exercice.jeu.moteur,
-          habillage: paquet.exercice.jeu.habillage,
+          habillage: paquet.habillage.id,
           graine,
           demarreLe,
           termineLe,
-          dureeMs: resume.dureeMs,
-          // Toujours `true` : `false` est structurellement inatteignable (§ 5.6, R14).
-          reussi: resume.reussi,
-          nbErreurs: resume.nbErreurs,
-          aideUtilisee: resume.aideUtilisee,
-          etoiles: nombreEtoiles,
-          detail: { etapes: resume.etapes }
-        } as unknown as TentativeAEnregistrer;
+          resume
+        };
 
         await enregistrerTentative(charge);
         magasin.getState().marquerTentativeEnvoyee();
@@ -150,6 +167,18 @@ export function EcranRecompense(): ReactElement {
       <p className="zone-lecture" style={{ fontSize: '1.5rem', padding: '1rem', margin: 0 }}>
         {FELICITATIONS[nombreEtoiles] ?? FELICITATIONS[1]}
       </p>
+
+      {/* ─────────────────────────────────────────────────────────────────────────────────
+          LA CASCADE DE D25 REMPLACE LE SEUL DÉCOMPTE D'ÉTOILES.
+
+          Les étoiles ci-dessus disent ce que ce nœud-ci valait ; la cascade dit où en est
+          l'enfant dans le système qui le motive déjà à l'école — étoile, tampon spécial,
+          image. Et surtout elle montre **le vide restant** (D25, point 3), qui est la seule
+          partie de tout cet écran qui donne envie de recommencer.
+
+          `null` tant que les seuils ne sont pas chargés : aucune jauge inventée, aucun
+          nombre en dur (convention C2). */}
+      <CascadeRecompense gain={dernierGain} />
 
       <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
         <button type="button" className="cible cible-appel" onClick={rejouer}>
