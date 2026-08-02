@@ -1,0 +1,107 @@
+{
+  "$commentaire": "LE REGISTRE DES SVG QUE NI UN HABILLAGE NI `contenu/monde/` NE DÉCLARE. Lot A3. ── LE DÉFAUT QU'IL SOLDE. `npm run test:contenu`, contrôle P3.2, rendait 14 anomalies, toutes antérieures à la passe de nuit et toutes du même motif : « aucun habillage ni document de `contenu/monde/` ne déclare ce SVG ». Le contrôle avait raison de les dire — un `.svg` que personne ne réclame est soit du contenu mort, soit une déclaration manquante — mais il n'offrait AUCUNE sortie autre que la suppression, et le père seul décide de ce qui part. Les quatorze fichiers sont donc INTACTS sur disque ; ce document leur donne un propriétaire écrit. ── LES DEUX SEULES SORTIES, ET POURQUOI ELLES SONT ÉTROITES. Un registre qui accepterait n'importe quelle ligne serait un tapis sous lequel balayer les orphelins de demain, c'est-à-dire pire que l'anomalie qu'il fait taire. Chaque entrée porte donc une obligation MÉCANIQUE, vérifiée par `scripts/test-contenu.mjs` et par `tests/unitaires/registre-svg.test.ts` : (1) `declaresParLeCode` — le fichier est vivant, il est nommé par du code ; l'entrée cite le fichier source ET le symbole, et le contrôle EXIGE que ce fichier source contienne littéralement ce symbole. On ne peut donc pas déclarer une fiction : renommer l'état dans le code casse le registre, et c'est le but. (2) `archives` — le fichier est remplacé ; l'entrée NOMME son successeur, et le contrôle exige que ce successeur existe sur disque ET soit lui-même déclaré par un habillage ou par `contenu/monde/`. On ne peut donc pas archiver un orphelin neuf : archiver, c'est nommer ce qui a pris la place. ── QUATRE GARDE-FOUS DE PLUS, tous mesurés et non affirmés : une entrée dont le fichier a disparu est une anomalie (le registre ne peut pas pourrir) ; une entrée pour un SVG que `contenu/habillages/` ou `contenu/monde/` déclare DÉJÀ est une anomalie (le registre ne doit jamais masquer une vraie déclaration) ; un fichier présent dans les deux listes est une anomalie ; et les SVG des deux listes subissent le MÊME contrôle structurel de régions fermées que les autres (annexe P § 3.2) — un archivé reste lisible, `carte-monde.svg` et `ecole.svg` servent encore de référence à des tests. Résultat mesuré : 94/94 SVG contrôlés, contre 80/94 avant ce lot. ── AUCUNE SUPPRESSION. Ce document n'efface rien et n'autorise rien à effacer. Si un jour un SVG n'a ni consommateur ni successeur, il n'entre PAS ici : il se signale au père, qui tranche.",
+  "declaresParLeCode": [
+    {
+      "fichier": "assets/gobi/animation/repos.svg",
+      "consommateur": "partage/src/monde/types.ts",
+      "symbole": "'repos'",
+      "raison": "L'un des cinq états d'animation de l'addendum § A.2, livrés par le lot N3 (contrat de finition v3 § 4.3). L'état existe dans le code — `EtatAnimationGobi` le nomme, `Gobi.tsx` le porte sur `data-animation-gobi`, `EcranCampement.tsx` passe `animation=\"repos\"`. MESURÉ, et il faut le dire plutôt que le laisser croire : aucun composant ne CHARGE ce fichier aujourd'hui. `client/src/composants/Gobi.tsx` dessine le corps EN LIGNE, exprès (« un `fetch` par montage coûterait une requête là où le budget vise une réponse sous 100 ms »). Ce SVG est donc le dessin de RÉFÉRENCE de l'état : c'est lui qui tient la promesse de D20 et D28 — groupe `gobi-corps` identique octet pour octet d'un état à l'autre, seul le geste change — et c'est de lui que partira l'animation le jour où elle sera câblée (addendum § P.10). Le supprimer coûterait de redessiner cinq poses à partir de la canonique verrouillée (D36) ; le garder ne coûte rien."
+    },
+    {
+      "fichier": "assets/gobi/animation/joie.svg",
+      "consommateur": "partage/src/monde/types.ts",
+      "symbole": "'joie'",
+      "raison": "Même statut que `repos.svg` : état déclaré par `EtatAnimationGobi`, dessin de référence livré par N3 à partir de la canonique verrouillée (D36). C'est la pose de la réussite — la seule que R14 rende obligatoire, puisque toute session se termine sur une réussite."
+    },
+    {
+      "fichier": "assets/gobi/animation/aide.svg",
+      "consommateur": "partage/src/monde/types.ts",
+      "symbole": "'aide'",
+      "raison": "Même statut que `repos.svg`. C'est la pose que la bulle d'aide doit montrer : « l'aide de Gobi ne coûte rien et n'est jamais présentée comme un échec » (CLAUDE.md). Un dessin qui contredirait cette règle se verrait ici et nulle part ailleurs."
+    },
+    {
+      "fichier": "assets/gobi/animation/hesitation.svg",
+      "consommateur": "partage/src/monde/types.ts",
+      "symbole": "'hesitation'",
+      "raison": "Même statut que `repos.svg`. La pose de l'attente — jamais celle du reproche : c'est la seule des cinq qui pouvait glisser vers l'écran d'échec, et c'est la raison pour laquelle son dessin est conservé tel que N3 l'a validé."
+    },
+    {
+      "fichier": "assets/gobi/animation/apparition.svg",
+      "consommateur": "partage/src/monde/types.ts",
+      "symbole": "'apparition'",
+      "raison": "Même statut que `repos.svg`. La pose d'entrée en scène ; `CodeVibration` (`partage/src/fournisseurs/haptique.ts`) porte le même code `apparition`, ce qui rend le geste et la vibration solidaires."
+    },
+    {
+      "fichier": "assets/gobi/cristal-base.svg",
+      "consommateur": "serveur/src/depots/monde.ts",
+      "symbole": "assets/gobi/cristal-base.svg",
+      "raison": "CE FICHIER N'A JAMAIS ÉTÉ MORT : il est le repli du serveur. `lireFormes` écrit `cristal: declaree?.cristal ?? 'assets/gobi/cristal-base.svg'` — toute forme obtenue par l'enfant mais absente du référentiel est servie AVEC CE DESSIN, plutôt qu'avec un trou. C'est exactement le défaut que `contenu/schemas/monde.schema.json` nomme déjà pour la carte : « un décor déclaré dans du code n'est pas déclaré ». Le voir en « contenu mort » était donc un contresens du contrôle, pas un défaut du fichier. Il porte de surcroît le cristal seul, l'objet que D20 désigne comme le porteur des vingt-cinq déclinaisons — jamais le corps."
+    }
+  ],
+  "archives": [
+    {
+      "fichier": "assets/gobi/stade-1-oeuf.svg",
+      "remplacePar": "assets/gobi/stades/stade-1.svg",
+      "raison": "Stade v1, remplacé par les dix stades de D43. Le motif est écrit noir sur blanc dans `Docs/questions-en-attente.md` (§ N3-6) et il est dirimant : les cinq anciens sont des bouchons écrits AVANT D36, leur `<desc>` affirme encore « la forme canonique de Gobi n'est PAS validée » — faux depuis D36 —, leur corps est un ovale rose SANS le cœur de Pierre, et chacun diffère des autres, ce qui rend impossible l'invariant « `gobi-corps` identique octet pour octet » sur lequel repose tout le lot N3. Le contrat § 4.3 les annonçait réutilisés aux rangs 1, 3, 5, 7 et 10 ; N3 a écrit l'écart au lieu de le taire. ILS RESTENT SUR DISQUE : le choix se défait en changeant cinq chemins dans `contenu/monde/gobi-stades.json`.",
+      "decision": "contrat de finition v3 § 4.3 (« aucune suppression ») ; écart N3-6 de Docs/questions-en-attente.md",
+      "encoreLuPar": ["tests/unitaires/svg-remplissage.test.ts"]
+    },
+    {
+      "fichier": "assets/gobi/stade-2-boule.svg",
+      "remplacePar": "assets/gobi/stades/stade-3.svg",
+      "raison": "Stade v1, code `boule`. Le code survit — il est au rang 3 des dix stades de D43, parce que `stade_gobi.stade_code` n'a AUCUNE contrainte CHECK en base et que renuméroter un code existant invaliderait en silence les états déjà écrits. C'est le DESSIN qui est remplacé, pour le motif de l'entrée précédente. Le fichier reste sur disque.",
+      "decision": "contrat de finition v3 § 4.3 ; écart N3-6 de Docs/questions-en-attente.md",
+      "encoreLuPar": ["tests/unitaires/svg-remplissage.test.ts"]
+    },
+    {
+      "fichier": "assets/gobi/stade-3-crete.svg",
+      "remplacePar": "assets/gobi/stades/stade-5.svg",
+      "raison": "Stade v1, code `crete`, conservé au rang 5 des dix stades de D43. Dessin remplacé, code intact, fichier intact — même motif que les deux entrées précédentes.",
+      "decision": "contrat de finition v3 § 4.3 ; écart N3-6 de Docs/questions-en-attente.md",
+      "encoreLuPar": ["tests/unitaires/svg-remplissage.test.ts"]
+    },
+    {
+      "fichier": "assets/gobi/stade-4-equipe.svg",
+      "remplacePar": "assets/gobi/stades/stade-7.svg",
+      "raison": "Stade v1, code `equipe`, conservé au rang 7 des dix stades de D43. Dessin remplacé, code intact, fichier intact.",
+      "decision": "contrat de finition v3 § 4.3 ; écart N3-6 de Docs/questions-en-attente.md",
+      "encoreLuPar": ["tests/unitaires/svg-remplissage.test.ts"]
+    },
+    {
+      "fichier": "assets/gobi/stade-5-gardien.svg",
+      "remplacePar": "assets/gobi/stades/stade-10.svg",
+      "raison": "Stade v1, code `gardien`, conservé au rang 10 — le dernier, celui qui s'atteint quand la collection des vingt-cinq formes est complète. Dessin remplacé, code intact, fichier intact.",
+      "decision": "contrat de finition v3 § 4.3 ; écart N3-6 de Docs/questions-en-attente.md",
+      "encoreLuPar": ["tests/unitaires/svg-remplissage.test.ts"]
+    },
+    {
+      "fichier": "habillages/carte/carte-monde.svg",
+      "remplacePar": "habillages/carte/carte-monde-v2.svg",
+      "raison": "La carte de la v1 : six hexagones identiques. Remplacée par `carte-monde-v2.svg`, que `contenu/monde/regions.json` déclare en `scene.fichier` et que `client/src/ecrans/EcranCarte.tsx` sert désormais (`SVG_CARTE`, mesuré à l'écriture de cette entrée). La v1 N'EST PAS un déchet : les deux fichiers portent les MÊMES six identifiants de région, dans le MÊME ordre, avec les MÊMES six centres de marqueur et le MÊME `viewBox` — `tests/unitaires/ids-regions-stables.test.ts` (constante `V1`) les compare fichier à fichier et échoue si l'un dérive de l'autre. La supprimer désarmerait ce test.",
+      "decision": "lot A3 ; passage à la v2 consigné dans le $commentaire de contenu/monde/regions.json et dans l'en-tête de client/src/ecrans/EcranCarte.tsx",
+      "encoreLuPar": [
+        "tests/unitaires/ids-regions-stables.test.ts",
+        "tests/unitaires/svg-remplissage.test.ts",
+        "scripts/verifier-regions-fermees.mjs"
+      ]
+    },
+    {
+      "fichier": "habillages/clairiere/ecole.svg",
+      "remplacePar": "habillages/clairiere/ecole-v2.svg",
+      "raison": "Décor bouchon D2 de La Clairière, remplacé par `ecole-v2.svg` — c'est ce dernier que `contenu/habillages/clairiere/ecole.habillage.json` déclare en `scene.fichier` (mesuré). La v1 reste le FIXTURE de trois suites : `tests/configuration/preparation.ts` l'expose sous `CHEMIN_SVG_ECOLE`, `tests/composants/MoteurColorie.test.tsx` la sert au harnais, `tests/unitaires/decor-lisible.test.ts` la lit. La supprimer casserait ces trois suites sans rien gagner ; l'archiver dit ce qu'elle est devenue.",
+      "decision": "lot A3 ; l'habillage `ecole.habillage.json` pointe sur la v2 depuis la campagne v2 (mesuré : `scene.fichier` = habillages/clairiere/ecole-v2.svg)",
+      "encoreLuPar": [
+        "tests/configuration/preparation.ts",
+        "tests/composants/MoteurColorie.test.tsx",
+        "tests/unitaires/decor-lisible.test.ts"
+      ]
+    },
+    {
+      "fichier": "habillages/galeries/grottes.svg",
+      "remplacePar": "habillages/galeries/grottes-v2.svg",
+      "raison": "Décor bouchon D2 des Galeries, remplacé par `grottes-v2.svg`, seul déclaré par `contenu/habillages/galeries/grottes.habillage.json` (mesuré). La v1 déclarait six régions et ne portait AUCUN attribut `data-region-svg` — écart relevé par `tests/unitaires/ids-regions-stables.test.ts` : elle n'était donc pas jouable en l'état, et c'est bien la v2 qui l'a soldé. Fichier conservé comme trace de la génération de départ.",
+      "decision": "lot A3 ; l'habillage `grottes.habillage.json` pointe sur la v2 depuis la campagne v2 (mesuré : `scene.fichier` = habillages/galeries/grottes-v2.svg)",
+      "encoreLuPar": ["tests/unitaires/ids-regions-stables.test.ts"]
+    }
+  ]
+}

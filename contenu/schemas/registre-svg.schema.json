@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "pierre:schemas/registre-svg",
+  "title": "Registre des SVG hors habillage",
+  "description": "Le schema de `contenu/registre-svg.json`, seul document qui donne un proprietaire ecrit a un `.svg` de `contenu/` que ni un `*.habillage.json` ni un document de `contenu/monde/` ne declare. Lot A3. Le schema ne fait que la moitie du travail : il impose la FORME des entrees. Les obligations qui comptent sont RELATIONNELLES et ne sont pas exprimables ici — le fichier existe, le consommateur contient litteralement le symbole, le successeur existe ET est lui-meme declare, l'entree ne double aucune vraie declaration. Elles sont tenues par `scripts/test-contenu.mjs` (controle P3.2) et par `tests/unitaires/registre-svg.test.ts`, qui EXECUTENT la verification au lieu de l'affirmer. Un schema seul laisserait passer une ligne inventee ; c'est precisement ce que ce registre ne doit jamais permettre.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["declaresParLeCode", "archives"],
+  "properties": {
+    "$commentaire": { "type": "string" },
+    "declaresParLeCode": {
+      "description": "Les SVG VIVANTS que du code nomme, sans qu'un habillage ni `contenu/monde/` puisse les declarer. « Un decor declare dans du code n'est pas declare » : cette liste est la reparation de ce defaut, pas sa continuation.",
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/entreeDeclaree" }
+    },
+    "archives": {
+      "description": "Les SVG REMPLACES, conserves exprès. Aucun fichier n'est efface : le pere seul decide de ce qui part. Archiver oblige a NOMMER le successeur, ce qui interdit d'y ranger un orphelin neuf.",
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/entreeArchivee" }
+    }
+  },
+  "$defs": {
+    "cheminAsset": {
+      "description": "Chemin relatif a la racine de `contenu/`. Meme motif que `monde.schema.json` et `habillage.schema.json` : un seul point, celui de l'extension.",
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*(/[a-z0-9]+(-[a-z0-9]+)*)*\\.svg$"
+    },
+    "cheminSource": {
+      "description": "Chemin d'un fichier du depot, relatif a la racine, en separateurs POSIX.",
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._-]+(/[A-Za-z0-9._-]+)*$"
+    },
+    "raison": {
+      "description": "Pourquoi ce fichier est ici, en francais et en clair. Un registre sans raison ecrite est une liste de silences ; la longueur minimale l'impose plutot que de l'esperer.",
+      "type": "string",
+      "minLength": 80
+    },
+    "entreeDeclaree": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fichier", "consommateur", "symbole", "raison"],
+      "properties": {
+        "fichier": { "$ref": "#/$defs/cheminAsset" },
+        "consommateur": {
+          "description": "Le fichier source qui nomme cet asset. Il doit exister ET contenir litteralement `symbole` — sinon l'entree est une fiction, et le controle le dit.",
+          "$ref": "#/$defs/cheminSource"
+        },
+        "symbole": {
+          "description": "Le texte exact a retrouver dans `consommateur` : un chemin d'asset, ou le membre d'union qui nomme l'etat. C'est le lien mecanique entre le dessin et le code ; le renommer d'un cote casse le registre, et c'est le but.",
+          "type": "string",
+          "minLength": 3
+        },
+        "raison": { "$ref": "#/$defs/raison" }
+      }
+    },
+    "entreeArchivee": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fichier", "remplacePar", "raison", "decision"],
+      "properties": {
+        "fichier": { "$ref": "#/$defs/cheminAsset" },
+        "remplacePar": {
+          "description": "Le successeur. Il doit exister sur disque ET etre declare par un habillage, par `contenu/monde/`, ou par `declaresParLeCode`. C'est la clause qui empeche d'archiver un orphelin : archiver, c'est nommer ce qui a pris la place.",
+          "$ref": "#/$defs/cheminAsset"
+        },
+        "raison": { "$ref": "#/$defs/raison" },
+        "decision": {
+          "description": "Ou la decision est ecrite : contrat, journal des decisions, ou lot. Une archive sans origine ecrite n'a pas ete decidee.",
+          "type": "string",
+          "minLength": 8
+        },
+        "encoreLuPar": {
+          "description": "Les fichiers du depot qui lisent encore l'archive — tests de reference, scripts. Chacun doit exister ET citer le nom du fichier : c'est ce qui rend visible qu'une suppression casserait quelque chose.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/cheminSource" }
+        }
+      }
+    }
+  }
+}

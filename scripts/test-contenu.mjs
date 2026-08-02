@@ -12,12 +12,30 @@
  *
  * C'est aussi la commande que l'agent générateur de contenu doit exécuter avant de déposer un
  * brouillon (annexe T § T1). Elle ne modifie jamais rien : elle lit et elle juge.
+ *
+ * S'y ajoute enfin le contrôle **M6.2** (lot A2), qui ne vient pas non plus de l'annexe T mais
+ * du point de synchronisation du contrat de finition v3 § 6.2 : le croisement de
+ * `contenu/monde/regions.json` et de `contenu/noeuds/**`. Mesuré avant ce lot, sortie citée :
+ *
+ *   $ grep -n "noeud" scripts/test-contenu.mjs
+ *   358,359,360,361,362,363,364   (une variable locale du parcours SVG, aucune lecture)
+ *
+ * Sept occurrences, aucun fichier de nœud ouvert. Un agent pouvait livrer six nœuds invisibles
+ * sur la carte et lire « 0 problème » — c'est arrivé deux fois (contrat § 1.5, puis N8).
+ *
+ * S'y ajoute enfin, pour le lot A3, la **troisième source de déclaration** du contrôle P3.2 :
+ * `contenu/registre-svg.json`. Le contrôle rendait 14 anomalies « aucun habillage ni document
+ * de `contenu/monde/` ne déclare ce SVG » sans offrir d'autre issue que la suppression, alors
+ * qu'aucun lot ne supprime un fichier de contenu. Le registre ouvre les deux issues qui
+ * manquaient — déclarer ce que le code seul nomme, archiver ce qui a été remplacé — et il est
+ * lui-même contrôlé, entrée par entrée, plus bas dans ce fichier. Aucun octet n'a été effacé.
  */
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join, posix, relative, sep } from 'node:path';
 
 import { RACINE, ecrireEtape, genererRapport } from './rapport.mjs';
 import { cheminsRemplisNonFermes } from './svg-remplissage.mjs';
+import { croiserNoeudsEtRegions, resumerCroisement } from './verifier-noeuds-regions.mjs';
 
 const ETAPE = 'test:contenu';
 const debut = Date.now();
@@ -25,6 +43,8 @@ const debut = Date.now();
 const DOSSIER_CONTENU = join(RACINE, 'contenu');
 const CHEMIN_SCHEMA_EXERCICE = join(DOSSIER_CONTENU, 'schemas', 'exercice.schema.json');
 const CHEMIN_COMPETENCES = join(DOSSIER_CONTENU, 'referentiel', 'competences.json');
+const CHEMIN_REGISTRE_SVG = join(DOSSIER_CONTENU, 'registre-svg.json');
+const CHEMIN_SCHEMA_REGISTRE = join(DOSSIER_CONTENU, 'schemas', 'registre-svg.schema.json');
 
 /**
  * Règle des 64 px, transposée dans l'échelle du `viewBox` — contrat § 5.2 : « une `surface` au
@@ -366,6 +386,87 @@ for (const cheminDoc of fichiersJson(join(DOSSIER_CONTENU, 'monde'))) {
   }
 }
 
+// ─────────────────────────────────────────────────────────────────────────────────────────
+// TROISIÈME SOURCE DE DÉCLARATION — `contenu/registre-svg.json` (lot A3).
+//
+// Mesuré avant ce lot, sortie citée :
+//
+//   $ npm run test:contenu
+//   test:contenu — 167 contrôle(s), 14 problème(s)
+//     ✗ contenu/assets/gobi/animation/{aide,apparition,hesitation,joie,repos}.svg   (5)
+//     ✗ contenu/assets/gobi/{cristal-base,stade-1-oeuf…stade-5-gardien}.svg         (6)
+//     ✗ contenu/habillages/{carte/carte-monde,clairiere/ecole,galeries/grottes}.svg (3)
+//     … 80/94 SVG contrôlés en régions fermées
+//
+// Quatorze fichiers, un seul motif : « aucun habillage ni document de `contenu/monde/` ne
+// déclare ce SVG ». Le contrôle avait raison de les dire ; il n'offrait AUCUNE sortie autre
+// que la suppression, et **le père seul décide de ce qui part**. Un contrôle dont la seule
+// issue est interdite finit désactivé — c'est ainsi qu'un garde-fou meurt.
+//
+// Le registre donne les deux issues manquantes, et **il est plus strict que l'anomalie qu'il
+// éteint** : on n'y entre qu'en payant une obligation mécanique, vérifiée plus bas.
+//   • `declaresParLeCode` — le fichier est vivant, du code le nomme. `cristal-base.svg` est le
+//     repli de `lireFormes` (serveur/src/depots/monde.ts) : il n'a jamais été mort, il était
+//     déclaré au mauvais endroit. « Un décor déclaré dans du code n'est pas déclaré »
+//     (contenu/schemas/monde.schema.json) : on le déclare ici, on ne le cache pas.
+//   • `archives` — le fichier est REMPLACÉ, et l'entrée nomme son successeur. Interdit d'y
+//     ranger un orphelin neuf : archiver, c'est nommer ce qui a pris la place.
+//
+// Les deux listes subissent le MÊME contrôle structurel de régions fermées que les SVG du
+// monde. Un archivé n'est pas dispensé de lisibilité : `carte-monde.svg` et `ecole.svg`
+// servent encore de référence à cinq suites de tests.
+// ─────────────────────────────────────────────────────────────────────────────────────────
+
+const registre = existsSync(CHEMIN_REGISTRE_SVG) ? lireJson(CHEMIN_REGISTRE_SVG) : null;
+
+nbControles += 1;
+if (registre === null) {
+  signaler(
+    relatif(CHEMIN_REGISTRE_SVG),
+    'registre des SVG hors habillage absent : sans lui, tout asset nommé par le code seul ' +
+      'redevient « contenu mort » et la seule issue offerte est la suppression.',
+    'P3.2'
+  );
+} else if (existsSync(CHEMIN_SCHEMA_REGISTRE)) {
+  const validerRegistre = ajv.compile(lireJson(CHEMIN_SCHEMA_REGISTRE));
+  if (!validerRegistre(registre)) {
+    for (const erreur of validerRegistre.errors ?? []) {
+      signaler(relatif(CHEMIN_REGISTRE_SVG), `${erreur.instancePath || '/'} ${erreur.message}`, 'P3.2');
+    }
+  }
+} else {
+  signaler(relatif(CHEMIN_SCHEMA_REGISTRE), 'schéma du registre des SVG absent', 'P3.2');
+}
+
+const entreesDeclarees = Array.isArray(registre?.declaresParLeCode)
+  ? registre.declaresParLeCode
+  : [];
+const entreesArchivees = Array.isArray(registre?.archives) ? registre.archives : [];
+
+/** `chemin absolu du .svg` → l'entrée de registre qui le porte, et sa liste d'origine. */
+const svgDuRegistre = new Map();
+for (const entree of entreesDeclarees) {
+  svgDuRegistre.set(join(DOSSIER_CONTENU, ...String(entree.fichier).split('/')), {
+    entree,
+    liste: 'declaresParLeCode'
+  });
+}
+for (const entree of entreesArchivees) {
+  const cle = join(DOSSIER_CONTENU, ...String(entree.fichier).split('/'));
+  const deja = svgDuRegistre.get(cle);
+  if (deja !== undefined) {
+    signaler(
+      relatif(CHEMIN_REGISTRE_SVG),
+      `« ${entree.fichier} » figure à la fois dans \`declaresParLeCode\` et dans ` +
+        '`archives` : un asset est vivant OU remplacé, jamais les deux. Le registre ' +
+        'contredirait le code qu’il prétend documenter.',
+      'P3.2'
+    );
+    continue;
+  }
+  svgDuRegistre.set(cle, { entree, liste: 'archives' });
+}
+
 const tousLesSvg = fichiers(DOSSIER_CONTENU, '.svg');
 let nbSvgControles = 0;
 
@@ -384,26 +485,144 @@ for (const cheminSvg of tousLesSvg) {
   }
 
   const declarePar = svgDuMonde.get(cheminSvg);
-  if (declarePar === undefined) {
+  const auRegistre = svgDuRegistre.get(cheminSvg);
+
+  if (declarePar === undefined && auRegistre === undefined) {
     signaler(
       ou,
-      'aucun habillage ni document de `contenu/monde/` ne déclare ce SVG : ses régions ne ' +
-        'peuvent être ni contrôlées, ni jouées. Contenu mort, ou déclaration manquante.',
+      'aucun habillage, aucun document de `contenu/monde/` et aucune entrée de ' +
+        '`contenu/registre-svg.json` ne déclare ce SVG : ses régions ne peuvent être ni ' +
+        'contrôlées, ni jouées. Contenu mort, ou déclaration manquante. Deux issues, jamais ' +
+        'la suppression : le déclarer là où il est joué, ou l’inscrire au registre — vivant ' +
+        'avec le code qui le nomme, ou archivé avec le fichier qui l’a remplacé.',
       'P3.2'
     );
     continue;
   }
 
+  // Le registre ne doit JAMAIS masquer une vraie déclaration : si l'asset a retrouvé un
+  // habillage ou un document du monde, son entrée est périmée et doit disparaître. Sans ce
+  // contrôle, un fichier archivé puis remis en service resterait « archivé » pour toujours.
+  if (declarePar !== undefined && auRegistre !== undefined) {
+    signaler(
+      ou,
+      `déclaré par ${relatif(declarePar)} ET inscrit au registre (\`${auRegistre.liste}\`) : ` +
+        'le registre ne vaut que pour ce qu’aucune déclaration de contenu ne porte. Retirer ' +
+        'l’entrée du registre.',
+      'P3.2'
+    );
+  }
+
   nbSvgControles += 1;
   const fautifs = cheminsRemplisNonFermes(readFileSync(cheminSvg, 'utf8'), estCheminFerme);
   if (fautifs.length > 0) {
+    const source =
+      declarePar !== undefined
+        ? `déclaré par ${relatif(declarePar)}`
+        : `inscrit au registre (\`${auRegistre.liste}\`)`;
     signaler(
       ou,
-      `déclaré par ${relatif(declarePar)} — ${fautifs.length} tracé(s) rempli(s) et NON ` +
-        `fermé(s) : ${fautifs.join(', ')}. Le remplissage fuit sur toute l'image ` +
-        '(annexe P § 3.2).',
+      `${source} — ${fautifs.length} tracé(s) rempli(s) et NON fermé(s) : ` +
+        `${fautifs.join(', ')}. Le remplissage fuit sur toute l'image (annexe P § 3.2).`,
       'P3.2'
     );
+  }
+}
+
+// ── Le registre lui-même est contrôlé, entrée par entrée. Sans cela il ne serait qu'une
+//    liste de silences : il suffirait d'y écrire un nom pour éteindre une anomalie.
+
+/** Un chemin d'asset est-il porté par une déclaration de contenu, ou par un asset vivant ? */
+function estDeclareVivant(cheminRelatifContenu) {
+  const absolu = join(DOSSIER_CONTENU, ...String(cheminRelatifContenu).split('/'));
+  if (svgParChemin.has(absolu) || svgDuMonde.has(absolu)) return true;
+  return svgDuRegistre.get(absolu)?.liste === 'declaresParLeCode';
+}
+
+for (const entree of entreesDeclarees) {
+  nbControles += 1;
+  const absolu = join(DOSSIER_CONTENU, ...String(entree.fichier).split('/'));
+  if (!existsSync(absolu)) {
+    signaler(
+      relatif(CHEMIN_REGISTRE_SVG),
+      `\`declaresParLeCode\` cite « ${entree.fichier} », absent du disque. Une entrée qui ne ` +
+        'désigne plus rien est un registre qui pourrit : la corriger ou la retirer.',
+      'P3.2'
+    );
+    continue;
+  }
+  const source = join(RACINE, ...String(entree.consommateur).split('/'));
+  if (!existsSync(source)) {
+    signaler(
+      relatif(CHEMIN_REGISTRE_SVG),
+      `« ${entree.fichier} » se dit consommé par « ${entree.consommateur} », qui n’existe ` +
+        'pas. L’asset n’a donc aucun propriétaire : ce n’est pas une déclaration, c’est une ' +
+        'affirmation.',
+      'P3.2'
+    );
+    continue;
+  }
+  if (!readFileSync(source, 'utf8').includes(String(entree.symbole))) {
+    signaler(
+      relatif(CHEMIN_REGISTRE_SVG),
+      `« ${entree.consommateur} » ne contient nulle part « ${entree.symbole} », que le ` +
+        `registre lui prête pour « ${entree.fichier} ». Le lien entre le dessin et le code ` +
+        'est rompu — renommé d’un côté, pas de l’autre.',
+      'P3.2'
+    );
+  }
+}
+
+for (const entree of entreesArchivees) {
+  nbControles += 1;
+  const absolu = join(DOSSIER_CONTENU, ...String(entree.fichier).split('/'));
+  if (!existsSync(absolu)) {
+    signaler(
+      relatif(CHEMIN_REGISTRE_SVG),
+      `\`archives\` cite « ${entree.fichier} », absent du disque. **Aucun lot ne supprime un ` +
+        'fichier de contenu** : soit il a été renommé et l’entrée doit suivre, soit une ' +
+        'suppression a eu lieu et elle doit être signalée au père.',
+      'P3.2'
+    );
+    continue;
+  }
+  const successeur = join(DOSSIER_CONTENU, ...String(entree.remplacePar).split('/'));
+  if (!existsSync(successeur)) {
+    signaler(
+      relatif(CHEMIN_REGISTRE_SVG),
+      `« ${entree.fichier} » est archivé au profit de « ${entree.remplacePar} », qui n’existe ` +
+        'pas. On n’archive pas contre un fichier absent : ce serait ranger un orphelin.',
+      'P3.2'
+    );
+    continue;
+  }
+  if (!estDeclareVivant(entree.remplacePar)) {
+    signaler(
+      relatif(CHEMIN_REGISTRE_SVG),
+      `« ${entree.fichier} » est archivé au profit de « ${entree.remplacePar} », que rien ne ` +
+        'déclare — ni habillage, ni `contenu/monde/`, ni `declaresParLeCode`. Le successeur ' +
+        'serait alors lui-même un orphelin, et le registre aurait servi à masquer deux ' +
+        'fichiers au lieu d’un.',
+      'P3.2'
+    );
+  }
+  for (const lecteur of entree.encoreLuPar ?? []) {
+    const cheminLecteur = join(RACINE, ...String(lecteur).split('/'));
+    const nom = String(entree.fichier).split('/').pop();
+    if (!existsSync(cheminLecteur)) {
+      signaler(
+        relatif(CHEMIN_REGISTRE_SVG),
+        `« ${entree.fichier} » se dit encore lu par « ${lecteur} », qui n’existe pas.`,
+        'P3.2'
+      );
+    } else if (!readFileSync(cheminLecteur, 'utf8').includes(nom)) {
+      signaler(
+        relatif(CHEMIN_REGISTRE_SVG),
+        `« ${lecteur} » ne cite plus « ${nom} » : l’archive a perdu ce lecteur, et le ` +
+          'registre annonce une dépendance qui n’existe plus.',
+        'P3.2'
+      );
+    }
   }
 }
 
@@ -418,6 +637,45 @@ for (const { chemin, donnees } of exercices) {
   } else {
     vus.set(id, chemin);
   }
+}
+
+// ──────────── contrôle M6.2 — `regions.json` × `contenu/noeuds/**`, les DEUX populations
+//
+// « `noeuds` ne cite que des nœuds réellement livrés : c'est lui qui fait le pourcentage de
+// recoloration » — `contenu/monde/regions.json` le dit de lui-même. Un nœud livré et non cité
+// est invisible sur la carte ; un nœud cité et non livré rend la région à jamais incomplète.
+// Aucune relecture d'un seul fichier ne peut le voir : les deux côtés sont cohérents avec
+// eux-mêmes, et c'est leur ÉCART qui ment. D'où un croisement, et non une lecture.
+//
+// La règle qui commande : on énumère les OBJETS des deux côtés — les fichiers de nœud, les
+// entrées des tableaux `noeuds` — jamais les occurrences d'un identifiant. Un `grep` rendait
+// le même nombre de lignes avant et après le défaut.
+
+const CHEMIN_REGIONS = join(DOSSIER_CONTENU, 'monde', 'regions.json');
+let resumeCroisement = 'contrôle M6.2 non exécuté';
+
+nbControles += 1;
+if (!existsSync(CHEMIN_REGIONS)) {
+  signaler(
+    relatif(CHEMIN_REGIONS),
+    'le document des régions est absent : la carte n’a aucune source de nœuds, et le ' +
+      'pourcentage de recoloration ne peut pas être calculé.',
+    'M6.2'
+  );
+} else {
+  const croisement = croiserNoeudsEtRegions({
+    documentRegions: lireJson(CHEMIN_REGIONS),
+    noeuds: fichiersJson(join(DOSSIER_CONTENU, 'noeuds')).map((chemin) => ({
+      chemin: relatif(chemin),
+      donnees: lireJson(chemin)
+    })),
+    exercices: new Set(exercices.map(({ donnees }) => String(donnees?.id)))
+  });
+
+  for (const anomalie of croisement.anomalies) {
+    signaler(anomalie.ou, `${anomalie.message} [${anomalie.regle}]`, 'M6.2');
+  }
+  resumeCroisement = resumerCroisement(croisement);
 }
 
 // ─────────────────────────────────────────────────────────────────────────── utilitaires
@@ -444,7 +702,11 @@ function surfaceMinimaleViewBox(viewBox) {
 
 const note =
   `${exercices.length} exercice(s), ${habillages.size} habillage(s), ` +
-  `${nbSvgControles}/${tousLesSvg.length} SVG contrôlés en régions fermées (annexe P § 3.2). ` +
+  `${nbSvgControles}/${tousLesSvg.length} SVG contrôlés en régions fermées (annexe P § 3.2), ` +
+  `dont ${entreesDeclarees.length} vivant(s) déclaré(s) par le code et ` +
+  `${entreesArchivees.length} archivé(s) — `+
+  `contenu/registre-svg.json, aucun fichier supprimé. ` +
+  `Carte (M6.2) : ${resumeCroisement}. ` +
   `Contrôles désactivés en v1, avec leur raison (contrat § 9.8) : ` +
   controlesDesactives.map(([n, quoi, pourquoi]) => `#${n} ${quoi} — ${pourquoi}`).join(' ; ') +
   '.';
