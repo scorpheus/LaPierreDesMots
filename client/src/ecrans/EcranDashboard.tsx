@@ -148,9 +148,10 @@ export function EcranDashboard({
         </button>
       </header>
 
-      {/* Les deux onglets. `role="tablist"` et `aria-selected` plutôt qu'un simple couple de
-          boutons : axe-core en fait un critère `serious`, et `tests/qualite/a11y-galerie.spec.ts`
-          le vérifie. */}
+      {/* Les TROIS onglets — « les deux » depuis H2, et le commentaire le disait encore.
+          `role="tablist"` et `aria-selected` plutôt qu'un simple trio de boutons : axe-core en
+          fait un critère `serious`, et `tests/qualite/a11y-galerie.spec.ts` le vérifie — en les
+          NOMMANT, pour qu'un onglet perdu se voie au lieu de faire baisser un compte. */}
       <div role="tablist" aria-label="Espace parent" style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
         {(
           [

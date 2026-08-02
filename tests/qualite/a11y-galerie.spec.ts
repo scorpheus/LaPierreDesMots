@@ -140,12 +140,31 @@ test.describe('R16 — la galerie se manipule avec le pouce', () => {
     expect(tropPetites, `cibles sous ${String(CIBLE_MINIMALE_PX)} px`).toEqual([]);
   });
 
-  test('les deux onglets de la zone parent aussi', async ({ page }) => {
+  /**
+   * Les onglets sont NOMMÉS, plus comptés — et le cas en devient plus strict.
+   *
+   * Il affirmait `count() === 2`. Le lot H2 a livré un troisième onglet, « le profil » (ce que
+   * l'enfant a réellement fait, et la remise à zéro) : le cas est donc devenu rouge sur un ajout
+   * légitime, sans rien dire de ce qui avait changé.
+   *
+   * Un compte ne dit jamais LAQUELLE manque le jour où l'une disparaît — c'est le motif déjà
+   * retenu dans `parcours-audit-tout-le-site.spec.ts` pour les départs de la carte. On exige donc
+   * la LISTE exacte, dans l'ordre du rendu. Rien n'est assoupli : `toEqual` sur trois noms est
+   * plus contraignant que `toBe(2)`, et la mesure R16 qui suit est inchangée.
+   */
+  test('les onglets de la zone parent aussi', async ({ page }) => {
     await ouvrirLaGalerie(page);
 
     const onglets = page.locator('[data-onglet-parent]');
     const nb = await onglets.count();
-    expect(nb, 'les deux onglets doivent exister').toBe(2);
+    const codes = await onglets.evaluateAll((elements) =>
+      elements.map((element) => element.getAttribute('data-onglet-parent') ?? '?')
+    );
+    expect(codes, 'les onglets déclarés par EcranDashboard').toEqual([
+      'suivi',
+      'galerie',
+      'profil'
+    ]);
 
     const tropPetits: string[] = [];
     for (let rang = 0; rang < nb; rang += 1) {
