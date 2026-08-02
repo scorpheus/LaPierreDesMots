@@ -36,6 +36,7 @@ import { join, posix, relative, sep } from 'node:path';
 import { RACINE, ecrireEtape, genererRapport } from './rapport.mjs';
 import { cheminsRemplisNonFermes } from './svg-remplissage.mjs';
 import { croiserNoeudsEtRegions, resumerCroisement } from './verifier-noeuds-regions.mjs';
+import { croiserPrerequis, resumerPrerequis } from './verifier-prerequis.mjs';
 
 const ETAPE = 'test:contenu';
 const debut = Date.now();
@@ -59,9 +60,25 @@ const GABARIT = { largeur: 1920, hauteur: 1200, bandeReserveePx: 240 };
 const CIBLE_MINIMALE_PX = 64;
 
 const controlesDesactives = [
-  ['7', 'Graphe de prérequis acyclique', 'un seul nœud en v1, aucun prérequis (D1)'],
-  ['8', 'Audio pré-rendu par consigne (R15)', 'pas d’audio en v1 (D1) — dette explicite, écart n° 4'],
-  ['9', 'Couverture lexicale CE1', 'aucune liste de fréquence dans le dépôt à ce stade'],
+  [
+    '8',
+    'Audio pré-rendu par consigne (R15)',
+    'mesurée ailleurs depuis le lot N2 : `tests/unitaires/consignes-audibles.test.ts` ' +
+      'interroge le manifeste — « la SEULE source de vérité sur l’existence d’un clip » — ' +
+      'et exige 100 % des consignes livrées, avec un cas de non-vacuité. La raison v1 — ' +
+      '« pas d’audio en v1 (D1), dette explicite » — est caduque : `production/voix.lock.json` ' +
+      'déclare 174 clips pour 69 clés à couvrir, 0 refusé'
+  ],
+  [
+    '9',
+    'Couverture lexicale CE1',
+    'la raison v1 — « aucune liste de fréquence dans le dépôt à ce stade » — est caduque : ' +
+      '`LEXIQUE_CE1` de `scripts/generer-phonologie.mjs` en est une. Le contrôle reste ' +
+      'désactivé faute d’un SEUIL tranché par le parent : 93,0 % des mots lus en jeu y ' +
+      'figurent, et les 4 absents sont `b`, `d` (les graphèmes travaillés, D23), `gobi` ' +
+      '(le personnage) et `voit` (conjugaison de `voir`, qui y figure). Refuser à 100 % ' +
+      'interdirait D23 ; choisir 90 % serait inventer une loi — cela revient au parent'
+  ],
   [
     '10',
     '≥ 3 moteurs par compétence (R12)',
@@ -653,6 +670,7 @@ for (const { chemin, donnees } of exercices) {
 
 const CHEMIN_REGIONS = join(DOSSIER_CONTENU, 'monde', 'regions.json');
 let resumeCroisement = 'contrôle M6.2 non exécuté';
+let resumePrerequis = 'contrôle 7 non exécuté';
 
 nbControles += 1;
 if (!existsSync(CHEMIN_REGIONS)) {
@@ -676,6 +694,31 @@ if (!existsSync(CHEMIN_REGIONS)) {
     signaler(anomalie.ou, `${anomalie.message} [${anomalie.regle}]`, 'M6.2');
   }
   resumeCroisement = resumerCroisement(croisement);
+}
+
+// ───────────────── contrôle 7 — le graphe de prérequis, RÉVEILLÉ (il dormait sur une raison fausse)
+//
+// Il figurait parmi les DÉSACTIVÉS, avec pour raison « un seul nœud en v1, aucun prérequis
+// (D1) ». Mesuré à l'intégration : **18 nœuds livrés, 17 portent un prérequis**. La raison
+// était caduque, et le contrôle dormait sur un graphe réel — même motif que les SVG du lot A3.
+//
+// Le croisement vit dans `scripts/verifier-prerequis.mjs`, PUR, pour qu'on puisse lui
+// soumettre un graphe cassé et exiger qu'il le refuse : `tests/unitaires/prerequis-noeuds.test.ts`
+// lui donne un cycle, un prérequis inconnu et un dépôt sans porte d'entrée. Un garde qu'on n'a
+// jamais vu se déclencher n'est pas un garde.
+
+nbControles += 1;
+{
+  const rapport = croiserPrerequis(
+    fichiersJson(join(DOSSIER_CONTENU, 'noeuds')).map((chemin) => ({
+      chemin: relatif(chemin),
+      donnees: lireJson(chemin)
+    }))
+  );
+  for (const anomalie of rapport.anomalies) {
+    signaler(anomalie.ou, `${anomalie.message} [${anomalie.regle}]`, 7);
+  }
+  resumePrerequis = resumerPrerequis(rapport);
 }
 
 // ─────────────────────────────────────────────────────────────────────────── utilitaires
@@ -707,6 +750,7 @@ const note =
   `${entreesArchivees.length} archivé(s) — `+
   `contenu/registre-svg.json, aucun fichier supprimé. ` +
   `Carte (M6.2) : ${resumeCroisement}. ` +
+  `${resumePrerequis} ` +
   `Contrôles désactivés en v1, avec leur raison (contrat § 9.8) : ` +
   controlesDesactives.map(([n, quoi, pourquoi]) => `#${n} ${quoi} — ${pourquoi}`).join(' ; ') +
   '.';
