@@ -2903,3 +2903,715 @@ couverture — la QA des parcours et l'audit d'accessibilité — mesuraient tou
 aucune des deux n'avait le moyen de savoir qu'elle n'était jamais arrivée. C'est pourquoi
 `allerSur` **vérifie désormais le `data-ecran` atteint** avant de mesurer quoi que ce soit : une
 recette qui n'aboutit pas fait échouer le cas, au lieu de le rendre vert sur du vide.
+
+---
+
+## Q-A2 — La carte et les régions : ce que le lot A2 a mesuré et tranché
+
+**Ce qui était annoncé, et qui n'était plus vrai.** Le brief du lot A2 annonçait que
+`contenu/monde/regions.json` citait `["clairiere-01"]` seul devant cinq nœuds livrés. Mesuré au
+démarrage du lot, sortie citée :
+
+```
+$ ls contenu/noeuds/*.json | wc -l                 → 12
+$ (nœuds cités par regions.json)                   → 12
+  clairiere 6 cités / 6 livrés   galeries 6 cités / 6 livrés
+  marais-jumeau, foret-muette, volcan, cite-des-histoires : 0 / 0
+```
+
+**Le lot N7 avait déjà soldé le défaut** — il le documente dans le `$commentaire` du fichier —
+et `tests/unitaires/ids-regions-stables.test.ts` croisait déjà les deux populations. A2 n'a donc
+rien eu à corriger dans les données : **écart nul dans les deux sens, sur les six régions.**
+C'est la troisième mesure de ce défaut (§ 1.5 : 1 cité / 5 livrés ; après N8 : 7 / 12 ;
+aujourd'hui : 12 / 12) et la première où il est absent.
+
+### Ce qui manquait vraiment, et que A2 a écrit
+
+Le défaut est réapparu DEUX fois après correction. La question n'était donc pas « le corriger »
+mais « pourquoi revient-il ». Mesuré, sortie citée :
+
+```
+$ grep -n "noeud" scripts/test-contenu.mjs
+358,359,360,361,362,363,364     (une variable locale du parcours SVG)
+```
+
+Sept occurrences, **aucune lecture** : `npm run test:contenu` — c'est-à-dire *la commande que
+l'agent générateur de contenu exécute avant de déposer un brouillon* (annexe T § T1), donc le
+moment exact où le défaut naît — n'ouvrait aucun fichier de `contenu/noeuds/`. Un agent pouvait
+livrer six nœuds invisibles sur la carte et lire « 0 problème ». Le garde de N7 vivait en Vitest,
+là où l'auteur du contenu ne passe pas.
+
+D'où le **contrôle M6.2**, ajouté à `test:contenu` (`scripts/verifier-noeuds-regions.mjs`), qui
+croise les deux populations d'OBJETS et échoue dans les deux sens. Il rend systématiquement
+**les deux comptes et leur écart**, par région et au total, même quand tout va bien — un rapport
+muet tant que rien ne casse ne permet jamais de vérifier qu'il mesure quelque chose.
+
+### Les arbitrages rendus seul
+
+1. **`M6.2` plutôt qu'un « contrôle 11 ».** Les contrôles 1 à 10 sont ceux de l'annexe T § T1 ;
+   celui-ci vient du point de synchronisation du contrat de finition v3 § 6.2. Il suit le
+   précédent de `P3.2`, qui porte déjà le nom de sa source plutôt qu'un rang inventé.
+
+2. **Sept règles, pas une.** Au-delà des deux sens du croisement, le contrôle refuse aussi : un
+   nœud cité deux fois (le dénominateur du pourcentage baisse sans qu'aucun décompte ne bouge),
+   un nœud cité par une région qui n'est pas la sienne, un nœud déclarant une septième région,
+   un nœud citant un exercice absent, et deux nœuds d'une même région au même `ordre`. Toutes
+   sont vertes aujourd'hui ; chacune décrit un état où l'enfant perd quelque chose.
+
+3. **La contiguïté des `ordre` n'est PAS contrôlée.** Elle est vraie aujourd'hui (1..6 sur les
+   deux régions ouvertes), mais aucune source ne l'exige, et un contrôle qu'aucun document ne
+   fonde bloquerait un jour une livraison légitime. Seul le doublon de rang est refusé, parce
+   qu'à rang égal l'ordre de reprise dépend du système de fichiers.
+
+4. **`croiserNoeudsEtRegions` est PURE.** Les documents arrivent déjà analysés. C'est ce qui
+   permet de prouver que le garde se déclenche sur l'état historique **sans toucher un seul
+   fichier du dépôt** — condition d'autant plus nécessaire que d'autres lots écrivaient en
+   parallèle pendant la campagne. Sortie citée :
+
+```
+--- ETAT HISTORIQUE (contrat § 1.5) ---
+  1 nœud(s) cité(s) par regions.json, 12 livré(s) sur disque, écart -11
+  anomalies : 11   (noeud-invisible × 11)
+--- ETAT ACTUEL DU DEPOT ---
+  12 nœud(s) cité(s) par regions.json, 12 livré(s) sur disque, écart 0
+  anomalies : 0
+```
+
+### Le pourcentage de recoloration, vérifié sur une progression réelle
+
+`tests/api/monde.test.ts` vérifiait les deux BORNES — 0 % sur un profil neuf, 100 % après
+`terminerClairiere()`. Les deux sont exactes et restent en place. **Elles ne peuvent pas voir ce
+qui se passe entre.** Une région qui sauterait de 0 à 100 % au premier nœud les passerait toutes
+les deux au vert : c'est précisément l'état qu'a produit le défaut du § 1.5, et c'est le « dans
+la clairière je n'ai eu qu'un exercice » du père.
+
+`tests/api/carte-recoloration.test.ts` parcourt donc la progression **cran par cran, de 0 à 6**,
+à travers le vrai HTTP, et exige la part exacte à chaque cran. Mesuré : le pourcentage vaut
+`k / 6` pour chaque `k`, l'Éclat n'arrive qu'au sixième nœud, rejouer un nœud ne le compte pas
+deux fois, et terminer les Galeries ne peint pas la Clairière.
+
+**Piège évité, et il mérite d'être écrit.** Ce fichier tire son dénominateur de `regions.json` :
+sous le défaut du § 1.5 il aurait vérifié « 0/1 puis 1/1 » et serait passé **entièrement au
+vert**. Un test qui lit sa référence dans le fichier qu'il devrait juger ne juge rien. Son
+premier cas oppose donc les deux populations avant toute mesure. Vérifié :
+
+```
+livrés sur disque (region == clairiere)   6
+état historique : déclarés 1  → toEqual(livrés) false, length >= 4 false   → le cas ÉCHOUE
+état actuel     : déclarés 6  → toEqual(livrés) true,  length >= 4 true    → le cas PASSE
+```
+
+### Ce qui reste vrai après A2
+
+Le pourcentage affiché **correspond aux nœuds réellement terminés** : `progression_noeud` ne
+reçoit de ligne que par une tentative journalisée, et `ResumeTentative.reussi` vaut
+structurellement `true` (R14) — un nœud abandonné n'écrit rien (`EcranNoeud.tsx:197`). Le
+numérateur compte donc des nœuds distincts achevés, jamais des tentatives, et le dénominateur est
+la liste déclarée. Les deux sont désormais gardés.
+
+---
+
+## Lot A3 — les 14 anomalies de `test:contenu` : ce que j'ai tranché seul
+
+**Mesuré avant, sortie citée :**
+
+```
+$ npm run test:contenu
+test:contenu — 167 contrôle(s), 14 problème(s)
+  … 80/94 SVG contrôlés en régions fermées (annexe P § 3.2)
+```
+
+**Mesuré après, sortie citée :**
+
+```
+$ npm run test:contenu
+test:contenu — 183 contrôle(s), 0 problème(s)
+  … 94/94 SVG contrôlés en régions fermées (annexe P § 3.2),
+    dont 6 vivant(s) déclaré(s) par le code et 8 archivé(s)
+    — contenu/registre-svg.json, aucun fichier supprimé.
+```
+
+**Aucun fichier n'a été supprimé.** Les quatorze sont intacts sur disque, à l'octet près.
+
+### Q-A3-1 — Le contrôle P3.2 n'offrait qu'une issue, et elle était interdite
+
+Le message des quatorze anomalies disait « Contenu mort, ou déclaration manquante » et laissait le
+lecteur devant une seule action possible : effacer. Or **aucun lot ne supprime un fichier de
+contenu** — le père seul décide de ce qui part. Un contrôle dont la seule issue est interdite ne se
+corrige pas : il se désactive, ou il se subit. C'est ainsi qu'un garde-fou meurt.
+
+**Tranché** : ajouter une troisième source de déclaration, `contenu/registre-svg.json`, avec deux
+listes et **aucune ligne gratuite**. J'ai écarté la suppression (interdite), l'exclusion par motif
+de chemin (elle éteindrait aussi les orphelins de demain) et un dossier `archives/` physique
+(déplacer un fichier, c'est casser en silence les cinq suites qui le lisent encore).
+
+### Q-A3-2 — Deux voies, et le partage des quatorze fichiers
+
+**Voie « déclarer » — 6 fichiers vivants que du code nomme.** L'entrée cite le fichier source ET le
+symbole, et le contrôle exige que ce fichier source **contienne littéralement ce symbole**.
+
+| Fichier | Consommateur | Symbole |
+|---|---|---|
+| `assets/gobi/cristal-base.svg` | `serveur/src/depots/monde.ts` | `assets/gobi/cristal-base.svg` |
+| `assets/gobi/animation/repos.svg` | `partage/src/monde/types.ts` | `'repos'` |
+| `assets/gobi/animation/joie.svg` | `partage/src/monde/types.ts` | `'joie'` |
+| `assets/gobi/animation/aide.svg` | `partage/src/monde/types.ts` | `'aide'` |
+| `assets/gobi/animation/hesitation.svg` | `partage/src/monde/types.ts` | `'hesitation'` |
+| `assets/gobi/animation/apparition.svg` | `partage/src/monde/types.ts` | `'apparition'` |
+
+`cristal-base.svg` **n'a jamais été mort** : `lireFormes` l'écrit en repli
+(`cristal: declaree?.cristal ?? 'assets/gobi/cristal-base.svg'`, `serveur/src/depots/monde.ts`).
+Toute forme obtenue par l'enfant mais absente du référentiel est servie avec ce dessin plutôt
+qu'avec un trou. Le voir en « contenu mort » était un contresens du contrôle, exactement le défaut
+que `contenu/schemas/monde.schema.json` nomme déjà pour la carte : « un décor déclaré dans du code
+n'est pas déclaré ».
+
+**Voie « archiver » — 8 fichiers remplacés, conservés exprès.** L'entrée **nomme le successeur**,
+qui doit exister ET être lui-même déclaré.
+
+| Archivé | Remplacé par | Motif |
+|---|---|---|
+| `assets/gobi/stade-1-oeuf.svg` | `assets/gobi/stades/stade-1.svg` | écart N3-6 |
+| `assets/gobi/stade-2-boule.svg` | `assets/gobi/stades/stade-3.svg` | écart N3-6 |
+| `assets/gobi/stade-3-crete.svg` | `assets/gobi/stades/stade-5.svg` | écart N3-6 |
+| `assets/gobi/stade-4-equipe.svg` | `assets/gobi/stades/stade-7.svg` | écart N3-6 |
+| `assets/gobi/stade-5-gardien.svg` | `assets/gobi/stades/stade-10.svg` | écart N3-6 |
+| `habillages/carte/carte-monde.svg` | `habillages/carte/carte-monde-v2.svg` | v1, `EcranCarte.tsx` sert la v2 |
+| `habillages/clairiere/ecole.svg` | `habillages/clairiere/ecole-v2.svg` | v1, l'habillage pointe la v2 |
+| `habillages/galeries/grottes.svg` | `habillages/galeries/grottes-v2.svg` | v1, l'habillage pointe la v2 |
+
+Les cinq stades v1 relèvent d'une décision **déjà écrite** que je n'ai pas reprise : le contrat
+§ 4.3 (« aucune suppression ») et l'écart N3-6 plus haut dans ce document. Le registre ne fait que
+la rendre mécanique. Les trois décors v1 restent les **fixtures** de cinq suites —
+`CHEMIN_SVG_ECOLE`, la comparaison V1/V2 de `ids-regions-stables.test.ts` — et c'est le champ
+`encoreLuPar` qui rend cette dépendance visible plutôt que devinée.
+
+### Q-A3-3 — Pourquoi le registre est plus strict que l'anomalie qu'il éteint
+
+Un mécanisme d'exemption non gardé devient l'endroit où l'on range ce qu'on ne veut pas regarder.
+Six obligations, toutes **exécutées** par `scripts/test-contenu.mjs` et par
+`tests/unitaires/registre-svg.test.ts`, jamais affirmées :
+
+1. le fichier cité existe sur disque — le registre ne peut pas pourrir ;
+2. `declaresParLeCode` : le consommateur existe **et contient littéralement le symbole** — renommer
+   l'état d'un seul côté casse le registre, et c'est le but ;
+3. `archives` : le successeur existe **et est lui-même déclaré** — on n'archive pas contre un
+   orphelin, sinon le registre masquerait deux fichiers au lieu d'un ;
+4. aucune entrée ne double une déclaration réelle — un fichier remis en service perd son entrée ;
+5. aucun fichier dans les deux listes — vivant OU remplacé, jamais les deux ;
+6. les SVG des deux listes subissent le **même** contrôle de régions fermées que les autres :
+   80/94 → **94/94**. Un archivé n'est pas dispensé de lisibilité.
+
+**Preuve que les cas discriminent, mesurée et non affirmée.** Un SVG bidon déposé dans
+`contenu/assets/gobi/` (créé puis retiré dans la même session) :
+
+```
+$ npm run test:contenu
+test:contenu — 184 contrôle(s), 1 problème(s)
+  ✗ contenu/assets/gobi/preuve-orpheline-a3.svg : [contrôle P3.2] aucun habillage, aucun
+    document de `contenu/monde/` et aucune entrée de `contenu/registre-svg.json` ne déclare…
+$ npx vitest run --project unitaires tests/unitaires/registre-svg.test.ts
+  × chaque `.svg` de contenu/ a EXACTEMENT une source de déclaration
+```
+
+Et un `remplacePar` détourné vers un fichier archivé, donc non déclaré :
+
+```
+✗ contenu/registre-svg.json : « habillages/galeries/grottes.svg » est archivé au profit de
+  « assets/gobi/stade-1-oeuf.svg », que rien ne déclare — ni habillage, ni `contenu/monde/`,
+  ni `declaresParLeCode`.
+→ AssertionError: assets/gobi/stade-1-oeuf.svg n'est déclaré nulle part
+```
+
+### Q-A3-4 — Le risque est gardé dans les DEUX chaînes, pas seulement dans `test:contenu`
+
+`npm run test:contenu` est une commande à part, **absente de `npm run test`**. Un développeur qui
+lance la suite unitaire ne la voit pas. `tests/unitaires/registre-svg.test.ts` tient donc le même
+invariant en audit d'**objets** — on énumère les `.svg` présents sur disque, jamais les
+déclarations — et un orphelin ne peut plus attendre qu'on pense à la bonne commande.
+
+Ce fichier tient de plus un invariant que `test:contenu` ne peut pas tenir : le dossier
+`contenu/assets/gobi/animation/` ne porte aucune liste et le code aucun chemin ; le lien passe par
+le **nom**. Le test lit l'union `EtatAnimationGobi` dans `partage/src/monde/types.ts` sur disque —
+un type importé serait effacé à l'exécution — et exige **un dessin par état, un état par dessin**,
+dans les deux sens.
+
+### Q-A3-5 — Ce que je signale au père, et que je n'ai PAS décidé
+
+- **Les cinq animations de Gobi ne sont chargées par aucun composant.** Mesuré :
+  `client/src/composants/Gobi.tsx` dessine le corps **en ligne**, exprès (« un `fetch` par montage
+  coûterait une requête là où le budget vise une réponse sous 100 ms »), et l'état ne voyage que
+  par l'attribut `data-animation-gobi`. Les cinq SVG sont donc les **dessins de référence** des
+  cinq états, livrés par N3 depuis la canonique verrouillée (D36), pas des fichiers servis. Je les
+  ai déclarés vivants plutôt qu'archivés : ils n'ont pas de successeur, et le jour où l'animation
+  de l'addendum § P.10 sera câblée, c'est d'eux qu'elle partira. **Si le père juge que l'animation
+  ne sera pas câblée, c'est lui qui décide de leur sort — pas moi.**
+- **Un SVG sans consommateur ET sans successeur n'entre pas au registre.** Le cas ne s'est pas
+  présenté sur les quatorze. S'il se présente demain, le contrôle le dira et il faudra un arbitrage
+  humain : le registre refuse par construction de l'absorber.
+- **Deux écrivains sur `scripts/test-contenu.mjs`.** Constaté à l'écriture : le fichier avait changé
+  sur disque entre ma lecture et ma première édition — le lot A2 y ajoutait le contrôle M6.2 au même
+  moment. Mes ajouts sont localisés (chargement du registre, branche du parcours P3.2, boucles de
+  contrôle du registre, note finale) et les deux jeux de modifications coexistent :
+  `npm run test:contenu` rend 183 contrôles, M6.2 compris. **La règle « un seul écrivain par
+  fichier » a été enfreinte par le découpage de la campagne, pas par un lot.**
+
+### Fichiers écrits par A3
+
+| | Chemin |
+|---|---|
+| C | `contenu/registre-svg.json` |
+| C | `contenu/schemas/registre-svg.schema.json` |
+| C | `tests/unitaires/registre-svg.test.ts` |
+| M | `scripts/test-contenu.mjs` |
+| M | `Docs/questions-en-attente.md` (cette section) |
+
+## Lot A1 — la perte silencieuse du moteur `phrase` : ce qui a été mesuré et tranché
+
+Solde **Q-I14**. Le défaut était réel, il était pire que signalé, et l'écart entre les deux est
+exactement la leçon de **D48** — auditer les objets, jamais les occurrences.
+
+### Ce que le journal disait, et ce que le code faisait
+
+`pDevinette` (`partage/src/pedagogie/bkt.ts`) lève pour `ordre` et `appariement` quand
+`nbElements` manque (D13). L'appel part de `alimenterPedagogie`, **dans la transaction qui vient
+d'insérer la tentative**. La transaction est annulée, `POST /api/tentatives` rend 500, et rien
+n'est enregistré : ni le journal, ni les étoiles, ni `progression_noeud`, ni la maîtrise. L'écran
+de récompense s'affiche quand même. « Le journal fait foi » : la tentative n'a jamais existé.
+
+### La portée annoncée était fausse — mesurée, pas supposée
+
+Q-I14 nommait **un** moteur (`phrase`). Le commentaire de `partage/src/moteurs/types.ts` en
+désignait **deux autres** (« ce nombre n'est connu QUE du moteur — `chrono` et `paires` », « deux
+moteurs sur treize »). Les trois affirmations étaient fausses ensemble.
+
+Recensement par OBJET, les quatorze moteurs du registre passés un par un, chacun monté sur une
+fixture acceptée par le schéma qu'il publie et son `resume()` posté à la vraie route :
+
+| | moteur | `modeReponse` | `nbElements` avant |
+|---|---|---|---|
+| ⚠ | `assemble` | `ordre` | absent → **500** |
+| ⚠ | `chrono` | `ordre` | absent → **500** |
+| ⚠ | `paires` | `appariement` | absent → **500** |
+| ⚠ | `phrase` | `ordre` | absent → **500** |
+| ✓ | `attrape`, `chemin`, `eclair`, `histoire`, `tri` | `vrai-faux` / `qcm-3` / `qcm-4` | sans objet |
+| ✓ | `grave` | `saisie` | sans objet |
+| ✓ | `colorie`, `libre` | `colorie` | sans objet |
+| ✓ | `place` | `place` | sans objet |
+| ✓ | `trace` | `trace` | sans objet |
+
+**Quatre moteurs sur quatorze perdaient la tentative**, et **aucun des quatorze** ne posait le
+champ — y compris les deux que le commentaire désignait comme ses porteurs. Commande citée, avant
+correctif :
+
+```
+$ grep -rn "nbElements" partage/src client/src --include=*.ts --include=*.tsx
+partage/src/moteurs/types.ts:83      (la déclaration du champ)
+partage/src/pedagogie/bkt.ts:89,90,99,104,105   (celui qui lève)
+partage/src/pedagogie/types.ts:111   (le type d'observation)
+```
+
+Zéro occurrence dans un moteur. **C'est là le piège :** chercher `nbElements` ne trouve que les
+moteurs qui n'ont pas le défaut. Il fallait énumérer les moteurs qui DEVAIENT le poser.
+
+### Tranché seul — 1. Le champ devient REQUIS, il n'est plus facultatif
+
+`ResumeEtape.nbElements` et `EtapeGenerique.nbElements` passent de `?: number | null` à
+`: number | null`. Motif : un champ facultatif se remplit quand on y pense, et personne n'y a
+pensé quatorze fois de suite. Requis, **l'oubli ne compile plus** — la discipline que le dépôt
+applique déjà au registre des moteurs (`tous.ts`) et au quatrième paramètre du BKT.
+
+Le compilateur a alors nommé lui-même les propriétaires, sans qu'aucune liste soit recopiée :
+
+```
+$ npx tsc -b | grep -oE "moteurs/[a-z]+/moteur\.ts" | sort -u | wc -l
+13          (les 13 qui passent par resumeDepuisEtapes)
++ colorie   (nommé ensuite, il construit son ResumeEtape à la main)
+= 14 / 14
+```
+
+Un moteur qui n'a pas de nombre d'éléments répond désormais `null` **explicitement**, avec la
+raison en commentaire. C'est une réponse, pas un silence.
+
+### Tranché seul — 2. Ce que chaque moteur transmet
+
+`assemble` → `etape.solution.length` · `chrono` → `etape.ordre.length` ·
+`phrase` → `etape.ordre.length` · `paires` → `etape.aApparier.length`.
+
+Les trois premiers ont `minItems: 2` à leur schéma : jamais de valeur dégénérée.
+
+### Tranché seul — 3. `paires` peut valoir `n = 1`, et le moteur dit quand même la vérité
+
+`aApparier` admet `minItems: 1` au schéma de `paires`, et `pDevinette` refuse `n < 2` (« en
+dessous il n'y a pas de hasard »). Le moteur transmet donc **la valeur réelle**, pas une valeur
+confortable : c'est `journaliserEtapes` qui borne déjà par `Math.max(2, n)`, et les deux chemins
+du BKT — l'incrémental comme le recalcul intégral — relisent le journal, donc voient la valeur
+bornée. Aucun 500 n'en découle, ce qui est vérifié.
+
+Faire remonter `2` depuis le moteur là où le contenu en compte `1` aurait fait mentir le journal
+pour éviter une borne qui existait déjà. **Point laissé au père**, il n'est pas de mon ressort :
+faut-il porter `aApparier.minItems` à `2` ? Un « memory » à une seule paire a `p_devinette = 1` —
+il ne mesure rien.
+
+**Le contenu réel tranche dans le même sens.** Un exercice `paires` a été livré par un lot
+parallèle pendant que j'écrivais (`contenu/exercices/galeries/echos-paires-01.json`) — mon
+premier relevé, « aucun exercice `paires` au dépôt », a donc péri en une heure. Remesuré sur les
+quatre exercices réels en mode calculé, sortie citée :
+
+    phrase    guirlande-phrase-01.json         4,4
+    paires    echos-paires-01.json             2,2
+    chrono    frise-chrono-01.json             4
+    assemble  stalagmites-assemble-01.json     3,2,2
+
+**Huit étapes, toutes >= 2.** Le cas `n = 1` n'existe que dans une fixture de test, jamais dans
+ce que l'enfant joue. Le point reste donc ouvert sans urgence — mais il ne repose plus sur
+l'absence de contenu, il repose sur une mesure.
+
+Un vingtième cas du test le surveille désormais **sur `contenu/exercices/**` directement**, sans
+fabriquer aucune donnée : il s'étend tout seul au contenu à venir, et il attrapera une consigne à
+un seul élément le jour où quelqu'un en écrit une.
+
+### Tranché seul — 4. Un filet serveur : une tentative n'est JAMAIS perdue
+
+Corriger les moteurs supprime la cause ; il restait que **n'importe quelle étape mal formée
+pouvait détruire une tentative réellement jouée**. `alimenterPedagogie` applique désormais à
+`nbElements` la règle qu'il applique déjà à la compétence : l'étape fautive est **écartée** du
+journal fin, et rien d'autre ne bouge — la tentative, les étoiles et la progression sont écrites.
+
+Trois raisons de ne pas choisir les autres options :
+
+- **compléter par un défaut** ferait monter la maîtrise estimée sur des réponses au hasard —
+  nommément la « régression pédagogique silencieuse » de l'annexe T § 1 ;
+- **refuser en 400** ferait perdre la tentative tout autant qu'un 500 ;
+- **journaliser l'étape telle quelle** empoisonnerait le journal *pour toujours* :
+  `recalculerMaitrise` relit la table à chaque appel et lèverait à son tour, donc le rejeu
+  (annexe T § T2) deviendrait impossible.
+
+Le filet n'est pas silencieux : `ResultatEnregistrement` gagne `etapesEcartees`, et la route
+l'inscrit en `warn` avec le profil, le nœud et le moteur. Un filet qu'on ne voit pas servir est un
+défaut qui dort.
+
+Vérifié avant d'écrire quoi que ce soit : la base de développement ne porte **aucune ligne
+empoisonnée** — les transactions fautives avaient toutes été annulées.
+
+```
+$ SELECT mode_reponse, COUNT(*), SUM(nb_elements IS NULL) FROM etapes_tentative GROUP BY 1
+colorie  4  4
+trace    4  4
+```
+
+Les deux modes ont `p_devinette` tabulée : leurs `NULL` sont légitimes. **Aucune migration de
+données n'est nécessaire.**
+
+### Le test qui garde le risque
+
+`tests/api/tentatives-nbelements.test.ts` — 20 cas.
+
+Il n'affirme rien sur les moteurs : il les **monte** et poste leur `resume()` réel à la vraie
+route, celui-là même qu'`EcranRecompense` envoie tel quel. Le cas `phrase` joue le **contenu réel
+de `clairiere-05`** (`clairiere-guirlande-phrase-01`, deux consignes de quatre mots), pas une
+fixture — c'est l'exercice que l'enfant termine et celui que Q-I14 incrimine.
+
+Sa table de cas est comparée à `moteursEnregistres()` : **un quinzième moteur ajouté sans cas fait
+échouer le premier test.** Aucun compte n'y est recopié.
+
+Ce qu'il exige, par moteur : `201` (pas 500), la tentative au journal, `progression_noeud` écrite,
+autant de lignes au journal fin que d'étapes, le BKT alimenté, `nb_elements >= 2` en base pour
+tout mode calculé et `NULL` partout ailleurs, et `recalculerMaitrise` qui ne lève pas.
+
+État avant correctif, sortie citée :
+
+```
+× tout moteur en mode `ordre`/`appariement` pose `nbElements` — D13
+  → assemble/c1 (ordre) → undefined · paires/c1 (appariement) → undefined
+  · phrase/c1 (ordre) → undefined · chrono/c1 (ordre) → undefined
+× assemble → 500 · × paires → 500 · × phrase → 500 · × chrono → 500
+× filet : rend 201 … → expected 500 to be 201
+Tests  6 failed | 13 passed (19)
+```
+
+Après : `19 passed (19)`.
+
+### Chiffres du lot — mesurés, commandes exécutées
+
+| grandeur | valeur |
+|---|---|
+| moteurs audités **par objet** | **14 / 14** |
+| moteurs en mode `ordre`/`appariement` | **4** (`assemble`, `chrono`, `paires`, `phrase`) |
+| moteurs qui posaient `nbElements` **avant** | **0 / 14** |
+| moteurs qui répondent `nbElements` **après** | **14 / 14** |
+| moteurs nommés par le compilateur seul | **14 / 14** |
+| cas du test de garde, échec avant → après | **6 → 0**, sur 20 |
+| `npx tsc -b` | **0 erreur** |
+| `npx vitest run --project api --project composants` | **431 tests, 40 fichiers, 0 échec** |
+| étapes en mode calculé au **contenu réel** | **8**, toutes >= 2 |
+| `npm run test:contenu` | **213 contrôles, 0 problème** (183 une heure plus tôt : un lot parallèle livrait la région des galeries) |
+| `npx eslint` sur les fichiers du lot | **0 erreur** (14 avertissements préexistants sur des `schema-contenu.ts` non touchés) |
+| lignes empoisonnées à migrer en base | **0** |
+
+**Sur `npx vitest run` en entier.** Le dépôt entier rendait **1458 / 1458** au moment où j'ai
+fini d'écrire. Une heure plus tard il rend **1454 / 1459**, et les cinq échecs sont ceux d'un lot
+parallèle qui venait de livrer six exercices des galeries sans leurs clips audio
+(`consignes-audibles`, `couverture-audio`). Aucun ne touche un moteur, ni `tentatives`, ni
+`nbElements` — vérifié cas par cas. La mesure que je donne au tableau est donc celle de MON
+périmètre, projets `api` et `composants`, qui l'englobe entièrement.
+
+### Fichiers écrits par A1
+
+| | Chemin |
+|---|---|
+| C | `tests/api/tentatives-nbelements.test.ts` |
+| M | `partage/src/moteurs/types.ts` (`ResumeEtape.nbElements` requis + portée corrigée) |
+| M | `partage/src/moteurs/commun/etapes.ts` (`EtapeGenerique.nbElements` requis, transporté) |
+| M | `partage/src/moteurs/{assemble,chrono,paires,phrase}/{types.ts,moteur.ts}` (le nombre réel) |
+| M | `partage/src/moteurs/{attrape,chemin,eclair,grave,histoire,libre,tri}/{types.ts,moteur.ts}` (`null` assumé) |
+| M | `partage/src/moteurs/{colorie,place,trace}/moteur.ts` (`null` assumé) |
+| M | `serveur/src/depots/tentatives.ts` (le filet, `etapesEcartees`) |
+| M | `serveur/src/routes/tentatives.ts` (le `warn` qui rend le filet visible) |
+| M | `Docs/questions-en-attente.md` (cette section) |
+
+**Deux écrivains sur `Docs/questions-en-attente.md`.** Les lots A2 et A3 y écrivaient au même
+moment ; cette section est ajoutée **en fin de fichier**, par ajout et non par réécriture, pour ne
+rien écraser de leur travail.
+
+---
+
+## Lot A4 — les six moteurs sans exercice
+
+**Ajouté en FIN de fichier, par ajout et jamais par réécriture** : les lots A1 à A3 y écrivaient
+au même moment.
+
+### Le chiffre du lot, mesuré et non affirmé
+
+`tests/e2e/parcours-audit-moteurs.spec.ts`, sortie citée, après livraison :
+
+```
+[qa-moteurs] 14 moteur(s) joué(s) de bout en bout sur 14 déclaré(s) :
+             assemble, attrape, chemin, chrono, colorie, eclair, grave, histoire,
+             libre, paires, phrase, place, trace, tri
+```
+
+Et sur `git HEAD` — c'est-à-dire sans ce lot — le même croisement, joué par
+`scripts/verifier-moteurs-atteignables.mjs` :
+
+```
+8/14 moteur(s) atteignable(s) par l'enfant, écart -6
+  — inatteignables : assemble, chemin, chrono, histoire, libre, paires
+```
+
+### Q-A4-1. Un exercice `libre` fait monter le BKT sans rien prouver — à trancher
+
+`contenu/exercices/galeries/paroi-libre-01.json` déclare `lex.couleur`, et il le DOIT :
+`contenu/schemas/exercice.schema.json` impose `competences.minItems: 1`, et
+`partage/src/pedagogie/selecteur.ts` écarte des sorties tout nœud dont la liste est vide
+(`candidat.competences.length > 0`). Déclarer « aucune compétence » est donc inexprimable.
+
+Conséquence mesurée dans le code, pas supposée :
+
+- `partage/src/moteurs/libre/moteur.ts` — `resume()` rend `nbErreurs: 0` par construction ;
+- `serveur/src/depots/tentatives.ts` — l'étape est journalisée avec `reussi = nbErreurs === 0`,
+  donc **toujours vrai** ;
+- `modeReponse` vaut `colorie`, soit `p_devinette = 0,02`
+  (`contenu/referentiel/parametres-pedagogie.json`), c'est-à-dire **sous le seuil de faible
+  devinette de D13** (`seuilFaibleDevinette: 0,10`).
+
+Un coloriage libre compte donc comme une réussite à faible devinette, et deux d'entre eux
+satisfont à eux seuls la clause `tentativesFaibleDevinetteMin: 2` de D13 — la clause écrite
+précisément pour qu'une série chanceuse ne fabrique pas un acquis. C'est la « régression
+pédagogique silencieuse » que l'annexe T § 1 nomme comme le premier risque du projet, prise par
+l'autre bout.
+
+**Ce lot n'y touche pas** : le remède est une ligne de `serveur/src/routes/tentatives.ts`
+(ne pas alimenter la pédagogie quand `exercice.jeu.moteur === 'libre'`), fichier qu'A4 ne possède
+pas, et c'est un arbitrage pédagogique, pas un arbitrage de contenu. **Proposition** : exclure
+`libre` de l'alimentation BKT tout en le laissant au vivier des sorties.
+
+### Q-A4-2. `libre` — l'aide de Gobi ne pouvait pas rester muette. Tranché.
+
+Le contrat des features v2 § 4.8 fait de `demanderAide` un **no-op** sur `libre` (« aider
+supposerait une attente, il n'y en a pas »). Le raisonnement est juste ; sa conséquence ne l'était
+pas : la coquille rend un bouton « Gobi, aide-moi » sur ce moteur comme sur les treize autres, et
+ce bouton ne faisait **rien** — sur le seul écran conçu pour l'enfant qui n'a plus envie de
+déchiffrer. Mesuré dès le premier nœud `libre` livré :
+
+```
+x « libre » : l’aide de Gobi est offerte et ne coûte jamais un échec
+  Error: « libre » : l'aide est tapée et rien ne change
+```
+
+**Tranché seul** : Gobi répond une phrase (« Ici, il n’y a rien à réussir. Prends la couleur que
+tu veux. ») et **rien d'autre ne bouge**. `niveauAide` reste `aucune`, `resume().aideUtilisee`
+reste `aucune`, `calculerEtoiles` rend toujours 3 — la garantie du § 4.8 (« trois étoiles à chaque
+fois, et c'est voulu ») tient mécaniquement, et `tests/unitaires/moteurs-reducteurs.test.ts`
+l'assert désormais en toutes lettres, ce qu'il ne faisait pas. La seule assertion inversée est
+`aideProposee === null`, qui décrivait le no-op et non une règle.
+
+### Q-A4-3. « la région porte de 4 à 6 nœuds » plafonnait la mauvaise population. Tranché à moitié.
+
+Deux tests transposaient à la **région** ce que la v2 § 5.2 ligne 143 dit d'une **sortie** :
+
+| fichier | cas | état |
+|---|---|---|
+| `tests/e2e/parcours-sortie-6-noeuds.spec.ts` | « la région déclare de 4 à 6 nœuds » | **corrigé** |
+| `tests/unitaires/clairiere-sortie-complete.test.ts` | « elle porte de 4 à 6 nœuds » | **laissé tel quel** |
+
+La longueur d'une sortie est une DONNÉE (`selecteur.nbNoeudsMin` / `nbNoeudsMax` de
+`contenu/referentiel/parametres-pedagogie.json`), tirée à chaque passage par `composerSortie`, et
+déjà gardée sur 60 passages par `tests/unitaires/sortie-variete.test.ts`. Transposé à la région,
+le plafond produit l'inverse de ce qu'il protège — l'en-tête de `sortie-variete.test.ts` le dit
+lui-même : « quand le vivier tient tout entier dans la sortie — **le cas de nos deux régions** —,
+mélanger le milieu ne change que l'ORDRE, jamais la composition ». Une région plafonnée à six
+nœuds sert toujours les six mêmes exercices : R13 devient vraie par pénurie et D46 (« bon en 5
+minutes comme en 30 ») est hors d'atteinte.
+
+La borne haute a donc **changé de population, elle n'a pas été retirée**, et dans le sens qui
+exige davantage : la région doit porter de quoi composer une sortie de longueur **maximale**
+(`>= nbNoeudsMax`), ce que l'ancienne borne ne vérifiait pas. Le jumeau de la Clairière n'est pas
+touché : la Clairière compte exactement six nœuds, il n'y a rien à arbitrer sur pièce.
+**À confirmer par le père** — c'est la seule modification d'assertion du lot.
+
+### Q-A4-4. R15 ne voyait ni les questions de `histoire`, ni l'invitation de `libre`
+
+Ce n'était pas une négligence : aucun exercice de ces deux moteurs n'existait quand
+`scripts/recenser-textes.mjs` a été écrit. C'est D48 à la lettre — ce qu'aucun objet ne porte,
+aucun recensement ne cherche. Trois conséquences, toutes corrigées ici, toutes du même type que la
+correction déjà payée pour la consigne au singulier de `trace` :
+
+1. `scripts/recenser-textes.mjs` lit désormais `questions` (moteur `histoire`) et l'invitation du
+   moteur `libre` ;
+2. `client/src/ecrans/EcranNoeud.tsx` (`extraireEtapes`) fait de même — sans quoi le bouton
+   « Écouter » n'était **pas rendu du tout** sur ces deux moteurs ;
+3. `tests/unitaires/consignes-audibles.test.ts` portait une **seconde implantation** de
+   `consignesDe`, qui avait dérivé de la première. Son oracle est maintenant la sortie du
+   recenseur : une source, un lecteur. Le dénominateur passe de 16 à 18 exercices, le seuil reste
+   100 %.
+
+L'invitation de `libre` (« Colorie comme tu veux. ») est devenue `INVITE_LIBRE`, constante
+exportée de `client/src/moteurs/libre/MoteurLibre.tsx`, **lue** par le recenseur dans ce
+fichier-là. `inviteLibre()` LÈVE si la constante disparaît, plutôt que de commander un clip que
+l'écran n'affiche pas.
+
+### Q-A4-5. `paires` n'est pas encore un memory — limite assumée
+
+`client/src/moteurs/paires/MoteurPaires.tsx` rend le `libelle` de **toutes** les cartes en clair :
+les cartes ne se retournent pas, faute d'asset dessiné (`asset: null` partout, D2). L'appariement
+reste une tâche de lecture — il faut lire « bol » puis « le bol » — mais le plaisir du memory n'y
+est pas. **Rien à corriger dans le contenu** : le jour où les vignettes existent, l'exercice ne
+bouge pas d'une ligne.
+
+### Où le contenu a été écrit, et pourquoi pas dans `contenu/brouillons/`
+
+`contenu/brouillons/` est **ignoré par git** (`.gitignore`, « contenu produit par agent, avant
+relecture parent ») et son schéma — `contenu/schemas/brouillon.schema.json` — décrit la sortie de
+l'**ingestion de PDF**, pas un exercice jouable. Un exercice écrit à la main n'y est pas
+exprimable, et l'y déposer l'aurait perdu au premier clone. On suit donc le précédent posé par
+`clairiere-guirlande-phrase-01.json` et ses jumeaux : écriture dans `contenu/exercices/`, avec la
+marque **PLACEHOLDER — À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ** dans le `$commentaire`, que le
+schéma d'enveloppe prévoit exactement pour cela.
+
+### Couverture lexicale CE1 — mesurée
+
+Sur le texte **réellement lu en jeu** (consignes, récits, questions, libellés de cible ; titres et
+blocs-syllabes exclus), contre `LEXIQUE_CE1` de `scripts/generer-phonologie.mjs` (430 mots) :
+
+```
+mots distincts LUS EN JEU : 57
+au lexique CE1            : 53 = 93,0 %
+HORS lexique              : 4 -> b, d, gobi, voit
+```
+
+Les quatre : `b` et `d` sont les **graphèmes que l'exercice travaille** (D23) ; `gobi` est le nom
+du personnage ; `voit` est une forme conjuguée de `voir`, qui est au lexique — `estAuLexique` ne
+lève que le pluriel et le féminin, jamais la conjugaison. Trois consignes ont été **réécrites**
+pour rester dans le lexique : « Empile » devient « Range », « Avance seulement sur les mots qui
+commencent par b » devient « Marche sur les mots où tu lis un b », « Quel cristal est petit ? »
+devient « Trouve le petit cristal. »
+
+### Fichiers écrits par A4
+
+| | Chemin |
+|---|---|
+| C | `contenu/exercices/galeries/{stalagmites-assemble,passage-chemin,frise-chrono,echo-conte-histoire,echos-paires,paroi-libre}-01.json` |
+| C | `contenu/habillages/galeries/{stalagmites,passage,frise,echo-conte,echos,paroi-libre}.habillage.json` et les 6 `.svg` |
+| C | `contenu/noeuds/galeries-07.json` … `galeries-12.json` |
+| C | `scripts/verifier-moteurs-atteignables.mjs` |
+| C | `tests/unitaires/moteurs-atteignables.test.ts` |
+| M | `contenu/monde/regions.json` (six identifiants ajoutés à `galeries.noeuds`, rien d'autre) |
+| M | `partage/src/moteurs/libre/moteur.ts` (Q-A4-2) |
+| M | `client/src/moteurs/libre/MoteurLibre.tsx` (`INVITE_LIBRE` exportée) |
+| M | `client/src/ecrans/EcranNoeud.tsx` (`extraireEtapes` : `questions` et `libre`) |
+| M | `scripts/recenser-textes.mjs` (Q-A4-4) |
+| M | `tests/unitaires/consignes-audibles.test.ts` (oracle = le recenseur) |
+| M | `tests/unitaires/moteurs-reducteurs.test.ts` (Q-A4-2) |
+| M | `tests/e2e/parcours-sortie-6-noeuds.spec.ts` (Q-A4-3) |
+| M | `contenu/audio/manifeste.json`, `contenu/audio/galeries/*.opus`, `production/voix.lock.json` (par `npm run voix`, jamais à la main) |
+| M | `Docs/questions-en-attente.md` (cette section) |
+
+### Ce que le lot a mesuré en finissant
+
+| Commande | Résultat |
+|---|---|
+| `npx tsc -b` | **0 erreur** |
+| `npx eslint` sur les 9 fichiers touchés | **0 erreur, 1 avertissement préexistant** (`consigne` inutilisée dans `MoteurLibre.tsx`) |
+| `npx vitest run --project unitaires --project composants --project api` | **1470 tests, 95 fichiers, 0 échec** |
+| `npm run test:contenu` | **225 contrôles, 0 problème** — 18 exercices, 44 habillages, 18 nœuds cités / 18 livrés, écart 0 |
+| `npm run voix` | **69 / 69 consignes = 100 %**, 0 clip refusé |
+| `node scripts/playwright.mjs test --project=parcours --project=robustesse` | **186 tests, 0 échec** |
+| moteurs atteignables | **14 / 14** |
+
+---
+
+## Q-INT — arbitrages de l'intégration du 2026-08-02
+
+Tranchés seuls pendant l'intégration des lots A1 à A4, et consignés ici comme le veut la règle 11.
+
+### Q-INT-1 — le contrôle 7 de `test:contenu` a été RÉVEILLÉ
+
+`scripts/test-contenu.mjs` listait quatre contrôles désactivés « avec leur raison », et
+**imprimait ces raisons à chaque exécution** — donc dans le rapport que le père lit. Trois
+d'entre elles étaient devenues fausses. Mesuré avant d'écrire, en énumérant les fichiers de
+`contenu/noeuds/` (jamais les occurrences de « prerequis », D48) :
+
+```
+nœuds livrés : 18 | portant un prérequis non vide : 17
+```
+
+La raison du n° 7 — « un seul nœud en v1, aucun prérequis (D1) » — était donc caduque, et le
+contrôle dormait sur un graphe réel de 18 nœuds. **Le graphe est sain** : 0 cycle, 0 prérequis
+inconnu, 0 nœud inatteignable. Aucun défaut n'en est sorti, mais rien ne le surveillait : un
+cycle introduit demain par un lot de contenu produirait des nœuds que l'enfant n'ouvrirait
+jamais — un état sans issue au sens de R14.
+
+**Décision :** le contrôle est réactivé. Le croisement vit dans `scripts/verifier-prerequis.mjs`,
+**pur**, pour qu'on puisse lui soumettre un graphe cassé et exiger qu'il le refuse ;
+`tests/unitaires/prerequis-noeuds.test.ts` lui donne un cycle, un prérequis inconnu, un dépôt
+sans porte d'entrée et un identifiant en double. Les six premiers cas échoueraient si la
+fonction rendait toujours « rien à signaler ».
+
+**Écarté :** corriger seulement le texte de la raison. Cela aurait remplacé un mensonge par un
+aveu, sans rien garder.
+
+### Q-INT-2 — les raisons des contrôles 8 et 9, corrigées sans les réactiver
+
+- **n° 8 (audio pré-rendu, R15)** — la raison disait « pas d'audio en v1 (D1), dette explicite ».
+  `production/voix.lock.json` déclare **174 clips pour 69 clés à couvrir, 0 refusé**, et
+  `tests/unitaires/consignes-audibles.test.ts` exige déjà 100 % des consignes livrées, avec un
+  cas de non-vacuité. La raison pointe désormais ce test, comme le n° 10 le fait depuis la v2.
+- **n° 9 (couverture lexicale CE1)** — la raison disait « aucune liste de fréquence dans le
+  dépôt ». `LEXIQUE_CE1` de `scripts/generer-phonologie.mjs` en est une. Ce qui manque n'est pas
+  la liste mais un **SEUIL**, et il n'est pas à moi : 93,0 % des mots lus en jeu y figurent, les
+  quatre absents sont `b` et `d` — **les graphèmes que D23 fait précisément travailler** —,
+  `gobi` et `voit`. Exiger 100 % interdirait D23 ; choisir 90 % serait inventer une loi.
+  **→ QUESTION AU PÈRE : quel seuil, et les graphèmes travaillés sont-ils exemptés d'office ?**
+
+### Q-INT-3 — ce que l'intégration a mesuré et n'a PAS corrigé
+
+Constats vérifiés par commande, laissés en l'état parce qu'aucun ne blesse l'enfant aujourd'hui
+et qu'aucun ne se corrige sans une décision.
+
+| Constat | Mesure | Pourquoi laissé |
+|---|---|---|
+| `TOLERANCE_ATTRAPE_PX` et `TOLERANCE_TRI_PX` sont déclarés dans `partage` et **lus par personne** | 2 constantes, 0 lecteur | La tolérance de 24 px **est** appliquée — par **11 copies privées** `const TOLERANCE_PX = 24` dans les composants du client. L'enfant a bien ses 24 px. Mais changer la constante de `partage` ne changerait rien : c'est un piège, pas un défaut. Unifier touche 13 fichiers et relève d'un lot. |
+| 23 symboles exportés ne sont **nommés nulle part ailleurs** dans le dépôt | 23 / 554 | Dont `serveur/src/depots/*.ts :: recalculerToutesLesCascades`, `recalculerToutesLesMaitrises`, `recalculerToutesLesProgressions` — des recalculs intégraux sans appelant ni test. À trancher : filet d'exploitation à garder, ou code mort à retirer ? |
+| 15 fichiers `.pyc` de `__pycache__/` sont **suivis par git** | 15 | Artefacts de compilation Python. Leur retrait est une **suppression** : je ne supprime rien que ma session n'ait créé. **Proposé, pas fait.** |
+| 9 exercices sur 18 portent `PLACEHOLDER — À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ` | 9 / 18 | C'est la moitié du contenu jouable. Aucun agent ne peut lever cette marque : c'est la relecture humaine, et elle est la raison d'être de la marque. |
