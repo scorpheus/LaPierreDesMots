@@ -18,7 +18,7 @@
  */
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { expect, test } from '@playwright/test';
+import { expect, test } from './invariants.js';
 
 import type { Page } from '@playwright/test';
 

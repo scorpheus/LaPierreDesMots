@@ -297,13 +297,39 @@ export async function preparerSansProfil(page: Page): Promise<void> {
  * trouve sur les douze écrans de nœud, termine donc des exercices, et les Galeries se
  * refermaient avant que le cas D38 ne les cherche — `départs offerts : clairiere,
  * marais-jumeau`. La QA se polluait elle-même.
+ *
+ * ── LA PROMESSE CI-DESSUS ÉTAIT FAUSSE, ET ELLE A DÉSARMÉ UN CONTRÔLE POSITIF ─────────────
+ *
+ * Elle ne changeait que le PRÉNOM. Or `chargerProfil` cherche **d'abord par `id`**, et l'`id`
+ * restait celui de la fixture partagée : le profil « vierge » était donc, dès qu'une recette
+ * précédente avait joué, le profil COMMUN avec toute sa progression.
+ *
+ * Mesuré, sortie citée, sur `parcours-zz-invariants.spec.ts:399` (« l'enfant voit ses étoiles
+ * et le journal reste vide », le défaut n° 4 du père réinjecté au réseau) :
+ *
+ *     ce fichier SEUL ......................... 11 passed
+ *     parcours-nominal.spec.ts puis ce fichier .  1 failed, 14 passed
+ *
+ * Le contrôle positif ne mordait plus, parce que le serveur servait déjà les étoiles laissées
+ * par la recette précédente : `servies >= promises`, aucune violation, vert. **Un contrôle
+ * positif qui ne mord plus est exactement le test trompeur que ce lot combat**, et il l'était
+ * dans le dispositif chargé de prouver que le harnais mord.
+ *
+ * Le prénom entraîne donc désormais un `id` DÉRIVÉ DE LUI — déterministe, sans horloge ni
+ * tirage : `chargerProfil` ne le trouve ni par `id` ni par prénom, et crée un profil neuf.
  */
 export async function preparer(page: Page, prenom?: string): Promise<void> {
   await preparerSansProfil(page);
   await page.evaluate(
     async ({ fixture, prenomPropre }) =>
       (window as unknown as FenetreTest).__test.chargerProfil(
-        prenomPropre === undefined ? fixture : { ...fixture, prenom: prenomPropre },
+        prenomPropre === undefined
+          ? fixture
+          : {
+              ...fixture,
+              prenom: prenomPropre,
+              id: `profil-test-${prenomPropre.toLowerCase().replace(/[^a-z0-9]+/gu, '-')}`,
+            },
       ),
     { fixture: fixtureProfil, prenomPropre: prenom },
   );
@@ -628,8 +654,24 @@ export async function ouvrirLaZoneParent(page: Page): Promise<void> {
 }
 
 /** Joue un nœud `colorie` jusqu'à l'écran de récompense, par le magasin. */
-export async function jouerJusquALaRecompense(page: Page, noeud: string): Promise<void> {
-  await entrerDansLeNoeud(page, noeud);
+export async function jouerJusquALaRecompense(
+  page: Page,
+  noeud: string,
+  prenom?: string,
+): Promise<void> {
+  // `prenom` est TRANSMIS jusqu'à `choisirLeProfil`, et c'est une correction mesurée, pas un
+  // confort. Sans lui, `choisirLeProfil` prend `[data-profil]` **en premier**, c'est-à-dire le
+  // profil le plus ANCIEN de la base partagée de la campagne — jamais celui que la recette
+  // vient de préparer. Le contrôle positif « l'enfant voit ses étoiles et le journal reste
+  // vide » jouait donc sur le profil d'une recette précédente, qui portait déjà ses 3 étoiles :
+  //
+  //     [diag-fin] profil = prf-d5bd… « Alma »   (créé par parcours-nominal)
+  //               prog   = [{ noeud: 'clairiere-01', etoiles: 3, nbTentatives: 1 }]
+  //     [diag]     servies:clairiere-01 = 3 · promis = 3   → aucune violation, VERT
+  //
+  // Le contrôle rendait vert alors que la sentinelle n'avait rien vu : c'est le test trompeur
+  // que ce lot combat, à l'intérieur du dispositif qui doit prouver que le harnais mord.
+  await entrerDansLeNoeud(page, noeud, prenom);
   await page.evaluate(async () => {
     const crochets = (window as unknown as FenetreTest).__test;
     interface EtatColorieLu {

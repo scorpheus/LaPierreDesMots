@@ -12,7 +12,7 @@
  * Le hasard vient de `Alea`, jamais de `Math.random` : un échec du singe doit être rejouable
  * à l'identique en relançant avec la même graine (annexe T § 6, interdictions).
  */
-import { expect, test } from '@playwright/test';
+import { expect, test } from './invariants.js';
 
 import { creerAlea } from '@pierre/partage';
 

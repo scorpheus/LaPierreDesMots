@@ -33,6 +33,21 @@ pre-commit:
         Les tests T1/T2 echouent.
         Regle non negociable : on corrige le code, jamais le test — et on ne met JAMAIS
         un test en `skip` pour faire passer une suite.
+    trompeurs:
+      # Deux secondes, et c'est la SEULE traduction mecanique de la phrase ci-dessus.
+      #
+      # Jusqu'au lot Q5, « on ne met JAMAIS un test en skip » n'existait que dans ce
+      # `fail_text` et dans CLAUDE.md : aucune commande ne le verifiait. Un test desactive
+      # ou sans assertion passait le crochet sans un mot. Il est ici et pas au `pre-push`
+      # parce qu'un test creux se corrige quand on vient de l'ecrire, pas trois jours apres.
+      run: npm run qa:trompeurs
+      fail_text: |
+        Un test ne prouve pas ce qu'il annonce.
+        · BLOQUANT : un cas sans aucune assertion, ou desactive par `.skip` / `.only`.
+          Un test desactive est un mensonge dans le rapport (CLAUDE.md, regle non negociable).
+        · PLAFOND : le nombre d'avertissements a monte. Corriger le nouveau, ou justifier
+          la montee par ecrit dans Docs/questions-en-attente.md — jamais en silence.
+        Le detail nomme le fichier, la ligne, le cas et le remede.
 
 pre-push:
   parallel: false

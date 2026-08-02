@@ -31,7 +31,7 @@
  * tape tout. C'est exactement le couple demandé, et la propriété qui compte n'est pas qu'une
  * réponse soit juste — c'est qu'une réponse FAUSSE ne produise jamais d'écran d'échec (R14).
  */
-import { expect, test } from '@playwright/test';
+import { expect, test } from './invariants.js';
 
 import type { Page } from '@playwright/test';
 

@@ -40,7 +40,7 @@
  *
  * Aucune attente de durée (annexe T § 6) : on attend un état, jamais un délai.
  */
-import { expect, test } from '@playwright/test';
+import { expect, test } from './invariants.js';
 
 import type { Page } from '@playwright/test';
 

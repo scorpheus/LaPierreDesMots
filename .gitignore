@@ -17,6 +17,10 @@ donnees/*.db-wal
 donnees/*.db-shm
 donnees/*.db-journal
 donnees/*.pid
+# Les sauvegardes prises avant une remise à zéro : c'est la base VÉCUE de l'enfant, donc la
+# même donnée de jeu, dans un sous-dossier. Les motifs ci-dessus ne descendaient pas d'un cran
+# et 1,7 Mo de base réelle seraient partis au dépôt au premier `git add -A`.
+donnees/sauvegardes/
 
 # --- sorties de test (le `.gitkeep` de `tests/rapports/` reste suivi)
 tests/rapports/

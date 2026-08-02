@@ -39,7 +39,7 @@
  * code du foyer **par requête**, et d'exiger un 200. Si l'ordre changeait un jour, ce fichier
  * échouerait en nommant la cause au lieu d'échouer sur une assertion d'écran incompréhensible.
  */
-import { expect, test } from '@playwright/test';
+import { expect, test } from './invariants.js';
 
 import type { Page } from '@playwright/test';
 
