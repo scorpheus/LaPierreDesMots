@@ -229,7 +229,26 @@ export class DepotContenuMemoire implements DepotContenu {
     return Promise.resolve(this.competences);
   }
 
+  /**
+   * `Object.hasOwn` AVANT l'indexation — corrige par le lot QA Q4 (fuzzer d'API).
+   *
+   * `this.assets[chemin]` interroge la CHAINE DE PROTOTYPES. Le chemin vient de l'URL, donc du
+   * reseau : `GET /api/contenu/assets/__proto__` rendait `Object.prototype`, et
+   * `GET /api/contenu/assets/constructor` la fonction `Object`. Ni l'un ni l'autre n'est
+   * `undefined`, la garde ne se declenchait pas, et la route repondait **500** :
+   *
+   *   [pierre] 500 sur GET /api/contenu/assets/__proto__ — The first argument must be of type
+   *     string or an instance of Buffer, ArrayBuffer, or Array … Received an instance of Object
+   *
+   * Le depot DISQUE (`serveur/src/services/depot-contenu-disque.ts`) n'a pas ce defaut : il
+   * passe par `resoudreSousRacine` puis `readFile`. Le defaut etait donc dans le DOUBLE, ce qui
+   * est pire qu'anodin — c'est lui que montent les 22 fichiers de `tests/api/`, et un double qui
+   * plante la ou la production tient fait mentir toute la suite dans les deux sens.
+   */
   lireAsset(chemin: CheminAsset): Promise<Uint8Array | null> {
+    if (!Object.hasOwn(this.assets, chemin)) {
+      return Promise.resolve(null);
+    }
     const trouve = this.assets[chemin];
     if (trouve === undefined) {
       return Promise.resolve(null);

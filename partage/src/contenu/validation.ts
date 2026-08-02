@@ -189,15 +189,30 @@ export function validerExercice(donnees: unknown): RapportValidation {
   return valider(donnees) ? rapport([]) : rapport(traduire(valider.errors));
 }
 
+/**
+ * Les calques d'un habillage, ou une liste VIDE si l'habillage n'en déclare pas de lisibles.
+ *
+ * Ajouté par le lot QA Q4. `habillage.scene.calques` était lu directement à trois endroits :
+ * un habillage produit par un agent et privé de `scene` faisait lever `TypeError: Cannot read
+ * properties of undefined`, y compris dans `scripts/test-contenu.mjs:497`, qui passe à
+ * `validerSceneSvg` un JSON relu du disque sans l'avoir validé. Le contrôle de contenu tombait
+ * alors sur une trace de pile au lieu de dire quel fichier est cassé.
+ */
+function calquesDeclares(habillage: unknown): readonly Habillage['scene']['calques'][number][] {
+  const scene = (habillage as { scene?: unknown } | null)?.scene;
+  const calques = (scene as { calques?: unknown } | null | undefined)?.calques;
+  return Array.isArray(calques) ? (calques as Habillage['scene']['calques'][number][]) : [];
+}
+
 /** Toutes les régions déclarées coloriables par l'habillage. */
 function regionsColoriables(habillage: Habillage): Set<IdRegionSvg> {
   const regions = new Set<IdRegionSvg>();
-  for (const calque of habillage.scene.calques) {
-    if (calque.role !== 'coloriable') {
+  for (const calque of calquesDeclares(habillage)) {
+    if (calque?.role !== 'coloriable') {
       continue;
     }
-    for (const region of calque.regions) {
-      regions.add(region.id);
+    for (const region of Array.isArray(calque.regions) ? calque.regions : []) {
+      regions.add(region?.id);
     }
   }
   return regions;
@@ -238,6 +253,57 @@ function recenserRegions(valeur: unknown, chemin: string, trouvees: Array<[strin
  * `scripts/test-contenu.mjs` (lot L-G).
  */
 export function validerBlocJeu(exercice: Exercice, habillage: Habillage): RapportValidation {
+  // ════════════════════════════════════════════════════════════════════════════════════════
+  // UN JUGE NE PLANTE PAS, IL REFUSE — ajouté par le lot QA Q4 (fuzzer de contenu).
+  //
+  // Ces trois lignes déstructuraient `exercice.jeu` sans rien vérifier. Mesuré, sortie citée,
+  // sur les 18 exercices du dépôt dont on met `jeu` à `null` :
+  //
+  //   TypeError: Cannot destructure property 'moteur' of 'exercice.jeu' as it is null.
+  //
+  // Le type `Exercice` ne prouve RIEN ici : le contenu arrive d'un fichier JSON produit par un
+  // agent ou par ingestion, et le typage TypeScript ne franchit pas cette frontière-là plus
+  // qu'il ne franchit la frontière HTTP. Le serveur, lui, valide l'enveloppe d'abord
+  // (`serveur/src/routes/contenu.ts:80`) ; mais `validerBlocJeu` est un symbole PUBLIC du
+  // sous-chemin `@pierre/partage/validation` (contrat § 11.2), et le prochain appelant n'aura
+  // pas forcément cette discipline.
+  //
+  // C'est la forme exacte de la mutation n° 15 de `Docs/audit-qa.md` : « le repli lève au lieu
+  // de replier ». Un refus se lit, se corrige et n'arrête rien ; une exception remonte jusqu'à
+  // l'écran ou fait tomber `npm run test:contenu` sur une trace de pile.
+  //
+  // La garde ne peut RIEN accepter de plus qu'avant : elle ne transforme que des plantages en
+  // refus. Aucune assertion existante ne s'en trouve assouplie.
+  // ════════════════════════════════════════════════════════════════════════════════════════
+  if (typeof exercice !== 'object' || exercice === null) {
+    return rapport([
+      {
+        chemin: '',
+        message: 'L’exercice n’est pas un objet : valider l’enveloppe avant le bloc « jeu ».',
+        regle: 'enveloppe-illisible',
+      },
+    ]);
+  }
+  const blocJeu = (exercice as { jeu?: unknown }).jeu;
+  if (typeof blocJeu !== 'object' || blocJeu === null || Array.isArray(blocJeu)) {
+    return rapport([
+      {
+        chemin: '/jeu',
+        message: 'Le bloc « jeu » est absent ou n’est pas un objet : rien à confronter à l’habillage.',
+        regle: 'enveloppe-illisible',
+      },
+    ]);
+  }
+  if (typeof habillage !== 'object' || habillage === null || Array.isArray(habillage)) {
+    return rapport([
+      {
+        chemin: '',
+        message: 'L’habillage fourni n’est pas un objet : impossible de juger le bloc « jeu ».',
+        regle: 'habillage-illisible',
+      },
+    ]);
+  }
+
   const problemes: ProblemeValidation[] = [];
   const { moteur: codeMoteur, habillage: idHabillage, contenu } = exercice.jeu;
 
@@ -265,7 +331,12 @@ export function validerBlocJeu(exercice: Exercice, habillage: Habillage): Rappor
     });
   }
 
-  if (!habillage.moteurs.includes(codeMoteur)) {
+  // `moteurs` absent ou d'un autre type vaut « aucun moteur déclaré » : l'habillage est alors
+  // signalé incompatible, ce qu'il est — plutôt que de lever sur `.includes` (lot QA Q4).
+  const moteursDeclares: readonly unknown[] = Array.isArray(habillage.moteurs)
+    ? habillage.moteurs
+    : [];
+  if (!moteursDeclares.includes(codeMoteur)) {
     problemes.push({
       chemin: '/jeu/habillage',
       message: `L'habillage « ${habillage.id} » ne déclare pas le moteur « ${codeMoteur} ».`,
@@ -369,10 +440,44 @@ function calquesDuSvg(texteSvg: string): Map<string, string> {
  * retrouver la forme fautive dans le fichier.
  */
 export function validerSceneSvg(texteSvg: string, habillage: Habillage): RapportValidation {
+  // Deux refus PROPRES là où il y avait deux exceptions — lot QA Q4, même raison qu'à
+  // `validerBlocJeu` : `scripts/test-contenu.mjs:497` passe ici un habillage relu du disque et
+  // jamais validé, et le SVG arrive d'un `readFileSync` qui peut rendre autre chose qu'un texte.
+  if (typeof texteSvg !== 'string') {
+    return rapport([
+      {
+        chemin: '',
+        message: 'Le SVG de scène n’est pas un texte : rien à contrôler.',
+        regle: 'svg-illisible',
+      },
+    ]);
+  }
+  const declares = calquesDeclares(habillage);
+  if (declares.length === 0) {
+    return rapport([
+      {
+        chemin: '',
+        message:
+          'L’habillage ne déclare aucun calque lisible (`scene.calques` absent ou vide) : ' +
+          'aucune région coloriable ne peut être contrôlée.',
+        regle: 'habillage-illisible',
+      },
+    ]);
+  }
+
   const problemes: ProblemeValidation[] = [];
   const calques = calquesDuSvg(texteSvg);
 
-  for (const calque of habillage.scene.calques) {
+  for (const calque of declares) {
+    // Un calque qui n'est pas un objet est un habillage cassé, pas une exception à lever.
+    if (typeof calque !== 'object' || calque === null) {
+      problemes.push({
+        chemin: '/scene/calques',
+        message: 'Un calque déclaré n’est pas un objet : l’habillage est illisible.',
+        regle: 'habillage-illisible',
+      });
+      continue;
+    }
     const corps = calques.get(calque.id);
     if (corps === undefined) {
       problemes.push({
@@ -406,11 +511,11 @@ export function validerSceneSvg(texteSvg: string, habillage: Habillage): Rapport
       }
     }
 
-    for (const region of calque.regions) {
-      if (!presents.has(region.id)) {
+    for (const region of Array.isArray(calque.regions) ? calque.regions : []) {
+      if (!presents.has(region?.id)) {
         problemes.push({
-          chemin: `#${calque.id}/${region.id}`,
-          message: `Région « ${region.id} » déclarée par « ${habillage.id} » et absente du SVG.`,
+          chemin: `#${calque.id}/${region?.id}`,
+          message: `Région « ${region?.id} » déclarée par « ${habillage.id} » et absente du SVG.`,
           regle: 'svg-region-absente',
         });
       }

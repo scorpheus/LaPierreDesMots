@@ -315,10 +315,33 @@ export function enregistrerRoutesTentatives(
       );
     }
 
+    // ══════════════════════════════════════════════════════════════════════════════════════
+    // LE JOURNAL FAIT FOI, Y COMPRIS ICI — corrige par le lot QA Q4 (fuzzer d'API).
+    //
+    // Ces trois lignes lisaient `validee.noeud`, c'est-a-dire le nœud que le CORPS revendique.
+    // Quand la cle d'idempotence est deja connue, `enregistrerTentative` court-circuite et rend
+    // la tentative DEJA STOCKEE — qui peut porter un autre nœud. La progression du nœud
+    // revendique n'existe alors pas, et la route levait : **500**.
+    //
+    // Mesure du fuzzer (`tests/api/fuzz-api.test.ts`), 12 corps hostiles sur le seul champ
+    // `noeud` :
+    //
+    //   [pierre] 500 sur POST /api/tentatives
+    //     Progression introuvable apres enregistrement (profil prf-…, noeud quarante-deux).
+    //
+    // Ce n'est pas un cas de laboratoire : c'est l'AUTRE bout de la mutation M20 de
+    // `Docs/audit-qa.md` § 4.3 (« la cle d'idempotence oublie le nœud »). Une cle qui collisionne
+    // entre deux nœuds produit exactement ce corps-la, et l'enfant qui vient de terminer recoit
+    // une erreur interne au lieu de sa recompense — la forme meme du defaut n° 4 du pere.
+    //
+    // On lit donc la progression du nœud REELLEMENT enregistre. La reponse decrit alors un etat
+    // coherent — `tentative` et `progression` parlent du meme nœud — au lieu de croiser une
+    // tentative stockee avec la progression d'un nœud qu'elle ne concerne pas.
+    // ══════════════════════════════════════════════════════════════════════════════════════
     const progression: ProgressionNoeud | null = lireProgressionNoeud(
       contexte.base,
-      validee.profil,
-      validee.noeud
+      resultat.tentative.profil,
+      resultat.tentative.noeud
     );
 
     // La tentative vient d'etre ecrite dans la meme transaction : son absence de progression
@@ -326,7 +349,8 @@ export function enregistrerRoutesTentatives(
     // de renvoyer un corps qui ne respecte pas `ReponseTentative` (contrat § 3.4).
     if (progression === null) {
       throw new Error(
-        `Progression introuvable apres enregistrement (profil ${validee.profil}, noeud ${validee.noeud}).`
+        'Progression introuvable apres enregistrement ' +
+          `(profil ${resultat.tentative.profil}, noeud ${resultat.tentative.noeud}).`
       );
     }
 

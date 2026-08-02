@@ -210,6 +210,34 @@ function HoteOuverture(): ReactElement {
   );
 }
 
+/**
+ * ═════════════════════════════════════════════════════════════════════════════════════════════
+ * `surRejouerOuverture` — CÂBLAGE MANQUANT, trouvé par le lot Q2 le 2026-08-02.
+ *
+ * Le fait, mesuré avant correction, sortie citée :
+ *
+ *     $ grep -rn "surRejouerOuverture" client/src
+ *     client/src/ecrans/EcranCampement.tsx:58   (déclaration de la propriété)
+ *     client/src/ecrans/EcranCampement.tsx:92   (déstructuration)
+ *     client/src/ecrans/EcranCampement.tsx:234  (garde de rendu)
+ *     client/src/ecrans/EcranCampement.tsx:241  (onClick)
+ *     → AUCUNE ligne dans routeur.tsx
+ *
+ * `EcranCampement` ne rend son bouton « Revoir l'histoire » que si le rappel lui est donné —
+ * « un bouton qui ne mènerait nulle part serait pire que son absence, et ce lot refuse d'en
+ * poser un » (son propre en-tête). Personne ne le lui donnait : D35 point 3 — « rejouable ; un
+ * enfant qui n'a pas suivi la première fois doit pouvoir y revenir SEUL » — restait sur le
+ * papier côté campement, et le commentaire de `CHEMINS.ouverture`, vingt lignes plus haut dans
+ * ce fichier, annonçait pourtant que « c'est par cette constante que le campement rejoue
+ * l'ouverture ».
+ *
+ * Aucune suite ne pouvait le voir : `parcours-audit-tout-le-site.spec.ts` exige de chaque écran
+ * UNE sortie, et le campement en avait deux. Un contrôle ABSENT ne se compte pas.
+ *
+ * L'ajout est de trois lignes et strictement additif : il n'invente aucune destination, il
+ * emprunte `CHEMINS.ouverture`, déjà déclarée ici pour cet usage exact.
+ * ═════════════════════════════════════════════════════════════════════════════════════════════
+ */
 function HoteCampement(): ReactElement {
   const naviguer = useNavigate();
   return (
@@ -219,6 +247,9 @@ function HoteCampement(): ReactElement {
       }}
       surAllerCoffre={() => {
         void naviguer({ to: CHEMINS.coffre });
+      }}
+      surRejouerOuverture={() => {
+        void naviguer({ to: CHEMINS.ouverture });
       }}
     />
   );
