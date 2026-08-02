@@ -43,6 +43,7 @@ import { EcranCarte } from './ecrans/EcranCarte.js';
 import { EcranCodeParent } from './ecrans/EcranCodeParent.js';
 import { EcranCoffre } from './ecrans/EcranCoffre.js';
 import { EcranDashboard } from './ecrans/EcranDashboard.js';
+import { EcranGalerieParent } from './ecrans/EcranGalerieParent.js';
 import { EcranNoeud } from './ecrans/EcranNoeud.js';
 import { EcranOuverture } from './ecrans/EcranOuverture.js';
 import { EcranProfils } from './ecrans/EcranProfils.js';
@@ -72,6 +73,27 @@ export const CHEMINS = {
   reglagesLecture: '/reglages-lecture',
   parent: '/parent',
   parentDashboard: '/parent/dashboard',
+  /**
+   * AJOUT À L'INTÉGRATION — la galerie parent en plein écran (D34).
+   *
+   * Le contrat de finition v3 § 6.2 nomme cette route explicitement et la confie à N4 :
+   * « Le contrat les nomme ici : `/ouverture` (N4), `/parent/galerie` et `/parent/definir`
+   * (N5) ». N4 n'a ajouté que `/ouverture`. `client/src/ecrans/EcranGalerieParent.tsx` était
+   * donc écrit, compilé, testé — et importé par personne :
+   *
+   *     $ grep -rn "EcranGalerieParent" client/src --include=*.tsx | grep -v son propre fichier
+   *     (aucune sortie)
+   *
+   * C'est exactement le mode de défaillance que D10 nomme : « un contrat gelé n'oblige
+   * personne tant qu'un fichier n'est pas nommé pour chaque morceau », et il revient à
+   * l'orchestrateur de vérifier que chaque symbole déclaré a trouvé son propriétaire.
+   *
+   * `/parent/definir` n'est PAS ajoutée, et c'est mesuré, pas oublié : `EcranCodeParent`
+   * rend `EcranDefinirCode` lui-même quand aucun code n'est posé
+   * (`EcranCodeParent.tsx:45,157`). La porte est donc déjà complète, et une seconde route
+   * vers le même écran ferait deux chemins pour un seul état.
+   */
+  parentGalerie: '/parent/galerie',
   /**
    * AJOUT N4 — la séquence d'ouverture (D35, contrat de finition v3 § 4.4 et § 6.2).
    *
@@ -345,8 +367,48 @@ function HoteDashboard(): ReactElement {
       profil={profil.id}
       prenom={profil.prenom}
       surSortie={rendreLaMainAuJeu}
+      surGaleriePleinEcran={() => {
+        void naviguer({ to: CHEMINS.parentGalerie });
+      }}
     />
   );
+}
+
+/**
+ * La galerie parent en plein écran — D34, route du contrat de finition v3 § 6.2.
+ *
+ * Le dashboard porte déjà la galerie en ONGLET (choix de N5, pour qu'elle soit atteignable
+ * sans dépendre d'une route). Les deux coexistent et servent deux usages distincts : l'onglet
+ * pour jeter un œil sans quitter le suivi, le plein écran pour parcourir un catalogue qui
+ * grandit. Ils rendent le MÊME `GalerieExercices` avec le MÊME catalogue — il n'y a pas deux
+ * chemins de données, il y a deux portes sur le même, et `EcranGalerieParent` le dit dans son
+ * propre en-tête.
+ *
+ * Le profil suivi est celui de la session. Sans profil, on ne bloque pas : on rend la main au
+ * choix du joueur, qui est un écran avec sortie — jamais un écran vide.
+ */
+function HoteGalerieParent(): ReactElement {
+  const naviguer = useNavigate();
+  const profilDeSession = useEtatJeu((etat) => etat.profil);
+  const [profilSuivi, fixerProfilSuivi] = useState<Profil | null>(null);
+  const profil = profilDeSession ?? profilSuivi;
+
+  const retourAuSuivi = (): void => {
+    void naviguer({ to: CHEMINS.parentDashboard });
+  };
+
+  if (profil === null) {
+    return (
+      <ChoixProfilParent
+        surChoix={fixerProfilSuivi}
+        surRetour={() => {
+          void naviguer({ to: CHEMIN_PAR_ECRAN.profils });
+        }}
+      />
+    );
+  }
+
+  return <EcranGalerieParent profil={profil.id} surRetour={retourAuSuivi} />;
 }
 
 // Type de retour volontairement inféré : `createRouter` est générique sur l'arbre de routes,
@@ -394,6 +456,11 @@ function construireRouteur() {
       getParentRoute: () => routeRacine,
       path: CHEMINS.parentDashboard,
       component: HoteDashboard
+    }),
+    createRoute({
+      getParentRoute: () => routeRacine,
+      path: CHEMINS.parentGalerie,
+      component: HoteGalerieParent
     })
   ]);
 

@@ -152,8 +152,28 @@ export function EcranReglagesLecture({
     [enregistrement, reglages],
   );
 
+  /**
+   * Combien de fois chaque bouton d'ecoute a ete tape.
+   *
+   * Meme motif que `data-ecoutes` sur `BoutonEcouter`, et meme mesure : `dire()` n'ecrit rien
+   * dans le DOM et ne change aucun etat, si bien que ces cinq boutons etaient rigoureusement
+   * identiques avant et apres un tap. L'audit « aucun element interactif mort » les relevait
+   * comme morts :
+   *
+   *     button « Ecouter : Taille des lettres »
+   *     button « Ecouter : Espace entre les lettres »
+   *     button « Ecouter : Espace entre les mots »
+   *     button « Ecouter : Espace entre les lignes »
+   *
+   * Le son partait bien — ce n'etait pas une panne. Mais un bouton dont le seul effet est
+   * inaudible (tablette en sourdine, volume a zero) est indiscernable d'un bouton casse, pour
+   * l'adulte comme pour le test. C'est la forme exacte du defaut n° 2 du pere.
+   */
+  const [ecoutes, fixerEcoutes] = useState<Readonly<Record<string, number>>>({});
+
   const dire = useCallback(
-    (texte: string): void => {
+    (texte: string, cle = texte): void => {
+      fixerEcoutes((precedent) => ({ ...precedent, [cle]: (precedent[cle] ?? 0) + 1 }));
       void services.voix.dire({ texte, locuteur: 'narrateur' });
     },
     [services],
@@ -182,8 +202,9 @@ export function EcranReglagesLecture({
           type="button"
           className="cible"
           data-ecouter="titre"
+          data-ecoutes={String(ecoutes['titre'] ?? 0)}
           onClick={() => {
-            dire('Comment tu lis le mieux ? Essaie, et regarde en dessous.');
+            dire('Comment tu lis le mieux ? Essaie, et regarde en dessous.', 'titre');
           }}
           aria-label="Écouter la question"
         >
@@ -208,8 +229,9 @@ export function EcranReglagesLecture({
             type="button"
             className="cible"
             data-ecouter="police"
+            data-ecoutes={String(ecoutes['police'] ?? 0)}
             onClick={() => {
-              dire('La forme des lettres. Choisis celle que tu préfères.');
+              dire('La forme des lettres. Choisis celle que tu préfères.', 'police');
             }}
             aria-label="Écouter : la forme des lettres"
           >
@@ -256,8 +278,9 @@ export function EcranReglagesLecture({
                 type="button"
                 className="cible"
                 data-ecouter={cle}
+                data-ecoutes={String(ecoutes[cle] ?? 0)}
                 onClick={() => {
-                  dire(intitule);
+                  dire(intitule, cle);
                 }}
                 aria-label={`Écouter : ${intitule}`}
               >

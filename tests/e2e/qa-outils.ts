@@ -1,6 +1,6 @@
 /**
- * Outillage commun de la campagne QA — « il faudrait que tu code des qa pour tester tout le
- * site » (le père, verbatim).
+ * Outillage commun de la campagne QA — « la qa est extremement important pour tester tout les
+ * cas de jeu et tenter de tout realiser » (le père, verbatim).
  *
  * ══════════════════════════════════════════════════════════════════════════════════════════
  * LE PRINCIPE QUI COMMANDE TOUT CE FICHIER : ON AUDITE LES OBJETS, PAS LES OCCURRENCES.
@@ -11,18 +11,54 @@
  * façon dont le défaut du père a survécu à 23 parcours E2E verts.
  *
  * Ici, l'inventaire est DÉRIVÉ du code :
- *   • les écrans, de la table `CHEMINS` de `client/src/routeur.tsx` ;
+ *   • les écrans, des littéraux `data-ecran="…"` de `client/src/**` — c'est-à-dire de tout ce
+ *     que l'application sait rendre, et non de ce qu'un test se rappelle ;
  *   • les moteurs, de l'union `CodeMoteur` de `partage/src/identifiants.ts` ;
  *   • les nœuds jouables, de `contenu/noeuds/*.json`.
  *
- * Conséquence opposable, et c'est la seule raison d'être de ce fichier : **une route ajoutée
- * sans recette QA fait ÉCHOUER la suite**, au lieu de passer inaperçue. Un moteur déclaré sans
- * exercice aussi. L'inventaire ne peut pas prendre du retard sur le code, parce qu'il n'est
- * pas écrit à côté du code — il est lu dedans.
+ * Conséquence opposable : **un écran ajouté demain sans recette QA fait ÉCHOUER la suite.**
  * ══════════════════════════════════════════════════════════════════════════════════════════
  *
+ * ── CE QUI A ÉTÉ CORRIGÉ ICI À L'INTÉGRATION, ET POURQUOI C'ÉTAIT GRAVE ────────────────────
+ *
+ * **1. La QA naviguait par URL, et n'atteignait AUCUN des écrans qu'elle croyait auditer.**
+ *
+ * `client/src/routeur.tsx` monte `createMemoryHistory({ initialEntries: ['/'] })` — un choix
+ * délibéré et documenté (« le jeu est une borne sur tablette »). Un `page.goto('/campement')`
+ * recharge donc l'application, qui repart de `/`. Mesuré, les huit routes déclarées :
+ *
+ *     goto /                 -> data-ecran=profils   location=/
+ *     goto /carte            -> data-ecran=profils   location=/carte
+ *     goto /campement        -> data-ecran=profils   location=/campement
+ *     goto /coffre           -> data-ecran=profils   location=/coffre
+ *     goto /reglages-lecture -> data-ecran=profils   location=/reglages-lecture
+ *     goto /parent           -> data-ecran=profils   location=/parent
+ *     goto /parent/dashboard -> data-ecran=profils   location=/parent/dashboard
+ *     goto /ouverture        -> data-ecran=profils   location=/ouverture
+ *
+ * **Huit routes, un seul écran.** L'ancienne suite auditait l'écran des profils huit fois et
+ * publiait « 8 / 8 routes visitées ». Elle ne mentait pas volontairement : elle n'avait
+ * simplement aucun moyen de savoir qu'elle n'était jamais arrivée. C'est le mode de
+ * défaillance que cette campagne existe pour rendre impossible, et il était DANS l'outil censé
+ * l'empêcher. Les recettes ci-dessous naviguent donc comme l'enfant : en tapant.
+ *
+ * **2. La QA tapait `click`, l'interface écoute `pointerdown`.**
+ *
+ * `client/src/moteurs/colorie/SceneSvg.tsx` peint sur `onPointerDown`. Un `MouseEvent('click')`
+ * synthétique ne le déclenche jamais : l'audit relevait 33 régions « mortes » sur
+ * `clairiere-01` alors que toutes répondent au doigt. `taper()` émet désormais la séquence
+ * complète — `pointerdown`, `pointerup`, `click` —, c'est-à-dire ce que fait un doigt.
+ *
+ * **3. La population « interactive » comptait du décor.**
+ *
+ * `[data-region-svg]` désignait aussi les formes du décor de la carte, qui ne portent aucun
+ * gestionnaire et n'ont jamais prétendu en porter. Les régions réellement jouables, elles,
+ * reçoivent `role="button"` et `tabindex="0"` de `SceneSvg` — elles restent donc dans la
+ * population par `[role="button"]`. On mesure ce que l'arbre d'accessibilité déclare
+ * interactif, plus les prises de jeu explicites : rien de moins, mais plus rien de décoratif.
+ *
  * Aucune attente de durée (annexe T § 6, règle non négociable de CLAUDE.md) : on attend un
- * ÉTAT — deux images rendues, un sélecteur visible —, jamais un délai.
+ * ÉTAT, jamais un délai.
  *
  * Ce fichier n'est pas un `*.spec.ts` : `playwright.config.ts` ne collecte que
  * `parcours-*.spec.ts` dans le projet `parcours`. Il est importé, jamais exécuté seul.
@@ -52,13 +88,15 @@ export const fixtureProfil = lireJson<Record<string, unknown>>('tests/fixtures/p
 export const GRAINE = Number(process.env['ATELIER_GRAINE'] ?? 20260801);
 export const INSTANT = '2026-09-01T08:00:00Z';
 
+/** Le code du foyer employé par la QA. Même valeur que `parcours-parent.spec.ts`. */
+export const CODE_PARENT = '4271';
+
 /**
- * La population « interactive », reprise MOT POUR MOT de `singe.spec.ts` et de
- * `parcours-issues-de-secours.spec.ts`.
+ * La population « interactive ».
  *
- * Trois fichiers qui auditent le même site doivent regarder la même population : sinon leurs
- * désaccords viennent de ce qu'ils REGARDENT et non de ce qu'ils en concluent, et plus aucun
- * des trois ne prouve quoi que ce soit.
+ * `[data-region-svg]` a été RETIRÉ — voir le point 3 de l'en-tête. Les régions jouables
+ * entrent par `[role="button"]`, que `SceneSvg` leur pose ; le décor, qui n'en reçoit pas,
+ * cesse d'être compté comme une commande morte.
  */
 export const SELECTEUR_INTERACTIF = [
   'button:not([disabled])',
@@ -67,7 +105,6 @@ export const SELECTEUR_INTERACTIF = [
   'input',
   'select',
   '[data-godet]',
-  '[data-region-svg]',
   '[tabindex]:not([tabindex="-1"])',
 ].join(', ');
 
@@ -93,14 +130,23 @@ export interface CrochetsTest {
 }
 export type FenetreTest = Window & { __test: CrochetsTest };
 
-/** Où l'on se trouve : le code d'écran ET le chemin du routeur, ensemble. */
-export async function positionne(page: Page): Promise<string> {
+/** L'écran courant, tel que le DOM le déclare. */
+export async function ecranCourant(page: Page): Promise<string> {
   return page.evaluate(
-    () =>
-      `${document.querySelector('[data-ecran]')?.getAttribute('data-ecran') ?? 'aucun'}@${
-        window.location.pathname
-      }`,
+    () => document.querySelector('[data-ecran]')?.getAttribute('data-ecran') ?? 'aucun',
   );
+}
+
+/**
+ * Où l'on se trouve.
+ *
+ * Le chemin de `window.location` n'y figure PLUS : l'historique du routeur est en mémoire, donc
+ * `location.pathname` ne bouge jamais et l'ajouter revenait à concaténer une constante. Pire,
+ * il donnait l'illusion qu'un changement d'écran était observé alors que seule la partie
+ * `data-ecran` variait jamais.
+ */
+export async function positionne(page: Page): Promise<string> {
+  return ecranCourant(page);
 }
 
 /** Attend un ÉTAT — deux images rendues —, jamais une durée. */
@@ -117,20 +163,135 @@ export async function deuxImages(page: Page): Promise<void> {
   );
 }
 
-/** Démarrage propre : animations coupées, graine et horloge figées, profil chargé. */
-export async function preparer(page: Page): Promise<void> {
+/**
+ * LE MOUCHARD D'ÉCRANS — pose un observateur AVANT que l'application ne monte, et retient
+ * TOUT `data-ecran` que le DOM aura porté, même une seule image.
+ *
+ * ── POURQUOI IL EXISTE, ET C'EST UNE MESURE, PAS UNE PRÉCAUTION ────────────────────────────
+ * `chargement` est un écran réel — `client/src/routeur.tsx` le rend tant que
+ * `EtatMagasin.ecran` vaut `'chargement'` — mais il est INHABITABLE : `Application.tsx:66-71`
+ * en sort dans un `useEffect` de montage, sans attendre le réseau. Le commentaire du fichier
+ * l'assume (« un seul pas, et une seule fois »), et c'est un bon choix : l'enfant ne doit pas
+ * regarder un écran d'attente parce que le serveur traîne.
+ *
+ * Conséquence pour la QA : aucune recette ne peut s'y ARRÊTER. J'ai d'abord essayé de retenir
+ * `GET /api/profils` indéfiniment ; l'application passe quand même à `profils`, parce que la
+ * transition ne dépend pas de cette requête. L'écran reste donc invisible à toute recette.
+ *
+ * Deux façons de traiter ça, et une seule est honnête :
+ *   • l'exempter de l'inventaire — c'est-à-dire s'accorder une dérogation, et une QA qui a le
+ *     droit de s'exempter n'a plus de couverture opposable ;
+ *   • **l'OBSERVER**, ce que fait ce mouchard. `chargement` entre alors dans la couverture
+ *     parce qu'il a réellement été vu, pas parce qu'on a décidé de l'oublier.
+ *
+ * Les audits « une sortie », « R16 » et « aucun élément mort » ne s'y appliquent pas, et c'est
+ * mécaniquement fondé plutôt que décrété : ils portent sur les écrans où l'enfant peut rester
+ * et taper. Un écran sans le moindre élément interactif, dont on sort sans rien faire, n'a ni
+ * sortie à chercher ni cible à mesurer.
+ */
+const MOUCHARDS_POSES = new WeakSet<Page>();
+
+export async function installerMouchardDEcrans(page: Page): Promise<void> {
+  // Un seul par page : `addInitScript` s'ACCUMULE sur le contexte, et une recette appelée
+  // vingt fois poserait vingt observateurs sur chaque rechargement.
+  if (MOUCHARDS_POSES.has(page)) return;
+  MOUCHARDS_POSES.add(page);
+  await page.addInitScript(() => {
+    const vus = new Set<string>();
+    (window as unknown as { __ecransVus: Set<string> }).__ecransVus = vus;
+
+    const noter = (noeud: Node | null): void => {
+      if (noeud === null || noeud.nodeType !== 1) return;
+      const element = noeud as Element;
+      const propre = element.getAttribute('data-ecran');
+      if (propre !== null && propre.length > 0) vus.add(propre);
+      for (const descendant of element.querySelectorAll('[data-ecran]')) {
+        const code = descendant.getAttribute('data-ecran');
+        if (code !== null && code.length > 0) vus.add(code);
+      }
+    };
+
+    /**
+     * On lit les ENREGISTREMENTS, pas seulement le DOM courant — et c'est la seule version
+     * qui marche. Un `MutationObserver` livre ses lots à la fin du micro-tâche : relire
+     * `document` à ce moment-là rate tout écran déjà remplacé entre-temps, ce qui est
+     * exactement le cas de `chargement` (remplacé par `profils` dans l'effet de montage).
+     * Les nœuds retirés, eux, restent dans `record.addedNodes` du lot où ils sont apparus.
+     */
+    const observateur = new MutationObserver((lots) => {
+      for (const lot of lots) {
+        for (const ajoute of lot.addedNodes) noter(ajoute);
+        noter(lot.target);
+        // React reutilise le meme <main> d'un ecran a l'autre : le changement n'est alors ni
+        // un ajout ni un retrait, seulement un attribut qui bascule. Sans l'ancienne valeur,
+        // l'ecran quitte est perdu.
+        if (lot.type === 'attributes' && lot.oldValue !== null) vus.add(lot.oldValue);
+      }
+      noter(document.documentElement);
+    });
+    // `documentElement` existe déjà quand un script d'initialisation s'exécute ; on observe
+    // donc l'arbre entier, dès avant que React ne monte quoi que ce soit.
+    // `document` et NON `document.documentElement` : au moment ou un script d'initialisation
+    // s'execute, l'element racine est celui du document vide, et l'analyseur le REMPLACE
+    // ensuite. Observer ce noeud-la revient a n'observer rien — mesure a l'appui, le mouchard
+    // ne relevait aucun ecran, pas meme `profils`. `document` est stable.
+    observateur.observe(document, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeOldValue: true,
+      attributeFilter: ['data-ecran'],
+    });
+    noter(document.documentElement);
+  });
+}
+
+/** Tous les `data-ecran` que cette page a portés depuis son chargement. */
+export async function ecransVus(page: Page): Promise<readonly string[]> {
+  return page.evaluate(() => [
+    ...((window as unknown as { __ecransVus?: Set<string> }).__ecransVus ?? []),
+  ]);
+}
+
+/**
+ * Démarrage SANS profil : animations coupées, graine et horloge figées, et rien d'autre.
+ *
+ * Indispensable à deux écrans que `preparer()` rend inatteignables, et ce n'est pas un détail
+ * de plomberie : `choix-profil-parent` n'existe QUE lorsque `profil` vaut `null`, c'est-à-dire
+ * exactement le chemin que le père a pris — la porte parent est en pied de l'écran des profils,
+ * donc avant tout choix de joueur. Les deux suites parent existantes appellent `chargerProfil`
+ * avant d'ouvrir la porte ; **le seul chemin qu'un humain emprunte était donc le seul qu'aucun
+ * test ne prenait**, et c'est écrit noir sur blanc dans `client/src/routeur.tsx`.
+ */
+export async function preparerSansProfil(page: Page): Promise<void> {
+  // Toute interception posee par une recette precedente est LEVEE ici. Sans cela, la recette
+  // qui retient le paquet d'un noeud pour observer l'ecran d'attente le retiendrait aussi pour
+  // les vingt recettes suivantes — mesure a l'appui : la couverture etait tombee de 12 ecrans
+  // a 2. Une mise en place qui fuit sur le cas d'apres est pire qu'une mise en place absente,
+  // parce qu'elle fait echouer un cas innocent.
+  await page.unrouteAll({ behavior: 'ignoreErrors' });
+  await installerMouchardDEcrans(page);
   await page.goto('/');
   await page.waitForFunction(() => (window as unknown as FenetreTest).__test !== undefined);
   await page.evaluate(
-    async ({ fixture, graine, instant }) => {
+    ({ graine, instant }) => {
       const crochets = (window as unknown as FenetreTest).__test;
       crochets.sauterAnimations();
       crochets.graine(graine);
       crochets.figerHorloge(instant);
-      await crochets.chargerProfil(fixture);
     },
-    { fixture: fixtureProfil, graine: GRAINE, instant: INSTANT },
+    { graine: GRAINE, instant: INSTANT },
   );
+}
+
+/** Démarrage propre : animations coupées, graine et horloge figées, profil chargé. */
+export async function preparer(page: Page): Promise<void> {
+  await preparerSansProfil(page);
+  await page.evaluate(
+    async (fixture) => (window as unknown as FenetreTest).__test.chargerProfil(fixture),
+    fixtureProfil,
+  );
+  await expect(page.locator('[data-ecran="profils"]')).toBeVisible();
 }
 
 export async function etatDuJeu(page: Page): Promise<ReturnType<CrochetsTest['etat']>> {
@@ -143,9 +304,7 @@ export async function etatDuJeu(page: Page): Promise<ReturnType<CrochetsTest['et
  * Les chemins déclarés par `CHEMINS` dans `client/src/routeur.tsx`.
  *
  * Lu dans le source plutôt qu'importé : Playwright n'a pas les alias `@client/*` de Vitest, et
- * une recopie du littéral serait précisément la liste qui prend du retard. Le motif vise la
- * forme gelée du fichier — `cle: '/chemin'` — et le contrôle ci-dessous refuse un inventaire
- * vide, pour qu'un changement de forme échoue au lieu de rendre zéro route en silence.
+ * une recopie du littéral serait précisément la liste qui prend du retard.
  */
 export function cheminsDuRouteur(): ReadonlyMap<string, string> {
   const source = lireTexte('client/src/routeur.tsx');
@@ -165,6 +324,48 @@ export function cheminsDuRouteur(): ReadonlyMap<string, string> {
     throw new Error('QA : `CHEMINS` a été trouvée mais aucune entrée n’a pu en être lue.');
   }
   return chemins;
+}
+
+/** Tous les fichiers `.ts`/`.tsx` sous un dossier du dépôt. */
+function sourcesDe(dossier: string): readonly string[] {
+  const trouves: string[] = [];
+  const parcourir = (relatif: string): void => {
+    for (const entree of readdirSync(cheminDepot(relatif), { withFileTypes: true })) {
+      const chemin = `${relatif}/${entree.name}`;
+      if (entree.isDirectory()) parcourir(chemin);
+      else if (/\.tsx?$/.test(entree.name)) trouves.push(chemin);
+    }
+  };
+  parcourir(dossier);
+  return trouves;
+}
+
+/**
+ * TOUS les écrans que l'application sait rendre, lus dans le source.
+ *
+ * C'EST LE DÉNOMINATEUR DE LA COUVERTURE, et c'est le cœur de la demande du père : « un test
+ * qui compte les écrans atteignables et les compare aux écrans visités, et qui ÉCHOUE si
+ * l'écart n'est pas nul ».
+ *
+ * On énumère les littéraux `data-ecran="…"` plutôt que les routes, et la différence est tout
+ * l'intérêt : trois écrans du dépôt n'ont AUCUNE route à eux — `profils`, `carte` et `noeud`
+ * sont pilotés par l'état du magasin, et `choix-profil-parent` n'apparaît que dans une branche
+ * de `HoteDashboard`. Un inventaire fondé sur les routes les aurait tous manqués.
+ */
+export function ecransDeclares(): readonly string[] {
+  const vus = new Set<string>();
+  for (const fichier of sourcesDe('client/src')) {
+    for (const trouve of lireTexte(fichier).matchAll(/data-ecran="([a-z-]+)"/g)) {
+      vus.add(trouve[1]!);
+    }
+  }
+  if (vus.size === 0) {
+    throw new Error(
+      'QA : aucun `data-ecran="…"` trouvé dans client/src. L’inventaire des écrans serait ' +
+        'vide, donc la couverture serait vraie par vacuité — on refuse de continuer.',
+    );
+  }
+  return [...vus].sort();
 }
 
 /**
@@ -230,6 +431,9 @@ export function noeudsLivres(): readonly NoeudLivre[] {
     }
     noeuds.push({ id: noeud.id, region: noeud.region, exercice: noeud.exercice, moteur });
   }
+  if (noeuds.length === 0) {
+    throw new Error('QA : aucun nœud livré. La couverture des moteurs serait vraie par vacuité.');
+  }
   return noeuds;
 }
 
@@ -245,7 +449,8 @@ export interface CibleTropPetite {
  * R16 — les cibles trop petites de l'écran courant.
  *
  * Ne sont mesurés que les éléments VISIBLES et de surface non nulle : un contrôle masqué ou
- * replié ne demande aucune coordination au doigt, et le compter rendrait la mesure ininterprétable.
+ * replié ne demande aucune coordination au doigt, et le compter rendrait la mesure
+ * ininterprétable.
  */
 export async function ciblesTropPetites(page: Page): Promise<readonly CibleTropPetite[]> {
   return page.evaluate(
@@ -272,11 +477,16 @@ export async function ciblesTropPetites(page: Page): Promise<readonly CibleTropP
 }
 
 /**
- * Tape l'élément de rang `rang` et dit ce que le tap a changé.
+ * Tape l'élément de rang `rang` COMME UN DOIGT, et dit ce que le tap a changé.
  *
- * `dispatchEvent` et non `.click()` : les éléments SVG (`[data-region-svg]`, `[role="button"]`
- * posé sur un `<circle>`) n'exposent pas tous `click`, et l'audit doit couvrir exactement la
- * population que `singe.spec.ts` déclare interactive.
+ * La séquence `pointerdown` → `pointerup` → `click` n'est pas un excès de prudence : c'est la
+ * correction du point 2 de l'en-tête. `SceneSvg` peint sur `pointerdown`, les boutons React
+ * répondent à `click` ; n'émettre que le second faisait passer 33 régions vivantes pour
+ * mortes, et n'émettre que le premier raterait tous les boutons. Un doigt réel produit les
+ * trois, dans cet ordre.
+ *
+ * `dispatchEvent` et non `.click()` : les éléments SVG (`role="button"` posé sur un `<circle>`)
+ * n'exposent pas tous `click`.
  */
 export async function taperElement(
   page: Page,
@@ -292,9 +502,22 @@ export async function taperElement(
         element.getAttribute('aria-label') ??
         element.getAttribute('data-region-svg') ??
         (element.textContent ?? '').trim().slice(0, 40);
+
+      const boite = element.getBoundingClientRect();
+      const commun = {
+        bubbles: true,
+        cancelable: true,
+        composed: true,
+        clientX: boite.left + boite.width / 2,
+        clientY: boite.top + boite.height / 2,
+      };
       element.dispatchEvent(
-        new MouseEvent('click', { bubbles: true, cancelable: true, composed: true }),
+        new PointerEvent('pointerdown', { ...commun, pointerId: 1, pointerType: 'touch' }),
       );
+      element.dispatchEvent(
+        new PointerEvent('pointerup', { ...commun, pointerId: 1, pointerType: 'touch' }),
+      );
+      element.dispatchEvent(new MouseEvent('click', commun));
       return `${element.tagName.toLowerCase()} « ${nom} »`;
     },
     { selecteur: SELECTEUR_INTERACTIF, index: rang },
@@ -308,17 +531,16 @@ export async function taperElement(
 // ══════════════════════════════════════════════════════════════════ recettes d'accès (écrans)
 
 export interface EcranQA {
-  /** Le nom lisible, et la clé qui le rattache à `CHEMINS` quand il en vient un. */
+  /** Le nom lisible. */
   readonly nom: string;
-  readonly cleChemin: string | null;
+  /** Le `data-ecran` que la recette doit atteindre — vérifié, jamais supposé. */
+  readonly attendu: string;
+  /** Navigue depuis un `preparer()` frais. */
   readonly aller: (page: Page) => Promise<void>;
 }
 
 export async function choisirLeProfil(page: Page): Promise<void> {
-  await page
-    .getByText(String(fixtureProfil['prenom']), { exact: false })
-    .first()
-    .click();
+  await page.locator('[data-profil]').first().click();
   await expect(page.locator('[data-ecran="carte"]')).toBeVisible();
 }
 
@@ -329,4 +551,46 @@ export async function entrerDansLeNoeud(page: Page, noeud: string): Promise<void
     noeud,
   );
   await expect(page.locator('[data-ecran="noeud"]')).toBeVisible();
+}
+
+/**
+ * Ouvre la zone parent et rend la main sur le dashboard.
+ *
+ * Le code du foyer est POSÉ ici quand il n'existe pas encore : depuis le lot N5,
+ * `POST /api/parent/ouvrir` ne le pose plus en silence (c'était le défaut qui faisait d'un
+ * enfant tapant `1234` le propriétaire du code). La porte rend donc `data-parent-mode`
+ * = `definition` sur une base neuve, et `ouverture` ensuite ; les deux mènent au dashboard
+ * avec le même pavé, ce qui est exactement ce que N5 avait promis.
+ */
+export async function ouvrirLaZoneParent(page: Page): Promise<void> {
+  await page.locator('[data-acces-parent]').click();
+  await expect(page.locator('[data-parent="code"]')).toBeVisible();
+  for (const chiffre of CODE_PARENT) {
+    await page.locator(`[data-touche="${chiffre}"]`).click();
+  }
+  await page.locator('[data-valider="code-parent"]').click();
+}
+
+/** Joue un nœud `colorie` jusqu'à l'écran de récompense, par le magasin. */
+export async function jouerJusquALaRecompense(page: Page, noeud: string): Promise<void> {
+  await entrerDansLeNoeud(page, noeud);
+  await page.evaluate(async () => {
+    const crochets = (window as unknown as FenetreTest).__test;
+    interface EtatColorieLu {
+      readonly indexConsigne: number;
+      readonly consignes: ReadonlyArray<{
+        readonly ciblesRestantes: ReadonlyArray<{ readonly region: string; readonly couleur: string }>;
+      }>;
+    }
+    // Borne de sécurité, jamais une attente : 6 consignes × 9 cibles × 2 actions = 108.
+    for (let tour = 0; tour < 160; tour += 1) {
+      const etat = crochets.etat();
+      if (etat.ecran === 'recompense') return;
+      const moteur = etat.etatMoteur as EtatColorieLu | null;
+      const cible = moteur?.consignes[moteur.indexConsigne]?.ciblesRestantes[0];
+      if (cible === undefined) return;
+      await crochets.repondre({ type: 'choisirCouleur', couleur: cible.couleur });
+      await crochets.repondre({ type: 'peindre', region: cible.region });
+    }
+  });
 }

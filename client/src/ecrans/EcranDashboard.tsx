@@ -55,6 +55,15 @@ export interface ProprietesEcranDashboard {
    * qui sait naviguer ; il reçoit le drapeau et n'a qu'à ne rien journaliser.
    */
   readonly surLancerExercice?: (entree: EntreeGalerie, options: OptionsLancement) => void;
+  /**
+   * AJOUT A L'INTEGRATION — ouvre la galerie EN PLEIN ECRAN (route `/parent/galerie`).
+   *
+   * L'onglet ci-dessous reste la porte de premiere intention. Le plein ecran existe parce que
+   * le catalogue grandit : `EcranGalerieParent` etait ecrit par N5, prevu par le contrat de
+   * finition v3 § 6.2, et importe par PERSONNE — la route que N4 devait poser n'a jamais ete
+   * posee. Ce rappel est ce qui la rend atteignable.
+   */
+  readonly surGaleriePleinEcran?: () => void;
 }
 
 /** Les deux onglets de la zone parent. `suivi` est celui qui s'ouvre. */
@@ -65,7 +74,8 @@ export function EcranDashboard({
   prenom,
   surSortie,
   surTravailler,
-  surLancerExercice
+  surLancerExercice,
+  surGaleriePleinEcran
 }: ProprietesEcranDashboard): ReactElement {
   const clientRequetes = useQueryClient();
   const [onglet, fixerOnglet] = useState<OngletParent>('suivi');
@@ -148,6 +158,20 @@ export function EcranDashboard({
 
       {onglet === 'galerie' ? (
         <div role="tabpanel" id="panneau-galerie" aria-labelledby="onglet-galerie">
+          {/* La porte du plein ecran. `data-vers` est la meme convention que les sorties du
+              jeu (`data-vers="carte"`, `data-vers="coffre"`) : une seule facon de nommer une
+              destination dans tout le depot, et la QA n'a donc qu'un motif a connaitre. */}
+          {surGaleriePleinEcran === undefined ? null : (
+            <button
+              type="button"
+              className="cible cible-secondaire"
+              data-vers="galerie-parent"
+              onClick={surGaleriePleinEcran}
+              style={{ marginBlockEnd: '1rem' }}
+            >
+              Voir le catalogue en plein écran
+            </button>
+          )}
           {galerie.isPending ? <p style={{ margin: 0 }}>On rassemble les exercices…</p> : null}
           {galerie.isError ? (
             <div className="zone-lecture" style={{ padding: '1rem', display: 'grid', gap: '1rem' }}>

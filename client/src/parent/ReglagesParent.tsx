@@ -124,7 +124,11 @@ export function ReglagesParent({ surChangement }: ProprietesReglagesParent): Rea
           checked={reglages.animationsCalmes}
           data-reglage="animations-calmes"
           onChange={(evenement) => appliquer({ animationsCalmes: evenement.target.checked })}
-          style={{ inlineSize: '2rem', blockSize: '2rem' }}
+          // R16 — « cibles >= 64 px, aucune coordination fine exigee ». Ces deux cases
+          // mesuraient 32 x 32 px (2 rem), mesure de l'audit QA :  input « » 32x32.
+          // Le `label` portait bien `--cible-min`, mais c'est la CASE qu'on vise du doigt,
+          // pas son etiquette. `--cible-min` vaut 64px (styles/global.css:114).
+          style={{ inlineSize: 'var(--cible-min)', blockSize: 'var(--cible-min)' }}
         />
         Animations calmes
       </label>
@@ -138,7 +142,11 @@ export function ReglagesParent({ surChangement }: ProprietesReglagesParent): Rea
           checked={reglages.boutonEcouter}
           data-reglage="bouton-ecouter"
           onChange={(evenement) => appliquer({ boutonEcouter: evenement.target.checked })}
-          style={{ inlineSize: '2rem', blockSize: '2rem' }}
+          // R16 — « cibles >= 64 px, aucune coordination fine exigee ». Ces deux cases
+          // mesuraient 32 x 32 px (2 rem), mesure de l'audit QA :  input « » 32x32.
+          // Le `label` portait bien `--cible-min`, mais c'est la CASE qu'on vise du doigt,
+          // pas son etiquette. `--cible-min` vaut 64px (styles/global.css:114).
+          style={{ inlineSize: 'var(--cible-min)', blockSize: 'var(--cible-min)' }}
         />
         Proposer le bouton « Écouter » à l’enfant
       </label>
