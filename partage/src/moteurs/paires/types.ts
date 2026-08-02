@@ -70,6 +70,16 @@ export interface EtatEtapePaires {
   readonly derniereActionMs: number;
   readonly instantIndiceMs: number | null;
   readonly modeReponse: ModeReponse;
+  /**
+   * Le nombre de paires à reconstituer sur cette étape. `modeReponse` vaut
+   * `'appariement'` : `p_devinette` vaut `1 / n!` et se calcule depuis CE nombre (D13).
+   *
+   * Le schéma admet `minItems: 1`, et une paire unique donnerait `n = 1`, sous le plancher
+   * de `pDevinette`. Ce cas est déjà borné EN AVAL — `journaliserEtapes` écrit
+   * `Math.max(2, n)` et les deux chemins du BKT relisent le journal — donc la valeur réelle
+   * part telle quelle d'ici, sans second barème inventé dans le moteur.
+   */
+  readonly nbElements: number | null;
   readonly confusion: ConfusionObservee | null;
 }
 

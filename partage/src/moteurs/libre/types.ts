@@ -42,6 +42,12 @@ export interface EtatEtapeLibre {
   readonly derniereActionMs: number;
   readonly instantIndiceMs: number | null;
   readonly modeReponse: ModeReponse;
+  /**
+   * Toujours `null` : la `p_devinette` de ce mode est TABULÉE (D13), jamais calculée en
+   * 1/n!. Le champ est REQUIS par `EtapeGenerique` — chaque moteur doit répondre, y compris
+   * par `null` assumé (correctif A1, Q-I14).
+   */
+  readonly nbElements: number | null;
   readonly confusion: ConfusionObservee | null;
 }
 

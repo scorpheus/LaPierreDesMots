@@ -199,6 +199,8 @@ export const moteurChemin: Moteur<ContenuChemin, EtatChemin, ActionChemin> = {
         derniereActionMs: instant,
         instantIndiceMs: null,
         modeReponse: modeReponseChemin(entree.contenu),
+        // Mode à `p_devinette` tabulée : aucun nombre d'éléments à transmettre (D13).
+        nbElements: null,
         confusion: null,
       }),
     );

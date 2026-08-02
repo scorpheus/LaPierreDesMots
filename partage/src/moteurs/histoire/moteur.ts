@@ -199,6 +199,8 @@ export const moteurHistoire: Moteur<ContenuHistoire, EtatHistoire, ActionHistoir
         derniereActionMs: instant,
         instantIndiceMs: null,
         modeReponse: modeReponseHistoire(entree.contenu, index),
+        // Mode à `p_devinette` tabulée : aucun nombre d'éléments à transmettre (D13).
+        nbElements: null,
         confusion: null,
       }),
     );

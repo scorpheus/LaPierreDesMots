@@ -68,6 +68,12 @@ export interface EtatEtapeAssemble {
   readonly derniereActionMs: number;
   readonly instantIndiceMs: number | null;
   readonly modeReponse: ModeReponse;
+  /**
+   * Le nombre de blocs à ordonner. `modeReponse` vaut `'ordre'` : `p_devinette` vaut
+   * `1 / n!` et se calcule depuis CE nombre (D13). Sans lui, `pDevinette` lève, la
+   * transaction du serveur est annulée et **la tentative est perdue** (Q-I14).
+   */
+  readonly nbElements: number | null;
   readonly confusion: ConfusionObservee | null;
 }
 

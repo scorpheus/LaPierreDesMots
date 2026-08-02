@@ -364,9 +364,16 @@ function resume(etat: EtatColorie): ResumeTentative {
     // `confusion: null` — une région peinte à tort n'est pas une confusion de graphème ;
     // `ConfusionObservee` attend un couple attendu/rendu de graphèmes (D23), que ce moteur
     // n'a pas. Rien n'est donc affirmé.
+    //
+    // `nbElements: null` — quatrième champ, rendu REQUIS par le lot A1 (Q-I14). La
+    // `p_devinette` du mode `colorie` est TABULÉE à 0,02 (D13), jamais calculée en 1/n! :
+    // il n'y a aucun nombre d'éléments à transmettre. Répondre `null` est une décision, et
+    // c'est bien une réponse — le champ était facultatif, et c'est cette facilité-là qui a
+    // fait perdre une tentative entière sur un autre moteur.
     // ─────────────────────────────────────────────────────────────────────────────────────
     modeReponse: 'colorie',
     latenceMs: null,
+    nbElements: null,
     confusion: null
   }));
 

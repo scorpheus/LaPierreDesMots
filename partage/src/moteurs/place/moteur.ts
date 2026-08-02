@@ -81,6 +81,10 @@ function etapeDe(consigne: EtatConsignePlace): EtapeGenerique {
     finMs: consigne.finMs,
     premiereActionMs: consigne.premiereActionMs,
     modeReponse: MODE_REPONSE,
+    // Mode `place` : `p_devinette` est TABULÉE à 0,05 (D13), jamais calculée en 1/n!. Le
+    // champ est requis par `EtapeGenerique` — répondre `null` est une décision, pas un oubli
+    // (correctif A1, Q-I14).
+    nbElements: null,
     confusion: null,
   };
 }

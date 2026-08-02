@@ -199,6 +199,8 @@ export const moteurAttrape: Moteur<ContenuAttrape, EtatAttrape, ActionAttrape> =
         derniereActionMs: instant,
         instantIndiceMs: null,
         modeReponse: modeReponseAttrape(entree.contenu),
+        // Mode à `p_devinette` tabulée : aucun nombre d'éléments à transmettre (D13).
+        nbElements: null,
         confusion: null,
       }),
     );

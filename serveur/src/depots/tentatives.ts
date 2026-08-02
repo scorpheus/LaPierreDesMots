@@ -44,6 +44,15 @@ import type { EtapeAJournaliser } from './etapes.js';
 /** Les trois paliers de la v2 § 5.4, tels que la contrainte CHECK de la table les accepte. */
 const NIVEAUX_AIDE: readonly string[] = ['aucune', 'indice', 'demonstration'];
 
+/**
+ * Les deux modes dont `p_devinette` vaut `1 / n!` et se calcule depuis `nbElements` (D13).
+ *
+ * Meme liste que `MODES_CALCULES` de `partage/src/pedagogie/bkt.ts`. Elle est recopiee ici
+ * plutot qu'importee a dessein : ce fichier doit savoir DECIDER de journaliser une etape sans
+ * appeler `pDevinette`, dont la levee est justement ce qu'on veut eviter.
+ */
+const MODES_P_DEVINETTE_CALCULEE: readonly string[] = ['ordre', 'appariement'];
+
 interface LigneTentative {
   readonly id: string;
   readonly cle_idempotence: string;
@@ -88,6 +97,12 @@ export interface ResultatEnregistrement {
   readonly tentative: Tentative;
   /** Nombre d'etapes reellement inscrites au journal fin. `0` sur un rejeu. */
   readonly etapesJournalisees: number;
+  /**
+   * Nombre d'etapes ECARTEES du journal fin faute de `nbElements` utilisable en mode `ordre`
+   * ou `appariement` (lot A1). Doit valoir `0` : c'est le filet, pas un mode de marche.
+   * La route le journalise en `warn` — un filet silencieux est un defaut qui dort.
+   */
+  readonly etapesEcartees: number;
 }
 
 /**
@@ -217,7 +232,7 @@ export function enregistrerTentative(
   return dansTransaction(base, () => {
     const dejaLa = lireParCle(base, validee.cleIdempotence);
     if (dejaLa !== null) {
-      return { deja: true, tentative: dejaLa, etapesJournalisees: 0 };
+      return { deja: true, tentative: dejaLa, etapesJournalisees: 0, etapesEcartees: 0 };
     }
 
     try {
@@ -251,7 +266,7 @@ export function enregistrerTentative(
       // est le doublon que l'idempotence doit absorber — pas une erreur a remonter a l'enfant.
       const concurrente = lireParCle(base, validee.cleIdempotence);
       if (concurrente !== null) {
-        return { deja: true, tentative: concurrente, etapesJournalisees: 0 };
+        return { deja: true, tentative: concurrente, etapesJournalisees: 0, etapesEcartees: 0 };
       }
       throw erreur;
     }
@@ -274,9 +289,14 @@ export function enregistrerTentative(
     // Journal fin et projections pedagogiques, DANS LA MEME TRANSACTION que la tentative : il
     // n'existe aucun instant ou le journal porte une tentative dont les etapes manquent, ni ou
     // une maitrise refleterait une etape que le journal ignore.
-    const etapesJournalisees = alimenterPedagogie(base, inseree.id, validee, pedagogie);
+    const alimentation = alimenterPedagogie(base, inseree.id, validee, pedagogie);
 
-    return { deja: false, tentative: inseree, etapesJournalisees };
+    return {
+      deja: false,
+      tentative: inseree,
+      etapesJournalisees: alimentation.journalisees,
+      etapesEcartees: alimentation.ecartees
+    };
   });
 }
 
@@ -291,23 +311,53 @@ export function enregistrerTentative(
  * confusion sait de quelle competence elle releve), sinon la premiere competence de l'exercice.
  * Une etape sans confusion et sans exercice connu n'est pas journalisee : on prefere une ligne
  * absente a une ligne rattachee a une competence inventee.
+ *
+ * ─────────────────────────────────────────────────────────────────────────────────────────
+ * FILET DU LOT A1 (Q-I14) — une etape mal formee ne fait plus PERDRE la tentative.
+ *
+ * Une etape en mode `ordre` ou `appariement` sans `nbElements` faisait lever `pDevinette`
+ * (D13) depuis ce fichier, DANS la transaction qui venait d'inserer la tentative. La
+ * transaction etait annulee, la route rendait 500, et rien n'etait enregistre : ni le
+ * journal, ni les etoiles, ni la progression du noeud. L'enfant voyait sa recompense et
+ * l'acquis disparaissait — l'exact contraire de R14.
+ *
+ * On applique donc a `nbElements` la regle deja en vigueur ici pour la competence : l'etape
+ * fautive est ECARTEE du journal fin, et rien d'autre ne bouge. Ce n'est pas un defaut
+ * invente — c'est une ligne absente, et le compte remonte a la route qui l'inscrit en `warn`.
+ * Journaliser l'etape avec un `nbElements` suppose ferait monter la maitrise estimee sur des
+ * reponses au hasard (la « regression pedagogique silencieuse » de l'annexe T § 1) ; et
+ * l'inserer telle quelle empoisonnerait le journal pour toujours, puisque `recalculerMaitrise`
+ * releve la table a chaque appel et leverait a son tour.
+ *
+ * Une valeur NON nulle, meme egale a 1, n'est pas ecartee : `journaliserEtapes` la borne deja
+ * par `Math.max(2, ...)` et les deux chemins du BKT relisent le journal. Le seul cas qui
+ * levait est l'absence.
+ * ─────────────────────────────────────────────────────────────────────────────────────────
  */
 function alimenterPedagogie(
   base: DatabaseSync,
   tentativeId: string,
   validee: TentativeValidee,
   pedagogie: AlimentationPedagogique | undefined
-): number {
+): { readonly journalisees: number; readonly ecartees: number } {
   if (pedagogie === undefined || validee.resume.etapes.length === 0) {
-    return 0;
+    return { journalisees: 0, ecartees: 0 };
   }
 
   const competenceParDefaut = pedagogie.competences[0] ?? null;
 
+  let ecartees = 0;
   const aJournaliser: EtapeAJournaliser[] = [];
   validee.resume.etapes.forEach((etape, rang) => {
     const competence = etape.confusion?.competence ?? competenceParDefaut;
     if (competence === null || competence.trim() === '') {
+      return;
+    }
+    if (
+      MODES_P_DEVINETTE_CALCULEE.includes(etape.modeReponse) &&
+      (typeof etape.nbElements !== 'number' || !Number.isFinite(etape.nbElements))
+    ) {
+      ecartees += 1;
       return;
     }
     aJournaliser.push({
@@ -331,7 +381,7 @@ function alimenterPedagogie(
 
   const inserees = journaliserEtapes(base, aJournaliser, validee.termineLe);
   if (inserees === 0) {
-    return 0;
+    return { journalisees: 0, ecartees };
   }
 
   // On relit le journal plutot que de reutiliser les objets en memoire : les projections
@@ -351,5 +401,5 @@ function alimenterPedagogie(
     );
   }
 
-  return inserees;
+  return { journalisees: inserees, ecartees };
 }

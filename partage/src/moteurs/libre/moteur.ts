@@ -32,6 +32,24 @@ import type { ActionLibre, ContenuLibre, EtatLibre, EtatEtapeLibre } from './typ
 /** L'identifiant de l'unique étape. Il n'y a rien à découper : il n'y a pas de consigne. */
 const ETAPE_UNIQUE = 'libre';
 
+/**
+ * Ce que Gobi répond quand on l'appelle ici — lot A4.
+ *
+ * `AideProposee.niveau` n'admet pas `aucune` (`Exclude<NiveauAide, 'aucune'>`), donc la
+ * valeur est `indice` : c'est le TYPE qui l'impose, pas un palier atteint. Le palier, lui,
+ * reste `aucune` dans l'état — voir `demanderAide` ci-dessous —, et c'est lui seul que
+ * `resume()` transporte jusqu'aux étoiles.
+ *
+ * `cible: null` parce qu'il n'y a rien à montrer : aucune région n'est plus juste qu'une
+ * autre. Le texte est dit par `FournisseurVoix` et n'est jamais affiché seul (R15).
+ */
+const AIDE_LIBRE: AideProposee = {
+  niveau: 'indice',
+  code: 'relire-consigne',
+  cible: null,
+  texte: 'Ici, il n’y a rien à réussir. Prends la couleur que tu veux.',
+};
+
 export const moteurLibre: Moteur<ContenuLibre, EtatLibre, ActionLibre> = {
   code: 'libre',
   version: 1,
@@ -57,6 +75,8 @@ export const moteurLibre: Moteur<ContenuLibre, EtatLibre, ActionLibre> = {
       derniereActionMs: instant,
       instantIndiceMs: null,
       modeReponse: modeReponseLibre(entree.contenu),
+      // Mode à `p_devinette` tabulée : aucun nombre d'éléments à transmettre (D13).
+      nbElements: null,
       confusion: null,
     };
 
@@ -122,8 +142,37 @@ export const moteurLibre: Moteur<ContenuLibre, EtatLibre, ActionLibre> = {
         return { ...etat, etapes: [{ ...etape, nbEcoutes: etape.nbEcoutes + 1 }] };
 
       case 'demanderAide':
-        // No-op assumé, voir l'en-tête : aider supposerait une attente, il n'y en a pas.
-        return etat;
+        // ─────────────────────────────────────────────────────────────────────────────────
+        // GOBI RÉPOND. Corrigé au lot A4, quand `libre` est devenu atteignable.
+        //
+        // Ce cas était un NO-OP assumé — « aider supposerait une attente, il n'y en a pas ».
+        // Le raisonnement est juste et il reste écrit ; sa CONSÉQUENCE ne l'était pas : la
+        // coquille rend un bouton « Gobi, aide-moi » sur ce moteur comme sur les treize
+        // autres, et ce bouton ne faisait rien. Un bouton qui ne répond pas « casse la
+        // confiance plus sûrement qu'un bouton absent » (D42) — et il le faisait sur le seul
+        // écran conçu pour l'enfant qui n'a plus envie de déchiffrer.
+        //
+        // Mesuré, pas supposé, dès le premier nœud `libre` livré :
+        //
+        //   x « libre » : l’aide de Gobi est offerte et ne coûte jamais un échec
+        //     Error: « libre » : l'aide est tapée et rien ne change
+        //     (tests/e2e/parcours-audit-moteurs.spec.ts:159)
+        //
+        // CE QUI NE CHANGE PAS, ET C'EST LE POINT : `niveauAide` — celui de l'étape comme
+        // celui de l'exercice — reste `aucune`. `resumeDepuisEtapes` rend donc toujours
+        // `aideUtilisee: 'aucune'`, et `calculerEtoiles` toujours 3. La garantie du § 4.8
+        // (« trois étoiles à chaque fois, et c'est voulu ») tient mécaniquement, et
+        // `tests/unitaires/moteurs-reducteurs.test.ts` l'assert désormais en toutes lettres.
+        // Ce qui change est la seule chose qui manquait : Gobi dit un mot.
+        // ─────────────────────────────────────────────────────────────────────────────────
+        if (etat.termineMs !== null) return etat;
+        return {
+          ...etat,
+          // L'écoute est comptée, comme pour `ecouterConsigne` : elle est gratuite (R15) et
+          // c'est elle qui rend l'état différent à chaque demande, donc le bouton vivant.
+          etapes: [{ ...etape, nbEcoutes: etape.nbEcoutes + 1 }],
+          aide: AIDE_LIBRE,
+        };
 
       case 'battementHorloge':
         // Aucun seuil ne mûrit : il n'existe ni indice, ni démonstration, ni relecture.

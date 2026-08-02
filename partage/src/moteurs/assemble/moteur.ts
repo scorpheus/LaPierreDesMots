@@ -198,6 +198,9 @@ export const moteurAssemble: Moteur<ContenuAssemble, EtatAssemble, ActionAssembl
         derniereActionMs: instant,
         instantIndiceMs: null,
         modeReponse: modeReponseAssemble(entree.contenu),
+        // `'ordre'` : `p_devinette = 1/n!` se calcule depuis ce nombre (D13). Le schéma
+        // impose `minItems: 2`, donc jamais de valeur dégénérée.
+        nbElements: etape.solution.length,
         confusion: null,
       }),
     );

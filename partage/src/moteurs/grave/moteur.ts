@@ -199,6 +199,8 @@ export const moteurGrave: Moteur<ContenuGrave, EtatGrave, ActionGrave> = {
         derniereActionMs: instant,
         instantIndiceMs: null,
         modeReponse: modeReponseGrave(entree.contenu),
+        // Mode à `p_devinette` tabulée : aucun nombre d'éléments à transmettre (D13).
+        nbElements: null,
         confusion: null,
       }),
     );

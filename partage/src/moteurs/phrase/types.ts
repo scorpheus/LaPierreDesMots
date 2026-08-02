@@ -66,6 +66,15 @@ export interface EtatEtapePhrase {
   readonly derniereActionMs: number;
   readonly instantIndiceMs: number | null;
   readonly modeReponse: ModeReponse;
+  /**
+   * Le nombre d'étiquettes-mots à ordonner. `modeReponse` vaut `'ordre'` : `p_devinette`
+   * vaut `1 / n!` et se calcule depuis CE nombre (D13).
+   *
+   * C'est le champ dont l'absence faisait rendre 500 à `POST /api/tentatives` et perdait
+   * la tentative entière sur le nœud `clairiere-05` — progression, étoiles et maîtrise
+   * comprises, sans que rien ne se voie à l'écran (Q-I14).
+   */
+  readonly nbElements: number | null;
   readonly confusion: ConfusionObservee | null;
 }
 

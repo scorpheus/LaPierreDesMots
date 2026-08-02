@@ -199,6 +199,8 @@ export const moteurTri: Moteur<ContenuTri, EtatTri, ActionTri> = {
         derniereActionMs: instant,
         instantIndiceMs: null,
         modeReponse: modeReponseTri(entree.contenu),
+        // Mode à `p_devinette` tabulée : aucun nombre d'éléments à transmettre (D13).
+        nbElements: null,
         confusion: null,
       }),
     );

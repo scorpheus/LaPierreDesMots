@@ -298,6 +298,23 @@ export function enregistrerRoutesTentatives(
       pedagogie
     );
 
+    // Le filet du lot A1 a-t-il servi ? Il ne devrait JAMAIS servir : les quatorze moteurs
+    // posent `nbElements` et un test le garde moteur par moteur. S'il sert, c'est qu'un moteur
+    // a regresse ou qu'un client tiers envoie un resume incomplet — la tentative est sauvee,
+    // mais le journal fin a perdu une etape, et cela doit se LIRE quelque part.
+    if (resultat.etapesEcartees > 0) {
+      requete.log.warn(
+        {
+          profil: validee.profil,
+          noeud: validee.noeud,
+          moteur: validee.moteur,
+          etapesEcartees: resultat.etapesEcartees
+        },
+        'Etapes ecartees du journal fin : mode « ordre »/« appariement » sans « nbElements » ' +
+          '(D13). La tentative est enregistree ; la pedagogie ne voit pas ces etapes.'
+      );
+    }
+
     const progression: ProgressionNoeud | null = lireProgressionNoeud(
       contexte.base,
       validee.profil,

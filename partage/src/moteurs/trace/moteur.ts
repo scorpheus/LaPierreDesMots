@@ -131,6 +131,10 @@ function etapeDe(etat: EtatTrace): EtapeGenerique {
     finMs: etat.termineMs,
     premiereActionMs: etat.premiereActionMs,
     modeReponse: MODE_REPONSE,
+    // Mode `trace` : `p_devinette` est TABULÉE (D13), jamais calculée en 1/n!. Le champ est
+    // requis par `EtapeGenerique` — répondre `null` est une décision, pas un oubli
+    // (correctif A1, Q-I14).
+    nbElements: null,
     confusion: confusionDe(etat),
   };
 }
@@ -146,6 +150,7 @@ function etapesDeProgression(etat: EtatTrace): readonly EtapeGenerique[] {
     finMs: trait.termine ? etat.derniereActionMs : null,
     premiereActionMs: etat.premiereActionMs,
     modeReponse: MODE_REPONSE,
+    nbElements: null,
     confusion: null,
   }));
 }

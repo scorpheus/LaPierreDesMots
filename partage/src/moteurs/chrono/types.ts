@@ -65,6 +65,12 @@ export interface EtatEtapeChrono {
   readonly derniereActionMs: number;
   readonly instantIndiceMs: number | null;
   readonly modeReponse: ModeReponse;
+  /**
+   * Le nombre de vignettes à remettre dans l'ordre du récit. `modeReponse` vaut `'ordre'` :
+   * `p_devinette` vaut `1 / n!` et se calcule depuis CE nombre (D13). Sans lui, la
+   * tentative est perdue en 500 (Q-I14).
+   */
+  readonly nbElements: number | null;
   readonly confusion: ConfusionObservee | null;
 }
 

@@ -199,6 +199,8 @@ export const moteurEclair: Moteur<ContenuEclair, EtatEclair, ActionEclair> = {
         derniereActionMs: instant,
         instantIndiceMs: null,
         modeReponse: modeReponseEclair(entree.contenu, index),
+        // Mode à `p_devinette` tabulée : aucun nombre d'éléments à transmettre (D13).
+        nbElements: null,
         confusion: null,
       }),
     );

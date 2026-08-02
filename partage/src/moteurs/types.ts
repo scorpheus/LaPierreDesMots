@@ -69,18 +69,28 @@ export interface ResumeEtape {
   readonly confusion: ConfusionObservee | null;
   /**
    * ─────────────────────────────────────────────────────────────────────────────────────
-   * AJOUT SIGNALÉ AU CONTRAT GELÉ (§ 4.4) — champ FACULTATIF, donc sans effet sur les lots
-   * qui ne le posent pas.
+   * AJOUT SIGNALÉ AU CONTRAT GELÉ (§ 4.4). **RENDU REQUIS par le lot A1** — il était
+   * facultatif, et c'est précisément ce qui a coûté une tentative entière (Q-I14).
    *
    * Les modes `ordre` et `appariement` calculent `p_devinette = 1/n!` depuis le nombre
-   * d'éléments (D13). Ce nombre n'est connu QUE du moteur — `chrono` et `paires` (L2-E) —, et
-   * `ResumeEtape` tel que le contrat le fige ne le transporte pas. Sans lui, `pDevinette`
-   * lève sur ces deux modes et deux moteurs sur treize cessent d'alimenter le BKT, en
-   * silence. Le champ est donc ajouté ici plutôt qu'une valeur par défaut inventée au
-   * serveur — « refuser plutôt qu'émettre du faux ».
+   * d'éléments (D13). Ce nombre n'est connu QUE du moteur, et `ResumeEtape` tel que le
+   * contrat le fige ne le transportait pas. Sans lui, `pDevinette` lève — depuis
+   * `alimenterPedagogie`, DANS la transaction qui vient d'insérer la tentative : la
+   * transaction est annulée, la route rend 500, et rien n'est enregistré. Ni progression,
+   * ni étoiles, ni maîtrise. L'écran de récompense s'affiche quand même.
+   *
+   * ⚠ LA PORTÉE ANNONCÉE ICI ÉTAIT FAUSSE. Ce commentaire désignait « `chrono` et `paires` »
+   * et « deux moteurs sur treize ». Mesuré le 2026-08-02, moteur par moteur : **quatre**
+   * moteurs déclarent un mode calculé — `assemble`, `chrono`, `paires`, `phrase` — et
+   * **aucun des quatorze** ne posait le champ. Chercher les occurrences de `nbElements`
+   * trouvait les moteurs sains ; il fallait énumérer les moteurs qui DEVAIENT le poser
+   * (D48). Le champ requis met l'obligation là où le compilateur la voit.
    * ─────────────────────────────────────────────────────────────────────────────────────
+   *
+   * `null` pour les sept modes dont `p_devinette` est tabulée. Jamais un défaut inventé :
+   * une valeur supposée ferait monter la maîtrise estimée sur des réponses au hasard.
    */
-  readonly nbElements?: number | null;
+  readonly nbElements: number | null;
 }
 
 export interface ResumeTentative {

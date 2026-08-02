@@ -29,6 +29,29 @@ export interface EtapeGenerique {
   /** Instant de la PREMIÈRE action de l'enfant sur cette étape — origine de la latence. */
   readonly premiereActionMs: number | null;
   readonly modeReponse: ModeReponse;
+  /**
+   * ─────────────────────────────────────────────────────────────────────────────────────
+   * REQUIS, ET NON FACULTATIF — correctif du lot A1 (Q-I14).
+   *
+   * Les modes `ordre` et `appariement` calculent `p_devinette = 1/n!` depuis ce nombre
+   * (D13), et `pDevinette` LÈVE quand il manque. L'appel part de `alimenterPedagogie`,
+   * DANS la transaction qui vient d'insérer la tentative : la transaction est annulée, la
+   * route rend 500, et **la tentative est perdue** — écran de récompense compris.
+   *
+   * Le champ était facultatif sur `ResumeEtape` et absent d'ici. Résultat mesuré le
+   * 2026-08-02 : **aucun** des quatorze moteurs ne le posait, alors que quatre en avaient
+   * besoin — `assemble`, `chrono`, `paires`, `phrase`. Q-I14 n'en signalait qu'un et le
+   * commentaire de `../types.ts` en désignait deux autres : chercher les OCCURRENCES de
+   * `nbElements` ne trouve que les moteurs qui n'ont pas le défaut.
+   *
+   * Le rendre requis ici met l'obligation là où le compilateur la voit : les treize moteurs
+   * qui passent par `resumeDepuisEtapes` doivent désormais RÉPONDRE — un nombre, ou `null`
+   * assumé. L'oubli ne compile plus, au lieu de ne se voir qu'en 500 devant l'enfant.
+   * ─────────────────────────────────────────────────────────────────────────────────────
+   *
+   * `null` pour les sept modes dont `p_devinette` est tabulée. Jamais un défaut inventé.
+   */
+  readonly nbElements: number | null;
   readonly confusion: ConfusionObservee | null;
 }
 
@@ -77,6 +100,9 @@ export function resumeEtapeDepuis(etape: EtapeGenerique, finMs: number): ResumeE
     dureeMs: Math.max(0, fin - etape.debutMs),
     modeReponse: etape.modeReponse,
     latenceMs: latenceDe(etape),
+    // Transporté tel quel : ce nombre n'est connu QUE du moteur, et le serveur refuse de
+    // l'inventer (D13). Le recopier ici est le seul lien entre les deux.
+    nbElements: etape.nbElements,
     confusion: etape.confusion,
   };
 }

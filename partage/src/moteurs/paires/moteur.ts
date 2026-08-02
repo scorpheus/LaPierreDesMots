@@ -199,6 +199,8 @@ export const moteurPaires: Moteur<ContenuPaires, EtatPaires, ActionPaires> = {
         derniereActionMs: instant,
         instantIndiceMs: null,
         modeReponse: modeReponsePaires(entree.contenu),
+        // `'appariement'` : `p_devinette = 1/n!` se calcule depuis ce nombre (D13).
+        nbElements: etape.aApparier.length,
         confusion: null,
       }),
     );
