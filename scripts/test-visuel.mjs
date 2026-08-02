@@ -26,8 +26,37 @@ const debut = Date.now();
 
 const arguments_ = process.argv.slice(2);
 const majDemandee = arguments_.includes('--maj');
+// `--strict` reste ACCEPTÉ pour ne casser aucune habitude, mais il n'a plus d'effet : son
+// comportement est devenu le défaut. Voir l'encadré ci-dessous.
 const stricte = arguments_.includes('--strict');
-const modeSnapshots = majDemandee ? 'all' : stricte ? 'none' : 'missing';
+void stricte;
+
+/**
+ * ── LE DÉFAUT EST `none`, ET C'EST UNE CORRECTION DE SÛRETÉ ────────────────────────────────
+ *
+ * Cette ligne valait `majDemandee ? 'all' : stricte ? 'none' : 'missing'`. Le mode `missing`
+ * de Playwright **écrit silencieusement toute référence absente**, puis s'en sert de vérité
+ * pour tous les passages suivants.
+ *
+ * Vécu, pas supposé : un simple `npm run verifier` — c'est-à-dire un double-clic sur
+ * `verifier.bat` — a créé
+ * `tests/visuel/decor-v2.spec.ts-snapshots/carte-monde-v2-visuel-win32.png`, une référence de
+ * 157 Ko née d'une commande de VÉRIFICATION, que personne n'avait regardée. Elle a été
+ * supprimée.
+ *
+ * C'est précisément ce que CLAUDE.md interdit — « ne jamais mettre à jour une référence de
+ * test visuel de sa propre initiative » — et ce que **D39** protège : les références attendent
+ * le nouveau graphisme ET un adulte qui a vu l'image. Une garantie qui repose sur la
+ * discipline de celui qui tape la commande n'en est pas une : le défaut la rend mécanique.
+ *
+ * Conséquence assumée : tant qu'une référence manque, `test:visuel` est ROUGE. C'est l'état
+ * déclaré du dépôt (D39), et il vaut mieux qu'un vert obtenu en photographiant l'écran tel
+ * qu'il est aujourd'hui.
+ *
+ * Pour produire les références, la porte reste ouverte et explicite :
+ *     npm run test:visuel -- --maj
+ */
+const modeSnapshots = majDemandee ? 'all' : 'none';
 
 const DOSSIER_VISUEL = join(RACINE, 'tests', 'visuel');
 const CHEMIN_JSON = join(DOSSIER_BRUT, 'test-visuel.playwright.json');

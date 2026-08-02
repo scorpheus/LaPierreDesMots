@@ -109,11 +109,17 @@ async function comptes(page: Page): Promise<Record<string, number>> {
 }
 
 test.describe('la carte du monde', () => {
-  test('un profil neuf : une région ouverte, cinq voilées de Grisaille', async ({ page }) => {
+  // D38 — « Les deux régions sont ouvertes d'emblée », qui amende la v2 § 3.3
+  // (`Docs/journal-des-decisions.md:740`). Ce cas exigeait « une ouverte, cinq voilées » :
+  // il décrivait la règle abrogée. Le total reste vérifié à six par la somme des trois
+  // comptes — c'est ce qui empêche de rendre le cas vert en perdant une région en route.
+  test('un profil neuf : DEUX régions ouvertes, quatre voilées de Grisaille (D38)', async ({
+    page
+  }) => {
     await preparer(page);
     await ouvrirLaCarte(page);
 
-    expect(await comptes(page)).toEqual({ voilee: 5, ouverte: 1, terminee: 0 });
+    expect(await comptes(page)).toEqual({ voilee: 4, ouverte: 2, terminee: 0 });
     // Le voile est bien posé, et il n'intercepte pas le tap : la région reste atteignable.
     expect(await page.locator('[data-voile="grisaille"]').count()).toBeGreaterThan(0);
 
@@ -135,6 +141,7 @@ test.describe('la carte du monde', () => {
       'data-region-etat',
       'terminee'
     );
+    // D38 : la Clairière close, la fenêtre de deux régions glisse sur les suivantes.
     expect(await comptes(page)).toEqual({ voilee: 3, ouverte: 2, terminee: 1 });
     // Le chemin d'encre a avancé : une dérivée de la progression, jamais un état à part.
     const avancement = await page

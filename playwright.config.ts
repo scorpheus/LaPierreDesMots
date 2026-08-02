@@ -61,6 +61,29 @@ export default defineConfig({
   },
   fullyParallel: false,
   forbidOnly: true,
+
+  /**
+   * ── AUCUNE RÉFÉRENCE VISUELLE N'EST FIGÉE PAR ACCIDENT ────────────────────────────────────
+   *
+   * Posé à l'intégration de la campagne N, après l'avoir vécu. Le défaut par défaut de
+   * Playwright est `updateSnapshots: 'missing'` : **une capture absente est ÉCRITE
+   * silencieusement** au premier passage, puis sert de référence à tous les suivants.
+   *
+   * Mesuré : un simple `npm run verifier` a créé
+   * `tests/visuel/decor-v2.spec.ts-snapshots/carte-monde-v2-visuel-win32.png` — une référence
+   * de 157 Ko, née d'une commande de vérification, que personne n'avait regardée. Elle a été
+   * supprimée.
+   *
+   * C'est exactement ce que CLAUDE.md interdit : « ne jamais mettre à jour une référence de
+   * test visuel de sa propre initiative », et ce que **D39** protège — les références attendent
+   * le nouveau graphisme ET un adulte qui a vu l'image. Une règle qui repose sur la discipline
+   * de celui qui lance la commande n'est pas une règle : `'none'` la rend mécanique. Une
+   * capture manquante fait désormais ÉCHOUER le cas, elle ne s'invente plus.
+   *
+   * Pour produire les références, quand le père aura validé le graphisme, la porte reste
+   * ouverte et explicite : `npm run test:visuel -- --update-snapshots`.
+   */
+  updateSnapshots: 'none',
   retries: 0,
   workers: 1,
   outputDir: 'tests/rapports/artefacts/playwright',
