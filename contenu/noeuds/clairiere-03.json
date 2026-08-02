@@ -1,0 +1,10 @@
+{
+  "id": "clairiere-03",
+  "region": "clairiere",
+  "ordre": 3,
+  "exercice": "clairiere-paniers-couleurs-01",
+  "prerequis": [
+    "clairiere-02"
+  ],
+  "temps": "developpement"
+}

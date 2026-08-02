@@ -12,7 +12,10 @@
     "./lecture": { "types": "./src/lecture/index.ts", "default": "./dist/lecture/index.js" },
     "./recompenses": { "types": "./src/recompenses/index.ts", "default": "./dist/recompenses/index.js" },
     "./monde": { "types": "./src/monde/index.ts", "default": "./dist/monde/index.js" },
-    "./parent": { "types": "./src/parent/index.ts", "default": "./dist/parent/index.js" }
+    "./parent": { "types": "./src/parent/index.ts", "default": "./dist/parent/index.js" },
+    "./voix": { "types": "./src/voix/index.ts", "default": "./dist/voix/index.js" },
+    "./ouverture": { "types": "./src/ouverture/index.ts", "default": "./dist/ouverture/index.js" },
+    "./ton": { "types": "./src/ton/index.ts", "default": "./dist/ton/index.js" }
   },
   "scripts": { "construire": "tsc -b" },
   "dependencies": {

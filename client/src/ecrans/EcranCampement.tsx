@@ -19,17 +19,21 @@ import { useCallback, useMemo } from 'react';
 import type { ReactElement } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import type { EtatMonde, PointInteraction } from '@pierre/partage';
-import { campementDuDocument, prochainStade, stadesDuDocument } from '@pierre/partage/monde';
+import {
+  campementDuDocument, construireEtagere, prochainStade, stadesDuDocument
+} from '@pierre/partage/monde';
 // `DocumentCampement` et `StadeGobi` viennent du SOUS-CHEMIN : le barillet racine ne réexporte
 // que les seize types du § 4.5 (convention C1), et `DocumentCampement` n'en fait pas partie.
-import type { DocumentCampement, StadeGobi } from '@pierre/partage/monde';
+import type { DocumentCampement, FormeDeclaree, StadeGobi } from '@pierre/partage/monde';
 import { lireMonde, urlAsset } from '../api/client.js';
 import { Compagnon } from '../composants/Compagnon.js';
 import { Gobi } from '../composants/Gobi.js';
 import { useEtatJeu, useMagasin } from '../etat/services.js';
 import { Chaudron } from '../monde/Chaudron.js';
+import { Etagere, useCatalogueFormes } from '../monde/Etagere.js';
 import { MurDesNoms } from '../monde/MurDesNoms.js';
 import type { NomDuMur } from '../monde/MurDesNoms.js';
+import { PastilleSortie } from '../monde/PastilleSortie.js';
 import { PointLibre } from '../monde/PointLibre.js';
 
 export interface ProprietesEcranCampement {
@@ -43,6 +47,20 @@ export interface ProprietesEcranCampement {
   readonly surAllerCoffre?: () => void;
   /** Ouvre le coloriage libre. Absent tant qu'aucun nœud `libre` n'est livré (L2-E). */
   readonly surOuvrirChaudron?: () => void;
+  /**
+   * Rejoue la séquence d'ouverture — D35, point 3.
+   *
+   * Le rappel vient du routeur, qui est le seul à connaître `CHEMINS.ouverture` (lot N4,
+   * contrat v3 § 6.2 : `routeur.tsx` appartient à N4). Tant que N4 ne l'a pas câblé, le bouton
+   * n'est simplement pas rendu : un bouton qui ne mènerait nulle part serait pire que son
+   * absence, et ce lot refuse d'en poser un.
+   */
+  readonly surRejouerOuverture?: () => void;
+  /**
+   * Le catalogue des formes, injecté par les tests. Lu par requête sinon — c'est le même
+   * fichier que `stades`, et la même clé de requête : il n'est téléchargé qu'une fois.
+   */
+  readonly catalogueFormes?: { readonly formes: readonly FormeDeclaree[] } | null;
 }
 
 /** `0 0 1200 800` → `[1200, 800]`. Retombe sur le gabarit par défaut si la chaîne est illisible. */
@@ -67,9 +85,11 @@ export function EcranCampement({
   campement: campementInjecte = null,
   monde: mondeInjecte = null,
   stades: stadesInjectes = null,
+  catalogueFormes: catalogueInjecte = null,
   surAllerCarte,
   surAllerCoffre,
-  surOuvrirChaudron
+  surOuvrirChaudron,
+  surRejouerOuverture
 }: ProprietesEcranCampement = {}): ReactElement {
   const magasin = useMagasin();
   const profil = useEtatJeu((etat) => etat.profil);
@@ -101,6 +121,22 @@ export function EcranCampement({
   const campement = campementInjecte ?? requeteCampement.data ?? null;
   const monde = mondeInjecte ?? requeteMonde.data ?? null;
   const stades = stadesInjectes ?? requeteStades.data ?? [];
+
+  // Le catalogue des formes — la même clé de requête que `stades`, donc le même téléchargement.
+  const catalogueCharge = useCatalogueFormes();
+  const catalogue = catalogueInjecte ?? catalogueCharge;
+
+  /**
+   * L'étagère, cases vides comprises — D44.
+   *
+   * C'est la réponse à « le père n'a pas compris le campement » : le mur des noms grave ce qui
+   * est acquis, l'étagère montre ce qui reste. Sans elle, le campement ne disait nulle part
+   * combien de formes il y a en tout, donc ne donnait aucune raison d'y revenir.
+   */
+  const etagere = useMemo(
+    () => construireEtagere(catalogue, monde?.gobi.formes ?? []),
+    [catalogue, monde]
+  );
 
   const points: readonly PointInteraction[] = campement?.points ?? [];
   const [largeurScene, hauteurScene] = dimensions(campement?.scene.viewBox ?? '0 0 1200 800');
@@ -139,14 +175,29 @@ export function EcranCampement({
       data-ecran="campement"
       style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}
     >
-      <header style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+      {/* ── LES SORTIES DU CAMPEMENT — R18 : ça se comprend sans lire ────────────────────────
+          Le père n'a pas compris le campement. Le défaut mesuré n'était pas le décor, c'était
+          la barre du haut : trois mots posés côte à côte, sans image, dans la police de lecture.
+          Chaque destination porte désormais un PICTOGRAMME de 2,75 rem au-dessus de son mot —
+          `data-pictogramme` le rend comptable, et `parcours-campement-sans-texte.spec.ts`
+          échoue si une seule destination en manque. Le mot reste, pour l'adulte et pour le
+          lecteur d'écran ; il n'est plus la seule prise. */}
+      <header
+        data-campement-sorties="oui"
+        style={{ display: 'flex', alignItems: 'flex-end', gap: '1rem', flexWrap: 'wrap' }}
+      >
         <h1 className="titre" style={{ fontSize: '2.25rem', margin: 0 }}>
           Le campement
         </h1>
+
+        {/* D46 : le campement n'est JAMAIS sur le chemin obligatoire. On en repart en un tap. */}
+        {profil === null ? null : <PastilleSortie profil={profil} style={{ inlineSize: '11rem' }} />}
+
         <button
           type="button"
-          className="cible cible-appel"
+          className="cible"
           data-vers="carte"
+          data-pictogramme="carte"
           aria-label="Ouvrir la carte du monde"
           onClick={() => {
             if (surAllerCarte === undefined) {
@@ -155,18 +206,47 @@ export function EcranCampement({
               surAllerCarte();
             }
           }}
+          style={{ flexDirection: 'column', gap: '0.35rem', inlineSize: '11rem' }}
         >
-          La carte
+          <span aria-hidden="true" style={{ fontSize: '2.75rem', lineHeight: 1 }}>
+            🗺️
+          </span>
+          <span>La carte</span>
         </button>
+
         <button
           type="button"
           className="cible"
           data-vers="coffre"
+          data-pictogramme="coffre"
           aria-label="Ouvrir le coffre aux collections"
           onClick={surAllerCoffre}
+          style={{ flexDirection: 'column', gap: '0.35rem', inlineSize: '11rem' }}
         >
-          Le coffre
+          <span aria-hidden="true" style={{ fontSize: '2.75rem', lineHeight: 1 }}>
+            🧰
+          </span>
+          <span>Le coffre</span>
         </button>
+
+        {/* D35, point 3 : l'histoire du début se rejoue à volonté, et seulement d'ici — jamais
+            imposée une seconde fois. Le rappel vient du routeur (N4) ; sans lui, pas de bouton. */}
+        {surRejouerOuverture === undefined ? null : (
+          <button
+            type="button"
+            className="cible"
+            data-vers="ouverture"
+            data-pictogramme="ouverture"
+            aria-label="Revoir l’histoire du début"
+            onClick={surRejouerOuverture}
+            style={{ flexDirection: 'column', gap: '0.35rem', inlineSize: '11rem' }}
+          >
+            <span aria-hidden="true" style={{ fontSize: '2.75rem', lineHeight: 1 }}>
+              📖
+            </span>
+            <span>Revoir l’histoire</span>
+          </button>
+        )}
       </header>
 
       {/* ── le décor et ses points d'interaction : la prise de R11 ─────────────────────── */}
@@ -222,6 +302,11 @@ export function EcranCampement({
           </p>
         )}
       </section>
+
+      {/* L'étagère : l'album des formes, cases vides comprises (D44). Elle est posée AVANT le
+          mur des noms parce qu'elle répond à la question que le mur ne répond pas — « combien
+          y en a-t-il en tout ? ». Le mur grave l'acquis, l'étagère montre le reste. */}
+      <Etagere etagere={etagere} titre="L’étagère de Gobi" />
 
       <MurDesNoms noms={noms} />
 

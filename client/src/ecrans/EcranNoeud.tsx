@@ -5,13 +5,14 @@
 // C'est la condition de la promesse « ajouter un moteur ne touche pas la coquille » — et le
 // critère de fin du lot L-D au contrat § 2 : « `EcranNoeud` monte un moteur INCONNU ».
 //
-// Il porte en propre six choses, et rien d'autre :
+// Il porte en propre sept choses, et rien d'autre :
 //   1. la barre de consigne (`data-consigne`, `data-consigne-etat`) ;
 //   2. Gobi et le bouton « écouter » (R15) ;
 //   3. `data-test-pret`, qui remplace toute attente de durée dans les tests T4 (§ 10) ;
 //   4. `data-serie`, la longueur de la série de bonnes réponses (contrat features v2 § 7) ;
 //   5. `data-appui`, LA RÉPONSE VISIBLE SOUS 100 ms (v2 § 8) — voir plus bas ;
-//   6. la jauge du palier intermédiaire, qui montre le vide restant (D25, point 3).
+//   6. la jauge du palier intermédiaire, qui montre le vide restant (D25, point 3) ;
+//   7. LA SORTIE — `data-vers="carte"`. Voir l'encadré ci-dessous : elle manquait.
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
 import type { CheminAsset, JaugePalier as ModeleJauge, NiveauAide } from '@pierre/partage';
@@ -165,6 +166,45 @@ export function EcranNoeud(): ReactElement {
     },
     [magasin]
   );
+
+  /**
+   * ════════════════════════════════════════════════════════════════════════════════════════
+   * LA SORTIE DU NŒUD — règle 3 : **AUCUN ÉTAT SANS ISSUE.**
+   *
+   * Cet écran n'en avait aucune. Le père s'y est trouvé bloqué dans les Galeries — « il n'y a
+   * pas de bouton retour » —, et le pire est qu'il n'y avait rien d'autre à faire que réussir
+   * la lettre `d`, dont le ductus est faux (D33). Un enfant, lui, n'aurait pas su le dire : il
+   * aurait simplement arrêté de jouer.
+   *
+   * Pourquoi `test:e2e:singe` ne l'a pas vu : il mesure « au moins un élément interactif est
+   * présent », et il y en avait deux. **Compter les éléments interactifs n'est pas compter les
+   * sorties** — audit des occurrences au lieu des objets.
+   * `tests/e2e/parcours-issues-de-secours.spec.ts` audite les objets : il ESSAIE chaque
+   * élément et regarde si l'écran change.
+   *
+   * Trois choix, tous contraints :
+   *
+   *   1. **Un seul tap, aucune confirmation.** Une boîte « es-tu sûr ? » serait un état de
+   *      plus à savoir quitter, à 7 ans, au moment précis où l'enfant veut partir. Le coût
+   *      d'un départ accidentel est nul — la carte est à un tap, et l'acquis n'est jamais
+   *      repris (R14).
+   *   2. **On passe par `naviguer('carte')`**, exactement comme `EcranRecompense`, et non par
+   *      le routeur : `EtatMagasin.ecran` reste l'UNIQUE écrivain de l'écran courant, donc
+   *      `window.__test.etat().ecran` continue de dire la vérité (§ 7.1).
+   *   3. **La tentative interrompue n'est pas journalisée.** PLACEHOLDER, question Q-R3 de
+   *      `Docs/questions-en-attente.md`. Seul `EcranRecompense` écrit dans `tentatives`
+   *      (§ 6.3), et il n'est atteint qu'à la clôture du nœud : partir en cours de route
+   *      n'écrit rien. C'est délibéré — `ResumeTentative.reussi` est « toujours `true` à la
+   *      fin » (`partage/src/moteurs/types.ts:87`), une tentative abandonnée n'a donc pas de
+   *      résumé honnête à publier, et la journaliser ferait passer pour un échec ce qui n'est
+   *      qu'un « je vais jouer à autre chose ». C'est la même posture que D34 pour le mode
+   *      parent testeur : ce qui n'est pas une vraie tentative de l'enfant ne nourrit pas le
+   *      BKT ni le Leitner. À arbitrer par le père.
+   * ════════════════════════════════════════════════════════════════════════════════════════
+   */
+  const retourCarte = useCallback((): void => {
+    magasin.getState().naviguer('carte');
+  }, [magasin]);
 
   /**
    * ════════════════════════════════════════════════════════════════════════════════════════
@@ -357,6 +397,20 @@ export function EcranNoeud(): ReactElement {
           borderRadius: 'var(--rayon-carte)'
         }}
       >
+        {/* LA SORTIE, en tête de la barre et non reléguée en pied : c'est le premier élément
+            que l'œil rencontre quand on cherche à partir. Voir l'encadré plus haut. */}
+        <button
+          type="button"
+          className="cible"
+          data-vers="carte"
+          aria-label="Revenir à la carte"
+          onClick={retourCarte}
+          style={{ flex: '0 0 auto', fontSize: '1.125rem', gap: '0.5rem' }}
+        >
+          <span aria-hidden="true">←</span>
+          <span>La carte</span>
+        </button>
+
         <div style={{ flex: '1 1 auto' }}>
           {etapes.map((etape, index) => {
             const etat =
@@ -387,7 +441,15 @@ export function EcranNoeud(): ReactElement {
         {etapeCourante === null ? null : (
           <BoutonEcouter
             texte={etapeCourante.texte}
-            clip={etapeCourante.audio}
+            /* AJOUT N2 (contrat de finition v3 § 6.1, « six appelants adaptent leur mise en
+               page »). La propriété `clip` du bouton — un chemin de fichier — devient `cle`,
+               une clé de manifeste. On la CONSTRUIT ici plutôt que de la lire dans
+               l'exercice : c'est exactement la convention de `scripts/recenser-textes.mjs`,
+               `<idExercice>/<idConsigne>`, et la construire au même endroit que l'écran qui
+               l'affiche évite d'ajouter un champ aux fichiers d'exercice — dont N1 et N8 sont
+               propriétaires, pas N2. Le champ `audio` de l'exercice n'est plus lu du tout ;
+               il vaut `null` partout et le manifeste l'a remplacé. */
+            cle={`${paquet.exercice.id}/${etapeCourante.id}`}
             surEcoute={() => emettre(ACTION_ECOUTE)}
           />
         )}

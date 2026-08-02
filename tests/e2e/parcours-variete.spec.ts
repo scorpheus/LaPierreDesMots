@@ -79,6 +79,67 @@ function noeudsDuDepot(): readonly string[] {
     .sort();
 }
 
+function lireJsonDuDepot(cheminRelatif: string): Record<string, unknown> {
+  return JSON.parse(readFileSync(fileURLToPath(new URL(cheminRelatif, RACINE)), 'utf8')) as Record<
+    string,
+    unknown
+  >;
+}
+
+/**
+ * Le nœud propose-t-il une consigne AUDIBLE ?
+ *
+ * On lit le contenu livré, jamais l'écran : c'est le disque qui dit si un clip existe, et
+ * l'écran qui doit s'y conformer. L'inverse — déduire de l'écran ce que le contenu porte —
+ * rendrait le test tautologique.
+ *
+ * ADAPTÉ PAR N2 : la source de vérité est le MANIFESTE, plus le champ `audio` des exercices.
+ * Voir le bloc de commentaire dans le corps de la fonction — l'oracle a changé, la propriété
+ * mesurée n'a pas bougé d'un mot.
+ */
+function consigneAvecAudio(noeud: string): boolean {
+  const idExercice = lireJsonDuDepot(`contenu/noeuds/${noeud}.json`)['exercice'];
+  if (typeof idExercice !== 'string') {
+    return false;
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════════════════
+  // ORACLE CHANGÉ PAR LE LOT N2 — et si on ne l'avait pas changé, ce cas aurait CESSÉ
+  // D'ARMER en silence, ce qui est le pire état pour une assertion.
+  //
+  // La version d'origine lisait le champ `audio` des fichiers d'exercice. Le contrat de
+  // finition v3 § 4.2 interdit à N2 de toucher aux exercices — « la résolution passe par la
+  // clé du manifeste, jamais par le champ `audio` du JSON » — donc ce champ restera `null`
+  // pour toujours. Le commentaire ci-dessus promettait que « le jour où les voix arrivent,
+  // ce cas redevient la prise sur R15 TOUT SEUL » : il ne le redevenait pas, il regardait
+  // au mauvais endroit.
+  //
+  // On lit donc `contenu/audio/manifeste.json`, qui est « la SEULE source de vérité sur
+  // l'existence d'un clip » (§ 5.4), et on y cherche la clé `<idExercice>/<idConsigne>` —
+  // exactement celle que `EcranNoeud.tsx` passe au bouton. Le test reste non tautologique :
+  // c'est toujours le DISQUE qui dit ce qui existe, et l'écran qui doit s'y conformer.
+  // ══════════════════════════════════════════════════════════════════════════════════════
+  let clips: readonly { readonly cle?: unknown; readonly rendu?: unknown }[] = [];
+  try {
+    const manifeste = lireJsonDuDepot('contenu/audio/manifeste.json');
+    const liste = manifeste['clips'];
+    if (Array.isArray(liste)) {
+      clips = liste as readonly { readonly cle?: unknown; readonly rendu?: unknown }[];
+    }
+  } catch {
+    // Aucun manifeste : `npm run voix` n'a pas tourné. Aucun nœud n'est audible, et D42
+    // masque partout — c'est un état valide, pas une erreur.
+    return false;
+  }
+
+  return clips.some(
+    (clip) =>
+      clip.rendu === 'normal' &&
+      typeof clip.cle === 'string' &&
+      clip.cle.startsWith(`${idExercice}/`),
+  );
+}
+
 test.describe('variété d’une sortie', () => {
   test('R13 — une sortie ne rejoue jamais deux fois le même habillage', async ({ page }) => {
     await preparer(page);
@@ -122,18 +183,68 @@ test.describe('variété d’une sortie', () => {
     }
   });
 
-  test('chaque moteur ouvert propose une réécoute gratuite (R15)', async ({ page }) => {
-    // « Aucune consigne n'existe uniquement à l'écrit » : le bouton doit être là, sur chaque
-    // moteur, sans condition. C'est la seule prise mécanique qu'on ait sur R15 tant que les
-    // clips de voix n'existent pas (§ 8, n° 1).
+  test('aucun bouton « écouter » muet, et un bouton dès qu’un clip existe (D42, R15)', async ({
+    page,
+  }) => {
+    // ════════════════════════════════════════════════════════════════════════════════════
+    // CE CAS A ÉTÉ RÉÉCRIT PARCE QU'IL CONTREDISAIT UNE DÉCISION, PAS PARCE QU'IL GÊNAIT.
+    //
+    // Il assertionnait auparavant « le bouton doit être là, sur chaque moteur, SANS
+    // CONDITION », et se déclarait « la seule prise mécanique sur R15 tant que les clips
+    // n'existent pas ». **D42** (`Docs/journal-des-decisions.md`, 2026-08-02) a tranché
+    // l'inverse, et sur le fait constaté par le père — il a tapé ce bouton et n'a rien eu :
+    //
+    //   « Le bouton « écouter » est masqué tant qu'aucun audio n'existe pour la consigne.
+    //     Rien ne ment, rien ne déçoit — un bouton qui ne répond pas casse la confiance plus
+    //     sûrement qu'un bouton absent. Conséquence à ne pas oublier : R15 reste visiblement
+    //     non satisfaite. »
+    //
+    // Un bouton présent partout n'était donc plus une prise sur R15 : c'était la mesure d'un
+    // décor. La prise est déplacée, pas relâchée, et elle est double :
+    //
+    //   • **aujourd'hui** — aucun bouton de la coquille n'est offert sans savoir quoi jouer.
+    //     `data-clip` porte la clé du clip ; `data-clip="null"` est donc, littéralement, le
+    //     bouton que le père a tapé. On en exige ZÉRO.
+    //   • **le jour où les voix arrivent (D41)** — dès qu'une consigne porte un audio, le
+    //     bouton est exigé. Ce cas redevient la prise sur R15 **tout seul**, sans que
+    //     personne ne le rouvre : c'est le contenu sur disque qui arme l'assertion.
+    //
+    // La dette elle-même est chiffrée ailleurs, et reste rouge :
+    // `tests/unitaires/consignes-audibles.test.ts`.
+    // ════════════════════════════════════════════════════════════════════════════════════
     await preparer(page);
-    for (const noeud of noeudsDuDepot()) {
+
+    const noeuds = noeudsDuDepot();
+    let noeudsAvecAudio = 0;
+
+    for (const noeud of noeuds) {
       await page.evaluate(async (identifiant) => {
         const fenetre = window as unknown as FenetreTest;
         await fenetre.__test.allerAuNoeud(identifiant);
       }, noeud);
       await expect(page.locator('[data-moteur]')).toHaveCount(1);
-      await expect(page.locator('[data-action="ecouter"]')).toHaveCount(1);
+
+      // Le refus de D42, mesuré sur le DOM et non sur la parole du composant.
+      await expect(
+        page.locator('[data-action="ecouter"][data-clip="null"]'),
+        `le nœud ${noeud} offre un bouton « Écouter » qui ne peut rien jouer (D42)`,
+      ).toHaveCount(0);
+
+      if (consigneAvecAudio(noeud)) {
+        noeudsAvecAudio += 1;
+        await expect(
+          page.locator('[data-action="ecouter"]'),
+          `le nœud ${noeud} a un clip et ne propose pas de réécoute (R15)`,
+        ).not.toHaveCount(0);
+      }
     }
+
+    // CONTRAT DE SORTIE — le chiffre qui empêche ce cas d'être vert à vide. Tant qu'il vaut
+    // zéro, la moitié « R15 » ci-dessus n'a rien assertionné, et la ligne le dit à voix haute
+    // au lieu de laisser croire que la règle est tenue.
+    console.info(
+      `[écouter] ${String(noeuds.length)} nœuds audités, ${String(noeudsAvecAudio)} avec audio ` +
+        `— R15 reste non satisfaite tant que ce second chiffre vaut 0 (D42, D41).`,
+    );
   });
 });

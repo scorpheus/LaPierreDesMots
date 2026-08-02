@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800" role="img" aria-label="La Pierre des Mots se brise en mille eclats">
+  <title>La Pierre des Mots</title>
+  <desc>PLACEHOLDER — decor bouchon ecrit a la main (D2), lot N4, tableau 1 sur 5 de la sequence d ouverture (D35). Toutes les formes sont FERMEES par construction (chaque `path` finit par Z) : un trait interrompu d un pixel ferait fuiter le remplissage sur toute l image, et c est la verification bloquante du pipeline. La Pierre est entiere au centre, ses eclats partent vers les bords — le geste du recit, pas une ruine : chaque eclat porte une lettre, et c est ce que l enfant vient rechercher.</desc>
+  <g id="calque-ciel">
+    <path id="ciel" d="M0,0 L1200,0 L1200,800 L0,800 Z" fill="#1B2440"/>
+  </g>
+  <g id="calque-halo">
+    <path id="halo" d="M600,140 L840,400 L600,660 L360,400 Z" fill="#2A3660"/>
+  </g>
+  <g id="calque-pierre" stroke="#FFF6E3" stroke-width="8" stroke-linejoin="round">
+    <path id="pierre-coeur" d="M600,230 L706,330 L680,470 L520,470 L494,330 Z" fill="#FFC93C"/>
+    <path id="pierre-facette-gauche" d="M600,230 L520,470 L494,330 Z" fill="#FFD974"/>
+    <path id="pierre-facette-droite" d="M600,230 L706,330 L680,470 Z" fill="#E8A81E"/>
+  </g>
+  <g id="calque-eclats" stroke="#FFF6E3" stroke-width="6" stroke-linejoin="round" fill="#FFC93C">
+    <path id="eclat-1" d="M300,180 L358,206 L326,262 L278,228 Z"/>
+    <path id="eclat-2" d="M880,190 L942,214 L914,272 L862,238 Z"/>
+    <path id="eclat-3" d="M226,520 L288,540 L262,600 L208,568 Z"/>
+    <path id="eclat-4" d="M932,540 L992,564 L960,622 L910,586 Z"/>
+    <path id="eclat-5" d="M580,690 L640,712 L612,768 L560,736 Z"/>
+  </g>
+  <g id="calque-lettres" fill="#1B2440" font-family="Andika, sans-serif" font-size="42" font-weight="700" text-anchor="middle">
+    <text x="318" y="234">a</text>
+    <text x="902" y="242">o</text>
+    <text x="248" y="572">m</text>
+    <text x="950" y="594">i</text>
+    <text x="600" y="740">u</text>
+  </g>
+</svg>

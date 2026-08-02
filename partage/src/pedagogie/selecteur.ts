@@ -33,6 +33,69 @@ import type {
 /** Une sortie a une ouverture ET une clôture : en dessous de deux nœuds, il n'y a pas de sortie. */
 const NB_NOEUDS_PLANCHER = 2;
 
+/**
+ * Le nombre de nœuds de CETTE sortie — lot N8.
+ *
+ * AVANT : `Math.min(nbNoeudsMax, vivier.length)`. La longueur était donc **constante** pour
+ * une région donnée, et `nbNoeudsMin` — déclaré dans
+ * `contenu/referentiel/parametres-pedagogie.json`, porté par `ContraintesSelecteur`, relu par
+ * `parametres.ts` — n'était lu par aucune ligne de ce fichier. La v2 § 5.2 dit « 4 à 6 nœuds
+ * enchaînés » ; on en servait toujours 6.
+ *
+ * APRÈS : la longueur est tirée dans `[nbNoeudsMin, nbNoeudsMax]` par l'`Alea` injecté. Une
+ * sortie courte n'est pas une sortie ratée — D46 : « le jeu doit être bon en 5 minutes comme
+ * en 30 », et c'est la longueur qui porte cette promesse.
+ *
+ * Le plancher à deux reste opposable : quand le vivier ne permet pas d'atteindre
+ * `nbNoeudsMin`, on sert ce qu'on a plutôt que de refuser. Refuser une sortie de trois nœuds
+ * parce qu'on en voulait quatre, ce serait rendre la région injouable — un état sans issue,
+ * le pire bug possible sur une application d'enfant.
+ */
+function nbNoeudsDeLaSortie(
+  contraintes: { readonly nbNoeudsMin: number; readonly nbNoeudsMax: number },
+  tailleVivier: number,
+  alea: Alea,
+): number {
+  const bas = Math.max(NB_NOEUDS_PLANCHER, Math.trunc(contraintes.nbNoeudsMin));
+  const haut = Math.max(bas, Math.trunc(contraintes.nbNoeudsMax));
+  // `entier(bas, haut + 1)` est appelé INCONDITIONNELLEMENT, y compris quand le vivier est
+  // trop court pour en profiter : l'état de l'`Alea` doit avancer du même nombre de tirages
+  // quelle que soit la taille du vivier, sinon deux appels de même graine sur deux régions
+  // différentes deviendraient corrélés d'une façon impossible à relire.
+  const tire = alea.entier(bas, haut + 1);
+  return Math.max(NB_NOEUDS_PLANCHER, Math.min(tire, tailleVivier));
+}
+
+/**
+ * Tire un candidat DANS son palier de difficulté — lot N8.
+ *
+ * AVANT : `restants.shift()` pour l'échauffement, `restants.pop()` pour la synthèse. Sur les
+ * six nœuds de La Clairière — difficultés 1, 1, 1, 1, 2, 2 — l'ouverture était donc
+ * `clairiere-01` à **chaque** sortie, mesuré sur 60 passages. L'échauffement est pourtant
+ * l'exercice que l'enfant voit le plus souvent.
+ *
+ * APRÈS : on tire parmi TOUS les candidats de difficulté extrême, jamais au travers des
+ * paliers. Le trajet de la v2 § 5.2 est conservé à la lettre — « nœud 1 échauffement, réussite
+ * quasi certaine » reste le plus facile du vivier, « nœud final un peu plus corsé » reste le
+ * plus difficile — mais lequel des ex æquo joue ce rôle change d'un passage à l'autre.
+ *
+ * `restants` est trié canoniquement : le palier est donc un segment contigu, et le tirage ne
+ * dépend pas de l'ordre de lecture du disque.
+ */
+function tirerDansLePalier(
+  restants: NoeudCandidat[],
+  extreme: 'facile' | 'difficile',
+  alea: Alea,
+): NoeudCandidat {
+  const reference = (
+    extreme === 'facile' ? restants[0] : restants[restants.length - 1]
+  ) as NoeudCandidat;
+  const palier = restants.filter((candidat) => candidat.difficulte === reference.difficulte);
+  const choisi = alea.choisir(palier);
+  restants.splice(restants.indexOf(choisi), 1);
+  return choisi;
+}
+
 function refuser(message: string, details: Readonly<Record<string, unknown>>): never {
   throw new ErreurPierre('contenu-invalide', message, details);
 }
@@ -137,17 +200,37 @@ export function composerSortie(
   //    nombre de nœuds, sans quoi une sortie de 6 pourrait n'avoir que 4 habillages distincts.
   //    Quand les données lèvent la contrainte, le vivier garde TOUS les candidats — écrire un
   //    `Map` inconditionnel dédupliquerait quand même et rendrait le drapeau décoratif.
+  //
+  //    N8 — LE DÉFAUT QUE CETTE BOUCLE PORTAIT, mesuré avant correction. La déduplication
+  //    gardait le PREMIER candidat de l'ordre canonique et jetait les autres. Or l'ordre
+  //    canonique est total et déterministe : un nœud qui partage son habillage avec un nœud
+  //    plus facile n'était donc **jamais** retenu, dans aucune sortie, jamais.
+  //
+  //    Mesuré sur Les Galeries : cinq habillages pour six nœuds ; `galeries-06`
+  //    (`galeries.cristal`, l'axe b/p) tombait derrière `galeries-03` qui porte le même
+  //    habillage, et sortait de 60 passages sur 60. Un exercice livré, référencé par un nœud,
+  //    validé par le schéma — et invisible. C'est exactement le défaut que
+  //    `clairiere-sortie-complete.test.ts` traque du côté des données ; il existait aussi ici,
+  //    du côté du code, et aucun test ne le voyait parce qu'on ne regardait qu'une sortie.
+  //
+  //    Le représentant de chaque habillage se TIRE donc parmi les candidats qui le portent.
+  //    Bénéfice second, et c'est celui que N8 cherchait : deux passages ne proposent plus le
+  //    même exercice pour un habillage donné.
   const ordonnes = [...eligibles].sort(ordreCanonique);
   let vivier: readonly NoeudCandidat[];
   if (contraintes.habillageUniqueParSortie) {
-    const vus = new Set<string>();
-    vivier = ordonnes.filter((candidat) => {
-      if (vus.has(candidat.habillage)) {
-        return false;
-      }
-      vus.add(candidat.habillage);
-      return true;
-    });
+    const parHabillage = new Map<string, NoeudCandidat[]>();
+    for (const candidat of ordonnes) {
+      const groupe = parHabillage.get(candidat.habillage) ?? [];
+      groupe.push(candidat);
+      parHabillage.set(candidat.habillage, groupe);
+    }
+    // Les clés sont triées : l'ordre d'insertion d'une `Map` suit l'ordre canonique des
+    // candidats, mais s'appuyer dessus rendrait le tirage sensible à un changement de tri.
+    const habillages = [...parHabillage.keys()].sort();
+    vivier = habillages
+      .map((habillage) => alea.choisir(parHabillage.get(habillage) as NoeudCandidat[]))
+      .sort(ordreCanonique);
   } else {
     vivier = ordonnes;
   }
@@ -165,16 +248,22 @@ export function composerSortie(
     );
   }
 
-  const n = Math.min(contraintes.nbNoeudsMax, vivier.length);
+  const n = nbNoeudsDeLaSortie(contraintes, vivier.length, alea);
   const roles = rolesDeLaSortie(n, contraintes.rangRevision);
 
   // 3. Attribuer les nœuds aux rôles.
   //    L'échauffement est le plus facile du vivier (« réussite quasi certaine », v2 § 5.2) ;
   //    la synthèse est le plus difficile (« défi de synthèse »). Le milieu est mélangé par
-  //    l'`Alea` injecté : c'est la seule source de variété, et elle est reproductible.
+  //    l'`Alea` injecté.
+  //
+  //    N8 : le mélange du milieu N'ÉTAIT PAS une source de variété suffisante. Quand le vivier
+  //    tient tout entier dans la sortie — le cas de nos deux régions —, mélanger le milieu ne
+  //    change que l'ORDRE, jamais la composition, et l'ouverture comme la clôture restaient
+  //    identiques à chaque passage. Les deux extrémités se tirent donc maintenant DANS leur
+  //    palier de difficulté (`tirerDansLePalier`), et la longueur elle-même varie.
   const restants = [...vivier];
-  const echauffement = restants.shift() as NoeudCandidat;
-  const synthese = restants.pop() as NoeudCandidat;
+  const echauffement = tirerDansLePalier(restants, 'facile', alea);
+  const synthese = tirerDansLePalier(restants, 'difficile', alea);
   const milieu = alea.melanger(restants).slice(0, Math.max(0, n - NB_NOEUDS_PLANCHER));
 
   const choisis: NoeudCandidat[] = [echauffement, ...milieu, synthese];

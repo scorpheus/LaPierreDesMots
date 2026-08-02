@@ -32,6 +32,8 @@ import { enregistrerRoutesPedagogie } from './routes/pedagogie.js';
 import { enregistrerRoutesSortie } from './routes/sortie.js';
 import { enregistrerRoutesMonde } from './routes/monde.js';
 import { enregistrerRoutesParent } from './routes/parent.js';
+// Lot N2 (contrat de finition v3 § 8) — le manifeste des voix et les clips Opus.
+import { enregistrerRoutesAudio } from './routes/audio.js';
 import { enregistrerStatique } from './statique.js';
 
 export interface OptionsApplication {
@@ -129,6 +131,11 @@ export function construireApplication(options: OptionsApplication): FastifyInsta
   enregistrerRoutesSortie(app, contexte); // L2-D — composition d'une sortie
   enregistrerRoutesMonde(app, contexte); // L2-F — monde, campement
   enregistrerRoutesParent(app, contexte); // L2-H — zone parent
+
+  // N2 — `GET /api/audio/manifeste` et le service statique de `contenu/audio/`. Enregistre
+  // AVANT le gestionnaire d'erreurs et avant `enregistrerStatique`, comme les autres : le
+  // service statique porte le 404 attrape-tout et prendrait `/api/audio/*` sinon.
+  enregistrerRoutesAudio(app, contexte);
 
   // Toute erreur repond `ErreurApi` (contrat § 3.3).
   // `erreur` arrive en `unknown` : on le reduit une fois, ici, plutot que de le supposer

@@ -25,16 +25,30 @@ import type { Point } from '../commun/geometrie.js';
 import type { EchantillonGeste, ModeleLettre, TraitLettre } from './types.js';
 
 /**
- * R16, sans exception : 24 px de tolérance. Le couloir de guidage est LARGE, et c'est voulu —
+ * R16, sans exception : 32 px de tolérance. Le couloir de guidage est LARGE, et c'est voulu —
  * l'exercice porte sur l'orientation et le sens, jamais sur la propreté du geste. Un enfant
  * qui trace un `b` tremblant mais bien orienté a réussi.
+ *
+ * POURQUOI 32 ET NON PLUS 24 — parce que cette valeur est aussi le RAYON de la zone où le
+ * doigt est accepté pour commencer un trait. À 24, cette zone faisait 48 px de large : moins
+ * que les 64 px que CLAUDE.md règle 5 impose à toute cible tapable, et moins que la plus
+ * petite cible du reste de l'application. Un `d` correct posé 20 px à côté — 28 px de
+ * décalage en diagonale — était refusé `depart-eloigne`. D33 conséquence 5 tranche
+ * explicitement ce choix : « on assouplit la **précision** (R16 — aucune coordination fine),
+ * jamais le **sens** ». Le desserrage ne touche donc que la précision ; `sensRespecte` et
+ * `sens-inverse` sont inchangés.
+ *
+ * CE QUE LE DESSERRAGE NE CASSE PAS, mesuré et non affirmé : converties, ces 32 px valent
+ * 7,62 unités de `viewBox`, et le rond du `d` ne couvre alors le rond du `b` qu'à **0,22** —
+ * très en dessous de `COUVERTURE_MINIMALE`. Tracer l'autre lettre reste refusé.
+ * `tests/unitaires/trace-validation.test.ts` garde ce chiffre.
  *
  * UNITÉ — **des pixels CSS**, et c'est le seul endroit du fichier qui en manipule. Les
  * fonctions de mesure ne connaissent, elles, que des unités `viewBox` : la conversion se
  * fait en un point unique, `toleranceViewBox`, juste en dessous. Confondre les deux rend le
  * moteur aveugle — le commentaire de cette fonction le mesure.
  */
-export const TOLERANCE_TRACE_PX = 24;
+export const TOLERANCE_TRACE_PX = 32;
 
 /** Fraction des points du modèle à franchir pour valider un trait. PLACEHOLDER — à valider. */
 export const COUVERTURE_MINIMALE = 0.8;
@@ -49,11 +63,12 @@ export const LARGEUR_RENDU_PX = 420;
  * La tolérance R16, convertie dans les unités du `viewBox` du modèle.
  *
  * SANS CETTE CONVERSION, LE MOTEUR EST AVEUGLE, et ce n'est pas une figure de style : mesuré
- * sur `minuscules.json`, le rond du `d` couvre celui du `b` à **0,89** quand on applique les
- * 24 bruts à un `viewBox` large de 100 unités — au-dessus de `COUVERTURE_MINIMALE`. Un
+ * sur `minuscules.json`, le rond du `d` ressemble à celui du `b` à **1,00** quand on applique
+ * les 32 bruts à un `viewBox` large de 100 unités — au-dessus de `COUVERTURE_MINIMALE`. Un
  * enfant qui trace exactement la mauvaise lettre serait alors accepté, et seule la
- * vérification du point de départ le rattraperait. Les 24 px valent 24 px à l'écran, pas 24
- * unités de dessin ; à 420 px pour 100 unités, ils valent **5,7 unités**.
+ * vérification du point de départ le rattraperait. Les 32 px valent 32 px à l'écran, pas 32
+ * unités de dessin ; à 420 px pour 100 unités, ils valent **7,62 unités**, et la même mesure
+ * retombe alors à **0,22**.
  *
  * Repli sur `TOLERANCE_TRACE_PX` si le `viewBox` est illisible — un modèle mal formé ne doit
  * pas lever au milieu d'un geste.
@@ -235,6 +250,25 @@ export function sensRespecte(
 }
 
 /**
+ * Les deux ressemblances qui décident de l'axe : celle du trait attendu, et celle de son
+ * reflet sur l'axe candidat. Toutes deux indépendantes du sens de parcours — c'est une
+ * mesure de FORME.
+ */
+function couverturesMiroir(
+  modele: ModeleLettre,
+  trait: TraitLettre,
+  geste: readonly EchantillonGeste[],
+  tolerance: number,
+  axeCandidat: AxeMiroir | null,
+): { readonly direct: number; readonly miroir: number } {
+  const points = pointsDuGeste(geste);
+  const direct = ressemblance(trait.points, points, tolerance);
+  if (axeCandidat === null) return { direct, miroir: 0 };
+  const reflet = refleterPoints(trait.points, axeCandidat, modele.viewBox);
+  return { direct, miroir: ressemblance(reflet, points, tolerance) };
+}
+
+/**
  * L'axe confondu pour UN trait, par comparaison au reflet du trait attendu.
  *
  * Deux conditions, et il faut les deux : le reflet doit être **mieux** couvert que
@@ -243,17 +277,11 @@ export function sensRespecte(
  * ressemblent à rien et dont l'axe n'existe pas.
  */
 function axeDuTrait(
-  modele: ModeleLettre,
-  trait: TraitLettre,
-  geste: readonly EchantillonGeste[],
-  tolerance: number,
   axeCandidat: AxeMiroir | null,
+  couvertures: { readonly direct: number; readonly miroir: number },
 ): AxeMiroir | null {
   if (axeCandidat === null) return null;
-  const points = pointsDuGeste(geste);
-  const direct = ressemblance(trait.points, points, tolerance);
-  const reflet = refleterPoints(trait.points, axeCandidat, modele.viewBox);
-  const miroir = ressemblance(reflet, points, tolerance);
+  const { direct, miroir } = couvertures;
   if (miroir > direct && miroir >= COUVERTURE_MINIMALE) return axeCandidat;
   return null;
 }
@@ -272,14 +300,34 @@ function axeDuTrait(
  * « `sens-inverse` — le geste suit le modèle à l'envers — LE cas qui nous intéresse », sous
  * un titre qui annonce « **le sens distingue `b` de `d`** ».
  *
- * La règle n'est pas une tautologie, parce qu'elle est conditionnée à DEUX faits mesurés et
+ * La règle n'est pas une tautologie, parce qu'elle est conditionnée à TROIS faits mesurés et
  * non déclarés : le geste couvre réellement le modèle inversé à `COUVERTURE_MINIMALE`
- * (`sens-inverse` n'est pas prononcé autrement), et la lettre est déclarée à risque sur cet
- * axe par l'exercice. Un gribouillis ne franchit pas le premier ; une lettre sans axe de
- * risque ne franchit pas le second.
+ * (`sens-inverse` n'est pas prononcé autrement), le geste ressemble au REFLET du trait
+ * attendu au moins autant, et la lettre est déclarée à risque sur cet axe par l'exercice. Un
+ * gribouillis ne franchit pas le premier ; un trait à l'envers de lui-même ne franchit pas le
+ * second ; une lettre sans axe de risque ne franchit pas le troisième.
+ *
+ * LA TROISIÈME CONDITION EST UN CORRECTIF DE D33, et elle vient d'un cas réel. Depuis que le
+ * ductus du `d` est celui de l'école, un enfant qui trace son rond dans le mauvais sens
+ * produit `sens-inverse` — une erreur de GESTE. Sans preuve géométrique, la règle nommait
+ * alors `gauche-droite`, et le top 10 des confusions de D23 comptait des erreurs de ductus
+ * comme des confusions miroir : l'indicateur cessait de mesurer ce qu'il annonce. Mesuré sur
+ * ce cas : ressemblance au trait attendu **1,00**, à son reflet **0,22** — le geste ne
+ * ressemble pas du tout à l'autre lettre. Sur le cas qui a fait écrire cette règle — le rond
+ * du `p` tracé à la place de celui du `b` — la même mesure donne **1,00** des deux côtés, et
+ * l'axe est rendu comme avant.
+ *
+ * `miroir > direct` n'est PAS exigé ici, et c'est toute la raison d'être de cette seconde
+ * voie : quand le trait est sa propre image sur l'axe, les deux ressemblances sont égales à
+ * 1 et `axeDuTrait` ne peut rien trancher.
  */
-function axeParInversionDeSens(modele: ModeleLettre, motif: MotifRefusTrace | null): AxeMiroir | null {
+function axeParInversionDeSens(
+  modele: ModeleLettre,
+  motif: MotifRefusTrace | null,
+  couvertures: { readonly direct: number; readonly miroir: number },
+): AxeMiroir | null {
   if (motif !== 'sens-inverse') return null;
+  if (couvertures.miroir < COUVERTURE_MINIMALE) return null;
   return modele.axeRisque;
 }
 
@@ -308,7 +356,8 @@ export function evaluerTrait(
   // La tolérance par défaut est CONVERTIE dans les unités du modèle, jamais appliquée brute.
   const marge = tolerance ?? toleranceViewBox(modele.viewBox);
   const points = pointsDuGeste(geste);
-  const axeGeometrique = axeDuTrait(modele, trait, geste, marge, modele.axeRisque);
+  const couvertures = couverturesMiroir(modele, trait, geste, marge, modele.axeRisque);
+  const axeGeometrique = axeDuTrait(modele.axeRisque, couvertures);
 
   const decision = (
     acceptee: boolean,
@@ -320,8 +369,8 @@ export function evaluerTrait(
     compteErreur: motif === null ? false : REFUS_TRACE_COMPTE_ERREUR[motif],
     couverture,
     // La forme d'abord, le sens en second recours. Les deux voies nomment le même axe
-    // candidat ; aucune ne l'invente.
-    axe: axeGeometrique ?? axeParInversionDeSens(modele, motif),
+    // candidat ; aucune ne l'invente, et toutes deux exigent la preuve géométrique.
+    axe: axeGeometrique ?? axeParInversionDeSens(modele, motif, couvertures),
   });
 
   if (points.length < 2) return decision(false, 'trace-incomplet', 0);

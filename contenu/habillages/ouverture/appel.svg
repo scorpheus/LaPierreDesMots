@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800" role="img" aria-label="Le chemin part vers la Clairiere">
+  <title>Viens</title>
+  <desc>PLACEHOLDER — decor bouchon ecrit a la main (D2), lot N4, tableau 5 sur 5 (D35). Le dernier tableau ne raconte plus, il OUVRE : le chemin part du bas de l ecran, la ou l enfant a le doigt, et file vers la Clairiere deja verte au loin. Aucun obstacle sur ce chemin, aucune porte, aucune etape — c est la traduction en image de D46 : « partir en sortie se fait en un tap, aucun ecran intermediaire obligatoire, nulle part ». Toutes les formes sont fermees par un Z.</desc>
+  <g id="calque-ciel">
+    <path id="ciel" d="M0,0 L1200,0 L1200,470 L0,470 Z" fill="#8FD6F2"/>
+    <path id="soleil" d="M980,120 L1064,204 L980,288 L896,204 Z" fill="#FFC93C"/>
+  </g>
+  <g id="calque-sol" stroke="#1B2440" stroke-width="6" stroke-linejoin="round">
+    <path id="pre-lointain" d="M0,410 L1200,410 L1200,560 L0,560 Z" fill="#2FA86B"/>
+    <path id="pre-proche" d="M0,560 L1200,560 L1200,800 L0,800 Z" fill="#3DDC97"/>
+  </g>
+  <g id="calque-chemin" stroke="#1B2440" stroke-width="6" stroke-linejoin="round">
+    <path id="chemin" d="M520,800 L680,800 L636,430 L570,430 Z" fill="#F0E0BC"/>
+  </g>
+  <g id="calque-clairiere" stroke="#1B2440" stroke-width="6" stroke-linejoin="round">
+    <path id="arbre-maison-tronc" d="M576,430 L630,430 L630,330 L576,330 Z" fill="#C98B4B"/>
+    <path id="arbre-maison-houppier" d="M603,152 L723,282 L669,354 L537,354 L483,282 Z" fill="#2FA86B"/>
+    <path id="arbre-maison-porte" d="M588,430 L618,430 L618,376 L588,376 Z" fill="#FFC93C"/>
+  </g>
+  <g id="calque-lucioles" stroke="#1B2440" stroke-width="4" stroke-linejoin="round" fill="#FFC93C">
+    <path id="luciole-1" d="M300,500 L326,474 L352,500 L326,526 Z"/>
+    <path id="luciole-2" d="M860,540 L884,516 L908,540 L884,564 Z"/>
+    <path id="luciole-3" d="M200,660 L226,634 L252,660 L226,686 Z"/>
+    <path id="luciole-4" d="M980,672 L1004,648 L1028,672 L1004,696 Z"/>
+  </g>
+  <g id="calque-nom" fill="#1B2440" font-family="Andika, sans-serif" font-size="40" font-weight="700" text-anchor="middle">
+    <text x="603" y="740">la Clairière</text>
+  </g>
+</svg>

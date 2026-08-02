@@ -1,0 +1,75 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Lot N8. AXE HAUT-BAS UNIQUEMENT — b ↔ p. C'est l'axe que le père a RAPPORTÉ (D23, fait rapporté : « l'enfant confond b/p »). Le clavier ne porte que deux touches : ajouter d et q y remettrait l'autre axe. POURQUOI IL NE DÉCLARE PAS `gph.miroir.haut-bas`, et c'est un arbitrage consigné dans Docs/questions-en-attente.md : R12 exige 3 moteurs par compétence CITÉE ; Les Galeries n'ouvrent que 4 nœuds neufs et 3 moteurs hors `trace` (eclair, tri, grave) ; on ne peut donc couvrir qu'UN axe à 3 moteurs. L'axe gauche-droite l'est ; l'axe haut-bas est travaillé par ce contenu et par `miroir-bp-01` (moteur `trace`), et sa compétence est DÉRIVÉE à l'exécution par le moteur `trace` (moteurs/trace/moteur.ts) — elle n'est donc pas perdue pour le tableau de bord. La déclarer ici ferait tomber R12 à 1 moteur sur 3 et rendrait la suite rouge : un compte faux ne vaut pas mieux qu'un compte absent.",
+  "id": "galeries-pierre-bp-01",
+  "version": 1,
+  "titre": "Graver le b et le p",
+  "competences": ["comp.consigne.simple"],
+  "difficulte": 4,
+  "jeu": {
+    "moteur": "grave",
+    "habillage": "galeries.veine",
+    "noeud": "galeries-06",
+    "etoiles": { "sansAide": true, "sansErreur": true },
+    "aideGobi": ["relire-consigne", "souffle-syllabe", "surligne-graphene"],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Grave la lettre pour écrire ce mot.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "bol",
+          "trous": [{ "id": "trou-un", "position": 0, "attendu": "b" }],
+          "motsCles": ["grave", "lettre", "mot"]
+        },
+        {
+          "id": "c2",
+          "texte": "Grave la lettre pour écrire ce mot.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "pic",
+          "trous": [{ "id": "trou-deux", "position": 0, "attendu": "p" }],
+          "motsCles": ["grave", "lettre", "mot"]
+        },
+        {
+          "id": "c3",
+          "texte": "Grave la lettre pour écrire ce mot.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "bus",
+          "trous": [{ "id": "trou-trois", "position": 0, "attendu": "b" }],
+          "motsCles": ["grave", "lettre", "mot"]
+        },
+        {
+          "id": "c4",
+          "texte": "Grave la lettre pour écrire ce mot.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "poule",
+          "trous": [{ "id": "trou-quatre", "position": 0, "attendu": "p" }],
+          "motsCles": ["grave", "lettre", "mot"]
+        },
+        {
+          "id": "c5",
+          "texte": "Grave la lettre pour écrire ce mot.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "jupe",
+          "trous": [{ "id": "trou-cinq", "position": 2, "attendu": "p" }],
+          "motsCles": ["grave", "lettre", "mot"]
+        },
+        {
+          "id": "c6",
+          "texte": "Grave la lettre pour écrire ce mot.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "robe",
+          "trous": [{ "id": "trou-six", "position": 2, "attendu": "b" }],
+          "motsCles": ["grave", "lettre", "mot"]
+        }
+      ],
+      "clavier": ["b", "p"],
+      "competence": "gph.miroir.haut-bas"
+    }
+  }
+}

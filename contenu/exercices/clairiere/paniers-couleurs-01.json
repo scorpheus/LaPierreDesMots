@@ -8,7 +8,7 @@
   "jeu": {
     "moteur": "tri",
     "habillage": "clairiere.paniers",
-    "noeud": "clairiere-01",
+    "noeud": "clairiere-03",
     "etoiles": { "sansAide": true, "sansErreur": true },
     "aideGobi": ["relire-consigne", "souffle-syllabe", "montre-cible"],
     "contenu": {

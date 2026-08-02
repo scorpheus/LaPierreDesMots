@@ -40,9 +40,30 @@ async function ouvrir(code: string) {
   });
 }
 
+/**
+ * MODIFIÉ N5 — pose le code du foyer par la route qui en a désormais la charge.
+ *
+ * Ce préambule appelait `ouvrir(CODE)` et comptait sur le fait que la première ouverture
+ * posait le code. Le contrat de finition v3 § 1.8 a mesuré ce que cela produisait — « un
+ * enfant curieux qui tape 1234 devient propriétaire du code parent » — et son § 8 le retire :
+ * « `POST /api/parent/ouvrir` **cesse de poser le code**. Quand aucun code n'existe, il répond
+ * **404** ».
+ *
+ * Le préambule change donc de route ; **aucune assertion de ce fichier n'a été touchée**, et
+ * le cas qui affirmait l'ancien comportement est réécrit plus bas, à sa place, pour affirmer
+ * le nouveau. Rien n'est mis en `skip`, rien n'est assoupli.
+ */
+async function poserLeCode(code = CODE) {
+  return contexte.application.inject({
+    method: 'POST',
+    url: '/api/parent/definir',
+    payload: { code }
+  });
+}
+
 /** Pose le code du foyer et rend un jeton valable. */
 async function jeton(): Promise<string> {
-  const reponse = await ouvrir(CODE);
+  const reponse = await poserLeCode();
   expect(reponse.statusCode).toBe(200);
   return (reponse.json() as { jeton: string }).jeton;
 }
@@ -60,8 +81,25 @@ async function creerProfil(prenom = 'Alma'): Promise<string> {
 // ────────────────────────────────────────────────────────────────────────────── le verrou
 
 describe('POST /api/parent/ouvrir', () => {
-  it('pose le code du foyer au tout premier passage et rend un jeton', async () => {
+  // REÉCRIT N5 — ce cas affirmait « pose le code du foyer au tout premier passage et rend un
+  // jeton ». C'était la description fidèle du défaut mesuré au contrat de finition v3 § 1.8.
+  // Le § 8 le retire : « `POST /api/parent/ouvrir` cesse de poser le code. Quand aucun code
+  // n'existe, il répond 404 avec `ErreurApi.code = 'introuvable'` ». Le cas garde donc
+  // désormais le comportement neuf, au même endroit, et `tests/api/parent-definir-code.test.ts`
+  // garde tout le reste de la porte.
+  it('NE pose PLUS le code au premier passage : 404, et rien n’est écrit', async () => {
     const reponse = await ouvrir(CODE);
+    expect(reponse.statusCode).toBe(404);
+    expect((reponse.json() as { code: string }).code).toBe('introuvable');
+
+    const lignes = contexte.base
+      .prepare('SELECT COUNT(*) AS n FROM code_parent')
+      .get() as unknown as { n: number };
+    expect(Number(lignes.n), 'aucun code posé en silence').toBe(0);
+  });
+
+  it('le code posé par `definir` rend un jeton utilisable', async () => {
+    const reponse = await poserLeCode();
     expect(reponse.statusCode).toBe(200);
     const corps = reponse.json() as { jeton: string; expireLe: string };
     expect(corps.jeton.length).toBeGreaterThan(16);
@@ -69,19 +107,20 @@ describe('POST /api/parent/ouvrir', () => {
   });
 
   it('accepte ensuite ce code et lui seul', async () => {
-    await ouvrir(CODE);
+    await poserLeCode();
     expect((await ouvrir(CODE)).statusCode).toBe(200);
     expect((await ouvrir('9999')).statusCode).toBe(401);
   });
 
   it('refuse un code qui n’a pas quatre chiffres', async () => {
+    await poserLeCode();
     const reponse = await ouvrir('12');
     expect(reponse.statusCode).toBe(400);
     expect((reponse.json() as { message: string }).message).toContain('4 chiffres');
   });
 
   it('CONTRAT DE SORTIE : le verrou se ferme au 5ᵉ échec, mesuré par requêtes', async () => {
-    await ouvrir(CODE);
+    await poserLeCode();
 
     const statuts: number[] = [];
     for (let essai = 1; essai <= 6; essai += 1) {
@@ -96,7 +135,7 @@ describe('POST /api/parent/ouvrir', () => {
   });
 
   it('répond 423 et non 401 quand le verrou est actif, et dit quand ça rouvre', async () => {
-    await ouvrir(CODE);
+    await poserLeCode();
     for (let essai = 1; essai <= 5; essai += 1) {
       await ouvrir('0000');
     }
@@ -116,7 +155,7 @@ describe('POST /api/parent/ouvrir', () => {
   });
 
   it('un code juste remet le compteur à zéro : quatre échecs ne s’accumulent pas', async () => {
-    await ouvrir(CODE);
+    await poserLeCode();
     for (let essai = 1; essai <= 4; essai += 1) {
       expect((await ouvrir('0000')).statusCode).toBe(401);
     }
@@ -129,7 +168,7 @@ describe('POST /api/parent/ouvrir', () => {
   });
 
   it('un format invalide compte comme un échec — sinon le verrou serait contournable', async () => {
-    await ouvrir(CODE);
+    await poserLeCode();
     for (let essai = 1; essai <= 4; essai += 1) {
       expect((await ouvrir('pasuncode')).statusCode).toBe(400);
     }

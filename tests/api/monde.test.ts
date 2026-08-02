@@ -28,11 +28,16 @@ import { enregistrerRoutesProfils } from '@serveur/routes/profils';
 import { enregistrerRoutesTentatives } from '@serveur/routes/tentatives';
 import { chargerReferentielMonde, enregistrerFormeGobi } from '@serveur/depots/monde';
 
+import { readdirSync } from 'node:fs';
+import { join } from 'node:path';
+
 import {
   DOSSIER_MIGRATIONS,
   INSTANT_DE_REFERENCE,
+  RACINE_DEPOT,
   aleaDeTest,
-  horlogeDeTest
+  horlogeDeTest,
+  lireJson
 } from '../configuration/preparation.js';
 
 /** L'application qui porte les trois modules de routes utiles au lot. */
@@ -101,29 +106,89 @@ async function creerProfil(prenom = 'Alma'): Promise<string> {
   return (reponse.json() as { id: string }).id;
 }
 
-/** Journalise une tentative à trois étoiles sur l'unique nœud livré de la Clairière. */
+/**
+ * Les nœuds de la Clairière et leur exercice, LUS SUR DISQUE.
+ *
+ * Cette table remplace le triplet `clairiere-01` / `clairiere-ecole-01` / `clairiere.ecole`
+ * qui était écrit en dur dans le corps du helper, sous le commentaire « l'unique nœud livré de
+ * la Clairière ». Ce n'est plus vrai : la v2 § 5.2 demande « 4 à 6 nœuds enchaînés » et le lot
+ * C4 les a livrés. Un helper qui journalise UN nœud et s'appelle `terminerClairiere` mentirait
+ * sur ce qu'il fait, et les trois cas qui l'appellent testeraient une région à 20 %.
+ */
+function noeudsDeLaClairiere(): readonly {
+  readonly noeud: string;
+  readonly exercice: string;
+  readonly moteur: string;
+  readonly habillage: string;
+}[] {
+  const parExercice = new Map<string, { moteur: string; habillage: string }>();
+  for (const fichier of readdirSync(join(RACINE_DEPOT, 'contenu/exercices/clairiere'))) {
+    if (!fichier.endsWith('.json')) continue;
+    const exercice = lireJson<{
+      readonly id: string;
+      readonly jeu: { readonly moteur: string; readonly habillage: string };
+    }>(`contenu/exercices/clairiere/${fichier}`);
+    parExercice.set(exercice.id, {
+      moteur: exercice.jeu.moteur,
+      habillage: exercice.jeu.habillage
+    });
+  }
+
+  return readdirSync(join(RACINE_DEPOT, 'contenu/noeuds'))
+    .filter((fichier) => fichier.endsWith('.json'))
+    .map((fichier) =>
+      lireJson<{
+        readonly id: string;
+        readonly region: string;
+        readonly ordre: number;
+        readonly exercice: string;
+      }>(`contenu/noeuds/${fichier}`)
+    )
+    .filter((noeud) => noeud.region === 'clairiere')
+    .sort((gauche, droite) => gauche.ordre - droite.ordre)
+    .map((noeud) => {
+      const jeu = parExercice.get(noeud.exercice);
+      expect(jeu, `le nœud ${noeud.id} cite un exercice absent : ${noeud.exercice}`).toBeDefined();
+      return {
+        noeud: noeud.id,
+        exercice: noeud.exercice,
+        moteur: jeu!.moteur,
+        habillage: jeu!.habillage
+      };
+    });
+}
+
+/** Journalise une tentative à trois étoiles sur CHAQUE nœud livré de la Clairière. */
 async function terminerClairiere(profilId: string): Promise<void> {
   const { createHash } = await import('node:crypto');
   const graine = 20260801;
-  const reponse = await monde.inject({
-    method: 'POST',
-    url: '/api/tentatives',
-    payload: {
-      cleIdempotence: createHash('sha256')
-        .update([profilId, 'clairiere-01', INSTANT_DE_REFERENCE, String(graine)].join('|'))
-        .digest('hex'),
-      profil: profilId,
-      noeud: 'clairiere-01',
-      exercice: 'clairiere-ecole-01',
-      moteur: 'colorie',
-      habillage: 'clairiere.ecole',
-      graine,
-      demarreLe: INSTANT_DE_REFERENCE,
-      termineLe: '2026-09-01T08:01:00Z',
-      resume: { reussi: true, nbErreurs: 0, aideUtilisee: 'aucune', dureeMs: 60_000, etapes: [] }
-    }
-  });
-  expect(reponse.statusCode).toBeLessThan(300);
+  const etapes = noeudsDeLaClairiere();
+
+  // Une région qui n'aurait plus de nœud rendrait ce helper silencieusement inopérant, et les
+  // trois cas qui s'en servent passeraient sur un monde jamais recolorié.
+  expect(etapes.length, 'la Clairière ne livre aucun nœud').toBeGreaterThan(0);
+
+  for (const etape of etapes) {
+    const reponse = await monde.inject({
+      method: 'POST',
+      url: '/api/tentatives',
+      payload: {
+        cleIdempotence: createHash('sha256')
+          .update([profilId, etape.noeud, INSTANT_DE_REFERENCE, String(graine)].join('|'))
+          .digest('hex'),
+        profil: profilId,
+        noeud: etape.noeud,
+        exercice: etape.exercice,
+        moteur: etape.moteur,
+        habillage: etape.habillage,
+        graine,
+        demarreLe: INSTANT_DE_REFERENCE,
+        termineLe: '2026-09-01T08:01:00Z',
+        resume: { reussi: true, nbErreurs: 0, aideUtilisee: 'aucune', dureeMs: 60_000, etapes: [] }
+      }
+    });
+    expect(reponse.statusCode, `tentative refusée sur ${etape.noeud}`).toBeLessThan(300);
+  }
 }
 
 async function lireMondeHttp(profilId: string): Promise<EtatMondeLu> {
@@ -139,11 +204,18 @@ function region(etat: EtatMondeLu, code: string) {
 }
 
 describe('GET /api/profils/:id/monde', () => {
-  it('rend une carte neuve : la Clairière ouverte, les cinq autres voilées', async () => {
+  // D38 — « Les deux régions sont ouvertes d'emblée », qui amende la v2 § 3.3
+  // (`Docs/journal-des-decisions.md:740`). Ce cas exigeait UNE seule région ouverte : il
+  // décrivait la règle abrogée, et il la gardait vivante jusque dans la réponse HTTP.
+  // Les Galeries sont nommées explicitement — c'est la région que D38 vise, et un simple
+  // `toHaveLength(2)` ne dirait pas LAQUELLE s'est ouverte.
+  it('rend une carte neuve : la Clairière ET les Galeries ouvertes, les quatre autres voilées (D38)', async () => {
     const etat = await lireMondeHttp(await creerProfil());
     expect(etat.carte.regions).toHaveLength(6);
     expect(region(etat, 'clairiere').ouverte).toBe(true);
-    expect(etat.carte.regions.filter((entree) => entree.ouverte)).toHaveLength(1);
+    expect(region(etat, 'galeries').ouverte).toBe(true);
+    expect(region(etat, 'marais-jumeau').ouverte).toBe(false);
+    expect(etat.carte.regions.filter((entree) => entree.ouverte)).toHaveLength(2);
     expect(etat.carte.regions.every((entree) => entree.eclatObtenuLe === null)).toBe(true);
   });
 
@@ -329,7 +401,13 @@ describe('étanchéité stricte entre profils — v2 § 11', () => {
 
     const monsieurNoe = await lireMondeHttp(noe);
     expect(region(monsieurNoe, 'clairiere').pourcentageColorie).toBe(0);
-    expect(region(monsieurNoe, 'galeries').ouverte).toBe(false);
+    // Le témoin d'étanchéité était `galeries.ouverte === false`. D38 ouvre les Galeries pour
+    // TOUT LE MONDE dès la première seconde : ce témoin ne distingue donc plus un profil neuf
+    // d'un profil avancé, et il aurait été vert quoi qu'il arrive — un test qui ne mesure plus
+    // rien. On le remplace par deux témoins que D38 ne touche pas et qui, eux, séparent
+    // réellement les deux profils : Alma a obtenu l'Éclat de la Clairière, Noé n'a rien.
+    expect(region(monsieurNoe, 'galeries').pourcentageColorie).toBe(0);
+    expect(monsieurNoe.carte.regions.every((entree) => entree.eclatObtenuLe === null)).toBe(true);
     expect(monsieurNoe.gobi.formes).toEqual([]);
     expect(monsieurNoe.campement.every((objet) => objet.placeLe === null)).toBe(true);
 

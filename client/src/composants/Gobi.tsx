@@ -51,33 +51,88 @@ export interface ProprietesGobi {
 const INVITE_PAR_DEFAUT = 'Si tu veux, je peux t’aider. Ça ne coûte rien.';
 
 /**
- * Le corps, par stade. Cinq dessins, et **c'est tout ce qui change du corps** : la crête de
- * cristaux pousse, le reste est identique d'un stade à l'autre (D28, point 1).
+ * Le corps, par stade. **DIX dessins depuis N3** (D43), et la crête est tout ce qui change :
+ * le reste est identique d'un stade à l'autre (D28, point 1).
  *
- * PLACEHOLDER — ces silhouettes doublent volontairement, en très simplifié, les cinq SVG de
- * `contenu/assets/gobi/`. Le corps est dessiné EN LIGNE parce que Gobi apparaît dans la bulle
- * d'aide de chaque exercice : un `fetch` par montage coûterait une requête là où le budget vise
- * une réponse sous 100 ms. La forme canonique n'est pas validée (D7, D31 étape A).
+ * Le corps est dessiné EN LIGNE parce que Gobi apparaît dans la bulle d'aide de chaque
+ * exercice : un `fetch` par montage coûterait une requête là où le budget vise une réponse
+ * sous 100 ms. C'est le seul motif de cette duplication, et elle a un prix — voir ci-dessous.
+ *
+ * MODIFIÉ PAR N3, HORS DE SON PÉRIMÈTRE DÉCLARÉ, ET C'EST SIGNALÉ. Le contrat de finition v3
+ * § 5.7 fait passer `CodeStadeGobi` de 5 à 10 membres, mais son § 4.3 ne liste pas ce fichier
+ * dans le lot. Or ce `Record` est exhaustif : à 5 clés pour 10 membres, **rien ne compile**,
+ * et les vagues 2 et 3 seraient bloquées. Aucun des huit lots ne le possède — vérifié : le
+ * contrat ne le cite nulle part —, donc il n'y a pas deux écrivains. Les dix crêtes sont
+ * régénérées ensemble pour que le nombre de cristaux suive celui des SVG livrés
+ * (`contenu/assets/gobi/stades/stade-{1..10}.svg`) : 1, 1, 1, 2, 3, 5, 6, 7, 8, 9. Les
+ * conserver telles quelles aurait rendu la progression non monotone — `couronne` en aurait
+ * porté plus que `equipe`, qui vient après.
+ *
+ * CE QUE CE FICHIER RESTE : une réduction. Elle double la donnée des SVG (convention C5) sans
+ * qu'un test compare les deux, parce que l'un est un `path` de 64 unités et l'autre un dessin
+ * de 200. Le seul lien vérifié est le NOMBRE de cristaux, ci-dessous.
  */
 const CRETE_PAR_STADE: Readonly<Record<CodeStadeGobi, readonly string[]>> = {
-  oeuf: ['M32,2 L38,14 L32,20 L26,14 Z'],
-  boule: ['M32,0 L40,14 L32,22 L24,14 Z'],
-  crete: ['M20,8 L26,20 L20,26 L14,20 Z', 'M32,0 L40,14 L32,22 L24,14 Z', 'M44,8 L50,20 L44,26 L38,20 Z'],
+  oeuf: ['M32,8 L37,12.9 L32,17 L27,12.9 Z'],
+  fissure: ['M32,7 L37.5,12.5 L32,17 L26.5,12.5 Z', 'M32,6 L34.5,10 L32,14 L29.5,10 Z'],
+  boule: ['M32,2 L39,10.3 L32,17 L25,10.3 Z'],
+  'premier-cristal': [
+    'M24,9.4 L28.5,14.3 L24,18.4 L19.5,14.3 Z',
+    'M36,1.3 L43,10.1 L36,17.3 L29,10.1 Z'
+  ],
+  crete: [
+    'M20,10.2 L25,15.7 L20,20.2 L15,15.7 Z',
+    'M32,0 L39.5,9.3 L32,17 L24.5,9.3 Z',
+    'M44,10.2 L49,15.7 L44,20.2 L39,15.7 Z'
+  ],
+  couronne: [
+    'M13,18.3 L17,22.7 L13,26.3 L9,22.7 Z',
+    'M22,7.2 L27.5,13.8 L22,19.2 L16.5,13.8 Z',
+    'M32,-1 L39.5,8.9 L32,17 L24.5,8.9 Z',
+    'M42,7.2 L47.5,13.8 L42,19.2 L36.5,13.8 Z',
+    'M51,18.3 L55,22.7 L51,26.3 L47,22.7 Z'
+  ],
   equipe: [
-    'M18,8 L25,20 L18,27 L11,20 Z',
-    'M32,-2 L41,14 L32,23 L23,14 Z',
-    'M46,8 L53,20 L46,27 L39,20 Z'
+    'M11,22.4 L14.5,26.3 L11,29.4 L7.5,26.3 Z',
+    'M20,9.2 L25,15.3 L20,20.2 L15,15.3 Z',
+    'M28,0.3 L35,9.7 L28,17.3 L21,9.7 Z',
+    'M37,1.5 L43.5,10.3 L37,17.5 L30.5,10.3 Z',
+    'M45,9.8 L50,15.9 L45,20.8 L40,15.9 Z',
+    'M53,22.4 L56.5,26.3 L53,29.4 L49.5,26.3 Z'
+  ],
+  besace: [
+    'M10,25.4 L13.2,28.7 L10,31.4 L6.8,28.7 Z',
+    'M17,12.3 L21.4,17.8 L17,22.3 L12.6,17.8 Z',
+    'M25,3 L31,11.3 L25,18 L19,11.3 Z',
+    'M32,-1 L39,8.9 L32,17 L25,8.9 Z',
+    'M39,3 L45,11.3 L39,18 L33,11.3 Z',
+    'M47,12.3 L51.4,17.8 L47,22.3 L42.6,17.8 Z',
+    'M54,25.4 L57.2,28.7 L54,31.4 L50.8,28.7 Z'
+  ],
+  veilleur: [
+    'M9,28.1 L12,31.4 L9,34.1 L6,31.4 Z',
+    'M15,15.1 L19,20.1 L15,24.1 L11,20.1 Z',
+    'M22,6.2 L27.2,13.3 L22,19.2 L16.8,13.3 Z',
+    'M29,-0.8 L36,9.1 L29,17.2 L22,9.1 Z',
+    'M36,1.3 L42.4,10.1 L36,17.3 L29.6,10.1 Z',
+    'M43,6.7 L48.2,13.8 L43,19.7 L37.8,13.8 Z',
+    'M49,15.1 L53,20.1 L49,24.1 L45,20.1 Z',
+    'M55,28.1 L58,31.4 L55,34.1 L52,31.4 Z'
   ],
   gardien: [
-    'M10,16 L15,25 L10,31 L5,25 Z',
-    'M20,6 L27,19 L20,26 L13,19 Z',
-    'M32,-4 L42,13 L32,23 L22,13 Z',
-    'M44,6 L51,19 L44,26 L37,19 Z',
-    'M54,16 L59,25 L54,31 L49,25 Z'
+    'M8,28.2 L11,32.1 L8,35.2 L5,32.1 Z',
+    'M13,16.3 L17,21.8 L13,26.3 L9,21.8 Z',
+    'M19,6.8 L24.4,14.5 L19,20.8 L13.6,14.5 Z',
+    'M26,-0.2 L32.6,9.7 L26,17.8 L19.4,9.7 Z',
+    'M33,-2 L40,8.4 L33,17 L26,8.4 Z',
+    'M40,0.4 L46.6,10.3 L40,18.4 L33.4,10.3 Z',
+    'M46,7.5 L51.4,15.2 L46,21.5 L40.6,15.2 Z',
+    'M52,17.7 L56,23.2 L52,27.7 L48,23.2 Z',
+    'M56,28.2 L59,32.1 L56,35.2 L53,32.1 Z'
   ]
 };
 
-/** Le corps est le MÊME pour les cinq stades : c'est la règle, pas une économie. */
+/** Le corps est le MÊME pour les dix stades : c'est la règle, pas une économie. */
 function CorpsDeGobi({ stade }: { readonly stade: CodeStadeGobi }): ReactElement {
   return (
     <g id="gobi-dessin">

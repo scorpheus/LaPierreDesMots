@@ -1,0 +1,217 @@
+{
+  "$commentaire": "VERROU DE GOBI — lot N3, contrat de finition v3 § 4.3. Sans ce fichier, la bibliothèque devient un cimetière d'images irrégénérables (CLAUDE.md, annexe P § 3.6). Il porte trois choses qu'aucune autre ne porte : la provenance exacte de la canonique, la PALETTE mesurée sur ses pixels — c'est elle que les SVG de contenu/assets/gobi/ appliquent, ils ne l'inventent pas —, et, pour chaque déclinaison, l'empreinte de SA SOURCE. Ce dernier champ est ce qui rend la règle « profondeur de chaîne = 1 » (D32) vérifiable après coup et non seulement promise.",
+  "canonique": {
+    "fichier": "production/personnages/gobi/canonique.png",
+    "largeur": 1024,
+    "hauteur": 1024,
+    "empreintePixels": "sha256:98b85bb34f34e702e030d11117358e614e9fe1ff15eae63686ef9641a78319dd",
+    "empreinteFichier": "sha256:2426f0c6ebb5707b1a0601a53239cd23607c9186854885bd98a0fd94ff4c7aaf",
+    "$empreinte": "L'empreinte qui fait foi est celle des PIXELS, jamais celle du fichier : ComfyUI écrit le graphe dans un bloc de texte du PNG, donc trois images identiques au pixel près ont trois sha256 de fichier différents (skill generer-asset, piège 4). Les deux empreintes ci-dessus sont d'ailleurs différentes l'une de l'autre, ce qui le montre. L'empreinte des pixels a été calculée DEUX FOIS, par deux implantations indépendantes — scripts/decliner-gobi.mjs (node:zlib) et PIL — et elles concordent exactement.",
+    "produitePar": {
+      "workflow": "production/workflows/gobi-declinaison.api.json",
+      "modele": "qwen_image_edit_2511_bf16.safetensors",
+      "clip": "qwen_2.5_vl_7b_fp8_scaled.safetensors",
+      "vae": "qwen_image_vae.safetensors",
+      "graine": 4004,
+      "pas": 20,
+      "cfg": 2.5,
+      "sampler": "euler",
+      "scheduler": "simple",
+      "denoise": 1,
+      "megapixels": 1,
+      "sourceImage": "production/personnages/gobi/references/flux_B-couleur_g6006_00001_.png",
+      "instruction": "add a glowing golden six-pointed star crystal centred on the creature's round belly, with a soft warm halo of light radiating from it onto the fur around it"
+    },
+    "validation": {
+      "decision": "D36",
+      "$quoi": "La canonique n'est pas une image de plus : c'est la CLÔTURE de l'étape A de D31, seule étape non automatisable du pipeline. L'utilisateur a fourni deux références et tranché — « un mélange des 2, en couleur c'est bien ». D36 précise la fusion : « le corps et l'expression joyeuse de la référence 1, plus le cœur de Pierre rayonnant de la référence 2 ». La canonique applique exactement cela : la référence 1 (flux_B-couleur_g6006, corps crème duveteux) reçoit par une seule passe d'édition l'étoile-cristal dorée lumineuse au ventre, qui n'appartenait qu'à la référence 2.",
+      "references": [
+        "production/personnages/gobi/references/flux_B-couleur_g6006_00001_.png",
+        "production/personnages/gobi/references/flux_B-couleur_g1001_00001_.png"
+      ],
+      "conforme": {
+        "corps rond duveteux, contour dentelé": true,
+        "couronne de 5 à 7 cristaux facettés de tailles inégales": true,
+        "grands yeux ronds très sombres à deux reflets": true,
+        "sourcils fins et arqués": true,
+        "deux bras courts, arrondis, levés et ouverts": true,
+        "deux petits pieds sous le corps": true,
+        "joues rondes et colorées": true,
+        "cœur de Pierre lumineux au ventre, seule source de lumière": true,
+        "en couleur (D29 : le trait noir ne concerne que les décors)": true
+      },
+      "ecartAssume": "La bouche de la canonique est un sourire FERMÉ, alors que la référence 1 montrait une bouche ouverte à deux dents. C'est le sourire de la référence 2, que D36 décrit comme « plus doux ». L'écart est conservé et non corrigé : D27 tranche que caractère n'est pas dureté, et la bouche ouverte à dents tire vers l'excitation là où le personnage doit rassurer un enfant qui déchiffre. Les états d'animation `joie` et `hesitation` rouvrent la bouche là où elle a du sens."
+    },
+    "palette": {
+      "$mesure": "Échantillonnée sur les pixels de la canonique, jamais choisie à la main. C'est la source des couleurs de contenu/assets/gobi/**/*.svg : un SVG qui inventerait sa teinte ferait dériver le personnage sans qu'aucun test ne le voie.",
+      "fond": "#FFF9DE",
+      "corpsClair": "#FFECC3",
+      "corpsOmbre": "#FFDDA8",
+      "pied": "#FECF98",
+      "trait": "#4B2207",
+      "sourcil": "#945125",
+      "oeil": "#140A05",
+      "joue": "#FF8355",
+      "coeurOr": "#F7C21B",
+      "coeurOrProfond": "#C47400",
+      "coeurHalo": "#FFDD6D",
+      "cristalBleu": "#BEE5F5",
+      "cristalBleuOmbre": "#ADC8E0",
+      "cristalClair": "#C5EAFA",
+      "cristalRose": "#FACBEB",
+      "ombreSol": "#D4BA87"
+    }
+  },
+  "declinaisons": [
+    {
+      "code": "repos",
+      "cible": "production/personnages/gobi/animation/repos.png",
+      "source": "production/personnages/gobi/canonique.png",
+      "sourceEmpreintePixels": "sha256:98b85bb34f34e702e030d11117358e614e9fe1ff15eae63686ef9641a78319dd",
+      "empreintePixels": "sha256:361afd49944a5bd47ff3bb17e110108f863f338d7861c66856600bc312aaf539",
+      "instruction": "lower both arms softly against the sides of the body and close the mouth into a small calm smile",
+      "graine": 4004,
+      "workflow": "production/workflows/gobi-declinaison.api.json"
+    },
+    {
+      "code": "joie",
+      "cible": "production/personnages/gobi/animation/joie.png",
+      "source": "production/personnages/gobi/canonique.png",
+      "sourceEmpreintePixels": "sha256:98b85bb34f34e702e030d11117358e614e9fe1ff15eae63686ef9641a78319dd",
+      "empreintePixels": "sha256:d82b30c9ba0a937ce72e3277a3989d56e615af033e123f7065ab1d0c74a8e344",
+      "instruction": "raise both arms high above the head, open the mouth into a wide smile and lift both eyebrows",
+      "graine": 4005,
+      "workflow": "production/workflows/gobi-declinaison.api.json"
+    },
+    {
+      "code": "aide",
+      "cible": "production/personnages/gobi/animation/aide.png",
+      "source": "production/personnages/gobi/canonique.png",
+      "sourceEmpreintePixels": "sha256:98b85bb34f34e702e030d11117358e614e9fe1ff15eae63686ef9641a78319dd",
+      "empreintePixels": "sha256:70aa1681880e93c9f46e38171a8205367ac3eee8078a9ba85b83b4c6c12c1d3c",
+      "instruction": "extend the left arm forward with the paw open toward the viewer, keep the other arm against the body",
+      "graine": 4006,
+      "workflow": "production/workflows/gobi-declinaison.api.json"
+    },
+    {
+      "code": "hesitation",
+      "cible": "production/personnages/gobi/animation/hesitation.png",
+      "source": "production/personnages/gobi/canonique.png",
+      "sourceEmpreintePixels": "sha256:98b85bb34f34e702e030d11117358e614e9fe1ff15eae63686ef9641a78319dd",
+      "empreintePixels": "sha256:ec54ccd0e0458005ebab20e685ab440fa7f8f4a1a6abb740f3c3e9d460fe979e",
+      "instruction": "tilt the head slightly to one side, bring one paw up near the cheek and make the mouth a small round o",
+      "graine": 4007,
+      "workflow": "production/workflows/gobi-declinaison.api.json"
+    },
+    {
+      "code": "apparition",
+      "cible": "production/personnages/gobi/animation/apparition.png",
+      "source": "production/personnages/gobi/canonique.png",
+      "sourceEmpreintePixels": "sha256:98b85bb34f34e702e030d11117358e614e9fe1ff15eae63686ef9641a78319dd",
+      "empreintePixels": "sha256:98df5730461805622410fb49bbe5e16c4e5f178aac760d9a7c63de8648ffb590",
+      "instruction": "make the whole creature smaller and centred, surrounded by a ring of small pale sparkles",
+      "graine": 4008,
+      "workflow": "production/workflows/gobi-declinaison.api.json"
+    },
+    {
+      "code": "stade-1",
+      "cible": "production/personnages/gobi/stades/stade-1.png",
+      "source": "production/personnages/gobi/canonique.png",
+      "sourceEmpreintePixels": "sha256:98b85bb34f34e702e030d11117358e614e9fe1ff15eae63686ef9641a78319dd",
+      "empreintePixels": "sha256:50f532689da0a511a2022f54bc0d3f473165c92607cb482b46db931498a907d5",
+      "instruction": "replace the crystal crown by a single small pale crystal bud on top of the head",
+      "graine": 4101,
+      "workflow": "production/workflows/gobi-declinaison.api.json"
+    },
+    {
+      "code": "stade-2",
+      "cible": "production/personnages/gobi/stades/stade-2.png",
+      "source": "production/personnages/gobi/canonique.png",
+      "sourceEmpreintePixels": "sha256:98b85bb34f34e702e030d11117358e614e9fe1ff15eae63686ef9641a78319dd",
+      "empreintePixels": "sha256:9cca1fbd469924b285e88fb4b1d9a88b864c0da828c6c2b05d4aa5627cd16be0",
+      "instruction": "replace the crystal crown by one small pale crystal bud with a thin bright line of light along it",
+      "graine": 4102,
+      "workflow": "production/workflows/gobi-declinaison.api.json"
+    },
+    {
+      "code": "stade-3",
+      "cible": "production/personnages/gobi/stades/stade-3.png",
+      "source": "production/personnages/gobi/canonique.png",
+      "sourceEmpreintePixels": "sha256:98b85bb34f34e702e030d11117358e614e9fe1ff15eae63686ef9641a78319dd",
+      "empreintePixels": "sha256:6392cf2d90c29e6929241a7db9ef85535b13b46c5b85cd85f7b4b3c11db8f9ff",
+      "instruction": "replace the crystal crown by one single tall pale blue crystal on top of the head",
+      "graine": 4103,
+      "workflow": "production/workflows/gobi-declinaison.api.json"
+    },
+    {
+      "code": "stade-4",
+      "cible": "production/personnages/gobi/stades/stade-4.png",
+      "source": "production/personnages/gobi/canonique.png",
+      "sourceEmpreintePixels": "sha256:98b85bb34f34e702e030d11117358e614e9fe1ff15eae63686ef9641a78319dd",
+      "empreintePixels": "sha256:d52888199b9a4722487e847eb8f686c681c2b6e74b323bdeea8485a0ba60170d",
+      "instruction": "replace the crystal crown by two crystals on top of the head, one tall and one short",
+      "graine": 4104,
+      "workflow": "production/workflows/gobi-declinaison.api.json"
+    },
+    {
+      "code": "stade-5",
+      "cible": "production/personnages/gobi/stades/stade-5.png",
+      "source": "production/personnages/gobi/canonique.png",
+      "sourceEmpreintePixels": "sha256:98b85bb34f34e702e030d11117358e614e9fe1ff15eae63686ef9641a78319dd",
+      "empreintePixels": "sha256:cafa147fd56c9f428e88e62e2c932616a68249ae814c4ab7364d0b4e767adba2",
+      "instruction": "replace the crystal crown by three crystals of uneven height on top of the head",
+      "graine": 4105,
+      "workflow": "production/workflows/gobi-declinaison.api.json"
+    },
+    {
+      "code": "stade-6",
+      "cible": "production/personnages/gobi/stades/stade-6.png",
+      "source": "production/personnages/gobi/canonique.png",
+      "sourceEmpreintePixels": "sha256:98b85bb34f34e702e030d11117358e614e9fe1ff15eae63686ef9641a78319dd",
+      "empreintePixels": "sha256:9c83348f5aaf64ad68b249a98038772f657f0baecc04ce1dcff8e01f1a335f65",
+      "instruction": "replace the crystal crown by five crystals of uneven height spread across the top of the head",
+      "graine": 4106,
+      "workflow": "production/workflows/gobi-declinaison.api.json"
+    },
+    {
+      "code": "stade-7",
+      "cible": "production/personnages/gobi/stades/stade-7.png",
+      "source": "production/personnages/gobi/canonique.png",
+      "sourceEmpreintePixels": "sha256:98b85bb34f34e702e030d11117358e614e9fe1ff15eae63686ef9641a78319dd",
+      "empreintePixels": "sha256:ccd07dd810c238b647267a7d0623dab4cc1f8e52c9e0b6285400573d55e10ad7",
+      "instruction": "replace the crystal crown by six crystals spread across the head and add a small violet crystal at the centre",
+      "graine": 4107,
+      "workflow": "production/workflows/gobi-declinaison.api.json"
+    },
+    {
+      "code": "stade-8",
+      "cible": "production/personnages/gobi/stades/stade-8.png",
+      "source": "production/personnages/gobi/canonique.png",
+      "sourceEmpreintePixels": "sha256:98b85bb34f34e702e030d11117358e614e9fe1ff15eae63686ef9641a78319dd",
+      "empreintePixels": "sha256:1ee8c04935e8a8227959ea43ac5f3106a50df4e833dbcc014c7e2c7f259e4b67",
+      "instruction": "replace the crystal crown by seven crystals spread across the head and add a small woven satchel over one shoulder",
+      "graine": 4108,
+      "workflow": "production/workflows/gobi-declinaison.api.json"
+    },
+    {
+      "code": "stade-9",
+      "cible": "production/personnages/gobi/stades/stade-9.png",
+      "source": "production/personnages/gobi/canonique.png",
+      "sourceEmpreintePixels": "sha256:98b85bb34f34e702e030d11117358e614e9fe1ff15eae63686ef9641a78319dd",
+      "empreintePixels": "sha256:fd7977237e3dca2e84e1f5768f4a3429aee3da44ba022db3763b4b8164c1032d",
+      "instruction": "replace the crystal crown by eight crystals spread across the head, the tallest one glowing pale gold",
+      "graine": 4109,
+      "workflow": "production/workflows/gobi-declinaison.api.json"
+    },
+    {
+      "code": "stade-10",
+      "cible": "production/personnages/gobi/stades/stade-10.png",
+      "source": "production/personnages/gobi/canonique.png",
+      "sourceEmpreintePixels": "sha256:98b85bb34f34e702e030d11117358e614e9fe1ff15eae63686ef9641a78319dd",
+      "empreintePixels": "sha256:5a378f3f1b0158ef9933ef38ae17b6d9bdb347e5eab544f0af529ef1c26e3b76",
+      "instruction": "replace the crystal crown by nine crystals forming a wide even crown across the whole head, all softly glowing",
+      "graine": 4110,
+      "workflow": "production/workflows/gobi-declinaison.api.json"
+    }
+  ]
+}

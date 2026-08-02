@@ -8,7 +8,7 @@
   "jeu": {
     "moteur": "place",
     "habillage": "clairiere.ecole-place",
-    "noeud": "clairiere-01",
+    "noeud": "clairiere-04",
     "etoiles": { "sansAide": true, "sansErreur": true },
     "aideGobi": ["relire-consigne", "souffle-syllabe", "montre-cible"],
     "contenu": {

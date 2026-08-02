@@ -35,9 +35,11 @@ import type { ComparaisonTypographie, ReglagesLecture } from '@pierre/partage/le
 import type { CodeCompagnon, EtatMaitrise, ItemLeitner, PlanSortie } from '@pierre/partage/pedagogie';
 import type { CodeObjetCampement, EtatMonde } from '@pierre/partage/monde';
 import type {
+  CatalogueGalerie,
   CodeExport,
   DecisionRelecture,
   EntreeRelecture,
+  EtatPorteParent,
   OuvertureParent,
   ResumeDashboard
 } from '@pierre/partage/parent';
@@ -246,6 +248,43 @@ export async function ouvrirZoneParent(code: string): Promise<OuvertureParent> {
   );
   jetonParent = ouverture.jeton;
   return ouverture;
+}
+
+// ────────────────────────────────────────── la porte parent (N5, finition v3 § 1.8 et § 8)
+
+/**
+ * L'état de la porte : y a-t-il un code, et la zone est-elle verrouillée ?
+ *
+ * **Aucun jeton n'est envoyé, et c'est nécessaire** : l'écran l'interroge AVANT d'avoir un
+ * code à taper. C'est cette réponse qui lui dit s'il doit DEMANDER un code ou en PROPOSER un
+ * — la distinction que la v1 ne pouvait pas faire, et faute de laquelle elle posait le code du
+ * foyer au premier enfant qui passait (contrat de finition v3 § 1.8).
+ */
+export function lireEtatPorteParent(): Promise<EtatPorteParent> {
+  return demander<EtatPorteParent>(CHEMINS_API.parentEtat);
+}
+
+/**
+ * Pose le code du foyer, ou le redéfinit quand un jeton est déjà en main.
+ *
+ * Lève une `ErreurReseau` de statut **409** quand un code existe déjà et qu'aucun jeton n'est
+ * posé : jamais un remplacement silencieux. Le jeton rendu est retenu comme celui d'`ouvrir`,
+ * pour que le parent n'ait pas à retaper le code qu'il vient de choisir.
+ */
+export async function definirCodeParent(code: string): Promise<OuvertureParent> {
+  const ouverture = await demander<OuvertureParent>(CHEMINS_API.parentDefinir, {
+    ...corpsJson({ code }),
+    headers: entetesParent()
+  });
+  jetonParent = ouverture.jeton;
+  return ouverture;
+}
+
+/** Le catalogue de la galerie parent — D34. Exige le jeton : invisible côté enfant. */
+export function lireGalerieParent(profil: IdProfil): Promise<CatalogueGalerie> {
+  return demander<CatalogueGalerie>(CHEMINS_API.parentGalerie(profil), {
+    headers: entetesParent()
+  });
 }
 
 export function lireDashboardParent(profil: IdProfil): Promise<DashboardParent> {

@@ -1,0 +1,10 @@
+{
+  "id": "galeries-04",
+  "region": "galeries",
+  "ordre": 4,
+  "exercice": "galeries-grottes-bd-01",
+  "prerequis": [
+    "galeries-03"
+  ],
+  "temps": "developpement"
+}

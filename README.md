@@ -10,7 +10,23 @@ maison.
 
 ---
 
+## Jouer : double-cliquer sur `demarrer.bat`
+
+**C'est la seule chose à savoir.** `demarrer.bat` est à la racine du dossier ; il vérifie Node,
+installe ce qui manque au premier lancement, compile, démarre le serveur et affiche l'adresse à
+ouvrir sur la tablette. Pour arrêter : `arreter.bat`, juste à côté.
+
+> Cette section est en tête **volontairement**, et un test le vérifie
+> (`tests/unitaires/lancement-decouvrable.test.ts`). Le lanceur était auparavant nommé pour la
+> première fois après trois commandes d'installation : un parent qui ouvre ce fichier pour faire
+> jouer son enfant tombait sur `git clone` avant de tomber sur le double-clic.
+
+---
+
 ## Installer, en trois commandes
+
+À ne faire qu'une fois, et seulement si le dossier vient d'être cloné — `demarrer.bat` sait
+s'installer tout seul.
 
 ```
 git clone <url-du-depot> LaPierreDesMots
@@ -93,6 +109,38 @@ jusqu'au pixel colorié sur la tablette.
 Ce qui **n'y est pas encore**, et c'est délibéré : l'audio (les consignes existent à l'écrit, le
 bouton « écouter » est câblé mais muet), la carte des six régions, le modèle pédagogique adaptatif,
 les cinq autres régions.
+
+## L'espace du parent, et son code à quatre chiffres
+
+L'espace du parent — le suivi, la galerie de tous les exercices, la relecture des contenus, les
+exports — se trouve **en pied de l'écran d'accueil**, sous les joueurs. Il est protégé par un code
+à quatre chiffres, et il n'apparaît nulle part dans le monde de l'enfant.
+
+**Le code se choisit, il ne se pose pas tout seul.**
+
+1. **Au tout premier passage**, l'écran demande de *choisir* le code du foyer. Les quatre chiffres
+   sont montrés **en clair** pendant la saisie : ce n'est pas encore une serrure, il n'y a rien à
+   cacher, et un code mal tapé qu'on n'aurait pas vu enfermerait le parent dehors.
+   **Note-le quelque part** — personne ne peut le retrouver à ta place.
+2. **Ensuite**, le même écran demande simplement de l'entrer, en pastilles masquées.
+3. **Pour en changer** : entrer l'ancien, puis choisir le nouveau. On ne remplace jamais un code
+   sans la preuve qu'on connaît le précédent.
+4. **Cinq codes faux** ferment l'espace un quart d'heure. L'écran dit *quand* il rouvre, jamais
+   que c'est faux — un enfant peut tomber là par hasard, il ne doit rien y trouver d'inquiétant.
+
+**Si le code est oublié**, il n'y a pas de récupération par courriel : le jeu est hors ligne et ne
+connaît personne. Le foyer garde la main sur ses données, et c'est un choix, pas un oubli. La
+remise à zéro est une opération d'administration, faite sur le PC qui héberge le jeu :
+
+```
+sqlite3 donnees/pierre.db "DELETE FROM code_parent;"
+```
+
+Au démarrage suivant, l'espace du parent redemande de choisir un code, comme au premier jour.
+**Rien d'autre n'est perdu** : ni les profils, ni la progression, ni le journal des tentatives.
+
+**Ce qui se joue depuis la galerie du parent n'entre jamais dans le suivi de l'enfant.** Un adulte
+peut essayer les vingt exercices d'affilée sans fausser une seule statistique.
 
 ## Les règles qui ne se négocient pas
 

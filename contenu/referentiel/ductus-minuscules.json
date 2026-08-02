@@ -1,0 +1,114 @@
+{
+  "$schema": "../schemas/ductus.schema.json",
+  "note": "Le ductus est un code commun, pas une convention libre (D33). Ce fichier declare le geste ; contenu/modeles-lettres/minuscules.json ne fait que le dessiner. Quand les deux divergent, c'est le modele qui a tort. On ne declare ici que ce qu'une source tranche : les 21 lettres restantes sont nommees dans `nonTranchees` plutot que devinees, parce qu'un ductus faux appris au CP est plus couteux qu'un ductus absent.",
+  "casse": "minuscule",
+  "source": "Docs/journal-des-decisions.md — D33, « Le sens du trace (ductus) est norme ». Signale par la mere de l'enfant apres essai reel : le d ne se trace pas dans le bon sens.",
+  "regles": [
+    {
+      "id": "rond-antihoraire",
+      "enonce": "Une lettre initiee par un rond part en haut a droite du rond et tourne en sens antihoraire, comme pour tracer un o. La boucle vient avant la haste.",
+      "source": "D33, texte : « pour le d : le geste part en haut a droite de la lettre, tourne dans le sens antihoraire — comme pour tracer un o — puis remonte. La boucle vient avant la haste. » Etendu aux lettres de la MEME famille gestuelle, jamais aux lettres qui lui ressemblent (D33, consequence 4).",
+      "lettres": [
+        {
+          "lettre": "a",
+          "premierTrait": "a-rond",
+          "depart": [54.0, 62.68],
+          "sens": "antihoraire"
+        },
+        {
+          "lettre": "d",
+          "premierTrait": "d-panse",
+          "depart": [70.0, 60.0],
+          "sens": "antihoraire",
+          "commentaire": "La lettre du retour du pere : « je n'ai pas reussi a faire le d ». Le modele livre partait de [70, 100], en bas, et tournait a l'horaire — l'exact inverse de ce geste."
+        },
+        {
+          "lettre": "g",
+          "premierTrait": "g-rond",
+          "depart": [54.0, 62.68],
+          "sens": "antihoraire"
+        },
+        {
+          "lettre": "o",
+          "premierTrait": "o-rond",
+          "depart": [64.14, 65.86],
+          "sens": "antihoraire",
+          "commentaire": "Le o est le geste de reference que D33 cite. Le modele livre partait du bas [50, 100] et tournait a l'horaire : le geste dont le d devait s'inspirer etait lui-meme a l'envers."
+        },
+        {
+          "lettre": "q",
+          "premierTrait": "q-panse",
+          "depart": [70.0, 60.0],
+          "sens": "antihoraire",
+          "commentaire": "Deja conforme dans le modele livre. C'est ce qui prouve que le d n'etait pas une convention assumee mais une inversion isolee : meme famille, meme axe, meme fichier, sens oppose."
+        }
+      ]
+    },
+    {
+      "id": "haste-descendante",
+      "enonce": "Une barre, une hampe, une queue, une jambe, un baton ou une canne se trace de haut en bas. Elle ne remonte jamais.",
+      "source": "D33, consequence 1 : le ductus est une donnee declaree, jamais deduite de la forme. Les hampes du p et du q etaient obtenues par reflexion haut-bas de celles du b et du d — une reflexion inverse le sens de parcours, et ces deux hastes se tracaient donc de bas en haut, contre l'usage de toutes les autres du fichier.",
+      "traits": [
+        "a-barre",
+        "b-hampe",
+        "d-hampe",
+        "e-barre",
+        "f-courbe",
+        "f-barre",
+        "g-queue",
+        "h-hampe",
+        "i-baton",
+        "j-baton",
+        "k-hampe",
+        "k-jambes",
+        "l-hampe",
+        "m-hampe",
+        "n-hampe",
+        "p-hampe",
+        "q-hampe",
+        "r-hampe",
+        "t-hampe",
+        "t-barre",
+        "u-jambe",
+        "x-oblique-1",
+        "x-oblique-2",
+        "y-queue"
+      ]
+    }
+  ],
+  "nonTranchees": [
+    {
+      "lettre": "b",
+      "raison": "D33 dit que le b s'initie par « la boucle haute et descendante » et qu'il n'est PAS de la famille du d, sans decrire le sens de sa panse. Le modele livre part du bas de la hampe et tourne en antihoraire, ce qui suit le crayon la ou il se trouve ; on n'y touche pas sans source. Question Q-C2-1."
+    },
+    {
+      "lettre": "c",
+      "raison": "Le modele livre a son ouverture EN HAUT, entre [37.14, 64.68] et [62.86, 64.68], la ou un c ouvre a droite. Le trace ne peut pas etre reoriente sans redessiner la lettre, et redessiner n'est pas une correction de ductus. Question Q-C2-2."
+    },
+    {
+      "lettre": "e",
+      "raison": "Initiee par la barre du milieu, pas par un rond : hors du champ de la regle rond-antihoraire. Le sens de l'arc qui suit n'est tranche par aucune source lue."
+    },
+    { "lettre": "f", "raison": "Famille des lettres a boucle, non decrite par D33." },
+    { "lettre": "h", "raison": "Famille des ponts, non decrite par D33." },
+    { "lettre": "i", "raison": "Famille des barres simples ; seule la regle haste-descendante s'y applique." },
+    { "lettre": "j", "raison": "Famille des barres simples ; seule la regle haste-descendante s'y applique." },
+    { "lettre": "k", "raison": "Famille des barres simples ; seule la regle haste-descendante s'y applique." },
+    { "lettre": "l", "raison": "Famille des barres simples ; seule la regle haste-descendante s'y applique." },
+    { "lettre": "m", "raison": "Famille des ponts, non decrite par D33." },
+    { "lettre": "n", "raison": "Famille des ponts, non decrite par D33." },
+    {
+      "lettre": "p",
+      "raison": "La panse du p n'est pas une initiation : la hampe vient d'abord, et la regle haste-descendante la couvre desormais. Le sens de la panse suit le crayon, arrive en haut de la hampe ; aucune source lue ne le tranche. Question Q-C2-1."
+    },
+    { "lettre": "r", "raison": "Famille des ponts, non decrite par D33." },
+    { "lettre": "s", "raison": "Famille du serpent, non decrite par D33." },
+    { "lettre": "t", "raison": "Famille des barres simples ; seule la regle haste-descendante s'y applique." },
+    { "lettre": "u", "raison": "Famille des creux, non decrite par D33." },
+    { "lettre": "v", "raison": "Famille des pointes, non decrite par D33." },
+    { "lettre": "w", "raison": "Famille des pointes, non decrite par D33." },
+    { "lettre": "x", "raison": "Deux obliques ; seule la regle haste-descendante s'y applique." },
+    { "lettre": "y", "raison": "Famille des pointes, non decrite par D33." },
+    { "lettre": "z", "raison": "Famille du zigzag, non decrite par D33." }
+  ]
+}

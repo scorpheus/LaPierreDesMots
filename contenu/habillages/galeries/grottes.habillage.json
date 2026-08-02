@@ -6,7 +6,7 @@
   "libelle": "Les trois grottes",
   "region": "galeries",
   "scene": {
-    "fichier": "habillages/galeries/grottes.svg",
+    "fichier": "habillages/galeries/grottes-v2.svg",
     "viewBox": "0 0 960 600",
     "calques": [
       {
@@ -22,55 +22,55 @@
             "id": "grotte-un",
             "libelle": "la première grotte",
             "centroide": [
-              190.0,
-              190.0
+              170,
+              420.3
             ],
-            "surface": 32000.0
+            "surface": 23980.6
           },
           {
             "id": "grotte-deux",
             "libelle": "la deuxième grotte",
             "centroide": [
-              480.0,
-              190.0
+              480,
+              403.9
             ],
-            "surface": 32000.0
+            "surface": 22435.8
           },
           {
             "id": "grotte-trois",
             "libelle": "la troisième grotte",
             "centroide": [
-              770.0,
-              190.0
+              800,
+              438
             ],
-            "surface": 32000.0
+            "surface": 21938.5
           },
           {
             "id": "stalactite",
             "libelle": "la stalactite",
             "centroide": [
-              190.0,
-              420.0
+              332,
+              152.5
             ],
-            "surface": 32000.0
+            "surface": 6448
           },
           {
             "id": "flaque",
             "libelle": "la flaque",
             "centroide": [
-              480.0,
-              420.0
+              480,
+              540
             ],
-            "surface": 32000.0
+            "surface": 33915.6
           },
           {
             "id": "voute",
             "libelle": "la voûte",
             "centroide": [
-              770.0,
-              420.0
+              451.9,
+              76.1
             ],
-            "surface": 32000.0
+            "surface": 64546.1
           }
         ]
       },

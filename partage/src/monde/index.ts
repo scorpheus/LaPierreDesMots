@@ -28,6 +28,17 @@ export {
   auditerCampement, campementDuDocument, objetsDuDocument, pointsDuDocument, sceneDuDocument,
 } from './campement.js';
 
+// ── AJOUT N6 (contrat de finition v3 § 4.6) ───────────────────────────────────────────────
+// ⚠ DÉFAUT DU PLAN GELÉ, signalé au rapport de N6. Le § 4.6 confie à N6
+// `partage/src/monde/etagere.ts` ET `client/src/monde/Etagere.tsx`, mais n'attribue à AUCUN
+// lot la ligne de barillet qui relie les deux : `@pierre/partage/monde` est le seul chemin
+// d'import du client vers `partage/` (`client/vite.config.ts:44`), et sans ces trois lignes
+// `construireEtagere` est un module que rien ne peut atteindre depuis le client. L'ajout est
+// STRICTEMENT additif — aucune ligne existante n'est touchée — et aucun autre lot ne déclare
+// ce fichier au § 4.
+export type { CaseEtagere, CatalogueFormes, Etagere } from './etagere.js';
+export { construireEtagere } from './etagere.js';
+
 export type { DefinitionRegion, DocumentRegions, EtatAfficheRegion } from './carte.js';
 export {
   appliquerEclat, carteInitiale, etatAfficheRegion, ouvrirCeQuiDoitLEtre, paralleleDuDocument,

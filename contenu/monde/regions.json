@@ -1,8 +1,8 @@
 {
-  "$commentaire": "Les six régions de la v2 § 3.3, DANS L'ORDRE DE LA PROGRESSION PHONOLOGIQUE — cet ordre est la progression, il ne se réarrange pas. Deux régions restent ouvertes en parallèle dès la troisième. `competences` ne cite que des codes présents dans `contenu/referentiel/competences.json` : le référentiel est un objet protégé (annexe P § 6.4), aucun lot n'y ajoute de code sans validation, et `tests/unitaires/carte.test.ts` échoue si une région en invente un. Les régions dont le référentiel ne porte pas encore les compétences déclarent une liste vide plutôt qu'un code mort. `noeuds` ne cite que des nœuds réellement livrés : c'est lui qui fait le pourcentage de recoloration, et un nœud fantôme rendrait la région à jamais incomplète.",
+  "$commentaire": "Les six régions de la v2 § 3.3, DANS L'ORDRE DE LA PROGRESSION PHONOLOGIQUE — cet ordre est la progression, il ne se réarrange pas. Deux régions restent ouvertes en parallèle dès la troisième. `competences` ne cite que des codes présents dans `contenu/referentiel/competences.json` : le référentiel est un objet protégé (annexe P § 6.4), aucun lot n'y ajoute de code sans validation, et `tests/unitaires/carte.test.ts` échoue si une région en invente un. Les régions dont le référentiel ne porte pas encore les compétences déclarent une liste vide plutôt qu'un code mort. `noeuds` ne cite que des nœuds réellement livrés : c'est lui qui fait le pourcentage de recoloration, et un nœud fantôme rendrait la région à jamais incomplète. ── LOT N7, POINT DE SYNCHRONISATION DU § 6.2 : « N8 veut y ajouter ses nœuds. Il ne le fait pas : N7 lit la liste des nœuds livrés et l inscrit. » Mesuré à l écriture : `ls contenu/noeuds/*.json` rend DOUZE fichiers (clairiere-01 à -06, galeries-01 à -06) alors que ce document n en citait que SEPT. Les cinq autres étaient écrits, validés, et INVISIBLES sur la carte : ni atteignables, ni comptés dans la recoloration. Même défaut que le § 1.5 du contrat sur les quatre nœuds de La Clairière, reparu après la livraison de N8. `tests/unitaires/ids-regions-stables.test.ts` croise désormais les deux populations et échoue dans les DEUX sens. ── LA SCÈNE POINTE SUR LA v2. ÉCART À SIGNALER À N4 : `client/src/ecrans/EcranCarte.tsx` ne lit PAS ce champ, il porte le chemin en dur ligne 32 (`SVG_CARTE = habillages/carte/carte-monde.svg`) ; mesuré, `scene` n a aucun consommateur dans partage/, client/ ni serveur/. Tant que cette ligne n est pas passée à `carte-monde-v2.svg`, l enfant voit encore les six hexagones identiques de la v1, et la v1 apparaît en « contenu mort » au contrôle P3.2 alors qu elle est le seul fichier réellement servi. Les deux fichiers portent les MÊMES six identifiants dans le MÊME ordre et les MÊMES six centres de marqueur (comparés fichier à fichier par le test) : le passage est un changement d une ligne, sans risque. `EcranCarte.tsx` appartient à N4 (§ 6.2), N7 ne l écrit pas. ── NOM DE FICHIER : le contrat § 4.7 écrit `carte-monde.v2.svg`, que le motif `cheminAsset` de `contenu/schemas/monde.schema.json` REFUSE (il n admet qu un seul point, celui de l extension). Le tiret est la seule forme que les deux documents gelés acceptent — voir Q-R7 de questions-en-attente.md.",
   "ouvertesEnParallele": 2,
   "scene": {
-    "fichier": "habillages/carte/carte-monde.svg",
+    "fichier": "habillages/carte/carte-monde-v2.svg",
     "viewBox": "0 0 1200 800"
   },
   "regions": [
@@ -11,25 +11,43 @@
       "ordre": 1,
       "libelle": "La Clairière",
       "domaine": "Voyelles, syllabes simples (CV), premiers mots outils",
-      "ambiance": "Prairie, lucioles, arbre-maison",
-      "competences": ["comp.consigne.simple", "comp.consigne.multiple", "lex.couleur"],
-      "noeuds": ["clairiere-01"]
+      "ambiance": "Une prairie où les lucioles se rallument à mesure que tu lis, autour de l’arbre-maison",
+      "competences": [
+        "comp.consigne.simple",
+        "comp.consigne.multiple",
+        "lex.couleur"
+      ],
+      "noeuds": [
+        "clairiere-01",
+        "clairiere-02",
+        "clairiere-03",
+        "clairiere-04",
+        "clairiere-05",
+        "clairiere-06"
+      ]
     },
     {
       "region": "galeries",
       "ordre": 2,
       "libelle": "Les Galeries",
       "domaine": "Syllabes CVC, confusions b/d/p/q, sons proches",
-      "ambiance": "Grottes de cristal, échos",
+      "ambiance": "Des grottes de cristal qui te renvoient en écho les sons que tu poses",
       "competences": [],
-      "noeuds": ["galeries-01", "galeries-02"]
+      "noeuds": [
+        "galeries-01",
+        "galeries-02",
+        "galeries-03",
+        "galeries-04",
+        "galeries-05",
+        "galeries-06"
+      ]
     },
     {
       "region": "marais-jumeau",
       "ordre": 3,
       "libelle": "Le Marais Jumeau",
       "domaine": "Nasales on/an/in/ou, digrammes",
-      "ambiance": "Marais brumeux, nénuphars, grenouilles",
+      "ambiance": "Un marais de nénuphars où les grenouilles répondent dès qu’on distingue deux sons jumeaux",
       "competences": [],
       "noeuds": []
     },
@@ -38,7 +56,7 @@
       "ordre": 4,
       "libelle": "La Forêt Muette",
       "domaine": "Lettres finales muettes, pluriels, liaisons",
-      "ambiance": "Forêt d’automne, feuilles qui tombent sur les lettres",
+      "ambiance": "Une forêt d’automne dont les feuilles rendent leurs lettres quand on les lit à voix haute",
       "competences": [],
       "noeuds": []
     },
@@ -47,7 +65,7 @@
       "ordre": 5,
       "libelle": "Le Volcan",
       "domaine": "Graphèmes rares : eau, ill, gn, ph, ch/qu",
-      "ambiance": "Roche, laves, forges",
+      "ambiance": "Des forges de lave où l’on reforge les graphèmes les plus rares, un par un",
       "competences": [],
       "noeuds": []
     },
@@ -56,7 +74,7 @@
       "ordre": 6,
       "libelle": "La Cité des Histoires",
       "domaine": "Compréhension : textes, inférences, chronologie",
-      "ambiance": "Ville-bibliothèque, ponts de livres",
+      "ambiance": "Une ville-bibliothèque dont les ponts de livres se rebâtissent sous les pas de qui lit",
       "competences": [],
       "noeuds": []
     }

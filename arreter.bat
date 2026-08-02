@@ -34,6 +34,8 @@ if errorlevel 1 goto :arret_rate
 del "%FICHIER_PID%" >nul 2>nul
 echo   Serveur arrete.
 echo.
+echo   Pour rejouer : double-cliquer sur demarrer.bat
+echo.
 exit /b 0
 
 rem ---------------------------------------------------------------------------
@@ -42,6 +44,8 @@ rem ---------------------------------------------------------------------------
 echo.
 echo   Aucun serveur en cours : %FICHIER_PID% n'existe pas.
 echo   Rien a arreter.
+echo.
+echo   Pour lancer le jeu : double-cliquer sur demarrer.bat
 echo.
 exit /b 0
 
@@ -57,6 +61,8 @@ exit /b 1
 echo   Le processus %PID% n'existe plus - le serveur etait deja arrete.
 del "%FICHIER_PID%" >nul 2>nul
 echo.
+echo   Pour relancer le jeu : double-cliquer sur demarrer.bat
+echo.
 exit /b 0
 
 :arret_rate
@@ -64,5 +70,7 @@ echo.
 echo   [X] Impossible d'arreter le processus %PID%.
 echo       Il appartient peut-etre a une autre session Windows.
 echo       Fermer la fenetre du serveur, ou utiliser le Gestionnaire des taches.
+echo.
+echo       Ensuite, pour rejouer : double-cliquer sur demarrer.bat
 echo.
 exit /b 1

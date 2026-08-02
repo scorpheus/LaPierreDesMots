@@ -8,19 +8,40 @@ vocabulaire métier l'est aussi (`Alea`, `Horloge`, `FournisseurVoix`, `tentativ
 tenir évite un dépôt à deux langues. Seules exceptions : les identifiants imposés par un outil
 externe.
 
-## État du dépôt : spécification seule, phase de brainstorming
+## État du dépôt : l'application existe et tourne
 
-**Il n'y a aucun code.** Le dépôt contient `Docs/` (4 fichiers) et ce CLAUDE.md. Pas de
-`package.json`, pas de `src/`, aucune des commandes citées plus bas n'existe encore. Git est
-initialisé (`main`, un commit, un `origin` configuré).
+> **Corrigé par le lot N5** (contrat de finition v3 § 1.1 et § 4.5). Cette section affirmait
+> « Il n'y a aucun code », « pas de `package.json`, pas de `src/` », et « ne pas écrire de code ».
+> C'était vrai le premier jour ; ça ne l'est plus depuis sept commits. Un document de cadrage qui
+> décrit un dépôt vide devant un dépôt plein est pire qu'un document absent : il fait prendre des
+> décisions justes pour un projet qui n'existe plus.
 
-Conséquence directe : **ne pas initialiser le projet, ne pas écrire de code, ne pas créer
-d'arborescence de son propre chef.** Tant que la phase de brainstorming dure, le travail porte sur
-les documents — les affiner, les confronter, en dériver des décisions. L'amorce du développement
-est une décision de l'utilisateur, pas une initiative.
+**Mesuré, jamais rapporté** — commandes exécutées le 2026-08-02, sorties citées :
 
-Corollaire de la dernière ligne de l'addendum : **ce qui n'est pas dans `Docs/` n'a pas été décidé.**
+```
+$ find partage/src -name "*.ts" | wc -l                            → 110
+$ find client/src \( -name "*.ts" -o -name "*.tsx" \) | wc -l      →  89
+$ find serveur/src -name "*.ts" | wc -l                            →  29
+$ find tests \( -name "*.test.ts" -o -name "*.test.tsx" -o -name "*.spec.ts" \) | wc -l → 82
+$ ls serveur/migrations/*.sql | wc -l                              →   6
+$ find contenu/exercices -name "*.json" | wc -l                    →   7
+$ ls contenu/noeuds/*.json | wc -l                                 →   7
+```
+
+**Les 14 moteurs existent tous** (`client/src/moteurs/`), la chaîne de test tourne, les migrations
+SQL sont numérotées et appliquées, `demarrer.bat` lance le jeu. **Toutes les commandes `npm run`
+listées plus bas existent.** Le travail en cours est la **finition**, décrite lot par lot dans
+[contrat-finition-v3.md](Docs/contrat-finition-v3.md) : le ductus, les voix, Gobi décliné, la
+séquence d'ouverture, la zone parent, le campement, le décor, le contenu.
+
+**Ces chiffres périment.** Plusieurs campagnes écrivent en parallèle sur ce dépôt ; le contrat de
+finition v3 § 11, point 6, en fait une règle qui vaut plus que lui-même : *un lot relance les
+commandes ci-dessus avant sa première écriture, et signale tout écart au lieu de recopier ce
+document.* Un document gelé décrit un dépôt à un instant ; il ne le fige pas.
+
+Ce qui reste vrai, et qui n'a pas changé : **ce qui n'est pas dans `Docs/` n'a pas été décidé.**
 Une valeur, un nom de fichier, un seuil qui n'y figure pas est à proposer, jamais à supposer acquis.
+Et les quatre documents de référence ne se modifient pas sans validation (voir plus bas).
 
 ## Les documents et leur autorité
 
@@ -184,9 +205,13 @@ Annexe T § 6, à appliquer telle quelle :
    d'annoncer la fin. Ne jamais annoncer « terminé » sans avoir exécuté `npm run verifier` dans le
    même tour.
 
-## Commandes — **prévues, aucune n'existe encore**
+## Commandes — **elles existent toutes**
 
-Contrat cible de l'annexe T § 5, à honorer à l'initialisation du dépôt :
+> Corrigé par N5 : le titre disait « prévues, aucune n'existe encore ». Mesuré sur
+> `package.json`, sortie citée : **7 / 7 présentes** sur les sept ci-dessous, et **21 scripts**
+> en tout.
+
+Contrat de l'annexe T § 5, honoré :
 
 ```
 npm run test              # T1 + T2, sans watch

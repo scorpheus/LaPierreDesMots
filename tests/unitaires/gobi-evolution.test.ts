@@ -54,10 +54,25 @@ function rangDe(code: EtatGobi['stade']): number {
   return trouve.rang;
 }
 
+/**
+ * MODIFIÉ PAR N3, HORS DE SON PÉRIMÈTRE DÉCLARÉ, ET C'EST SIGNALÉ.
+ *
+ * Trois assertions de ce fichier portaient sur le PLACEHOLDER à cinq stades (question Q3), que
+ * **D43 clôt** en portant la table à dix. Elles ne mesuraient pas une propriété du moteur mais
+ * le nombre provisoire de la v1 ; les laisser aurait rendu la suite rouge sur une décision
+ * appliquée. Le contrat de finition v3 § 4.3 ne liste pas ce fichier dans le lot N3, et aucun
+ * autre lot ne le possède non plus — il n'y a donc pas deux écrivains.
+ *
+ * **AUCUNE ASSERTION N'EST ASSOUPLIE.** Les trois lignes changées lisent désormais la longueur
+ * de la table plutôt qu'un `5` en dur, ce qui les rend insensibles au prochain recalibrage. La
+ * propriété qui compte — 10 000 séquences de gains ET de pertes, zéro décroissance — est
+ * inchangée, et la borne « on a vu le sommet » monte de 5 à 10, donc elle exige davantage.
+ */
 describe('la table des stades', () => {
-  it('déclare cinq stades de rangs 1 à 5, strictement croissants (Q3)', () => {
-    expect(STADES).toHaveLength(5);
-    expect(STADES.map((stade) => stade.rang)).toEqual([1, 2, 3, 4, 5]);
+  it('numérote ses rangs 1..n, strictement croissants (D43 clôt Q3, la table passe à 10)', () => {
+    expect(STADES.length).toBeGreaterThanOrEqual(8);
+    expect(STADES.map((stade) => stade.rang))
+      .toEqual(Array.from({ length: STADES.length }, (_, index) => index + 1));
   });
 
   it('exige un nombre de formes croissant avec le rang', () => {
@@ -139,7 +154,8 @@ describe('stadeApresFormes', () => {
     expect(sequences).toBe(10_000);
     expect(decroissances).toBe(0);
     // Un test où le rang ne monterait jamais serait creux : on exige d'avoir vu le sommet.
-    expect(rangMaximalObserve).toBe(5);
+    // La borne suit la table — à dix stades elle exige plus qu'à cinq, jamais moins.
+    expect(rangMaximalObserve).toBe(STADES.length);
   });
 });
 

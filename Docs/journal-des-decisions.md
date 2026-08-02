@@ -592,6 +592,275 @@ a été purement ignorée.** L'hypothèse reste à trancher proprement — mais 
 **Livrables** : `Docs/guide-comfyui.md`, `production/workflows/*.api.json` figés, et le skill
 `generer-asset` — pour qu'aucune session ne refasse les cinq séries.
 
+### D33. Le sens du tracé (ductus) est normé — le moteur `trace` doit le respecter
+
+**Signalé par la mère de l'enfant, après essai réel : le `d` ne se trace pas dans le bon sens.**
+Vérifié, elle a raison, et l'enjeu dépasse l'exactitude.
+
+**Ce que dit la littérature de l'Éducation nationale :**
+
+- Le **ductus** — le sens d'écriture des lettres — est un **code commun**, pas une convention libre.
+- **Mal appris dès le départ, un ductus incorrect est très difficile à corriger plus tard** et peut
+  bloquer durablement la vitesse d'écriture. **Le CP est l'année clé** de l'automatisation du geste.
+- Les lettres cursives françaises se regroupent en **4 familles gestuelles** selon le mouvement qui
+  les initie. On travaille une famille à la fois, pour automatiser le geste de base avant de passer
+  à la suivante.
+- Pour le **`d`** : le geste part **en haut à droite** de la lettre, **tourne dans le sens
+  antihoraire** — comme pour tracer un `o` — puis remonte. La boucle vient **avant** la haste.
+
+**Pourquoi c'est le point le plus important du retour, et pas un détail :**
+
+`b` et `d` **n'appartiennent pas à la même famille gestuelle**. Le `b` s'initie par la boucle haute
+et descendante ; le `d` par la rotation antihoraire du `o`. **C'est précisément ce geste différent
+qui les distingue** — et c'est le seul levier réellement documenté contre la confusion miroir
+(D23 : « la pratique du geste d'écriture accélère l'apprentissage de la lecture »).
+
+> Un moteur de tracé qui enseigne un mauvais sens **détruit le mécanisme même** pour lequel il a été
+> ajouté. Il vaudrait mieux ne pas l'avoir que l'avoir faux.
+
+**Conséquences opposables :**
+
+1. Le ductus de chaque lettre est une **donnée déclarée** (`contenu/referentiel/ductus-*.json`),
+   avec point de départ, sens de rotation et ordre des traits — jamais dérivé de la forme.
+2. **Un tracé au bon endroit mais dans le mauvais sens n'est pas une réussite.** La validation porte
+   sur le geste, pas seulement sur le résultat.
+3. Le guidage montre le sens : point de départ marqué, flèche de direction, tracé fantôme animé.
+4. **Regrouper les lettres par famille gestuelle**, jamais par ressemblance visuelle.
+5. Cette exigence prime sur le desserrage des tolérances : on assouplit la **précision** (R16 —
+   aucune coordination fine), jamais le **sens**.
+
+**Source** :
+[Le geste d'écriture et la copie — Éduscol](https://eduscol.education.fr/document/14380/download) ·
+[L'écriture à l'école maternelle — Éduscol](https://eduscol.education.gouv.fr/sites/default/files/document/ressc1ecritureforme-lettres456435pdf-74256.pdf) ·
+[Le ductus, code d'écriture cursive](https://lutinsdematernelle.over-blog.com/2017/06/ecriture-cursive-le-code-ou-ductus.html) ·
+[Progression écriture cursive CP (ac-dijon)](https://circo89-avallon.ac-dijon.fr/IMG/pdf/progression_ecriture_cp_beaune.pdf)
+
+**Note d'orchestration** : la campagne « retour utilisateur 1 » était déjà en vol quand ce point est
+arrivé. Son lot C2 desserre les tolérances **sans connaître le ductus** — son résultat devra donc
+être repris, pas rejeté : le desserrage reste juste, le sens est à ajouter.
+
+### D34. Un mode « parent testeur » — accès à tous les exercices depuis la zone parent
+
+**Demandé après essai réel, en tant que testeur ET parent.**
+
+Le crochet `window.__test` existe déjà mais il est **absent du bundle de production** (annexe T
+§ 8.3), et il doit le rester : « un enfant curieux finira par trouver `allerAuNoeud` — et
+honnêtement, il aura raison d'essayer ».
+
+La réponse n'est donc pas de le rouvrir, mais d'ajouter une **galerie d'exercices dans la zone
+parent**, déjà protégée par code à 4 chiffres :
+
+- **tout exercice du catalogue est lançable directement**, quel que soit l'état de progression ;
+- **rien de ce qui s'y joue n'est journalisé** dans `tentatives` — sinon un parent qui teste fausse
+  les statistiques de l'enfant, et le journal cesse de faire foi ;
+- chaque exercice s'accompagne de son moteur, son habillage, ses compétences et son état de
+  validation, pour servir aussi d'**écran de relecture** (annexe P § 6.3) ;
+- l'entrée est **invisible depuis l'espace enfant**.
+
+Bénéfice au-delà du confort : c'est ce qui rend R12 et R13 vérifiables **à l'œil** — trois moteurs
+par compétence, trois habillages par moteur — au lieu de reposer uniquement sur un test.
+
+### D35. Il manque la séquence d'ouverture — « le monde t'attend en gris » n'est pas une promesse
+
+**Constaté à l'essai** : *« je n'ai pas compris la phrase "le monde t'attend en gris", c'est pas
+joyeux pour l'instant, mais il manque la séquence d'intro sûrement »*. Diagnostic exact.
+
+Sans le récit qui la précède, cette phrase énonce une **perte**. Avec lui, elle énonce une
+**mission** : la Pierre s'est brisée, les noms s'effacent, ce qui n'a plus de nom perd ses
+couleurs — *et toi, tu sais encore lire les noms, alors les habitants t'attendent* (v2 § 3.1).
+C'est exactement le même fait, retourné de l'absence vers le pouvoir d'agir.
+
+**Conséquences :**
+
+1. **Une séquence d'ouverture est nécessaire, pas décorative.** Elle porte le sens de tout le
+   mécanisme de recoloration : sans elle, le gris est une tristesse ; avec elle, c'est un travail
+   qui attend l'enfant.
+2. **Toute formulation est relue sous cet angle** : le jeu ne dit jamais ce qui manque, il dit
+   toujours ce que l'enfant peut rendre. Jamais « le monde est gris », toujours « tu peux lui
+   rendre ses couleurs ». C'est la même règle que la non-punition de l'erreur (R14), appliquée au
+   texte.
+3. Elle est **passable au tap** dès la première seconde, et **rejouable** depuis le campement — un
+   enfant qui n'a pas suivi la première fois doit pouvoir y revenir seul.
+4. C'est le poste où une vidéo générée se justifie (D22 : vue une fois, sautable, aucun état à
+   refléter).
+
+### D36. Gobi — forme canonique validée. Clôt l'étape A de D31.
+
+**L'utilisateur a fourni deux images de référence et tranché : « un mélange des 2, en couleur
+c'est bien ».** C'est le jugement humain que D31 désignait comme non automatisable, et il débloque
+toute la production d'assets.
+
+**Ce que les deux références portent en commun** — et qui est désormais le canon :
+
+| Élément | Description |
+|---|---|
+| **Corps** | Une sphère duveteuse, contour dentelé qui donne le pelage à l'œil. Aucun angle sur la chair |
+| **Crête** | 5 à 7 **cristaux facettés** de tailles inégales, plantés sur le crâne comme une couronne |
+| **Yeux** | Grands, ronds, très sombres, deux reflets. Sourcils **fins et arqués** — c'est eux qui donnent la douceur |
+| **Bras** | Deux, courts, arrondis, **levés et ouverts** — posture d'accueil (conforme à D24) |
+| **Pieds** | Deux, petits, sous le corps |
+| **Joues** | Rondes et colorées |
+
+**Ce que chaque référence apporte en propre, et qu'il faut fusionner :**
+
+- **Référence 1** (corps crème) : la **matière duveteuse** très lisible, la bouche ouverte avec deux
+  petites dents, l'énergie joyeuse. Cristaux froids — bleus, violets, rose.
+- **Référence 2** (corps mauve) : le **cœur de Pierre**, une étoile-cristal jaune **lumineuse** au
+  centre du ventre qui rayonne — c'est l'élément narratif qui manquait à la première. Sourire fermé,
+  plus doux. Cristaux chauds — verts, jaunes.
+
+**La fusion retenue** : le corps et l'expression joyeuse de la référence 1, **plus le cœur de Pierre
+rayonnant** de la référence 2. Le cœur n'est pas décoratif : c'est le lien à la Pierre brisée, et la
+seule source lumineuse autorisée sur le personnage.
+
+**Ce que cela confirme :**
+
+1. **La couleur est validée pour les personnages** — D29 tenait. Le trait noir sur blanc ne
+   concerne que les décors, parce qu'eux se recolorient.
+2. **Le registre est tranché** : rond, doux, chaleureux, expressif. Les séries 4 et 5 (héros
+   élancé, super-héros) sont abandonnées.
+3. **Le cristal porte les déclinaisons**, comme prévu — sa forme et sa couleur changent par
+   graphème maîtrisé, le corps jamais. Les 25 formes et les 5 stades (D28) se construisent dessus.
+
+**Étape B, maintenant possible** : verrouiller cette image et la décliner par Qwen-Image-Edit ou
+Flux Kontext (D32). Rappel de la règle : **toute déclinaison repart de l'image canonique**, jamais
+de la déclinaison précédente — après six éditions en chaîne, la dégradation est visible.
+
+**Prérequis matériel** : les deux références doivent être déposées sur disque dans
+`production/personnages/gobi/reference/`. Sans fichier, aucun verrouillage n'est possible.
+
+### D37 à D40 — arbitrages du 2026-08-02
+
+**D37. Le nuancier de 11 couleurs est validé.** Rouge, orange, jaune, vert, bleu, violet, rose,
+brun, noir, blanc, gris — les godets que l'enfant tape. Il couvre toutes les consignes des fiches
+d'origine sans exception. **La palette d'interface (7 jetons, v2 § 9.2) reste intacte** : ce sont
+deux choses distinctes, l'une habille le jeu, l'autre sert à colorier. Clôt l'addition non validée
+signalée par le contrat v1.
+
+**D38. Les deux régions sont ouvertes d'emblée.** Amende la v2 § 3.3, qui n'ouvrait deux régions en
+parallèle qu'à partir de la troisième. Motif : l'enfant déchiffre encore (D14) et **les Galeries
+travaillent précisément les confusions `b`/`d`/`p`/`q` dont il a besoin maintenant** (D23) ;
+l'attendre serait lui refuser le contenu le plus utile. Second motif, du père : « il faut qu'il
+puisse changer de type d'exercice et voir la suite » — l'autonomie du choix est elle-même un moteur
+de motivation.
+
+**D39. Les captures visuelles de référence attendent le nouveau graphisme.** Le décor est en cours
+de réécriture et Gobi va être refait : figer des références maintenant serait les refaire aussitôt.
+**`test:visuel` reste donc rouge, et c'est déclaré comme tel** — la chaîne dit la vérité plutôt que
+d'être verte à bon compte. Aucune référence n'est figée sans validation humaine (annexe T § 6).
+
+**D40. Le nom « La Pierre des Mots » est conservé.** Clôt le point ouvert O1. Il n'est plus un titre
+de travail.
+
+### D41 à D44 — second lot d'arbitrages, 2026-08-02
+
+**D41. Voix entièrement synthétiques.** Sept locuteurs produits par Chatterbox ou XTTS-v2 (à
+installer, autorisation à demander). **Aucun enregistrement familial** — écarte la suggestion de
+l'annexe P § 4.2. Conséquence assumée : on perd le levier de la voix familière, que l'annexe
+décrivait comme « sans commune mesure » ; la porte reste ouverte, cloner une voix plus tard ne
+change aucune interface.
+
+**D42. Le bouton « écouter » est masqué tant qu'aucun audio n'existe** pour la consigne. Rien ne
+ment, rien ne déçoit — un bouton qui ne répond pas casse la confiance plus sûrement qu'un bouton
+absent. **Conséquence à ne pas oublier : R15 reste visiblement non satisfaite**, et l'enfant n'a
+aucune aide à la lecture d'ici la livraison des voix. Cela **remonte la priorité du lot voix** : ce
+n'est plus une dette confortable, c'est un manque que rien ne compense.
+
+**D43. Gobi évolue en 8 à 10 stades, à petits pas.** Chaque stade est un changement discret — un
+cristal de plus, une teinte qui glisse. Progression très fréquente et toujours visible, au prix
+d'aucun moment spectaculaire. Remplace le placeholder à 5 stades. L'évolution reste
+**irréversible** (un acquis n'est jamais repris) et **portée par le cristal**, jamais par le corps
+(D28, D36).
+
+**D44. Les formes de Gobi se collectionnent sur une étagère à cases vides.** Comme un album de
+vignettes : les emplacements non gagnés sont **en creux et visibles**. C'est exactement le principe
+retenu en D25 — *ce qui motive, c'est de voir la case suivante encore vide*. Le père n'avait pas
+compris les formes du campement : le remède n'est pas graphique, c'est de montrer le manque.
+
+### D45. Le campement est conservé tel quel — le pari d'Adibou est maintenu
+
+L'orchestrateur proposait de le supprimer au profit de la carte, jugeant l'incompréhension du père
+comme un verdict de conception. **Arbitrage contraire, et il fait autorité** : le hub reste
+central, avec ses 25 points d'interaction gratuits (R11) et ses 30 objets qui réagissent au
+toucher.
+
+**Le motif retenu** : l'incompréhension vient des **assets bouchons**, pas du concept. Un campement
+peuplé de rectangles gris n'est pas un lieu — c'est un menu déguisé. Le juger avant que le
+graphisme n'existe, c'était juger la mauvaise chose.
+
+**À rejuger une fois le graphisme refait**, et pas avant : si le père ne le comprend toujours pas
+avec de vrais décors, alors seulement la question de conception se posera.
+
+### D46. La durée d'une session est variable — le jeu doit être bon en 5 minutes comme en 30
+
+*« Ça dépendra de son envie »*. Ce n'est pas une non-réponse, c'est une contrainte de conception, et
+elle **réconcilie D45 avec le risque qu'il portait** :
+
+1. **Le campement n'est JAMAIS sur le chemin obligatoire vers le jeu.** Depuis l'ouverture de
+   l'application, partir en sortie doit se faire en **un tap**, sans traverser le hub. Un enfant qui
+   a cinq minutes ne doit pas les dépenser en trajet.
+2. **Mais le campement récompense celui qui s'attarde** : c'est là que vont les interactions
+   gratuites, la collection, le coloriage libre, les compagnons. Il est *offert*, jamais *imposé*.
+3. **Aucun écran intermédiaire obligatoire**, nulle part. Chaque écran qui s'interpose entre l'envie
+   de jouer et le jeu mange du temps de lecture.
+
+C'est la formulation qui permet de garder le pari d'Adibou sans en payer le coût sur les sessions
+courtes.
+
+### D47. Le ductus livré était bien faux — mesuré, et l'erreur est isolée
+
+D33 était fondé sur la littérature. **La mesure confirme le défaut dans le code livré.**
+
+Aire signée sur `contenu/modeles-lettres/minuscules.json` (repère à `y` vers le bas, aire > 0 =
+horaire) :
+
+| Lettre | Départ du rond | Sens tracé | Conforme à D33 ? |
+|---|---|---|---|
+| **`d`** | `[70, 100]` — **en bas** | **horaire** | **faux sur les deux points** |
+| `q` | `[70, 60]` — en haut | antihoraire | **conforme** |
+| `a`, `g` | `[60.59, 70]` | horaire | faux sur le sens |
+| `o` | `[50, 100]` | horaire | faux sur les deux points |
+
+Le `d` livré est **exactement le parcours inverse** de celui de l'école. Et dans le **même
+fichier**, `q` — même famille gestuelle — est juste : ce n'est donc pas une convention assumée,
+c'est une **inversion isolée**. Conséquence mesurée : un enfant qui trace le `d` au geste de
+l'école reçoit `sens-inverse`, **paie une étoile**, et **fait remonter au dashboard une confusion
+`b`/`d` qu'il n'a pas commise**. Le capteur salissait la donnée qu'il devait produire.
+
+### D48. Pourquoi le bot singe n'a pas vu l'écran sans issue — auditer les OBJETS, pas les occurrences
+
+`tests/e2e/singe.spec.ts` assertait `sante.interactifs > 0`. Sur le nœud `trace` il y a deux
+éléments interactifs — Écouter, aide de Gobi — donc **le singe était vert sur un écran d'où l'on ne
+peut pas sortir**.
+
+> **Compter les éléments interactifs n'est pas compter les sorties.**
+
+C'est le mode d'échec « auditer les occurrences au lieu des objets » : on recense ce que l'attribut
+donne à voir, au lieu d'énumérer les objets qui devraient porter la propriété. Le test correct
+énumère **les écrans atteignables** et vérifie, pour chacun, qu'**au moins un élément mène
+ailleurs** — mesuré : **8 écrans audités, 2 sans issue**, les deux nœuds.
+
+**Règle générale** : une assertion de robustesse porte sur la propriété qui compte, jamais sur un
+indice corrélé. `interactifs > 0` est un indice ; `mène ailleurs` est la propriété.
+
+### D49. Trois défauts en chaîne rendaient l'aide inatteignable
+
+Découverts ensemble, ils se renforçaient :
+
+1. `trait-hors-ordre` est **du code mort** — un trait ultérieur tombe toujours sur
+   `depart-eloigne` avant lui. Le seul motif capable de dire « commence par le rond » est
+   inatteignable.
+2. `depart-eloigne` **ne compte pas d'erreur** — donc `nbErreurs` reste à 0 après cinq essais.
+3. Donc `erreursAvantIndice: 2` **ne se déclenche jamais** : l'aide n'arrive qu'après **45 s
+   d'attente**… sur un écran sans sortie.
+
+Un enfant qui s'y trompait était donc coincé, sans aide et sans issue. Aucun des trois défauts
+n'était visible seul.
+
+**Et la tolérance de départ faisait 48 px** (2 × 24) là où R16 exige des cibles de 64 px : un `d`
+correct posé 20 px à côté était refusé. D33 autorise explicitement à assouplir la précision — jamais
+le sens.
+
 ---
 
 ## Points encore ouverts

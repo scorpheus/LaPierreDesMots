@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" width="960" height="600" role="img" aria-label="Les trois grottes">
+  <title>Les trois grottes</title>
+  <!--
+    DÉCOR v2 — lot N7. Les Galeries cessent d'être six rectangles.
+
+    LE DÉFAUT DE LA v1, MESURÉ : `grottes.svg` dessinait six `<rect>` de 200 × 160 arrondis
+    à 12, tous identiques, tous de surface 32000, simplement translatés. « La première
+    grotte » et « la voûte » y étaient le MÊME dessin. C'est le défaut jumeau de celui de la
+    maîtresse, et il n'avait jamais été relevé parce que personne n'a encore joué les Galeries.
+
+    Les six `id` gelés sont conservés à la lettre. La scène se lit maintenant comme une
+    grotte : la voûte coiffe le haut, la stalactite pend du plafond (plus haute que large),
+    la flaque s'étale au sol, et les trois bouches de grotte ont trois tailles et trois
+    formes différentes. `decor-reconnaissable.test.ts` mesure les six silhouettes et les six
+    surfaces : aucune paire ne se ressemble.
+  -->
+  <g id="calque-fond">
+    <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
+  </g>
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round">
+    <path id="voute" class="zone" data-region-svg="voute" fill="#8E97A8" fill-rule="evenodd" d="M30,250 L30,250 L36.84,213.53 L57.14,178.18 L90.29,145 L135.28,115.01 L190.75,89.13 L255,68.13 L326.09,52.66 L401.86,43.19 L480,40 L558.14,43.19 L633.91,52.66 L705,68.13 L769.25,89.13 L824.72,115.01 L869.71,145 L902.86,178.18 L923.16,213.53 L930,250 L930,250 Z M100,250 L100,250 L105.77,225.69 L122.92,202.12 L150.91,180 L188.9,160.01 L235.74,142.75 L290,128.76 L350.03,118.44 L414.01,112.13 L480,110 L545.99,112.13 L609.97,118.44 L670,128.76 L724.26,142.75 L771.1,160.01 L809.09,180 L837.08,202.12 L854.23,225.69 L860,250 L860,250 Z"/>
+    <path id="stalactite" class="zone" data-region-svg="stalactite" fill="#8E97A8" fill-rule="evenodd" d="M300,120 L362,130 L340,260 L332,380 L322,258 Z"/>
+    <path id="grotte-un" class="zone" data-region-svg="grotte-un" fill="#8E97A8" fill-rule="evenodd" d="M90,500 L90,420 L92.73,396.71 L100.72,375 L113.43,356.36 L130,342.06 L149.29,333.07 L170,330 L190.71,333.07 L210,342.06 L226.57,356.36 L239.28,375 L247.27,396.71 L250,420 L250,500 Z"/>
+    <path id="grotte-deux" class="zone" data-region-svg="grotte-deux" fill="#8E97A8" fill-rule="evenodd" d="M420,500 L420,400 L422.04,371.01 L428.04,344 L437.57,320.8 L450,303.01 L464.47,291.82 L480,288 L495.53,291.82 L510,303.01 L522.43,320.8 L531.96,344 L537.96,371.01 L540,400 L540,500 Z"/>
+    <path id="grotte-trois" class="zone" data-region-svg="grotte-trois" fill="#8E97A8" fill-rule="evenodd" d="M700,500 L700,440 L703.41,423.44 L713.4,408 L729.29,394.75 L750,384.57 L774.12,378.18 L800,376 L825.88,378.18 L850,384.57 L870.71,394.75 L886.6,408 L896.59,423.44 L900,440 L900,500 Z"/>
+    <path id="flaque" class="zone" data-region-svg="flaque" fill="#8E97A8" fill-rule="evenodd" d="M480,498 L547.29,499.43 L610,503.63 L663.85,510.3 L705.17,519 L731.14,529.13 L740,540 L731.14,550.87 L705.17,561 L663.85,569.7 L610,576.37 L547.29,580.57 L480,582 L412.71,580.57 L350,576.37 L296.15,569.7 L254.83,561 L228.86,550.87 L220,540 L228.86,529.13 L254.83,519 L296.15,510.3 L350,503.63 L412.71,499.43 Z"/>
+  </g>
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round">
+    <path class="trait" d="M0,500 L960,500"/>
+    <path class="trait" d="M40,250 L40,500"/>
+    <path class="trait" d="M920,250 L920,500"/>
+    <path class="trait" d="M340,382 L340,404"/>
+    <path class="trait" d="M240,560 L720,560"/>
+    <path class="trait" d="M120,420 L120,500"/>
+    <path class="trait" d="M220,420 L220,500"/>
+  </g>
+</svg>

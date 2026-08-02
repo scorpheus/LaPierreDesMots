@@ -13,6 +13,7 @@ export type {
   TraitLettre,
   ModeleLettre,
   ContenuTrace,
+  AideTrace,
   EchantillonGeste,
   EtatTrait,
   EtatTrace,

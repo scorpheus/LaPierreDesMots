@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800" role="img" aria-label="Un enfant lit un nom, et la couleur revient sur le monde">
+  <title>Toi, tu sais lire les noms</title>
+  <desc>PLACEHOLDER — decor bouchon ecrit a la main (D2), lot N4, tableau 3 sur 5 (D35). C est le tableau qui donne le pouvoir : l enfant est au centre, le mot qu il lit est grand et lisible, et la couleur part de sa bouche vers le pre. Le mot montre est « PRE » — trois lettres, deux graphemes simples, au niveau de dechiffrage de D14 : le tableau doit etre LU par l enfant, pas seulement regarde. Toutes les formes sont fermees par un Z.</desc>
+  <g id="calque-fond">
+    <path id="fond" d="M0,0 L1200,0 L1200,800 L0,800 Z" fill="#FFF6E3"/>
+  </g>
+  <g id="calque-pre" stroke="#1B2440" stroke-width="6" stroke-linejoin="round">
+    <path id="pre-rendu" d="M640,600 L1200,540 L1200,800 L640,800 Z" fill="#3DDC97"/>
+    <path id="pre-en-attente" d="M0,620 L640,600 L640,800 L0,800 Z" fill="#C6CBD4"/>
+  </g>
+  <g id="calque-enfant" stroke="#1B2440" stroke-width="6" stroke-linejoin="round">
+    <path id="corps" d="M300,620 L300,440 L420,440 L420,620 Z" fill="#8FD6F2"/>
+    <path id="tete" d="M360,270 L424,334 L360,398 L296,334 Z" fill="#F2C79A"/>
+    <path id="bras" d="M420,470 L560,440 L568,478 L428,508 Z" fill="#F2C79A"/>
+  </g>
+  <g id="calque-livre" stroke="#1B2440" stroke-width="6" stroke-linejoin="round">
+    <path id="livre" d="M540,400 L740,376 L740,516 L540,540 Z" fill="#FFF6E3"/>
+  </g>
+  <g id="calque-mot" fill="#1B2440" font-family="Andika, sans-serif" font-size="86" font-weight="700" text-anchor="middle">
+    <text x="640" y="490">pré</text>
+  </g>
+  <g id="calque-souffle" stroke="#1B2440" stroke-width="5" stroke-linejoin="round">
+    <path id="souffle-1" d="M780,420 L850,396 L866,444 L796,468 Z" fill="#FFC93C"/>
+    <path id="souffle-2" d="M890,382 L968,356 L986,408 L908,434 Z" fill="#3DDC97"/>
+    <path id="souffle-3" d="M1010,344 L1094,318 L1114,372 L1030,398 Z" fill="#FF5D8F"/>
+  </g>
+</svg>

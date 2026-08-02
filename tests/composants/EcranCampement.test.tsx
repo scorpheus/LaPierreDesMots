@@ -214,12 +214,24 @@ describe('le campement montre le monde sans jamais le cacher', () => {
     expect(cristal?.getAttribute('data-cristal')).toBe('assets/gobi/cristal-base.svg');
   });
 
+  /**
+   * MODIFIÉ PAR N3, hors de son périmètre déclaré, et c'est signalé. Les deux valeurs
+   * attendues étaient celles de la table à CINQ stades ; D43 la porte à dix, donc le stade
+   * qui suit `crete` n'est plus `equipe` (rang 4 sur 5) mais `couronne` (rang 6 sur 10).
+   *
+   * Elles sont désormais LUES DANS LA TABLE plutôt qu'écrites en dur : ce cas mesure que la
+   * jauge montre le vide restant, pas que la table vaut telle ou telle valeur. Un seuil
+   * recopié ici en était une seconde source de vérité, et c'est lui qui a cassé.
+   */
   it('annonce le VIDE restant avant le prochain stade, pas seulement l’acquis (D25)', () => {
     monter();
     const jauge = document.querySelector('[data-prochain-stade]');
-    expect(jauge?.getAttribute('data-prochain-stade')).toBe('equipe');
-    // 2 formes obtenues, 15 requises au stade `equipe` : 13 restantes.
-    expect(jauge?.getAttribute('data-formes-restantes')).toBe('13');
+    const rangDeCrete = STADES.find((stade) => stade.code === 'crete')!.rang;
+    const suivant = STADES.find((stade) => stade.rang === rangDeCrete + 1)!;
+    expect(jauge?.getAttribute('data-prochain-stade')).toBe(suivant.code);
+    // Le monde factice porte 2 formes ; le reste est ce que le seuil du suivant exige.
+    expect(jauge?.getAttribute('data-formes-restantes'))
+      .toBe(String(suivant.formesRequises - 2));
   });
 
   it('grave les formes acquises au mur des noms, et n’en retire aucune', () => {

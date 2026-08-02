@@ -59,8 +59,32 @@ export function TopConfusions({
       </p>
 
       {parAxe.map(({ axe, lignes }) => (
-        <div key={axe} style={{ display: 'grid', gap: '0.5rem' }}>
-          <h3 style={{ fontSize: '1.125rem', margin: 0 }}>{LIBELLE_AXE[axe]}</h3>
+        <div
+          key={axe}
+          // AJOUT N5 — le groupe porte son axe et son compte DANS LE DOM.
+          //
+          // La séparation existait déjà ligne par ligne (`data-confusion-axe`), et elle est
+          // juste. Ce qui manquait est le niveau au-dessus : combien sur CET axe. Sans ce
+          // compte, deux situations très différentes se rendent de la même façon —
+          // « six gauche-droite et zéro haut-bas » et « trois de chaque » — et c'est
+          // exactement la distinction que D23 demande de produire, celle qu'un orthophoniste
+          // lirait. Le total par axe est le premier chiffre qu'on cherche, et il n'était
+          // calculé nulle part.
+          data-groupe-axe={axe}
+          data-groupe-nb={String(lignes.length)}
+          data-groupe-occurrences={String(
+            lignes.reduce((total, ligne) => total + ligne.nbOccurrences, 0)
+          )}
+          style={{ display: 'grid', gap: '0.5rem' }}
+        >
+          <h3 style={{ fontSize: '1.125rem', margin: 0 }}>
+            {LIBELLE_AXE[axe]}
+            {lignes.length === 0
+              ? ''
+              : ` — ${String(lignes.length)} paire(s), ${String(
+                  lignes.reduce((total, ligne) => total + ligne.nbOccurrences, 0)
+                )} fois`}
+          </h3>
           {lignes.length === 0 ? (
             <p style={{ margin: 0 }}>Rien à signaler sur cet axe.</p>
           ) : (

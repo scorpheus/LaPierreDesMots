@@ -6,7 +6,7 @@
   "libelle": "La cour de l’école",
   "region": "clairiere",
   "scene": {
-    "fichier": "habillages/clairiere/ecole.svg",
+    "fichier": "habillages/clairiere/ecole-v2.svg",
     "viewBox": "0 0 922 615",
     "calques": [
       {
@@ -22,271 +22,280 @@
             "id": "ciel",
             "libelle": "le ciel",
             "centroide": [
-              461.0,
-              87.5
+              461,
+              200
             ],
-            "surface": 161350.0
+            "surface": 368800
           },
           {
             "id": "herbe",
             "libelle": "l’herbe de la cour",
             "centroide": [
-              457.1,
-              513.8
+              461,
+              507.5
             ],
-            "surface": 99199.3
+            "surface": 198230
           },
           {
             "id": "toit-ecole",
             "libelle": "le toit de l’école",
             "centroide": [
-              270.0,
-              243.5
+              151.4,
+              237.9
             ],
-            "surface": 13023.5
+            "surface": 21055.8
           },
           {
             "id": "horloge-ecole",
             "libelle": "l’horloge de l’école",
             "centroide": [
-              270.0,
-              225.0
+              215,
+              232
             ],
-            "surface": 5026.5
+            "surface": 2069.2
           },
           {
             "id": "mur-ecole",
             "libelle": "le mur de l’école",
             "centroide": [
-              270.0,
-              344.6
+              161.7,
+              376.6
             ],
-            "surface": 32500.0
+            "surface": 28000
           },
           {
             "id": "porte-ecole",
             "libelle": "la porte de l’école",
             "centroide": [
-              270.0,
-              370.0
+              215,
+              352.5
             ],
-            "surface": 7300.0
+            "surface": 4750
           },
           {
             "id": "fenetre-ecole-1",
             "libelle": "la première fenêtre de l’école",
             "centroide": [
-              180.0,
-              330.0
+              120,
+              330
             ],
-            "surface": 5600.0
+            "surface": 3000
           },
           {
             "id": "fenetre-ecole-2",
             "libelle": "la deuxième fenêtre de l’école",
             "centroide": [
-              360.0,
-              330.0
+              310,
+              330
             ],
-            "surface": 5600.0
+            "surface": 3000
           },
           {
             "id": "feuilles-arbre-1",
             "libelle": "les feuilles du premier arbre",
             "centroide": [
-              560.0,
-              250.0
+              500,
+              258
             ],
-            "surface": 7238.2
+            "surface": 7155.3
           },
           {
             "id": "tronc-arbre-1",
             "libelle": "le tronc du premier arbre",
             "centroide": [
-              560.0,
-              359.0
+              500,
+              350
             ],
-            "surface": 5124.0
+            "surface": 3400
           },
           {
             "id": "feuilles-arbre-2",
             "libelle": "les feuilles du deuxième arbre",
             "centroide": [
-              665.0,
-              250.0
+              615,
+              258
             ],
-            "surface": 7238.2
+            "surface": 7155.3
           },
           {
             "id": "tronc-arbre-2",
             "libelle": "le tronc du deuxième arbre",
             "centroide": [
-              665.0,
-              359.0
+              615,
+              350
             ],
-            "surface": 5124.0
+            "surface": 3400
           },
           {
             "id": "feuilles-arbre-3",
             "libelle": "les feuilles du troisième arbre",
             "centroide": [
-              770.0,
-              250.0
+              730,
+              258
             ],
-            "surface": 7238.2
+            "surface": 7155.3
           },
           {
             "id": "tronc-arbre-3",
             "libelle": "le tronc du troisième arbre",
             "centroide": [
-              770.0,
-              359.0
+              730,
+              350
             ],
-            "surface": 5124.0
+            "surface": 3400
           },
           {
             "id": "feuilles-arbre-4",
             "libelle": "les feuilles du quatrième arbre",
             "centroide": [
-              872.0,
-              250.0
+              845,
+              258
             ],
-            "surface": 7238.2
+            "surface": 7155.3
           },
           {
             "id": "tronc-arbre-4",
             "libelle": "le tronc du quatrième arbre",
             "centroide": [
-              872.0,
-              359.0
+              845,
+              350
             ],
-            "surface": 5124.0
+            "surface": 3400
           },
           {
             "id": "cheveux-maitresse",
             "libelle": "les cheveux de la maîtresse",
             "centroide": [
-              290.0,
-              464.0
+              175,
+              406
             ],
-            "surface": 5026.5
+            "surface": 4462.1
           },
           {
             "id": "pull-maitresse",
             "libelle": "le pull de la maîtresse",
             "centroide": [
-              290.0,
-              536.0
+              175,
+              486.2
             ],
-            "surface": 5120.0
+            "surface": 7560
           },
           {
             "id": "jupe-maitresse",
             "libelle": "la jupe de la maîtresse",
             "centroide": [
-              290.0,
-              592.2
+              166.3,
+              570
             ],
-            "surface": 5016.0
+            "surface": 6768
+          },
+          {
+            "id": "tableau",
+            "libelle": "le tableau de la maîtresse",
+            "centroide": [
+              325,
+              480
+            ],
+            "surface": 18000
           },
           {
             "id": "cheveux-garcon-1",
             "libelle": "les cheveux du premier garçon",
             "centroide": [
-              420.0,
-              464.0
+              500,
+              478
             ],
-            "surface": 5026.5
+            "surface": 2088.7
           },
           {
             "id": "tshirt-garcon-1",
             "libelle": "le tee-shirt du premier garçon",
             "centroide": [
-              420.0,
-              536.0
+              500,
+              524.1
             ],
-            "surface": 5120.0
+            "surface": 3360
           },
           {
             "id": "cheveux-garcon-2",
             "libelle": "les cheveux du deuxième garçon",
             "centroide": [
-              520.0,
-              464.0
+              615,
+              478
             ],
-            "surface": 5026.5
+            "surface": 2088.7
           },
           {
             "id": "tshirt-garcon-2",
             "libelle": "le tee-shirt du deuxième garçon",
             "centroide": [
-              520.0,
-              536.0
+              615,
+              524.1
             ],
-            "surface": 5120.0
+            "surface": 3360
           },
           {
             "id": "cheveux-fille-1",
             "libelle": "les cheveux de la première fille",
             "centroide": [
-              650.0,
-              464.0
+              730,
+              478
             ],
-            "surface": 5026.5
+            "surface": 2088.7
           },
           {
             "id": "robe-fille-1",
             "libelle": "la robe de la première fille",
             "centroide": [
-              650.0,
-              563.8
+              730,
+              551.8
             ],
-            "surface": 10136.0
+            "surface": 6956
           },
           {
             "id": "cheveux-fille-2",
             "libelle": "les cheveux de la deuxième fille",
             "centroide": [
-              810.0,
-              464.0
+              845,
+              478
             ],
-            "surface": 5026.5
+            "surface": 2088.7
           },
           {
             "id": "robe-fille-2",
             "libelle": "la robe de la deuxième fille",
             "centroide": [
-              810.0,
-              563.8
+              845,
+              551.8
             ],
-            "surface": 10136.0
+            "surface": 6956
           },
           {
             "id": "banc",
             "libelle": "le banc",
             "centroide": [
-              95.0,
-              495.0
+              25.9,
+              481.3
             ],
-            "surface": 8500.0
+            "surface": 3264
           },
           {
             "id": "corde",
             "libelle": "la corde à sauter",
             "centroide": [
-              105.0,
-              566.5
+              120.6,
+              574
             ],
-            "surface": 6310.0
+            "surface": 3541.2
           },
           {
             "id": "ballon",
             "libelle": "le ballon",
             "centroide": [
-              490.0,
-              375.0
+              430,
+              578
             ],
-            "surface": 5026.5
+            "surface": 2264
           }
         ]
       },

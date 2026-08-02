@@ -23,6 +23,7 @@
 
 import type {
   AideProposee,
+  NiveauAide,
   ContexteMoteur,
   EntreeMoteur,
   Moteur,
@@ -44,6 +45,7 @@ import { SCHEMA_CONTENU_TRACE } from './schema-contenu.js';
 import type { MotifRefusTrace } from './validation.js';
 import type {
   ActionTrace,
+  AideTrace,
   ContenuTrace,
   EtatTrace,
   EtatTrait,
@@ -158,6 +160,19 @@ function etapesDeProgression(etat: EtatTrace): readonly EtapeGenerique[] {
  * automatique est jouée par l'hôte `MoteurTrace.tsx`, qui tient le quota côté rendu —
  * exactement comme `MoteurColorie.tsx` le fait déjà en v1.
  */
+/**
+ * L'aide du socle commun, augmentée du libellé du trait attendu (`AideTrace`).
+ *
+ * Un point unique : partout ailleurs dans ce fichier, l'aide se construit par ici, jamais à
+ * la main. `construireAide` reste la seule à décider du `code` et du `niveau` — on ne
+ * réimplante pas la règle du § 4.3.1, on lui ajoute un champ.
+ */
+function construireAideTrace(niveau: NiveauAide, trait: TraitLettre | null): AideTrace | null {
+  const base = construireAide(niveau, trait?.id ?? null, trait?.libelle ?? null);
+  if (base === null) return null;
+  return { ...base, libelle: trait?.libelle ?? null };
+}
+
 function appliquerPaliers(etat: EtatTrace, instant: number): EtatTrace {
   if (etat.termineMs !== null) return etat;
 
@@ -172,7 +187,7 @@ function appliquerPaliers(etat: EtatTrace, instant: number): EtatTrace {
     derniereActionMs: instant,
     instantIndiceMs:
       niveau === 'indice' && etat.instantIndiceMs === null ? instant : etat.instantIndiceMs,
-    aide: construireAide(niveau, trait?.id ?? null, trait?.libelle ?? null),
+    aide: construireAideTrace(niveau, trait),
   };
 }
 
@@ -227,6 +242,30 @@ function traitPlusLoinReconnu(etat: EtatTrace): boolean {
   return false;
 }
 
+/**
+ * Le motif définitif du refus, une fois posée la question « et si c'était un trait d'après ? ».
+ *
+ * DÉFAUT CORRIGÉ — `trait-hors-ordre` était INATTEIGNABLE, et c'est le père qui l'a payé sur
+ * le `d`. La requalification n'était tentée que sur `trace-incomplet`, or un trait ultérieur
+ * commence à SON départ, donc loin de celui qu'on attend : `evaluerTrait` répondait
+ * `depart-eloigne` et la question n'était jamais posée. Le seul motif capable de dire
+ * « commence par le rond » ne pouvait donc jamais sortir. Mesuré avant correction :
+ * `expected 'depart-eloigne' to be 'trait-hors-ordre'`.
+ *
+ * Les DEUX motifs sans coût sont désormais requalifiables, et eux seuls :
+ *   • `sens-inverse` ne l'est jamais — c'est un fait mesuré sur le geste, et le confondre
+ *     avec un problème d'ordre perdrait le signal de D23 ;
+ *   • `trait-hors-ordre` compte comme erreur (`REFUS_TRACE_COMPTE_ERREUR`), et c'est ce qui
+ *     fait enfin monter `nbErreurs` : avant, cinq tentatives dans le mauvais ordre laissaient
+ *     le compteur à **0**, l'aide de Gobi n'arrivait donc jamais par la voie des erreurs, et
+ *     l'enfant devait attendre 45 s d'inactivité devant un écran qu'il ne comprenait pas.
+ */
+function motifRequalifie(etat: EtatTrace, motif: MotifRefusTrace | null): MotifRefusTrace {
+  const brut = motif ?? 'trace-incomplet';
+  if (brut !== 'trace-incomplet' && brut !== 'depart-eloigne') return brut;
+  return traitPlusLoinReconnu(etat) ? 'trait-hors-ordre' : brut;
+}
+
 function reduireTerminerGeste(etat: EtatTrace, instant: number): EtatTrace {
   const lettre = lettreActive(etat);
   const trait = traitAttendu(etat);
@@ -250,15 +289,24 @@ function reduireTerminerGeste(etat: EtatTrace, instant: number): EtatTrace {
   if (!decision.acceptee) {
     // Requalification : « il n'a pas su tracer la hampe » et « il a commencé par le rond »
     // ne se soignent pas de la même façon. Seul ce test les sépare.
-    const motif: MotifRefusTrace =
-      decision.motif === 'trace-incomplet' && traitPlusLoinReconnu(etat)
-        ? 'trait-hors-ordre'
-        : (decision.motif ?? 'trace-incomplet');
+    const motif = motifRequalifie(etat, decision.motif);
     const compteErreur = REFUS_TRACE_COMPTE_ERREUR[motif];
+
+    // UN ORDRE IMPOSÉ SE DIT, il ne se devine pas. Sur `trait-hors-ordre`, l'enfant a tracé
+    // un trait juste, au mauvais moment : la seule chose qui lui manque est le NOM du trait
+    // à faire d'abord. On accorde donc l'indice tout de suite, sans attendre la deuxième
+    // erreur — au même palier et au même coût que l'appel volontaire de Gobi, plus bas.
+    // Le niveau ne redescend jamais (`aideLaPlusHaute`), R14 est tenue.
+    const niveau: NiveauAide =
+      motif === 'trait-hors-ordre' ? aideLaPlusHaute(etat.niveauAide, 'indice') : etat.niveauAide;
 
     return appliquerPaliers(
       {
         ...etat,
+        niveauAide: niveau,
+        instantIndiceMs:
+          niveau === 'indice' && etat.instantIndiceMs === null ? instant : etat.instantIndiceMs,
+        aide: motif === 'trait-hors-ordre' ? construireAideTrace(niveau, trait) : etat.aide,
         gesteEnCours: [],
         traits:
           etatTrait === undefined
@@ -360,7 +408,7 @@ function reduire(etat: EtatTrace, action: ActionTrace, contexte: ContexteMoteur)
         niveauAide: niveau,
         derniereActionMs: instant,
         instantIndiceMs: etat.instantIndiceMs ?? instant,
-        aide: construireAide(niveau, trait?.id ?? null, trait?.libelle ?? null),
+        aide: construireAideTrace(niveau, trait),
       };
     }
 

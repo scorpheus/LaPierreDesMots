@@ -29,6 +29,7 @@ import type { Horloge, SeuilsCascade } from '@pierre/partage';
 import { lireSeuilsCascade } from '@pierre/partage/recompenses';
 import type { ServicesJeu } from '../moteurs/types.js';
 import { creerAudioTone } from '../services/audio-tone.js';
+import { creerVoixFichier } from '../services/voix-fichier.js';
 import { creerVoixNavigateur } from '../services/voix-navigateur.js';
 import { creerHaptiqueNavigateur } from '../gamefeel/haptique-navigateur.js';
 import { creerRetourSensoriel } from '../gamefeel/retour.js';
@@ -80,10 +81,25 @@ export function creerServicesParDefaut(graine = resoudreGraineParDefaut()): Serv
   const audio = creerAudioTone();
   const haptique = creerHaptiqueNavigateur({ animationsDesactivees });
 
+  // ─────────────────────────────────────────────────────────────────────────────────────
+  // AJOUT N2 — `voix-fichier` devient le chemin NOMINAL, `voix-navigateur` le repli.
+  //
+  // Le fournisseur est construit AVEC UN MANIFESTE VIDE, et c'est délibéré : la construction
+  // des services est synchrone, le manifeste arrive par le réseau. D'ici là `aUnClip` rend
+  // `false`, D42 masque le bouton, et le comportement est exactement celui d'une
+  // installation où `npm run voix` n'a jamais tourné — rien ne ment, rien ne déçoit.
+  // `chargerManifesteVoix` ci-dessous le pose dès qu'il est là.
+  //
+  // `creerVoixNavigateur` reste importé et exporté : le § 10 du contrat interdit de le
+  // supprimer, et `basculerSurLeRepli` en fait un usage explicite plutôt qu'un import mort.
+  // ─────────────────────────────────────────────────────────────────────────────────────
+  const voix = creerVoixFichier();
+  void voix.recupererManifeste();
+
   return {
     alea: creerAlea(graine),
     horloge: creerHorloge(),
-    voix: creerVoixNavigateur(),
+    voix,
     audio,
     haptique,
     // `emettreSurCanevasCourant` est une indirection assumée : `RetourSensoriel` est construit
@@ -185,4 +201,33 @@ export function useEtatJeu<T>(selecteur: (etat: EtatMagasin) => T): T {
     () => selecteur(magasin.getState()),
     () => selecteur(magasin.getState())
   );
+}
+
+// ──────────────────────────────────────────────────────────── les voix (ajout N2)
+
+/**
+ * Pose le manifeste sur un fournisseur `voix-fichier` déjà construit.
+ *
+ * Sert au démarrage de l'application et aux tests, qui veulent un manifeste connu plutôt
+ * qu'une requête réseau. Sans effet — et sans erreur — sur un fournisseur qui n'est pas
+ * `voix-fichier` : le repli n'a pas de manifeste à poser, et c'est normal.
+ */
+export function chargerManifesteVoix(services: ServicesJeu, brut: unknown): void {
+  const candidat = services.voix as { chargerManifeste?: (brut: unknown) => void };
+  if (typeof candidat.chargerManifeste === 'function') {
+    candidat.chargerManifeste(brut);
+  }
+}
+
+/**
+ * Le repli de D9, rendu explicite.
+ *
+ * `voix-navigateur` ne connaît aucun clip : `aUnClip` y vaut toujours `false`, donc D42
+ * masque tous les boutons. C'est le comportement voulu sur une installation dont
+ * `contenu/audio/` n'a pas été généré — le jeu se lance, il est muet, et il ne ment pas.
+ * Cette fonction existe pour que ce choix soit NOMMÉ dans le code plutôt que déduit de la
+ * présence d'un import.
+ */
+export function creerVoixDeRepli(): ServicesJeu['voix'] {
+  return creerVoixNavigateur();
 }

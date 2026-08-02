@@ -43,6 +43,19 @@ const ALIAS_PARTAGE = {
   '@pierre/partage/recompenses': source('recompenses/index.ts'),
   '@pierre/partage/monde': source('monde/index.ts'),
   '@pierre/partage/parent': source('parent/index.ts'),
+  // ── AJOUT N4 (contrat de finition v3) ─────────────────────────────────────────────────
+  // Le § 4.4 confie à N4 `partage/src/ouverture/index.ts` avec pour rôle « sous-chemin
+  // `@pierre/partage/ouverture` », mais n'attribue à AUCUN lot les trois fichiers où un
+  // sous-chemin se déclare (`partage/package.json`, ce fichier, `vitest.config.ts`). Sans
+  // cette ligne le sous-chemin n'existe pas et le livrable de N4 est creux. Signalé au
+  // rapport de N4 comme omission du plan gelé — N2 (`/voix`) a le même besoin, et l'ajout
+  // est purement additif, donc fusionnable.
+  '@pierre/partage/ouverture': source('ouverture/index.ts'),
+  // AJOUT N2 — même omission, même remède, et la note de N4 ci-dessus la prévoyait.
+  // `@pierre/partage/voix` porte les VALEURS de N2 (`aUnClip`, `clipDe`, `SEUIL_QC`) : la
+  // convention C1 leur interdit le barillet, donc sans cette ligne le client ne les résout
+  // pas et `voix-fichier.ts` ne se lie pas.
+  '@pierre/partage/voix': source('voix/index.ts'),
   '@pierre/partage': source('index.ts')
 };
 
@@ -98,9 +111,39 @@ export default defineConfig(({ mode }) => {
   const estTest = mode === 'test';
 
   return {
-    // Chemins relatifs : le bundle est servi indifféremment depuis Vite, depuis Fastify
-    // (`serveur/src/statique.ts`) ou depuis un `file://` de dépannage.
-    base: './',
+    // ═══════════════════════════════════════════════════════════════════════════════════════
+    // CHEMINS ABSOLUS — corrigé à l'intégration de la campagne N. Mesuré, pas supposé.
+    //
+    // Cette ligne valait `'./'`, au motif que « le bundle est servi indifféremment depuis
+    // Vite, depuis Fastify ou depuis un `file://` de dépannage ». Le motif est VOID et la
+    // conséquence était un écran blanc sans issue :
+    //
+    //  1. le motif ne tient pas — `prechargerPolices()` (plus haut dans ce fichier) émet
+    //     déjà `href: '/polices/…'`, un chemin ABSOLU. Un `file://` ne résolvait donc déjà
+    //     aucune police. On payait le prix d'une portabilité qui n'existait pas.
+    //
+    //  2. le prix, lui, était réel. Sous `base: './'`, `index.html` porte
+    //     `src="./assets/index-*.js"`. Le navigateur le résout contre le RÉPERTOIRE de l'URL
+    //     courante : à `/parent/dashboard`, cela donne `/parent/assets/index-*.js`. Le repli
+    //     SPA de `serveur/src/statique.ts` répond alors `index.html` — mesuré :
+    //
+    //         $ curl -o /dev/null -w "%{http_code} %{content_type}" \
+    //               http://127.0.0.1:8098/parent/assets/index-2mjMLhgT.js
+    //         200 text/html; charset=utf-8            <-- du HTML là où le module est attendu
+    //
+    //     Le module ne se charge pas, React ne monte jamais, la page reste BLANCHE et n'offre
+    //     aucune sortie. C'est la règle absolue « AUCUN ÉTAT SANS ISSUE » enfreinte sur la
+    //     seule route de profondeur 2 du dépôt — `/parent/dashboard`, précisément l'écran que
+    //     le père cherchait. Tout rechargement ou favori sur cette URL donnait un écran mort.
+    //
+    // `'/'` rend les chemins absolus : ils résolvent identiquement à toute profondeur d'URL.
+    // Le service Fastify et le serveur Vite servent tous deux depuis la racine du site, donc
+    // aucun des deux n'y perd quoi que ce soit.
+    //
+    // Gardé par `tests/e2e/parcours-profondeur-url.spec.ts`, qui recharge CHAQUE route de
+    // `CHEMINS` par une vraie navigation et exige que l'application monte.
+    // ═══════════════════════════════════════════════════════════════════════════════════════
+    base: '/',
     plugins: [react(), tailwind(), prechargerPolices()],
 
     // Les cinq WOFF2 vivent dans `client/public/polices/` et sont copiés tels quels à la

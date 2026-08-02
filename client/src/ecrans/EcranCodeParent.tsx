@@ -12,12 +12,37 @@
 //   3. **Un pavé à gros chiffres**, cibles ≥ 64 px (R16) : le parent le tape debout, d'une
 //      main, avec la tablette dans l'autre.
 //
-// PLACEHOLDER — à valider : la toute première ouverture POSE le code du foyer (le serveur le
-// fait, voir `serveur/src/routes/parent.ts`). L'écran le dit en toutes lettres pour que
-// personne ne pose un code par accident.
+//
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+// CORRIGÉ N5 — le PLACEHOLDER qui occupait cette place est mort, et voici de quoi.
+//
+// Il disait : « la toute première ouverture POSE le code du foyer ». Le contrat de finition
+// v3 § 1.8 a mesuré ce que cela produisait : « un enfant curieux qui tape 1234 devient
+// propriétaire du code parent, sans qu'un écran l'ait jamais demandé ».
+//
+// Cet écran DEMANDE désormais l'état de la porte avant de rendre quoi que ce soit :
+//   • aucun code posé   → il rend `EcranDefinirCode`, qui montre les chiffres en clair et dit
+//                          ce qu'il fait ;
+//   • un code posé      → il rend le pavé d'ouverture, inchangé.
+//
+// LE CHOIX QUI COMPTE, ET IL N'EST PAS ÉVIDENT : la bascule est LOCALE, pas une route. Le
+// contrat § 6.2 donne `client/src/routeur.tsx` à N4, et une route `/parent/definir` aurait
+// donc attendu un autre lot. Or une porte parent qui répond 404 sans écran derrière est un
+// état sans issue, et c'est le pire bug possible ici. En composant les deux écrans dans le
+// même hôte, la zone parent est réparée SANS dépendre d'aucun autre lot, et la route reste
+// disponible plus tard sans rien changer à ce fichier.
+//
+// TANT QUE L'ÉTAT N'EST PAS CONNU, on rend le pavé d'ouverture plutôt qu'un écran d'attente :
+// c'est le cas de loin le plus fréquent (le code est posé une fois dans la vie du foyer), et
+// un scintillement « attente → pavé » à chaque visite coûterait plus qu'il ne rapporte. Si la
+// réponse dit « aucun code », l'écran bascule ; et un `ouvrir` tenté entre-temps répond 404,
+// que le pavé traduit lui aussi en bascule. Les deux chemins mènent au même endroit.
+// ═══════════════════════════════════════════════════════════════════════════════════════════
 import { useCallback, useState } from 'react';
 import type { ReactElement } from 'react';
-import { ErreurReseau, ouvrirZoneParent } from '../api/client.js';
+import { useQuery } from '@tanstack/react-query';
+import { ErreurReseau, lireEtatPorteParent, ouvrirZoneParent } from '../api/client.js';
+import { EcranDefinirCode } from './EcranDefinirCode.js';
 
 export interface ProprietesEcranCodeParent {
   /** Appelé une fois le code accepté. */
@@ -56,6 +81,25 @@ export function EcranCodeParent({
   const [message, fixerMessage] = useState<string | null>(null);
   const [verrouilleJusqua, fixerVerrou] = useState<string | null>(null);
   const [enCours, fixerEnCours] = useState(false);
+  /**
+   * Bascule locale vers l'écran de définition.
+   *
+   * Deux sources l'allument, et il en faut deux : la réponse de `GET /api/parent/etat` quand
+   * elle arrive, et le **404 de `ouvrir`** si le parent a été plus rapide qu'elle. Sans la
+   * seconde, un tap sur « Entrer » avant la fin de la requête laisserait l'écran afficher
+   * « ce n'est pas ce code » pour un code qui n'existe pas — le message le plus décourageant
+   * qu'on puisse rendre à quelqu'un qui n'a rien fait de mal.
+   */
+  const [definitionForcee, fixerDefinitionForcee] = useState(false);
+
+  const porte = useQuery({
+    queryKey: ['parent', 'etat'],
+    queryFn: lireEtatPorteParent,
+    // La porte n'est pas une donnée de session : elle change une fois dans la vie du foyer.
+    // On la relit à chaque montage de l'écran, et jamais entre deux.
+    staleTime: 0,
+    retry: false
+  });
 
   const verrouille = verrouilleJusqua !== null;
 
@@ -90,14 +134,38 @@ export function EcranCodeParent({
           fixerMessage(null);
           return;
         }
+        // 404 : AUCUN code n'existe. Ce n'est pas un mauvais code, c'est une porte qui n'a
+        // pas encore de serrure. On bascule vers la definition au lieu de reprocher quoi que
+        // ce soit — et le serveur, lui, n'a rien pose (contrat de finition v3 § 8).
+        if (cause instanceof ErreurReseau && cause.statut === 404) {
+          fixerDefinitionForcee(true);
+          fixerMessage(null);
+          return;
+        }
         fixerMessage('Ce n’est pas ce code. On réessaie ?');
       });
   }, [enCours, saisie, surOuverture, verrouille]);
+
+  // ── la bascule vers la definition ───────────────────────────────────────────────────────
+  //
+  // `porte.data?.codeDefini === false` est ecrit ainsi, et non `!porte.data?.codeDefini` :
+  // tant que la requete n'a pas repondu, `porte.data` vaut `undefined` et la negation
+  // basculerait vers la definition a chaque montage, y compris sur un foyer qui a un code
+  // depuis des mois.
+  if (definitionForcee || porte.data?.codeDefini === false) {
+    return (
+      <EcranDefinirCode
+        surDefinition={surOuverture}
+        {...(surAbandon === undefined ? {} : { surAbandon })}
+      />
+    );
+  }
 
   return (
     <main
       data-ecran="code-parent"
       data-parent="code"
+      data-parent-mode="ouverture"
       data-verrou={verrouille ? 'actif' : 'inactif'}
       style={{
         padding: '2rem',
@@ -119,8 +187,11 @@ export function EcranCodeParent({
         </p>
       ) : (
         <p style={{ margin: 0, textAlign: 'center' }}>
-          Tape le code à quatre chiffres. Au tout premier passage, le code que tu tapes devient
-          celui du foyer.
+          {/* CORRIGÉ N5 — la phrase d'avant disait « au tout premier passage, le code que tu
+              tapes devient celui du foyer ». Elle décrivait fidèlement le défaut du § 1.8.
+              Le code se choisit désormais sur son propre écran, et celui-ci ne fait plus
+              qu'ouvrir. */}
+          Tape le code à quatre chiffres du foyer.
         </p>
       )}
 

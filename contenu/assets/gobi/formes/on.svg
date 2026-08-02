@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Gobi-ON">
+  <title>Gobi-ON</title>
+  <desc>Le cristal du grapheme « on » — Gobi-ON. C est LUI qui porte la declinaison, jamais le corps (D20, D36). Sa silhouette et sa teinte sont propres a ce grapheme : deux formes identiques ne se collectionneraient pas (D44). Le viewBox fait 64 unites, ce qui est la cible tapable minimale de R16.</desc>
+  <g id="cristal">
+    <path id="cristal-face" d="M32,16 L38.64,26.92 L41.39,37.84 L39.13,58 L24.87,58 L22.61,37.84 L25.36,26.92 Z" fill="#CFC4EE" stroke="#4B2207" stroke-width="3" stroke-linejoin="round"/>
+    <path id="cristal-facette" d="M32,16 L39.13,58 L24.87,58 Z" fill="#A99CD8" stroke="none" opacity="0.8"/>
+    <path id="cristal-eclat" d="M28.55,28.6 L30.62,42.04" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" opacity="0.85" fill="none"/>
+  </g>
+</svg>

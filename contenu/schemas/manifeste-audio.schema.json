@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pierre-des-mots.local/schemas/manifeste-audio.schema.json",
+  "title": "Manifeste des voix",
+  "$commentaire": "Lot N2, contrat de finition v3 § 4.2. Le manifeste est la SEULE source de vérité sur l'existence d'un clip (D42) : un texte absent d'ici n'a pas de bouton « écouter », jamais un bouton qui ne répond pas. Ce fichier est GÉNÉRÉ par `npm run voix` ; le schéma est là pour que `npm run test:contenu` refuse un manifeste abîmé avant qu'il n'atteigne l'enfant, et pour que la forme soit lisible sans lire le script qui la produit.",
+  "type": "object",
+  "required": ["version", "genereLe", "moteurTts", "clips"],
+  "additionalProperties": false,
+  "properties": {
+    "$commentaire": { "type": "string" },
+    "version": { "type": "integer", "minimum": 1 },
+    "genereLe": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Horodatage ISO 8601 du rendu. Sert au parent à savoir si les voix sont plus vieilles que les consignes."
+    },
+    "moteurTts": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Ex. `piper/2023.11.14-2`. Consigné pour la reproductibilité ; le détail complet est dans `production/voix.lock.json`."
+    },
+    "clips": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/clip" }
+    }
+  },
+  "$defs": {
+    "clip": {
+      "type": "object",
+      "required": [
+        "cle", "rendu", "locuteur", "texte", "fichier",
+        "dureeMs", "octets", "empreinteTexte", "qcScore"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "cle": {
+          "type": "string",
+          "minLength": 1,
+          "description": "`<idExercice>/<idConsigne>`, `campement/<idPoint>`, `ouverture/<codeTableau>`, `mot/<mot>` ou `locuteur/<locuteur>`. Elle ne contient JAMAIS le locuteur ni le rendu : ceux-ci sont des variantes de la même clé."
+        },
+        "rendu": {
+          "enum": ["normal", "syllabe", "lent"],
+          "description": "`normal` est celui que le bouton « écouter » joue, et le seul que `aUnAudio` regarde. `syllabe` est la relecture de D33/R15 sur les mots cibles."
+        },
+        "locuteur": {
+          "enum": ["narrateur", "gobi", "maitresse", "filou", "bulle", "roc", "plume"],
+          "$commentaire": "Les SEPT de D41. `enfant` a été retiré de l'union v1 : D41 écarte l'enregistrement familial, et une voix d'enfant synthétique ne sert aucune consigne."
+        },
+        "texte": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Le texte source, tel qu'il est écrit à l'écran — apostrophes typographiques comprises."
+        },
+        "fichier": {
+          "type": "string",
+          "pattern": "^audio/[A-Za-z0-9_./-]+\\.opus$",
+          "description": "Relatif à `contenu/`. Le nom porte l'empreinte courte du texte, donc un clip ne change jamais sous le même nom — c'est ce qui autorise `Cache-Control: immutable` (§ 8)."
+        },
+        "dureeMs": {
+          "type": "integer",
+          "minimum": 200,
+          "description": "MESURÉE par `ffprobe`, jamais estimée. Le plancher de 200 ms refuse un clip muet : un fichier vide passerait tous les tests d'existence."
+        },
+        "octets": { "type": "integer", "minimum": 512 },
+        "empreinteTexte": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$",
+          "description": "SHA-256 du texte source. Un texte modifié rend le clip périmé, mécaniquement — sans qu'un humain ait à s'en souvenir."
+        },
+        "qcScore": {
+          "type": "number",
+          "minimum": 0.85,
+          "maximum": 1,
+          "$commentaire": "Similarité de la transcription inverse (faster-whisper `large-v3`, `fr`). Le minimum du schéma EST `SEUIL_QC` : un clip sous le seuil n'a pas le droit d'être au manifeste, parce qu'un clip inintelligible est pire qu'un bouton absent (D42)."
+        }
+      }
+    }
+  }
+}

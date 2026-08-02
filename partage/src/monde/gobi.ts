@@ -31,7 +31,18 @@ export interface DocumentStadesGobi {
   readonly formes: readonly FormeDeclaree[];
 }
 
-const CODES_STADE: readonly CodeStadeGobi[] = ['oeuf', 'boule', 'crete', 'equipe', 'gardien'];
+/**
+ * Les dix codes de stade, dans l'ordre des rangs — D43, lot N3.
+ *
+ * L'ordre de cette liste n'est PAS la source de vérité des rangs : c'est le champ `rang` du
+ * document qui l'est, et `stadesDuDocument` le vérifie. La liste ne sert qu'à refuser un code
+ * inconnu. Elle est néanmoins écrite dans l'ordre, parce qu'une liste ordonnée qui ne le
+ * paraîtrait pas invite à la lire de travers.
+ */
+const CODES_STADE: readonly CodeStadeGobi[] = [
+  'oeuf', 'fissure', 'boule', 'premier-cristal', 'crete',
+  'couronne', 'equipe', 'besace', 'veilleur', 'gardien'
+];
 
 function objet(valeur: unknown): Readonly<Record<string, unknown>> {
   if (typeof valeur !== 'object' || valeur === null) {

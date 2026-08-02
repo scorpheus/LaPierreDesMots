@@ -170,3 +170,41 @@ export type { ContenuHistoire, EtatHistoire, ActionHistoire } from './moteurs/hi
 export type { ContenuChrono, EtatChrono, ActionChrono } from './moteurs/chrono/types.js';
 export type { ContenuGrave, EtatGrave, ActionGrave } from './moteurs/grave/types.js';
 export type { ContenuLibre, EtatLibre, ActionLibre } from './moteurs/libre/types.js';
+
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+// AJOUT N2 — les voix. Contrat de finition v3 § 4.2 et § 5.4.
+//
+// **TYPES SEULEMENT** (convention C1). `clipDe`, `aUnAudio`, `couvertureConsignes`, `SEUIL_QC`
+// et `LOCUTEURS` sont des VALEURS : elles passent par `@pierre/partage/voix`, jamais par ce
+// barillet. `Locuteur` figure déjà ligne 32 via `fournisseurs/voix.js`, qui le réexporte
+// depuis ici — un seul lieu de définition, deux chemins d'accès.
+//
+// ⚠ ÉCRIVAIN MULTIPLE SUR CE FICHIER — défaut du plan gelé, signalé au rapport de N2.
+// Le § 4.2 (N2) ET le § 4.4 (N4) déclarent tous deux `M partage/src/index.ts`, et le § 6.3
+// l'assume (« réexporte les types de N1, N2, N3 et N4 »). Cela contredit la règle « un seul
+// écrivain par fichier, sans exception » du § 4. Le remède retenu : chaque lot n'AJOUTE qu'un
+// bloc en fin de fichier, délimité et signé, et ne touche à aucune ligne existante. Les
+// ajouts fusionnent alors sans conflit — mais la règle reste enfreinte, et c'est le contrat
+// qui l'enfreint, pas les lots.
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+
+export type {
+  CleAudio, RenduVoix, ClipVoix, ManifesteVoix, CouvertureAudio,
+} from './voix/manifeste.js';
+
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+// Additions de la campagne de finition v3 — § 4.4, lot N4. TYPES UNIQUEMENT (convention C1).
+//
+// Les VALEURS de la séquence — `sequenceDuDocument`, `CHEMINS_OUVERTURE`, `PASSABLE_DES_MS`,
+// `ouvertureAJouerSeule` — restent hors d'ici et passent par `@pierre/partage/ouverture`.
+// Coût de bundle de ces trois lignes : nul, elles sont effacées à la compilation.
+//
+// `partage/src/ton/index.ts` n'est PAS réexporté, et c'est délibéré : il lit le disque
+// (`node:fs`) pour énumérer les textes destinés à l'enfant. Un barillet qui l'exposerait
+// ferait entrer `node:fs` dans le graphe du client. Il vit derrière `@pierre/partage/ton`,
+// atteint par les seuls tests et outillage.
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+
+export type {
+  CodeTableauOuverture, TableauOuverture, SequenceOuverture, EtatOuverture,
+} from './ouverture/types.js';

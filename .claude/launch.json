@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "pierre-client-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "-w", "@pierre/client"],
+      "port": 5173
+    }
+  ]
+}

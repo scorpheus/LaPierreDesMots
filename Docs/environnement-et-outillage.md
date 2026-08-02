@@ -128,7 +128,76 @@ ComfyUI, le TTS et llama.cpp visent tous la même VRAM. Le verrou consultatif
 **déjà résident** sur le GPU. Tout job GPU l'acquiert, y compris une session llama.cpp lancée pour
 générer du contenu.
 
-## 6. Ce qui manque avant L1
+## 6. Le nuancier de coloriage — validation de D37, consignée (lot N7)
+
+**D37 valide le nuancier de 11 couleurs. Cette section consigne CE QUI A ÉTÉ VÉRIFIÉ**, parce
+qu'une décision sans sa mesure n'est pas opposable.
+
+### 6.1 Le nuancier existe déjà, et N7 n'y ajoute rien
+
+Mesuré, pas rapporté :
+
+```
+$ grep -n "CouleurColoriage\|NUANCIER\|JetonCouleur" partage/src/palette.ts
+16:export type JetonCouleur =          → 7 membres (v2 § 9.2)
+26:export type CouleurColoriage =      → 11 membres
+65:export const NUANCIER               → 11 entrées
+```
+
+Les **7 jetons** de la v2 § 9.2 sont intacts, à l'octet près, et les **11 couleurs** du
+nuancier vivent à côté d'eux sans en modifier aucun. `partage/src/palette.ts` n'est **pas**
+modifié par N7 : le contrat de finition v3 § 4.7 est explicite — « D37 les valide, elle n'en
+ajoute aucune. Un lot qui y touche sort de son périmètre. »
+
+### 6.2 Les quatre couleurs à valider, et leur origine
+
+Sept des onze reprennent un objet déjà validé ; **quatre sont des propositions** que D37
+entérine. La colonne « origine » n'est pas décorative : elle dit ce qui a été décidé et ce qui
+a été proposé.
+
+| couleur | valeur | origine |
+|---|---|---|
+| `jaune` | `#FFC93C` | jeton `soleil` (v2 § 9.2) |
+| `bleu` | `#2FA8E0` | jeton `lagon` (v2 § 9.2) |
+| `rose` | `#FF5D8F` | jeton `framboise` (v2 § 9.2) |
+| `noir` | `#1B2440` | jeton `trait` (v2 § 9.2) |
+| `blanc` | `#FFF6E3` | jeton `parchemin` (v2 § 9.2) |
+| `gris` | `#8E97A8` | jeton `grisaille` (v2 § 9.2) |
+| `brun` | `#7A5230` | cheveux châtains de la v2 § 4.1 |
+| **`rouge`** | `#E03131` | **proposée**, entérinée par D37 |
+| **`orange`** | `#F76707` | **proposée**, entérinée par D37 |
+| **`vert`** | `#2FB344` | **proposée**, entérinée par D37 |
+| **`violet`** | `#8B5CF6` | **proposée**, entérinée par D37 |
+
+### 6.3 Ce que le décor en fait — et pourquoi il ne porte AUCUNE de ces couleurs
+
+« La couleur vient du code, pas du modèle » (annexe P § 2). Les décors v2 de N7
+(`ecole-v2.svg`, `grottes-v2.svg`) posent `fill="#8E97A8"` — la Grisaille — sur **toutes** leurs
+régions coloriables, et rien d'autre. Une région grise n'est pas une image filtrée : c'est
+**l'état par défaut d'un SVG dont les remplissages ne sont pas assignés**. C'est `SceneSvg` qui
+écrit le `fill` depuis `NUANCIER` au moment où l'enfant peint.
+
+Conséquence opposable pour tout décor à venir : **un décor qui porterait une couleur du
+nuancier en dur cesserait d'être recoloriable**, et le défaut ne se verrait qu'à l'usage.
+
+### 6.4 Le contrôle bloquant des régions fermées
+
+`scripts/verifier-regions-fermees.mjs` (lot N7) applique l'annexe P § 3.2 à **tous** les SVG de
+`contenu/`, y compris ceux qu'aucun habillage ne déclare — que `scripts/test-contenu.mjs`
+laissait hors de portée en les classant « contenu mort ». Sortie citée telle quelle :
+
+```
+$ node scripts/verifier-regions-fermees.mjs
+verifier-regions-fermees — 93 SVG, 1345 élément(s) dessiné(s), 234 région(s) déclarée(s) par 37 habillage(s)
+```
+
+Quatre règles bloquantes (`chemin-ouvert`, `trait-rempli`, `region-declaree-absente`,
+`region-non-declaree`) et trois de métrologie (`surface-divergente`, `centroide-hors-region`,
+`mesure-impossible`), ces dernières bloquantes sous `--strict`. Le module est aussi exercé par
+`tests/unitaires/regions-fermees.test.ts`, qui lui donne d'abord un SVG sain et un SVG fautif :
+un contrôle qu'aucun test ne discrimine est un contrôle qu'on croit avoir.
+
+## 7. Ce qui manque avant L1
 
 - [ ] `potrace` (vectorisation)
 - [ ] Serveur MCP « atelier » (annexe P § 6.2) — au moins `etat_projet`, `lancer_tests`, `capturer_ecran`

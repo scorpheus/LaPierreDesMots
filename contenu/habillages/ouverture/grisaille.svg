@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800" role="img" aria-label="Le monde en gris, et un coin qui a garde ses couleurs">
+  <title>La Grisaille</title>
+  <desc>PLACEHOLDER — decor bouchon ecrit a la main (D2), lot N4, tableau 2 sur 5 (D35). Le meme paysage, deux fois : a gauche il a garde ses couleurs, a droite la Grisaille l a pris. Ce n est PAS un filtre pose sur une image coloree — c est l etat par defaut d un SVG dont les remplissages ne sont pas assignes (« la couleur vient du code, pas du modele », annexe P § 2). Le partage vertical au milieu est l argument entier du tableau : ce que l enfant voit a gauche, il peut le rendre a droite. Toutes les formes sont fermees par un Z.</desc>
+  <g id="calque-ciel">
+    <path id="ciel-couleur" d="M0,0 L600,0 L600,800 L0,800 Z" fill="#8FD6F2"/>
+    <path id="ciel-grisaille" d="M600,0 L1200,0 L1200,800 L600,800 Z" fill="#C6CBD4"/>
+  </g>
+  <g id="calque-sol" stroke="#1B2440" stroke-width="6" stroke-linejoin="round">
+    <path id="sol-couleur" d="M0,560 L600,560 L600,800 L0,800 Z" fill="#3DDC97"/>
+    <path id="sol-grisaille" d="M600,560 L1200,560 L1200,800 L600,800 Z" fill="#A9AFB9"/>
+  </g>
+  <g id="calque-arbre-couleur" stroke="#1B2440" stroke-width="6" stroke-linejoin="round">
+    <path id="tronc-couleur" d="M250,560 L286,560 L286,400 L250,400 Z" fill="#C98B4B"/>
+    <path id="houppier-couleur" d="M268,196 L376,326 L322,396 L214,396 L160,326 Z" fill="#2FA86B"/>
+  </g>
+  <g id="calque-arbre-grisaille" stroke="#1B2440" stroke-width="6" stroke-linejoin="round">
+    <path id="tronc-grisaille" d="M914,560 L950,560 L950,400 L914,400 Z" fill="#9AA0AA"/>
+    <path id="houppier-grisaille" d="M932,196 L1040,326 L986,396 L878,396 L824,326 Z" fill="#B9BFC9"/>
+  </g>
+  <g id="calque-fleurs" stroke="#1B2440" stroke-width="5" stroke-linejoin="round">
+    <path id="fleur-couleur-1" d="M120,660 L152,628 L184,660 L152,692 Z" fill="#FF5D8F"/>
+    <path id="fleur-couleur-2" d="M420,700 L452,668 L484,700 L452,732 Z" fill="#FFC93C"/>
+    <path id="fleur-grisaille-1" d="M720,660 L752,628 L784,660 L752,692 Z" fill="#B9BFC9"/>
+    <path id="fleur-grisaille-2" d="M1020,700 L1052,668 L1084,700 L1052,732 Z" fill="#B9BFC9"/>
+  </g>
+  <g id="calque-lisiere">
+    <path id="lisiere" d="M594,0 L606,0 L606,800 L594,800 Z" fill="#FFF6E3"/>
+  </g>
+</svg>

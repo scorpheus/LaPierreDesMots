@@ -28,6 +28,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { CreationProfil, Profil } from '@pierre/partage';
 import { creerProfil, listerProfils } from '../api/client.js';
 import { useMagasin } from '../etat/services.js';
+import { PastilleSortie } from '../monde/PastilleSortie.js';
 import { EcranReglagesLecture } from './EcranReglagesLecture.js';
 
 /** Les couleurs d'avatar, prises au nuancier. Aucune ne signifie « raté ». */
@@ -70,6 +71,18 @@ function CarteProfil({ profil, surChoix, surReglages }: ProprietesCarteProfil): 
     <button
       type="button"
       className="cible carte-profil"
+      // `data-profil` — la prise stable du choix de profil, posée à l'intégration.
+      //
+      // Les suites E2E désignaient cette carte par son TEXTE (`getByText(prenom)`), et
+      // `parcours-galerie-parent.spec.ts` l'attendait déjà sous la forme `[data-profil]` —
+      // un attribut que personne n'avait écrit. Le cas ne trouvait donc jamais sa cible et
+      // sortait en dépassement de délai à 90 s, sans jamais dire ce qui manquait.
+      //
+      // Un sélecteur par texte est fragile pour une raison de fond ici : le prénom est une
+      // donnée de l'enfant, et l'écran en affiche plusieurs (le titre de la carte, l'étiquette
+      // accessible, les réglages de lecture). `first()` désignait alors « la première chose
+      // qui contient Alma », pas « la carte d'Alma ».
+      data-profil={String(profil.id)}
       onClick={() => surChoix(profil)}
       aria-label={`Jouer avec le profil de ${prenom}`}
       style={{
@@ -102,6 +115,19 @@ function CarteProfil({ profil, surChoix, surReglages }: ProprietesCarteProfil): 
         {prenom}
       </span>
     </button>
+
+    {/* ── D46 : partir en sortie en UN TAP, depuis l'ouverture de l'application ────────────
+        La pastille choisit le profil ET ouvre le premier nœud, dans le même tour de boucle.
+        Elle est POSÉE À CÔTÉ de la carte-profil, et non à sa place : le contrat v3 § 4.6
+        gloses « le tap qui choisit le profil part directement en sortie », mais six suites
+        E2E déjà livrées tapent le prénom et attendent `[data-ecran="carte"]`
+        (`parcours-campement`, `parcours-nominal`, `parcours-trace`, `parcours-sortie-clairiere`,
+        `parcours-issues-de-secours`, `a11y`, `visuel/carte`). Aucune ne m'appartient, et
+        « ne jamais assouplir une assertion » interdit de les corriger d'ici. La carte-profil
+        garde donc sa destination, la pastille en ajoute une plus courte, et D46 est tenue :
+        UN tap depuis l'ouverture suffit à être dans un exercice. Arbitrage consigné dans
+        `Docs/questions-en-attente.md`. */}
+    <PastilleSortie profil={profil} style={{ inlineSize: '13rem' }} />
 
     {/* Les réglages de lecture sont PAR PROFIL (D19) : l'accès part donc de la carte de
         l'enfant, jamais d'un menu général. Un seul tap, aucun mot de passe — la zone parent

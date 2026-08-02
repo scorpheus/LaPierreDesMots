@@ -28,6 +28,8 @@ import type {
   CodeCompagnon, CodeRegion, Compagnon, EtatCarte, EtatGobi, EtatMonde, EtatRegion, FormeGobi,
   Horloge, Horodatage, ObjetCampement, StadeGobi,
 } from '@pierre/partage';
+import { OUVERTURE_JAMAIS_VUE } from '@pierre/partage/ouverture';
+import type { EtatOuverture } from '@pierre/partage/ouverture';
 import {
   ajouterForme,
   appliquerEclat,
@@ -434,6 +436,69 @@ export function poserObjetCampement(
        ON CONFLICT (profil_id, objet_code) DO NOTHING`
     )
     .run(profilId, code, String(horodatage(horloge)));
+}
+
+// ──────────────────────────────────────────────────── la sequence d'ouverture (N4, D35)
+
+interface LigneOuverture {
+  readonly vue_le: string;
+  readonly passee: number;
+  readonly nb_rejeux: number;
+}
+
+/**
+ * Ce que le serveur sait de la sequence d'ouverture pour ce profil.
+ *
+ * Aucune ligne = jamais vue, et c'est l'etat de depart de tout profil neuf. On ne cree PAS de
+ * ligne a la creation du profil : une table dont l'absence de ligne a un sens est plus simple
+ * a relire qu'une table peuplee de zeros, et elle donne le meme resultat.
+ */
+export function lireOuverture(base: DatabaseSync, profilId: string): EtatOuverture {
+  const ligne = base
+    .prepare('SELECT vue_le, passee, nb_rejeux FROM ouverture_vue WHERE profil_id = ?')
+    .get(profilId) as unknown as LigneOuverture | undefined;
+
+  if (ligne === undefined) {
+    return OUVERTURE_JAMAIS_VUE;
+  }
+  return {
+    vue: true,
+    passee: Number(ligne.passee) === 1,
+    nbRejeux: Number(ligne.nb_rejeux)
+  };
+}
+
+/**
+ * Enregistre que la sequence a ete vue. Idempotent au sens de R14 : **un acquis n'est jamais
+ * repris**.
+ *
+ * Trois proprietes, et chacune corrige une facon de mentir au parent :
+ *
+ *   1. `vue_le` garde sa PREMIERE date. Rejouer le recit n'efface pas le jour ou l'enfant l'a
+ *      decouvert.
+ *   2. `passee` ne repasse JAMAIS de 0 a 1. Un enfant qui a regarde l'histoire en entier une
+ *      fois l'a vue, meme s'il la saute les fois suivantes — c'est la question a laquelle le
+ *      parent veut une reponse (« l'a-t-il vue ? »), et `MIN` la garde juste.
+ *   3. `nb_rejeux` compte les passages AU-DELA du premier. Un enfant qui y revient seul est le
+ *      signal que D35 esperait ; il merite d'etre compte, pas ecrase.
+ */
+export function enregistrerOuvertureVue(
+  base: DatabaseSync,
+  profilId: string,
+  passee: boolean,
+  horloge: Horloge,
+): EtatOuverture {
+  base
+    .prepare(
+      `INSERT INTO ouverture_vue (profil_id, vue_le, passee, nb_rejeux)
+       VALUES (?, ?, ?, 0)
+       ON CONFLICT (profil_id) DO UPDATE SET
+         passee    = MIN(ouverture_vue.passee, excluded.passee),
+         nb_rejeux = ouverture_vue.nb_rejeux + 1`
+    )
+    .run(profilId, String(horodatage(horloge)), passee ? 1 : 0);
+
+  return lireOuverture(base, profilId);
 }
 
 /** Compte une visite sur un point d'interaction. Sert a varier les reactions, jamais a noter. */

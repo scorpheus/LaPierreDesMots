@@ -12,7 +12,7 @@
  * travaille aucune paire — absent, et non `null` ni chaîne vide : un test qui lit deux
  * valeurs séparées par un espace doit échouer, pas passer.
  *
- * AUCUNE COORDINATION FINE (R16). Le couloir de tolérance fait 24 px CSS de demi-largeur,
+ * AUCUNE COORDINATION FINE (R16). Le couloir de tolérance fait 32 px CSS de demi-largeur,
  * converti ici une seule fois en unités `viewBox` — la logique pure ne connaît que des
  * unités `viewBox`, jamais des pixels.
  */
@@ -37,8 +37,15 @@ const PERIODE_BATTEMENT_MS = 1000;
 /** R15 : « au moins une fois par tranche de 20 s », comme `colorie` et `place`. */
 const RELECTURE_MS = 20_000;
 
-/** R16, en pixels CSS. Converti en unités `viewBox` par le facteur d'échelle du SVG. */
-const TOLERANCE_CSS_PX = 24;
+/**
+ * R16, en pixels CSS. Converti en unités `viewBox` par le facteur d'échelle du SVG.
+ *
+ * Miroir exact de `TOLERANCE_TRACE_PX` (`partage/src/moteurs/trace/validation.ts`), qui
+ * porte la raison du 32 : la zone où le doigt est accepté est un disque de ce RAYON, et
+ * CLAUDE.md règle 5 exige 64 px pour toute cible. Les deux valeurs doivent rester égales —
+ * un couloir dessiné plus étroit que celui qui est mesuré ferait mentir l'écran.
+ */
+const TOLERANCE_CSS_PX = 32;
 
 const TRAIT = 'var(--trait, #1B2440)';
 const ENCRE = 'var(--encre, #2E5EAA)';
@@ -62,6 +69,25 @@ function bornesViewBox(viewBox: string): readonly [number, number, number, numbe
     return [0, 0, 100, 160];
   }
   return [minX, minY, largeur, hauteur];
+}
+
+/**
+ * Le retour après un refus. Jamais un reproche, jamais du rouge (R14, D16) — mais il DIT
+ * quoi refaire quand il le sait.
+ *
+ * `trait-hors-ordre` est le seul motif qui porte une information actionnable : l'enfant a
+ * tracé un trait juste, au mauvais moment. Lui répondre « On recommence ce trait » ne lui
+ * apprend rien — c'est précisément ce qui bloquait sur le `d`, dont l'ordre est l'inverse de
+ * celui du `b` (D33). Le libellé du trait attendu vient de l'état, jamais d'une chaîne
+ * recopiée ici.
+ */
+function messageDeRefus(etat: EtatTrace, libelleAttendu: string | null): string {
+  if (etat.dernierRefus === null) return '';
+  const libelle = etat.aide?.libelle ?? libelleAttendu;
+  if (etat.dernierRefus.motif === 'trait-hors-ordre' && libelle !== null) {
+    return `On commence par ${libelle}, tranquillement.`;
+  }
+  return 'On recommence ce trait, tranquillement.';
 }
 
 export function MoteurTrace(
@@ -268,7 +294,7 @@ export function MoteurTrace(
       </svg>
 
       <p role="status" aria-live="polite" data-refus={etat.dernierRefus?.motif ?? 'non'}>
-        {etat.dernierRefus === null ? '' : 'On recommence ce trait, tranquillement.'}
+        {messageDeRefus(etat, traitAttendu?.libelle ?? null)}
       </p>
 
       <span data-trait-libelle="oui" style={{ color: TRAIT }}>

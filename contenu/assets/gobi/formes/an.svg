@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Gobi-AN">
+  <title>Gobi-AN</title>
+  <desc>Le cristal du grapheme « an » — Gobi-AN. C est LUI qui porte la declinaison, jamais le corps (D20, D36). Sa silhouette et sa teinte sont propres a ce grapheme : deux formes identiques ne se collectionneraient pas (D44). Le viewBox fait 64 unites, ce qui est la cible tapable minimale de R16.</desc>
+  <g id="cristal">
+    <path id="cristal-face" d="M32,17 L36.78,25 L40.33,32.99 L43.52,40.98 L40.99,58 L23.01,58 L20.48,40.98 L23.67,32.99 L27.22,25 Z" fill="#FACBEB" stroke="#4B2207" stroke-width="3" stroke-linejoin="round"/>
+    <path id="cristal-facette" d="M32,17 L40.99,58 L23.01,58 Z" fill="#EBA6D6" stroke="none" opacity="0.8"/>
+    <path id="cristal-eclat" d="M27.65,29.3 L30.26,42.42" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" opacity="0.85" fill="none"/>
+  </g>
+</svg>

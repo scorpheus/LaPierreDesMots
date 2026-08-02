@@ -2,24 +2,49 @@
  * Synthèse vocale, derrière une interface — annexe T § 2.3.
  *
  * « Rien n'est synthétisé à l'exécution » (CLAUDE.md) : l'implantation réelle joue un clip
- * pré-rendu. En v1 il n'y a aucun audio (décision D1, écart n° 4 du contrat) et le client
- * câble `VoixMuette`, qui journalise ce qu'on lui a demandé de dire.
+ * PRÉ-RENDU, produit au build par `npm run voix` et déclaré au manifeste
+ * (`contenu/audio/manifeste.json`).
+ *
+ * ═════════════════════════════════════════════════════════════════════════════════════════
+ * MODIFIÉ PAR N2 — contrat de finition v3 § 5.5. Deux changements, et un seul motif.
+ *
+ * 1. `Locuteur` passe de QUATRE à SEPT membres, et sa définition déménage dans
+ *    `../voix/manifeste.js`. D41 : voix entièrement synthétiques, sept locuteurs. `'enfant'`
+ *    est RETIRÉ — D41 écarte l'enregistrement familial, et une voix d'enfant synthétique ne
+ *    sert aucune consigne. Les quatre compagnons entrent, parce que ce sont eux qui parlent
+ *    en région.
+ *
+ * 2. `DemandeVoix.clip` (un CHEMIN de fichier) devient `DemandeVoix.cle` (une CLÉ de
+ *    manifeste), et `FournisseurVoix` gagne `aUnClip`.
+ *
+ *    Le motif est D42 : « le bouton écouter est masqué tant qu'aucun audio n'existe ». Pour
+ *    tenir cette règle, l'application doit répondre à « ce texte a-t-il un clip ? » AVANT de
+ *    rendre quoi que ce soit. Avec un chemin de fichier, chaque appelant devait le savoir
+ *    lui-même — c'est-à-dire que chaque appelant pouvait se tromper. Avec une clé, un seul
+ *    objet sait : le fournisseur. `aUnClip` est la question, `dire` est la réponse, et le
+ *    bouton n'a plus rien à deviner.
+ * ═════════════════════════════════════════════════════════════════════════════════════════
  */
 
-import type { CheminAsset } from '../identifiants.js';
+import type { CleAudio, Locuteur } from '../voix/manifeste.js';
 
-/** Qui parle. Chaque locuteur a sa voix clonée ou sa voix de synthèse. */
-export type Locuteur = 'gobi' | 'narrateur' | 'maitresse' | 'enfant';
+export type { CleAudio, Locuteur };
 
 export interface DemandeVoix {
   /** Le texte à dire, tel qu'il est écrit à l'écran (apostrophes typographiques comprises). */
   readonly texte: string;
   readonly locuteur?: Locuteur;
-  /** Clé du clip pré-rendu quand elle est connue. `null` = pas de clip pour ce texte. */
-  readonly clip?: CheminAsset | null;
+  /**
+   * REMPLACE `clip` — la clé du manifeste, jamais un chemin de fichier.
+   *
+   * Le fournisseur résout ; l'appelant n'a pas à connaître l'arborescence de `contenu/audio/`,
+   * ni le nom de fichier — qui porte l'empreinte du texte et change donc à chaque correction
+   * de la consigne. `null` : aucun clip n'est demandé, et le fournisseur se tait.
+   */
+  readonly cle?: CleAudio | null;
   /** 1 = vitesse normale. Le palier d'aide `souffle-syllabe` ralentit. */
   readonly vitesse?: number;
-  /** Vrai pour une diction syllabée (palier `indice`, contrat § 5.6). */
+  /** Vrai pour une diction syllabée (palier `indice`) : le rendu `syllabe` du manifeste. */
   readonly syllabe?: boolean;
 }
 
@@ -30,4 +55,12 @@ export interface FournisseurVoix {
   taire(): void;
   /** Faux quand aucune voix n'est disponible : l'appelant ne doit alors rien attendre. */
   readonly disponible: boolean;
+  /**
+   * AJOUT N2 — ce que `BoutonEcouter` interroge AVANT de se rendre (D42).
+   *
+   * Elle ne joue rien, ne charge rien, ne réserve rien : elle consulte le manifeste. Elle
+   * doit donc être appelable à chaque rendu React sans coût, et rendre `false` sur `null`
+   * plutôt que de lever — un bouton ne fait pas tomber un écran.
+   */
+  aUnClip(cle: CleAudio | null): boolean;
 }

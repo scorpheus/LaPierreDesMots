@@ -1,0 +1,41 @@
+{
+  "$commentaire": "La séquence d'ouverture — D35, lot N4. Elle répond mot pour mot au constat du père : « je n'ai pas compris la phrase “le monde t'attend en gris”, c'est pas joyeux pour l'instant, mais il manque la séquence d'intro sûrement ». Les cinq tableaux racontent le MÊME fait que cette phrase, retourné de l'absence vers le pouvoir d'agir : la Pierre s'est brisée, ce qui n'a plus de nom perd ses couleurs, et TOI tu sais encore lire les noms. Chaque `texte` est relu par `enonceUnePerte` (convention C7) : les tableaux 1 et 2 énoncent bien une perte — c'est la prémisse du monde — mais chacun porte, dans la même phrase, le geste que l'enfant peut faire. Un tableau qui perdrait sa seconde moitié ferait échouer `tests/unitaires/ton-sans-perte.test.ts`, et c'est le but. Vocabulaire tenu au déchiffrage de D14 : phrases courtes, mots outils fréquents, aucune subordonnée empilée.",
+  "passableDesMs": 0,
+  "tableaux": [
+    {
+      "code": "pierre",
+      "texte": "La Pierre des Mots gardait tous les noms du monde. Un jour, elle s’est brisée — et chaque nom que tu sais lire en recolle un éclat.",
+      "cleAudio": "ouverture/pierre",
+      "dureeMs": 6000,
+      "asset": "habillages/ouverture/pierre.svg"
+    },
+    {
+      "code": "grisaille",
+      "texte": "Ce qui n’a plus de nom perd ses couleurs. Le monde t’attend en gris : tu peux les lui rendre.",
+      "cleAudio": "ouverture/grisaille",
+      "dureeMs": 6000,
+      "asset": "habillages/ouverture/grisaille.svg"
+    },
+    {
+      "code": "noms",
+      "texte": "Toi, tu sais encore lire les noms. Chaque mot que tu lis rend sa couleur à un morceau du monde.",
+      "cleAudio": "ouverture/noms",
+      "dureeMs": 6000,
+      "asset": "habillages/ouverture/noms.svg"
+    },
+    {
+      "code": "habitants",
+      "texte": "Gobi, Filou, Bulle, Roc et Plume vivent ici. Ils t’attendent pour retrouver leurs couleurs.",
+      "cleAudio": "ouverture/habitants",
+      "dureeMs": 6000,
+      "asset": "habillages/ouverture/habitants.svg"
+    },
+    {
+      "code": "appel",
+      "texte": "Viens. On commence par la Clairière : le premier mot que tu liras rallume déjà tout un pré.",
+      "cleAudio": "ouverture/appel",
+      "dureeMs": 5000,
+      "asset": "habillages/ouverture/appel.svg"
+    }
+  ]
+}

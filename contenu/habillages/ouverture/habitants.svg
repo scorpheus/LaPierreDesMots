@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800" role="img" aria-label="Gobi et les quatre compagnons attendent l enfant">
+  <title>Les habitants t’attendent</title>
+  <desc>PLACEHOLDER — decor bouchon ecrit a la main (D2), lot N4, tableau 4 sur 5 (D35). Gobi au centre, plus grand, bras courts leves et ouverts en posture d accueil (D24, D36), coeur de Pierre lumineux au ventre (D36) et couronne de cristaux sur le crane. Les quatre compagnons de `contenu/monde/compagnons.json` l entourent, dans l ordre des regions : Filou, Bulle, Roc, Plume. C EST UN BOUCHON : le vrai Gobi vient de N3, qui verrouille la canonique et la decline. Les formes de ce fichier ne pretendent pas etre le personnage — elles tiennent la place et la composition. Toutes fermees par un Z.</desc>
+  <g id="calque-fond">
+    <path id="fond" d="M0,0 L1200,0 L1200,800 L0,800 Z" fill="#FFF6E3"/>
+    <path id="sol" d="M0,640 L1200,640 L1200,800 L0,800 Z" fill="#3DDC97"/>
+  </g>
+  <g id="calque-gobi" stroke="#1B2440" stroke-width="7" stroke-linejoin="round">
+    <path id="gobi-corps" d="M600,300 L724,424 L700,610 L500,610 L476,424 Z" fill="#C9A7E8"/>
+    <path id="gobi-bras-gauche" d="M486,440 L392,368 L360,410 L458,494 Z" fill="#C9A7E8"/>
+    <path id="gobi-bras-droit" d="M714,440 L808,368 L840,410 L742,494 Z" fill="#C9A7E8"/>
+    <path id="gobi-coeur" d="M600,452 L644,506 L600,560 L556,506 Z" fill="#FFC93C"/>
+    <path id="gobi-cristal-1" d="M544,300 L568,232 L594,300 Z" fill="#8FD6F2"/>
+    <path id="gobi-cristal-2" d="M594,300 L612,206 L634,300 Z" fill="#3DDC97"/>
+    <path id="gobi-cristal-3" d="M634,300 L664,244 L682,300 Z" fill="#FF5D8F"/>
+    <path id="gobi-oeil-gauche" d="M556,378 L578,356 L600,378 L578,400 Z" fill="#1B2440"/>
+    <path id="gobi-oeil-droit" d="M624,378 L646,356 L668,378 L646,400 Z" fill="#1B2440"/>
+  </g>
+  <g id="calque-compagnons" stroke="#1B2440" stroke-width="6" stroke-linejoin="round">
+    <path id="compagnon-filou" d="M180,480 L252,552 L232,640 L128,640 L108,552 Z" fill="#FFC93C"/>
+    <path id="compagnon-bulle" d="M370,500 L432,562 L414,640 L326,640 L308,562 Z" fill="#8FD6F2"/>
+    <path id="compagnon-roc" d="M830,500 L892,562 L874,640 L786,640 L768,562 Z" fill="#C98B4B"/>
+    <path id="compagnon-plume" d="M1020,480 L1092,552 L1072,640 L968,640 L948,552 Z" fill="#FF5D8F"/>
+  </g>
+  <g id="calque-noms" fill="#1B2440" font-family="Andika, sans-serif" font-size="34" text-anchor="middle">
+    <text x="180" y="706">Filou</text>
+    <text x="370" y="706">Bulle</text>
+    <text x="600" y="706">Gobi</text>
+    <text x="830" y="706">Roc</text>
+    <text x="1020" y="706">Plume</text>
+  </g>
+</svg>

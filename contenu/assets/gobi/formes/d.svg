@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Gobi-D">
+  <title>Gobi-D</title>
+  <desc>Le cristal du grapheme « d » — Gobi-D. C est LUI qui porte la declinaison, jamais le corps (D20, D36). Sa silhouette et sa teinte sont propres a ce grapheme : deux formes identiques ne se collectionneraient pas (D44). Le viewBox fait 64 unites, ce qui est la cible tapable minimale de R16.</desc>
+  <g id="cristal">
+    <path id="cristal-face" d="M32,12 L39.75,29.94 L40.37,58 L23.63,58 L24.25,29.94 Z" fill="#C3EEDC" stroke="#4B2207" stroke-width="3" stroke-linejoin="round"/>
+    <path id="cristal-facette" d="M32,12 L40.37,58 L23.63,58 Z" fill="#95D6BC" stroke="none" opacity="0.8"/>
+    <path id="cristal-eclat" d="M27.95,25.8 L30.38,40.52" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" opacity="0.85" fill="none"/>
+  </g>
+</svg>

@@ -93,13 +93,15 @@ export interface ErreurApi {
 }
 
 /**
- * Les chemins des **dix-neuf** routes : les 7 de la v1, plus les 12 du contrat des features
- * v2 § 5.3. `motifs` est la forme paramétrée pour l'enregistrement côté serveur ; les fonctions
- * construisent l'URL côté client, en encodant leurs arguments.
+ * Les chemins des **vingt-quatre** routes : les 7 de la v1, les 12 du contrat des features
+ * v2 § 5.3, et les 5 de la campagne de finition v3 § 8 (`POST /api/profils/:id/ouverture`
+ * partage son chemin avec le `GET`). `motifs` est la forme paramétrée pour l'enregistrement
+ * côté serveur ; les fonctions construisent l'URL côté client, en encodant leurs arguments.
  *
- * **L2-H déclare TOUS les chemins, y compris ceux qu'il n'implante pas** (contrat § 5.1). Un
- * chemin déclaré ici et implanté ailleurs ne peut pas diverger d'un côté sans cesser de
- * compiler de l'autre — c'est toute la raison d'être de cette table unique.
+ * **Le propriétaire de ce fichier déclare TOUS les chemins, y compris ceux qu'il n'implante
+ * pas** (contrat v2 § 5.1, repris par le contrat de finition v3 § 8, qui confie le fichier à
+ * N5). Un chemin déclaré ici et implanté ailleurs ne peut pas diverger d'un côté sans cesser
+ * de compiler de l'autre — c'est toute la raison d'être de cette table unique.
  */
 export const CHEMINS_API = {
   // ── les 7 de la v1 ──────────────────────────────────────────────────────────────────────
@@ -136,6 +138,39 @@ export const CHEMINS_API = {
   parentRelecture: (exercice: IdExercice): string =>
     `/api/parent/relecture/${encodeURIComponent(exercice)}`,
 
+  // ── les 6 routes de la campagne de finition v3 § 8 ──────────────────────────────────────
+  //
+  // **N5 déclare TOUS les chemins, y compris ceux qu'il n'implante pas** (contrat de finition
+  // v3 § 8, qui lui confie ce fichier pour la campagne). Le motif est celui de L2-H et il n'a
+  // pas changé : un chemin déclaré ici et implanté ailleurs ne peut pas diverger d'un côté
+  // sans cesser de compiler de l'autre. Trois lots écrivent des routes cette fois-ci ; c'est
+  // exactement la situation où trois tables concurrentes finiraient par se contredire.
+  //
+  // Le propriétaire de chaque implantation est nommé en regard, pour que l'orchestrateur
+  // puisse vérifier lui-même que chaque symbole déclaré a trouvé le sien.
+
+  /** N2 — le manifeste des voix, seule source de vérité sur l'existence d'un clip (D42). */
+  audioManifeste: '/api/audio/manifeste',
+
+  /** N4 — la séquence d'ouverture a-t-elle été vue par ce profil ? (D35) */
+  ouvertureProfil: (id: IdProfil): string => `/api/profils/${encodeURIComponent(id)}/ouverture`,
+
+  /** N5 — l'état de la porte parent. La SEULE route de la zone qui s'ouvre sans jeton. */
+  parentEtat: '/api/parent/etat',
+
+  /**
+   * N5 — la première définition du code du foyer.
+   *
+   * Répond **409 Conflict** quand un code existe déjà — jamais 200, jamais un remplacement
+   * silencieux (§ 8). La redéfinition passe par `parentOuvrir` puis par ce chemin **avec le
+   * jeton** : on ne détruit jamais un code existant sans la preuve qu'on connaît l'ancien.
+   */
+  parentDefinir: '/api/parent/definir',
+
+  /** N5 — le catalogue de la galerie parent (D34). */
+  parentGalerie: (profil: IdProfil): string =>
+    `/api/parent/${encodeURIComponent(profil)}/galerie`,
+
   motifs: {
     sante: '/api/sante',
     profils: '/api/profils',
@@ -155,6 +190,12 @@ export const CHEMINS_API = {
     parentDashboard: '/api/parent/:profil/dashboard',
     parentExport: '/api/parent/:profil/export/:code',
     parentRelecture: '/api/parent/relecture/:exercice',
+    // ── campagne de finition v3 § 8 ───────────────────────────────────────────────────────
+    audioManifeste: '/api/audio/manifeste',
+    ouvertureProfil: '/api/profils/:id/ouverture',
+    parentEtat: '/api/parent/etat',
+    parentDefinir: '/api/parent/definir',
+    parentGalerie: '/api/parent/:profil/galerie',
   },
 } as const;
 

@@ -37,6 +37,26 @@ export class VoixMuette implements FournisseurVoix {
   /** Nombre d'appels à `taire()`. */
   nbInterruptions = 0;
 
+  /**
+   * AJOUT N2 — les clés que cette voix de test déclare connaître.
+   *
+   * ⚠ FICHIER SANS PROPRIÉTAIRE AU PLAN GELÉ, signalé au rapport de N2. Le § 4.2 ajoute
+   * `aUnClip` à `FournisseurVoix` (§ 5.5) sans attribuer ce fichier à quiconque — or
+   * `VoixMuette` le déclare `implements`, donc la suite entière cesse de compiler sans cet
+   * ajout. Trois lignes, purement additives.
+   *
+   * VIDE PAR DÉFAUT, et c'est le choix qui compte : une voix de test qui prétendrait
+   * connaître toutes les clés rendrait le bouton « écouter » PARTOUT dans les tests
+   * composants, et D42 ne serait plus jamais exercée. Un test qui veut le bouton déclare
+   * nommément ses clés — `voix.clesConnues.add('clairiere-ecole-01/c1')` — et devient ainsi
+   * lisible sur ce qu'il suppose.
+   */
+  readonly clesConnues = new Set<string>();
+
+  aUnClip(cle: string | null): boolean {
+    return cle !== null && this.clesConnues.has(cle);
+  }
+
   dire(demande: DemandeVoix): Promise<void> {
     this.demandes.push(demande);
     return Promise.resolve();

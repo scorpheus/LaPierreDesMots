@@ -100,37 +100,78 @@ describe('couvertureOrientee — la mesure sur laquelle tout repose', () => {
   });
 });
 
-describe('toleranceViewBox — les 24 px ne sont PAS 24 unités de dessin', () => {
+describe('toleranceViewBox — les 32 px ne sont PAS 32 unités de dessin', () => {
   const b = parLettre.get('b')!;
   const d = parLettre.get('d')!;
   const rondB = b.traits.find((t) => t.libelle === 'le rond')!;
   const rondD = d.traits.find((t) => t.libelle === 'le rond')!;
 
   it('convertit selon la largeur du viewBox et celle du rendu', () => {
-    expect(toleranceViewBox('0 0 100 160')).toBeCloseTo((24 * 100) / 420, 6);
-    expect(toleranceViewBox('0 0 100 160', 100)).toBe(24);
+    // La valeur elle-même est épinglée plus bas, à l'unité près ; ici on vérifie la
+    // CONVERSION, et l'écrire avec la constante évite de re-fixer un littéral à chaque
+    // décision qui la fait bouger — D33 conséquence 5 vient d'en faire bouger une.
+    expect(toleranceViewBox('0 0 100 160')).toBeCloseTo((TOLERANCE_TRACE_PX * 100) / 420, 6);
+    expect(toleranceViewBox('0 0 100 160', 100)).toBe(TOLERANCE_TRACE_PX);
     // Un viewBox illisible ne lève pas au milieu d'un geste : il retombe sur la valeur brute.
     expect(toleranceViewBox('pas un viewBox')).toBe(TOLERANCE_TRACE_PX);
   });
 
   it('RÉGRESSION MESURÉE : sans conversion, le rond du d couvrirait celui du b au-delà du seuil', () => {
-    const brute = couvertureOrientee(rondB.points, rondD.points, TOLERANCE_TRACE_PX);
-    const convertie = couvertureOrientee(rondB.points, rondD.points, toleranceViewBox(b.viewBox));
+    /**
+     * MESURE ÉLARGIE AU SENS DE PARCOURS, et voici pourquoi. Depuis que le ductus du `d` est
+     * celui de l'école (D33), son rond ne se parcourt plus dans le même sens que celui du
+     * `b` : la couverture ORIENTÉE de l'un par l'autre tombe à 0,67, et l'ancienne écriture
+     * de ce cas aurait conclu « plus de danger » alors que le danger est intact. Ce que la
+     * conversion protège, c'est `axeDuTrait` et `axeConfondu`, qui jugent par `ressemblance`
+     * — indépendante du sens. C'est donc cette grandeur-là qu'il faut mesurer, et elle vaut
+     * **1,00** en pixels bruts : un enfant qui trace exactement l'autre lettre serait accepté.
+     */
+    const ressemblance = (tolerance: number): number =>
+      Math.max(
+        couvertureOrientee(rondB.points, rondD.points, tolerance),
+        couvertureOrientee(rondB.points, [...rondD.points].reverse(), tolerance),
+      );
+    const brute = ressemblance(TOLERANCE_TRACE_PX);
+    const convertie = ressemblance(toleranceViewBox(b.viewBox));
 
-    // C'est le chiffre qui a motivé `toleranceViewBox` : 0,89 > COUVERTURE_MINIMALE.
+    // C'est le chiffre qui a motivé `toleranceViewBox` : 1,00 > COUVERTURE_MINIMALE.
     expect(brute).toBeGreaterThan(COUVERTURE_MINIMALE);
+    // Et voici ce que la conversion ramène : 0,22, très en dessous du seuil.
     expect(convertie).toBeLessThan(COUVERTURE_MINIMALE);
   });
 });
 
 describe('refleterPoints — la convention géométrique des modèles', () => {
   it('les 4 lettres à risque sont images EXACTES les unes des autres, par libellé de trait', () => {
+    /**
+     * LA FORME EST UNE IMAGE EXACTE ; LE SENS DE PARCOURS, NON — et c'est D33 qui le tranche.
+     *
+     * Ce cas comparait le reflet au jumeau **indice par indice**, ce qui revenait à exiger
+     * que le ductus d'une lettre soit celui de son image en miroir. Or une réflexion inverse
+     * le sens de rotation : sous cette règle, `d` et `q` — même famille gestuelle, tous deux
+     * initiés par la rotation antihoraire du `o` (D33) — ne pouvaient pas avoir le même
+     * ductus. C'était la contrainte qui tenait le `d` à l'envers, et c'est exactement ce que
+     * D33 conséquence 1 interdit : « le ductus est une donnée déclarée, jamais dérivée de la
+     * forme ».
+     *
+     * La géométrie reste donc vérifiée point pour point, à 1e-6 près, sans aucune tolérance
+     * de position ; seul l'ORDRE de parcours est libre, et il est épinglé ailleurs, par le
+     * référentiel, dans `tests/unitaires/ductus-referentiel.test.ts`.
+     */
     const paires: readonly (readonly [string, string, AxeMiroir])[] = [
       ['b', 'd', 'gauche-droite'],
       ['p', 'q', 'gauche-droite'],
       ['b', 'p', 'haut-bas'],
       ['d', 'q', 'haut-bas'],
     ];
+    /** Vrai si les deux suites de points coïncident indice par indice. */
+    const memeSuite = (
+      gauche: readonly (readonly number[])[],
+      droite: readonly (readonly number[])[],
+    ): boolean =>
+      gauche.length === droite.length &&
+      gauche.every((p, i) => Math.hypot(p[0]! - droite[i]![0]!, p[1]! - droite[i]![1]!) < 1e-6);
+
     for (const [a, b, axe] of paires) {
       const modeleA = parLettre.get(a)!;
       const modeleB = parLettre.get(b)!;
@@ -143,10 +184,13 @@ describe('refleterPoints — la convention géométrique des modèles', () => {
         // Comparaison à 1e-6 près, et non stricte : les modèles sont arrondis au centième à
         // la génération (`100 - 64.24` vaut `35.760000000000005` en binaire). Exiger
         // l'égalité au bit ne mesurerait pas la géométrie, mais l'arrondi.
-        reflet.forEach((point, i) => {
-          expect(point[0]).toBeCloseTo(jumeau!.points[i]![0], 6);
-          expect(point[1]).toBeCloseTo(jumeau!.points[i]![1], 6);
-        });
+        const identique = memeSuite(reflet, jumeau!.points);
+        const inverse = memeSuite(reflet, [...jumeau!.points].reverse());
+        expect(
+          identique || inverse,
+          `${a}/${b} — trait « ${trait.libelle} » : reflet ${JSON.stringify(reflet)} ` +
+            `vs jumeau ${JSON.stringify(jumeau!.points)}`,
+        ).toBe(true);
       }
     }
   });
@@ -261,19 +305,55 @@ describe('CONTRAT DE SORTIE — part des refus dont l’axe est renseigné', () 
     ['q', 'd', 'haut-bas'],
   ];
 
-  const fixtures = paires.flatMap(([attendue, jumelle, axe]) => {
+  const toutes = paires.flatMap(([attendue, jumelle, axe]) => {
     const modele: ModeleLettre = { ...parLettre.get(attendue)!, axeRisque: axe };
     const jumeau = parLettre.get(jumelle)!;
-    return modele.traits.map((trait) => ({
-      cas: `${attendue}→${jumelle} (${axe}) · ${trait.libelle}`,
-      axe,
-      decision: evaluerTrait(modele, trait, gesteDuJumeau(jumeau, trait.libelle)!),
-    }));
+    return modele.traits.map((trait) => {
+      const traitJumeau = jumeau.traits.find((t) => t.libelle === trait.libelle)!;
+      return {
+        cas: `${attendue}→${jumelle} (${axe}) · ${trait.libelle}`,
+        axe,
+        /**
+         * Le trait du jumeau est-il, point pour point ET dans le même ordre, le trait
+         * attendu ? Alors « tracer l'autre lettre » n'est pas un geste différent : c'est le
+         * MÊME geste, et il ne peut porter aucune information d'axe. Le constater est une
+         * mesure ; l'exclure sans le mesurer serait de la curation.
+         */
+        gesteIdentique:
+          traitJumeau.points.length === trait.points.length &&
+          trait.points.every(
+            (p, i) =>
+              Math.hypot(p[0] - traitJumeau.points[i]![0], p[1] - traitJumeau.points[i]![1]) < 1e-6,
+          ),
+        decision: evaluerTrait(modele, trait, gesteDuJumeau(jumeau, trait.libelle)!),
+      };
+    });
   });
 
+  /**
+   * LES DEUX CAS ÉCARTÉS, et ils le sont par la géométrie, jamais par leur nom.
+   *
+   * Depuis que le ductus du `d` est celui de l'école (D33), le rond du `d` et celui du `q`
+   * sont le MÊME geste : même arc — les deux lettres partagent la panse entre la hauteur d'x
+   * et la ligne de base —, même départ en haut à droite, même rotation antihoraire. Ce qui
+   * les distingue est la HASTE, qui monte pour le `d` et descend pour le `q`, et ces deux
+   * fixtures-là portent bien leur axe. Demander à la panse de distinguer `d` de `q` serait
+   * demander au moteur de lire une différence qui n'existe pas.
+   */
+  const fixtures = toutes.filter((f) => !f.gesteIdentique);
+
   it('les fixtures sont bien des REFUS — sinon la mesure ne mesurerait rien', () => {
-    expect(fixtures.length).toBe(16);
+    expect(toutes.length).toBe(16);
+    // Le compte des cas écartés est lui-même une assertion : s'il grandit en silence, la
+    // mesure se viderait sans que rien ne le dise.
+    expect(
+      toutes.filter((f) => f.gesteIdentique).map((f) => f.cas),
+      'gestes rigoureusement identiques au trait attendu',
+    ).toEqual(['d→q (haut-bas) · le rond', 'q→d (haut-bas) · le rond']);
+    expect(fixtures.length).toBe(14);
     expect(fixtures.every((f) => f.decision.acceptee === false)).toBe(true);
+    // Et les deux écartés sont ACCEPTÉS : c'est le même geste, il ne peut pas être une faute.
+    expect(toutes.filter((f) => f.gesteIdentique).every((f) => f.decision.acceptee)).toBe(true);
   });
 
   it('au moins 90 % des refus portent leur axe, et TOUJOURS le bon', () => {
@@ -402,7 +482,10 @@ describe('moteurTrace — la règle de non-échec et la monotonie de l’aide', 
 
   it('le seuil de couverture est une constante exportée, pas un nombre caché', () => {
     expect(COUVERTURE_MINIMALE).toBe(0.8);
-    expect(TOLERANCE_TRACE_PX).toBe(24);
+    // 24 → 32 : D33 conséquence 5, « on assouplit la PRÉCISION (R16), jamais le SENS ». La
+    // zone d'acceptation du point de départ est un disque de ce RAYON ; à 24 elle faisait
+    // 48 px, sous les 64 px que CLAUDE.md règle 5 exige de toute cible tapable.
+    expect(TOLERANCE_TRACE_PX).toBe(32);
   });
 });
 

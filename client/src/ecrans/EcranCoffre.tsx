@@ -15,8 +15,10 @@
 import type { ReactElement } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import type { EtatMonde } from '@pierre/partage';
+import { construireEtagere } from '@pierre/partage/monde';
 import { lireMonde, urlAsset } from '../api/client.js';
 import { useEtatJeu } from '../etat/services.js';
+import { Etagere, useCatalogueFormes } from '../monde/Etagere.js';
 
 export interface ProprietesEcranCoffre {
   /** Le monde du profil. Injecté par les tests et par un hôte qui l'a déjà ; chargé sinon. */
@@ -99,9 +101,13 @@ export function EcranCoffre({
   });
 
   const monde: EtatMonde | null = mondeInjecte ?? requete.data ?? null;
-  const formes = monde?.gobi.formes ?? [];
   const regions = monde?.carte.regions ?? [];
   const objets = monde?.campement ?? [];
+
+  // L'étagère, cases vides comprises. Même catalogue et même clé de requête qu'au campement :
+  // les deux écrans montrent exactement le même album, jamais deux comptes différents (C5).
+  const catalogue = useCatalogueFormes();
+  const etagere = construireEtagere(catalogue, monde?.gobi.formes ?? []);
 
   const nbEclats = regions.filter((region) => region.eclatObtenuLe !== null).length;
 
@@ -125,28 +131,17 @@ export function EcranCoffre({
         </button>
       </header>
 
+      {/* ── LA PREMIÈRE COLLECTION PASSE À L'ÉTAGÈRE — D44, lot N6 ──────────────────────────
+          Ce que cette section faisait, et qui était le défaut : `formes.map(...)` ne rendait
+          QUE les formes gagnées. Un enfant qui n'en avait aucune lisait une phrase ; un enfant
+          qui en avait trois voyait trois vignettes. Les vingt-deux cases restantes — c'est-à-dire
+          la seule raison d'y revenir (D25, point 3) — n'existaient nulle part.
+          `construireEtagere` garantit `cases.length === nbTotal` : le vide ne peut plus être
+          oublié, parce qu'il n'y a plus de liste où il serait absent.
+          L'attribut `data-collection-titre="formes"` est CONSERVÉ : `parcours-campement.spec.ts`
+          (L2-F) l'attend, et il n'appartient pas à ce lot. */}
       <section aria-label="Les formes de Gobi" data-collection-titre="formes">
-        <h2 className="titre" style={{ fontSize: '1.5rem', margin: '0 0 0.75rem' }}>
-          Les formes de Gobi — {formes.length}
-        </h2>
-        {formes.length === 0 ? (
-          <p className="zone-lecture" style={{ padding: '0.5rem 0.75rem' }}>
-            Chaque son que tu apprends donnera un cristal à Gobi.
-          </p>
-        ) : (
-          <ul style={STYLE_LISTE}>
-            {formes.map((forme) => (
-              <Case
-                key={String(forme.grapheme)}
-                cle={String(forme.grapheme)}
-                libelle={forme.libelle}
-                asset={String(forme.cristal)}
-                obtenu
-                categorie="forme"
-              />
-            ))}
-          </ul>
-        )}
+        <Etagere etagere={etagere} titre="Les formes de Gobi" />
       </section>
 
       <section aria-label="Les Éclats de Pierre" data-collection-titre="eclats">

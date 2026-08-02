@@ -13,6 +13,25 @@
  *     Un `b` tremblant mais bien orienté a réussi (R16).
  *
  * Aucun rouge, jamais : un trait raté s'estompe et se redemande (D16, R14).
+ *
+ * ────────────────────────────────────────────────────────────────────────────────────────
+ * DÉFAUT CORRIGÉ — L'ORDRE IMPOSÉ ÉTAIT INVISIBLE. Le moteur impose l'ordre des traits, et
+ * l'ordre du `d` est l'inverse de celui du `b` : la boucle d'abord (D33). Or ce composant
+ * rendait le trait attendu (`en-cours`) et le trait d'après (`a-tracer`) avec **exactement
+ * les mêmes attributs** — même couloir, même pointillé, **deux disques de départ jaunes
+ * identiques et deux flèches**. Seul `data-trait-etat`, invisible, les séparait. L'enfant
+ * voyait donc deux invitations à poser le doigt, et celle qui n'était pas la bonne était
+ * refusée sans rien expliquer. C'est ce que le père a rencontré sur le `d`.
+ *
+ * TROIS RÈGLES, désormais :
+ *   1. **Un seul point de départ à l'écran**, celui du trait attendu. Le trait d'après est un
+ *      fantôme : pas de disque, pas de flèche, rien à viser.
+ *   2. Le trait attendu est plus **contrasté** que celui d'après — le regard va au bon
+ *      endroit sans qu'on ait à lire quoi que ce soit.
+ *   3. Le disque de départ fait au moins **64 px CSS** de diamètre (CLAUDE.md règle 5, R16).
+ *      À `min(100%, 420px)` pour 100 unités de `viewBox`, cela fait `r >= 7,62` : il valait
+ *      `r=5`, soit 42 px — sous la plus petite cible tapable de l'application.
+ * ────────────────────────────────────────────────────────────────────────────────────────
  */
 
 import type { ReactElement } from 'react';
@@ -22,6 +41,21 @@ const TRAIT = 'var(--trait, #1B2440)';
 const GUIDE = 'var(--guide, rgba(27, 36, 64, 0.18))';
 const COULOIR = 'var(--couloir, rgba(242, 193, 78, 0.28))';
 const DEPART = 'var(--depart, #F2C14E)';
+
+/**
+ * Le trait D'APRÈS, en retrait. PLACEHOLDER — les deux valeurs sont un défaut raisonnable,
+ * pas une décision : elles disent seulement « moins présent que celui d'à côté ». La
+ * question est posée en fin de `Docs/questions-en-attente.md`.
+ */
+const COULOIR_ATTENTE = 'var(--couloir-attente, rgba(242, 193, 78, 0.09))';
+const GUIDE_ATTENTE = 'var(--guide-attente, rgba(27, 36, 64, 0.07))';
+
+/**
+ * Rayon du disque de départ, en unités `viewBox`. `8 × 2 × 4,2 px/unité = 67,2 px` — au-delà
+ * des 64 px exigés, et `tests/composants/MoteurTrace-ordre-visible.test.tsx` le mesure.
+ */
+const RAYON_DEPART = 8;
+const RAYON_DEPART_ANIME = 10;
 
 export interface ProprietesGuidageLettre {
   readonly trait: TraitLettre;
@@ -50,20 +84,30 @@ function flecheDeSens(trait: TraitLettre): { readonly x: number; readonly y: num
   return { x: b[0], y: b[1], angle };
 }
 
+/** Ce que l'on dit du trait à qui ne voit pas l'écran. L'ordre en fait partie. */
+function annonce(trait: TraitLettre, etat: ProprietesGuidageLettre['etat']): string {
+  if (etat === 'trace') return `${trait.libelle}, déjà gravé`;
+  if (etat === 'en-cours') return `${trait.libelle}, à tracer maintenant`;
+  return `${trait.libelle}, après`;
+}
+
 export function GuidageLettre(proprietes: ProprietesGuidageLettre): ReactElement {
   const { trait, etat, tolerance, animationsDesactivees, enDemonstration } = proprietes;
   const fleche = flecheDeSens(trait);
   const largeurCouloir = Math.max(2, tolerance * 2);
 
+  // Le trait attendu, et lui seul, se vise : il porte le départ, la flèche, et le contraste.
+  const aViser = etat === 'en-cours';
+
   return (
-    <g data-trait={trait.id} data-trait-etat={etat} aria-label={trait.libelle}>
+    <g data-trait={trait.id} data-trait-etat={etat} aria-label={annonce(trait, etat)}>
       {/* Le couloir, à sa vraie largeur : ce qui est toléré est ce qui est montré. */}
       <polyline
         data-guide="couloir"
         points={polyligne(trait)}
         fill="none"
-        stroke={etat === 'trace' ? 'none' : COULOIR}
-        strokeWidth={largeurCouloir}
+        stroke={etat === 'trace' ? 'none' : aViser ? COULOIR : COULOIR_ATTENTE}
+        strokeWidth={aViser ? largeurCouloir : Math.max(2, largeurCouloir / 2)}
         strokeLinecap="round"
         strokeLinejoin="round"
       />
@@ -73,20 +117,21 @@ export function GuidageLettre(proprietes: ProprietesGuidageLettre): ReactElement
         data-guide="modele"
         points={polyligne(trait)}
         fill="none"
-        stroke={etat === 'trace' ? TRAIT : GUIDE}
-        strokeWidth={etat === 'trace' ? 4 : 2.5}
-        strokeDasharray={etat === 'trace' ? undefined : '5 6'}
+        stroke={etat === 'trace' ? TRAIT : aViser ? GUIDE : GUIDE_ATTENTE}
+        strokeWidth={etat === 'trace' ? 4 : aViser ? 3 : 1.5}
+        strokeDasharray={etat === 'trace' ? undefined : aViser ? '5 6' : '2 8'}
         strokeLinecap="round"
         strokeLinejoin="round"
       />
 
-      {etat === 'trace' ? null : (
+      {/* UN SEUL point de départ à l'écran : celui du trait attendu. */}
+      {aViser ? (
         <>
           <circle
             data-guide="depart"
             cx={trait.depart[0]}
             cy={trait.depart[1]}
-            r={enDemonstration && !animationsDesactivees ? 7 : 5}
+            r={enDemonstration && !animationsDesactivees ? RAYON_DEPART_ANIME : RAYON_DEPART}
             fill={DEPART}
             stroke={TRAIT}
             strokeWidth={1.5}
@@ -100,9 +145,9 @@ export function GuidageLettre(proprietes: ProprietesGuidageLettre): ReactElement
             />
           )}
         </>
-      )}
+      ) : null}
 
-      <title>{trait.libelle}</title>
+      <title>{annonce(trait, etat)}</title>
     </g>
   );
 }

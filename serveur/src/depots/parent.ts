@@ -38,7 +38,17 @@ interface LigneCode {
   readonly empreinte: Uint8Array;
 }
 
-/** Rend `null` tant qu'aucun code n'a ete pose. Le premier acces le posera. */
+/**
+ * Comment le code du foyer a ete pose — colonne `defini_par` de la migration 009.
+ *
+ * `ouverture-implicite` est la valeur des bases anterieures a N5 : elle est CONSERVEE plutot
+ * que devinee, pour que le dashboard puisse un jour proposer au parent de redefinir un code
+ * qu'il n'a jamais choisi. On ne detruit jamais un code existant — le parent serait enferme
+ * dehors (contrat de finition v3 § 7.3).
+ */
+export type OrigineCodeParent = 'ouverture-implicite' | 'ecran-definition' | 'redefinition';
+
+/** Rend `null` tant qu'aucun code n'a ete pose. Seule `POST /api/parent/definir` le pose. */
 export function lireCodeParent(base: DatabaseSync): CodeParentStocke | null {
   const ligne = base
     .prepare('SELECT sel, empreinte FROM code_parent WHERE id = 1')
@@ -49,23 +59,51 @@ export function lireCodeParent(base: DatabaseSync): CodeParentStocke | null {
   return { sel: Buffer.from(ligne.sel), empreinte: Buffer.from(ligne.empreinte) };
 }
 
-/** Pose ou remplace le code du foyer. `cree_le` n'est ecrit qu'a la premiere pose. */
+/**
+ * AJOUT N5 — **la question qui manquait**, et dont l'absence a produit le defaut du § 1.8.
+ *
+ * Sans elle, `POST /api/parent/ouvrir` ne pouvait rien faire d'autre que poser le code au
+ * premier appel : il lisait `lireCodeParent`, trouvait `null`, et n'avait aucun moyen de dire
+ * la difference entre « personne n'a encore choisi de code » et « le code tape est faux ».
+ * C'est cette confusion — et non un oubli d'ecran — qui rendait un enfant proprietaire du
+ * code du foyer.
+ *
+ * Elle ne lit ni le sel ni l'empreinte : la reponse est un booleen, et la route qui la rend
+ * (`GET /api/parent/etat`) est la seule de la zone parent a s'ouvrir sans jeton.
+ */
+export function codeEstDefini(base: DatabaseSync): boolean {
+  const ligne = base
+    .prepare('SELECT 1 AS present FROM code_parent WHERE id = 1')
+    .get() as unknown as { present: number } | undefined;
+  return ligne !== undefined;
+}
+
+/**
+ * Pose ou remplace le code du foyer. `cree_le` n'est ecrit qu'a la premiere pose.
+ *
+ * MODIFIE N5 — `origine` est desormais exige a l'appel, sans valeur par defaut. C'est
+ * volontaire : une valeur par defaut serait une occurrence qu'aucune recherche textuelle ne
+ * trouve, et la colonne `defini_par` existe justement pour que personne ne puisse poser un
+ * code sans dire d'ou il vient.
+ */
 export function ecrireCodeParent(
   base: DatabaseSync,
   sel: Buffer,
   empreinte: Buffer,
-  maintenant: Horodatage
+  maintenant: Horodatage,
+  origine: OrigineCodeParent
 ): void {
   base
     .prepare(
-      `INSERT INTO code_parent (id, sel, empreinte, cree_le, modifie_le)
-       VALUES (1, ?, ?, ?, ?)
+      `INSERT INTO code_parent (id, sel, empreinte, cree_le, modifie_le, defini_par)
+       VALUES (1, ?, ?, ?, ?, ?)
        ON CONFLICT (id) DO UPDATE SET
          sel        = excluded.sel,
          empreinte  = excluded.empreinte,
-         modifie_le = excluded.modifie_le`
+         modifie_le = excluded.modifie_le,
+         defini_par = excluded.defini_par`
     )
-    .run(sel, empreinte, String(maintenant), String(maintenant));
+    .run(sel, empreinte, String(maintenant), String(maintenant), origine);
 }
 
 // ───────────────────────────────────────────────────────────────────────────── le verrou

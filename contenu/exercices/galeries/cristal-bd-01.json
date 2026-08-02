@@ -1,0 +1,94 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Lot N8. AXE GAUCHE-DROITE UNIQUEMENT — b ↔ d. D23, conséquence 1 : « distinguer les AXES de confusion, jamais traiter b/d/p/q en bloc ». Aucun mot en p ni en q n'entre ici, et le fichier de l'axe haut-bas (`cristal-bp-01.json`) ne porte aucun mot en d. Les paires viennent de `contenu/brouillons/phonologie/galeries/miroir-gauche-droite.json`, produit par `scripts/generer-phonologie.mjs`, qui remesure que chaque mot de la colonne A porte b et jamais d, et l'inverse. `expositionMs` à 1800 : l'enfant déchiffre encore (D14), le mot éclair n'a d'intérêt que s'il a le temps d'être LU. Paramètre de données, recalibrable (D13).",
+  "id": "galeries-cristal-bd-01",
+  "version": 1,
+  "titre": "Les cristaux b et d",
+  "competences": ["gph.miroir.gauche-droite"],
+  "difficulte": 3,
+  "jeu": {
+    "moteur": "eclair",
+    "habillage": "galeries.cristal",
+    "noeud": "galeries-03",
+    "etoiles": { "sansAide": true, "sansErreur": true },
+    "aideGobi": ["relire-consigne", "souffle-syllabe", "surligne-graphene"],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "mot": "bol",
+          "texte": "Touche le mot que tu as lu.",
+          "forme": "imperative",
+          "audio": null,
+          "expositionMs": 1800,
+          "options": ["mot-bol", "mot-dos"],
+          "reponse": "mot-bol",
+          "motsCles": ["touche", "mot", "lu"]
+        },
+        {
+          "id": "c2",
+          "mot": "dos",
+          "texte": "Touche le mot que tu as lu.",
+          "forme": "imperative",
+          "audio": null,
+          "expositionMs": 1800,
+          "options": ["mot-dos", "mot-bol"],
+          "reponse": "mot-dos",
+          "motsCles": ["touche", "mot", "lu"]
+        },
+        {
+          "id": "c3",
+          "mot": "banane",
+          "texte": "Touche le mot que tu as lu.",
+          "forme": "imperative",
+          "audio": null,
+          "expositionMs": 1800,
+          "options": ["mot-banane", "mot-dame"],
+          "reponse": "mot-banane",
+          "motsCles": ["touche", "mot", "lu"]
+        },
+        {
+          "id": "c4",
+          "mot": "dame",
+          "texte": "Touche le mot que tu as lu.",
+          "forme": "imperative",
+          "audio": null,
+          "expositionMs": 1800,
+          "options": ["mot-dame", "mot-banane"],
+          "reponse": "mot-dame",
+          "motsCles": ["touche", "mot", "lu"]
+        },
+        {
+          "id": "c5",
+          "mot": "balle",
+          "texte": "Touche le mot que tu as lu.",
+          "forme": "imperative",
+          "audio": null,
+          "expositionMs": 1800,
+          "options": ["mot-balle", "mot-dalle"],
+          "reponse": "mot-balle",
+          "motsCles": ["touche", "mot", "lu"]
+        },
+        {
+          "id": "c6",
+          "mot": "dalle",
+          "texte": "Touche le mot que tu as lu.",
+          "forme": "imperative",
+          "audio": null,
+          "expositionMs": 1800,
+          "options": ["mot-dalle", "mot-balle"],
+          "reponse": "mot-dalle",
+          "motsCles": ["touche", "mot", "lu"]
+        }
+      ],
+      "options": [
+        { "id": "mot-bol", "libelle": "bol", "bonne": true, "confusionAvec": "dos" },
+        { "id": "mot-dos", "libelle": "dos", "bonne": true, "confusionAvec": "bol" },
+        { "id": "mot-banane", "libelle": "banane", "bonne": true, "confusionAvec": "dame" },
+        { "id": "mot-dame", "libelle": "dame", "bonne": true, "confusionAvec": "banane" },
+        { "id": "mot-balle", "libelle": "balle", "bonne": true, "confusionAvec": "dalle" },
+        { "id": "mot-dalle", "libelle": "dalle", "bonne": true, "confusionAvec": "balle" }
+      ],
+      "competence": "gph.miroir.gauche-droite"
+    }
+  }
+}

@@ -1,0 +1,107 @@
+{
+  "_commentaire": {
+    "usage": "LOT N3 — decliner Gobi depuis sa canonique VERROUILLEE (production/personnages/gobi/canonique.png). Pose, expression, etat d'animation, crete de cristaux, cristal de graphene. Le corps ne change JAMAIS (D20, D28, D36) : c'est la clause de conservation figee du noeud 6 qui le tient, pas la bonne volonte de l'appelant.",
+    "pourquoi_un_workflow_propre_a_gobi": "personnage-declinaison.api.json impose 'black and white line art ... no colour, no shading' dans sa clause de conservation FIGEE. D36 a valide Gobi EN COULEUR et D29 ne reserve le trait noir sur blanc qu'aux DECORS, parce qu'eux se recolorient. Appliquer le workflow generique a Gobi le decolorerait a chaque passe. Le skill generer-asset interdit de reecrire le fragment de style d'un workflow partage : on en fige donc un second, propre au personnage, plutot que d'amender celui des decors. La structure de graphe, le modele, le sampler, le nombre de pas et le CFG sont repris a l'identique — seules les deux clauses de texte changent, et elles changent dans le sens que D36 impose.",
+    "modele": "qwen_image_edit_2511_bf16.safetensors (UNETLoader) + qwen_2.5_vl_7b_fp8_scaled (CLIPLoader, type qwen_image) + qwen_image_vae",
+    "reglages": "20 pas, CFG 2.5, euler / simple, entree ramenee a 1,0 megapixel, denoise 1.0. Repris de personnage-declinaison, ou 2,5 a ete MESURE le 2026-08-01 comme le reglage le moins agressif franchissant la porte technique : sur une chaine dont la consigne est « ne change QUE cela », le moins agressif est le bon.",
+    "negatif": "ACTIF — CFG 2,5 > 1, le conditionnement negatif a un poids reel (skill generer-asset, piege 1). Les termes 'colour, coloured' du workflow des decors ont ete RETIRES : ils y interdisaient la couleur, ce que D36 exige au contraire ici. Ne jamais recopier un negatif d'un workflow vers l'autre.",
+    "profondeur_de_chaine": "1, IMPERATIF. On repart TOUJOURS de canonique.png, jamais du resultat d'une edition precedente (D32 : degradation visible apres six editions en cascade). scripts/decliner-gobi.mjs rend cette regle MECANIQUE : il refuse toute source qui n'est pas la canonique, et gobi.lock.json enregistre pour chaque declinaison l'empreinte pixels de sa source, de sorte qu'une chaine se verrait.",
+    "champs_modifiables": [
+      "4.inputs.image  -- nom du fichier canonique, prealablement televerse par POST /upload/image",
+      "6.inputs.prompt -- l'INSTRUCTION d'edition, substituee a {INSTRUCTION}. Les clauses de conservation qui l'entourent sont figees.",
+      "12.inputs.seed",
+      "5.inputs.megapixels -- 1,0 par defaut ; Qwen Edit se degrade au-dela de ~1 MP",
+      "14.inputs.filename_prefix"
+    ],
+    "interdit": "Toute autre modification (annexe P 3.4). En particulier : ne pas reecrire la clause de conservation, ne pas changer de modele, ne pas remonter le CFG pour « mieux appliquer » une instruction — c'est la crete qui se deforme la premiere."
+  },
+  "1": {
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "qwen_image_edit_2511_bf16.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "2": {
+    "class_type": "CLIPLoader",
+    "inputs": {
+      "clip_name": "qwen_2.5_vl_7b_fp8_scaled.safetensors",
+      "type": "qwen_image"
+    }
+  },
+  "3": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "qwen_image_vae.safetensors"
+    }
+  },
+  "4": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "gobi-canonique.png"
+    }
+  },
+  "5": {
+    "class_type": "ImageScaleToTotalPixels",
+    "inputs": {
+      "image": ["4", 0],
+      "upscale_method": "lanczos",
+      "megapixels": 1.0,
+      "resolution_steps": 1
+    }
+  },
+  "6": {
+    "class_type": "TextEncodeQwenImageEditPlus",
+    "inputs": {
+      "clip": ["2", 0],
+      "prompt": "Using the character in the reference image, {INSTRUCTION}. Keep the body shape, the round fluffy silhouette, the proportions, the outline thickness, the palette and the flat cartoon drawing style strictly identical to the reference. Keep the glowing golden star crystal on the belly. Keep the soft cream background flat and plain. Single character, centred, facing the viewer, friendly and calm.",
+      "vae": ["3", 0],
+      "image1": ["5", 0]
+    }
+  },
+  "7": {
+    "class_type": "TextEncodeQwenImageEditPlus",
+    "inputs": {
+      "clip": ["2", 0],
+      "prompt": "photorealistic, 3d render, plush toy photo, multiple views, several characters, text, letters, watermark, signature, frame, border, extra limbs, deformed hands, sharp teeth, angry eyebrows, frowning, scary, dark background, busy background, scene, landscape",
+      "vae": ["3", 0],
+      "image1": ["5", 0]
+    }
+  },
+  "8": {
+    "class_type": "VAEEncode",
+    "inputs": {
+      "pixels": ["5", 0],
+      "vae": ["3", 0]
+    }
+  },
+  "12": {
+    "class_type": "KSampler",
+    "inputs": {
+      "seed": 4004,
+      "steps": 20,
+      "cfg": 2.5,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1.0,
+      "model": ["1", 0],
+      "positive": ["6", 0],
+      "negative": ["7", 0],
+      "latent_image": ["8", 0]
+    }
+  },
+  "13": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": ["12", 0],
+      "vae": ["3", 0]
+    }
+  },
+  "14": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "images": ["13", 0],
+      "filename_prefix": "gobi-declinaison"
+    }
+  }
+}

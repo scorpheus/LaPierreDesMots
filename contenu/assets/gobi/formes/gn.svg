@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Gobi-GN">
+  <title>Gobi-GN</title>
+  <desc>Le cristal du grapheme « gn » — Gobi-GN. C est LUI qui porte la declinaison, jamais le corps (D20, D36). Sa silhouette et sa teinte sont propres a ce grapheme : deux formes identiques ne se collectionneraient pas (D44). Le viewBox fait 64 unites, ce qui est la cible tapable minimale de R16.</desc>
+  <g id="cristal">
+    <path id="cristal-face" d="M32,16 L38.47,26.92 L41.8,37.84 L39.75,58 L24.25,58 L22.2,37.84 L25.53,26.92 Z" fill="#C5EAFA" stroke="#4B2207" stroke-width="3" stroke-linejoin="round"/>
+    <path id="cristal-facette" d="M32,16 L39.75,58 L24.25,58 Z" fill="#9BD3EE" stroke="none" opacity="0.8"/>
+    <path id="cristal-eclat" d="M28.25,28.6 L30.5,42.04" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" opacity="0.85" fill="none"/>
+  </g>
+</svg>

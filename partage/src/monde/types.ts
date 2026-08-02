@@ -19,11 +19,27 @@ export type CodeObjetCampement = string;
 // ------------------------------------------------------------------ Gobi (D20, D24, D28)
 
 /**
- * Les stades d'évolution. **PLACEHOLDER assumé** : D28 laisse ouvert « combien de stades ».
- * Cinq est retenu parce que les cinq séries de production existantes deviennent alors cinq
- * stades plutôt que cinq échecs (D28, point 1). À valider — voir § 9, question Q3.
+ * MODIFIÉ N3 — 5 → 10 stades (D43 : « 8 à 10 stades, à petits pas »). Clôt la question Q3.
+ *
+ * Chaque stade est un changement discret — un cristal de plus, une teinte qui glisse. Le
+ * CRISTAL porte l'évolution ; le CORPS ne change jamais (D28, D36).
+ *
+ * Les cinq codes de la v1 sont CONSERVÉS aux rangs 1, 3, 5, 7 et 10 : les assets existants
+ * restent valides, et les cinq séries de production deviennent cinq stades, pas cinq échecs.
+ * Ce n'est pas seulement une politesse envers le passé — `stade_gobi.stade_code` n'a aucune
+ * contrainte `CHECK` en base, donc renuméroter un code déjà écrit passerait inaperçu.
  */
-export type CodeStadeGobi = 'oeuf' | 'boule' | 'crete' | 'equipe' | 'gardien';
+export type CodeStadeGobi =
+  | 'oeuf'            // 1
+  | 'fissure'         // 2
+  | 'boule'           // 3
+  | 'premier-cristal' // 4
+  | 'crete'           // 5
+  | 'couronne'        // 6
+  | 'equipe'          // 7
+  | 'besace'          // 8
+  | 'veilleur'        // 9
+  | 'gardien';        // 10
 
 export interface StadeGobi {
   readonly code: CodeStadeGobi;

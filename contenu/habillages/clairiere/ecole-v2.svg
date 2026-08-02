@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 922 615" width="922" height="615" role="img" aria-label="La cour de l’école">
+  <title>La cour de l’école</title>
+  <!--
+    DÉCOR v2 — lot N7, contrat de finition v3 § 4.7. « On doit reconnaître la maîtresse. »
+
+    LES 31 `id` DE RÉGION SONT CEUX DE LA v1, À LA LETTRE. Aucun n'est renommé, aucun ne
+    disparaît : `tests/unitaires/ids-regions-stables.test.ts` les nomme un par un contre la
+    liste gelée du contrat technique v1 § 9.4, plus le `tableau` de la question Q-R4.
+    Un identifiant peut naître, jamais mourir — une consigne qui nomme une région disparue
+    est un état sans issue, et c'est le pire défaut possible ici.
+
+    TROIS SIGNES DÉSIGNENT LA MAÎTRESSE, dans cet ordre de lisibilité :
+      1. LA TAILLE. 206 unités du haut du crâne au bas de la jupe, contre 134 pour une élève
+         et 100 pour un élève : un rapport de 1,54 qui se voit sans comparaison point à point.
+         Sa tête mesure 68 de large contre 44. Le seuil opposable est 1,35 (§ 9.2).
+      2. L'OBJET DE CLASSE. Le `tableau`, sur ses deux pieds, avec ses lignes d'écriture,
+         posé ENTRE elle et le premier élève — un tableau à l'autre bout de la cour ne
+         désignerait personne.
+      3. LE GESTE. Le bras (calque de trait) la relie au tableau : c'est elle qui y écrit.
+
+    LES ARBRES ONT UN TRONC ET UN HOUPPIER LOBÉ. La v1 dessinait un disque parfait au-dessus
+    d'un rectangle ; un disque se lit « ballon ». Le houppier oscille entre 42 et 54 unités de
+    rayon sur six lobes, et `decor-reconnaissable.test.ts` mesure cette rondeur : < 0,85 pour
+    un arbre, > 0,95 pour le ballon. La même mesure distingue les deux.
+
+    TOUTE LA GÉOMÉTRIE EST POLYGONALE (M/L/Z), sans un seul arc. Ce n'est pas un choix de
+    style : c'est ce qui rend la surface et le centroïde de chaque région calculables
+    exactement, donc opposables aux valeurs déclarées par `ecole.habillage.json`. Elles
+    donnent son rayon de visée à `regionSousLeDoigt` et son origine au balayage de
+    recoloration — une valeur périmée ferait peindre la région voisine.
+    `scripts/verifier-regions-fermees.mjs` les remesure à chaque `npm run test`.
+
+    Chaque région est un enfant DIRECT de `#calque-zones` : `SceneSvg.tsx:335` sélectionne
+    `#calque-zones > [id]`, et un tracé niché dans un sous-groupe échapperait au tap sans
+    qu'aucun message ne le dise.
+  -->
+  <g id="calque-fond">
+    <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L922,0 L922,615 L0,615 Z"/>
+  </g>
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round">
+    <path id="ciel" class="zone" data-region-svg="ciel" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L922,0 L922,400 L0,400 Z"/>
+    <path id="herbe" class="zone" data-region-svg="herbe" fill="#8E97A8" fill-rule="evenodd" d="M0,400 L922,400 L922,615 L0,615 Z"/>
+    <path id="toit-ecole" class="zone" data-region-svg="toit-ecole" fill="#8E97A8" fill-rule="evenodd" d="M30,275 L215,150 L400,275 Z M215,206 L224.95,207.98 L233.38,213.62 L239.02,222.05 L241,232 L239.02,241.95 L233.38,250.38 L224.95,256.02 L215,258 L205.05,256.02 L196.62,250.38 L190.98,241.95 L189,232 L190.98,222.05 L196.62,213.62 L205.05,207.98 Z"/>
+    <path id="horloge-ecole" class="zone" data-region-svg="horloge-ecole" fill="#8E97A8" fill-rule="evenodd" d="M215,206 L224.95,207.98 L233.38,213.62 L239.02,222.05 L241,232 L239.02,241.95 L233.38,250.38 L224.95,256.02 L215,258 L205.05,256.02 L196.62,250.38 L190.98,241.95 L189,232 L190.98,222.05 L196.62,213.62 L205.05,207.98 Z"/>
+    <path id="mur-ecole" class="zone" data-region-svg="mur-ecole" fill="#8E97A8" fill-rule="evenodd" d="M60,275 L370,275 L370,400 L60,400 Z M190,305 L240,305 L240,400 L190,400 Z M90,305 L150,305 L150,355 L90,355 Z M280,305 L340,305 L340,355 L280,355 Z"/>
+    <path id="porte-ecole" class="zone" data-region-svg="porte-ecole" fill="#8E97A8" fill-rule="evenodd" d="M190,305 L240,305 L240,400 L190,400 Z"/>
+    <path id="fenetre-ecole-1" class="zone" data-region-svg="fenetre-ecole-1" fill="#8E97A8" fill-rule="evenodd" d="M90,305 L150,305 L150,355 L90,355 Z"/>
+    <path id="fenetre-ecole-2" class="zone" data-region-svg="fenetre-ecole-2" fill="#8E97A8" fill-rule="evenodd" d="M280,305 L340,305 L340,355 L280,355 Z"/>
+    <path id="feuilles-arbre-1" class="zone" data-region-svg="feuilles-arbre-1" fill="#8E97A8" fill-rule="evenodd" d="M500,204 L512.42,211.64 L521,221.63 L533.94,224.06 L546.77,231 L546.36,245.58 L542,258 L546.36,270.42 L546.77,285 L533.94,291.94 L521,294.37 L512.42,304.36 L500,312 L487.58,304.36 L479,294.37 L466.06,291.94 L453.23,285 L453.64,270.42 L458,258 L453.64,245.58 L453.23,231 L466.06,224.06 L479,221.63 L487.58,211.64 Z"/>
+    <path id="tronc-arbre-1" class="zone" data-region-svg="tronc-arbre-1" fill="#8E97A8" fill-rule="evenodd" d="M483,300 L517,300 L517,400 L483,400 Z"/>
+    <path id="feuilles-arbre-2" class="zone" data-region-svg="feuilles-arbre-2" fill="#8E97A8" fill-rule="evenodd" d="M615,204 L627.42,211.64 L636,221.63 L648.94,224.06 L661.77,231 L661.36,245.58 L657,258 L661.36,270.42 L661.77,285 L648.94,291.94 L636,294.37 L627.42,304.36 L615,312 L602.58,304.36 L594,294.37 L581.06,291.94 L568.23,285 L568.64,270.42 L573,258 L568.64,245.58 L568.23,231 L581.06,224.06 L594,221.63 L602.58,211.64 Z"/>
+    <path id="tronc-arbre-2" class="zone" data-region-svg="tronc-arbre-2" fill="#8E97A8" fill-rule="evenodd" d="M598,300 L632,300 L632,400 L598,400 Z"/>
+    <path id="feuilles-arbre-3" class="zone" data-region-svg="feuilles-arbre-3" fill="#8E97A8" fill-rule="evenodd" d="M730,204 L742.42,211.64 L751,221.63 L763.94,224.06 L776.77,231 L776.36,245.58 L772,258 L776.36,270.42 L776.77,285 L763.94,291.94 L751,294.37 L742.42,304.36 L730,312 L717.58,304.36 L709,294.37 L696.06,291.94 L683.23,285 L683.64,270.42 L688,258 L683.64,245.58 L683.23,231 L696.06,224.06 L709,221.63 L717.58,211.64 Z"/>
+    <path id="tronc-arbre-3" class="zone" data-region-svg="tronc-arbre-3" fill="#8E97A8" fill-rule="evenodd" d="M713,300 L747,300 L747,400 L713,400 Z"/>
+    <path id="feuilles-arbre-4" class="zone" data-region-svg="feuilles-arbre-4" fill="#8E97A8" fill-rule="evenodd" d="M845,204 L857.42,211.64 L866,221.63 L878.94,224.06 L891.77,231 L891.36,245.58 L887,258 L891.36,270.42 L891.77,285 L878.94,291.94 L866,294.37 L857.42,304.36 L845,312 L832.58,304.36 L824,294.37 L811.06,291.94 L798.23,285 L798.64,270.42 L803,258 L798.64,245.58 L798.23,231 L811.06,224.06 L824,221.63 L832.58,211.64 Z"/>
+    <path id="tronc-arbre-4" class="zone" data-region-svg="tronc-arbre-4" fill="#8E97A8" fill-rule="evenodd" d="M828,300 L862,300 L862,400 L828,400 Z"/>
+    <path id="cheveux-maitresse" class="zone" data-region-svg="cheveux-maitresse" fill="#8E97A8" fill-rule="evenodd" d="M175,368 L186.74,369.86 L197.34,375.26 L205.74,383.66 L211.14,394.26 L213,406 L211.14,417.74 L205.74,428.34 L197.34,436.74 L186.74,442.14 L175,444 L163.26,442.14 L152.66,436.74 L144.26,428.34 L138.86,417.74 L137,406 L138.86,394.26 L144.26,383.66 L152.66,375.26 L163.26,369.86 Z"/>
+    <path id="pull-maitresse" class="zone" data-region-svg="pull-maitresse" fill="#8E97A8" fill-rule="evenodd" d="M129,444 L221,444 L213,534 L137,534 Z"/>
+    <path id="jupe-maitresse" class="zone" data-region-svg="jupe-maitresse" fill="#8E97A8" fill-rule="evenodd" d="M137,534 L213,534 L231,606 L119,606 Z"/>
+    <path id="tableau" class="zone" data-region-svg="tableau" fill="#8E97A8" fill-rule="evenodd" d="M250,420 L400,420 L400,540 L250,540 Z"/>
+    <path id="cheveux-garcon-1" class="zone" data-region-svg="cheveux-garcon-1" fill="#8E97A8" fill-rule="evenodd" d="M500,452 L508.03,453.27 L515.28,456.97 L521.03,462.72 L524.73,469.97 L526,478 L524.73,486.03 L521.03,493.28 L515.28,499.03 L508.03,502.73 L500,504 L491.97,502.73 L484.72,499.03 L478.97,493.28 L475.27,486.03 L474,478 L475.27,469.97 L478.97,462.72 L484.72,456.97 L491.97,453.27 Z"/>
+    <path id="tshirt-garcon-1" class="zone" data-region-svg="tshirt-garcon-1" fill="#8E97A8" fill-rule="evenodd" d="M470,496 L530,496 L526,556 L474,556 Z"/>
+    <path id="cheveux-garcon-2" class="zone" data-region-svg="cheveux-garcon-2" fill="#8E97A8" fill-rule="evenodd" d="M615,452 L623.03,453.27 L630.28,456.97 L636.03,462.72 L639.73,469.97 L641,478 L639.73,486.03 L636.03,493.28 L630.28,499.03 L623.03,502.73 L615,504 L606.97,502.73 L599.72,499.03 L593.97,493.28 L590.27,486.03 L589,478 L590.27,469.97 L593.97,462.72 L599.72,456.97 L606.97,453.27 Z"/>
+    <path id="tshirt-garcon-2" class="zone" data-region-svg="tshirt-garcon-2" fill="#8E97A8" fill-rule="evenodd" d="M585,496 L645,496 L641,556 L589,556 Z"/>
+    <path id="cheveux-fille-1" class="zone" data-region-svg="cheveux-fille-1" fill="#8E97A8" fill-rule="evenodd" d="M730,452 L738.03,453.27 L745.28,456.97 L751.03,462.72 L754.73,469.97 L756,478 L754.73,486.03 L751.03,493.28 L745.28,499.03 L738.03,502.73 L730,504 L721.97,502.73 L714.72,499.03 L708.97,493.28 L705.27,486.03 L704,478 L705.27,469.97 L708.97,462.72 L714.72,456.97 L721.97,453.27 Z"/>
+    <path id="robe-fille-1" class="zone" data-region-svg="robe-fille-1" fill="#8E97A8" fill-rule="evenodd" d="M700,496 L760,496 L774,590 L686,590 Z"/>
+    <path id="cheveux-fille-2" class="zone" data-region-svg="cheveux-fille-2" fill="#8E97A8" fill-rule="evenodd" d="M845,452 L853.03,453.27 L860.28,456.97 L866.03,462.72 L869.73,469.97 L871,478 L869.73,486.03 L866.03,493.28 L860.28,499.03 L853.03,502.73 L845,504 L836.97,502.73 L829.72,499.03 L823.97,493.28 L820.27,486.03 L819,478 L820.27,469.97 L823.97,462.72 L829.72,456.97 L836.97,453.27 Z"/>
+    <path id="robe-fille-2" class="zone" data-region-svg="robe-fille-2" fill="#8E97A8" fill-rule="evenodd" d="M815,496 L875,496 L889,590 L801,590 Z"/>
+    <path id="banc" class="zone" data-region-svg="banc" fill="#8E97A8" fill-rule="evenodd" d="M15,470 L115,470 L115,492 L15,492 Z M26,492 L40,492 L40,530 L26,530 Z M90,492 L104,492 L104,530 L90,530 Z"/>
+    <path id="corde" class="zone" data-region-svg="corde" fill="#8E97A8" fill-rule="evenodd" d="M70,544 L88.54,545.52 L105.27,549.92 L118.54,556.78 L127.06,565.42 L130,575 L127.06,584.58 L118.54,593.22 L105.27,600.08 L88.54,604.48 L70,606 L51.46,604.48 L34.73,600.08 L21.46,593.22 L12.94,584.58 L10,575 L12.94,565.42 L21.46,556.78 L34.73,549.92 L51.46,545.52 Z M70,558 L82.98,558.83 L94.69,561.25 L103.98,565.01 L109.94,569.75 L112,575 L109.94,580.25 L103.98,584.99 L94.69,588.75 L82.98,591.17 L70,592 L57.02,591.17 L45.31,588.75 L36.02,584.99 L30.06,580.25 L28,575 L30.06,569.75 L36.02,565.01 L45.31,561.25 L57.02,558.83 Z"/>
+    <path id="ballon" class="zone" data-region-svg="ballon" fill="#8E97A8" fill-rule="evenodd" d="M430,551 L436.99,551.92 L443.5,554.62 L449.09,558.91 L453.38,564.5 L456.08,571.01 L457,578 L456.08,584.99 L453.38,591.5 L449.09,597.09 L443.5,601.38 L436.99,604.08 L430,605 L423.01,604.08 L416.5,601.38 L410.91,597.09 L406.62,591.5 L403.92,584.99 L403,578 L403.92,571.01 L406.62,564.5 L410.91,558.91 L416.5,554.62 L423.01,551.92 Z"/>
+  </g>
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round">
+    <path class="trait" d="M120,305 L120,355"/>
+    <path class="trait" d="M90,330 L150,330"/>
+    <path class="trait" d="M310,305 L310,355"/>
+    <path class="trait" d="M280,330 L340,330"/>
+    <path class="trait" d="M230,355 L230,365"/>
+    <path class="trait" d="M215,232 L215,208"/>
+    <path class="trait" d="M215,232 L233,240"/>
+    <path class="trait" d="M0,400 L922,400"/>
+    <path class="trait" d="M500,310 L500,395"/>
+    <path class="trait" d="M615,310 L615,395"/>
+    <path class="trait" d="M730,310 L730,395"/>
+    <path class="trait" d="M845,310 L845,395"/>
+    <path class="trait" d="M161,400 L171,400"/>
+    <path class="trait" d="M187,400 L197,400"/>
+    <path class="trait" d="M164,420 L186,420"/>
+    <path class="trait" d="M221,460 L252,440"/>
+    <path class="trait" d="M266,540 L254,600"/>
+    <path class="trait" d="M384,540 L396,600"/>
+    <path class="trait" d="M258,576 L392,576"/>
+    <path class="trait" d="M270,452 L380,452"/>
+    <path class="trait" d="M270,484 L340,484"/>
+    <path class="trait" d="M490,472 L496,472"/>
+    <path class="trait" d="M504,472 L510,472"/>
+    <path class="trait" d="M493,488 L507,488"/>
+    <path class="trait" d="M488,556 L488,590"/>
+    <path class="trait" d="M512,556 L512,590"/>
+    <path class="trait" d="M605,472 L611,472"/>
+    <path class="trait" d="M619,472 L625,472"/>
+    <path class="trait" d="M608,488 L622,488"/>
+    <path class="trait" d="M603,556 L603,590"/>
+    <path class="trait" d="M627,556 L627,590"/>
+    <path class="trait" d="M720,472 L726,472"/>
+    <path class="trait" d="M734,472 L740,472"/>
+    <path class="trait" d="M723,488 L737,488"/>
+    <path class="trait" d="M835,472 L841,472"/>
+    <path class="trait" d="M849,472 L855,472"/>
+    <path class="trait" d="M838,488 L852,488"/>
+    <path class="trait" d="M15,478 L115,478"/>
+    <path class="trait" d="M403,578 L457,578"/>
+    <path class="trait" d="M430,551 L430,605"/>
+  </g>
+</svg>

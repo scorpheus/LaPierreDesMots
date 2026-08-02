@@ -1,0 +1,75 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Lot N8. AXE GAUCHE-DROITE UNIQUEMENT — b ↔ d (D23, conséquence 1). Le clavier ne porte que deux touches : ajouter p et q y remettrait l'autre axe, et un enfant gêné par un seul des deux paierait la confusion de l'autre. Les trous alternent la position 0 et une position interne — un enfant qui n'aurait appris que « ça commence par b » ne passerait pas c5 ni c6. Les mots viennent de `contenu/brouillons/phonologie/galeries/miroir-gauche-droite.json`, dont le générateur remesure qu'aucun ne porte les deux lettres. C'est le TROISIÈME moteur de `gph.miroir.gauche-droite` (avec `eclair` et `tri`) : c'est lui qui rend R12 tenable sur cet axe.",
+  "id": "galeries-pierre-bd-01",
+  "version": 1,
+  "titre": "Graver le b et le d",
+  "competences": ["gph.miroir.gauche-droite"],
+  "difficulte": 4,
+  "jeu": {
+    "moteur": "grave",
+    "habillage": "galeries.pierre",
+    "noeud": "galeries-05",
+    "etoiles": { "sansAide": true, "sansErreur": true },
+    "aideGobi": ["relire-consigne", "souffle-syllabe", "surligne-graphene"],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Grave la lettre pour écrire ce mot.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "bol",
+          "trous": [{ "id": "trou-un", "position": 0, "attendu": "b" }],
+          "motsCles": ["grave", "lettre", "mot"]
+        },
+        {
+          "id": "c2",
+          "texte": "Grave la lettre pour écrire ce mot.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "dos",
+          "trous": [{ "id": "trou-deux", "position": 0, "attendu": "d" }],
+          "motsCles": ["grave", "lettre", "mot"]
+        },
+        {
+          "id": "c3",
+          "texte": "Grave la lettre pour écrire ce mot.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "bus",
+          "trous": [{ "id": "trou-trois", "position": 0, "attendu": "b" }],
+          "motsCles": ["grave", "lettre", "mot"]
+        },
+        {
+          "id": "c4",
+          "texte": "Grave la lettre pour écrire ce mot.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "dame",
+          "trous": [{ "id": "trou-quatre", "position": 0, "attendu": "d" }],
+          "motsCles": ["grave", "lettre", "mot"]
+        },
+        {
+          "id": "c5",
+          "texte": "Grave la lettre pour écrire ce mot.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "cabane",
+          "trous": [{ "id": "trou-cinq", "position": 2, "attendu": "b" }],
+          "motsCles": ["grave", "lettre", "mot"]
+        },
+        {
+          "id": "c6",
+          "texte": "Grave la lettre pour écrire ce mot.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "radis",
+          "trous": [{ "id": "trou-six", "position": 2, "attendu": "d" }],
+          "motsCles": ["grave", "lettre", "mot"]
+        }
+      ],
+      "clavier": ["b", "d"],
+      "competence": "gph.miroir.gauche-droite"
+    }
+  }
+}

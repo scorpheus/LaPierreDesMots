@@ -1,8 +1,12 @@
 /**
- * La zone parent — contrat des features v2 § 5.3, lot L2-H.
+ * La zone parent — contrat des features v2 § 5.3 (lot L2-H), etendu par le contrat de
+ * finition v3 § 4.5, § 7.3 et § 8 (lot N5).
  *
- * Quatre routes, toutes protegees sauf la premiere :
- *   POST /api/parent/ouvrir                  -> { jeton } ou 423
+ * Sept routes, toutes protegees sauf les trois premieres :
+ *   GET  /api/parent/etat                    -> EtatPorteParent          (aucun jeton)
+ *   POST /api/parent/definir                 -> { jeton } | 409 | 400    (jeton optionnel)
+ *   POST /api/parent/ouvrir                  -> { jeton } | 404 | 401 | 423
+ *   GET  /api/parent/:profil/galerie         -> CatalogueGalerie         (routes/parent-galerie)
  *   GET  /api/parent/:profil/dashboard       -> ResumeDashboard
  *   GET  /api/parent/:profil/export/:code    -> text/csv
  *   POST /api/parent/relecture/:exercice     -> EntreeRelecture
@@ -17,22 +21,49 @@
  *    dans le corps, le jeton dans un en-tete : les URL sont journalisees par Fastify et
  *    restent dans l'historique du navigateur.
  *
- * PLACEHOLDER — a valider (consigne dans `Docs/questions-en-attente.md`) : la PREMIERE
- * ouverture pose le code du foyer. Le contrat gele n'accorde aucune route « definir le code »
- * et la v2 § 11 ne dit pas comment il naît. Poser le code au premier acces evite un ecran de
- * configuration que personne n'a specifie, et le verrou couvre le reste.
+ * ═══════════════════════════════════════════════════════════════════════════════════════════
+ * CE QUE N5 CORRIGE, ET POURQUOI C'ETAIT GRAVE — contrat de finition v3 § 1.8
+ *
+ * Le PLACEHOLDER qui occupait cette place disait : « la PREMIERE ouverture pose le code du
+ * foyer ». Mesure sur le code livre, § 1.8 :
+ *
+ *   > `POST /api/parent/ouvrir` **pose silencieusement le code du foyer au premier appel**.
+ *   > Un enfant curieux qui tape `1234` devient proprietaire du code parent, sans qu'un ecran
+ *   > l'ait jamais demande.
+ *
+ * La cause n'etait pas un ecran manquant : c'etait une AMBIGUITE de lecture. `lireCodeParent`
+ * rendant `null`, la route n'avait aucun moyen de distinguer « personne n'a encore choisi de
+ * code » de « le code tape est faux ». Faute de pouvoir les distinguer, elle traitait les deux
+ * comme le premier.
+ *
+ * Le remede est donc `codeEstDefini()` d'abord, et l'ecran ensuite :
+ *   • `ouvrir` sans code defini repond **404 `introuvable`** et NE POSE RIEN ;
+ *   • `definir` pose le code, une fois. Une seconde definition **sans jeton** repond
+ *     **409 Conflict** — jamais 200, jamais un remplacement silencieux ;
+ *   • `definir` **avec jeton** redefinit, parce qu'« on ne detruit jamais un code existant :
+ *     le parent serait enferme dehors » (§ 7.3) et qu'il lui faut donc un chemin pour en
+ *     changer, qui passe par la preuve qu'il connait l'ancien ;
+ *   • `etat` rend la porte lisible du dehors, sans jeton, sans fuiter ni sel ni empreinte.
+ *     C'est elle qui permet a l'ecran de savoir s'il doit demander un code ou en proposer un.
+ * ═══════════════════════════════════════════════════════════════════════════════════════════
  */
 
 import path from 'node:path';
 
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
-import type { ResumeDashboard, StatutRelecture, VerrouParent } from '@pierre/partage/parent';
+import type {
+  EtatPorteParent,
+  ResumeDashboard,
+  StatutRelecture,
+  VerrouParent
+} from '@pierre/partage/parent';
 import { ENTETE_JETON_PARENT } from '@pierre/partage/parent';
 
 import type { ContexteServeur } from '../configuration.js';
 import { CODES_ERREUR, RACINE_DEPOT, erreurApi, horodatage } from '../configuration.js';
 import {
+  codeEstDefini,
   ecrireCodeParent,
   ecrireVerrou,
   lireCodeParent,
@@ -42,6 +73,7 @@ import {
   synchroniserBrouillons,
   trancherRelecture
 } from '../depots/parent.js';
+import { enregistrerRoutesParentGalerie } from './parent-galerie.js';
 import {
   appliquerEchec,
   deriverCode,
@@ -143,6 +175,97 @@ export function enregistrerRoutesParent(app: FastifyInstance, contexte: Contexte
     return true;
   }
 
+  // ─────────────────────────────────────────────────────────── GET /api/parent/etat
+  //
+  // LA SEULE ROUTE DE LA ZONE PARENT QUI S'OUVRE SANS JETON, et il le faut : le client
+  // l'interroge AVANT d'avoir un code a taper. Elle ne rend aucune donnee de l'enfant, ni le
+  // sel, ni l'empreinte, ni le code — trois booleens et une echeance.
+  //
+  // Sans elle, l'ecran ne peut pas savoir s'il doit demander un code ou en proposer un, et il
+  // ne lui reste qu'a deviner. C'est en devinant que la v1 posait le code du foyer au premier
+  // enfant qui passait.
+
+  app.get('/api/parent/etat', (_requete, reponse) => {
+    const verrou = lireVerrou(contexte.base);
+    const etat: EtatPorteParent = {
+      codeDefini: codeEstDefini(contexte.base),
+      verrouilleJusqua: verrou.verrouilleJusqua === null ? null : String(verrou.verrouilleJusqua),
+      nbEchecs: verrou.nbEchecs
+    };
+    return reponse.send(etat);
+  });
+
+  /** 423 Locked, et JAMAIS 401 : le parent doit lire quand il pourra reessayer. */
+  function repondreVerrouille(reponse: FastifyReply, etat: VerrouParent): FastifyReply {
+    return reponse.code(423).send({
+      ...erreurApi(
+        CODES_ERREUR.conflit,
+        `La zone parent est fermee un moment. Reessaie apres ${String(etat.verrouilleJusqua)}.`
+      ),
+      details: { verrouilleJusqua: etat.verrouilleJusqua, nbEchecs: etat.nbEchecs }
+    });
+  }
+
+  // ───────────────────────────────────────────────────────── POST /api/parent/definir
+  //
+  // LA ROUTE QUI MANQUAIT — contrat de finition v3 § 1.8 et § 8.
+  //
+  // Elle est la SEULE a poser un code. `ouvrir` n'en pose plus aucun, et c'est ce
+  // deplacement — pas l'ecran qui l'accompagne — qui solde le defaut : tant qu'une route
+  // d'authentification pouvait aussi creer l'identifiant, aucun ecran n'aurait suffi.
+  //
+  // Le verrou N'EST PAS consulte ici quand aucun code n'existe : verrouiller la definition
+  // d'un code que personne n'a jamais pose enfermerait le parent dehors de sa propre maison,
+  // ce que le § 7.3 interdit en toutes lettres. En revanche la REDEFINITION passe par le
+  // jeton, donc par `ouvrir`, donc par le verrou. Aucun trou : le chemin qui remplace un code
+  // existant est exactement celui qui compte les echecs.
+
+  app.post('/api/parent/definir', (requete, reponse) => {
+    const corps = requete.body as { code?: unknown } | null;
+    const code = typeof corps?.code === 'string' ? corps.code.trim() : '';
+    const maintenant = String(horodatage(contexte.horloge));
+
+    if (!MOTIF_CODE.test(code)) {
+      // Aucun echec compte ici, et aucun code n'est pose : un parent qui se trompe de touche
+      // en CHOISISSANT son code n'a rien a payer. Le compteur d'echecs garde `ouvrir`, ou il
+      // protege quelque chose ; ici il ne protegerait rien.
+      return reponse
+        .code(400)
+        .send(erreurApi(CODES_ERREUR.invalide, 'Le code parent compte exactement 4 chiffres.'));
+    }
+
+    const dejaDefini = codeEstDefini(contexte.base);
+    const avecJeton = jetonDeLaRequete(requete);
+    const jetonVivant =
+      avecJeton !== null &&
+      (jetons.get(avecJeton) ?? 0) > Date.parse(String(horodatage(contexte.horloge)));
+
+    if (dejaDefini && !jetonVivant) {
+      // 409 Conflict, jamais 200 et jamais un remplacement silencieux (§ 8). Le message dit
+      // au parent ce qu'il PEUT faire — entrer avec son code — et non ce qui lui manque (C7).
+      return reponse
+        .code(409)
+        .send(
+          erreurApi(
+            CODES_ERREUR.conflit,
+            'Un code existe deja pour ce foyer. Entre-le pour ouvrir la zone parent, ' +
+              'puis tu pourras en choisir un autre.'
+          )
+        );
+    }
+
+    const sel = selNeuf();
+    ecrireCodeParent(
+      contexte.base,
+      sel,
+      deriverCode(code, sel),
+      maintenant,
+      dejaDefini ? 'redefinition' : 'ecran-definition'
+    );
+    reinitialiserVerrou(contexte.base);
+    return reponse.send(poserJeton(Date.parse(maintenant)));
+  });
+
   // ────────────────────────────────────────────────────────── POST /api/parent/ouvrir
 
   app.post('/api/parent/ouvrir', (requete, reponse) => {
@@ -150,19 +273,9 @@ export function enregistrerRoutesParent(app: FastifyInstance, contexte: Contexte
     const code = typeof corps?.code === 'string' ? corps.code.trim() : '';
     const maintenant = String(horodatage(contexte.horloge));
 
-    /** 423 Locked, et JAMAIS 401 : le parent doit lire quand il pourra reessayer. */
-    const repondreVerrouille = (etat: VerrouParent): FastifyReply =>
-      reponse.code(423).send({
-        ...erreurApi(
-          CODES_ERREUR.conflit,
-          `La zone parent est fermee un moment. Reessaie apres ${String(etat.verrouilleJusqua)}.`
-        ),
-        details: { verrouilleJusqua: etat.verrouilleJusqua, nbEchecs: etat.nbEchecs }
-      });
-
     const verrou = lireVerrou(contexte.base);
     if (estVerrouille(verrou, maintenant)) {
-      return repondreVerrouille(verrou);
+      return repondreVerrouille(reponse, verrou);
     }
 
     if (!MOTIF_CODE.test(code)) {
@@ -173,7 +286,7 @@ export function enregistrerRoutesParent(app: FastifyInstance, contexte: Contexte
       if (estVerrouille(apres, maintenant)) {
         // L'echec qui ferme le verrou l'annonce, quelle que soit sa nature : sinon le parent
         // lirait « 4 chiffres » et taperait un code juste dans le vide.
-        return repondreVerrouille(apres);
+        return repondreVerrouille(reponse, apres);
       }
       return reponse
         .code(400)
@@ -183,18 +296,26 @@ export function enregistrerRoutesParent(app: FastifyInstance, contexte: Contexte
     const stocke = lireCodeParent(contexte.base);
 
     if (stocke === null) {
-      // PLACEHOLDER — la premiere ouverture POSE le code du foyer (voir l'en-tete du fichier).
-      const sel = selNeuf();
-      ecrireCodeParent(contexte.base, sel, deriverCode(code, sel), maintenant);
-      reinitialiserVerrou(contexte.base);
-      return reponse.send(poserJeton(Date.parse(maintenant)));
+      // CORRIGE N5 — la route NE POSE PLUS RIEN (contrat de finition v3 § 1.8 et § 8).
+      //
+      // 404 `introuvable`, et AUCUN echec compte : il n'y a rien a proteger tant qu'il n'y a
+      // pas de code, et faire monter le compteur ici verrouillerait la porte avant meme
+      // qu'elle existe. Le client traduit ce 404 en ecran de definition (`EcranDefinirCode`).
+      return reponse
+        .code(404)
+        .send(
+          erreurApi(
+            CODES_ERREUR.introuvable,
+            'Aucun code n’a encore ete choisi pour ce foyer. Choisis-en un.'
+          )
+        );
     }
 
     if (!verifierCode(code, stocke.sel, stocke.empreinte)) {
       const apres = appliquerEchec(verrou, maintenant);
       ecrireVerrou(contexte.base, apres);
       if (estVerrouille(apres, maintenant)) {
-        return repondreVerrouille(apres);
+        return repondreVerrouille(reponse, apres);
       }
       return reponse.code(401).send(erreurApi(CODES_ERREUR.invalide, 'Ce code ne convient pas.'));
     }
@@ -296,4 +417,16 @@ export function enregistrerRoutesParent(app: FastifyInstance, contexte: Contexte
       return reponse.send(entree);
     }
   );
+
+  // ───────────────────────────────────── GET /api/parent/:profil/galerie — D34, lot N5
+  //
+  // Enregistree ICI et non dans `application.ts`, qui appartient a N2 pour cette campagne
+  // (contrat de finition v3 § 4.2). `application.ts` porte lui-meme l'avertissement : « un lot
+  // qui ecrit une route sans qu'elle soit branchee verrait son travail silencieusement
+  // absent ». On garde donc un seul ecrivain par fichier ET une route qui existe, en la
+  // branchant depuis le fichier de routes que N5 possede.
+  //
+  // `jetonValide` lui est passe tel quel : la galerie est protegee par le MEME garde que le
+  // dashboard, sans qu'aucune seconde implantation ne puisse deriver de la premiere.
+  enregistrerRoutesParentGalerie(app, contexte, jetonValide);
 }

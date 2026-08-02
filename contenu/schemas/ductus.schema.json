@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "pierre:schemas/ductus",
+  "title": "Ductus declare des lettres",
+  "description": "Le sens d'ecriture des lettres, DECLARE (D33, consequence 1) : point de depart, sens de rotation, ordre des traits — jamais deduit de la forme. Un modele de contenu/modeles-lettres/ qui contredit ce fichier est faux ; c'est ce fichier qui fait foi, et tests/unitaires/ductus-referentiel.test.ts le confronte lettre par lettre. Un ductus mal appris au CP est tres difficile a corriger plus tard (D33) : le declarer ailleurs que dans un referentiel versionne reviendrait a l'abandonner au premier coup de crayon d'un generateur.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["casse", "source", "regles", "nonTranchees"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "note": { "type": "string" },
+    "casse": { "enum": ["minuscule", "majuscule", "cursive"] },
+    "source": {
+      "type": "string",
+      "minLength": 4,
+      "description": "La decision qui fait foi. Aucune regle ne s'ecrit ici sans elle."
+    },
+    "regles": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/regle" }
+    },
+    "nonTranchees": {
+      "type": "array",
+      "description": "Les lettres dont le geste initial n'est tranche par AUCUNE source. Elles sont nommees une par une : une lettre absente a la fois des regles et de cette liste est un trou, et le test le dit. On declare ce qu'on sait, jamais ce qu'on suppose.",
+      "items": { "$ref": "#/$defs/nonTranchee" }
+    }
+  },
+  "$defs": {
+    "point": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": { "type": "number" }
+    },
+    "regle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "enonce", "source"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+        "enonce": { "type": "string", "minLength": 10 },
+        "source": { "type": "string", "minLength": 10 },
+        "lettres": {
+          "type": "array",
+          "description": "Les lettres que la regle determine, avec leur geste initial mesurable.",
+          "items": { "$ref": "#/$defs/lettre" }
+        },
+        "traits": {
+          "type": "array",
+          "description": "Les identifiants de traits que la regle couvre, enumeres UN PAR UN. Une regle qui ne nommerait que sa condition laisserait le compte des objets couverts a la charge d'une recherche textuelle, et une valeur par defaut silencieuse y echapperait.",
+          "items": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" }
+        }
+      }
+    },
+    "lettre": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["lettre", "premierTrait", "depart", "sens"],
+      "properties": {
+        "lettre": { "type": "string", "minLength": 1, "maxLength": 2 },
+        "premierTrait": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+        "depart": { "$ref": "#/$defs/point" },
+        "sens": { "enum": ["horaire", "antihoraire", "sans-objet"] },
+        "commentaire": { "type": "string" }
+      }
+    },
+    "nonTranchee": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["lettre", "raison"],
+      "properties": {
+        "lettre": { "type": "string", "minLength": 1, "maxLength": 2 },
+        "raison": { "type": "string", "minLength": 10 }
+      }
+    }
+  }
+}

@@ -63,6 +63,25 @@ export interface ContenuTrace {
   readonly consigneId: IdConsigne;
 }
 
+/**
+ * L'aide du moteur `trace`, enrichie du LIBELLÉ du trait attendu.
+ *
+ * ÉCART AU CONTRAT GELÉ n° 6 — un champ ajouté, jamais retiré : `AideProposee` reste
+ * satisfaite, et aucun autre lot n'a à connaître celui-ci.
+ *
+ * POURQUOI IL FAUT CE CHAMP. L'ordre des traits est imposé (`ordreEtapesImpose`), et l'ordre
+ * du `d` est l'inverse de celui du `b` — le rond d'abord. Un enfant qui commence par la
+ * grande barre reçoit un refus, et le seul retour à l'écran était « On recommence ce trait,
+ * tranquillement. » : rien qui dise ce qu'il faut changer. `cible` porte l'identifiant du
+ * trait (`d-panse`), que personne ne lit à voix haute ; `texte` est le texte à faire dire,
+ * qui peut être une phrase entière. `libelle` porte le nom du trait — « le rond » — pour que
+ * l'hôte puisse le nommer sans réinterpréter les deux autres champs.
+ */
+export interface AideTrace extends AideProposee {
+  /** « le rond », « la grande barre » — le trait que l'enfant doit tracer MAINTENANT. */
+  readonly libelle: string | null;
+}
+
 export interface EchantillonGeste {
   readonly point: Point;
   readonly instantMs: number;
@@ -100,7 +119,7 @@ export interface EtatTrace {
   readonly gesteEnCours: readonly EchantillonGeste[];
   readonly nbErreurs: number;
   readonly niveauAide: NiveauAide;
-  readonly aide: AideProposee | null;
+  readonly aide: AideTrace | null;
   readonly dernierRefus: RefusTrace | null;
   /** L'axe effectivement confondu, quand il l'a été. Alimente le top 10 du dashboard (D23). */
   readonly axeConfondu: AxeMiroir | null;

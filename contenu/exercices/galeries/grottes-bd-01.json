@@ -1,0 +1,60 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Lot N8. AXE GAUCHE-DROITE UNIQUEMENT — b ↔ d (D23, conséquence 1). Deux réceptacles et deux seulement : trois grottes, ce serait « b, d, p » dans le même écran, c'est-à-dire le traitement en bloc que D23 interdit. `confusionAvec` de chaque élément nomme son partenaire miroir : c'est ce champ qui alimente le Top 10 des confusions du tableau de bord (D23, conséquence 3), et sans lui l'exercice ne serait qu'un compteur. Les huit mots viennent de `contenu/brouillons/phonologie/galeries/miroir-gauche-droite.json` ; aucun ne porte les deux lettres, le générateur le remesure.",
+  "id": "galeries-grottes-bd-01",
+  "version": 1,
+  "titre": "Les grottes du b et du d",
+  "competences": ["gph.miroir.gauche-droite", "comp.consigne.multiple"],
+  "difficulte": 3,
+  "jeu": {
+    "moteur": "tri",
+    "habillage": "galeries.grottes",
+    "noeud": "galeries-04",
+    "etoiles": { "sansAide": true, "sansErreur": true },
+    "aideGobi": ["relire-consigne", "surligne-graphene", "montre-cible"],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Range dans la grotte de gauche les mots avec la lettre b.",
+          "forme": "imperative",
+          "audio": null,
+          "aRanger": ["mot-bateau", "mot-bouche", "mot-cabane", "mot-robe"],
+          "motsCles": ["range", "grotte", "lettre"]
+        },
+        {
+          "id": "c2",
+          "texte": "Range dans la grotte de droite les mots avec la lettre d.",
+          "forme": "imperative",
+          "audio": null,
+          "aRanger": ["mot-domino", "mot-dame", "mot-radis", "mot-salade"],
+          "motsCles": ["range", "grotte", "lettre"]
+        }
+      ],
+      "receptacles": [
+        {
+          "id": "grotte-un",
+          "libelle": "la grotte de gauche",
+          "critere": "les mots avec la lettre b",
+          "zone": [[60, 60], [440, 60], [440, 300], [60, 300]]
+        },
+        {
+          "id": "grotte-deux",
+          "libelle": "la grotte de droite",
+          "critere": "les mots avec la lettre d",
+          "zone": [[520, 60], [900, 60], [900, 300], [520, 300]]
+        }
+      ],
+      "elements": [
+        { "id": "mot-bateau", "libelle": "bateau", "asset": null, "receptacleAttendu": "grotte-un", "confusionAvec": "mot-domino" },
+        { "id": "mot-bouche", "libelle": "bouche", "asset": null, "receptacleAttendu": "grotte-un", "confusionAvec": "mot-dame" },
+        { "id": "mot-cabane", "libelle": "cabane", "asset": null, "receptacleAttendu": "grotte-un", "confusionAvec": "mot-salade" },
+        { "id": "mot-robe", "libelle": "robe", "asset": null, "receptacleAttendu": "grotte-un", "confusionAvec": "mot-radis" },
+        { "id": "mot-domino", "libelle": "domino", "asset": null, "receptacleAttendu": "grotte-deux", "confusionAvec": "mot-bateau" },
+        { "id": "mot-dame", "libelle": "dame", "asset": null, "receptacleAttendu": "grotte-deux", "confusionAvec": "mot-bouche" },
+        { "id": "mot-radis", "libelle": "radis", "asset": null, "receptacleAttendu": "grotte-deux", "confusionAvec": "mot-robe" },
+        { "id": "mot-salade", "libelle": "salade", "asset": null, "receptacleAttendu": "grotte-deux", "confusionAvec": "mot-cabane" }
+      ],
+      "competence": "gph.miroir.gauche-droite"
+    }
+  }
+}

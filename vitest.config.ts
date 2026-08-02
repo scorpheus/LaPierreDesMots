@@ -42,6 +42,15 @@ const alias = {
   '@pierre/partage/recompenses': racine('./partage/src/recompenses/index.ts'),
   '@pierre/partage/monde': racine('./partage/src/monde/index.ts'),
   '@pierre/partage/parent': racine('./partage/src/parent/index.ts'),
+  // AJOUT N4 — voir le commentaire jumeau de `client/vite.config.ts`. Le § 4.4 du contrat de
+  // finition v3 attribue le sous-chemin `@pierre/partage/ouverture` à N4 sans attribuer les
+  // fichiers où un sous-chemin se déclare. Omission signalée au rapport de N4.
+  '@pierre/partage/ouverture': racine('./partage/src/ouverture/index.ts'),
+  // AJOUT N2, même omission et même remède que la ligne ci-dessus. Le § 4.2 confie à N2
+  // `partage/src/voix/index.ts` avec pour rôle « sous-chemin `@pierre/partage/voix` » sans
+  // nommer les trois fichiers où un sous-chemin se déclare. L'ajout est purement additif :
+  // N2 et N4 ont trouvé le trou indépendamment et leurs deux lignes fusionnent sans conflit.
+  '@pierre/partage/voix': racine('./partage/src/voix/index.ts'),
   '@pierre/partage': racine('./partage/src/index.ts'),
   // Réservés aux tests — contrat § 11.3.
   '@partage': racine('./partage/src'),

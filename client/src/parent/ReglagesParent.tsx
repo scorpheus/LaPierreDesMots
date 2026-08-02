@@ -1,61 +1,46 @@
 // Réglages de la zone parent — v2 § 14 : « réglages, exports CSV, sauvegarde en un clic ».
 //
 // PLACEHOLDER — à valider (consigné dans `Docs/questions-en-attente.md`). Le contrat gelé
-// n'accorde à ce lot AUCUNE route pour persister ces trois réglages : les 12 routes du § 5.3
+// n'accorde à ce lot AUCUNE route pour persister ces réglages : les 12 routes du § 5.3
 // n'en portent aucune. Deux issues étaient possibles — inventer une route hors contrat, ou
 // stocker localement. On stocke localement, dans `localStorage`, sur l'appareil du parent :
 //   • rien de pédagogique n'y est écrit — ce sont des préférences de confort ;
 //   • aucun autre lot n'est bloqué par ce choix ;
-//   • le jour où une route existe, seul ce fichier bouge.
+//   • le jour où une route existe, seul `reglages-foyer.ts` bouge.
 //
 // « Animations calmes » n'est pas un réglage d'accessibilité de plus : c'est le même levier que
 // `prefers-reduced-motion`, exposé au parent parce que la tablette du salon ne le propose pas.
-import { useCallback, useEffect, useState } from 'react';
+//
+// ────────────────────────────────────────────────────────────────────────────────────────
+// LE QUATRIÈME RÉGLAGE — demandé par le père, verbatim : « une option pour activer ou
+// désactiver du côté parent le bouton écouter ».
+//
+// Il ne vit PAS dans les réglages de lecture (`EcranReglagesLecture`) : ceux-là s'ouvrent
+// depuis l'écran des profils, **sans code**, donc l'enfant pourrait se rendre ce que le
+// parent vient de lui retirer. Un réglage d'adulte se pose derrière le code d'adulte.
+//
+// Il ne remplace pas D42 et ne le contredit pas : D42 masque le bouton quand aucun clip
+// n'existe (honnêteté), ce réglage le masque quand le parent le décide (pédagogie). Les deux
+// se composent dans `BoutonEcouter.tsx`, et aucun des deux ne peut annuler l'autre.
+// ────────────────────────────────────────────────────────────────────────────────────────
+//
+// L'état lui-même vit dans `reglages-foyer.ts` — une feuille sans JSX, pour que
+// `BoutonEcouter.tsx` puisse le lire sans tirer cet écran dans le bundle de l'enfant.
+import { useCallback, useEffect } from 'react';
 import type { ReactElement } from 'react';
 
-/** Clé unique dans `localStorage`. Préfixée : la borne peut servir à autre chose. */
-const CLE_STOCKAGE = 'pierre.reglages-parent';
+import {
+  REGLAGES_FOYER_PAR_DEFAUT,
+  ecrireReglagesFoyer,
+  lireReglagesFoyer,
+  useReglagesFoyer
+} from './reglages-foyer.js';
+import type { ReglagesFoyer } from './reglages-foyer.js';
 
-export interface ReglagesFoyer {
-  /** Volume des effets sonores, de 0 à 1. */
-  readonly volumeEffets: number;
-  /** Volume des voix et consignes, de 0 à 1. R15 : jamais coupé à zéro par défaut. */
-  readonly volumeVoix: number;
-  /** Animations calmes : le décor bouge moins, le texte ne bouge jamais (v2 § 9.3). */
-  readonly animationsCalmes: boolean;
-}
-
-export const REGLAGES_FOYER_PAR_DEFAUT: ReglagesFoyer = {
-  volumeEffets: 0.8,
-  volumeVoix: 1,
-  animationsCalmes: false
-};
-
-export function lireReglagesFoyer(): ReglagesFoyer {
-  try {
-    const brut = globalThis.localStorage?.getItem(CLE_STOCKAGE);
-    if (brut === null || brut === undefined) {
-      return REGLAGES_FOYER_PAR_DEFAUT;
-    }
-    const analyse = JSON.parse(brut) as Partial<ReglagesFoyer>;
-    return {
-      volumeEffets: borner(analyse.volumeEffets, REGLAGES_FOYER_PAR_DEFAUT.volumeEffets),
-      volumeVoix: borner(analyse.volumeVoix, REGLAGES_FOYER_PAR_DEFAUT.volumeVoix),
-      animationsCalmes: analyse.animationsCalmes === true
-    };
-  } catch {
-    // Un stockage abîmé ne doit pas fermer la zone parent : on repart des défauts.
-    return REGLAGES_FOYER_PAR_DEFAUT;
-  }
-}
-
-function borner(valeur: unknown, defaut: number): number {
-  if (typeof valeur !== 'number' || !Number.isFinite(valeur)) {
-    return defaut;
-  }
-  // Hors bornes, on RAMÈNE, on ne rejette jamais : un réglage refusé bloquerait l'écran.
-  return Math.min(1, Math.max(0, valeur));
-}
+// Ré-exports : `ReglagesParent.tsx` portait ces trois noms avant que l'état n'en sorte.
+// Les republier ici évite de faire bouger un seul appelant existant.
+export { REGLAGES_FOYER_PAR_DEFAUT, lireReglagesFoyer };
+export type { ReglagesFoyer };
 
 export interface ProprietesReglagesParent {
   /** Appelé à chaque changement, pour que la racine applique le réglage tout de suite. */
@@ -63,17 +48,23 @@ export interface ProprietesReglagesParent {
 }
 
 export function ReglagesParent({ surChangement }: ProprietesReglagesParent): ReactElement {
-  const [reglages, fixerReglages] = useState<ReglagesFoyer>(lireReglagesFoyer);
+  const reglages = useReglagesFoyer();
 
   const appliquer = useCallback(
-    (suivants: ReglagesFoyer): void => {
-      fixerReglages(suivants);
-      try {
-        globalThis.localStorage?.setItem(CLE_STOCKAGE, JSON.stringify(suivants));
-      } catch {
-        // Mode privé, quota plein : le réglage vaut pour la session et c'est déjà utile.
-      }
-      surChangement?.(suivants);
+    (voulus: Partial<ReglagesFoyer>): void => {
+      // L'écriture prévient elle-même le monde de l'enfant : le bouton « Écouter » apparaît
+      // ou disparaît dans la seconde, sans rechargement et sans passer par un rendu de ce
+      // composant. C'est ce qui rend le réglage vérifiable par le parent, tout de suite.
+      //
+      // ⚠ L'ÉCRITURE EST SUR SA PROPRE LIGNE, ET CE N'EST PAS DU STYLE.
+      // `surChangement?.(ecrireReglagesFoyer(voulus))` court-circuite l'appel ENTIER quand
+      // `surChangement` est absent — argument compris. Or `EcranDashboard.tsx` rend
+      // `<ReglagesParent />` sans cette propriété : écrit ainsi, AUCUN des quatre réglages
+      // n'aurait été enregistré dans l'application réelle, et rien à l'écran ne l'aurait dit.
+      // Mesuré par `tests/composants/BoutonEcouter-option-parent.test.tsx` — le cas « le
+      // réglage se pose depuis la ZONE PARENT » échouait exactement là-dessus.
+      const complets = ecrireReglagesFoyer(voulus);
+      surChangement?.(complets);
     },
     [surChangement]
   );
@@ -105,7 +96,7 @@ export function ReglagesParent({ surChangement }: ProprietesReglagesParent): Rea
           value={Math.round(reglages.volumeEffets * 100)}
           data-reglage="volume-effets"
           onChange={(evenement) =>
-            appliquer({ ...reglages, volumeEffets: Number(evenement.target.value) / 100 })
+            appliquer({ volumeEffets: Number(evenement.target.value) / 100 })
           }
           style={{ minBlockSize: 'var(--cible-min)' }}
         />
@@ -120,9 +111,7 @@ export function ReglagesParent({ surChangement }: ProprietesReglagesParent): Rea
           step={5}
           value={Math.round(reglages.volumeVoix * 100)}
           data-reglage="volume-voix"
-          onChange={(evenement) =>
-            appliquer({ ...reglages, volumeVoix: Number(evenement.target.value) / 100 })
-          }
+          onChange={(evenement) => appliquer({ volumeVoix: Number(evenement.target.value) / 100 })}
           style={{ minBlockSize: 'var(--cible-min)' }}
         />
       </label>
@@ -134,16 +123,38 @@ export function ReglagesParent({ surChangement }: ProprietesReglagesParent): Rea
           type="checkbox"
           checked={reglages.animationsCalmes}
           data-reglage="animations-calmes"
-          onChange={(evenement) =>
-            appliquer({ ...reglages, animationsCalmes: evenement.target.checked })
-          }
+          onChange={(evenement) => appliquer({ animationsCalmes: evenement.target.checked })}
           style={{ inlineSize: '2rem', blockSize: '2rem' }}
         />
         Animations calmes
       </label>
 
+      {/* ─────────────────────────────────────────── le bouton « Écouter », demandé par le père */}
+      <label
+        style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minBlockSize: 'var(--cible-min)' }}
+      >
+        <input
+          type="checkbox"
+          checked={reglages.boutonEcouter}
+          data-reglage="bouton-ecouter"
+          onChange={(evenement) => appliquer({ boutonEcouter: evenement.target.checked })}
+          style={{ inlineSize: '2rem', blockSize: '2rem' }}
+        />
+        Proposer le bouton « Écouter » à l’enfant
+      </label>
+
+      <p data-note="bouton-ecouter" style={{ margin: 0, color: 'var(--texte-secondaire)' }}>
+        {reglages.boutonEcouter
+          ? // La phrase dit la dette telle qu'elle est (D42) : le père a tapé un bouton muet,
+            // il doit savoir pourquoi il ne le voit plus, sinon il croira à une régression.
+            'Le bouton n’apparaît que sur les consignes qui ont déjà une voix enregistrée. ' +
+              'Tant qu’aucune voix n’est produite, il reste caché : un bouton qui ne répond pas ' +
+              'déçoit plus qu’un bouton absent.'
+          : 'Le bouton « Écouter » est retiré du jeu. Les consignes restent lisibles à l’écran.'}
+      </p>
+
       <p style={{ margin: 0, color: 'var(--texte-secondaire)' }}>
-        Ces trois réglages sont gardés sur cet appareil. La sauvegarde des données de jeu se
+        Ces quatre réglages sont gardés sur cet appareil. La sauvegarde des données de jeu se
         fait par les exports ci-dessus.
       </p>
     </section>

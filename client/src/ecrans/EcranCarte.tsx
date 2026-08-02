@@ -22,14 +22,42 @@ import type { ReactElement } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import type { CodeRegion, EtatMonde, EtatRegion, IdNoeud } from '@pierre/partage';
 import { etatAfficheRegion, regionsOuvertes } from '@pierre/partage/monde';
-import { lireMonde, lirePaquetNoeud, urlAsset } from '../api/client.js';
+import { lireMonde, lireProgression, lirePaquetNoeud, urlAsset } from '../api/client.js';
 import { useEtatJeu, useMagasin } from '../etat/services.js';
 import { CheminEncre } from '../monde/CheminEncre.js';
 import { Parchemin } from '../monde/Parchemin.js';
 import { VoileGrisaille } from '../monde/VoileGrisaille.js';
 
-/** Le chemin du décor de la carte, relatif à `contenu/`. */
-const SVG_CARTE = 'habillages/carte/carte-monde.svg';
+/**
+ * Le chemin du décor de la carte, relatif à `contenu/`.
+ *
+ * ── PASSAGE À LA v2, fait à l'intégration de la campagne N ──────────────────────────────────
+ * Cette ligne portait `carte-monde.svg`, la carte de la v1 : six hexagones identiques. N7 a
+ * livré `carte-monde-v2.svg` et l'a déclarée dans `contenu/monde/regions.json` (`scene.fichier`),
+ * mais **ce fichier appartient à N4** (contrat de finition v3 § 6.2) et N7 n'avait pas le droit
+ * d'y écrire. Il a donc consigné l'écart dans le `$commentaire` de `regions.json`, en toutes
+ * lettres : « Tant que cette ligne n'est pas passée à `carte-monde-v2.svg`, l'enfant voit encore
+ * les six hexagones identiques de la v1 ». Personne ne l'a faite. C'est exactement le mode de
+ * défaillance que D10 nomme : un morceau qu'aucun fichier n'a pris en charge.
+ *
+ * Le passage est sûr, et c'est MESURÉ, pas supposé :
+ *   • même `viewBox` — `0 0 1200 800` dans les deux fichiers, donc la table `ANCRES` ci-dessous
+ *     reste juste au pixel près ;
+ *   • mêmes six identifiants de région, dans le même ordre, et mêmes six centres de marqueur —
+ *     `tests/unitaires/ids-regions-stables.test.ts` (V1/V2, lignes 243-244) compare les deux
+ *     fichiers et échoue si l'un dérive de l'autre.
+ *
+ * La v1 reste sur le disque : rien n'est supprimé, elle redevient simplement la référence de
+ * comparaison du test.
+ *
+ * DETTE ASSUMÉE, consignée dans `Docs/questions-en-attente.md` : ce chemin est ici ET dans
+ * `regions.json`. Le lire depuis le monde supprimerait la duplication (convention C5), mais
+ * `scene` n'est exposée ni par `partage/src/monde/types.ts` ni par le dépôt serveur — mesuré :
+ * `grep -n "scene" partage/src/monde/types.ts serveur/src/depots/monde.ts` ne rend aucune ligne.
+ * La plomberie traverse trois fichiers d'autres lots ; le test ci-dessus tient la cohérence en
+ * attendant, et c'est lui qui rend cette dette sûre plutôt que silencieuse.
+ */
+const SVG_CARTE = 'habillages/carte/carte-monde-v2.svg';
 
 /**
  * Les ancres de chaque région, en unités `viewBox`, **dans l'ordre de la progression**.
@@ -62,9 +90,17 @@ export interface ProprietesEcranCarte {
    * campement comme le coffre n'en font pas partie (défaut du contrat gelé, signalé au rapport).
    */
   readonly surAllerCampement?: () => void;
+  /**
+   * AJOUT N4 — ouvre la séquence d'ouverture (D35). Même disposition que ci-dessus : l'écran ne
+   * connaît aucun chemin, il reçoit un rappel.
+   */
+  readonly surVoirOuverture?: () => void;
 }
 
-export function EcranCarte({ surAllerCampement }: ProprietesEcranCarte = {}): ReactElement {
+export function EcranCarte({
+  surAllerCampement,
+  surVoirOuverture
+}: ProprietesEcranCarte = {}): ReactElement {
   const magasin = useMagasin();
   const profil = useEtatJeu((etat) => etat.profil);
   const animationsDesactivees = useEtatJeu((etat) => etat.animationsDesactivees);
@@ -76,6 +112,32 @@ export function EcranCarte({ surAllerCampement }: ProprietesEcranCarte = {}): Re
         throw new Error('Monde demandé sans profil choisi.');
       }
       return lireMonde(profil.id);
+    },
+    enabled: profil !== null
+  });
+
+  /**
+   * Ce qui est déjà terminé, nœud par nœud.
+   *
+   * ── POURQUOI CETTE REQUÊTE EXISTE (lot C4) ────────────────────────────────────────────────
+   * Cet écran entrait sur `region.noeuds[0]`, en dur, aux deux endroits qui font entrer dans
+   * une région. Tant que la Clairière n'avait qu'un nœud, c'était juste par accident. La v2
+   * § 5.2 en demande « 4 à 6 enchaînés » et ils sont désormais livrés : sans cette lecture,
+   * l'enfant rejouerait indéfiniment le premier et les quatre autres seraient du contenu écrit,
+   * validé, et invisible — exactement le défaut que le père a signalé, en plus grand.
+   *
+   * La clé `['progression', profil]` est celle qu'`EcranRecompense` invalide déjà après chaque
+   * tentative enregistrée : la carte se remet donc à jour toute seule au retour du nœud, sans
+   * qu'aucun autre écran n'ait à changer.
+   * ─────────────────────────────────────────────────────────────────────────────────────────
+   */
+  const requeteProgression = useQuery({
+    queryKey: ['progression', profil === null ? null : String(profil.id)],
+    queryFn: () => {
+      if (profil === null) {
+        throw new Error('Progression demandée sans profil choisi.');
+      }
+      return lireProgression(profil.id);
     },
     enabled: profil !== null
   });
@@ -101,6 +163,32 @@ export function EcranCarte({ surAllerCampement }: ProprietesEcranCarte = {}): Re
   const parCode = useMemo(
     () => new Map(regions.map((region) => [String(region.region), region])),
     [regions]
+  );
+
+  const noeudsFaits = useMemo(
+    () => new Set((requeteProgression.data ?? []).map((ligne) => String(ligne.noeud))),
+    [requeteProgression.data]
+  );
+
+  /**
+   * Où reprendre dans une région : le premier nœud non terminé.
+   *
+   * **Il n'y a jamais de `null` quand la région porte des nœuds.** Une région entièrement
+   * terminée renvoie sur son premier nœud plutôt que sur rien : un acquis n'est jamais repris
+   * (R14), rejouer est gratuit, et une prise qui cesserait de répondre serait un état sans
+   * issue — le pire défaut possible ici.
+   */
+  const reprise = useCallback(
+    (region: EtatRegion | undefined): { readonly noeud: IdNoeud | null; readonly rang: number } => {
+      const noeuds = region?.noeuds ?? [];
+      if (noeuds.length === 0) {
+        return { noeud: null, rang: 0 };
+      }
+      const index = noeuds.findIndex((noeud) => !noeudsFaits.has(String(noeud)));
+      const choisi = index === -1 ? 0 : index;
+      return { noeud: noeuds[choisi] ?? null, rang: choisi + 1 };
+    },
+    [noeudsFaits]
   );
 
   /** Le chemin d'encre avance comme la recoloration moyenne : une dérivée, jamais un état. */
@@ -148,10 +236,54 @@ export function EcranCarte({ surAllerCampement }: ProprietesEcranCarte = {}): Re
         </button>
       </header>
 
+      {/*
+        ══════════════════════════════════════════════════════════════════════════════════════
+        LA PHRASE QUE LE PÈRE N'A PAS COMPRISE — D35, corrigée par N4.
+
+        Mesurée au contrat de finition v3 § 4.4 comme le SEUL texte enfant fautif du client :
+
+          $ grep -rniE "en gris|perdu|il manque" client/src --include=*.tsx
+          client/src/ecrans/EcranCarte.tsx:153: Bonjour {profil.prenom} ! Le monde t’attend en gris.
+
+        Retour de l'essai, mot pour mot : « je n'ai pas compris la phrase "le monde t'attend en
+        gris", c'est pas joyeux pour l'instant ». Sans le récit qui la précède, elle énonce une
+        PERTE et ne donne rien à faire.
+
+        La correction est celle que D35 écrit lui-même — « c'est exactement le même fait,
+        retourné de l'absence vers le pouvoir d'agir » : le constat reste (il est vrai, et le
+        gris EST le mécanisme du jeu), mais la phrase se referme sur le geste de l'enfant.
+        `enonceUnePerte` accepte désormais ce texte pour cette raison précise, et pour aucune
+        autre : `tests/unitaires/ton-sans-perte.test.ts` refuserait la première moitié seule.
+        ══════════════════════════════════════════════════════════════════════════════════════
+      */}
       {profil === null ? null : (
         <p style={{ margin: 0, fontSize: '1.125rem' }}>
-          Bonjour {String(profil.prenom)}&nbsp;! Le monde t’attend en gris.
+          Bonjour {String(profil.prenom)}&nbsp;! Le monde t’attend en gris&nbsp;: tu peux lui
+          rendre ses couleurs.
         </p>
+      )}
+
+      {/*
+        L'ENTRÉE DU RÉCIT — D35, point 3 : « rejouable ; un enfant qui n'a pas suivi la
+        première fois doit pouvoir y revenir SEUL ».
+
+        Elle est ici, juste sous la phrase qu'elle explique, et non rangée dans un menu. C'est
+        la contrepartie assumée de l'arbitrage de N4 (voir `routeur.tsx`) : la séquence n'est
+        JAMAIS imposée — D46 point 3 l'interdit — donc son entrée doit être immédiatement
+        trouvable, sans quoi elle n'existerait que sur le papier. Le libellé nomme l'histoire,
+        pas un réglage : un enfant de sept ans tape ce qu'il comprend.
+      */}
+      {surVoirOuverture === undefined ? null : (
+        <button
+          type="button"
+          className="cible cible-secondaire"
+          data-vers="ouverture"
+          aria-label="Écouter l’histoire de la Pierre"
+          onClick={surVoirOuverture}
+          style={{ alignSelf: 'start' }}
+        >
+          L’histoire de la Pierre
+        </button>
       )}
 
       <Parchemin>
@@ -193,7 +325,7 @@ export function EcranCarte({ surAllerCampement }: ProprietesEcranCarte = {}): Re
           const region = parCode.get(String(code));
           const etat = region === undefined ? 'voilee' : etatAfficheRegion(region);
           const ouverte = jouables.has(String(code));
-          const premierNoeud = region?.noeuds[0] ?? null;
+          const premierNoeud = reprise(region).noeud;
 
           return (
             <g key={String(code)} data-region={String(code)} data-region-etat={etat}>
@@ -205,10 +337,25 @@ export function EcranCarte({ surAllerCampement }: ProprietesEcranCarte = {}): Re
                 fillOpacity={0.85}
                 stroke="var(--trait)"
                 strokeWidth={ouverte ? 6 : 3}
-                role="button"
-                tabIndex={0}
+                // ── UNE PRISE N'EXISTE QUE SI ELLE RÉPOND ────────────────────────────────
+                // Corrigé à l'intégration de la campagne N. Ces pastilles portaient
+                // `role="button"` et `tabIndex={0}` sur les SIX régions, alors que le
+                // gestionnaire commence par `if (ouverte && premierNoeud !== null)` : les
+                // quatre régions voilées étaient donc annoncées « bouton » au lecteur
+                // d'écran, atteignables à la tabulation, et strictement inertes au doigt.
+                //
+                // Mesuré par `parcours-qa-tout-le-site.spec.ts` — quatre contrôles morts :
+                //   circle « Le Marais Jumeau — voilee », « La Forêt Muette — voilee »,
+                //   « Le Volcan — voilee », « La Cité des Histoires — voilee »
+                //
+                // Une région voilée est un DÉCOR, pas une commande. On lui retire donc le
+                // rôle et le focus plutôt que de lui inventer une réponse : la seule autre
+                // issue aurait été un message, et un message dirait à l'enfant ce qui lui
+                // manque — exactement ce que la convention C7 et D35 interdisent.
+                {...(ouverte && premierNoeud !== null
+                  ? { role: 'button' as const, tabIndex: 0, style: { cursor: 'pointer' } }
+                  : { 'aria-hidden': true as const, style: { pointerEvents: 'none' as const } })}
                 aria-label={`${libelle} — ${etat}`}
-                style={{ cursor: 'pointer' }}
                 onClick={() => {
                   if (ouverte && premierNoeud !== null) {
                     entrer(premierNoeud);
@@ -247,17 +394,19 @@ export function EcranCarte({ surAllerCampement }: ProprietesEcranCarte = {}): Re
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
           {ANCRES.filter(([code]) => jouables.has(String(code))).map(([code, , , libelle]) => {
             const region = parCode.get(String(code));
-            const premierNoeud = region?.noeuds[0] ?? null;
+            const { noeud: noeudDeReprise, rang } = reprise(region);
+            const total = region?.noeuds.length ?? 0;
             return (
               <button
                 key={`depart-${String(code)}`}
                 type="button"
                 className="cible cible-appel"
                 data-depart={String(code)}
+                data-etape={rang === 0 ? '' : `${String(rang)}/${String(total)}`}
                 aria-label={`Partir vers ${libelle}`}
                 onClick={() => {
-                  if (premierNoeud !== null) {
-                    entrer(premierNoeud);
+                  if (noeudDeReprise !== null) {
+                    entrer(noeudDeReprise);
                   }
                 }}
                 style={{ flexDirection: 'column', gap: '0.5rem', padding: '1.25rem' }}
@@ -275,10 +424,14 @@ export function EcranCarte({ surAllerCampement }: ProprietesEcranCarte = {}): Re
                   Il reste {Math.round((1 - (region?.pourcentageColorie ?? 0)) * 100)} % à
                   rallumer
                 </span>
+                {/* Dire COMBIEN il y en a, et où on en est. Le père a demandé « je n'ai eu
+                    qu'un exercice, est-ce normal ? » : une région qui annonce son étape répond
+                    à la question avant qu'elle ne se pose. Aucun chiffre n'est en dur — ils
+                    viennent tous des nœuds déclarés par `contenu/monde/regions.json`. */}
                 <span style={{ fontSize: '1rem' }}>
-                  {premierNoeud === null
+                  {noeudDeReprise === null
                     ? 'Le chemin se dessine encore…'
-                    : 'Tape pour entrer'}
+                    : `Étape ${String(rang)} sur ${String(total)} — tape pour entrer`}
                 </span>
               </button>
             );

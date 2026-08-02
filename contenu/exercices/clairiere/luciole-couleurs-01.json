@@ -8,7 +8,7 @@
   "jeu": {
     "moteur": "eclair",
     "habillage": "clairiere.luciole",
-    "noeud": "clairiere-01",
+    "noeud": "clairiere-02",
     "etoiles": { "sansAide": true, "sansErreur": true },
     "aideGobi": ["relire-consigne", "souffle-syllabe", "montre-couleur"],
     "contenu": {

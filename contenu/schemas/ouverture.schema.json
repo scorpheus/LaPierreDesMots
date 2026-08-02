@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "pierre:schemas/ouverture",
+  "title": "Sequence d ouverture",
+  "description": "La sequence d ouverture de D35. Forme derivee de SequenceOuverture et TableauOuverture (contrat de finition v3 § 5.8, lot N4). Elle porte le sens de tout le mecanisme de recoloration : sans elle, le gris est une tristesse ; avec elle, c est un travail qui attend l enfant. Chaque `texte` traverse `enonceUnePerte` (convention C7) et `tests/unitaires/ton-sans-perte.test.ts` echoue si l un d eux enonce ce qui manque au lieu de ce que l enfant peut rendre.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["tableaux", "passableDesMs"],
+  "properties": {
+    "$commentaire": { "type": "string" },
+    "passableDesMs": {
+      "type": "integer",
+      "const": 0,
+      "description": "D35, point 3 : « passable au tap des la premiere seconde ». La valeur est GELEE a 0 par le schema, et non simplement documentee : un jour ou quelqu un voudra « juste deux secondes pour poser l ambiance », le fichier refusera de se charger. C est la seule facon qu une regle de conception survive a une bonne intention."
+    },
+    "tableaux": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "description": "Les cinq tableaux de D35, dans l ordre du recit : la Pierre, la Grisaille, les noms, les habitants, l appel.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["code", "texte", "cleAudio", "dureeMs", "asset"],
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": ["pierre", "grisaille", "noms", "habitants", "appel"]
+          },
+          "texte": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 220,
+            "description": "Lu par l enfant ET dit a voix haute. Une seule idee par tableau : l enfant dechiffre encore (D14)."
+          },
+          "cleAudio": {
+            "type": "string",
+            "pattern": "^ouverture/[a-z0-9]+(-[a-z0-9]+)*$",
+            "description": "Cle du manifeste de N2, jamais un chemin de fichier. `ouverture/<codeTableau>` (contrat v3 § 5.4). Tant que le clip n existe pas, D42 masque le bouton ecouter et le tableau reste lisible."
+          },
+          "dureeMs": {
+            "type": "integer",
+            "minimum": 1500,
+            "maximum": 12000,
+            "description": "Duree d affichage AUTOMATIQUE, jamais une attente imposee : un tap passe a la suite a n importe quel instant, et un second tap quitte la sequence entiere."
+          },
+          "asset": {
+            "type": "string",
+            "pattern": "^habillages/ouverture/[a-z0-9-]+\\.svg$"
+          }
+        }
+      }
+    }
+  }
+}

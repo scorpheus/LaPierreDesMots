@@ -102,7 +102,17 @@ export function carteInitiale(
   ouvertesEnParallele: number,
   compagnonParRegion: ReadonlyMap<CodeRegion, CodeCompagnon> = new Map(),
 ): EtatCarte {
-  return {
+  // D38 — la carte NEUVE passe par `ouvrirCeQuiDoitLEtre`, elle n'ouvre pas elle-même.
+  //
+  // Cette fonction posait `ouverte: definition.ordre === 1`, donc une seule région sur une
+  // partie neuve, quoi qu'en dise `ouvertesEnParallele`. Corriger `regionsOuvertes` sans
+  // corriger ceci n'aurait rien changé pour l'enfant : les Galeries seraient restées
+  // `ouverte: false`, et une région fermée n'est jamais « en cours », donc jamais proposée.
+  //
+  // On amorce au seul rang 1 puis on délègue : la règle d'ouverture n'est écrite QU'UNE fois,
+  // dans `ouvrirCeQuiDoitLEtre`. Deux implantations de la même règle finiraient par diverger,
+  // et c'est exactement ce qui vient d'être payé ici.
+  return ouvrirCeQuiDoitLEtre({
     ouvertesEnParallele: Math.max(1, ouvertesEnParallele),
     regions: definitions.map((definition) => ({
       region: definition.region,
@@ -113,7 +123,7 @@ export function carteInitiale(
       compagnon: compagnonParRegion.get(definition.region) ?? null,
       noeuds: definition.noeuds
     }))
-  };
+  });
 }
 
 /** Tri stable par ordre de progression. Aucune autre lecture de la carte n'en dépend. */
@@ -127,19 +137,37 @@ function enCours(region: EtatRegion): boolean {
 }
 
 /**
- * Les régions jouables maintenant. Deux en parallèle dès la troisième (v2 § 3.3).
+ * Les régions jouables maintenant : jusqu'à `ouvertesEnParallele`, DÈS LE DÉPART (D38).
  *
- * **Lecture retenue de « dès la troisième »** : tant qu'aucune région de rang ≥ 3 n'est en jeu,
- * une seule région est proposée — l'enfant n'a pas encore de choix à faire, et lui en donner un
- * dès la Clairière brouillerait la progression phonologique. Dès qu'une région de rang ≥ 3 est
- * ouverte, `ouvertesEnParallele` s'applique et « l'enfant choisit où aller ». La lecture est
- * consignée dans `Docs/questions-en-attente.md`.
+ * ── CE QUI A CHANGÉ, ET POURQUOI — corrigé à l'intégration de la campagne N ────────────────
+ * Cette fonction portait la règle de la v2 § 3.3, « deux régions en parallèle dès la
+ * troisième », implantée par la garde `ouvertes.some((r) => r.ordre >= 3) ? parallele : 1`.
+ *
+ * **D38 amende explicitement la v2 § 3.3** — c'est écrit dans ses termes
+ * (`Docs/journal-des-decisions.md:740`) : « Les deux régions sont ouvertes d'emblée. Amende la
+ * v2 § 3.3, qui n'ouvrait deux régions en parallèle qu'à partir de la troisième. » Le journal
+ * des décisions est la loi du projet et il est postérieur à la v2 ; la garde était donc du
+ * code qui appliquait une règle abrogée.
+ *
+ * Le motif de D38 est pédagogique et il est opposable : « les Galeries travaillent précisément
+ * les confusions `b`/`d`/`p`/`q` dont il a besoin maintenant (D23) ; l'attendre serait lui
+ * refuser le contenu le plus utile ».
+ *
+ * Ce que le défaut coûtait, mesuré et non supposé — `tests/e2e/parcours-sortie-6-noeuds.spec.ts`
+ * sur un profil neuf :
+ *
+ *     [sortie galeries] profil neuf — départs offerts : clairiere
+ *
+ * Un seul départ. Les six nœuds des Galeries étaient livrés, déclarés dans
+ * `contenu/monde/regions.json`, et **inatteignables**. C'est le « dans la clairière je n'ai eu
+ * qu'un exercice » du père, vu de l'autre bout.
+ *
+ * Le parallélisme reste une DONNÉE (`ouvertesEnParallele`, contenu/monde/regions.json), jamais
+ * un littéral : passer à trois régions se fait dans le JSON, sans toucher à ce fichier.
  */
 export function regionsOuvertes(carte: EtatCarte): readonly CodeRegion[] {
   const ouvertes = parOrdre(carte.regions.filter(enCours));
-  const parallele = Math.max(1, carte.ouvertesEnParallele);
-  const autorise = ouvertes.some((region) => region.ordre >= 3) ? parallele : 1;
-  return ouvertes.slice(0, autorise).map((region) => region.region);
+  return ouvertes.slice(0, Math.max(1, carte.ouvertesEnParallele)).map((region) => region.region);
 }
 
 /**
@@ -191,8 +219,12 @@ export function ouvrirCeQuiDoitLEtre(carte: EtatCarte): EtatCarte {
       return { ...carte, regions };
     }
     const nbEnCours = regions.filter(enCours).length;
-    const autorise = suivante.ordre >= 3 ? parallele : 1;
-    if (nbEnCours >= autorise) {
+    // D38 — le seuil est le parallélisme déclaré, à TOUS les rangs. La garde
+    // `suivante.ordre >= 3 ? parallele : 1` appliquait la v2 § 3.3, que D38 amende ; elle
+    // laissait les Galeries fermées sur un profil neuf. Voir `regionsOuvertes` ci-dessus :
+    // les deux fonctions portaient la même règle et devaient donc changer ensemble, sans
+    // quoi l'une aurait rouvert ce que l'autre venait de fermer.
+    if (nbEnCours >= parallele) {
       return { ...carte, regions };
     }
     const index = regions.findIndex((region) => region.region === suivante.region);

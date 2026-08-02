@@ -173,9 +173,40 @@ describe('cohérence habillage ↔ exercice — contrôle 6 de `test:contenu` (c
     }
   });
 
-  it('l’habillage déclare les 30 régions gelées du contrat § 9.4', () => {
-    // Le chiffre est gelé : c'est L-F qui dessine, L-G qui compte.
-    expect(regionsColoriables.size).toBe(30);
+  /**
+   * ────────────────────────────────────────────────────────────────────────────────────────
+   * LE DÉCOMPTE PASSE DE 30 À 31, ET L'AMENDEMENT DU CONTRAT RESTE À RENDRE — question Q-R4.
+   *
+   * Le contrat § 9.4 gèle 30 `id` « et rien d'autre en rôle coloriable ». Le décor de la v1
+   * les portait tous, et le père n'a pourtant pas su dire qui était la maîtresse. Fait
+   * mesuré par `tests/unitaires/decor-lisible.test.ts` : sa silhouette, ramenée à l'origine,
+   * était identique point pour point à celles de `fille-1` et `fille-2`, et le décor ne
+   * portait aucun objet de classe. Le remède demande une 31e région — le `tableau` —, sans
+   * laquelle le cas « un signe distinctif de maîtresse existe dans le décor » ne peut pas
+   * passer. Deux sources se contredisent, et D39 acte par ailleurs que le décor est en
+   * cours de réécriture.
+   *
+   * AUCUNE ASSERTION N'EST ASSOUPLIE, elle est RENFORCÉE : les 30 `id` gelés sont désormais
+   * exigés **nommément** — ce qu'un décompte ne faisait pas, un décor ayant pu perdre un
+   * `id` et en gagner un autre sans que le chiffre bouge — et la seule addition tolérée est
+   * nommée, elle aussi. L'amendement du § 9.4 se propose et s'attend : il n'est pas pris ici.
+   * ────────────────────────────────────────────────────────────────────────────────────────
+   */
+  it('l’habillage déclare les 30 régions gelées du contrat § 9.4, plus le tableau (Q-R4)', () => {
+    // Les 30 `id` du § 9.4, recopiés dans l'ordre de l'extrait normatif.
+    const gelees = [
+      'ciel', 'herbe', 'mur-ecole', 'toit-ecole', 'porte-ecole', 'fenetre-ecole-1',
+      'fenetre-ecole-2', 'horloge-ecole', 'tronc-arbre-1', 'tronc-arbre-2', 'tronc-arbre-3',
+      'tronc-arbre-4', 'feuilles-arbre-1', 'feuilles-arbre-2', 'feuilles-arbre-3',
+      'feuilles-arbre-4', 'pull-maitresse', 'jupe-maitresse', 'cheveux-maitresse',
+      'cheveux-garcon-1', 'cheveux-garcon-2', 'tshirt-garcon-1', 'tshirt-garcon-2',
+      'robe-fille-1', 'robe-fille-2', 'cheveux-fille-1', 'cheveux-fille-2', 'ballon',
+      'corde', 'banc'
+    ];
+    expect(gelees.length).toBe(30);
+    for (const id of gelees) expect(regionsColoriables).toContain(id);
+    expect([...regionsColoriables].filter((id) => !gelees.includes(id))).toEqual(['tableau']);
+    expect(regionsColoriables.size).toBe(31);
   });
 
   it('aucune région n’est déclarée deux fois', () => {

@@ -1,0 +1,10 @@
+{
+  "id": "clairiere-05",
+  "region": "clairiere",
+  "ordre": 5,
+  "exercice": "clairiere-guirlande-phrase-01",
+  "prerequis": [
+    "clairiere-04"
+  ],
+  "temps": "maitrise"
+}

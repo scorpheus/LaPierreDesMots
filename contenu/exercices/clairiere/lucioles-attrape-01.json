@@ -1,0 +1,126 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Sixième et dernier nœud de La Clairière (lot N8). Il ferme la sortie de la région sur un geste rapide et joyeux, après cinq nœuds de lecture posée : R14 veut qu'une session finisse sur une réussite, et `attrape` est le moteur où la réussite s'entend. Le vocabulaire est celui du lexique CE1 déclaré dans `scripts/generer-phonologie.mjs` — chaque mot y a été inscrit par un adulte, et `node scripts/valider-brouillons.mjs` le vérifie. `bonne: false` sur deux lucioles : sans intrus, il n'y a rien à lire, on attrape tout.",
+  "id": "clairiere-lucioles-attrape-01",
+  "version": 1,
+  "titre": "Les lucioles à attraper",
+  "competences": ["lex.couleur", "comp.consigne.simple"],
+  "difficulte": 2,
+  "jeu": {
+    "moteur": "attrape",
+    "habillage": "clairiere.lucioles",
+    "noeud": "clairiere-06",
+    "etoiles": { "sansAide": true, "sansErreur": true },
+    "aideGobi": ["relire-consigne", "souffle-syllabe", "montre-couleur"],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Attrape les lucioles où tu lis le mot bleu.",
+          "forme": "imperative",
+          "audio": null,
+          "aAttraper": ["luciole-bleu-un", "luciole-bleu-deux"],
+          "motsCles": ["attrape", "luciole", "bleu"]
+        },
+        {
+          "id": "c2",
+          "texte": "Attrape les lucioles où tu lis le mot vert.",
+          "forme": "imperative",
+          "audio": null,
+          "aAttraper": ["luciole-vert-un", "luciole-vert-deux"],
+          "motsCles": ["attrape", "luciole", "vert"]
+        },
+        {
+          "id": "c3",
+          "texte": "Attrape la luciole où tu lis le mot rouge.",
+          "forme": "imperative",
+          "audio": null,
+          "aAttraper": ["luciole-rouge"],
+          "motsCles": ["attrape", "luciole", "rouge"]
+        },
+        {
+          "id": "c4",
+          "texte": "Attrape la luciole où tu lis le mot jaune.",
+          "forme": "imperative",
+          "audio": null,
+          "aAttraper": ["luciole-jaune"],
+          "motsCles": ["attrape", "luciole", "jaune"]
+        }
+      ],
+      "cibles": [
+        {
+          "id": "luciole-bleu-un",
+          "libelle": "la luciole qui porte le mot bleu",
+          "bonne": true,
+          "asset": null,
+          "depart": [120, 120],
+          "taille": [150, 150],
+          "confusionAvec": "blanc"
+        },
+        {
+          "id": "luciole-bleu-deux",
+          "libelle": "la deuxième luciole qui porte le mot bleu",
+          "bonne": true,
+          "asset": null,
+          "depart": [320, 380],
+          "taille": [150, 150],
+          "confusionAvec": "blanc"
+        },
+        {
+          "id": "luciole-vert-un",
+          "libelle": "la luciole qui porte le mot vert",
+          "bonne": true,
+          "asset": null,
+          "depart": [520, 120],
+          "taille": [150, 150],
+          "confusionAvec": "ver"
+        },
+        {
+          "id": "luciole-vert-deux",
+          "libelle": "la deuxième luciole qui porte le mot vert",
+          "bonne": true,
+          "asset": null,
+          "depart": [720, 380],
+          "taille": [150, 150],
+          "confusionAvec": "ver"
+        },
+        {
+          "id": "luciole-rouge",
+          "libelle": "la luciole qui porte le mot rouge",
+          "bonne": true,
+          "asset": null,
+          "depart": [120, 380],
+          "taille": [150, 150],
+          "confusionAvec": "rose"
+        },
+        {
+          "id": "luciole-jaune",
+          "libelle": "la luciole qui porte le mot jaune",
+          "bonne": true,
+          "asset": null,
+          "depart": [720, 120],
+          "taille": [150, 150],
+          "confusionAvec": "jeune"
+        },
+        {
+          "id": "luciole-rose",
+          "libelle": "la luciole qui porte le mot rose",
+          "bonne": false,
+          "asset": null,
+          "depart": [320, 120],
+          "taille": [150, 150],
+          "confusionAvec": "rouge"
+        },
+        {
+          "id": "luciole-brun",
+          "libelle": "la luciole qui porte le mot brun",
+          "bonne": false,
+          "asset": null,
+          "depart": [520, 380],
+          "taille": [150, 150],
+          "confusionAvec": "blanc"
+        }
+      ],
+      "competence": "lex.couleur"
+    }
+  }
+}
