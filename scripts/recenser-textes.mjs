@@ -137,14 +137,52 @@ function fichiersExercices(racine) {
 }
 
 /**
- * Les consignes d'un exercice, dans les DEUX formes que la coquille sait lire.
+ * L'invitation du coloriage libre, LUE DANS LE COMPOSANT QUI L'AFFICHE.
  *
- * `EcranNoeud.tsx` (`extraireEtapes`) lit `consignes: [{ id, texte }]` au pluriel ET
- * `consigne: string` / `consigneId` au singulier pour le moteur `trace`. Ce recenseur lit
- * exactement les mêmes deux formes : un objet que l'écran sait afficher et que le recenseur
- * ne verrait pas serait une consigne muette invisible au contrat de sortie.
+ * `libre` est le seul moteur sans consigne — c'est son contrat (§ 4.8) — et il affiche
+ * pourtant un texte : `INVITE_LIBRE` de `client/src/moteurs/libre/MoteurLibre.tsx`. R15 ne
+ * fait aucune exception (« aucune consigne n'existe uniquement à l'écrit »), et le contrôle
+ * de mesure de `consignes-audibles.test.ts` — « au moins une consigne par exercice » —
+ * l'exige explicitement. On la LIT plutôt que de la recopier : une recopie est une seconde
+ * source de vérité, et elle prend du retard au premier changement de mot.
+ *
+ * REFUS plutôt que faux (convention C6) : si la constante disparaît ou change de forme, on
+ * lève. Rendre une chaîne par défaut ferait synthétiser un clip que l'écran n'affiche pas.
  */
-function consignesDe(exercice) {
+export function inviteLibre(racine = RACINE_PAR_DEFAUT) {
+  const chemin = join(racine, 'client', 'src', 'moteurs', 'libre', 'MoteurLibre.tsx');
+  const source = readFileSync(chemin, 'utf8');
+  const trouve = /export const INVITE_LIBRE\s*=\s*'([^']+)'/u.exec(source);
+  if (trouve === null) {
+    throw new Error(
+      'REFUS : `export const INVITE_LIBRE = \'…\'` est introuvable dans ' +
+        'client/src/moteurs/libre/MoteurLibre.tsx. Le texte que le moteur `libre` affiche ne ' +
+        'peut plus être recensé, donc plus être rendu en voix (R15). Corriger le motif AVANT ' +
+        'de relancer `npm run voix`.',
+    );
+  }
+  return trouve[1];
+}
+
+/**
+ * Les consignes d'un exercice, dans les QUATRE formes que la coquille sait lire.
+ *
+ * `EcranNoeud.tsx` (`extraireEtapes`) lit `consignes: [{ id, texte }]` au pluriel,
+ * `consigne: string` / `consigneId` au singulier pour le moteur `trace`, `questions:
+ * [{ id, texte }]` pour le moteur `histoire`, et l'invitation du moteur `libre`. Ce
+ * recenseur lit exactement les mêmes formes : un objet que l'écran sait afficher et que le
+ * recenseur ne verrait pas serait une consigne muette invisible au contrat de sortie.
+ *
+ * ── LES DEUX FORMES AJOUTÉES PAR LE LOT A4, ET POURQUOI ELLES MANQUAIENT ─────────────────
+ * Elles ne manquaient pas par négligence : aucun exercice `histoire` ni `libre` n'existait
+ * quand ce fichier a été écrit — les deux moteurs étaient déclarés, testés, et sans contenu.
+ * C'est le mode de défaillance nommé par D48 : ce qu'aucun objet ne porte, aucun recensement
+ * ne cherche. Dès qu'un exercice `histoire` est livré, ses questions s'affichent à l'écran
+ * (`MoteurHistoire.tsx`, `ZoneDeLecture texte={question.texte}`) et R15 s'y applique
+ * exactement comme à une consigne — c'est la même correction que celle déjà payée pour
+ * `trace`, dont la consigne au singulier n'était comptée par aucun `grep`.
+ */
+function consignesDe(exercice, racine = RACINE_PAR_DEFAUT) {
   const contenu = exercice.jeu?.contenu ?? {};
 
   const unique = contenu.consigne;
@@ -158,7 +196,17 @@ function consignesDe(exercice) {
     ];
   }
 
-  const liste = Array.isArray(contenu.consignes) ? contenu.consignes : [];
+  // `libre` — pas de consigne dans les données, un texte à l'écran quand même.
+  if (exercice.jeu?.moteur === 'libre') {
+    return [{ id: 'c1', texte: inviteLibre(racine), motsCles: [] }];
+  }
+
+  // `histoire` — les QUESTIONS sont ses étapes, et chacune s'affiche en zone de lecture.
+  const liste = Array.isArray(contenu.consignes)
+    ? contenu.consignes
+    : Array.isArray(contenu.questions)
+      ? contenu.questions
+      : [];
   return liste
     .filter((c) => typeof c?.texte === 'string' && c.texte.length > 0)
     .map((c, rang) => ({
@@ -198,7 +246,7 @@ export function recenser(racine = RACINE_PAR_DEFAUT) {
     const origine = chemin.slice(racine.length + 1).replaceAll('\\', '/');
     sources.push(origine);
 
-    for (const consigne of consignesDe(exercice)) {
+    for (const consigne of consignesDe(exercice, racine)) {
       objets.push({
         cle: `${exercice.id}/${consigne.id}`,
         texte: consigne.texte,

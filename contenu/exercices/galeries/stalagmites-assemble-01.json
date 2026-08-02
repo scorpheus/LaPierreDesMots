@@ -1,0 +1,58 @@
+{
+  "$commentaire": "PLACEHOLDER — À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Lot A4 : le moteur `assemble` était déclaré, testé, monté dans le registre, et AUCUN exercice ne le citait — donc inatteignable par l'enfant (mesuré par `tests/e2e/parcours-audit-moteurs.spec.ts`, 8 moteurs joués sur 14). Trois contraintes MESURÉES dans le code, pas supposées : (1) `partage/src/moteurs/assemble/moteur.ts` ne remet jamais `acquis` à zéro entre deux consignes — un bloc réutilisé d'un mot à l'autre serait refusé en `bloc-deja-pose`, motif qui ne compte PAS d'erreur et ne libère rien : l'exercice deviendrait interminable, un état sans issue. Les sept blocs utiles sont donc deux à deux distincts. (2) Le découpage syllabique n'est pas inventé : il est celui que rend `decouperSyllabes` de `partage/src/lecture/syllabation.ts` sur les trois mots — do·mi·no, ba·teau, bal·lon. (3) Le référentiel de compétences est un objet protégé (annexe P § 6.4) et ne porte aucun code de syllabation (point ouvert O10) : l'exercice déclare donc `gph.miroir.gauche-droite`, qui est ce qu'il travaille réellement — les deux intrus `bo` et `da` ne se distinguent des blocs justes `do` et `ba` que par l'axe b/d de D23. Les trois mots sont dans le lexique CE1 de `scripts/generer-phonologie.mjs`. `modeReponse` de chaque étape : `ordre` (1/n!, calculé au BKT depuis le nombre de blocs, D13).",
+  "id": "galeries-stalagmites-assemble-01",
+  "version": 1,
+  "titre": "Les stalagmites à empiler",
+  "competences": ["gph.miroir.gauche-droite"],
+  "difficulte": 3,
+  "jeu": {
+    "moteur": "assemble",
+    "habillage": "galeries.stalagmites",
+    "noeud": "galeries-07",
+    "etoiles": { "sansAide": true, "sansErreur": true },
+    "aideGobi": ["relire-consigne", "souffle-syllabe", "surligne-graphene", "montre-cible"],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Range les syllabes pour écrire : domino.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "domino",
+          "solution": ["bloc-do", "bloc-mi", "bloc-no"],
+          "motsCles": ["range", "syllabe", "domino"]
+        },
+        {
+          "id": "c2",
+          "texte": "Range les syllabes pour écrire : bateau.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "bateau",
+          "solution": ["bloc-ba", "bloc-teau"],
+          "motsCles": ["range", "syllabe", "bateau"]
+        },
+        {
+          "id": "c3",
+          "texte": "Range les syllabes pour écrire : ballon.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "ballon",
+          "solution": ["bloc-bal", "bloc-lon"],
+          "motsCles": ["range", "syllabe", "ballon"]
+        }
+      ],
+      "blocs": [
+        { "id": "bloc-do", "libelle": "do", "intrus": false, "confusionAvec": "bo" },
+        { "id": "bloc-mi", "libelle": "mi", "intrus": false, "confusionAvec": null },
+        { "id": "bloc-no", "libelle": "no", "intrus": false, "confusionAvec": null },
+        { "id": "bloc-ba", "libelle": "ba", "intrus": false, "confusionAvec": "da" },
+        { "id": "bloc-teau", "libelle": "teau", "intrus": false, "confusionAvec": null },
+        { "id": "bloc-bal", "libelle": "bal", "intrus": false, "confusionAvec": "dal" },
+        { "id": "bloc-lon", "libelle": "lon", "intrus": false, "confusionAvec": null },
+        { "id": "bloc-bo", "libelle": "bo", "intrus": true, "confusionAvec": "do" },
+        { "id": "bloc-da", "libelle": "da", "intrus": true, "confusionAvec": "ba" }
+      ],
+      "competence": "gph.miroir.gauche-droite"
+    }
+  }
+}

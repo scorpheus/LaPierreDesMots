@@ -1,0 +1,57 @@
+{
+  "$commentaire": "PLACEHOLDER — À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Lot A4 : le moteur `histoire` n'avait aucun exercice. C'est LE fichier où `modeReponse` se déclare ÉTAPE PAR ÉTAPE, et c'est mesurable : `modeReponseHistoire(contenu, index)` déduit le mode du nombre d'options de CHAQUE question — 2 options donnent `vrai-faux` (p_devinette 0,50), 3 donnent `qcm-3` (0,33). Cet exercice rend donc, dans l'ordre, `vrai-faux`, `qcm-3`, `qcm-3`. Un seul vrai/faux, et il est le premier : c'est la question d'entrée, celle dont la réussite doit être quasi certaine ; les deux suivantes portent l'information, conformément à D13 qui nomme le vrai/faux comme le format le moins informatif. Le vrai/faux n'a pas de moteur à lui (contrat features v2 § 8, n° 6) : il se retire d'une ligne de contenu, et c'est exactement pour cela qu'il n'y en a qu'un. DEUX contraintes mesurées : (1) `acquis` n'est jamais remis à zéro — la bonne réponse de chaque question est donc une option DISTINCTE (`q1-oui`, `q2-bleu`, `q3-rouge`), sans quoi la seconde serait refusée en `question-deja-repondue` et l'exercice deviendrait interminable ; (2) le récit reste consultable pendant les questions (`recitVisible`, action `basculerRecit`) et relire est GRATUIT (R15) — le texte n'est jamais retiré à un enfant qui déchiffre encore (D14). Récit de 6 phrases courtes, vocabulaire du lexique CE1 de `scripts/generer-phonologie.mjs`.",
+  "id": "galeries-echo-conte-histoire-01",
+  "version": 1,
+  "titre": "Le cristal bleu",
+  "competences": ["lex.couleur", "comp.consigne.simple"],
+  "difficulte": 3,
+  "jeu": {
+    "moteur": "histoire",
+    "habillage": "galeries.echo-conte",
+    "noeud": "galeries-10",
+    "etoiles": { "sansAide": true, "sansErreur": true },
+    "aideGobi": ["relire-consigne", "souffle-syllabe", "montre-couleur"],
+    "contenu": {
+      "titre": "Le cristal bleu",
+      "recit": "Gobi entre dans la grotte. Il a une lampe. Il voit un cristal bleu. Il voit aussi un cristal rouge. Le cristal bleu est petit. Le cristal rouge est gros.",
+      "audioRecit": null,
+      "questions": [
+        {
+          "id": "c1",
+          "texte": "Gobi a une lampe.",
+          "audio": null,
+          "options": ["q1-oui", "q1-non"],
+          "reponse": "q1-oui",
+          "motsCles": ["Gobi", "lampe"]
+        },
+        {
+          "id": "c2",
+          "texte": "Trouve le petit cristal.",
+          "audio": null,
+          "options": ["q2-bleu", "q2-rouge", "q2-vert"],
+          "reponse": "q2-bleu",
+          "motsCles": ["trouve", "cristal", "petit"]
+        },
+        {
+          "id": "c3",
+          "texte": "Trouve le gros cristal.",
+          "audio": null,
+          "options": ["q3-rouge", "q3-bleu", "q3-noir"],
+          "reponse": "q3-rouge",
+          "motsCles": ["trouve", "cristal", "gros"]
+        }
+      ],
+      "options": [
+        { "id": "q1-oui", "libelle": "oui", "confusionAvec": null },
+        { "id": "q1-non", "libelle": "non", "confusionAvec": "oui" },
+        { "id": "q2-bleu", "libelle": "le cristal bleu", "confusionAvec": null },
+        { "id": "q2-rouge", "libelle": "le cristal rouge", "confusionAvec": "le cristal bleu" },
+        { "id": "q2-vert", "libelle": "le cristal vert", "confusionAvec": "le cristal bleu" },
+        { "id": "q3-rouge", "libelle": "le cristal rouge", "confusionAvec": null },
+        { "id": "q3-bleu", "libelle": "le cristal bleu", "confusionAvec": "le cristal rouge" },
+        { "id": "q3-noir", "libelle": "le cristal noir", "confusionAvec": "le cristal rouge" }
+      ],
+      "competence": "lex.couleur"
+    }
+  }
+}

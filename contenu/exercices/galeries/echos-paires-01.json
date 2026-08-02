@@ -1,0 +1,46 @@
+{
+  "$commentaire": "PLACEHOLDER — À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Lot A4 : le moteur `paires` n'avait aucun exercice. Trois contraintes MESURÉES : (1) chaque valeur de `paire` porte EXACTEMENT deux cartes — le schéma ne sait pas compter, et une paire orpheline rendrait l'exercice interminable, un état sans issue (en-tête de `partage/src/moteurs/paires/schema-contenu.ts`, test `singe`). Quatre paires, huit cartes, deux par paire. (2) `acquis` est indexé par `IdPaire` et n'est jamais remis à zéro : les deux consignes portent donc des paires DISJOINTES, sans quoi la seconde serait refusée en `carte-deja-appariee`. (3) Retourner la PREMIÈRE carte ne juge rien et ne coûte rien : la validation n'a lieu qu'au second tap, et une paire fausse ne fait qu'un refus sans rouge (R14). Les quatre mots — bol, dos, banc, dent — sont dans le lexique CE1 de `scripts/generer-phonologie.mjs` et opposent b à d, l'axe gauche-droite de D23. LIMITE CONNUE ET ASSUMÉE : `client/src/moteurs/paires/MoteurPaires.tsx` rend le `libelle` de toutes les cartes en clair, faute d'asset dessiné (`asset` vaut `null` partout, D2). L'appariement reste une tâche de LECTURE — il faut lire « bol » et « le bol » —, mais ce n'est pas encore un memory à cartes retournées. Question consignée dans `Docs/questions-en-attente.md`. `modeReponse` de chaque étape : `appariement` (1/n!, calculé au BKT, D13).",
+  "id": "galeries-echos-paires-01",
+  "version": 1,
+  "titre": "Les cristaux qui se répondent",
+  "competences": ["gph.miroir.gauche-droite"],
+  "difficulte": 3,
+  "jeu": {
+    "moteur": "paires",
+    "habillage": "galeries.echos",
+    "noeud": "galeries-11",
+    "etoiles": { "sansAide": true, "sansErreur": true },
+    "aideGobi": ["relire-consigne", "souffle-syllabe", "surligne-graphene", "montre-cible"],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Trouve le mot et son image.",
+          "forme": "imperative",
+          "audio": null,
+          "aApparier": ["paire-bol", "paire-dos"],
+          "motsCles": ["trouve", "mot", "image"]
+        },
+        {
+          "id": "c2",
+          "texte": "Trouve aussi le mot et son image.",
+          "forme": "imperative",
+          "audio": null,
+          "aApparier": ["paire-banc", "paire-dent"],
+          "motsCles": ["trouve", "mot", "image"]
+        }
+      ],
+      "cartes": [
+        { "id": "mot-bol", "libelle": "bol", "face": "mot", "asset": null, "paire": "paire-bol" },
+        { "id": "image-bol", "libelle": "le bol", "face": "image", "asset": null, "paire": "paire-bol" },
+        { "id": "mot-dos", "libelle": "dos", "face": "mot", "asset": null, "paire": "paire-dos" },
+        { "id": "image-dos", "libelle": "le dos", "face": "image", "asset": null, "paire": "paire-dos" },
+        { "id": "mot-banc", "libelle": "banc", "face": "mot", "asset": null, "paire": "paire-banc" },
+        { "id": "image-banc", "libelle": "le banc", "face": "image", "asset": null, "paire": "paire-banc" },
+        { "id": "mot-dent", "libelle": "dent", "face": "mot", "asset": null, "paire": "paire-dent" },
+        { "id": "image-dent", "libelle": "la dent", "face": "image", "asset": null, "paire": "paire-dent" }
+      ],
+      "competence": "gph.miroir.gauche-droite"
+    }
+  }
+}

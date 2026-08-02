@@ -1,0 +1,10 @@
+{
+  "id": "galeries-08",
+  "region": "galeries",
+  "ordre": 8,
+  "exercice": "galeries-passage-chemin-01",
+  "prerequis": [
+    "galeries-07"
+  ],
+  "temps": "developpement"
+}

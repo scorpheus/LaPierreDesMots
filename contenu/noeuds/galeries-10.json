@@ -1,0 +1,10 @@
+{
+  "id": "galeries-10",
+  "region": "galeries",
+  "ordre": 10,
+  "exercice": "galeries-echo-conte-histoire-01",
+  "prerequis": [
+    "galeries-09"
+  ],
+  "temps": "developpement"
+}

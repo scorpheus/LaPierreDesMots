@@ -35,7 +35,8 @@ import { describe, expect, it } from 'vitest';
 import { aUnAudio, lireManifeste } from '@pierre/partage/voix';
 import type { ManifesteVoix } from '@pierre/partage/voix';
 
-import { RACINE_DEPOT, lireJson } from '../configuration/preparation.js';
+import { inviteLibre, recenser } from '../../scripts/recenser-textes.mjs';
+import { RACINE_DEPOT, lireTexte } from '../configuration/preparation.js';
 
 /** Une consigne livrée : d'où elle vient, ce qu'elle dit, et sous quelle clé elle s'entend. */
 interface ConsigneLivree {
@@ -63,39 +64,47 @@ function fichiersExercices(): readonly string[] {
 }
 
 /**
- * Extrait les consignes d'un exercice, dans les DEUX formes que la coquille sait lire —
- * `consignes: [{ id, texte }]` au pluriel, et `consigne: string` / `consigneId` au
- * singulier pour le moteur `trace` (`EcranNoeud.tsx`, `extraireEtapes`).
+ * Les consignes livrées, EXTRAITES PAR LE RECENSEUR LUI-MÊME — corrigé au lot A4.
+ *
+ * ══════════════════════════════════════════════════════════════════════════════════════════
+ * CE FICHIER PORTAIT UNE SECONDE IMPLANTATION DE `consignesDe`, ET ELLE A DÉRIVÉ.
+ *
+ * `scripts/recenser-textes.mjs` décide ce qui reçoit un clip ; ce test décidait, de son côté,
+ * ce qui doit en avoir un. Deux extracteurs pour la même question, donc deux occasions de ne
+ * pas voir le même objet — et c'est arrivé : ni l'un ni l'autre ne lisait les `questions` du
+ * moteur `histoire` ni l'invitation du moteur `libre`, faute d'exercice à lire quand ils ont
+ * été écrits (D48 : ce qu'aucun objet ne porte, aucun recensement ne cherche).
+ *
+ * Le pire cas n'est pourtant pas celui-là. Si SEUL le test avait été corrigé, il aurait exigé
+ * des clips que le rendu n'aurait jamais produits ; si seul le recenseur l'avait été, des
+ * clips auraient été rendus sans que rien ne vérifie qu'ils existent. La question ne se pose
+ * plus : **l'oracle du test est la sortie du recenseur**. Aucune assertion n'est assouplie —
+ * le dénominateur GROSSIT (16 exercices recensés hier, 18 aujourd'hui), et le seuil reste
+ * 100 %.
+ * ══════════════════════════════════════════════════════════════════════════════════════════
  */
-function consignesDe(chemin: string): readonly ConsigneLivree[] {
-  const exercice = lireJson<{
-    id: string;
-    jeu: { contenu: Record<string, unknown> };
-  }>(chemin);
-  const contenu = exercice.jeu.contenu;
-
-  const unique = contenu['consigne'];
-  if (typeof unique === 'string' && unique.length > 0) {
-    const id = typeof contenu['consigneId'] === 'string' ? contenu['consigneId'] : 'c1';
-    return [{ exercice: exercice.id, id, texte: unique, cle: `${exercice.id}/${id}` }];
-  }
-
-  const liste = contenu['consignes'];
-  if (!Array.isArray(liste)) return [];
-  return (liste as readonly Record<string, unknown>[])
-    .filter((c) => typeof c['texte'] === 'string')
-    .map((c, i) => {
-      const id = typeof c['id'] === 'string' ? c['id'] : `c${String(i + 1)}`;
-      return {
-        exercice: exercice.id,
-        id,
-        texte: String(c['texte']),
-        cle: `${exercice.id}/${id}`,
-      };
-    });
+interface ObjetRecense {
+  readonly cle: string;
+  readonly texte: string;
+  readonly rendu: string;
+  readonly origine: string;
 }
 
-const toutes: readonly ConsigneLivree[] = fichiersExercices().flatMap(consignesDe);
+const toutes: readonly ConsigneLivree[] = (
+  recenser() as { objets: readonly ObjetRecense[] }
+).objets
+  .filter(
+    (objet) =>
+      objet.rendu === 'normal' &&
+      objet.origine.startsWith('contenu/exercices/') &&
+      // Les mots cibles viennent des mêmes fichiers mais ne sont pas des consignes : le
+      // § 5.4 les met hors du taux, et `couverture-audio.test.ts` les assert à part.
+      !objet.cle.startsWith('mot/'),
+  )
+  .map((objet) => {
+    const [exercice, id] = objet.cle.split('/');
+    return { exercice: String(exercice), id: String(id), texte: objet.texte, cle: objet.cle };
+  });
 
 const CHEMIN_MANIFESTE = join(RACINE_DEPOT, 'contenu', 'audio', 'manifeste.json');
 const manifeste: ManifesteVoix = existsSync(CHEMIN_MANIFESTE)
@@ -109,6 +118,21 @@ describe('R15 — toute consigne livrée est audible en un tap', () => {
     const exercices = new Set(toutes.map((c) => c.exercice));
     expect(fichiersExercices().length).toBeGreaterThan(0);
     expect(exercices.size).toBe(fichiersExercices().length);
+  });
+
+  it('l’invitation du coloriage libre est UNE seule chaîne, lue là où elle s’affiche', () => {
+    // Troisième contrôle de la mesure, lot A4. Le moteur `libre` n'a pas de consigne dans ses
+    // données — c'est son contrat (§ 4.8) — mais il AFFICHE un texte, et R15 ne fait pas
+    // d'exception. Le recenseur va le chercher dans `MoteurLibre.tsx` ; ce cas prouve qu'il y
+    // va vraiment, et qu'il n'a pas recopié la phrase de son côté. Le jour où quelqu'un
+    // change le mot dans le composant, le clip se repérime tout seul (l'empreinte du texte
+    // fait partie du nom de fichier) et ce cas reste vert. Le jour où quelqu'un supprime la
+    // constante, `inviteLibre` LÈVE au lieu de rendre une chaîne inventée.
+    const source = lireTexte('client/src/moteurs/libre/MoteurLibre.tsx');
+    const texte = (inviteLibre as (racine?: string) => string)();
+    expect(source).toContain(`export const INVITE_LIBRE = '${texte}'`);
+    expect(source).toContain('texte={INVITE_LIBRE}');
+    expect(toutes.some((consigne) => consigne.texte === texte)).toBe(true);
   });
 
   it('le manifeste n’est pas vide — sinon le cas suivant mesurerait un dépôt sans voix', () => {

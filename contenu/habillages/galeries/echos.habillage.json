@@ -1,0 +1,106 @@
+{
+  "id": "galeries.echos",
+  "moteurs": [
+    "paires"
+  ],
+  "libelle": "Les cristaux qui se répondent",
+  "region": "galeries",
+  "scene": {
+    "fichier": "habillages/galeries/echos.svg",
+    "viewBox": "0 0 960 600",
+    "calques": [
+      {
+        "id": "calque-fond",
+        "role": "fond",
+        "regions": []
+      },
+      {
+        "id": "calque-zones",
+        "role": "coloriable",
+        "regions": [
+          {
+            "id": "cristal-echo-un",
+            "libelle": "le premier cristal",
+            "centroide": [
+              190,
+              190
+            ],
+            "surface": 32000
+          },
+          {
+            "id": "cristal-echo-deux",
+            "libelle": "le deuxième cristal",
+            "centroide": [
+              480,
+              190
+            ],
+            "surface": 32000
+          },
+          {
+            "id": "cristal-echo-trois",
+            "libelle": "le troisième cristal",
+            "centroide": [
+              770,
+              190
+            ],
+            "surface": 32000
+          },
+          {
+            "id": "cristal-echo-quatre",
+            "libelle": "le quatrième cristal",
+            "centroide": [
+              190,
+              420
+            ],
+            "surface": 32000
+          },
+          {
+            "id": "niche-des-echos",
+            "libelle": "la niche des échos",
+            "centroide": [
+              480,
+              420
+            ],
+            "surface": 32000
+          },
+          {
+            "id": "tapis-de-sable",
+            "libelle": "le tapis de sable",
+            "centroide": [
+              770,
+              420
+            ],
+            "surface": 32000
+          }
+        ]
+      },
+      {
+        "id": "calque-trait",
+        "role": "trait",
+        "regions": []
+      }
+    ]
+  },
+  "palette": {
+    "jetons": {},
+    "nuancier": [
+      "violet",
+      "bleu",
+      "gris",
+      "blanc",
+      "brun",
+      "noir"
+    ]
+  },
+  "timings": {
+    "appuiMs": 60,
+    "relachementMs": 120,
+    "refusMs": 180,
+    "recolorationMs": 800,
+    "interEtoilesMs": 180
+  },
+  "sons": {
+    "ambiance": null,
+    "effets": {}
+  }
+}

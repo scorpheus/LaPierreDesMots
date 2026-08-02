@@ -1,0 +1,96 @@
+{
+  "$commentaire": "PLACEHOLDER — À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Lot A4 : le moteur `chemin` n'avait aucun exercice. Quatre contraintes MESURÉES : (1) `voisines` doit être SYMÉTRIQUE — le schéma ne sait pas l'exprimer et un plateau asymétrique ferait un cul-de-sac invisible (en-tête de `partage/src/moteurs/chemin/schema-contenu.ts`). Les huit pierres forment deux rangées de quatre, reliées deux à deux, et chaque relation est écrite dans les deux sens. (2) `modeReponseChemin` DÉRIVE le mode du branchement réel : le plus grand nombre de voisines vaut 3 ici, donc `qcm-3`, donc p_devinette 0,33 (D13). Un couloir à deux voisines aurait donné `vrai-faux` à 0,50, le format que D13 nomme comme le moins informatif — c'est pour cela que le plateau a des embranchements. (3) `acquis` n'est jamais remis à zéro entre deux consignes : les deux parcours sont donc DISJOINTS, et les deux cases de départ (`pierre-bol`, `pierre-dos`) n'entrent dans aucun parcours. (4) Une case hors de portée est ignorée sans bruit et sans erreur (`case-non-adjacente`, `REFUS_CHEMIN_COMPTE_ERREUR` à `false`) : le geste n'est jamais puni, seule la LECTURE l'est (R16). Les huit mots sont dans le lexique CE1 de `scripts/generer-phonologie.mjs` et opposent b à d sur l'axe gauche-droite de D23.",
+  "id": "galeries-passage-chemin-01",
+  "version": 1,
+  "titre": "Le passage aux pierres plates",
+  "competences": ["gph.miroir.gauche-droite"],
+  "difficulte": 3,
+  "jeu": {
+    "moteur": "chemin",
+    "habillage": "galeries.passage",
+    "noeud": "galeries-08",
+    "etoiles": { "sansAide": true, "sansErreur": true },
+    "aideGobi": ["relire-consigne", "souffle-syllabe", "surligne-graphene", "montre-cible"],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Marche sur les mots où tu lis un b.",
+          "forme": "imperative",
+          "audio": null,
+          "depart": "pierre-bol",
+          "parcours": ["pierre-bille", "pierre-banc", "pierre-boule"],
+          "motsCles": ["marche", "mots", "lis"]
+        },
+        {
+          "id": "c2",
+          "texte": "Marche sur les mots où tu lis un d.",
+          "forme": "imperative",
+          "audio": null,
+          "depart": "pierre-dos",
+          "parcours": ["pierre-dent", "pierre-dame", "pierre-dalle"],
+          "motsCles": ["marche", "mots", "lis"]
+        }
+      ],
+      "cases": [
+        {
+          "id": "pierre-bol",
+          "libelle": "bol",
+          "position": [120, 180],
+          "voisines": ["pierre-bille", "pierre-dos"],
+          "confusionAvec": "dos"
+        },
+        {
+          "id": "pierre-bille",
+          "libelle": "bille",
+          "position": [340, 180],
+          "voisines": ["pierre-bol", "pierre-banc", "pierre-dent"],
+          "confusionAvec": "dent"
+        },
+        {
+          "id": "pierre-banc",
+          "libelle": "banc",
+          "position": [560, 180],
+          "voisines": ["pierre-bille", "pierre-boule", "pierre-dame"],
+          "confusionAvec": "dame"
+        },
+        {
+          "id": "pierre-boule",
+          "libelle": "boule",
+          "position": [780, 180],
+          "voisines": ["pierre-banc", "pierre-dalle"],
+          "confusionAvec": "dalle"
+        },
+        {
+          "id": "pierre-dos",
+          "libelle": "dos",
+          "position": [120, 420],
+          "voisines": ["pierre-dent", "pierre-bol"],
+          "confusionAvec": "bol"
+        },
+        {
+          "id": "pierre-dent",
+          "libelle": "dent",
+          "position": [340, 420],
+          "voisines": ["pierre-dos", "pierre-dame", "pierre-bille"],
+          "confusionAvec": "bille"
+        },
+        {
+          "id": "pierre-dame",
+          "libelle": "dame",
+          "position": [560, 420],
+          "voisines": ["pierre-dent", "pierre-dalle", "pierre-banc"],
+          "confusionAvec": "banc"
+        },
+        {
+          "id": "pierre-dalle",
+          "libelle": "dalle",
+          "position": [780, 420],
+          "voisines": ["pierre-dame", "pierre-boule"],
+          "confusionAvec": "boule"
+        }
+      ],
+      "competence": "gph.miroir.gauche-droite"
+    }
+  }
+}

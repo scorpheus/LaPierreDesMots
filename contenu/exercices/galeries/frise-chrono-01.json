@@ -1,0 +1,60 @@
+{
+  "$commentaire": "PLACEHOLDER — À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Lot A4 : le moteur `chrono` n'avait aucun exercice. Trois choix MESURÉS : (1) quatre vignettes et non cinq — le corpus dit « Numérote de 1 à 5 » (niveau 5) et le schéma borne `ordre` à 5, mais l'enfant DÉCHIFFRE ENCORE (D14) : chaque vignette est une phrase à lire, quatre phrases sont déjà un texte. (2) `acquis` n'est jamais remis à zéro entre deux consignes : une seule consigne, donc aucune vignette réutilisée, donc aucun `vignette-deja-numerotee`. (3) La compétence déclarée est `comp.consigne.simple` et non un code de chronologie : le référentiel est un objet protégé (annexe P § 6.4) et n'en porte aucun — le point ouvert O10 reste ouvert, et inventer un code ici l'aurait masqué. `comp.consigne.multiple` a été ÉCARTÉE bien qu'elle décrive mieux l'exercice : elle a `comp.consigne.simple` en prérequis, et `competenceEligible` (partage/src/pedagogie/selecteur.ts) écarte des sorties tout nœud dont un prérequis est sous 60 % — sur un profil neuf, ce nœud aurait été inatteignable, c'est-à-dire exactement le défaut que ce lot répare. `modeReponse` de l'étape : `ordre` (1/n!, calculé au BKT, D13). Le vocabulaire est celui du lexique CE1 de `scripts/generer-phonologie.mjs`.",
+  "id": "galeries-frise-chrono-01",
+  "version": 1,
+  "titre": "La frise gravée",
+  "competences": ["comp.consigne.simple"],
+  "difficulte": 3,
+  "jeu": {
+    "moteur": "chrono",
+    "habillage": "galeries.frise",
+    "noeud": "galeries-09",
+    "etoiles": { "sansAide": true, "sansErreur": true },
+    "aideGobi": ["relire-consigne", "souffle-syllabe", "montre-cible"],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Range les images dans l’ordre de l’histoire.",
+          "forme": "imperative",
+          "audio": null,
+          "recit": "Gobi entre dans la grotte. Il a une lampe. Il voit un cristal bleu. Gobi montre le cristal.",
+          "ordre": [
+            "vignette-entre",
+            "vignette-lampe",
+            "vignette-cristal",
+            "vignette-montre"
+          ],
+          "motsCles": ["range", "images", "ordre", "histoire"]
+        }
+      ],
+      "vignettes": [
+        {
+          "id": "vignette-entre",
+          "libelle": "Gobi entre dans la grotte.",
+          "asset": null,
+          "taille": [220, 160]
+        },
+        {
+          "id": "vignette-lampe",
+          "libelle": "Il a une lampe.",
+          "asset": null,
+          "taille": [220, 160]
+        },
+        {
+          "id": "vignette-cristal",
+          "libelle": "Il voit un cristal bleu.",
+          "asset": null,
+          "taille": [220, 160]
+        },
+        {
+          "id": "vignette-montre",
+          "libelle": "Gobi montre le cristal.",
+          "asset": null,
+          "taille": [220, 160]
+        }
+      ],
+      "competence": "comp.consigne.simple"
+    }
+  }
+}

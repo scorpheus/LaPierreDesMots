@@ -22,6 +22,7 @@ import { BoutonEcouter } from '../composants/BoutonEcouter.js';
 import { JaugePalier } from '../composants/JaugePalier.js';
 import { variablesHabillage } from '../habillages/chargeur.js';
 import { useEtatJeu, useMagasin, useServices } from '../etat/services.js';
+import { INVITE_LIBRE } from '../moteurs/libre/MoteurLibre.js';
 import { obtenirRendu } from '../moteurs/registre-rendu.js';
 import type { ComposantMoteur } from '../moteurs/types.js';
 import { reveillerAudio } from '../services/audio-tone.js';
@@ -73,11 +74,24 @@ const RANG_AIDE: Readonly<Record<string, number>> = {
  * sans exception : un moteur dont le contenu ne porte pas de `consignes` rend simplement une
  * barre vide. Signalé au rapport du lot L-D.
  */
-function extraireEtapes(contenu: unknown): readonly EtapeAffichable[] {
+function extraireEtapes(contenu: unknown, moteur: string): readonly EtapeAffichable[] {
   if (typeof contenu !== 'object' || contenu === null) {
     return [];
   }
   const racine = contenu as Record<string, unknown>;
+
+  // ───────────────────────────────────────────────────────────────────────────────────────
+  // L'INVITATION DU COLORIAGE LIBRE — ajout du lot A4, et c'est le MÊME défaut que `trace`.
+  //
+  // `libre` n'a pas de consigne dans ses données : c'est son contrat (§ 4.8). Il affiche
+  // pourtant un texte — `INVITE_LIBRE`, en zone de lecture —, et R15 ne fait pas d'exception
+  // pour lui : « aucune consigne n'existe uniquement à l'écrit, tout est audible en un tap ».
+  // Sans cette branche, `etapeCourante` vaut `null` et le bouton « Écouter » n'est pas rendu
+  // du tout, exactement comme sur les nœuds `trace` avant la correction du lot L-D.
+  // ───────────────────────────────────────────────────────────────────────────────────────
+  if (moteur === 'libre') {
+    return [{ id: 'c1', texte: INVITE_LIBRE, audio: null }];
+  }
 
   // ───────────────────────────────────────────────────────────────────────────────────────
   // LA CONSIGNE UNIQUE — le moteur `trace` (L2-C) et lui seul.
@@ -111,7 +125,15 @@ function extraireEtapes(contenu: unknown): readonly EtapeAffichable[] {
     ];
   }
 
-  const consignes = racine['consignes'];
+  // ───────────────────────────────────────────────────────────────────────────────────────
+  // LES QUESTIONS DU MOTEUR `histoire` — ajout du lot A4, troisième forme.
+  //
+  // Son `jeu.contenu` porte `questions: [{ id, texte }]` et non `consignes` : chaque question
+  // est une étape, elle s'affiche en zone de lecture (`MoteurHistoire.tsx`), et elle doit
+  // donc être audible. Aucune n'est devinée : `questions`, `id` et `texte` sont les noms du
+  // schéma que le moteur publie lui-même (`partage/src/moteurs/histoire/schema-contenu.ts`).
+  // ───────────────────────────────────────────────────────────────────────────────────────
+  const consignes = racine['consignes'] ?? racine['questions'];
   if (!Array.isArray(consignes)) {
     return [];
   }
@@ -329,7 +351,7 @@ export function EcranNoeud(): ReactElement {
   );
 
   const etapes = useMemo(
-    () => (paquet === null ? [] : extraireEtapes(paquet.exercice.jeu.contenu)),
+    () => (paquet === null ? [] : extraireEtapes(paquet.exercice.jeu.contenu, paquet.exercice.jeu.moteur)),
     [paquet]
   );
 

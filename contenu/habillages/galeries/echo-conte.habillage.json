@@ -1,0 +1,106 @@
+{
+  "id": "galeries.echo-conte",
+  "moteurs": [
+    "histoire"
+  ],
+  "libelle": "La salle des échos",
+  "region": "galeries",
+  "scene": {
+    "fichier": "habillages/galeries/echo-conte.svg",
+    "viewBox": "0 0 960 600",
+    "calques": [
+      {
+        "id": "calque-fond",
+        "role": "fond",
+        "regions": []
+      },
+      {
+        "id": "calque-zones",
+        "role": "coloriable",
+        "regions": [
+          {
+            "id": "voute-des-echos",
+            "libelle": "la voûte des échos",
+            "centroide": [
+              190,
+              190
+            ],
+            "surface": 32000
+          },
+          {
+            "id": "banc-de-pierre",
+            "libelle": "le banc de pierre",
+            "centroide": [
+              480,
+              190
+            ],
+            "surface": 32000
+          },
+          {
+            "id": "cristal-du-conte",
+            "libelle": "le cristal du conte",
+            "centroide": [
+              770,
+              190
+            ],
+            "surface": 32000
+          },
+          {
+            "id": "lampe-du-conte",
+            "libelle": "la lampe du conte",
+            "centroide": [
+              190,
+              420
+            ],
+            "surface": 32000
+          },
+          {
+            "id": "flaque-des-echos",
+            "libelle": "la flaque des échos",
+            "centroide": [
+              480,
+              420
+            ],
+            "surface": 32000
+          },
+          {
+            "id": "sol-des-echos",
+            "libelle": "le sol des échos",
+            "centroide": [
+              770,
+              420
+            ],
+            "surface": 32000
+          }
+        ]
+      },
+      {
+        "id": "calque-trait",
+        "role": "trait",
+        "regions": []
+      }
+    ]
+  },
+  "palette": {
+    "jetons": {},
+    "nuancier": [
+      "violet",
+      "bleu",
+      "gris",
+      "blanc",
+      "brun",
+      "noir"
+    ]
+  },
+  "timings": {
+    "appuiMs": 60,
+    "relachementMs": 120,
+    "refusMs": 180,
+    "recolorationMs": 800,
+    "interEtoilesMs": 180
+  },
+  "sons": {
+    "ambiance": null,
+    "effets": {}
+  }
+}

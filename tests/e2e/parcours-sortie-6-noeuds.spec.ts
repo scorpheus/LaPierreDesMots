@@ -55,9 +55,25 @@ const GRAINE = Number(process.env['ATELIER_GRAINE'] ?? 20260801);
 const INSTANT = '2026-09-01T08:00:00Z';
 const REGION = 'galeries';
 
-/** v2 § 5.2, ligne 143 : « 4 à 6 nœuds enchaînés ». */
-const NOEUDS_MIN = 4;
-const NOEUDS_MAX = 6;
+/**
+ * v2 § 5.2, ligne 143 : « 4 à 6 nœuds enchaînés ». **C'est la longueur d'une SORTIE.**
+ *
+ * Les bornes ne sont plus des littéraux : elles viennent de
+ * `contenu/referentiel/parametres-pedagogie.json`, `selecteur.nbNoeudsMin` /
+ * `nbNoeudsMax` — les MÊMES valeurs que `composerSortie` applique réellement (convention C2 :
+ * aucune valeur pédagogique en dur). Un littéral ici et une donnée là-bas, c'est deux sources
+ * de vérité pour un seul chiffre.
+ */
+const CONTRAINTES = (
+  JSON.parse(
+    readFileSync(
+      fileURLToPath(new URL('contenu/referentiel/parametres-pedagogie.json', RACINE)),
+      'utf8',
+    ),
+  ) as { selecteur: { nbNoeudsMin: number; nbNoeudsMax: number } }
+).selecteur;
+const NOEUDS_MIN = CONTRAINTES.nbNoeudsMin;
+const NOEUDS_MAX = CONTRAINTES.nbNoeudsMax;
 
 interface CrochetsTest {
   chargerProfil(fixture: unknown): Promise<void>;
@@ -142,13 +158,47 @@ async function entrerSurLaCarte(
 }
 
 test.describe('Les Galeries sont une région JOUABLE, pas seulement ouverte (D38)', () => {
-  test('la région déclare de 4 à 6 nœuds, comme une sortie', () => {
+  /**
+   * ════════════════════════════════════════════════════════════════════════════════════════
+   * LA BORNE HAUTE PORTAIT SUR LA MAUVAISE POPULATION — corrigé au lot A4, argument cité.
+   *
+   * Ce cas exigeait `4 ≤ nœuds de la région ≤ 6` et citait la v2 § 5.2 ligne 143 : « 4 à 6
+   * nœuds enchaînés ». La citation est exacte ; **elle décrit une SORTIE, pas une région.**
+   * La longueur d'une sortie est une DONNÉE (`selecteur.nbNoeudsMin` / `nbNoeudsMax` de
+   * `contenu/referentiel/parametres-pedagogie.json`), et c'est `composerSortie` qui la tire
+   * dans cet intervalle, à chaque passage, quel que soit le nombre de nœuds de la région.
+   * `tests/unitaires/sortie-variete.test.ts` l'assert déjà sur 60 passages par région.
+   *
+   * Transposée à la RÉGION, la borne haute produit l'effet inverse de ce qu'elle protège.
+   * L'en-tête de `sortie-variete.test.ts` l'écrit noir sur blanc, et c'est la mesure du lot
+   * N8 : « quand le vivier tient tout entier dans la sortie — **le cas de nos deux régions** —,
+   * mélanger le milieu ne change que l'ORDRE, jamais la composition ». Une région plafonnée à
+   * six nœuds sert donc toujours les mêmes six exercices ; R13 (« jamais deux fois le même
+   * habillage ») devient vraie par pénurie, et D46 (« bon en 5 minutes comme en 30 ») est
+   * inatteignable. Le plafond était le mécanisme même du défaut n° 4 du père.
+   *
+   * La borne haute change donc de population, elle n'est pas retirée — et dans le sens qui
+   * exige DAVANTAGE : une région doit porter de quoi composer une sortie de longueur MAXIMALE
+   * (`≥ nbNoeudsMax`), sans quoi `nbNoeudsMax` est un chiffre que l'application ne peut pas
+   * servir. L'ancienne borne ne le vérifiait pas.
+   *
+   * Le cas jumeau de la Clairière — `tests/unitaires/clairiere-sortie-complete.test.ts`,
+   * « elle porte de 4 à 6 nœuds » — porte le même défaut de population. Il n'est PAS touché
+   * ici : la Clairière compte exactement six nœuds, il n'y a donc rien à arbitrer sur pièce.
+   * Question consignée dans `Docs/questions-en-attente.md` (Q-A4-3).
+   * ════════════════════════════════════════════════════════════════════════════════════════
+   */
+  test('la région porte de quoi composer une sortie ENTIÈRE, pas seulement une sortie', () => {
     const declares = noeudsDeclares();
     expect(
       declares.length,
       `${REGION} déclare ${String(declares.length)} nœud(s) : ${declares.join(', ')}`,
     ).toBeGreaterThanOrEqual(NOEUDS_MIN);
-    expect(declares.length).toBeLessThanOrEqual(NOEUDS_MAX);
+    expect(
+      declares.length,
+      `${REGION} ne porte pas assez de nœuds pour une sortie de longueur maximale ` +
+        `(${String(NOEUDS_MAX)}) : l'application ne pourrait jamais servir cette longueur.`,
+    ).toBeGreaterThanOrEqual(NOEUDS_MAX);
   });
 
   test('regions.json ne cite que des nœuds réellement livrés, et les cite tous', () => {

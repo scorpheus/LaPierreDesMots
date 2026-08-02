@@ -1,0 +1,10 @@
+{
+  "id": "galeries-12",
+  "region": "galeries",
+  "ordre": 12,
+  "exercice": "galeries-paroi-libre-01",
+  "prerequis": [
+    "galeries-11"
+  ],
+  "temps": "maitrise"
+}

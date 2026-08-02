@@ -1,0 +1,106 @@
+{
+  "id": "galeries.frise",
+  "moteurs": [
+    "chrono"
+  ],
+  "libelle": "La frise gravée de la grotte",
+  "region": "galeries",
+  "scene": {
+    "fichier": "habillages/galeries/frise.svg",
+    "viewBox": "0 0 960 600",
+    "calques": [
+      {
+        "id": "calque-fond",
+        "role": "fond",
+        "regions": []
+      },
+      {
+        "id": "calque-zones",
+        "role": "coloriable",
+        "regions": [
+          {
+            "id": "case-de-frise-un",
+            "libelle": "la première case de la frise",
+            "centroide": [
+              190,
+              190
+            ],
+            "surface": 32000
+          },
+          {
+            "id": "case-de-frise-deux",
+            "libelle": "la deuxième case de la frise",
+            "centroide": [
+              480,
+              190
+            ],
+            "surface": 32000
+          },
+          {
+            "id": "case-de-frise-trois",
+            "libelle": "la troisième case de la frise",
+            "centroide": [
+              770,
+              190
+            ],
+            "surface": 32000
+          },
+          {
+            "id": "case-de-frise-quatre",
+            "libelle": "la quatrième case de la frise",
+            "centroide": [
+              190,
+              420
+            ],
+            "surface": 32000
+          },
+          {
+            "id": "bandeau-de-frise",
+            "libelle": "le bandeau de la frise",
+            "centroide": [
+              480,
+              420
+            ],
+            "surface": 32000
+          },
+          {
+            "id": "torche-de-frise",
+            "libelle": "la torche de la frise",
+            "centroide": [
+              770,
+              420
+            ],
+            "surface": 32000
+          }
+        ]
+      },
+      {
+        "id": "calque-trait",
+        "role": "trait",
+        "regions": []
+      }
+    ]
+  },
+  "palette": {
+    "jetons": {},
+    "nuancier": [
+      "violet",
+      "bleu",
+      "gris",
+      "blanc",
+      "brun",
+      "noir"
+    ]
+  },
+  "timings": {
+    "appuiMs": 60,
+    "relachementMs": 120,
+    "refusMs": 180,
+    "recolorationMs": 800,
+    "interEtoilesMs": 180
+  },
+  "sons": {
+    "ambiance": null,
+    "effets": {}
+  }
+}

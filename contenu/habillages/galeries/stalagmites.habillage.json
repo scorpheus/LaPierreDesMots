@@ -1,0 +1,106 @@
+{
+  "id": "galeries.stalagmites",
+  "moteurs": [
+    "assemble"
+  ],
+  "libelle": "Les stalagmites à empiler",
+  "region": "galeries",
+  "scene": {
+    "fichier": "habillages/galeries/stalagmites.svg",
+    "viewBox": "0 0 960 600",
+    "calques": [
+      {
+        "id": "calque-fond",
+        "role": "fond",
+        "regions": []
+      },
+      {
+        "id": "calque-zones",
+        "role": "coloriable",
+        "regions": [
+          {
+            "id": "socle-gauche",
+            "libelle": "le socle de gauche",
+            "centroide": [
+              190,
+              190
+            ],
+            "surface": 32000
+          },
+          {
+            "id": "socle-milieu",
+            "libelle": "le socle du milieu",
+            "centroide": [
+              480,
+              190
+            ],
+            "surface": 32000
+          },
+          {
+            "id": "socle-droit",
+            "libelle": "le socle de droite",
+            "centroide": [
+              770,
+              190
+            ],
+            "surface": 32000
+          },
+          {
+            "id": "stalagmite-un",
+            "libelle": "la première stalagmite",
+            "centroide": [
+              190,
+              420
+            ],
+            "surface": 32000
+          },
+          {
+            "id": "stalagmite-deux",
+            "libelle": "la deuxième stalagmite",
+            "centroide": [
+              480,
+              420
+            ],
+            "surface": 32000
+          },
+          {
+            "id": "sol-de-la-grotte",
+            "libelle": "le sol de la grotte",
+            "centroide": [
+              770,
+              420
+            ],
+            "surface": 32000
+          }
+        ]
+      },
+      {
+        "id": "calque-trait",
+        "role": "trait",
+        "regions": []
+      }
+    ]
+  },
+  "palette": {
+    "jetons": {},
+    "nuancier": [
+      "violet",
+      "bleu",
+      "gris",
+      "blanc",
+      "brun",
+      "noir"
+    ]
+  },
+  "timings": {
+    "appuiMs": 60,
+    "relachementMs": 120,
+    "refusMs": 180,
+    "recolorationMs": 800,
+    "interEtoilesMs": 180
+  },
+  "sons": {
+    "ambiance": null,
+    "effets": {}
+  }
+}

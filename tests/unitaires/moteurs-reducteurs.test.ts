@@ -38,6 +38,7 @@ import Ajv2020 from 'ajv/dist/2020.js';
 import { describe, expect, it } from 'vitest';
 
 import {
+  calculerEtoiles,
   creerAlea,
   creerHorlogeFigee,
   initialiserRegistreMoteurs,
@@ -282,9 +283,33 @@ describe.each(CAS.map((cas) => [cas.code, cas] as const))('réducteur %s', (code
       expect(precedent, `${code} : demanderAide n’a jamais rien donné`).toBeGreaterThan(0);
       expect(moteur.aideProposee(courant as never)).not.toBeNull();
     } else {
-      // `libre` : aucune aide, parce qu'il ne peut pas être raté (§ 4.8).
-      expect(precedent, `${code} : ce moteur ne doit proposer aucune aide`).toBe(0);
-      expect(moteur.aideProposee(courant as never)).toBeNull();
+      // ───────────────────────────────────────────────────────────────────────────────────
+      // `libre` — L'AIDE NE COÛTE RIEN, ET C'EST CELA QU'ON MESURE. Révisé au lot A4.
+      //
+      // Ce cas exigeait `aideProposee === null`, c'est-à-dire l'ABSENCE de réponse. C'était
+      // la description du no-op, pas l'énoncé d'une règle : le § 4.8 garantit « trois étoiles
+      // à chaque fois », il ne garantit nulle part que Gobi se taise. Et la coquille rend un
+      // bouton « Gobi, aide-moi » sur ce moteur comme sur les treize autres — un bouton muet,
+      // sur le seul écran fait pour l'enfant qui n'a plus envie de déchiffrer.
+      //
+      // On assert donc la garantie RÉELLE, et elle est plus forte que l'ancienne :
+      //   · le palier d'aide ne bouge pas, même après six demandes (`precedent === 0`) ;
+      //   · `calculerEtoiles` rend TROIS, ce que ce fichier n'avait jamais vérifié ;
+      //   · et Gobi répond, au lieu de laisser un bouton mort.
+      // ───────────────────────────────────────────────────────────────────────────────────
+      expect(precedent, `${code} : demander de l’aide a coûté un palier`).toBe(0);
+      expect(
+        moteur.resume(courant as never).aideUtilisee,
+        `${code} : l’aide doit rester gratuite`,
+      ).toBe('aucune');
+      expect(
+        calculerEtoiles(moteur.resume(courant as never)),
+        `${code} : § 4.8 — trois étoiles à chaque fois, et c’est voulu`,
+      ).toBe(3);
+      expect(
+        moteur.aideProposee(courant as never),
+        `${code} : le bouton « Gobi, aide-moi » ne doit jamais rester muet (D42)`,
+      ).not.toBeNull();
     }
     // L'aide de Gobi ne compte JAMAIS comme une erreur (v2 § 5.4).
     expect(moteur.resume(courant as never).nbErreurs).toBe(0);

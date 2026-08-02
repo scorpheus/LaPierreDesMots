@@ -1,0 +1,106 @@
+{
+  "id": "galeries.passage",
+  "moteurs": [
+    "chemin"
+  ],
+  "libelle": "Le passage aux pierres plates",
+  "region": "galeries",
+  "scene": {
+    "fichier": "habillages/galeries/passage.svg",
+    "viewBox": "0 0 960 600",
+    "calques": [
+      {
+        "id": "calque-fond",
+        "role": "fond",
+        "regions": []
+      },
+      {
+        "id": "calque-zones",
+        "role": "coloriable",
+        "regions": [
+          {
+            "id": "pierre-plate-un",
+            "libelle": "la première pierre plate",
+            "centroide": [
+              190,
+              190
+            ],
+            "surface": 32000
+          },
+          {
+            "id": "pierre-plate-deux",
+            "libelle": "la deuxième pierre plate",
+            "centroide": [
+              480,
+              190
+            ],
+            "surface": 32000
+          },
+          {
+            "id": "pierre-plate-trois",
+            "libelle": "la troisième pierre plate",
+            "centroide": [
+              770,
+              190
+            ],
+            "surface": 32000
+          },
+          {
+            "id": "ruisseau",
+            "libelle": "le ruisseau",
+            "centroide": [
+              190,
+              420
+            ],
+            "surface": 32000
+          },
+          {
+            "id": "paroi-du-passage",
+            "libelle": "la paroi du passage",
+            "centroide": [
+              480,
+              420
+            ],
+            "surface": 32000
+          },
+          {
+            "id": "lanterne-du-passage",
+            "libelle": "la lanterne du passage",
+            "centroide": [
+              770,
+              420
+            ],
+            "surface": 32000
+          }
+        ]
+      },
+      {
+        "id": "calque-trait",
+        "role": "trait",
+        "regions": []
+      }
+    ]
+  },
+  "palette": {
+    "jetons": {},
+    "nuancier": [
+      "violet",
+      "bleu",
+      "gris",
+      "blanc",
+      "brun",
+      "noir"
+    ]
+  },
+  "timings": {
+    "appuiMs": 60,
+    "relachementMs": 120,
+    "refusMs": 180,
+    "recolorationMs": 800,
+    "interEtoilesMs": 180
+  },
+  "sons": {
+    "ambiance": null,
+    "effets": {}
+  }
+}

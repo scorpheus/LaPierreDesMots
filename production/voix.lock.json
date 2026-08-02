@@ -1,6 +1,6 @@
 {
   "$commentaire": "Reproductibilité de la chaîne voix (CLAUDE.md, « fichiers de verrou »). Tout ce qu'il faut pour refabriquer un clip à l'identique : modèle, locuteur, vitesse, transposition, empreinte du texte, score de contrôle qualité. Sans lui, la bibliothèque de voix devient un cimetière de fichiers irrégénérables.",
-  "genereLe": "2026-08-01T23:56:11.237Z",
+  "genereLe": "2026-08-02T03:53:59.543Z",
   "moteurTts": "piper/2023.11.14-2",
   "moteurQc": "faster-whisper/large-v3/cpu-int8",
   "seuilQc": 0.85,
@@ -58,12 +58,12 @@
     }
   },
   "comptes": {
-    "objetsRecenses": 125,
-    "occurrencesDuMotAudio": 41,
-    "clesACouvrir": 57,
-    "clipsRendus": 0,
-    "clipsReutilises": 132,
-    "clipsAuManifeste": 132,
+    "objetsRecenses": 167,
+    "occurrencesDuMotAudio": 52,
+    "clesACouvrir": 69,
+    "clipsRendus": 13,
+    "clipsReutilises": 161,
+    "clipsAuManifeste": 174,
     "clipsRefuses": 0
   },
   "refuses": [],
@@ -939,6 +939,266 @@
       "qcInstrument": "transcription-inverse"
     },
     {
+      "cle": "galeries-echo-conte-histoire-01/c1",
+      "rendu": "normal",
+      "locuteur": "narrateur",
+      "fichier": "audio/galeries/galeries-echo-conte-histoire-01-c1.normal.334a9d25.opus",
+      "empreinteTexte": "334a9d252f0258f92a4cb4ea482f56dfbaa9d6a64c0e1d4dc959f9ec43ef2ced",
+      "dureeMs": 1530,
+      "qcScore": 1,
+      "qcInstrument": "transcription-inverse"
+    },
+    {
+      "cle": "mot/gobi",
+      "rendu": "normal",
+      "locuteur": "maitresse",
+      "fichier": "audio/mots/mot-gobi.normal.ed7206a0.opus",
+      "empreinteTexte": "ed7206a009fdb955779f54fdbb9a2e2b505746e2662e599141ed157ce7d4ebd8",
+      "dureeMs": 636,
+      "qcScore": 1,
+      "qcInstrument": "remesure-duree"
+    },
+    {
+      "cle": "mot/gobi",
+      "rendu": "syllabe",
+      "locuteur": "maitresse",
+      "fichier": "audio/mots/mot-gobi.syllabe.ed7206a0.opus",
+      "empreinteTexte": "ed7206a009fdb955779f54fdbb9a2e2b505746e2662e599141ed157ce7d4ebd8",
+      "dureeMs": 1253,
+      "qcScore": 1,
+      "qcInstrument": "remesure-duree"
+    },
+    {
+      "cle": "mot/lampe",
+      "rendu": "normal",
+      "locuteur": "maitresse",
+      "fichier": "audio/mots/mot-lampe.normal.158b51ff.opus",
+      "empreinteTexte": "158b51ff5078c2013c5376219eefb6d0a136da23091e7f2b783e4dc75690a0df",
+      "dureeMs": 613,
+      "qcScore": 1,
+      "qcInstrument": "remesure-duree"
+    },
+    {
+      "cle": "mot/lampe",
+      "rendu": "syllabe",
+      "locuteur": "maitresse",
+      "fichier": "audio/mots/mot-lampe.syllabe.158b51ff.opus",
+      "empreinteTexte": "158b51ff5078c2013c5376219eefb6d0a136da23091e7f2b783e4dc75690a0df",
+      "dureeMs": 1149,
+      "qcScore": 1,
+      "qcInstrument": "remesure-duree"
+    },
+    {
+      "cle": "galeries-echo-conte-histoire-01/c2",
+      "rendu": "normal",
+      "locuteur": "narrateur",
+      "fichier": "audio/galeries/galeries-echo-conte-histoire-01-c2.normal.617c40d6.opus",
+      "empreinteTexte": "617c40d62177fddb73e4b6ccf1da29ed750e5bea493189aa79f444fd8c8e9194",
+      "dureeMs": 1902,
+      "qcScore": 1,
+      "qcInstrument": "transcription-inverse"
+    },
+    {
+      "cle": "mot/trouve",
+      "rendu": "normal",
+      "locuteur": "maitresse",
+      "fichier": "audio/mots/mot-trouve.normal.d8631f57.opus",
+      "empreinteTexte": "d8631f57b4b1a5e32ee6181411ff9a4be770a4208a8031b7b0ebd8214a9e527d",
+      "dureeMs": 729,
+      "qcScore": 1,
+      "qcInstrument": "remesure-duree"
+    },
+    {
+      "cle": "mot/trouve",
+      "rendu": "syllabe",
+      "locuteur": "maitresse",
+      "fichier": "audio/mots/mot-trouve.syllabe.d8631f57.opus",
+      "empreinteTexte": "d8631f57b4b1a5e32ee6181411ff9a4be770a4208a8031b7b0ebd8214a9e527d",
+      "dureeMs": 1451,
+      "qcScore": 1,
+      "qcInstrument": "remesure-duree"
+    },
+    {
+      "cle": "mot/cristal",
+      "rendu": "normal",
+      "locuteur": "maitresse",
+      "fichier": "audio/mots/mot-cristal.normal.b3f465e9.opus",
+      "empreinteTexte": "b3f465e9e43c454a00ebf6cc1259ebfdf8a460dffe8a9ccd7af9653ac806b2d4",
+      "dureeMs": 984,
+      "qcScore": 1,
+      "qcInstrument": "remesure-duree"
+    },
+    {
+      "cle": "mot/cristal",
+      "rendu": "syllabe",
+      "locuteur": "maitresse",
+      "fichier": "audio/mots/mot-cristal.syllabe.b3f465e9.opus",
+      "empreinteTexte": "b3f465e9e43c454a00ebf6cc1259ebfdf8a460dffe8a9ccd7af9653ac806b2d4",
+      "dureeMs": 1520,
+      "qcScore": 1,
+      "qcInstrument": "remesure-duree"
+    },
+    {
+      "cle": "mot/petit",
+      "rendu": "normal",
+      "locuteur": "maitresse",
+      "fichier": "audio/mots/mot-petit.normal.8e3cefcb.opus",
+      "empreinteTexte": "8e3cefcb3c22369aad72eb9c22a0d0292c0640f01dfe2d6eb2827b4e5baa4deb",
+      "dureeMs": 636,
+      "qcScore": 1,
+      "qcInstrument": "remesure-duree"
+    },
+    {
+      "cle": "mot/petit",
+      "rendu": "syllabe",
+      "locuteur": "maitresse",
+      "fichier": "audio/mots/mot-petit.syllabe.8e3cefcb.opus",
+      "empreinteTexte": "8e3cefcb3c22369aad72eb9c22a0d0292c0640f01dfe2d6eb2827b4e5baa4deb",
+      "dureeMs": 1219,
+      "qcScore": 1,
+      "qcInstrument": "remesure-duree"
+    },
+    {
+      "cle": "galeries-echo-conte-histoire-01/c3",
+      "rendu": "normal",
+      "locuteur": "narrateur",
+      "fichier": "audio/galeries/galeries-echo-conte-histoire-01-c3.normal.48ebb9f7.opus",
+      "empreinteTexte": "48ebb9f758cd3fc62f7537692127c4e3bec0bee564ee2a6e951a3a96cfec3875",
+      "dureeMs": 2029,
+      "qcScore": 1,
+      "qcInstrument": "transcription-inverse"
+    },
+    {
+      "cle": "mot/gros",
+      "rendu": "normal",
+      "locuteur": "maitresse",
+      "fichier": "audio/mots/mot-gros.normal.59208daf.opus",
+      "empreinteTexte": "59208daf46d44c9601922608ee59eb2dfec76ae34455f213d9d23ef8c50f941e",
+      "dureeMs": 474,
+      "qcScore": 1,
+      "qcInstrument": "remesure-duree"
+    },
+    {
+      "cle": "mot/gros",
+      "rendu": "syllabe",
+      "locuteur": "maitresse",
+      "fichier": "audio/mots/mot-gros.syllabe.59208daf.opus",
+      "empreinteTexte": "59208daf46d44c9601922608ee59eb2dfec76ae34455f213d9d23ef8c50f941e",
+      "dureeMs": 462,
+      "qcScore": 1,
+      "qcInstrument": "remesure-duree"
+    },
+    {
+      "cle": "galeries-echos-paires-01/c1",
+      "rendu": "normal",
+      "locuteur": "narrateur",
+      "fichier": "audio/galeries/galeries-echos-paires-01-c1.normal.0f5e3ea8.opus",
+      "empreinteTexte": "0f5e3ea8df84ee407dc4a645fcfd2104725e3226193b24fe4d5cf1dd4b86356e",
+      "dureeMs": 2296,
+      "qcScore": 1,
+      "qcInstrument": "transcription-inverse"
+    },
+    {
+      "cle": "mot/image",
+      "rendu": "normal",
+      "locuteur": "maitresse",
+      "fichier": "audio/mots/mot-image.normal.6105d6cc.opus",
+      "empreinteTexte": "6105d6cc76af400325e94d588ce511be5bfdbb73b437dc51eca43917d7a43e3d",
+      "dureeMs": 868,
+      "qcScore": 1,
+      "qcInstrument": "remesure-duree"
+    },
+    {
+      "cle": "mot/image",
+      "rendu": "syllabe",
+      "locuteur": "maitresse",
+      "fichier": "audio/mots/mot-image.syllabe.6105d6cc.opus",
+      "empreinteTexte": "6105d6cc76af400325e94d588ce511be5bfdbb73b437dc51eca43917d7a43e3d",
+      "dureeMs": 1967,
+      "qcScore": 1,
+      "qcInstrument": "remesure-duree"
+    },
+    {
+      "cle": "galeries-echos-paires-01/c2",
+      "rendu": "normal",
+      "locuteur": "narrateur",
+      "fichier": "audio/galeries/galeries-echos-paires-01-c2.normal.ced129a2.opus",
+      "empreinteTexte": "ced129a2cad4ede7ed51c5e143c09650f3fe9795c03c6d00831828ed8ce0e674",
+      "dureeMs": 2656,
+      "qcScore": 1,
+      "qcInstrument": "transcription-inverse"
+    },
+    {
+      "cle": "galeries-frise-chrono-01/c1",
+      "rendu": "normal",
+      "locuteur": "narrateur",
+      "fichier": "audio/galeries/galeries-frise-chrono-01-c1.normal.657b3cb3.opus",
+      "empreinteTexte": "657b3cb38a8cc5026b09790536acd49c4b061fb4f733d5dadd42ab1f6fb76a48",
+      "dureeMs": 2587,
+      "qcScore": 1,
+      "qcInstrument": "transcription-inverse"
+    },
+    {
+      "cle": "mot/images",
+      "rendu": "normal",
+      "locuteur": "maitresse",
+      "fichier": "audio/mots/mot-images.normal.21b2eed1.opus",
+      "empreinteTexte": "21b2eed1e328a2c62fe4c17d51188bdea73450f29956dc5c8c95429313ddd72c",
+      "dureeMs": 903,
+      "qcScore": 1,
+      "qcInstrument": "remesure-duree"
+    },
+    {
+      "cle": "mot/images",
+      "rendu": "syllabe",
+      "locuteur": "maitresse",
+      "fichier": "audio/mots/mot-images.syllabe.21b2eed1.opus",
+      "empreinteTexte": "21b2eed1e328a2c62fe4c17d51188bdea73450f29956dc5c8c95429313ddd72c",
+      "dureeMs": 2304,
+      "qcScore": 1,
+      "qcInstrument": "remesure-duree"
+    },
+    {
+      "cle": "mot/ordre",
+      "rendu": "normal",
+      "locuteur": "maitresse",
+      "fichier": "audio/mots/mot-ordre.normal.84952c95.opus",
+      "empreinteTexte": "84952c95c50ad2811c592510c4867446512af79f9af7023050481e9b65b891c4",
+      "dureeMs": 868,
+      "qcScore": 1,
+      "qcInstrument": "remesure-duree"
+    },
+    {
+      "cle": "mot/ordre",
+      "rendu": "syllabe",
+      "locuteur": "maitresse",
+      "fichier": "audio/mots/mot-ordre.syllabe.84952c95.opus",
+      "empreinteTexte": "84952c95c50ad2811c592510c4867446512af79f9af7023050481e9b65b891c4",
+      "dureeMs": 928,
+      "qcScore": 1,
+      "qcInstrument": "remesure-duree"
+    },
+    {
+      "cle": "mot/histoire",
+      "rendu": "normal",
+      "locuteur": "maitresse",
+      "fichier": "audio/mots/mot-histoire.normal.d15eec53.opus",
+      "empreinteTexte": "d15eec53207e92fd31b2b10523b296153ce6fe362ae1db26b664e9d934789631",
+      "dureeMs": 787,
+      "qcScore": 1,
+      "qcInstrument": "remesure-duree"
+    },
+    {
+      "cle": "mot/histoire",
+      "rendu": "syllabe",
+      "locuteur": "maitresse",
+      "fichier": "audio/mots/mot-histoire.syllabe.d15eec53.opus",
+      "empreinteTexte": "d15eec53207e92fd31b2b10523b296153ce6fe362ae1db26b664e9d934789631",
+      "dureeMs": 2431,
+      "qcScore": 1,
+      "qcInstrument": "remesure-duree"
+    },
+    {
       "cle": "galeries-grottes-bd-01/c1",
       "rendu": "normal",
       "locuteur": "narrateur",
@@ -1016,6 +1276,76 @@
       "empreinteTexte": "386ccc9dda451489aeb24feb8bcbff23ab1a8d4343b60a67339fc5f24911e1f4",
       "dureeMs": 5307,
       "qcScore": 0.9677,
+      "qcInstrument": "transcription-inverse"
+    },
+    {
+      "cle": "galeries-paroi-libre-01/c1",
+      "rendu": "normal",
+      "locuteur": "narrateur",
+      "fichier": "audio/galeries/galeries-paroi-libre-01-c1.normal.40aef061.opus",
+      "empreinteTexte": "40aef0612965c9202c0fd73a901695e95e97658208f2f9c3a3e32906555166b7",
+      "dureeMs": 1495,
+      "qcScore": 0.9524,
+      "qcInstrument": "transcription-inverse"
+    },
+    {
+      "cle": "galeries-passage-chemin-01/c1",
+      "rendu": "normal",
+      "locuteur": "narrateur",
+      "fichier": "audio/galeries/galeries-passage-chemin-01-c1.normal.5791971d.opus",
+      "empreinteTexte": "5791971d493174e36ecd25506006805ef34a39ba90c06c88a50350a389ee2f16",
+      "dureeMs": 2772,
+      "qcScore": 1,
+      "qcInstrument": "transcription-inverse"
+    },
+    {
+      "cle": "mot/marche",
+      "rendu": "normal",
+      "locuteur": "maitresse",
+      "fichier": "audio/mots/mot-marche.normal.26074bd0.opus",
+      "empreinteTexte": "26074bd005508c06ab1e8c281735ca4478e7e4dd1dbbbd6e833c01093e0fe736",
+      "dureeMs": 845,
+      "qcScore": 1,
+      "qcInstrument": "remesure-duree"
+    },
+    {
+      "cle": "mot/marche",
+      "rendu": "syllabe",
+      "locuteur": "maitresse",
+      "fichier": "audio/mots/mot-marche.syllabe.26074bd0.opus",
+      "empreinteTexte": "26074bd005508c06ab1e8c281735ca4478e7e4dd1dbbbd6e833c01093e0fe736",
+      "dureeMs": 1370,
+      "qcScore": 1,
+      "qcInstrument": "remesure-duree"
+    },
+    {
+      "cle": "mot/lis",
+      "rendu": "normal",
+      "locuteur": "maitresse",
+      "fichier": "audio/mots/mot-lis.normal.afc0b0d1.opus",
+      "empreinteTexte": "afc0b0d1d853ba78ab43c5c36448cddbb82cce915e4d68d9e3ca7af40361d5c5",
+      "dureeMs": 462,
+      "qcScore": 1,
+      "qcInstrument": "remesure-duree"
+    },
+    {
+      "cle": "mot/lis",
+      "rendu": "syllabe",
+      "locuteur": "maitresse",
+      "fichier": "audio/mots/mot-lis.syllabe.afc0b0d1.opus",
+      "empreinteTexte": "afc0b0d1d853ba78ab43c5c36448cddbb82cce915e4d68d9e3ca7af40361d5c5",
+      "dureeMs": 648,
+      "qcScore": 1,
+      "qcInstrument": "remesure-duree"
+    },
+    {
+      "cle": "galeries-passage-chemin-01/c2",
+      "rendu": "normal",
+      "locuteur": "narrateur",
+      "fichier": "audio/galeries/galeries-passage-chemin-01-c2.normal.faccbc2d.opus",
+      "empreinteTexte": "faccbc2d40fa538bdeb7d0f92018b4dc5642875c4b378a8bedd519cede48ace9",
+      "dureeMs": 2761,
+      "qcScore": 0.9714,
       "qcInstrument": "transcription-inverse"
     },
     {
@@ -1155,6 +1485,96 @@
       "fichier": "audio/galeries/galeries-pierre-bp-01-c6.normal.733dd5ba.opus",
       "empreinteTexte": "733dd5bae4f7243f3af72d46abfcbf5d42ef327776af67d169fd269a9118c216",
       "dureeMs": 2505,
+      "qcScore": 1,
+      "qcInstrument": "transcription-inverse"
+    },
+    {
+      "cle": "galeries-stalagmites-assemble-01/c1",
+      "rendu": "normal",
+      "locuteur": "narrateur",
+      "fichier": "audio/galeries/galeries-stalagmites-assemble-01-c1.normal.334a8f62.opus",
+      "empreinteTexte": "334a8f627bd2c650b7ea11eba10b4f7fe677090486d78f004d6d9d22bbe0b28c",
+      "dureeMs": 3207,
+      "qcScore": 1,
+      "qcInstrument": "transcription-inverse"
+    },
+    {
+      "cle": "mot/syllabe",
+      "rendu": "normal",
+      "locuteur": "maitresse",
+      "fichier": "audio/mots/mot-syllabe.normal.60461a93.opus",
+      "empreinteTexte": "60461a93ca77d846ac7b88756157ff3996109ab36e8218fdaad1709cee864fed",
+      "dureeMs": 717,
+      "qcScore": 1,
+      "qcInstrument": "remesure-duree"
+    },
+    {
+      "cle": "mot/syllabe",
+      "rendu": "syllabe",
+      "locuteur": "maitresse",
+      "fichier": "audio/mots/mot-syllabe.syllabe.60461a93.opus",
+      "empreinteTexte": "60461a93ca77d846ac7b88756157ff3996109ab36e8218fdaad1709cee864fed",
+      "dureeMs": 3107,
+      "qcScore": 1,
+      "qcInstrument": "remesure-duree"
+    },
+    {
+      "cle": "mot/domino",
+      "rendu": "normal",
+      "locuteur": "maitresse",
+      "fichier": "audio/mots/mot-domino.normal.47944637.opus",
+      "empreinteTexte": "47944637b32facc94c1c49b32202b63e23b6ea7f225baa1d89868b3ff32d4a1e",
+      "dureeMs": 1066,
+      "qcScore": 1,
+      "qcInstrument": "remesure-duree"
+    },
+    {
+      "cle": "mot/domino",
+      "rendu": "syllabe",
+      "locuteur": "maitresse",
+      "fichier": "audio/mots/mot-domino.syllabe.47944637.opus",
+      "empreinteTexte": "47944637b32facc94c1c49b32202b63e23b6ea7f225baa1d89868b3ff32d4a1e",
+      "dureeMs": 2408,
+      "qcScore": 1,
+      "qcInstrument": "remesure-duree"
+    },
+    {
+      "cle": "galeries-stalagmites-assemble-01/c2",
+      "rendu": "normal",
+      "locuteur": "narrateur",
+      "fichier": "audio/galeries/galeries-stalagmites-assemble-01-c2.normal.676ea42c.opus",
+      "empreinteTexte": "676ea42c1d6b73307594c444dd7788529fb101f405d85486d15923f6d980e6bb",
+      "dureeMs": 2807,
+      "qcScore": 0.9474,
+      "qcInstrument": "transcription-inverse"
+    },
+    {
+      "cle": "mot/bateau",
+      "rendu": "normal",
+      "locuteur": "maitresse",
+      "fichier": "audio/mots/mot-bateau.normal.25c9ec1e.opus",
+      "empreinteTexte": "25c9ec1ed3674b8810b459eebe2e4130992373b8db72206e4c5883526004eb6c",
+      "dureeMs": 857,
+      "qcScore": 1,
+      "qcInstrument": "remesure-duree"
+    },
+    {
+      "cle": "mot/bateau",
+      "rendu": "syllabe",
+      "locuteur": "maitresse",
+      "fichier": "audio/mots/mot-bateau.syllabe.25c9ec1e.opus",
+      "empreinteTexte": "25c9ec1ed3674b8810b459eebe2e4130992373b8db72206e4c5883526004eb6c",
+      "dureeMs": 1520,
+      "qcScore": 1,
+      "qcInstrument": "remesure-duree"
+    },
+    {
+      "cle": "galeries-stalagmites-assemble-01/c3",
+      "rendu": "normal",
+      "locuteur": "narrateur",
+      "fichier": "audio/galeries/galeries-stalagmites-assemble-01-c3.normal.7f435ea6.opus",
+      "empreinteTexte": "7f435ea6805a5a011b9d4930517440d4f16bea4ed8f251fbee237ede38539228",
+      "dureeMs": 2621,
       "qcScore": 1,
       "qcInstrument": "transcription-inverse"
     },

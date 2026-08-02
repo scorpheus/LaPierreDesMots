@@ -1,0 +1,10 @@
+{
+  "id": "galeries-07",
+  "region": "galeries",
+  "ordre": 7,
+  "exercice": "galeries-stalagmites-assemble-01",
+  "prerequis": [
+    "galeries-06"
+  ],
+  "temps": "presentation"
+}

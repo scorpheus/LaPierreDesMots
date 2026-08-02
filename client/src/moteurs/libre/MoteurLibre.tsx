@@ -26,6 +26,23 @@ import type { ProprietesMoteur } from '../types.js';
 /** Cadence du `battementHorloge`. Le moteur ne connaît aucun `setTimeout` : c'est ici. */
 const PERIODE_BATTEMENT_MS = 1000;
 
+/**
+ * L'INVITATION DU COLORIAGE LIBRE — une CONSTANTE EXPORTÉE depuis le lot A4, et c'est R15.
+ *
+ * Elle était un littéral au milieu du JSX. `libre` n'a pas de consigne — c'est son contrat
+ * (§ 4.8) — mais il affiche quand même ce texte, et « aucune consigne n'existe uniquement à
+ * l'écrit, tout est audible en un tap » ne fait aucune exception pour le texte le plus doux
+ * du jeu. Un littéral enfoui n'est recensable par personne : `scripts/recenser-textes.mjs`
+ * ne pouvait ni le voir, ni lui commander un clip, et `EcranNoeud` ne pouvait pas lui rendre
+ * de bouton « Écouter ».
+ *
+ * Elle est donc exportée, employée aux deux endroits qui l'affichent, et **lue dans ce
+ * fichier-ci** par le recenseur des voix (même procédé que `CHEMINS` dans
+ * `tests/e2e/qa-outils.ts` : une source, plusieurs lecteurs, aucune recopie).
+ * `tests/unitaires/consignes-audibles.test.ts` compare les deux.
+ */
+export const INVITE_LIBRE = 'Colorie comme tu veux.';
+
 /** R16 : 64 px de côté au minimum, 24 px de tolérance obtenus par l'écart entre cibles. */
 const CIBLE_PX = 64;
 const TOLERANCE_PX = 24;
@@ -113,7 +130,7 @@ export function MoteurLibre(
       {/* La consigne passe par `ZoneDeLecture` : c'est le SEUL composant qui affiche du
           texte à déchiffrer (§ 5.1). Sans quoi « le décor s'agite, le texte jamais » ne
           tiendrait qu'à la discipline de onze fichiers. */}
-      <ZoneDeLecture texte="Colorie comme tu veux." motsCles={[]} />
+      <ZoneDeLecture texte={INVITE_LIBRE} motsCles={[]} />
 
       <div data-plateau="nuancier" style={{ display: 'flex', flexWrap: 'wrap' }}>
         {contenu.nuancierAutorise.map((couleur) => (

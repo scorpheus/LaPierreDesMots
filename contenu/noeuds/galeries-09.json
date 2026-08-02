@@ -1,0 +1,10 @@
+{
+  "id": "galeries-09",
+  "region": "galeries",
+  "ordre": 9,
+  "exercice": "galeries-frise-chrono-01",
+  "prerequis": [
+    "galeries-08"
+  ],
+  "temps": "developpement"
+}

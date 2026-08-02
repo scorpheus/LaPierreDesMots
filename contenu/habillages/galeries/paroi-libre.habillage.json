@@ -1,0 +1,111 @@
+{
+  "id": "galeries.paroi-libre",
+  "moteurs": [
+    "libre"
+  ],
+  "libelle": "La paroi qu’on peint comme on veut",
+  "region": "galeries",
+  "scene": {
+    "fichier": "habillages/galeries/paroi-libre.svg",
+    "viewBox": "0 0 960 600",
+    "calques": [
+      {
+        "id": "calque-fond",
+        "role": "fond",
+        "regions": []
+      },
+      {
+        "id": "calque-zones",
+        "role": "coloriable",
+        "regions": [
+          {
+            "id": "grande-paroi",
+            "libelle": "la grande paroi",
+            "centroide": [
+              190,
+              190
+            ],
+            "surface": 32000
+          },
+          {
+            "id": "petite-paroi",
+            "libelle": "la petite paroi",
+            "centroide": [
+              480,
+              190
+            ],
+            "surface": 32000
+          },
+          {
+            "id": "veine-de-cristal",
+            "libelle": "la veine de cristal",
+            "centroide": [
+              770,
+              190
+            ],
+            "surface": 32000
+          },
+          {
+            "id": "goutte-de-pluie",
+            "libelle": "la goutte de pluie",
+            "centroide": [
+              190,
+              420
+            ],
+            "surface": 32000
+          },
+          {
+            "id": "pierre-ronde",
+            "libelle": "la pierre ronde",
+            "centroide": [
+              480,
+              420
+            ],
+            "surface": 32000
+          },
+          {
+            "id": "ombre-du-fond",
+            "libelle": "l’ombre du fond",
+            "centroide": [
+              770,
+              420
+            ],
+            "surface": 32000
+          }
+        ]
+      },
+      {
+        "id": "calque-trait",
+        "role": "trait",
+        "regions": []
+      }
+    ]
+  },
+  "palette": {
+    "jetons": {},
+    "nuancier": [
+      "rouge",
+      "orange",
+      "jaune",
+      "vert",
+      "bleu",
+      "violet",
+      "rose",
+      "brun",
+      "noir",
+      "blanc",
+      "gris"
+    ]
+  },
+  "timings": {
+    "appuiMs": 60,
+    "relachementMs": 120,
+    "refusMs": 180,
+    "recolorationMs": 800,
+    "interEtoilesMs": 180
+  },
+  "sons": {
+    "ambiance": null,
+    "effets": {}
+  }
+}

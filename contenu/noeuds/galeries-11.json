@@ -1,0 +1,10 @@
+{
+  "id": "galeries-11",
+  "region": "galeries",
+  "ordre": 11,
+  "exercice": "galeries-echos-paires-01",
+  "prerequis": [
+    "galeries-10"
+  ],
+  "temps": "retournement"
+}
