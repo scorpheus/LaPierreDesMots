@@ -284,12 +284,28 @@ export async function preparerSansProfil(page: Page): Promise<void> {
   );
 }
 
-/** Démarrage propre : animations coupées, graine et horloge figées, profil chargé. */
-export async function preparer(page: Page): Promise<void> {
+/**
+ * Démarrage propre : animations coupées, graine et horloge figées, profil chargé.
+ *
+ * `prenom` donne un profil VIERGE, et c'est parfois indispensable — jamais un confort.
+ * `chargerProfil` (`client/src/testabilite/crochets.ts:159-170`) cherche le profil par son
+ * identifiant, puis **retombe sur un profil existant DE MÊME PRÉNOM**, et n'en crée un que si
+ * aucun ne correspond. Or la carte lit le monde SUR LE SERVEUR : tout cas qui joue des nœuds
+ * laisse une progression que les cas suivants héritent.
+ *
+ * Mesuré sur cette suite même : l'audit « aucun élément interactif mort » tape tout ce qu'il
+ * trouve sur les douze écrans de nœud, termine donc des exercices, et les Galeries se
+ * refermaient avant que le cas D38 ne les cherche — `départs offerts : clairiere,
+ * marais-jumeau`. La QA se polluait elle-même.
+ */
+export async function preparer(page: Page, prenom?: string): Promise<void> {
   await preparerSansProfil(page);
   await page.evaluate(
-    async (fixture) => (window as unknown as FenetreTest).__test.chargerProfil(fixture),
-    fixtureProfil,
+    async ({ fixture, prenomPropre }) =>
+      (window as unknown as FenetreTest).__test.chargerProfil(
+        prenomPropre === undefined ? fixture : { ...fixture, prenom: prenomPropre },
+      ),
+    { fixture: fixtureProfil, prenomPropre: prenom },
   );
   await expect(page.locator('[data-ecran="profils"]')).toBeVisible();
 }
@@ -539,13 +555,23 @@ export interface EcranQA {
   readonly aller: (page: Page) => Promise<void>;
 }
 
-export async function choisirLeProfil(page: Page): Promise<void> {
-  await page.locator('[data-profil]').first().click();
+export async function choisirLeProfil(page: Page, prenom?: string): Promise<void> {
+  // Quand un prénom propre est demandé, on vise SA carte : plusieurs profils coexistent dans
+  // la base partagée de la suite, et `.first()` désignerait le plus ancien.
+  const carte =
+    prenom === undefined
+      ? page.locator('[data-profil]').first()
+      : page.locator('[data-profil]').filter({ hasText: prenom }).first();
+  await carte.click();
   await expect(page.locator('[data-ecran="carte"]')).toBeVisible();
 }
 
-export async function entrerDansLeNoeud(page: Page, noeud: string): Promise<void> {
-  await choisirLeProfil(page);
+export async function entrerDansLeNoeud(
+  page: Page,
+  noeud: string,
+  prenom?: string,
+): Promise<void> {
+  await choisirLeProfil(page, prenom);
   await page.evaluate(
     async (id) => (window as unknown as FenetreTest).__test.allerAuNoeud(id),
     noeud,

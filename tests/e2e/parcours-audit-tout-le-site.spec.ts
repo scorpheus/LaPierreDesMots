@@ -50,10 +50,12 @@ import {
   CIBLE_MINIMALE_PX,
   cheminDepot,
   SELECTEUR_INTERACTIF,
+  choisirLeProfil,
   ciblesTropPetites,
   ecranCourant,
   ecransDeclares,
   ecransVus,
+  entrerDansLeNoeud,
   etatDuJeu,
   lireTexte,
   noeudsLivres,
@@ -287,8 +289,12 @@ test.describe('QA — le parcours complet et les deux régions', () => {
   });
 
   test('D38 — les deux régions sont proposées AU DÉPART, sur un profil neuf', async ({ page }) => {
-    await preparer(page);
-    await choisirLeProfil(page);
+    // Un prénom PROPRE : « profil neuf » doit l'être vraiment. Les audits qui précèdent dans
+    // ce fichier tapent tout ce qu'ils trouvent sur les douze écrans de nœud et terminent donc
+    // des exercices ; sans profil vierge, les Galeries seraient déjà closes ici.
+    const PRENOM = 'Iris';
+    await preparer(page, PRENOM);
+    await choisirLeProfil(page, PRENOM);
     const departs = await page
       .locator('[data-depart]')
       .evaluateAll((noeuds) => noeuds.map((e) => e.getAttribute('data-depart') ?? ''));
@@ -303,13 +309,15 @@ test.describe('QA — le parcours complet et les deux régions', () => {
     const regions = [...new Set(NOEUDS.map((n) => n.region))];
     expect(regions.length, 'deux régions sont livrées').toBeGreaterThanOrEqual(2);
 
-    await preparer(page);
+    // Même raison qu'au cas précédent : un profil vierge, pour que les deux régions soient
+    // réellement ouvertes au moment où l'on essaie de passer de l'une à l'autre.
+    const PRENOM = 'Lior';
     // Aller : carte → région A → carte → région B → carte. Chaque retour est EMPRUNTÉ, pas
     // seulement constaté present.
     for (const region of [...regions, ...[...regions].reverse()]) {
       const noeud = NOEUDS.find((n) => n.region === region)!;
-      await preparer(page);
-      await entrerDansLeNoeud(page, noeud.id);
+      await preparer(page, PRENOM);
+      await entrerDansLeNoeud(page, noeud.id, PRENOM);
       await expect(page.locator('[data-ecran="noeud"]')).toBeVisible();
 
       await page.locator('[data-vers="carte"]').click();
