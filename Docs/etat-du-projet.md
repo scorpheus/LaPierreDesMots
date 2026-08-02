@@ -81,8 +81,10 @@ proposée : elle produisait un bouton « Partir vers Le Marais Jumeau » qui ne 
 | `npx eslint .` | **0** | 0 erreur, 17 avertissements (variables inutilisées) |
 | `npx vitest run` | **0** | **1745 tests, 113 fichiers, 0 échec** |
 | `npm run test:contenu` | **0** | **226 contrôles, 0 problème** |
-| `npm run test:e2e` | **1** | **196 verts, 1 rouge** — voir « ce qui reste rouge » |
-| `npm run verifier` | **1** | `test:visuel` rouge par décision (D39) |
+| `npm run test:qualite` | **0** | **48 verts** · bundle 176,5 Ko gzip sur 250 Ko |
+| `npm run test:rejeu` | **0** | vert |
+| `npm run test:e2e` | **1** | **196 verts, 2 rouges** — voir « ce qui reste rouge » |
+| `npm run verifier` | **1** | rouge tant que `test:visuel` attend tes yeux (D39) |
 
 **L'invariant « l'enfant peut toujours faire quelque chose »**, mesuré sur les cinq profils qui ont
 un passé — c'est la question qui compte, et elle est vraie partout :
@@ -103,10 +105,15 @@ un passé — c'est la question qui compte, et elle est vraie partout :
 références maintenant serait les refaire aussitôt. Ça ne se corrige pas en codant, ça se lève en
 regardant les images (`tests/rapports/artefacts/`), puis `npm run test:visuel -- --maj`.
 
-**Un test E2E, `parcours-zz-invariants.spec.ts`** — il échoue dans la suite complète et **passe
-seul en 2,5 s**. Il ne vient pas de ce lot : il a été écrit aujourd'hui à 12:14 par une autre
-campagne qui travaillait sur le dépôt en même temps que moi. Vérifié par expérience témoin :
-annuler mes corrections et relancer la suite entière **ne le rend pas vert**.
+**Deux tests E2E, tous deux dans `parcours-zz-invariants.spec.ts`** — ils échouent dans la suite
+complète et **passent seuls en 2,5 s**. Ils ne viennent pas de ce lot : ce fichier a été écrit
+aujourd'hui à 12:14 par une autre campagne qui travaillait sur le dépôt en même temps que moi.
+Vérifié par **expérience témoin** : annuler mes corrections, recompiler et relancer la suite
+entière **ne les rend pas verts**. C'est un fichier encore en vol, pas une régression.
+
+Deux autres rouges de la chaîne `verifier` étaient de **mon** ressort, et sont réparés :
+`test:qualite` (l'audit d'accessibilité comptait deux onglets parent alors que H2 en a livré
+trois) et le budget de bundle qui n'en était que la conséquence.
 
 **La moitié du contenu est un brouillon.** 9 exercices sur 18 portent la marque
 `PLACEHOLDER — À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ`. Inchangé, et c'est toujours le vrai
