@@ -2619,3 +2619,242 @@ un lot de graphisme, et pas seulement après.
   Elles se produisent en un passage `npm run test:visuel -- --maj`, **par l'orchestrateur, après
   la vague 2**. Toutes les assertions du fichier précèdent la capture : il mesure déjà quelque
   chose sans elles.
+
+---
+
+# INTÉGRATION DES LOTS N1 À N8 — arbitrages rendus le 2026-08-02, dans la nuit
+
+Le père dormait, avec pour consigne « fais tes propres choix, continue jusqu'à la finition ».
+Chaque choix est ici, avec ce qui a été **mesuré** et pourquoi j'ai tranché ainsi. Aucun de ces
+points n'était couvert par un contrat gelé ; tous sont réversibles.
+
+## Q-I1 — D38 : la garde `ordre >= 3` retirée de `partage/src/monde/carte.ts`
+
+**Mesuré.** Sur un profil neuf, `parcours-sortie-6-noeuds` relevait
+`départs offerts : clairiere`. Les six nœuds des Galeries étaient livrés, déclarés dans
+`regions.json`, et **inatteignables**.
+
+**Cause.** `regionsOuvertes` et `ouvrirCeQuiDoitLEtre` portaient
+`ouvertes.some((r) => r.ordre >= 3) ? parallele : 1`, c'est-à-dire la v2 § 3.3. Or **D38 amende
+explicitement la v2 § 3.3** (`journal-des-decisions.md:740`).
+
+**Choix.** J'ai retiré la garde et fait passer `carteInitiale` par `ouvrirCeQuiDoitLEtre`, pour
+que la règle n'existe qu'à un seul endroit. Le parallélisme reste une donnée
+(`ouvertesEnParallele: 2` dans `regions.json`) : passer à trois régions se fait sans toucher au
+code.
+
+**Quatre cas de test décrivaient la règle abrogée** et ont été réécrits sur D38 — jamais
+assouplis : égalité exacte, régions nommées une à une. Le témoin d'étanchéité entre profils de
+`tests/api/monde.test.ts` était `galeries.ouverte === false` ; D38 le rend vrai pour tout le
+monde, donc il ne mesurait plus rien. Remplacé par deux témoins que D38 ne touche pas.
+
+## Q-I2 — `base: './'` vers `base: '/'` dans `client/vite.config.ts`
+
+**Mesuré**, sortie citée :
+
+```
+$ curl -o /dev/null -w "%{http_code} %{content_type}" \
+      http://127.0.0.1:8098/parent/assets/index-2mjMLhgT.js
+200 text/html; charset=utf-8
+```
+
+Sous `base: './'`, `index.html` porte `src="./assets/…"`. À `/parent/dashboard`, le navigateur
+résout contre `/parent/`, le repli SPA répond `index.html`, le module ne charge pas, **React ne
+monte jamais et la page reste blanche, sans aucune sortie** — la règle « aucun état sans issue »
+enfreinte sur la seule route de profondeur 2 du dépôt, et c'est l'écran que le père cherchait.
+
+Le motif écrit en commentaire — « servi depuis un `file://` de dépannage » — était **déjà void** :
+le préchargement des polices du même fichier émet `href="/polices/…"`, un chemin absolu.
+
+## Q-I3 — La carte v2 n'était servie à personne
+
+N7 a livré `carte-monde-v2.svg` et l'a déclarée dans `regions.json`, mais `EcranCarte.tsx`
+appartient à N4 (§ 6.2) et gardait le chemin v1 en dur. **N7 avait écrit l'écart en toutes
+lettres** dans le `$commentaire` de `regions.json` ; personne ne l'a repris. L'enfant voyait
+encore les six hexagones identiques de la v1.
+
+Passage fait, et il est sûr : même `viewBox`, mêmes six identifiants et centres de marqueur,
+comparés fichier à fichier par `ids-regions-stables.test.ts`.
+
+**Dette assumée** : le chemin existe maintenant à deux endroits (ici et `regions.json`). Le lire
+depuis le monde supprimerait la duplication, mais `scene` n'est exposée ni par
+`partage/src/monde/types.ts` ni par le dépôt serveur — la plomberie traverse trois fichiers.
+Le test tient la cohérence en attendant.
+
+## Q-I4 — Route `/parent/galerie` posée, `EcranGalerieParent` cesse d'être orphelin
+
+Le contrat de finition v3 § 6.2 nomme cette route et la confie à N4, qui n'a ajouté que
+`/ouverture`. Mesuré : `grep -rn "EcranGalerieParent" client/src` ne rendait **aucune** ligne
+hors de son propre fichier. Un écran écrit, compilé, testé, et monté par personne.
+
+`/parent/definir` n'a **pas** été ajoutée, et c'est délibéré : `EcranCodeParent` rend
+`EcranDefinirCode` lui-même quand aucun code n'est posé. Deux routes pour un seul état feraient
+deux chemins à maintenir.
+
+## Q-I5 — Les pastilles des régions voilées ne sont plus des boutons
+
+Elles portaient `role="button"` et `tabIndex={0}` sur les six régions, alors que le gestionnaire
+commence par `if (ouverte && …)`. Quatre contrôles annoncés « bouton » au lecteur d'écran,
+atteignables à la tabulation, et strictement inertes.
+
+**Choix : leur retirer le rôle plutôt que leur inventer une réponse.** Un message dirait à
+l'enfant ce qui lui manque — exactement ce que C7 et D35 interdisent. Une région voilée est du
+décor ; elle le redevient.
+
+## Q-I6 — R13 : un second habillage `grave` plutôt qu'un exercice déplacé
+
+`pierre-bd-01` et `pierre-bp-01` déclaraient tous deux `galeries.pierre` ; il n'existait qu'un
+habillage `grave` dans la région. `contenu/habillages/galeries/veine.{svg,habillage.json}` est
+l'unique correction — **aucune ligne de code**, ce qui est précisément la promesse de l'axe
+moteur × habillage × contenu de la v2 § 7.
+
+## Q-I7 — Le test `lancement-decouvrable` contredisait deux documents gelés
+
+Son premier cas exigeait `batsRacine[0] === 'demarrer.bat'`. **Insatisfiable**, et pas seulement
+difficile :
+
+1. il se contredit — la ligne 37 du même fichier fait `lireTexte('arreter.bat')`, donc le
+   fichier doit exister sous ce nom, alors que l'assertion exige qu'aucun `.bat` ne précède
+   `demarrer.bat` ;
+2. le seul remède — renommer `arreter.bat` — est interdit par
+   `Docs/contrat-technique-v1.md:55` et par `Docs/la-pierre-des-mots-specs-v2.md:385`, ce
+   dernier étant **un des quatre documents de référence** que je n'ai pas le droit de modifier.
+
+**Choix : remplacer l'assertion par une garantie satisfiable et plus large** — *tout* `.bat` de
+la racine autre que le lanceur doit nommer le lanceur dans ce qu'il affiche. L'ancien cas ne
+l'exigeait que d'`arreter.bat` ; le nouveau l'exige aussi de `verifier.bat` et de tout `.bat`
+ajouté demain. Les deux autres cas ont été soldés dans le CODE (`arreter.bat` nomme désormais
+`demarrer.bat` sur chacun de ses quatre chemins visibles ; le README nomme le lanceur en tête).
+
+**À confirmer par le père** : s'il préfère renommer `arreter.bat` en `eteindre.bat` — qui se
+classe après `demarrer.bat` —, cela coûte une ligne, mais **cela lui appartient**, parce que cela
+rend faux un document de référence.
+
+## Q-I8 — La QA naviguait par URL et n'atteignait aucun écran
+
+Le défaut le plus grave trouvé cette nuit, et il était **dans l'outil censé empêcher ce genre de
+défaut**. Mesuré :
+
+```
+goto /carte            -> data-ecran=profils
+goto /campement        -> data-ecran=profils
+goto /parent/dashboard -> data-ecran=profils
+(huit routes, un seul écran)
+```
+
+Le routeur monte `createMemoryHistory` — choix délibéré et documenté. Un `page.goto` recharge
+donc l'application sur `/`. La suite auditait l'écran des profils huit fois et publiait
+« 8/8 routes visitées ». Les recettes naviguent désormais **en tapant**, et `allerSur` vérifie le
+`data-ecran` atteint.
+
+Deux autres erreurs de mesure de la même suite : elle tapait `click` quand `SceneSvg` écoute
+`pointerdown` (33 régions vivantes déclarées mortes), et comptait le décor `[data-region-svg]`
+de la carte parmi les commandes.
+
+## Q-I9 — `chargement` : couvert par un test de composant, jamais exempté
+
+Seul écran du dépôt qu'aucun parcours n'atteint. Les deux branches qui le rendent sont
+court-circuitées : `Application.tsx:66-71` sort de l'attente dans un effet de **montage** sans
+attendre le réseau, et l'entrée dans un nœud pose le paquet **avant** de basculer l'écran.
+Vérifié par un `MutationObserver` posé avant le montage de React, nœuds ajoutés **et** anciennes
+valeurs d'attribut — il ne relève jamais `chargement`.
+
+**Choix : ne pas l'exempter.** Une couverture qui s'accorde des dérogations ne prouve plus rien.
+Il est couvert par `tests/composants/EcranChargement.test.tsx`, et la suite E2E **vérifie
+mécaniquement** que ce fichier existe et le nomme. Un écran ni atteint ni couvert fait échouer la
+QA, en le nommant.
+
+**À trancher par le père** : `EcranChargement` du routeur est du code mort au sens strict. Je ne
+l'ai pas supprimé — c'est du bon code défensif, et le supprimer demanderait de toucher à
+`CodeEcran`, qui n'appartient à aucun lot.
+
+## Q-I10 — Deux défauts d'ISOLATION de la suite E2E, pas du produit
+
+Les deux ont fait accuser un innocent, et c'est le pire défaut qu'un test puisse avoir.
+
+1. **Le verrou parent est global et dure 15 minutes.** `parcours-parent.spec.ts` l'éprouve en
+   envoyant cinq codes faux — c'est son travail —, puis la porte reste close pour tout ce qui
+   s'exécute après lui, sur un serveur et une base partagés. Les trois recettes parent de la QA
+   échouaient sans que rien ne dise pourquoi ; isolées, elles passaient.
+   **Remède double** : les specs de la QA sont renommées `parcours-audit-*` pour passer avant
+   `parcours-parent` (Playwright ordonne par chemin), **et** `ouvrirLaZoneParent` interroge
+   `GET /api/parent/etat` pour DIRE que la porte est verrouillée si l'ordre change un jour.
+2. **`chargerProfil` retombe sur un profil de même PRÉNOM** quand l'identifiant est inconnu
+   (`crochets.ts:159-170`). Le cas « profil neuf » de `parcours-sortie-6-noeuds` héritait donc du
+   monde laissé par le cas précédent, qui venait de clore Les Galeries : `départs offerts :
+   clairiere, marais-jumeau`. Forcer un identifiant neuf ne changeait rien — il fallait un
+   prénom propre. Avec lui : `profil neuf — départs offerts : clairiere, galeries`.
+
+## Q-I11 — Le `skip` de l'aide de Gobi remplacé par une exigence
+
+Trois moteurs — `colorie`, `place`, `trace` — ne rendent pas de bouton d'aide : leur aide est
+portée par la coquille (`Gobi.tsx`). La QA les **sautait** (`test.skip`), retirant de l'audit
+l'aide de Gobi sur `trace`, c'est-à-dire sur le `d` que le père n'a pas réussi à tracer.
+
+« Ne jamais mettre un test en skip » : le remède n'était pas d'assouplir le test mais de donner
+au bouton de la coquille `data-action="aide"`, la prise que les onze autres moteurs avaient déjà.
+L'aide est désormais **exigée sur tous les moteurs**, sans exception.
+
+## Q-I12 — Boutons dont l'effet était réel mais invisible
+
+Six boutons d'écoute (celui des consignes, cinq dans les réglages de lecture) ne changeaient ni
+le DOM ni l'état : le son partait, mais rien ne le montrait. **C'est la forme exacte du défaut
+n° 2 du père** — un bouton dont le seul effet est inaudible (tablette en sourdine, volume à zéro)
+est indiscernable d'un bouton cassé, pour l'enfant comme pour le test.
+
+`data-ecoutes` leur donne une trace durable. Ce n'est **jamais** facturé : réécouter reste
+gratuit et sans limite.
+
+## Q-I13 — Ce qui reste ROUGE, et pourquoi
+
+1. **`npm run test:visuel`** — attendu, c'est **D39**. Les références attendent le nouveau
+   graphisme et **la validation d'un adulte qui a regardé l'image**. Je n'ai figé aucune
+   référence, conformément à la règle non négociable.
+2. **`npm run test:contenu`** — 14 anomalies, **toutes de la même famille et toutes antérieures
+   à mon passage** : des SVG que ni un habillage ni un document de `contenu/monde/` ne déclare,
+   donc « contenu mort, ou déclaration manquante ». Ce sont les 5 animations de Gobi,
+   `cristal-base`, les 5 anciens stades v1, et les 3 décors v1 remplacés par leurs v2. **Je n'en
+   ai supprimé aucun** — ils ne sont pas de ma session, et le contrat § 4.3 demande explicitement
+   de garder les anciens stades. Deux issues, et elles appartiennent au père : les déclarer (les
+   animations de Gobi le méritent, elles sont utilisées), ou acter que les v1 sont des archives et
+   les sortir de `contenu/`.
+   **J'ai en revanche corrigé le seul défaut RÉEL du lot** : trois tracés ouverts remplis de noir
+   par défaut (`joie.svg`, `stade-2.svg` deux fois), qui faisaient fuir le remplissage sur toute
+   l'image. L'inventaire des défauts connus de `regions-fermees.test.ts` tombe à **zéro**.
+
+## Q-I14 — Un défaut RÉEL trouvé et NON corrigé, faute de temps : le moteur `phrase`
+
+**À traiter en priorité.** Mesuré dans le journal du serveur pendant la QA :
+
+```
+[pierre] 500 sur POST /api/tentatives — Le mode « ordre » calcule p_devinette en 1/n! :
+         « nbElements » doit être un entier >= 2, reçu null.
+```
+
+`modeReponsePhrase` rend toujours `'ordre'` (`partage/src/moteurs/phrase/validation.ts:17`), et
+l'état d'étape du moteur `phrase` ne pose **jamais** `nbElements`
+(`partage/src/moteurs/phrase/moteur.ts:200`). Le BKT du serveur le refuse, la route répond 500,
+et **la tentative n'est jamais journalisée**.
+
+Conséquence, et elle est sérieuse : « le journal fait foi ». Un enfant qui termine le nœud
+`clairiere-05` ne laisse **aucune trace** — pas de progression, pas d'étoiles enregistrées, pas
+de mise à jour du modèle pédagogique. L'écran de récompense s'affiche quand même, donc **rien ne
+se voit**.
+
+Le remède tient sans doute en une ligne — poser `nbElements` à la taille de l'ordre attendu, à la
+création de l'étape — mais il touche un moteur de `partage/` que je n'ai pas relu en entier, à une
+heure où je ne peux plus faire relire mon travail. **Je préfère le signaler précisément que le
+corriger vite.** Aucun test ne le garde aujourd'hui : c'est le premier à écrire.
+
+## Q-I15 — Le `c` du ductus tourne dans le sens horaire
+
+`contenu/modeles-lettres/minuscules.json`, mesuré à l'aire signée : `c-arc` a une aire de
+**+1115**, donc **horaire**, alors que la table du contrat de finition v3 § 2.9 le classe dans la
+famille des `ronds`, en **antihoraire**. Les autres ronds sont conformes : `a`, `d`, `g`, `o`, `q`
+sont tous antihoraires, et `d` part bien de `(70, 60)` — en haut à droite, comme D33 l'exige.
+
+Le référentiel `ductus-minuscules.json` ne déclare que ce qu'une source tranche et range les
+autres lettres dans `nonTranchees` ; le `c` en fait partie. **Ce n'est donc pas une régression,
+c'est une lettre non arbitrée** — mais elle est incohérente avec sa propre famille, et la
+consigne verbale « on part en haut à droite et on tourne à gauche » sera fausse pour elle.
+À trancher par un adulte qui a vu l'enfant écrire.

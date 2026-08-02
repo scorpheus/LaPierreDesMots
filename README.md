@@ -49,12 +49,10 @@ tiers). Elle ne sert pas à jouer :
 npm run preparer
 ```
 
-## Jouer
+## Le détail du lancement, et l'adresse de la tablette
 
-Double-cliquer sur **`demarrer.bat`**.
-
-Le script vérifie Node, installe les dépendances si c'est le premier lancement, compile ce qui
-doit l'être, démarre le serveur en HTTP (décision D3 : pas de certificat à installer sur la
+`demarrer.bat` vérifie Node, installe les dépendances si c'est le premier lancement, compile ce
+qui doit l'être, démarre le serveur en HTTP (décision D3 : pas de certificat à installer sur la
 tablette) et affiche l'adresse à ouvrir, avec son QR :
 
 ```
@@ -95,20 +93,40 @@ Développement : `npm run dev` (serveur qui se recharge + Vite), `npm run lint`,
 
 ## Ce que contient cette version
 
-La v1 est une **tranche verticale mince** : peu de surface, mais de bout en bout, du fichier JSON
-jusqu'au pixel colorié sur la tablette.
+**Chiffres mesurés le 2026-08-02, à l'intégration des lots N1 à N8** — commandes citées dans
+`Docs/questions-en-attente.md`, jamais recopiées d'un document.
 
-- **Un nœud jouable** — la cour de l'école, dans la région de la Clairière.
-- **Un moteur** — `colorie` : Gobi énonce une consigne, l'enfant tape une région du dessin avec la
-  couleur demandée, la couleur s'écoule dans la forme.
-- **Quatre écrans** — choix du profil, carte, nœud, récompense.
-- **Un serveur** Fastify avec sa base SQLite : profils, journal des tentatives, progression.
+- **Deux régions ouvertes dès la première seconde** (D38) — La Clairière et Les Galeries,
+  **6 nœuds chacune**, soit **12 nœuds** et **12 exercices**. Les Galeries travaillent
+  précisément les confusions `b`/`d`/`p`/`q`.
+- **8 moteurs de jeu réellement jouables** sur les 14 que le code déclare : `attrape`,
+  `colorie`, `eclair`, `grave`, `phrase`, `place`, `trace`, `tri`. Les six autres existent et
+  attendent leur contenu — la QA les compte et les nomme, pour qu'ils ne soient pas oubliés.
+- **132 clips de voix pré-rendus**, hors ligne, en Opus. **Toutes les consignes livrées ont une
+  voix** : le bouton « écouter » n'est plus masqué nulle part (D41, D42).
+- **13 écrans**, tous parcourus par la QA, tous avec une sortie.
+- **Le campement** et ses 30 points d'interaction gratuits, l'étagère des formes à cases vides
+  visibles, Gobi et ses **10 stades** d'évolution irréversible, **25 formes** de graphème.
+- **La séquence d'ouverture** en 5 tableaux, offerte et jamais imposée : partir en sortie reste
+  à **un seul tap** depuis l'ouverture de l'application (D46).
+- **L'espace du parent** : suivi, galerie de tous les exercices lançables sans rien journaliser,
+  relecture des contenus, exports, réglages.
+- **Un serveur** Fastify, base SQLite, **9 migrations** numérotées.
 - **La chaîne de test complète** — unitaires, composants, API, parcours, robustesse, visuel,
   accessibilité.
 
-Ce qui **n'y est pas encore**, et c'est délibéré : l'audio (les consignes existent à l'écrit, le
-bouton « écouter » est câblé mais muet), la carte des six régions, le modèle pédagogique adaptatif,
-les cinq autres régions.
+### Ce qui n'y est pas encore, et c'est délibéré
+
+- **Les quatre autres régions** (Marais Jumeau, Forêt Muette, Volcan, Cité des Histoires). Leurs
+  décors existent, leur contenu non. « L1 décide de tout » : une région complète et jouable avant
+  d'en construire cinq.
+- **Les captures visuelles de référence** — `npm run test:visuel` est **rouge, et c'est déclaré**
+  (D39). Le graphisme vient d'être refait ; figer les références maintenant reviendrait à les
+  refaire aussitôt. **Aucune référence n'est figée sans un adulte qui a regardé l'image.** C'est
+  la seule étape rouge de la chaîne, et elle attend une validation, pas une correction.
+- **Les cursives** : l'enfant sort du CP et lit du script. Le référentiel de ductus porte déjà le
+  champ `casse` ; les ajouter n'ajoutera pas une ligne de code, seulement des données.
+- **Le clonage d'une voix de la famille** — les voix sont entièrement synthétiques (D41).
 
 ## L'espace du parent, et son code à quatre chiffres
 

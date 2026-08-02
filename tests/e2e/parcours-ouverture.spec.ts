@@ -68,10 +68,21 @@ async function preparer(page: Page, profil: unknown = fixtureProfil): Promise<vo
   );
 }
 
-/** Le chemin de l'enfant : je choisis mon profil, je vois la carte. */
-async function allerALaCarte(page: Page): Promise<void> {
+/**
+ * Le chemin de l'enfant : je choisis mon profil, je vois la carte.
+ *
+ * `prenom` permet de viser un profil PRÉCIS. Sans lui, `getByText(...).first()` désigne « le
+ * premier élément qui contient ce prénom » — et le cas « VUE UNE FOIS » crée son propre profil
+ * côté serveur, donc un SECOND « Alma » quand un test antérieur en a déjà posé un. Le tap
+ * choisissait alors l'ancien, la séquence marquait l'ouverture de l'ancien, et le cas
+ * interrogeait le nouveau : `vue: false`, sans que rien ne dise pourquoi. Isolé, il passait.
+ */
+async function allerALaCarte(page: Page, prenom?: string): Promise<void> {
   await expect(page.locator('[data-ecran="profils"]')).toBeVisible();
-  await page.getByText(String(fixtureProfil['prenom']), { exact: false }).first().click();
+  await page
+    .getByText(String(prenom ?? fixtureProfil['prenom']), { exact: false })
+    .first()
+    .click();
   await expect(page.locator('[data-ecran="carte"]')).toBeVisible();
 }
 
@@ -183,14 +194,16 @@ test.describe('la séquence d’ouverture', () => {
     // On crée donc le profil comme l'application le fait, et on suit l'identifiant que le
     // serveur attribue — jamais un littéral, qui redeviendrait faux au premier changement
     // de schéma d'identifiants.
-    const creation = await request.post('/api/profils', {
-      data: { prenom: String(fixtureProfil['prenom']) }
-    });
+    // Un prénom PROPRE à ce cas — pas celui de la fixture. Voir l'encadré d'`allerALaCarte` :
+    // deux profils de même prénom rendent le tap ambigu, et le cas mesurait alors l'ouverture
+    // d'un autre enfant que celui qu'il interrogeait.
+    const PRENOM = 'Ouverture';
+    const creation = await request.post('/api/profils', { data: { prenom: PRENOM } });
     expect(creation.status(), 'le profil de la séquence doit être créé côté serveur').toBe(201);
     const profil = String(((await creation.json()) as { readonly id: unknown }).id);
 
-    await preparer(page, { ...fixtureProfil, id: profil });
-    await allerALaCarte(page);
+    await preparer(page, { ...fixtureProfil, id: profil, prenom: PRENOM });
+    await allerALaCarte(page, PRENOM);
 
     const avant = await (await request.get(`/api/profils/${profil}/ouverture`)).json();
     expect(avant).toMatchObject({ vue: false, nbRejeux: 0 });

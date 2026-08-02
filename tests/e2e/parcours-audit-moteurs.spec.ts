@@ -133,14 +133,24 @@ test.describe('QA — chaque moteur atteignable est joué de bout en bout', () =
       await preparer(page);
       await entrerDansLeNoeud(page, noeud);
 
+      // ── PLUS AUCUN `skip` ICI, ET C'EST UNE CORRECTION DE PRODUIT, PAS DE TEST ───────────
+      //
+      // Ce cas sautait quand le nœud ne rendait aucun `[data-action="aide"]`. Trois moteurs
+      // étaient dans ce cas — `colorie`, `place` et `trace` —, leur aide étant portée par la
+      // COQUILLE (`client/src/composants/Gobi.tsx`) et non par eux. Le `skip` retirait donc
+      // silencieusement de l'audit l'aide de Gobi sur `trace` : le moteur du `d` que le père
+      // n'a pas réussi à tracer, c'est-à-dire exactement là où l'aide compte le plus.
+      //
+      // « Ne jamais mettre un test en skip, ne jamais assouplir une assertion » (CLAUDE.md).
+      // Le bouton de la coquille porte désormais la même prise que les onze autres, et l'aide
+      // est EXIGÉE sur tous les moteurs, sans exception.
       const aide = page.locator('[data-action="aide"]');
-      const nbAide = await aide.count();
-      if (nbAide === 0) {
-        // On ne fait pas échouer le moteur pour ça : le bouton d'aide est porté par la coquille
-        // de certains moteurs et par le moteur lui-même pour d'autres. On l'affirme mesuré.
-        test.skip(true, `« ${moteur} » ne rend aucun [data-action="aide"] sur ce nœud`);
-        return;
-      }
+      expect(
+        await aide.count(),
+        `« ${moteur} » (nœud ${noeud}) ne rend aucun [data-action="aide"]. L'aide de Gobi doit ` +
+          `être offerte sur CHAQUE moteur — « elle ne coûte rien et n'est jamais présentée ` +
+          `comme un échec » (règle non négociable).`,
+      ).toBeGreaterThan(0);
 
       const avant = JSON.stringify(await etatDuJeu(page));
       await aide.first().click();

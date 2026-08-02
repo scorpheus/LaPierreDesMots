@@ -563,6 +563,36 @@ export async function entrerDansLeNoeud(page: Page, noeud: string): Promise<void
  * avec le même pavé, ce qui est exactement ce que N5 avait promis.
  */
 export async function ouvrirLaZoneParent(page: Page): Promise<void> {
+  // ── LE VERROU EST UNE RESSOURCE PARTAGÉE, ET IL SE DIAGNOSTIQUE ICI ──────────────────────
+  //
+  // `verrou_parent` n'a qu'UNE ligne pour tout le foyer, l'horloge du serveur est l'horloge
+  // système (non injectable — `serveur/src/index.ts:14` importe `horloge` telle quelle), et
+  // `DUREE_VERROU_MS` vaut 900_000, soit QUINZE MINUTES. La suite E2E tourne sur UN serveur
+  // et UNE base `:memory:` pour tous ses fichiers.
+  //
+  // Conséquence mesurée : `parcours-parent.spec.ts` éprouve le verrou en envoyant cinq codes
+  // faux — c'est son travail, et il le fait bien — puis la porte reste close pour tout ce qui
+  // s'exécute après lui. Les trois recettes parent de la QA échouaient alors sans que rien ne
+  // dise pourquoi ; isolées, elles passaient. C'est un défaut d'ISOLATION de la suite, pas du
+  // produit, et le pire des défauts de test : celui qui accuse un innocent.
+  //
+  // Deux remèdes, et il faut les deux :
+  //   • les fichiers de la QA sont nommés `parcours-audit-*` pour passer AVANT
+  //     `parcours-parent` (Playwright ordonne par chemin) ;
+  //   • et si l'ordre change un jour, le contrôle ci-dessous le DIT au lieu de laisser
+  //     échouer un `click` sur un délai de 90 s.
+  const etat = await page.request.get('/api/parent/etat');
+  if (etat.ok()) {
+    const lu = (await etat.json()) as { readonly verrouilleJusqua?: string | null };
+    expect(
+      lu.verrouilleJusqua ?? null,
+      'La porte parent est VERROUILLÉE avant que la QA n’ouvre. Un test antérieur a épuisé ' +
+        'les 5 essais du foyer (voir parcours-parent.spec.ts) et le verrou dure 15 minutes. ' +
+        'Ce n’est pas un défaut du produit : c’est l’ordre des fichiers. Les specs de la QA ' +
+        'doivent passer AVANT parcours-parent.spec.ts — d’où leur préfixe `parcours-audit-`.',
+    ).toBeNull();
+  }
+
   await page.locator('[data-acces-parent]').click();
   await expect(page.locator('[data-parent="code"]')).toBeVisible();
   for (const chiffre of CODE_PARENT) {

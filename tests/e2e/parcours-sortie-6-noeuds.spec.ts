@@ -93,23 +93,51 @@ function exerciceParNoeud(): ReadonlyMap<string, string> {
   return table;
 }
 
-async function entrerSurLaCarte(page: Page, termines: readonly string[]): Promise<void> {
+/**
+ * `idProfil` — POURQUOI IL EXISTE, et c'est un défaut d'isolation, pas un confort.
+ *
+ * La carte lit le monde SUR LE SERVEUR (`GET /api/profils/:id/monde`), pas dans le magasin :
+ * `chargerProfil` peut donc bien passer une progression vide, l'état des régions vient de la
+ * base, et la base est partagée par toute la suite E2E (un seul serveur, une seule
+ * `:memory:`). Le cas « on entre dans Les Galeries SANS avoir terminé la Clairière » suppose
+ * un profil NEUF ; or le cas qui le précède dans ce même fichier vient de parcourir les six
+ * nœuds des Galeries avec le même identifiant.
+ *
+ * Mesuré : `départs offerts : clairiere, marais-jumeau` — les Galeries avaient leur Éclat,
+ * donc elles étaient closes, donc D38 semblait violée. Le produit était juste ; c'est le test
+ * qui héritait de l'état du précédent. Un identifiant propre rend au cas la prémisse qu'il
+ * énonce.
+ */
+async function entrerSurLaCarte(
+  page: Page,
+  termines: readonly string[],
+  prenomPropre?: string,
+): Promise<void> {
   await page.evaluate(
-    async ({ fixture, graine, instant, progression }) => {
+    async ({ fixture, graine, instant, progression, prenom }) => {
       const crochets = (window as FenetreTest).__test;
       crochets.sauterAnimations();
       crochets.graine(graine);
       crochets.figerHorloge(instant);
       await crochets.chargerProfil({
         ...(fixture as Record<string, unknown>),
+        ...(prenom === undefined ? {} : { prenom }),
         progression: progression.map((noeud) => ({ noeud, etoiles: 3 })),
       });
     },
-    { fixture: fixtureProfil, graine: GRAINE, instant: INSTANT, progression: termines },
+    {
+      fixture: fixtureProfil,
+      graine: GRAINE,
+      instant: INSTANT,
+      progression: termines,
+      prenom: prenomPropre,
+    },
   );
 
   await expect(page.locator('[data-ecran="profils"]')).toBeVisible();
-  await page.getByText(String(fixtureProfil['prenom']), { exact: false }).first().click();
+  await page.getByText(String(prenomPropre ?? fixtureProfil['prenom']), { exact: false })
+    .first()
+    .click();
   await expect(page.locator('[data-ecran="carte"]')).toBeVisible();
 }
 
@@ -203,7 +231,13 @@ test.describe('Les Galeries sont une région JOUABLE, pas seulement ouverte (D38
     // l'autre : c'est aussi la garantie qu'aucune session ne se termine sans réussite (R14).
     await page.goto('/');
     await page.waitForFunction(() => (window as FenetreTest).__test !== undefined);
-    await entrerSurLaCarte(page, []);
+    // Un PRÉNOM propre à ce cas — et c'est bien le prénom, pas l'identifiant.
+    // `chargerProfil` (client/src/testabilite/crochets.ts:159-170) cherche d'abord le profil
+    // par son `id` ; s'il ne le trouve pas, il RETOMBE sur un profil existant DE MÊME PRÉNOM,
+    // et n'en crée un que si aucun ne correspond. Forcer un identifiant neuf ne changeait donc
+    // rien : le crochet retrouvait « Alma » et le cas héritait du monde laissé par le
+    // précédent, qui venait de clore Les Galeries.
+    await entrerSurLaCarte(page, [], 'Neuve');
 
     const departs = await page
       .locator('[data-depart]')

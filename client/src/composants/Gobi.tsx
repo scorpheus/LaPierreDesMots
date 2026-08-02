@@ -255,6 +255,18 @@ export function Gobi({
       <button
         type="button"
         className="cible cible-secondaire"
+        // `data-action="aide"` — la MÊME prise que les onze moteurs qui rendent leur propre
+        // bouton d'aide. Ajoutée à l'intégration.
+        //
+        // Onze moteurs sur quatorze portaient cet attribut ; `colorie`, `place` et `trace`
+        // n'en rendent aucun, parce que leur aide est portée par la COQUILLE — ce bouton-ci.
+        // La QA des moteurs ne trouvait donc pas de bouton d'aide sur ces trois-là et les
+        // SAUTAIT (`test.skip`), c'est-à-dire qu'elle ne vérifiait pas l'aide de Gobi
+        // précisément sur le moteur `trace`, celui du `d` que le père n'a pas réussi à faire.
+        //
+        // « Ne jamais mettre un test en skip » (CLAUDE.md) : le remède n'était pas d'assouplir
+        // le test mais de donner au bouton la prise que les autres avaient déjà.
+        data-action="aide"
         onClick={surDemande}
         aria-label="Demander de l’aide à Gobi"
       >
