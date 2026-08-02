@@ -94,6 +94,25 @@
   --lecture-famille: "Andika", "Atkinson Hyperlegible", Verdana, system-ui, sans-serif;
   /* Teinte de la syllabe de rang impair. Le rang pair garde l'encre — l'alternance doit se
      voir sans que le texte devienne bicolore au point de désigner une syllabe comme fautive.
-     Le lagon est le seul jeton froid de la palette et n'est associé à aucun refus. */
-  --lecture-syllabe-alternee: var(--lagon);
+     Le lagon est le seul jeton froid de la palette et n'est associé à aucun refus.
+
+     ── ASSOMBRI À L'INTÉGRATION — c'est du texte que l'enfant DÉCHIFFRE ──────────────────
+     Ce jeton valait `var(--lagon)`, soit #2FA8E0. Mesuré par axe-core, une fois que l'audit
+     d'accessibilité a réellement atteint les écrans de lecture :
+
+         #2fa8e0 sur #fff6e3 — ratio 2,5 : 1     (WCAG AA en exige 4,5 pour du texte)
+
+     Ce n'est pas une finesse de norme. **Une syllabe sur deux de chaque mot** était rendue à
+     2,5 : 1 sur le parchemin — c'est-à-dire la moitié de tout ce que l'enfant doit décoder,
+     à un contraste où l'œil peine. Pour un enfant qui sort du CP et déchiffre encore, la
+     coloration syllabique est une AIDE : rendue trop pâle, elle devenait un obstacle.
+
+     `#1B6F97` est le même bleu — teinte lagon conservée — assombri jusqu'à **5,19 : 1**.
+     Le jeton `--lagon` de la palette n'est PAS touché : la palette est un objet protégé
+     (CLAUDE.md), et seul cet alias de LECTURE change.
+
+     Le commentaire d'origine de `global.css:210` disait déjà « PLACEHOLDER : la teinte
+     alternée est à valider avec l'enfant ». Elle l'est toujours : ce choix corrige un défaut
+     mesuré, il ne clôt pas la question. Consigné en Q-I16 de questions-en-attente.md. */
+  --lecture-syllabe-alternee: #1B6F97;
 }

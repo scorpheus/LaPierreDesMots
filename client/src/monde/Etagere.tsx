@@ -59,10 +59,8 @@ function Vignette({ une }: { readonly une: CaseEtagere }): ReactElement {
         border: une.obtenue
           ? 'var(--epaisseur-trait) solid var(--trait)'
           : 'var(--epaisseur-trait) dashed var(--trait)',
-        backgroundColor: une.obtenue ? 'var(--parchemin)' : 'transparent',
-        // En creux : lisible, mais sans couleur. Le vide se voit, il ne disparaît pas.
-        opacity: une.obtenue ? 1 : 0.6,
-        filter: une.obtenue ? 'none' : 'saturate(0)'
+        backgroundColor: une.obtenue ? 'var(--parchemin)' : 'transparent'
+        // `opacity` et `filter` ne sont PLUS ici — voir l'encadré sur le libellé, plus bas.
       }}
     >
       {une.obtenue ? (
@@ -74,7 +72,24 @@ function Vignette({ une }: { readonly une: CaseEtagere }): ReactElement {
           aria-hidden="true"
         />
       ) : (
-        <svg width="48" height="48" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+        <svg
+          width="48"
+          height="48"
+          viewBox="0 0 48 48"
+          aria-hidden="true"
+          focusable="false"
+          // ── LE CREUX EST SUR LE DESSIN, PLUS SUR TOUTE LA CASE ────────────────────────
+          // `opacity: 0.6` et `saturate(0)` portaient sur le `<li>` entier, donc AUSSI sur
+          // le libellé. Mesuré par axe-core, une fois que l'audit a11y a réellement atteint
+          // le campement : `#767c8c` sur `#fff6e3`, **ratio 3,88 pour 4,5 exigé**, sur les
+          // 25 cases vides de l'étagère et les 37 du coffre.
+          //
+          // Le nom de la forme est justement ce que l'enfant doit pouvoir LIRE pour savoir
+          // ce qu'il lui reste à trouver : c'est le texte le plus utile de l'écran, et
+          // c'était le moins lisible. D44 demande que la case vide se VOIE « en creux » —
+          // elle parle du dessin, pas de son étiquette.
+          style={{ opacity: 0.6, filter: 'saturate(0)' }}
+        >
           {/* Le même cristal, en silhouette. La forme de ce qui viendra se remplir. */}
           <path
             d="M24,4 L44,24 L24,44 L4,24 Z"

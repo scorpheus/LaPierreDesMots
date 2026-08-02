@@ -50,14 +50,29 @@ function Case({
         flexDirection: 'column',
         gap: '0.35rem',
         inlineSize: '9rem',
-        cursor: 'default',
-        // En creux : la même case, en Grisaille. Jamais une case vide, jamais un cadenas.
-        opacity: obtenu ? 1 : 0.55,
-        filter: obtenu ? 'none' : 'saturate(0)'
+        cursor: 'default'
+        // `opacity` / `filter` ne sont plus ici : voir l'encadré sur le dessin, ci-dessous.
       }}
     >
       {asset === null ? (
-        <svg width="48" height="48" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+        <svg
+          width="48"
+          height="48"
+          viewBox="0 0 48 48"
+          aria-hidden="true"
+          focusable="false"
+          // ── LE CREUX PORTE SUR LE DESSIN, PAS SUR LE LIBELLÉ ──────────────────────────
+          // `opacity: 0.55` et `saturate(0)` s'appliquaient au `<li>` entier, donc aussi au
+          // nom de la pièce. Mesuré par axe-core une fois l'audit a11y réellement arrivé sur
+          // le coffre : `#828389` et `#82848f` sur `#fff6e3`, **ratios 3,51 et 3,46 pour 4,5
+          // exigés**, sur les cases non obtenues.
+          //
+          // « En creux : la même case, en Grisaille. Jamais une case vide, jamais un cadenas »
+          // parle du DESSIN. Le nom de la pièce, lui, est ce qui dit à l'enfant ce qu'il peut
+          // encore trouver : c'est le texte le plus utile de l'écran, et il était le moins
+          // lisible. Même correction que pour l'étagère (`client/src/monde/Etagere.tsx`).
+          style={{ opacity: 0.55, filter: 'saturate(0)' }}
+        >
           <path
             d="M24,4 L44,24 L24,44 L4,24 Z"
             fill="var(--grisaille)"
@@ -67,7 +82,14 @@ function Case({
           />
         </svg>
       ) : (
-        <img src={urlAsset(asset)} alt="" width={48} height={48} aria-hidden="true" />
+        <img
+          src={urlAsset(asset)}
+          alt=""
+          width={48}
+          height={48}
+          aria-hidden="true"
+          style={obtenu ? undefined : { opacity: 0.55, filter: 'saturate(0)' }}
+        />
       )}
       <span style={{ fontSize: '0.95rem', textAlign: 'center' }}>{libelle}</span>
     </li>

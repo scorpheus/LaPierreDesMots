@@ -2858,3 +2858,48 @@ autres lettres dans `nonTranchees` ; le `c` en fait partie. **Ce n'est donc pas 
 c'est une lettre non arbitrée** — mais elle est incohérente avec sa propre famille, et la
 consigne verbale « on part en haut à droite et on tourne à gauche » sera fausse pour elle.
 À trancher par un adulte qui a vu l'enfant écrire.
+
+## Q-I16 — L'audit d'accessibilité n'auditait qu'un seul écran, et il en cachait quatre défauts
+
+**Le même mensonge que Q-I8, dans un autre fichier.** `tests/qualite/a11y-tout-le-site.spec.ts`
+faisait `page.goto(chemin)` pour chacune des routes de `CHEMINS`, puis lançait axe-core. Le
+routeur étant en mémoire, **les sept routes rendaient toutes l'écran des profils** : le
+campement, le coffre, les réglages de lecture, le dashboard, la galerie, l'ouverture et les
+douze nœuds n'ont jamais vu passer axe-core, alors que le rapport annonçait
+« 7 route(s) déclarée(s) auditée(s) ».
+
+Ce fichier emploie désormais les **mêmes recettes** que la QA des parcours — un seul inventaire,
+une seule façon d'arriver sur un écran. Il est passé de 7 routes prétendues à **23 écrans
+réellement audités**, et il a immédiatement trouvé **12 écrans en violation**, tous
+`serious`. Quatre causes, toutes corrigées :
+
+1. **L'étagère et le coffre teignaient leur ÉTIQUETTE avec leur dessin.** `opacity: 0.6` (et
+   `0.55`) portait sur le `<li>` entier, donc aussi sur le nom de la forme. Mesuré :
+   `#767c8c` sur `#fff6e3` — **ratio 3,88** — et `#828389` / `#82848f` — **3,51 et 3,46** —
+   pour 4,5 exigés, sur 25 puis 37 cases.
+   D44 demande que la case non gagnée se voie « en creux » : elle parle du DESSIN. Le nom de
+   la forme, lui, est précisément ce qui dit à l'enfant ce qu'il lui reste à trouver — c'était
+   le texte le plus utile de l'écran, et le moins lisible. Le creux porte désormais sur le
+   dessin seul.
+
+2. **La coloration syllabique était à 2,5 : 1.** `--lecture-syllabe-alternee` valait
+   `var(--lagon)`, soit `#2FA8E0` sur parchemin. **Une syllabe sur deux de chaque mot** — donc
+   la moitié de tout ce que l'enfant déchiffre — était rendue à un contraste où l'œil peine.
+   Pour un enfant qui sort du CP, la coloration syllabique est une AIDE ; trop pâle, elle
+   devenait un obstacle.
+   Porté à `#1B6F97` — **même teinte lagon, assombrie, 5,19 : 1**. **Le jeton `--lagon` de la
+   palette n'est PAS touché** : la palette est un objet protégé (CLAUDE.md), et seul l'alias de
+   lecture change. Le commentaire d'origine disait déjà « PLACEHOLDER : la teinte alternée est
+   à valider avec l'enfant » — **elle l'est toujours**. Cette correction solde un défaut mesuré,
+   elle ne clôt pas la question du choix de teinte.
+
+3. **La scène du moteur `place` était `role="img"`.** Un rôle d'image déclare un contenu
+   atomique : un lecteur d'écran n'y entre pas. Or elle contient les emplacements que l'enfant
+   doit taper — c'est-à-dire tout l'exercice. Passée en `role="group"`.
+
+**Ce qu'il faut retenir de Q-I8 et Q-I16 ensemble** : les deux suites qui devaient garantir la
+couverture — la QA des parcours et l'audit d'accessibilité — mesuraient toutes deux le même
+écran en boucle et publiaient un compte rassurant. Aucune des deux ne mentait volontairement ;
+aucune des deux n'avait le moyen de savoir qu'elle n'était jamais arrivée. C'est pourquoi
+`allerSur` **vérifie désormais le `data-ecran` atteint** avant de mesurer quoi que ce soit : une
+recette qui n'aboutit pas fait échouer le cas, au lieu de le rendre vert sur du vide.

@@ -159,7 +159,18 @@ export function ScenePlace(proprietes: ProprietesScenePlace): ReactElement {
     <svg
       data-scene="place"
       viewBox={viewBox}
-      role="img"
+      // ── `group`, ET NON `img` ────────────────────────────────────────────────────────
+      // `role="img"` déclare un contenu ATOMIQUE : un lecteur d'écran n'annonce alors que
+      // l'étiquette et n'entre pas dedans. Or cette scène CONTIENT les cibles que l'enfant
+      // doit taper — la règle `nested-interactive` d'axe-core l'a relevé, en `serious`, dès
+      // que l'audit d'accessibilité a réellement atteint le nœud `clairiere-04` :
+      //
+      //     nested-interactive (serious) × 1   sur svg[data-scene="place"]
+      //
+      // Conséquence concrète : les emplacements du moteur `place` étaient invisibles à la
+      // navigation assistée, alors qu'ils sont tout l'exercice. `role="group"` garde
+      // l'étiquette du décor et rend ses enfants atteignables.
+      role="group"
       aria-label={habillage.libelle}
       style={{ width: '100%', height: 'auto', touchAction: 'none' }}
     >

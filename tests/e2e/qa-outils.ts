@@ -624,3 +624,121 @@ export async function jouerJusquALaRecompense(page: Page, noeud: string): Promis
     }
   });
 }
+
+/**
+ * LES RECETTES — comment l'enfant (ou le parent) arrive sur chaque écran.
+ *
+ * Chacune part d'un `preparer()` frais et navigue EN TAPANT. Aucune n'emploie `page.goto` :
+ * l'historique du routeur est en mémoire, et un `goto` recharge l'application sur `/` — voir
+ * l'en-tête de `qa-outils.ts`, mesure à l'appui.
+ */
+export function recettesDEcrans(): readonly EcranQA[] {
+  const NOEUDS = noeudsLivres();
+  /** Le premier nœud `colorie` : c'est par lui qu'on atteint l'écran de récompense. */
+  const NOEUD_COLORIE = NOEUDS.find((n) => n.moteur === 'colorie')?.id ?? NOEUDS[0]!.id;
+  return [
+  {
+    nom: 'profils (accueil)',
+    attendu: 'profils',
+    aller: preparer,
+  },
+  {
+    nom: 'carte du monde',
+    attendu: 'carte',
+    aller: async (page) => {
+      await preparer(page);
+      await choisirLeProfil(page);
+    },
+  },
+  {
+    nom: 'séquence d’ouverture',
+    attendu: 'ouverture',
+    aller: async (page) => {
+      await preparer(page);
+      await choisirLeProfil(page);
+      await page.locator('[data-vers="ouverture"]').click();
+    },
+  },
+  {
+    nom: 'campement',
+    attendu: 'campement',
+    aller: async (page) => {
+      await preparer(page);
+      await choisirLeProfil(page);
+      await page.locator('[data-vers="campement"]').click();
+    },
+  },
+  {
+    nom: 'coffre',
+    attendu: 'coffre',
+    aller: async (page) => {
+      await preparer(page);
+      await choisirLeProfil(page);
+      await page.locator('[data-vers="campement"]').click();
+      await expect(page.locator('[data-ecran="campement"]')).toBeVisible();
+      await page.locator('[data-vers="coffre"]').click();
+    },
+  },
+  {
+    nom: 'réglages de lecture',
+    attendu: 'reglages-lecture',
+    aller: async (page) => {
+      await preparer(page);
+      await page.locator('[data-reglages-lecture]').first().click();
+    },
+  },
+  {
+    nom: 'porte de la zone parent',
+    attendu: 'code-parent',
+    aller: async (page) => {
+      await preparer(page);
+      await page.locator('[data-acces-parent]').click();
+    },
+  },
+  {
+    nom: 'suivi parent (dashboard)',
+    attendu: 'dashboard',
+    aller: async (page) => {
+      await preparer(page);
+      await ouvrirLaZoneParent(page);
+    },
+  },
+  {
+    nom: 'galerie parent (plein écran)',
+    attendu: 'galerie-parent',
+    aller: async (page) => {
+      await preparer(page);
+      await ouvrirLaZoneParent(page);
+      await expect(page.locator('[data-ecran="dashboard"]')).toBeVisible();
+      await page.locator('[data-onglet-parent="galerie"]').click();
+      await page.locator('[data-vers="galerie-parent"]').click();
+    },
+  },
+  {
+    nom: 'choix du joueur à suivre (parent sans profil)',
+    attendu: 'choix-profil-parent',
+    aller: async (page) => {
+      // Le chemin que le père a réellement pris : la porte parent est en pied de l'écran des
+      // profils, donc AVANT tout choix de joueur. `profil` y vaut `null`.
+      await preparerSansProfil(page);
+      await ouvrirLaZoneParent(page);
+    },
+  },
+  {
+    nom: 'récompense',
+    attendu: 'recompense',
+    aller: async (page) => {
+      await preparer(page);
+      await jouerJusquALaRecompense(page, NOEUD_COLORIE);
+    },
+  },
+  ...NOEUDS.map((noeud) => ({
+    nom: `noeud/${noeud.id} (moteur ${noeud.moteur})`,
+    attendu: 'noeud',
+    aller: async (page: Page) => {
+      await preparer(page);
+      await entrerDansLeNoeud(page, noeud.id);
+    },
+  })),
+  ];
+}
