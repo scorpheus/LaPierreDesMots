@@ -17,6 +17,7 @@ import { construireApplication } from './application.js';
 import { appliquerMigrations } from './base/migrations.js';
 import { BASE_EN_MEMOIRE, ouvrirBase } from './base/connexion.js';
 import { lireConfiguration } from './configuration.js';
+import { reparerProgressionRegion } from './depots/monde.js';
 import { creerDepotContenuDisque } from './services/depot-contenu-disque.js';
 
 async function demarrer(): Promise<void> {
@@ -33,6 +34,18 @@ async function demarrer(): Promise<void> {
     process.stdout.write(
       `[pierre] migrations appliquees : ${rapport.appliquees.join(', ')} ` +
         `(schema en version ${String(rapport.versionCourante)})\n`
+    );
+  }
+
+  // H1 — le cache de recoloration se reconstruit AU DEMARRAGE, pas seulement a la premiere
+  // ouverture de la carte. `serveur/src/services/indicateurs.ts` lit `progression_region`
+  // directement pour le tableau de bord du parent : sans cet appel, un parent qui ouvre sa page
+  // avant que l'enfant n'ouvre la carte lirait le pourcentage que la migration 010 vient
+  // d'invalider. Idempotent, et sans effet quand tout est deja juste.
+  const reparees = reparerProgressionRegion(base);
+  if (reparees > 0) {
+    process.stdout.write(
+      `[pierre] recoloration recalculee pour ${String(reparees)} profil(s).\n`
     );
   }
 

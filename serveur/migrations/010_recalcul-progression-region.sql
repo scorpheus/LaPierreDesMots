@@ -1,0 +1,44 @@
+-- 010_recalcul-progression-region : INVALIDER le cache de recoloration -- lot H1.
+--
+-- ══════════════════════════════════════════════════════════════════════════════════════════
+-- CE QUE CETTE MIGRATION REPARE, MESURE ET NON RAPPORTE
+--
+-- `donnees/pierre.db`, profil reel `prf-0fbbeba7fb27d3f7` (« Ezekiel »), le 2026-08-02 :
+--
+--     progression_region : clairiere  pourcentage_colorie = 1  eclat_obtenu_le renseigne
+--                          galeries   pourcentage_colorie = 1  eclat_obtenu_le renseigne
+--     progression_noeud  : 3 nœuds termines -- clairiere-01, galeries-01, galeries-02
+--     contenu livre      : 18 nœuds -- clairiere 6, galeries 12
+--
+-- Les deux regions se croyaient terminees a 100 % avec 3 nœuds joues sur 18. Le pourcentage
+-- avait ete calcule et FIGE quand chaque region n'en declarait qu'un ou deux ; seize nœuds se
+-- sont ajoutes depuis et rien n'a ete recalcule, parce que le depot ecrivait
+-- MAX(ancien, nouveau) sur une colonne qui n'est pas un acquis. Consequence pour l'enfant :
+-- plus aucun monde cliquable sur la carte.
+--
+-- ── CE QU'ELLE FAIT, ET CE QU'ELLE NE TOUCHE PAS ─────────────────────────────────────────
+-- `pourcentage_colorie` est un CACHE recalculable depuis `progression_noeud` et le contenu
+-- courant. On l'invalide -- on le remet a 0 -- et le recalcul le reconstruit.
+--
+-- On ne touche a RIEN d'autre, et c'est la traduction litterale de R14, « un acquis n'est
+-- jamais repris » :
+--   * `eclat_obtenu_le` reste : un Eclat gagne reste gagne, meme si la region compte
+--     desormais plus de nœuds. C'est le POURCENTAGE qui se recalcule, pas le trophee.
+--   * `ouverte` reste : une region ouverte ne se referme jamais.
+--   * `progression_noeud.etoiles` n'est pas effleuree : aucune etoile ne peut decroitre.
+--
+-- ── POURQUOI CE N'EST PAS UN UPDATE QUI RECALCULE ────────────────────────────────────────
+-- Le denominateur d'une region est sa liste `noeuds`, declaree dans
+-- `contenu/monde/regions.json`. Aucun ordre SQL ne lit un fichier JSON, et recopier ces listes
+-- ici creerait une TROISIEME source de verite qui perimerait au prochain nœud livre -- c'est-
+-- a-dire exactement le defaut qu'on repare.
+--
+-- La reconstruction est donc faite en TypeScript, par `reparerProgressionRegion`
+-- (`serveur/src/depots/monde.ts`), que `serveur/src/index.ts` appelle une fois apres les
+-- migrations, avant d'ecouter. Toute lecture de carte la refait de toute facon.
+--
+-- Ni `PRAGMA journal_mode`, ni `PRAGMA foreign_keys` ici : ils sont poses a l'ouverture de la
+-- connexion (contrat technique v1 § 6.1).
+-- ══════════════════════════════════════════════════════════════════════════════════════════
+
+UPDATE progression_region SET pourcentage_colorie = 0;

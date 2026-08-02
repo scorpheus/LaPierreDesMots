@@ -8,9 +8,42 @@
  * journal n'a pas sont `formes_gobi` et `campement` : ce sont des acquis, on les ecrit une fois
  * et on ne les reprend jamais.
  *
- * DEUX ECRITURES MONOTONES, et elles ne sont pas negociables (R14) :
- *   * `progression_region.pourcentage_colorie` en `MAX(ancien, nouveau)` ;
- *   * `stade_gobi` en `MAX(rang_ancien, rang_nouveau)`.
+ * ════════════════════════════════════════════════════════════════════════════════════════════
+ * H1 — `pourcentage_colorie` EST UN CACHE, PAS UN ACQUIS. Ce fichier disait le contraire.
+ *
+ * L'en-tete affirmait « `progression_region.pourcentage_colorie` en MAX(ancien, nouveau) », et
+ * `lireCarte` doublait ce MAX SQL d'un `Math.max` en JavaScript. Le recalcul etait donc fait
+ * puis JETE : la valeur stockee gagnait toujours. La table n'etait pas une projection, c'etait
+ * une seconde source de verite, plus collante que le journal.
+ *
+ * Ce que cela a coute, mesure sur `donnees/pierre.db`, profil reel `prf-0fbbeba7fb27d3f7` :
+ *
+ *     progression_region : clairiere pourcentage_colorie = 1 · galeries pourcentage_colorie = 1
+ *     progression_noeud  : 3 nœuds termines sur les 18 livres
+ *
+ * Les deux regions se croyaient terminees a 100 % avec 3 nœuds joues sur 18, parce que le
+ * pourcentage avait ete fige quand chaque region n'en declarait qu'un ou deux. Consequence :
+ * plus aucun monde cliquable sur la carte.
+ *
+ * LA REGLE, DESORMAIS — une colonne, une nature, et elles ne se melangent plus :
+ *
+ * | colonne               | nature | ecriture                    | peut-elle baisser ? |
+ * |-----------------------|--------|-----------------------------|---------------------|
+ * | `pourcentage_colorie` | CACHE  | affectation directe          | OUI — c'est le recalcul |
+ * | `eclat_obtenu_le`     | ACQUIS | `COALESCE(ancien, nouveau)` | jamais (R14)        |
+ * | `ouverte`             | ACQUIS | `MAX(ancien, nouveau)`      | jamais (R14)        |
+ *
+ * Un Eclat gagne reste gagne meme si la region compte desormais plus de nœuds ; c'est le
+ * POURCENTAGE qui se recalcule. Et `enCours` (@pierre/partage/monde) ne se fonde plus sur
+ * l'Eclat mais sur la recoloration, sans quoi une region close hier resterait close pour
+ * toujours avec seize nœuds neufs dedans.
+ *
+ * `tests/api/progression-vecue.test.ts` rejoue la SEQUENCE : jouer sous un catalogue amputé,
+ * faire grandir le catalogue, relire la carte.
+ * ════════════════════════════════════════════════════════════════════════════════════════════
+ *
+ * UNE SEULE ECRITURE RESTE MONOTONE PAR MAX DE RANG, et elle ne l'est pas negociable (R14) :
+ * `stade_gobi` en `MAX(rang_ancien, rang_nouveau)`.
  * `tests/api/monde.test.ts` tente la regression et verifie qu'elle n'a pas eu lieu.
  *
  * Le REFERENTIEL (six regions, stades, compagnons, campement) n'est pas en base : c'est du
@@ -157,9 +190,14 @@ export function carteRecalculee(
   const compagnons = compagnonParRegion(referentiel.compagnons);
   const neuve = carteInitiale(referentiel.regions, referentiel.ouvertesEnParallele, compagnons);
 
-  const recoloriees: EtatRegion[] = neuve.regions.map((region) =>
-    recalculerRecoloration(region, termines)
-  );
+  // Une region ou l'enfant a DEJA termine un nœud reste ouverte, quoi qu'il arrive ensuite au
+  // referentiel. `ouvrirCeQuiDoitLEtre` n'ouvre que par la fenetre de parallelisme ; si un jour
+  // le contenu se reordonne, cette ligne garantit qu'on ne referme pas sous les doigts de
+  // l'enfant une region ou il a joue. Elle ne peut RIEN fermer : c'est un `||`.
+  const recoloriees: EtatRegion[] = neuve.regions.map((region) => {
+    const peinte = recalculerRecoloration(region, termines);
+    return peinte.pourcentageColorie > 0 ? { ...peinte, ouverte: true } : peinte;
+  });
 
   // L'Eclat est date par le dernier acces connu au nœud le plus recent de la region ; a defaut,
   // par la date d'acces du profil. On ne fabrique JAMAIS d'horodatage : il vient de la base.
@@ -191,7 +229,18 @@ export function carteRecalculee(
   return carte;
 }
 
-/** Ecrit la projection `progression_region` en MAX — un acquis n'est jamais repris (R14). */
+/**
+ * Ecrit la projection `progression_region`.
+ *
+ * Trois colonnes, deux natures — voir la table de l'en-tete de ce fichier :
+ *   * `ouverte` et `eclat_obtenu_le` sont des ACQUIS : MAX et COALESCE, ils ne baissent jamais ;
+ *   * `pourcentage_colorie` est un CACHE : **affectation directe**, il vaut toujours ce que le
+ *     recalcul vient de rendre depuis `progression_noeud` et le contenu COURANT.
+ *
+ * Le `MAX` qui etait ici figeait la valeur du jour ou elle avait ete ecrite. Seize nœuds
+ * ajoutes plus tard ne pouvaient plus la faire bouger, et deux regions restaient a 100 % avec
+ * trois nœuds joues sur dix-huit.
+ */
 export function ecrireProgressionRegion(
   base: DatabaseSync,
   profilId: string,
@@ -203,8 +252,7 @@ export function ecrireProgressionRegion(
      VALUES (?, ?, ?, ?, ?)
      ON CONFLICT (profil_id, region_code) DO UPDATE SET
        ouverte             = MAX(progression_region.ouverte, excluded.ouverte),
-       pourcentage_colorie = MAX(progression_region.pourcentage_colorie,
-                                 excluded.pourcentage_colorie),
+       pourcentage_colorie = excluded.pourcentage_colorie,
        eclat_obtenu_le     = COALESCE(progression_region.eclat_obtenu_le,
                                       excluded.eclat_obtenu_le)`
   );
@@ -219,7 +267,17 @@ export function ecrireProgressionRegion(
   }
 }
 
-/** Relit la carte depuis la projection, apres l'avoir recalculee et ecrite. */
+/**
+ * Relit la carte depuis la projection, apres l'avoir recalculee et ecrite.
+ *
+ * Le RECALCUL fait foi pour le pourcentage ; la projection ne sert plus qu'a rapporter les deux
+ * ACQUIS que le journal seul ne sait pas reproduire — l'ouverture d'une region et la date de son
+ * Eclat, qui dependent du catalogue tel qu'il etait ce jour-la.
+ *
+ * Le `Math.max(recalcul, valeur stockee)` qui etait ici annulait le recalcul chaque fois qu'il
+ * rendait moins. C'etait la seconde moitie du defaut H1 : meme le MAX SQL retire, cette ligne
+ * seule aurait suffi a maintenir 100 % sur une region de trois nœuds joues sur dix-huit.
+ */
 export function lireCarte(
   base: DatabaseSync,
   profilId: string,
@@ -246,13 +304,49 @@ export function lireCarte(
       return {
         ...region,
         ouverte: Number(ligne.ouverte) === 1,
-        pourcentageColorie: Math.max(region.pourcentageColorie, Number(ligne.pourcentage_colorie)),
+        // CACHE : la valeur qui vient d'etre recalculee, sans arbitrage avec la stockee.
+        pourcentageColorie: region.pourcentageColorie,
         eclatObtenuLe:
           region.eclatObtenuLe ??
           (ligne.eclat_obtenu_le === null ? null : (String(ligne.eclat_obtenu_le) as Horodatage))
       };
     })
   };
+}
+
+/**
+ * ══════════════════════════════════════════════════════════════════════════════════════════
+ * LA MIGRATION DE REPARATION — H1.
+ *
+ * `serveur/migrations/010_recalcul-progression-region.sql` INVALIDE le cache (elle met le
+ * pourcentage a 0 pour tous les profils) ; elle ne peut pas faire mieux, parce que le
+ * denominateur d'une region — sa liste `noeuds` — vit dans `contenu/monde/regions.json` et
+ * qu'aucun ordre SQL ne lit un fichier JSON.
+ *
+ * C'est donc ici que la reparation se termine, et il faut qu'elle se termine quelque part :
+ * `serveur/src/services/indicateurs.ts` lit `progression_region.pourcentage_colorie` DIRECTEMENT
+ * pour le tableau de bord du parent, sans passer par `lireCarte`. Sans cet appel, un parent qui
+ * ouvre sa page avant que l'enfant n'ouvre la carte lirait 0 % partout.
+ *
+ * `serveur/src/index.ts` l'appelle une fois, apres les migrations et avant d'ecouter.
+ *
+ * IDEMPOTENT et SANS PERTE : elle passe par `lireCarte`, donc par les memes ecritures que
+ * n'importe quelle lecture de carte — les Eclats et les ouvertures sont preserves par COALESCE
+ * et MAX, et aucune etoile n'est touchee (`progression_noeud` n'est ni lue en ecriture ni
+ * effacee ici). Rend le nombre de profils traites.
+ * ══════════════════════════════════════════════════════════════════════════════════════════
+ */
+export function reparerProgressionRegion(
+  base: DatabaseSync,
+  referentiel: ReferentielMonde = chargerReferentielMonde(),
+): number {
+  const lignes = base.prepare('SELECT id FROM profils ORDER BY id').all() as unknown as {
+    readonly id: string;
+  }[];
+  for (const ligne of lignes) {
+    lireCarte(base, String(ligne.id), referentiel);
+  }
+  return lignes.length;
 }
 
 // ─────────────────────────────────────────────────────────────────── Gobi

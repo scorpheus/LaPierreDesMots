@@ -392,7 +392,23 @@ export function EcranCarte({
           Où veux-tu aller&nbsp;?
         </h2>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
-          {ANCRES.filter(([code]) => jouables.has(String(code))).map(([code, , , libelle]) => {
+          {/*
+            UN DÉPART N'EXISTE QUE S'IL MÈNE QUELQUE PART — D48, et c'est la même règle que
+            les pastilles de la carte ci-dessus appliquent déjà.
+
+            Le filtre ne portait que sur `jouables`. Or une région ouverte dont AUCUN nœud
+            n'est livré passe ce filtre : elle produisait un bouton « Partir vers Le Marais
+            Jumeau » dont l'`onClick` est gardé par `noeudDeReprise !== null` et ne fait donc
+            rien. C'est exactement l'indice corrélé que D48 dénonce — « compter les éléments
+            interactifs n'est pas compter les sorties ».
+
+            La condition est la MÊME que celle du gestionnaire : ce qui décide de l'affichage
+            décide du clic, sinon les deux divergent et le bouton ment à nouveau.
+          */}
+          {ANCRES.filter(
+            ([code]) =>
+              jouables.has(String(code)) && reprise(parCode.get(String(code))).noeud !== null
+          ).map(([code, , , libelle]) => {
             const region = parCode.get(String(code));
             const { noeud: noeudDeReprise, rang } = reprise(region);
             const total = region?.noeuds.length ?? 0;

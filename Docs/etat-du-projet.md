@@ -1,128 +1,158 @@
-# État du projet — 2026-08-02, au réveil
+# État du projet — 2026-08-02, fin de journée
 
 Trois minutes de lecture. Tout ce qui suit a été **exécuté**, pas supposé.
 
 ---
 
-## En un coup d'œil
+## LA CHOSE À FAIRE EN PREMIER, ce matin, avant tout le reste
 
-| | |
-|---|---|
-| **Le jeu se joue** | Deux régions ouvertes, **18 nœuds**, les **14 moteurs** jouables |
-| **Rien n'est perdu** | Les 14 moteurs écrivent bien en base — c'était **4 sur 14 qui perdaient tout** |
-| **Ce qui reste rouge** | `test:visuel` seulement, et **il attend tes yeux**, pas une correction |
-| **Ce qui t'attend** | **9 exercices sur 18** sont des brouillons marqués « à valider par le parent » |
+**Ferme la Pierre et relance-la.** Double-clic sur `arreter.bat`, puis sur `demarrer.bat`.
+
+C'est tout. La réparation se fait toute seule au démarrage : le serveur applique la migration
+`010`, recalcule la recoloration de chaque profil, et l'écrit. Tu verras passer cette ligne :
+
+```
+[pierre] migrations appliquees : 10 (schema en version 10)
+[pierre] recoloration recalculee pour 1 profil(s).
+```
+
+Tant que le serveur n'est pas relancé, **Ezékiel reste bloqué** : celui qui tourne en ce moment a
+été démarré hier soir à 23:17 et ne connaît pas le correctif.
+
+Rien n'est perdu au passage — ni ses étoiles, ni ses deux Éclats. C'est vérifié plus bas, sur sa
+vraie base.
 
 ---
 
-## Ce qui marche, et se joue vraiment aujourd'hui
+## Le bug que tu as rencontré : mesuré, corrigé, vérifié sur TA base
 
-**Le défaut le plus grave est mort.** Une tentative terminée pouvait ne rien enregistrer : l'écran
-de récompense s'affichait, les étoiles tournaient, et le journal restait vide. La note de la nuit
-n'accusait qu'un moteur (`phrase`) ; l'audit par objet en a trouvé **quatre** — `assemble`,
-`chrono`, `paires`, `phrase`. Chacun rendait une erreur 500 qui annulait toute la transaction.
-Pour un enfant, cela veut dire : *il a fini son exercice, et le lendemain rien ne s'en souvient*.
-C'est exactement ce que R14 interdit.
+**Ce qui s'était passé.** Le pourcentage de coloriage de chaque région était *calculé une fois puis
+figé en base*. Quand Ezékiel a fini `clairiere-01`, la Clairière ne comptait qu'un seul nœud : elle
+est donc passée à 100 %, Éclat compris. Depuis, seize nœuds se sont ajoutés — et personne n'a
+recalculé. Les deux régions se croyaient finies, la carte ne proposait plus qu'elles, et **plus
+aucun monde n'était cliquable**.
 
-Vérifié par mes soins, en montant les 14 moteurs sur leurs **vrais exercices** et en relisant la
-**base de données**, pas la réponse du serveur :
+C'était une violation du principe fondateur du projet : *le journal fait foi, tout indicateur se
+recalcule depuis lui*. Cette colonne était devenue une seconde vérité, plus collante que le journal.
+
+**Vérifié sur une copie de `donnees/pierre.db`**, profil `prf-0fbbeba7fb27d3f7`, serveur monté sur
+le port 8099 — jamais sur l'original :
+
+| Région | Avant | Après | Nœuds faits | Éclat |
+|---|---|---|---|---|
+| Clairière | **100 %** | **16,67 %** | 1 / 6 | conservé (01/08 21:44) |
+| Galeries | **100 %** | **16,67 %** | 2 / 12 | conservé (02/08 07:27) |
 
 ```
-moteur     http   tentative  étapes  progression  maîtrise
-assemble   201    1          3       oui          oui
-… les 14 lignes, toutes identiques …
-MOTEURS QUI JOURNALISENT : 14 / 14
-recalculerMaitrise       : ok
+regionsOuvertes (ce que le doigt peut toucher) : [clairiere, galeries]
+  clairiere → clairiere-02  (etape 2/6)   GET /api/contenu/noeuds/clairiere-02 → 200
+  galeries  → galeries-03   (etape 3/12)  GET /api/contenu/noeuds/galeries-03  → 200
+
+sorties qui REPONDENT : 2        noeuds jouables : 18 / 18
+Eclats conserves (R14) : 2       noeuds termines / etoiles : 3 / 7
+
+L'ENFANT PEUT-IL REJOUER ? OUI
 ```
 
-**Les 14 moteurs sont atteignables.** Six d'entre eux — `assemble`, `chemin`, `chrono`,
-`histoire`, `libre`, `paires` — étaient du code écrit, testé, monté, et **introuvable dans le
-jeu** : aucun exercice ne les citait. Ils ont maintenant chacun leur exercice, leur habillage et
-leur nœud (`galeries-07` à `galeries-12`). Mesuré : **8/14 avant, 14/14 après.**
-
-**La carte ne ment pas.** J'ai terminé les 12 nœuds des Galeries un par un et relu le pourcentage
-après chaque réussite : 0 → 0,083 → 0,167 → … → 1. Un douzième par nœud, exactement, et l'Éclat
-tombe au douzième. Ce que l'enfant voit correspond à ce qu'il a fait.
-
-**Aucun état sans issue.** Le graphe des 18 nœuds : 0 cycle, 0 prérequis pointant dans le vide,
-0 nœud impossible à ouvrir. Le bot « casse-cou » donne 40 réponses fausses d'affilée sans
-provoquer un seul écran d'échec ; le « singe » tape 5000 fois au hasard sans rien casser.
+**Et le recalcul est réel.** Je n'ai pas cru le rapport : j'ai remis de force les six régions à
+100 % dans la base, puis relu la carte par la route. Elles sont revenues à 16,67 / 16,67 / 0 %, et
+les deux Éclats étaient toujours là.
 
 ---
 
-## Les chiffres qui comptent
+## Un SECOND blocage, que tu n'avais pas encore rencontré — et que tu aurais rencontré
+
+Trouvé par les nouveaux tests de « profils vécus », sur un enfant qui termine **honnêtement** les
+18 nœuds livrés : les deux régions qui portent du contenu passent à 100 %, la carte les retire, et
+les deux qu'elle ouvre à la place **n'ont aucun exercice**. Zéro sortie. L'enfant qui a tout réussi
+se retrouvait aussi bloqué que celui dont la base mentait.
+
+**Corrigé** : quand il n'y a plus rien de neuf, la carte repropose les régions déjà conquises —
+rejouer est gratuit et ne reprend aucun acquis. Et une région sans exercice n'est plus jamais
+proposée : elle produisait un bouton « Partir vers Le Marais Jumeau » qui ne faisait rien.
+
+---
+
+## Les chiffres
 
 | Commande | Sortie | Résultat |
 |---|---|---|
 | `npx tsc -b` | **0** | — |
 | `npx eslint .` | **0** | 0 erreur, 17 avertissements (variables inutilisées) |
-| `npx vitest run` | **0** | **1478 tests, 96 fichiers, 0 échec** |
+| `npx vitest run` | **0** | **1745 tests, 113 fichiers, 0 échec** |
 | `npm run test:contenu` | **0** | **226 contrôles, 0 problème** |
-| `npm run test:e2e` | **0** | **186 tests** (parcours + robustesse) |
-| `npm run verifier` | **1** | **10 étapes vertes sur 11** — seul `test:visuel` est rouge |
+| `npm run test:e2e` | **1** | **196 verts, 1 rouge** — voir « ce qui reste rouge » |
+| `npm run verifier` | **1** | `test:visuel` rouge par décision (D39) |
 
-En plus : `test:qualite` **48 tests verts**, `test:rejeu` vert.
+**L'invariant « l'enfant peut toujours faire quelque chose »**, mesuré sur les cinq profils qui ont
+un passé — c'est la question qui compte, et elle est vraie partout :
 
-| Couverture | |
-|---|---|
-| Moteurs qui **journalisent** en base | **14 / 14** |
-| Moteurs **atteignables** par l'enfant | **14 / 14** |
-| Écrans déclarés / recettes d'écran auditées en accessibilité | **13 / 29 recettes** |
-| Consignes **audibles** (un tap = une voix) | **69 clés couvertes, 174 clips, 0 refusé** |
-| Nœuds livrés / cités par la carte | **18 / 18**, écart 0 |
-| Fichiers **supprimés** cette session | **0** |
-| Commits | **4** (17 au total) |
+| Profil | Ce qu'il a vécu | Sorties qui répondent |
+|---|---|---|
+| à mi-parcours | Clairière finie, 4 Galeries sur 12 | **1** — galeries-05 |
+| **a tout fini** | les 18 nœuds livrés | **2** — clairiere-01, galeries-01 *(était 0)* |
+| a beaucoup échoué | 12 échecs avec aide, puis une réussite | **2** |
+| absent 40 jours | révisions Leitner dues | **2** |
+| **catalogue agrandi** | **le cas d'Ezékiel** | **2** — clairiere-02, galeries-03 *(était 0)* |
 
 ---
 
-## Ce qui ne marche pas encore
+## Ce qui reste rouge
 
-**`test:visuel` est rouge, et c'est voulu.** 8 captures sur 15 diffèrent de leur référence : la
-carte du monde, le décor v2, le nœud colorie, l'écran de récompense. **Aucune image ne se fige
-sans qu'un adulte l'ait regardée** (D39) — donc le rouge ne se répare pas en codant, il se lève
-en ouvrant les images. Elles sont dans `tests/rapports/artefacts/`. Si l'écart te va :
-`npm run test:visuel -- --maj`.
+**`test:visuel`** — rouge **par décision** (D39) : le décor et Gobi vont être refaits, figer des
+références maintenant serait les refaire aussitôt. Ça ne se corrige pas en codant, ça se lève en
+regardant les images (`tests/rapports/artefacts/`), puis `npm run test:visuel -- --maj`.
+
+**Un test E2E, `parcours-zz-invariants.spec.ts`** — il échoue dans la suite complète et **passe
+seul en 2,5 s**. Il ne vient pas de ce lot : il a été écrit aujourd'hui à 12:14 par une autre
+campagne qui travaillait sur le dépôt en même temps que moi. Vérifié par expérience témoin :
+annuler mes corrections et relancer la suite entière **ne le rend pas vert**.
 
 **La moitié du contenu est un brouillon.** 9 exercices sur 18 portent la marque
-`PLACEHOLDER — À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ`, dont les 6 nouveaux des Galeries. Ils
-sont mécaniquement valides — schémas, syllabation vérifiée contre le code, lexique CE1 à 93 % —
-mais **personne n'a jugé s'ils sont bons pour ton fils**. C'est le vrai reste à faire.
+`PLACEHOLDER — À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ`. Inchangé, et c'est toujours le vrai
+reste à faire.
 
-**Un piège dormant, sans conséquence aujourd'hui.** La tolérance de tap de 24 px (R16) est bien
-appliquée à l'enfant, mais par **11 copies privées** dans les composants du client, pendant que
-les deux constantes prévues pour cela dans `partage` (`TOLERANCE_ATTRAPE_PX`, `TOLERANCE_TRI_PX`)
-ne sont **lues par personne**. Changer la constante ne changerait rien. À unifier un jour.
+---
 
-**23 symboles exportés ne sont appelés nulle part**, dont trois recalculs intégraux côté serveur
-(`recalculerToutesLesCascades`, `recalculerToutesLesMaitrises`, `recalculerToutesLesProgressions`).
-Filet d'exploitation à garder, ou code mort ? À trancher.
+## Ce que tu dois savoir, même si ça n'est pas agréable
+
+**Le dépôt a eu deux campagnes qui écrivaient dessus en même temps.** Le brief de cette intégration
+disait « tu es seul sur le dépôt » ; c'était faux. Mesuré par horodatage : 17 specs E2E réécrites à
+11:51, `tests/e2e/invariants.ts` créé à 12:21, `partage/src/monde/carte.ts` — mon propre fichier —
+touché à 12:28.
+
+Ça m'a coûté trois exécutions E2E perdues sur des conflits de port et une fausse piste : j'ai
+d'abord cru que mes corrections cassaient un test. Il a fallu une expérience témoin pour établir
+que non. Le détail est dans `Docs/questions-en-attente.md`, section **Q-INTH-5**.
+
+**Conséquence concrète pour toi** : ce commit ne contient **que** les fichiers des lots H1, H2, H3
+et de leur intégration. Le travail de l'autre campagne est encore dans l'arbre de travail, non
+livré — c'est à elle de le finir.
 
 ---
 
 ## Ce qui attend ta décision
 
-Détail et mesures dans **`Docs/questions-en-attente.md`** — section **Q-INT** en fin de fichier.
+Détail et mesures dans **`Docs/questions-en-attente.md`**, section **Q-INTH** en fin de fichier.
 
-1. **Les 8 captures visuelles** — les regarder, puis figer ou refuser. C'est ce qui débloque
+1. **Les captures visuelles** — les regarder, puis figer ou refuser. C'est ce qui débloque
    `npm run verifier`.
-2. **Le seuil de couverture lexicale CE1** (Q-INT-2). 93,0 % des mots lus sont au lexique. Les
-   4 absents sont `b` et `d` — *les graphèmes que l'exercice fait justement travailler* —, `gobi`
-   et `voit`. Exiger 100 % interdirait D23. Choisir 90 % serait inventer une loi : c'est à toi.
-3. **Les 15 fichiers `.pyc` suivis par git.** Ce sont des artefacts de compilation Python. Les
-   retirer est une suppression : **je n'ai rien supprimé**, je te le signale.
+2. **Quand tout est terminé, rejouer ou réviser ?** Aujourd'hui la carte renvoie sur le *premier*
+   nœud de la région conquise. Le Leitner sait déjà quelles compétences sont dues : une sortie
+   « révision » serait pédagogiquement meilleure. Je ne l'ai pas fait — ce serait inventer une
+   règle que rien dans `Docs/` ne porte.
+3. **Faut-il montrer les régions vides ?** Le Marais Jumeau et la Forêt Muette sont dévoilés et
+   n'ont aucun exercice. Ils ne sont plus cliquables, donc plus trompeurs — mais faut-il les
+   laisser voilés jusqu'à ce qu'ils aient du contenu ? C'est de la mise en scène, pas du code.
+4. **Le seuil de couverture lexicale CE1** (Q-INT-2), inchangé : 93,0 % des mots lus y figurent.
 
 ---
 
-## La prochaine chose à faire — une seule
+## Un outil nouveau, si tu en as besoin
 
-**Ouvre les 9 exercices marqués PLACEHOLDER et dis lesquels ton fils peut jouer.**
+Le lot H2 a ajouté un onglet **« Le profil »** dans l'espace parent. Il montre, pour chaque région,
+ce que la base **stocke** et ce que le journal **dit vraiment**, avec l'écart — c'est ce qui aurait
+rendu ce bug visible en dix secondes. Il porte aussi une **remise à zéro** de profil, en deux
+portées, qui demande de retaper le prénom de l'enfant avant d'effacer quoi que ce soit.
 
-C'est ce qui débloque le plus, et de loin. Tout le reste est vert : la chaîne compile, les 14
-moteurs enregistrent, la carte dit la vérité, aucun écran ne coince. Ce qui manque n'est plus du
-code — c'est le seul jugement qu'aucun agent n'a le droit de rendre : *est-ce que ce texte-là,
-pour cet enfant-là qui confond encore `b` et `d`, est juste ?*
-
-Les six nouveaux sont dans `contenu/exercices/galeries/` (`stalagmites-assemble`,
-`passage-chemin`, `frise-chrono`, `echo-conte-histoire`, `echos-paires`, `paroi-libre`), les
-trois autres dans `contenu/exercices/clairiere/`. Chacun explique dans son `$commentaire` ce qui a
-été mesuré et ce qui a été supposé.
+Hors interface : `npm run profil:reinitialiser`. Elle sauvegarde la base avant d'écrire.

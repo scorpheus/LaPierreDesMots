@@ -22,6 +22,7 @@
     "construire": "npm run construire -w @pierre/partage && npm run construire -w @pierre/serveur && npm run construire -w @pierre/client",
     "construire:test": "npm run construire:test -w @pierre/client",
     "ingerer": "node scripts/ingerer.mjs",
+    "profil:reinitialiser": "node scripts/reinitialiser-profil.mjs",
     "voix:preparer": "node scripts/telecharger-tts.mjs",
     "voix": "node scripts/rendre-voix.mjs",
     "voix:qc": "node scripts/qc-voix.mjs",
@@ -34,6 +35,9 @@
     "test:visuel": "node scripts/test-visuel.mjs",
     "test:qualite": "node scripts/playwright.mjs test --project=qualite && node scripts/verifier-bundle.mjs",
     "test:rejeu": "node scripts/test-rejeu.mjs",
+    "qa:mutations": "node scripts/qa/banc-de-mutation.mjs",
+    "qa:trompeurs": "node scripts/qa/tests-trompeurs.mjs",
+    "qa:tableau": "node scripts/qa/tableau-de-bord.mjs",
     "verifier": "node scripts/verifier.mjs"
   },
   "dependencies": {

@@ -171,6 +171,22 @@ export const CHEMINS_API = {
   parentGalerie: (profil: IdProfil): string =>
     `/api/parent/${encodeURIComponent(profil)}/galerie`,
 
+  // ── H2 — l'état réel d'un profil, et sa remise à zéro ──────────────────────────────────
+  /**
+   * H2 — ce que le profil a RÉELLEMENT fait : nœuds terminés sur le total, étoiles, régions
+   * (stocké **et** recalculé, avec l'écart), dernières tentatives. C'est l'écran qui aurait
+   * rendu visible sans SQL le défaut du 2026-08-02.
+   */
+  parentEtatProfil: (profil: IdProfil): string =>
+    `/api/parent/${encodeURIComponent(profil)}/etat`,
+
+  /**
+   * H2 — la remise à zéro d'un profil. **POST**, jamais GET : une URL qu'un navigateur peut
+   * précharger ne doit pas pouvoir effacer la progression d'un enfant.
+   */
+  parentReinitialiser: (profil: IdProfil): string =>
+    `/api/parent/${encodeURIComponent(profil)}/reinitialiser`,
+
   motifs: {
     sante: '/api/sante',
     profils: '/api/profils',
@@ -196,6 +212,9 @@ export const CHEMINS_API = {
     parentEtat: '/api/parent/etat',
     parentDefinir: '/api/parent/definir',
     parentGalerie: '/api/parent/:profil/galerie',
+    // ── lot H2 ──────────────────────────────────────────────────────────────────────────
+    parentEtatProfil: '/api/parent/:profil/etat',
+    parentReinitialiser: '/api/parent/:profil/reinitialiser',
   },
 } as const;
 

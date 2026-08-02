@@ -55,3 +55,29 @@ export {
   quartiles,
   tendance,
 } from './indicateurs.js';
+
+// ── AJOUT H2 — remise à zéro d'un profil et état réel d'un profil ───────────────────────────
+// `reinitialisation.ts` est un fichier NEUF du même dossier. Même raison qu'au bloc N5
+// ci-dessus : un type que le barillet n'exporte pas est un type que personne ne peut importer.
+export type {
+  ApercuReinitialisation,
+  EtatProfil,
+  EtatRegionProfil,
+  LigneRapportReinitialisation,
+  PorteeReinitialisation,
+  RapportReinitialisation,
+  TentativeRecente,
+} from './reinitialisation.js';
+
+export {
+  PORTEES_REINITIALISATION,
+  TABLES_CONSERVEES_PAR_PROGRESSION,
+  compterRegionsIncoherentes,
+  confirmationValide,
+  conservesParLaPortee,
+  estPorteeReinitialisation,
+  libellePortee,
+  pertesDeLaPortee,
+  porteeEfface,
+  totalLignesEffacees,
+} from './reinitialisation.js';

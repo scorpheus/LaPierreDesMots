@@ -28,10 +28,14 @@ import type { DecisionRelecture, EntreeGalerie, OptionsLancement } from '@pierre
 import {
   fermerZoneParent,
   lireDashboardParent,
+  lireEtatProfilParent,
   lireGalerieParent,
   trancherRelectureContenu
 } from '../api/client.js';
 import { GalerieExercices } from '../parent/GalerieExercices.js';
+// AJOUT H2 — l'onglet « le profil » : ce que l'enfant a réellement fait, et repartir à zéro.
+import { EtatProfil } from '../parent/EtatProfil.js';
+import { ReinitialiserProfil } from '../parent/ReinitialiserProfil.js';
 import { BoutonExport } from '../parent/BoutonExport.js';
 import { CarteCouverture } from '../parent/CarteCouverture.js';
 import { CourbeLatence } from '../parent/CourbeLatence.js';
@@ -66,8 +70,15 @@ export interface ProprietesEcranDashboard {
   readonly surGaleriePleinEcran?: () => void;
 }
 
-/** Les deux onglets de la zone parent. `suivi` est celui qui s'ouvre. */
-type OngletParent = 'suivi' | 'galerie';
+/**
+ * Les onglets de la zone parent. `suivi` est celui qui s'ouvre.
+ *
+ * AJOUT H2 — `profil`. Il porte deux choses qui vont ensemble et qu'il serait absurde de
+ * séparer : **ce que l'enfant a réellement fait**, et **repartir à zéro**. Un parent qui
+ * constate que la carte ment doit trouver le remède sur le même écran que le constat ; les
+ * mettre à deux endroits, c'est obliger à se souvenir du chiffre en changeant de page.
+ */
+type OngletParent = 'suivi' | 'galerie' | 'profil';
 
 export function EcranDashboard({
   profil,
@@ -91,6 +102,14 @@ export function EcranDashboard({
     queryKey: ['parent', 'galerie', String(profil)],
     queryFn: () => lireGalerieParent(profil),
     enabled: onglet === 'galerie'
+  });
+
+  // AJOUT H2 — l'état réel du profil, demandé seulement quand son onglet s'ouvre, comme la
+  // galerie : le parent venu pour la courbe de latence ne paie pas un recalcul de carte.
+  const etatProfil = useQuery({
+    queryKey: ['parent', 'etat-profil', String(profil)],
+    queryFn: () => lireEtatProfilParent(profil),
+    enabled: onglet === 'profil'
   });
 
   const relecture = useMutation({
@@ -136,7 +155,8 @@ export function EcranDashboard({
         {(
           [
             ['suivi', 'Le suivi'],
-            ['galerie', 'Les exercices']
+            ['galerie', 'Les exercices'],
+            ['profil', 'Le profil']
           ] as const
         ).map(([code, libelle]) => (
           <button
@@ -189,6 +209,31 @@ export function EcranDashboard({
               {...(surLancerExercice === undefined ? {} : { surLancer: surLancerExercice })}
             />
           )}
+        </div>
+      ) : null}
+
+      {/* AJOUT H2 — l'onglet « le profil ». La remise à zéro est rendue MÊME quand l'état
+          n'arrive pas : c'est précisément quand quelque chose ne va pas qu'un parent en a
+          besoin, et une porte de secours qui dépend de ce qu'elle répare n'est pas une porte. */}
+      {onglet === 'profil' ? (
+        <div role="tabpanel" id="panneau-profil" aria-labelledby="onglet-profil" style={{ display: 'grid', gap: '2rem' }}>
+          {etatProfil.isPending ? <p style={{ margin: 0 }}>On relit ce que ton enfant a fait…</p> : null}
+          {etatProfil.isError ? (
+            <div className="zone-lecture" style={{ padding: '1rem', display: 'grid', gap: '1rem' }}>
+              <p style={{ margin: 0 }}>
+                L’état du profil n’arrive pas. Vérifie que la Pierre tourne, puis réessaie.
+              </p>
+              <button type="button" className="cible" onClick={() => void etatProfil.refetch()}>
+                Réessayer
+              </button>
+            </div>
+          ) : null}
+          {etatProfil.data === undefined ? null : <EtatProfil etat={etatProfil.data} />}
+          <ReinitialiserProfil
+            profil={profil}
+            prenom={etatProfil.data?.prenom ?? prenom ?? ''}
+            surTermine={() => void etatProfil.refetch()}
+          />
         </div>
       ) : null}
 

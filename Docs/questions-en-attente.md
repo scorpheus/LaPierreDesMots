@@ -3615,3 +3615,1027 @@ et qu'aucun ne se corrige sans une décision.
 | 23 symboles exportés ne sont **nommés nulle part ailleurs** dans le dépôt | 23 / 554 | Dont `serveur/src/depots/*.ts :: recalculerToutesLesCascades`, `recalculerToutesLesMaitrises`, `recalculerToutesLesProgressions` — des recalculs intégraux sans appelant ni test. À trancher : filet d'exploitation à garder, ou code mort à retirer ? |
 | 15 fichiers `.pyc` de `__pycache__/` sont **suivis par git** | 15 | Artefacts de compilation Python. Leur retrait est une **suppression** : je ne supprime rien que ma session n'ait créé. **Proposé, pas fait.** |
 | 9 exercices sur 18 portent `PLACEHOLDER — À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ` | 9 / 18 | C'est la moitié du contenu jouable. Aucun agent ne peut lever cette marque : c'est la relecture humaine, et elle est la raison d'être de la marque. |
+
+---
+
+# LOT H1 — `pourcentage_colorie` était une seconde source de vérité
+
+Tranché seul le 2026-08-02, consigné ici comme le veut la règle 11 du brief.
+
+## Q-H1-1 — Recalcul à la LECTURE, et non invalidation au changement de catalogue
+
+**Le défaut, mesuré sur `donnees/pierre.db`, profil `prf-0fbbeba7fb27d3f7` :**
+
+```
+progression_region : clairiere  ouverte=1  pourcentage_colorie=1  eclat 2026-08-01T21:44:00.062Z
+                     galeries   ouverte=1  pourcentage_colorie=1  eclat 2026-08-02T07:27:25.647Z
+progression_noeud  : clairiere-01 · galeries-01 · galeries-02      (3 nœuds)
+contenu livré      : 18 nœuds — clairiere 6, galeries 12
+```
+
+La cause n'était pas l'absence de recalcul : `carteRecalculee` le faisait, et juste. Elle était
+que le recalcul était **jeté** deux fois de suite — par `MAX(ancien, nouveau)` en SQL dans
+`ecrireProgressionRegion`, puis par `Math.max(recalcul, valeur stockée)` en JavaScript dans
+`lireCarte`. La valeur figée gagnait toujours. La table n'était pas une projection : c'était une
+seconde source de vérité, plus collante que le journal, ce que le contrat technique v1 et les
+specs v2 § 13.3 interdisent en toutes lettres.
+
+**Décision — voie 1 du brief, le recalcul à la lecture.** `progression_region` devient un cache
+reconstruit à chaque lecture de carte. Trois colonnes, deux natures, et elles ne se mélangent
+plus :
+
+| colonne | nature | écriture | peut-elle baisser ? |
+|---|---|---|---|
+| `pourcentage_colorie` | **CACHE** | affectation directe | **oui — c'est le recalcul** |
+| `eclat_obtenu_le` | acquis | `COALESCE(ancien, nouveau)` | jamais (R14) |
+| `ouverte` | acquis | `MAX(ancien, nouveau)` | jamais (R14) |
+
+**Écarté : l'invalidation au changement de catalogue.** Elle suppose qu'on DÉTECTE le changement
+— empreinte de `regions.json`, compteur de version, crochet de build. C'est exactement la
+détection qui a manqué ici : seize nœuds se sont ajoutés sans que rien ne s'en aperçoive. Un
+mécanisme qui doit remarquer un changement pour rester juste est un mécanisme qui finira par ne
+pas le remarquer. Le recalcul à la lecture, lui, ne peut pas dériver : il n'a rien à détecter.
+
+## Q-H1-2 — `enCours` ne se fonde plus sur l'Éclat mais sur la recoloration
+
+Corriger le pourcentage seul **n'aurait pas débloqué l'enfant**, et c'est le point le moins
+évident de ce lot. `regionsOuvertes` (`partage/src/monde/carte.ts`) filtrait par
+`enCours = ouverte && eclatObtenuLe === null` : les deux régions qui portent tout le contenu
+gardaient leur Éclat — légitimement, R14 — donc restaient exclues pour toujours, et les deux
+régions que la carte ouvrait à leur place ne portent aucun nœud livré. Zéro prise.
+
+**Décision :** `enCours = ouverte && pourcentageColorie < 1`. **L'Éclat est un trophée, pas un
+verrou.** Sur un catalogue stable les deux critères coïncident exactement — `appliquerEclat`
+porte le pourcentage à 1 —, et les 25 cas de `tests/unitaires/carte.test.ts` passent sans qu'une
+seule assertion soit touchée. Ils ne divergent que dans le cas H1, où l'ancien critère est faux.
+
+Même raisonnement pour `etatAfficheRegion` : « terminee » exige désormais l'Éclat **et** 100 %.
+Annoncer une région « terminée » pendant que la carte y montre encore du gris serait un mensonge
+visible à l'œil de l'enfant.
+
+## Q-H1-3 — La migration invalide, le TypeScript recalcule
+
+`serveur/migrations/010_recalcul-progression-region.sql` ne fait qu'un `UPDATE
+progression_region SET pourcentage_colorie = 0`. Elle ne peut pas faire mieux : le dénominateur
+d'une région est sa liste `noeuds`, déclarée dans `contenu/monde/regions.json`, et **aucun ordre
+SQL ne lit un fichier JSON**. Recopier ces listes dans la migration créerait une TROISIÈME source
+de vérité qui périmerait au prochain nœud livré — le défaut qu'on répare.
+
+La reconstruction est donc faite par `reparerProgressionRegion` (`serveur/src/depots/monde.ts`),
+appelée une fois par `serveur/src/index.ts` après les migrations et avant d'écouter. **Cet appel
+n'est pas décoratif** : `serveur/src/services/indicateurs.ts` lit
+`progression_region.pourcentage_colorie` DIRECTEMENT pour le tableau de bord du parent, sans
+passer par `lireCarte`. Sans lui, un parent qui ouvre sa page avant que l'enfant n'ouvre sa carte
+lirait 0 % partout.
+
+Vérifié sur une **copie** de la base vécue (sauvegarde dans
+`donnees/sauvegardes/pierre-2026-08-02T0940-avant-H1.db`, avec ses `-wal` et `-shm` : la base est
+en WAL, le seul `.db` ne contient rien) :
+
+```
+AVANT   clairiere 1        galeries 1        étoiles 1 / 3 / 3
+APRÈS   clairiere 0,1667   galeries 0,1667   étoiles 1 / 3 / 3   Éclats et `ouverte` intacts
+régions proposées à l'enfant : clairiere (reprise sur clairiere-02) · galeries (galeries-03)
+```
+
+La base réelle du père n'a **pas** été modifiée : son serveur tourne, et il appliquera la
+migration et la réparation à son prochain démarrage.
+
+## Q-H1-4 — L'audit des données dérivées : 21 tables, 4 restent exposées
+
+Audit par OBJET et non par occurrence (D48) : les 21 tables déclarées par
+`serveur/migrations/*.sql` ont été énumérées une par une, puis recoupées avec les 22 de la base
+réelle (21 + `schema_migrations`, créée par le runner).
+
+**7 tables portent une donnée DÉRIVÉE. 6 d'entre elles dépendent de `contenu/`. Avant H1,
+UNE SEULE se recalculait ; après H1, DEUX. Quatre restent exposées.**
+
+| table | dérivée de | dépend de `contenu/` | survit à un changement de contenu ? |
+|---|---|---|---|
+| `progression_region` | `progression_noeud` × `regions.json` | **oui — le catalogue** | **NON → corrigé par H1**, recalculé à chaque lecture |
+| `stade_gobi` | `formes_gobi` × `gobi-stades.json` | oui | **OUI** — `lireGobi` appelle `ecrireStade` à chaque lecture, contre le référentiel COURANT. Le `MAX(rang)` y est légitime : un stade est un acquis, pas une proportion |
+| `progression_noeud` | `tentatives` seul | non | **oui, par construction** — `MAX(etoiles)`, `COUNT(*)` ne citent aucun contenu. Une ligne pour un nœud retiré du catalogue est inoffensive : `recalculerRecoloration` intersecte avec la liste déclarée |
+| `progression_cascade` | `tentatives` × `parametres-recompenses.json` | **oui — les seuils** | **NON.** D13 dit de ces seuils qu'ils « seront recalibrés ». Les recalibrer laisserait `intermediaires_total` et `rares_total` calculés à l'ancienne loi, pour toujours |
+| `maitrise_competence` | `etapes_tentative` × `parametres-pedagogie.json` × `competences.json` | **oui** | **NON.** Un paramètre BKT modifié ne rejoue pas le journal ; `p` reste calculé à l'ancienne loi |
+| `items_leitner` | `etapes_tentative` × calendrier Leitner | **oui — les paramètres** | **NON.** Une échéance recalibrée ne repropage pas sur les items déjà planifiés |
+| `sorties.plan_json` | plan gelé citant des exercices | **oui — le catalogue** | **NON**, mais sans conséquence aujourd'hui : mesuré, `FROM sorties` n'apparaît **dans aucun** fichier de `serveur/src` — le plan est écrit et jamais relu. Le jour où on le relira, un exercice supprimé depuis donnera une sortie morte |
+
+Les 14 autres tables ne portent aucune donnée dérivée : deux journaux append-only (`tentatives`,
+`etapes_tentative`), trois acquis écrits une fois (`formes_gobi`, `campement`, `compagnons`), un
+compteur (`points_visites`), sept d'identité, de réglage ou de zone parent (`profils`,
+`reglages_lecture`, `essais_typographie`, `code_parent`, `verrou_parent`, `relecture_contenu`,
+`ouverture_vue`) — et une **table morte**, ci-dessous.
+
+**Le défaut de fond des quatre restantes est UN SEUL, et il est mesurable.** Les trois recalculs
+intégraux existent — `recalculerCascade`, `recalculerMaitrise`, `recalculerLeitner` — et sont
+**appelés par personne en production** :
+
+```
+$ grep -rn "recalculerToutesLes" --include=*.ts serveur scripts client | grep -v "export function"
+serveur/src/depots/cascade.ts:152      (dans sa propre définition)
+serveur/src/depots/maitrise.ts:255     (dans sa propre définition)
+serveur/src/depots/progression.ts:127  (dans sa propre définition)
+```
+
+Seuls les tests les appellent. Q-INT-3 les avait déjà relevés comme « exports sans appelant » et
+posait la question « filet à garder, ou code mort à retirer ? ». **H1 y répond : ce sont des
+filets, et il leur manque exactement ce que H1 vient de poser pour la carte — un appel au
+démarrage.** Ce n'est pas un lot de plus : c'est trois lignes dans `serveur/src/index.ts`, à côté
+de `reparerProgressionRegion`.
+
+**→ QUESTION AU PÈRE / prochain lot : recalculer aussi la cascade, la maîtrise et le Leitner au
+démarrage ?** Non fait ici, pour deux raisons. D'abord parce que ces trois recalculs rejouent
+tout le journal et que leur coût n'a pas été mesuré. Ensuite et surtout parce qu'ils portent un
+risque que le pourcentage n'a pas : `maitrise_competence.acquise_le` et les boîtes Leitner sont
+des ACQUIS, et un recalcul sous des paramètres modifiés pourrait en faire décroître — ce que R14
+interdit. Le pourcentage de recoloration, lui, n'est l'acquis de personne : c'est une proportion.
+Trancher demande de dire, paramètre par paramètre, ce qui est un acquis et ce qui est un calcul.
+
+### `etagere_rang` — une table déclarée, écrite par personne, lue par personne
+
+Mesuré sur tout le dépôt (hors `dist/`, `node_modules/`, `tests/rapports/`) :
+
+```
+partage/src/monde/etagere.ts:18                      (un commentaire)
+serveur/migrations/008_etagere.sql:8,15              (la création et son index)
+serveur/src/services/reinitialisation-profil.ts:19   (une liste de tables à vider)
+tests/api/parent-reinitialisation.test.ts:86         (une insertion de test)
+```
+
+Aucun dépôt ne l'écrit, aucune route ne la lit, **0 ligne** dans la base réelle. Ce n'est pas un
+oubli : N6 a tranché explicitement (`partage/src/monde/etagere.ts`, en-tête) que le rang d'une
+case est sa POSITION AU CATALOGUE et non son ordre d'obtention, sans quoi les cases vides
+seraient inexprimables. Le rang se calcule donc à la lecture depuis `gobi-stades.json` — ce qui
+est exactement la bonne discipline —, et la table de la migration 008 est devenue un fossile.
+
+**→ PROPOSÉ, PAS FAIT :** retirer `etagere_rang` par une migration. Une table qui n'existe pas
+ne peut pas mentir, mais supprimer un objet de schéma se propose et s'attend.
+
+## Q-H1-5 — Ce que H1 n'a PAS corrigé, et pourquoi
+
+**Le second défaut, trouvé par le lot H3 en parallèle : l'enfant qui a TOUT fini est aussi
+bloqué.** Quand les 18 nœuds livrés sont terminés, la Clairière et les Galeries sont à 100 %,
+donc hors jeu — légitimement cette fois —, et les deux régions ouvertes à leur place ne portent
+aucun nœud. `tests/api/profils-vecus.test.ts › V2 › L'ENFANT PEUT FAIRE QUELQUE CHOSE` reste
+rouge, et H3 l'a écrit rouge exprès.
+
+**Ce n'est pas le défaut du père** — aucun changement de catalogue n'y intervient — et H3 le
+consigne comme indépendant de H1. H1 ne le corrige donc pas, mais il en rapproche la solution :
+maintenant que `enCours` se lit sur la recoloration et non sur l'Éclat, il ne reste qu'une règle
+à écrire, et elle tient en une ligne — **ne jamais proposer une région qui ne porte aucun nœud**,
+ou bien **toujours reproposer la dernière région jouable quand aucune autre ne l'est**. Les deux
+touchent `enCours` / `regionsOuvertes` dans `partage/src/monde/carte.ts`.
+
+**→ ATTENTION AU PROCHAIN LOT : ce fichier a été écrit par H1.** Deux lots qui corrigent la même
+fonction pour deux défauts différents, c'est le conflit annoncé.
+
+**Deux échecs préexistants, mesurés et non causés par H1**, pour qu'on ne me les impute pas :
+
+- `tests/rapports/test-visuel.json`, **daté du 2026-08-02 06:32, avant ce lot** : `carte.spec.ts
+  › après l'Éclat : la Clairière est terminée` et `› et ça reste` échouent déjà sur
+  `toHaveAttribute`. Le cas termine UN nœud et attend « terminee » ; depuis que la Clairière en
+  déclare six, un nœud vaut 1/6 et ne pose plus d'Éclat — ce que `carte-recoloration.test.ts`
+  vérifie par ailleurs et qui est le comportement JUSTE. Le cas et sa capture de référence
+  datent d'un catalogue à un nœud. **Ni le test ni la référence ne sont touchés** : on ne met
+  jamais à jour une référence de sa propre initiative.
+- `tests/api/profils-vecus.test.ts › V2 › a bien un passé` lit `progression_region` sans avoir
+  jamais appelé `GET /monde`. Or `INSERT INTO progression_region` n'apparaît qu'en un seul point
+  du code de production (`serveur/src/depots/monde.ts:250`, appelé par `lireCarte` seul) : la
+  table est vide pour cette fixture, avant comme après H1.
+
+---
+
+# Lot H3 — la QA teste enfin un logiciel VÉCU
+
+## Q-H3-1 — Le verdict, fixture par fixture
+
+La demande de fond du père était : « est-ce que ton QA teste comme un humain ? ». La réponse
+était non. Cinq profils qui ont un PASSÉ ont été construits, et la seule question qui compte
+leur a été posée : **est-ce que l'enfant peut faire quelque chose ?**
+
+L'invariant n'est pas « un élément interactif est présent » — c'est la leçon de D48, et c'est
+exactement ce qui avait laissé passer le défaut. C'est **une sortie qui répond** : une région
+que `regionsOuvertes` rend tapable, qui porte un nœud de reprise, dont
+`GET /api/contenu/noeuds/:id` rend 200. Un bouton qui existe et ne mène nulle part vaut zéro.
+
+| Fixture | Ce qu'elle vit | L'enfant peut faire quelque chose ? |
+|---|---|---|
+| V1 `mi-parcours` | Clairière finie, 4 Galeries sur 12 | **oui** — 2 sorties |
+| V2 `tout-fini` | les 18 nœuds livrés terminés | **NON — 0 sortie** |
+| V3 `echoue-souvent` | 12 échecs avec aide, puis une réussite | **oui** |
+| V4 `inactif-40-jours` | absent 40 jours, révisions Leitner dues | **oui** |
+| V5 `catalogue-agrandi` | état écrit par un catalogue de 3 nœuds, relu sur 18 | **oui** (rouge avant H1) |
+
+Un seul « non », et il est écrit rouge exprès : c'est **Q-H1-5**, le second défaut, que H1 a
+consigné de son côté et qu'il ne corrige pas.
+
+**Ce que H3 ajoute à Q-H1-5, et qui change sa priorité : ce n'est pas un cas d'école.** Le
+découpage A de `tests/api/migration-catalogue.test.ts` reproduit l'état du jour où Ezékiel a
+joué — 1 nœud en Clairière, 2 aux Galeries, tous terminés. **À cet instant précis, avant même
+que le catalogue ne grandisse, il était déjà bloqué par ce second défaut.** Le défaut du
+catalogue périmé n'a fait que rendre le blocage permanent. Ezékiel a donc rencontré les deux,
+dans cet ordre.
+
+## Q-H3-2 — Les chiffres du lot
+
+```
+5   fixtures de profils vécus            tests/fixtures/profils-vecus/atelier-vecu.ts
+7   parcours humains                     tests/api/parcours-humains.test.ts
+3   découpages de catalogue + 1 retrait  tests/api/migration-catalogue.test.ts
+51  cas de test ajoutés                  50 verts, 1 rouge délibéré
+```
+
+Mesuré, sortie citée, `npx vitest run` sur tout le dépôt après écriture :
+`Test Files 1 failed | 101 passed (102)` · `Tests 1 failed | 1560 passed (1561)`.
+`npx tsc -b` rend 0. `npx eslint` sur les quatre fichiers rend 0.
+
+## Q-H3-3 — Quatre choix tranchés seuls
+
+1. **Les fixtures vivent en T2 (`fastify.inject`), pas en E2E.** Ce qui a cassé est un ÉTAT, pas
+   un pixel : le monter par les vraies routes le rend déterministe, rapide (≈ 1,5 s pour les
+   51 cas) et exécutable dans `npm run test`, donc dans `pre-push`. Un parcours humain en
+   Playwright aurait coûté cent fois plus cher pour mesurer la même chose. Les gestes purement
+   visuels — « ferme l'onglet pendant l'animation » — sont modélisés par leur seule conséquence
+   observable : le serveur a journalisé, le client n'a jamais lu la réponse, on remonte à neuf.
+
+2. **La règle de tapabilité est RECOPIÉE depuis `EcranCarte.tsx`, pas importée** — `reprise` et
+   `jouables` sont des closures locales de l'écran. Une recopie qui dérive mesurerait autre
+   chose que ce que l'enfant voit, et le mensonge serait invisible : trois cas de
+   `tests/api/profils-vecus.test.ts` relisent donc le fichier de l'écran et échouent si l'une
+   des deux règles y change. C'est le garde-fou de la recopie.
+
+3. **Aucun état de fixture n'est écrit à la main en base.** Tout passe par `POST /api/tentatives`
+   et par un référentiel INJECTÉ dans `enregistrerRoutesMonde`. C'est ce qui permet de jouer sur
+   un catalogue plus petit sans écrire une ligne dans `contenu/`, et sans devenir un second
+   écrivain de `serveur/src/application.ts`. La preuve que la fixture reproduit le vrai défaut
+   et non un défaut inventé : les six lignes de `progression_region` qu'elle produit avant
+   migration sont celles de `donnees/pierre.db`, ligne pour ligne, y compris `marais-jumeau` et
+   `foret-muette` ouvertes et `volcan` fermé.
+
+4. **`modeReponse` par moteur est un choix de fixture, pas une donnée du dépôt.** Le serveur
+   refuse une étape sans `modeReponse` (D13) et rien dans `contenu/` ne dit lequel un moteur
+   émet. La table `MODE_PAR_MOTEUR` est déclarée comme telle en commentaire ; aucune assertion
+   du lot ne dépend de la valeur exacte. **Si un jour un moteur déclare son mode dans son
+   habillage, cette table doit disparaître** — c'est la seule dette du lot.
+
+## Q-H3-4 — Ce qui reste à décider
+
+1. **Faut-il que l'invariant devienne une étape de `npm run verifier` à part entière ?** Il est
+   aujourd'hui trois cas parmi 1561. Une étape nommée « aucun profil bloqué » se lirait dans
+   `RAPPORT.md` sans être noyée. Proposé, pas fait : `scripts/verifier.mjs` n'appartient pas à
+   ce lot.
+
+2. **Faut-il jouer ces fixtures sur la VRAIE base au démarrage ?** `donnees/pierre.db` est le
+   seul profil vécu qui ne soit pas une reconstitution. Un contrôle au lancement — « ce profil
+   a-t-il au moins une sortie ? » — dirait au père en une seconde ce qu'il a mis une soirée à
+   comprendre. C'est une décision de produit, pas de test.
+
+3. **Le second défaut (Q-H1-5) touche `partage/src/monde/carte.ts`, que H1 vient d'écrire.**
+   Deux lots sur la même fonction pour deux défauts distincts : le prochain lot doit être seul
+   à y écrire.
+
+**Sauvegarde de la base réelle** faite avant toute manipulation, et complète — la base est en
+mode WAL, le seul `.db` ne contient rien :
+`donnees/sauvegardes/pierre-2026-08-02T-lot-H3.db` avec ses `-wal` et `-shm`.
+Relue et vérifiée : profil `prf-0fbbeba7fb27d3f7`, 3 lignes de `progression_noeud`,
+6 `tentatives`. **Aucun fichier source n'a été supprimé, et la base réelle n'a pas été touchée.**
+
+---
+
+## Lot H2 — remise à zéro d'un profil et écran d'état (2026-08-02)
+
+Demandé après essai réel : *« le père teste sur le profil de son fils et demande un moyen de
+repartir à zéro »*. Quatre livrables : la remise à zéro depuis la zone parent, ses deux portées,
+un écran d'état du profil, et une commande hors interface.
+
+### Q-H2-1 — Une remise à zéro efface-t-elle `tentatives`, pourtant append-only ?
+
+**Tranché : OUI, et c'est la seule réponse cohérente.**
+
+`001_socle.sql` porte en toutes lettres « aucun `UPDATE`, aucun `DELETE` n'est jamais écrit
+contre cette table », et le principe fondateur en dépend (specs v2 § 13.3). Le lot l'enfreint
+délibérément, dans un seul fichier — `serveur/src/services/reinitialisation-profil.ts` — et
+pour un motif qui est lui-même une conséquence du principe :
+
+- la règle append-only gouverne **le chemin de jeu**, pour qu'aucune mécanique ne révise
+  l'histoire de l'enfant à son insu ;
+- une remise à zéro n'est pas une mécanique de jeu : c'est un geste d'administration, derrière
+  un code à quatre chiffres, confirmé en retapant le prénom de l'enfant ;
+- **épargner le journal serait pire.** Un journal conservé face à des projections effacées
+  rendrait au profil, au premier recalcul venu — celui du lot H1 —, tout ce qu'on vient de lui
+  retirer. La remise à zéro serait annulée par la réparation.
+
+Le seul état cohérent après une remise à zéro est donc : journal vide, projections vides.
+L'invariant est préservé, pas rompu. Gardé par
+`tests/api/parent-reinitialisation.test.ts` → *« un recalcul complet après remise à zéro ne
+ressuscite rien »*.
+
+**Où le changer** : si l'on voulait un jour archiver plutôt qu'effacer, c'est la seule fonction
+`reinitialiserProfil` qui bouge, et le test ci-dessus qui dit ce qu'il faut préserver.
+
+### Q-H2-2 — Ce que chaque portée conserve
+
+**Tranché : on efface par DÉFAUT, on conserve par EXCEPTION.**
+
+La portée « progression seule » est définie comme *toutes les tables porteuses de `profil_id`,
+MOINS une liste blanche de deux noms* : `reglages_lecture` et `essais_typographie`. Jamais
+l'inverse.
+
+*Pourquoi ce sens et pas l'autre.* C'est D48 appliqué à l'effacement. Une liste de tables **à
+effacer** décrirait le schéma du jour où on l'a écrite ; une migration ajoutant demain une table
+porteuse de `profil_id` la laisserait derrière, et le profil « remis à zéro » garderait une
+projection périmée — **exactement le défaut que cette campagne corrige**. On ne répare pas un
+état périmé avec un mécanisme qui périme.
+
+`essais_typographie` accompagne `reglages_lecture` parce que jeter la mesure sans jeter le
+réglage laisserait un réglage dont plus personne ne sait d'où il vient (D19).
+
+**Ni l'une ni l'autre portée ne supprime le profil** : `profils` ne porte pas `profil_id`,
+n'est donc jamais touchée, et le prénom comme l'avatar survivent aux deux. Supprimer un profil
+est une autre action, qui n'a pas été demandée. `code_parent`, `verrou_parent`,
+`relecture_contenu` et `schema_migrations` sont épargnées par la même construction — effacer le
+code du foyer enfermerait le parent dehors (contrat de finition v3 § 7.3).
+
+**Où le changer** : `TABLES_CONSERVEES_PAR_PROGRESSION`, dans
+`partage/src/parent/reinitialisation.ts`. Un seul endroit.
+
+### Q-H2-3 — La confirmation : retaper le prénom de l'enfant
+
+**Tranché : le serveur exige que le prénom de l'enfant soit retapé.** Pas une case à cocher,
+pas un second bouton.
+
+*Pourquoi.* Le brief le pose comme condition : « c'est une action irréversible sur les données
+d'un enfant, elle ne doit jamais se déclencher par un tap distrait ». Un tap ne produit pas un
+prénom ; une requête égarée non plus. Et surtout, retaper « Ezékiel » oblige à avoir lu **de
+quel enfant il s'agit** — c'est la garde qui *nomme* le profil, pas seulement celle qui ralentit.
+
+La comparaison passe par `comparerNormalise` (`partage/src/texte.ts`) : « ezekiel » vaut
+« Ezékiel ». Le prénom est affiché juste au-dessus du champ ; refuser un accent punirait un
+parent qui a raison.
+
+La garde est **au serveur**, pas seulement à l'écran : `npm run profil:reinitialiser` passe par
+le même service, et une garde qui n'existerait qu'en React ne garderait rien.
+
+### Q-H2-4 — L'écran d'état CONSTATE, il ne répare pas
+
+**Tranché : `GET /api/parent/:profil/etat` est en lecture seule.**
+
+Il affiche, pour chaque région, **le pourcentage stocké ET le pourcentage recalculé, avec leur
+écart** — la transposition à un écran de la règle « si un agent doit recalculer, il imprime les
+deux valeurs et l'écart ». Le recalcul appelle `carteRecalculee` (`serveur/src/depots/monde.ts`)
+et n'en écrit pas un second : deux recalculs de la même grandeur dérivent, et le jour où ils
+divergent personne ne sait lequel croire.
+
+*Pourquoi il ne répare pas.* Un écran qui réparerait en affichant deviendrait inutilisable pour
+constater, et masquerait au lot H1 le défaut qu'il doit corriger **par migration, une fois**.
+Gardé par `tests/api/parent-etat-profil.test.ts` → *« l'écran CONSTATE et ne répare pas »*.
+
+`regionsIncoherentes` est le chiffre du lot : **2** sur l'état vécu du 2026-08-02, **0** sur un
+profil sain.
+
+### Q-H2-5 — La commande hors interface et sa sauvegarde
+
+**Tranché : `npm run profil:reinitialiser` n'efface rien sans `--confirmer`, et sauvegarde
+toujours.**
+
+Sans `--confirmer`, la commande affiche l'aperçu chiffré et s'arrête — la transposition à la
+ligne de commande de la confirmation explicite. Le défaut de portée est `--progression`, celle
+qui **conserve** : une commande dont le défaut est la destruction maximale punirait la frappe
+rapide.
+
+La sauvegarde est obligatoire, **aucun drapeau ne la désactive**, et elle est écrite par
+`VACUUM INTO` — un fichier unique et consolidé. Mesuré le 2026-08-02 : `donnees/pierre.db` fait
+**4 096 octets** quand son `-wal` en fait **799 312**. Une copie du seul `.db` serait une
+sauvegarde presque vide qui aurait l'air d'une sauvegarde.
+
+La commande charge le service depuis la **source TypeScript** (via `tsx`), jamais depuis
+`serveur/dist/` : un `dist` périmé effacerait selon l'ANCIENNE définition des portées et
+sortirait en vert. Même raisonnement que `scripts/test-rejeu.mjs`.
+
+### Q-H2-6 — Ce qui reste à décider
+
+1. **Faut-il une route de SUPPRESSION de profil ?** Ce lot remet à zéro, il ne supprime jamais.
+   Un profil créé par erreur (test, doublon de prénom) reste dans la liste pour toujours. Non
+   demandé, donc non fait ; la décision est de produit.
+
+2. **Faut-il une entrée `/parent/profil` dans le routeur ?** L'écran est aujourd'hui un
+   **onglet** de `EcranDashboard`, comme la galerie l'a été avant d'avoir sa route.
+   `client/src/routeur.tsx` n'appartient pas à ce lot.
+
+3. **Faut-il que `regionsIncoherentes > 0` déclenche un contrôle dans `npm run verifier` ?**
+   L'indicateur existe et se lit à l'écran ; personne ne le mesure au démarrage. Rejoint la
+   question 2 de Q-H3-4.
+
+### Sauvegardes et fichiers écrits par ce lot
+
+**La base réelle `donnees/pierre.db` n'a jamais été ouverte en écriture.** Tout le travail de
+mise au point s'est fait sur des copies, dans le répertoire temporaire de session.
+
+Sauvegardes écrites dans `donnees/sauvegardes/` :
+
+| Fichier | Ce que c'est |
+|---|---|
+| `pierre-2026-08-02T09-03-53-801Z.db` (+ `-wal`, `-shm`) | copie des trois fichiers, prise avant toute manipulation |
+| `pierre-2026-08-02T09-03-53-801Z-consolidee.db` | la même base, consolidée par `VACUUM INTO` — **c'est celle-ci qui se restaure d'un seul fichier** |
+| `pierre-avant-reinitialisation-2026-08-02T09-19-57-375Z.db` | écrite par la commande lors de son essai sur une COPIE ; contenu identique à la consolidée ci-dessus |
+| `pierre-avant-reinitialisation-2026-08-02T09-27-05-585Z.db` | idem, second essai (portée `--complete`) |
+
+Les deux dernières portent un nom qui pourrait inquiéter : **elles ne prouvent aucune remise à
+zéro de la base réelle**, seulement l'essai de la commande sur une copie. Aucun fichier source
+n'a été supprimé.
+
+---
+
+# Q4 — Fuzzer de contenu et fuzzer d'API (lot QA, 2026-08-02)
+
+**Ce que le lot a livré**, et ce qu'il a trouvé en le livrant.
+
+| Grandeur | Valeur | Comment elle est obtenue |
+|---|---|---|
+| Cas de contenu générés | **25 100** | `[fuzz-contenu]`, imprimé par le contrat de sortie |
+| — refusés proprement | **12 680** | la validation dit non, avec un pointeur et un message |
+| — acceptés | **11 626** | mutation restée licite (ex. `$commentaire`, ou un pointeur sous `jeu.contenu` que l'enveloppe déclare `true`) |
+| — jugés sur la seule absence de plantage | **794** | SVG pathologiques, graphes tirés, traversées de chemin |
+| Cas d'API générés | **2 019** | `[fuzz-api]` |
+| Routes fuzzées / déclarées | **29 / 29**, écart **0** | inventaire lu dans `printRoutes()` de Fastify, pas dans une liste écrite à la main |
+| Statuts observés côté API | `200×490 201×49 400×750 404×532 409×75 413×10 414×20 415×40 423×53` | **aucun 5xx** |
+| **Plantages trouvés** | **5 défauts**, **0 restant** | détail ci-dessous |
+| Preuves rouges | **6 / 6** + **1 contrôle négatif vert** | chaque fichier remis à l'octet près, empreinte sha256 vérifiée |
+
+## Les 5 défauts trouvés, et pourquoi ils comptent
+
+1. **`POST /api/tentatives` rendait 500 sur toute clé d'idempotence rejouée avec un autre nœud**
+   (`serveur/src/routes/tentatives.ts`). La route lisait la progression du nœud que le CORPS
+   revendique ; l'idempotence, elle, rend la tentative DÉJÀ STOCKÉE, qui peut porter un autre
+   nœud. Sortie citée : `Progression introuvable apres enregistrement (profil prf-…, noeud
+   quarante-deux)`. **C'est l'autre bout de la mutation M20 de `Docs/audit-qa.md` § 4.3** : une
+   clé qui oublie le nœud produit exactement ce corps-là, et l'enfant qui vient de terminer
+   reçoit une erreur interne au lieu de sa récompense — la forme du défaut n° 4 du père.
+   Corrigé : le journal fait foi, on lit la progression du nœud réellement enregistré.
+
+2. **`GET /api/contenu/assets/__proto__` rendait 500** (`partage/src/fournisseurs/factices.ts`).
+   `this.assets[chemin]` interrogeait la chaîne de prototypes. **Le dépôt DISQUE n'a pas ce
+   défaut** — vérifié, il passe par `resoudreSousRacine` puis `readFile`. C'était donc le
+   DOUBLE qui plantait, celui que montent les 22 fichiers de `tests/api/` : un double qui casse
+   là où la production tient fait mentir la suite dans les deux sens. Corrigé par `Object.hasOwn`.
+
+3. **`validerBlocJeu` LEVAIT au lieu de refuser** quand `jeu` n'est pas un objet
+   (`TypeError: Cannot destructure property 'moteur'`), sur les 18 exercices du dépôt.
+
+4. **`validerSceneSvg` LEVAIT** quand l'habillage n'a pas de `scene.calques` lisibles, ou qu'un
+   calque n'est pas un objet. C'est le cas réel de `scripts/test-contenu.mjs:497`, qui lui passe
+   un habillage relu du disque et **jamais validé** : un habillage cassé produit par un agent
+   faisait tomber tout `npm run test:contenu` sur une trace de pile, au lieu de nommer le
+   fichier fautif.
+
+5. **`habillage.moteurs.includes` levait** quand `moteurs` est absent. Même famille.
+
+Les défauts 3, 4 et 5 sont la forme exacte de la mutation n° 15 de l'audit — *« le repli lève au
+lieu de replier »*. Les gardes ajoutées **ne peuvent rien accepter de plus qu'avant** : elles ne
+transforment que des plantages en refus nommés (`enveloppe-illisible`, `habillage-illisible`,
+`svg-illisible`). Aucune assertion existante n'a été assouplie.
+
+## Arbitrages rendus seul
+
+| # | Arbitrage | Décidé |
+|---|---|---|
+| Q4-1 | **Le fuzzer corrige les défauts qu'il trouve.** Le brief demandait « plantages trouvés (attendu : 0 après correction) » : livrer un fuzzer rouge aurait laissé le travail à moitié fait | 5 corrections, 3 fichiers de production |
+| Q4-2 | **L'inventaire des routes vient de `printRoutes()` de Fastify**, pas d'une liste. Mesuré avant d'écrire : `printRoutes({ commonPrefix: false })` **perd les routes joker** (`/api/contenu/assets/*`, `/api/audio/*` n'y figurent pas) — c'est l'arbre par défaut qui fait foi | 29 routes, écart 0 |
+| Q4-3 | **Chaque route porte un appel NOMINAL au statut épinglé.** Sans lui on fuzzerait la zone parent sans jeton : 401 partout, zéro 500, et zéro ligne de code métier atteinte. C'est la traduction mécanique de « la QA se mentait sur sa couverture » | 29 nominaux verts |
+| Q4-4 | **Deux nominaux ne sont pas 200, et c'est écrit dans le fichier** : `POST /api/profils/:id/sortie` rend **409** (le dépôt du banc ne sert qu'un nœud, et le 409 arrive APRÈS le sélecteur) et `POST /api/parent/relecture/:exercice` rend **404** (aucun brouillon en relecture). Les deux franchissent bien tout le code que le fuzz veut éprouver | documenté sur pièce |
+| Q4-5 | **Les cas invalides sont dérivés du SCHÉMA, contrainte par contrainte** (`required`, `type`, `enum`, `pattern`, bornes, `additionalProperties`), jamais écrits à la main. Un champ ajouté demain est fuzzé sans qu'on touche au fichier ; un schéma qu'on desserrerait produirait MOINS de cas et ferait tomber le plancher | 868 + 1 058 contraintes |
+| Q4-6 | **`tests/fuzz/corpus.ts` est un nouveau dossier**, hors des trois projets de `vitest.config.ts` : il est importé, jamais collecté. Il ne porte donc aucun `expect`, et le garde prévu au lot QA-3c (« tout `tests/**/*.test.ts` contient un `expect(` ») ne le voit pas | 1 dossier créé |
+| Q4-7 | **Je n'ai pas compilé** (D10, jeton unique). Le type-check a été fait **sans émission**, par un `tsconfig` du répertoire temporaire : 153 fichiers de `partage/src` + `serveur/src`, zéro erreur, et un contrôle négatif prouve qu'il regarde bien `validation.ts` | aucun octet écrit dans `dist/` |
+
+## À trancher par le père ou l'orchestrateur
+
+1. **`npm run test:contenu` charge `partage/dist`, pas `partage/src`** (`scripts/test-contenu.mjs:158`,
+   `partage/package.json` → `"./validation": { "default": "./dist/contenu/validation.js" }`). Les
+   trois gardes ajoutées à `validation.ts` n'y entreront donc **qu'après un `npm run typescript`**
+   de l'orchestrateur. Le script est vert aujourd'hui (226 contrôles, 0 problème) sur l'ancien
+   `dist` ; le risque est nul puisque les gardes ne font que remplacer des exceptions par des
+   refus, mais le fait est là et il vaut d'être su.
+
+2. **Faut-il refuser en 409 une clé d'idempotence rejouée sur un AUTRE nœud ?** La correction du
+   défaut n° 1 rend la réponse cohérente (tentative et progression parlent du même nœud) et ne
+   perd rien. Dire au client que sa clé est fausse serait plus franc, mais c'est un changement de
+   sémantique d'API : non demandé, donc non fait.
+
+3. **Faut-il un plancher sur le nombre de routes dans `couverture-ecrans` côté serveur ?** Le
+   fuzzer d'API asserte `routes fuzzées == routes déclarées` ; rien n'oblige encore une route
+   NOUVELLE à recevoir un test de comportement. C'est la version « serveur » du lot QA-3a.
+
+4. **`GET /api/contenu/assets/*` et `GET /api/audio/*` ne servent aucun octet sur le banc** (le
+   dépôt de test est en mémoire et n'a pas d'assets). Leur fuzz éprouve donc la garde de décodage
+   et le 404, pas la lecture. La garde de traversée de PRODUCTION est éprouvée à part, par
+   `resoudreSousRacine` dans `tests/unitaires/fuzz-contenu.test.ts`.
+
+---
+
+# Lot Q5 — le harnais de mutation, le détecteur de tests trompeurs, le tableau de bord
+
+**Ce que le lot livre :** trois commandes qui mesurent la QA elle-même, et un cliquet qui
+empêche la mesure de se dégrader en silence.
+
+```
+npm run qa:mutations   # casse le code 33 fois et regarde si la suite hurle · ~4 min
+npm run qa:trompeurs   # les tests qui n'assertent rien, ou pas ce qu'ils disent · ~2 s
+npm run qa:tableau     # tests/rapports/TABLEAU-DE-BORD-QA.md · <1 s
+```
+
+**Contrat de sortie, mesuré le 2026-08-02, banc opposable :** 28 mutations + 5 contrôles
+négatifs · 1 mutant équivalent retiré du dénominateur · **27 mutations qui valent,
+16 détectées, 11 survivantes, dont 7 couvertes par une assertion E2E nommée et 4 que RIEN
+dans le dépôt ne verrait** (M11b, M18, M20, M26) · taux de survie **41 %** · **5 contrôles
+négatifs verts sur 5** · base verte AVANT et APRÈS · 264 s. Détecteur : **141 fichiers,
+1 477 cas, 0 bloquant, 66 avertissements.** Tableau de bord : **14 moteurs gardés sur 14,
+2 écrans sur 12** (fichier à leur nom), **8 écrans montés par aucun test de composant**.
+
+Le chiffre reproduit celui de `Docs/audit-qa.md` — 11 survivantes — avec un trou réel de plus,
+trouvé par ce lot : **M11b**.
+
+## Les arbitrages rendus seul
+
+| # | Arbitrage | Pourquoi, et ce que ça a coûté de le vérifier |
+|---|---|---|
+| Q5-1 | **Le harnais est dans `scripts/qa/`, pas dans `outils/mutation/`** comme le plan de `Docs/audit-qa.md` § 7 le nommait | Mesuré avant d'écrire une ligne : `.gitignore` ligne 7 porte `outils/`. Le harnais entier aurait été **invisible à git**, donc perdu au clone — l'exact contraire de D9. Le plan de l'audit n'avait pas relu le `.gitignore` |
+| Q5-2 | **La règle d'échec du banc n'est pas « zéro survivant »** mais « aucun NOUVEAU survivant » : chaque survivant porte son `pourquoi` écrit dans `scripts/qa/recettes.mjs`, et tout écart au verdict de référence fait rougir | La demande disait « échoue si une mutation survit ». Appliquée à la lettre, la commande serait **rouge en permanence** — 10 mutations sur 27 survivent aujourd'hui pour des raisons acceptées. Une commande toujours rouge est une commande qu'on cesse de lire, et c'est le mode de défaillance que ce lot combat |
+| Q5-3 | **Une AMÉLIORATION ne fait pas échouer le banc**, elle imprime la ligne exacte à changer | Sinon un lot QA-1/QA-2 qui ferme un trou casserait `qa:mutations` en atterrissant. Le cliquet se resserre à la main ; il ne se desserre jamais tout seul |
+| Q5-4 | **`qa:trompeurs` entre au `pre-commit`** (`lefthook.yml`), pas au `pre-push` | Deux secondes, et c'est la **seule traduction mécanique** de « ne jamais mettre un test en `skip` ». Cette règle vivait jusqu'ici dans le `fail_text` du crochet et dans CLAUDE.md, et **aucune commande ne la vérifiait**. Un test creux se corrige quand on vient de l'écrire, pas trois jours après |
+| Q5-5 | **Les bloquants sont à tolérance zéro, les avertissements sous plafond gelé** | Les six détecteurs lisent du texte, pas une intention. Un zéro sur des heuristiques se fait désactiver ; un plafond empêche d'en ajouter et rend visible chaque retrait |
+| Q5-6 | **Un banc partiel écrit `mutations-partiel.json`**, jamais le rapport de référence | Trouvé dans mon propre outillage : un `--seulement=M11,M11b` avait écrasé le rapport complet, et le tableau de bord a aussitôt affiché « 1 survivante sur 2 » comme si c'était l'état du dépôt. **Un rapport partiel qui prend la place du rapport complet est exactement le test trompeur que ce lot combat** |
+| Q5-7 | **`--racine=` sur le tableau de bord et `--recettes=` sur le banc** existent pour rendre leurs garde-fous exécutables | Un garde qu'on n'a jamais vu se déclencher n'a pas fait ses preuves. Les quatre chemins d'échec du banc et le garde de population du tableau ont été déclenchés, sortie citée dans le rapport du lot |
+| Q5-8 | **M11 de l'audit n'était pas la mutation que j'avais écrite**, et je l'ai corrigée au lieu de conclure que l'audit se trompait | Mon M11 retirait la marque `data-clip` ; le sien rendait le bouton SANS clip (D42). Le sien est bien détecté. Le mien ne l'est pas — d'où **M11b**, une recette ajoutée par ce lot |
+| Q5-9 | **Le cliquet a été resserré sur M2, puis DESSERRÉ vingt minutes plus tard — et c'est le meilleur résultat du lot** | Le banc a rendu `🎉 AMÉLIORATION` ; j'ai passé `attendu` à `DETECTEE` ; le banc suivant l'a vue SURVIVRE et **a sorti 1 contre son propre auteur**. La détection venait de `tests/composants/exploration-modele.test.tsx`, qu'une campagne écrivait : absent au premier banc, présent mais non suivi par git au second, donc exclu par l'invariant 3. Deux mesures justes, deux dépôts différents. Le banc imprime désormais, avant toute AMÉLIORATION, l'ordre de la **confirmer** par `--seulement=<id>` avant d'éditer quoi que ce soit |
+| Q5-10 | **Le tableau de bord affiche DEUX mesures d'écrans côte à côte**, et l'écart est l'information | La stricte (un fichier de test AU NOM de l'écran) rend 2 sur 12 ; la large (monté au moins une fois, test d'exploration compris) rend 4 sur 12. N'afficher que la stricte ferait réécrire des tests qui existent ; n'afficher que la large ferait croire que 4 écrans ont quelqu'un qui répond d'eux quand ils changent. **8 écrans ne sont montés par aucun test de composant** |
+| Q5-11 | **Le tableau de bord REFUSE d'afficher les chiffres d'un banc non opposable** — base rouge avant ou après, ou un seul contrôle négatif rouge | Ajouté après l'avoir vu arriver, et c'est la démonstration la plus importante du lot : un banc a rendu **33 recettes détectées sur 33, contrôles négatifs compris**. Chiffre magnifique, entièrement faux — la suite était passée au rouge à la deuxième recette (`tests/unitaires/carte.test.ts`, cassé par une campagne parallèle), et le banc comptait cette rougeur comme sa détection. **C'est mot pour mot le piège du § 1 de `Docs/audit-qa.md`, reproduit en conditions réelles**, et les cinq contrôles négatifs l'ont attrapé |
+
+## Ce que le lot a trouvé en passant, et qui n'était pas dans l'audit
+
+1. **M11b — le garde de D42 s'auto-désarme.** `tests/e2e/parcours-variete.spec.ts:229` exige
+   **zéro** élément `[data-action="ecouter"][data-clip="null"]`. Si l'attribut `data-clip`
+   disparaît tout entier, le sélecteur ne désigne plus rien et l'assertion reste verte : un
+   sélecteur qui ne peut plus rien désigner ne peut plus rien refuser. Le composant promet
+   pourtant, en commentaire, « un test n'a donc pas à croire le composant sur parole — il lit
+   l'attribut ». **Remède, dix lignes** : un test de composant qui exige la PRÉSENCE de
+   `data-clip` avec la bonne clé quand `aUnClip` rend `true`.
+
+2. **`erreursAvantDemonstration` n'a aucun test.** Trouvé par accident : en cherchant une
+   modification de `delais.ts` qui casse vraiment pour prouver le garde des contrôles négatifs,
+   j'ai passé `erreursAvantDemonstration: 3 → 99` et **la suite est restée verte**. Son jumeau
+   `erreursAvantIndice` est, lui, bien gardé (D49, M9). Le seuil qui décide quand Gobi montre le
+   geste n'est donc tenu par rien.
+
+3. **`tests/unitaires/qa-ductus-toutes-lettres.test.ts` est vert par vacuité possible.** Son cas
+   « CONTRAT DE SORTIE — le sens est discriminant sur toute la population » imprime
+   `LETTRES.length` et `TRAITS.length` puis asserte `acceptesEndroit === n` et
+   `refusesEnvers === n`, où `n = TRAITS_QUI_TOURNENT.length`. **Si ce filtre rendait une liste
+   vide, `n` vaudrait 0 et les deux assertions passeraient.** C'est le défaut n° 6 de
+   l'historique, dans un fichier qui s'appelle « contrat de sortie ». Remède : un plancher sur
+   `n`.
+
+4. **Le détecteur de tests trompeurs a rendu 33 faux bloquants à son premier jet**, et les cinq
+   causes sont écrites dans le fichier pour qu'on ne les réintroduise pas : la parenthèse de
+   `it.each(…)(…)`, le `.test(f)` d'une expression régulière lu comme un cas, `fc.assert` qui
+   est une assertion sans `expect`, une aide locale qui assert pour le cas, et
+   `test.slow()` / `test.beforeEach(…)` qui ne sont pas des cas. **Un détecteur qui crie faux se
+   fait désactiver, ce qui est pire que pas de détecteur du tout.**
+
+## À trancher par le père ou l'orchestrateur
+
+1. **Re-geler `PLAFOND_AVERTISSEMENTS`** (`scripts/qa/tests-trompeurs.mjs`) quand les campagnes
+   auront posé la plume, **et le faire avant le premier commit** puisque `qa:trompeurs` est
+   désormais au `pre-commit`. Il a été mesuré **pendant** que six campagnes écrivaient dans
+   `tests/` : la valeur est passée de 40 à 66 en une heure d'écriture parallèle, sans qu'aucun
+   test existant ne se dégrade — ce sont de nouveaux tests qui impriment de nouveaux chiffres.
+   La commande imprime elle-même la valeur à écrire ; l'opération dure deux secondes :
+   ```
+   npm run qa:trompeurs      # lire la ligne « avertissements », la recopier dans le fichier
+   ```
+   Le plafond est aujourd'hui gelé à **66**, la valeur mesurée à la dernière minute du lot.
+   **Aucun de ces 66 n'est un défaut nouveau** : ce sont des cas qui impriment un chiffre sans
+   l'asserter, dont 45 dans des tests écrits ce jour-là par d'autres campagnes.
+
+1 bis. **Le banc va ralentir, et il faut le savoir avant de s'en étonner.** Il coûte 4 minutes
+   aujourd'hui parce que la suite tient en 7 secondes. Un test d'exploration livré par une
+   campagne parallèle prend à lui seul **27 secondes** : le jour où il sera suivi par git, le
+   banc passera à un quart d'heure. Ce n'est pas un défaut du banc, c'est le prix d'un test qui
+   monte tout le graphe des écrans — mais la suite à 8 secondes était, selon les mots de l'audit,
+   « un atout du projet qu'il faut protéger ».
+
+2. **Faut-il ajouter `qa:mutations` au `pre-push` ?** Cinq minutes, contre les quelques minutes
+   que `verifier` prend déjà. Mon avis : **non pour l'instant** — le banc mute des fichiers de
+   production, et le faire tourner à chaque poussée multiplie les fenêtres de collision avec une
+   campagne parallèle. Il vaut mieux le lancer volontairement, machine calme. À rouvrir quand le
+   projet redeviendra mono-agent.
+
+3. **`tests/e2e/parcours-issues-de-secours.spec.ts`** — l'audit § 6.5 proposait de le supprimer
+   ou de le réduire à un renvoi, et n'a rien supprimé. Ce lot non plus. La question reste ouverte.
+
+4. **Les sept survivants « couverts en E2E » ne sont toujours pas vérifiés en exécutant.**
+   L'audit le disait déjà (§ 1, arbitrage A-3) : c'est la seule chose de son document qui demande
+   une exécution, et elle demande un build. Le banc porte le champ `assertionE2E` qui NOMME le
+   fichier et l'assertion pour chacun ; il ne les exécute pas.
+
+---
+
+## Lot Q3 — tests de PROPRIÉTÉ sur le moteur de jeu et la pédagogie (2026-08-02)
+
+Cinq fichiers neufs, plus un module d'outillage, tous dans `tests/unitaires/` :
+`propriete-tentative-coherente.test.ts`, `propriete-maitrise-bornee.test.ts`,
+`propriete-leitner-conservation.test.ts`, `propriete-sortie-jouee.test.ts`,
+`propriete-trace-sens.test.ts`, `propriete-outils.ts`. Aucun fichier existant n'est touché,
+aucune assertion n'est retirée ni assouplie, aucun `skip`.
+
+### Arbitrages rendus seul
+
+| # | Arbitrage | Décidé, et pourquoi |
+|---|---|---|
+| Q3-A1 | **Où poser les fichiers.** `vitest.config.ts` ne collecte que `tests/unitaires/**/*.test.ts` ; créer `tests/propriete/` aurait demandé de modifier la configuration, fichier que je ne possède pas et que plusieurs campagnes touchent. | Préfixe `propriete-` dans `tests/unitaires/`. Zéro modification de configuration, filtre `npx vitest run --project unitaires propriete-` immédiat. |
+| Q3-A2 | **Graine fixée à `20260802`, `numRuns: 1000`, `verbose: true`.** Sans graine explicite, `fast-check` prend `Date.now()` : l'espace exploré changerait à chaque exécution et un échec ne serait pas rejouable. | Une QA non déterministe est une QA qu'on finit par ignorer. La graine vit dans `propriete-outils.ts`, en un seul endroit. |
+| Q3-A3 | **La population des traits au sens mesurable est DÉRIVÉE, pas déclarée.** Un trait n'a un sens que si le modèle distingue lui-même ses deux parcours : `couvertureOrientee(points, points-inversés, tolérance) < COUVERTURE_MINIMALE`. Mesuré : **43 traits sur 45**, contre 23 pour le filtre par aire signée de `qa-ductus-toutes-lettres.test.ts`. | Les deux exclus sont `i-point` et `j-point` — couverture inverse `1.000`, entièrement contenus dans le disque de tolérance. **Un point n'a pas de sens** ; exiger qu'on refuse son parcours inverse serait exiger une distinction que la géométrie ne porte pas. Ils sont nommés, comptés, et leur comportement est épinglé par un cas dédié. |
+| Q3-A4 | **Le tremblement du geste est borné à 4 unités de `viewBox`** (≈ 17 px, plus du double du fichier existant), le pas d'échantillonnage tiré **à chaque segment** entre 1 et 20. | Bornes MESURÉES : à 4, les 45 traits restent acceptés et les 43 discriminants refusés à l'envers (5 400 et 5 160 gestes). À 6, deux obliques du `x` sortent du couloir de départ — c'est R16 qui parle, pas un défaut. On ne teste donc pas au-delà. |
+| Q3-A5 | **Trois moteurs sont exclus, nommément, de la propriété « le guidage de Gobi désigne une cible réelle »** : `colorie` et `libre` rendent `cible: null`, `trace` rend un identifiant de TRAIT qui se joue par un geste. | Exclusion déclarée dans une table (`ACTION_PRINCIPALE`), assertée (`toEqual(['colorie', 'libre', 'trace'])`) et imprimée. Une exclusion silencieuse aurait vendu une couverture non financée. |
+| Q3-A6 | **On n'assert PAS que suivre l'aide de Gobi fait progresser.** Mesuré : jouer la cible de l'aide n'ajoute aucune erreur sur les 11 moteurs couverts, mais ne fait avancer que 4 d'entre eux. | En conclure « le guidage est faux » serait juger un écart à un point de fonctionnement supposé : au palier `indice`, le code rendu est `relire-consigne`, dont la cible désigne ce qu'il faut **surligner**, pas ce qu'il faut jouer. On garde la propriété vraie et opposable (l'aide ne coûte rien, et elle désigne quelque chose de réel) et on laisse la question ouverte ci-dessous. |
+
+### Ce que le lot a trouvé sur lui-même, et qu'il faut retenir
+
+**Une propriété écrite avec un générateur trop propre ne garde rien.** La première version de
+`propriete-sortie-jouee.test.ts` engendrait son vivier avec
+`fc.uniqueArray(..., { selector: (c) => c.habillage })`, comme `selecteur.test.ts`. Tous les
+candidats portaient donc un habillage distinct : **R13 était vraie par construction du
+générateur, jamais par le code testé**. Le banc de mutation l'a dit — en court-circuitant la
+déduplication de `composerSortie`, la propriété restait **verte**. Le vivier tire désormais ses
+habillages dans un lot de six pour une quarantaine de nœuds, et un plancher compte les viviers
+en collision (mesuré : 968 sur 1 000). C'est la forme « générateur » du défaut n° 6 de
+l'historique : un test qui imprime une propriété et n'en mesure pas les conditions.
+
+### Questions ouvertes, à trancher par le père ou l'orchestrateur
+
+1. **Le guidage de Gobi doit-il conduire à la réussite ?** Mesuré sur les 14 moteurs : jouer la
+   cible que `aideProposee()` désigne fait progresser `attrape`, `eclair`, `histoire` et
+   `grave` ; les dix autres ne bougent pas. L'explication probable est que la cible du palier
+   `indice` sert au surlignage. **Si c'est bien l'intention, elle n'est écrite nulle part** — et
+   tant qu'elle ne l'est pas, personne ne peut distinguer « guidage informatif » de « guidage
+   faux ». Le champ à documenter est `AideProposee.cible` dans `partage/src/moteurs/types.ts`.
+
+2. **Quatre moteurs ne sont jamais fait avancer par le hasard** : `phrase`, `colorie`, `place`,
+   `trace` (mesuré, 1 000 séquences chacun). Pour eux, la monotonie de l'avancement est vraie
+   **par vacuité** dans ce lot. Le contrat de sortie l'imprime et les nomme, plutôt que de le
+   taire. Ils restent gardés par `tests/composants/` et les E2E. Faut-il un pilote guidé pour
+   ces quatre-là — c'est-à-dire un oracle qui connaît la bonne réponse de chaque moteur ?
+
+3. **Coût sur la suite : les cinq fichiers prennent 17 à 21 s** (`Duration 17.34s` puis
+   `21.27s` sur machine chargée par les campagnes parallèles ; 97 cas, 29 propriétés). Le § 1
+   de `Docs/audit-qa.md` insiste : une suite à 8 secondes est ce qui rend le test de mutation
+   possible en série, et c'est un atout à protéger. Le budget de 1 000 cas par propriété vient
+   du brief, et il est tenu partout. **Faut-il un `npm run test:propriete` séparé du
+   `npm run test` quotidien**, avec les mille cas hors du chemin chaud et deux cents dedans ?
+   Un premier réglage à 200/300 sur cinq propriétés coûtait 12,6 s au lieu de 21 s.
+
+---
+
+# Lot QA Q1 — les invariants globaux vérifiés après chaque action
+
+**Demande du père, verbatim :** « fait un super qa, c est comme ca qu on gagnera du temps ».
+**Constat de départ :** les recettes de ce dépôt vérifient l'état à la FIN ; les six défauts que le
+père a trouvés sont tous apparus AU MILIEU.
+
+## Ce que le lot pose
+
+| Fichier | Rôle |
+|---|---|
+| `tests/e2e/invariants.ts` | Le harnais. Une sentinelle injectée dans la page audite **chaque image peinte où quelque chose a bougé**, et remonte ses relevés à Playwright. Six invariants. |
+| `tests/e2e/parcours-zz-invariants.spec.ts` | Le contrat chiffré **et** sept contrôles positifs qui cassent l'application exprès pour prouver que la sentinelle mord. |
+| les 18 recettes existantes | **Une ligne changée chacune**, l'import de `test`. Rien d'autre : `git diff --stat` rend `18 files changed, 18 insertions(+), 18 deletions(-)`. |
+
+## Le chiffre — mesuré sur une campagne `--project=parcours` complète, jamais affirmé
+
+```
+[q1] invariants ............... 6
+[q1] recettes portant le harnais 19          (18 existantes + la clôture ; écart 0)
+[q1] cas audités .............. 194
+[q1] relevés (actions vérifiées) 3924
+[q1] gestes observés .......... 1323
+[q1] écrans habités ........... 12   campement, carte, choix-profil-parent, code-parent,
+                                     coffre, dashboard, galerie-parent, noeud, ouverture,
+                                     profils, recompense, reglages-lecture
+[q1] écrans à sortie prouvée .. 12   — impasses : 0
+[q1] violations d'invariants .. 0
+[q1] parcours le plus audité .. « écrans déclarés = écrans visités » : 219 relevés
+```
+
+Un relevé = l'audit des six invariants sur une image peinte. **3 924 vérifications au milieu
+des parcours, là où la QA n'en faisait aucune.** 1 323 d'entre elles suivent un geste ; les
+2 601 autres suivent un effet de React, une réponse poussée dans le magasin par
+`__test.repondre()`, ou une réponse du réseau — c'est-à-dire exactement ce qu'un harnais
+branché sur `locator.click()` n'aurait jamais vu.
+
+## Les arbitrages tranchés seul
+
+| # | Arbitrage | Décidé |
+|---|---|---|
+| Q1-1 | **La sentinelle vit DANS la page**, pas dans un mandataire de `Page`/`Locator`. `qa-outils.taperElement()` — l'action la plus fréquente de cette QA — passe par `page.evaluate` et non par `locator.click` : un mandataire posé sur les méthodes d'action ne l'aurait jamais vue. `__test.repondre()` non plus. | `MutationObserver` + gestes en capture |
+| Q1-2 | **On n'audite que des images PEINTES** (`requestAnimationFrame`). Un état intermédiaire de React que l'enfant n'a jamais pu voir n'est pas un défaut, et le compter ferait crier au loup. | audit coalescé par image |
+| Q1-3 | **`issue` ne mord qu'après un geste resté sur place.** Un écran atteint sans geste (`chargement`) n'est pas habitable : la distinction est mécanique, pas une dérogation. La propriété « mène ailleurs » de D48 est portée par le contrat de campagne, qui exige une SORTIE PROUVÉE par écran habité. | 2 niveaux |
+| Q1-4 | **`sante` retient `console.error` et les exceptions, pas `console.warn`.** Mesuré : zéro `console.error` sur la campagne complète. `console.warn` est employé par conception (`EcranRecompense` avale l'échec d'écriture) ; le garder fatal aurait fait rougir un comportement voulu. **Ce que ce `warn` cache est gardé autrement, et mieux, par l'invariant `serveur`.** | `error` fatal, `warn` non |
+| Q1-5 | **`cible` (R16) est mesurée quand la POPULATION change**, pas à chaque image : `getBoundingClientRect()` force une mise en page, et `colorie` peint des dizaines d'images sur 33 régions. L'audit par écran de `parcours-audit-tout-le-site.spec.ts` reste le filet exhaustif. | coût borné |
+| Q1-6 | **`acquis` compte `[data-etoile][data-acquise="oui"]`, jamais `[data-acquise]` seul.** Corrigé après une FAUSSE ALERTE mesurée : `JaugePalier` pose `data-acquise` sur ses cases, et la cascade rendait « 4 étoiles » sur un barème qui en compte 3. La jauge est exclue pour une raison de conception (D25 point 3 : « la jauge montre le VIDE restant, et il DÉCROÎT »). | un objet, une population |
+| Q1-7 | **Le journal porte le numéro du processus PARENT dans son nom.** Deux corrections successives, toutes deux mesurées : un fichier unique se faisait tronquer par la campagne parallèle, et une clé sur `process.pid` se fragmentait à chaque redémarrage de travailleur (30 fichiers, dont 27 avec un seul cas). `process.ppid` est le pilote de la campagne : stable aux redémarrages, distinct d'une campagne à l'autre. | 1 fichier par campagne |
+| Q1-8 | **Les contrôles positifs tournent sur une page à part.** Casser l'application sur la page du fixateur ferait échouer le cas pour la bonne raison, mais on ne pourrait plus distinguer « la sentinelle a mordu » de « le cas a raté ». **Aucun moyen d'acquitter une violation n'existe sur le chemin normal**, et c'est délibéré : une échappatoire finit toujours par servir. | 7 contrôles, pages dédiées |
+| Q1-9 | **Je n'ai pas compilé** (D10, jeton unique). `serveur/dist/` et `client/dist-test/` du 2026-08-02 ont servi tels quels. La preuve de faillibilité ne passe donc par AUCUNE recompilation : les défauts sont injectés dans la page et sur le réseau (`page.route`), ce qui est plus fort — le contrôle reste dans le dépôt et re-tourne à chaque campagne. | 0 octet écrit dans `dist/` |
+
+## Ce qui a été cassé pour prouver que la QA sait rougir
+
+Un test qu'on n'a pas vu échouer n'a fait ses preuves sur rien.
+
+1. **Huit contrôles positifs, permanents, dans le dépôt** (`parcours-zz-invariants.spec.ts`) :
+   un `data-etat="echec"` posé sur un écran · un bouton de 20 px · un écran dont on retire
+   toute prise · une erreur console · un écran blanc · une étoile acquise qu'on reprend ·
+   une progression que le serveur refuse · **et `POST /api/tentatives` coupé au niveau du
+   réseau**, qui réinjecte le défaut n° 4 du père sans recompiler. Chacun exige que la
+   sentinelle RAPPORTE la violation : `8 passed (8,1 s)`.
+2. **Le branchement lui-même** : une recette débranchée à la main a fait rendre
+   `19 recettes · 18 portant le harnais · écart 1`, en nommant `parcours-un-tap.spec.ts`.
+   Remise, l'écart est retombé à 0.
+3. **Une fausse alerte attrapée par la mesure elle-même** : la première version de l'invariant
+   `acquis` a fait rougir `parcours-cascade.spec.ts` avec « l'écran de récompense a montré
+   4 étoile(s) sur clairiere-01 ; le serveur en journalise 3 ». Quatre étoiles sur un barème
+   qui en compte trois : c'était la mesure qui était fausse, pas le produit (voir Q1-6). Une
+   sentinelle qui crie au loup est pire qu'une sentinelle absente.
+
+## À trancher par le père ou l'orchestrateur
+
+1. **Le serveur de test meurt en silence pendant la campagne E2E — QUATRE fois mesurées, dont
+   une AVANT ce lot.** Signature constante : `page.evaluate: TypeError: Failed to fetch` puis
+   `net::ERR_CONNECTION_REFUSED`, **sans une ligne sur la sortie d'erreur du serveur**, et le
+   port n'est plus écouté. Le tour de référence d'avant le lot rendait déjà `182 passed,
+   4 failed` par ce seul mécanisme ; le tour d'après rendait `180 passed, 15 failed`, et les
+   quinze descendent toutes d'une même mort à `parcours-galerie-parent`. **Relancés seuls, les
+   trois fichiers tombés rendent `17 passed (13,6 s)`.** La cause la plus probable est la
+   coexistence de plusieurs campagnes qui se disputent le port et s'entretuent les processus —
+   j'en ai moi-même tué un, par un filtre Windows écrit avec des barres obliques.
+   **`playwright.config.ts` fixe `PIERRE_PORT ?? 8080` : tant que plusieurs campagnes tournent,
+   il faut un port par campagne**, sinon toute mesure E2E est du bruit et personne ne peut plus
+   distinguer un défaut du produit d'une collision d'outillage. Ce fichier appartient à un
+   autre lot, je n'y ai pas touché.
+2. **Faut-il rendre `console.warn` fatal ?** Voir Q1-4. Aujourd'hui non, parce que
+   `EcranRecompense` l'emploie à dessein. Le jour où ce `warn` sera remplacé par une remontée
+   explicite, le passer fatal coûtera une ligne.
+3. **Le contrat de campagne ne couvre que le projet `parcours`.** `parcours-zz-invariants.spec.ts`
+   passe en dernier de son projet, donc avant `robustesse` (`cassecou`, `singe`), dont les bilans
+   n'entrent pas dans son chiffre. Les deux projets sont surveillés — chaque cas asserte ses
+   propres invariants —, mais le chiffre publié n'agrège que `parcours`. Le corriger demanderait
+   soit un rapporteur, soit un `globalTeardown` : les deux vivent dans `playwright.config.ts`.
+
+---
+
+## Q-INTH — intégration des lots H1, H2, H3 (2026-08-02, fin de journée)
+
+### Q-INTH-1 — Un SECOND état sans issue, et l'arbitrage qui l'a levé
+
+H3 a livré un cas **délibérément rouge**, et il avait raison de le livrer :
+
+```
+FAIL tests/api/profils-vecus.test.ts > V2 — un profil qui a terminé tout le contenu livré
+     > L’ENFANT PEUT FAIRE QUELQUE CHOSE
+     AssertionError: expected [] to not have a length of +0
+```
+
+Un enfant qui termine **honnêtement** les 18 nœuds livrés se retrouvait aussi bloqué que celui
+dont la base mentait : Clairière et Galeries atteignent 100 %, `enCours` cesse de les rendre, et
+les deux régions ouvertes à leur place (`marais-jumeau`, `foret-muette`) ne déclarent **aucun
+nœud**. Zéro exercice jouable.
+
+**Tranché : `regionsOuvertes` replie sur les régions déjà conquises quand la fenêtre de
+progression n'a plus rien à offrir.** Deux règles opposables l'imposent, et aucune ne se négocie :
+
+* **R14** (v2 § 5.4) — « aucun écran d'échec, aucun état sans issue, un acquis n'est jamais
+  repris ». Rejouer une région finie ne reprend rien : c'est gratuit.
+* **D46 § 1** — « partir en sortie doit se faire en **un tap** », depuis n'importe quel état.
+
+Le code de l'écran allait **déjà** dans ce sens et le disait mot pour mot — `reprise`
+(`EcranCarte.tsx`) : « une région entièrement terminée renvoie sur son premier nœud plutôt que
+sur rien » ; `prochaineSortie` (`PastilleSortie.tsx`) : « à défaut, la première ouverte tout
+court : on repart au début, et c'est gratuit ». Leur intention était défaite **en amont**, par
+`regionsOuvertes`. Le correctif ne fait que rendre l'amont cohérent avec l'aval.
+
+**Le repli ne préempte JAMAIS du contenu neuf** : il ne se déclenche que si la fenêtre ne porte
+rien. Un cas de test l'interdit explicitement (« ne repropose PAS une région terminée tant qu'il
+reste du contenu neuf ailleurs »).
+
+### Q-INTH-2 — Deux cas de `carte.test.ts` DÉPLACÉS, et pourquoi ce n'est pas un assouplissement
+
+Deux assertions décrivaient **une carte sans aucune prise comme le comportement correct** :
+
+| cas | assertion d'avant | état concerné |
+|---|---|---|
+| « ne propose plus rien quand les six Éclats sont obtenus » | `toEqual([])` | tout le jeu terminé |
+| « ne propose jamais une région dont l'Éclat est déjà obtenu » | `not.toContain('clairiere')` sur `apresEclats(2)` | **exactement l'état V2** |
+
+Elles sont **déplacées sur la nouvelle loi**, jamais relâchées — même geste que le bloc D38 plus
+haut dans le même fichier, et pour la même raison : le journal des décisions est postérieur aux
+tests qui l'ignorent. On garde une **égalité exacte** sur une liste nommée région par région, et
+on **ajoute** deux cas qui n'existaient pas :
+
+* « laisse toujours au moins une sortie, à TOUS les rangs d'avancement (R14) » — l'invariant du
+  lot, posé sur la fonction qui décide de ce qui est tapable, à chacun des sept rangs ;
+* « ne repropose PAS une région terminée tant qu'il reste du contenu neuf ailleurs » — le
+  garde-fou du repli.
+
+Bilan mécanique : **2 cas retirés, 3 ajoutés, 1 renforcé.**
+
+### Q-INTH-3 — `regionsOuvertes` ne propose plus une région sans nœud (D48)
+
+La règle « une région sans nœud n'est pas tapable » était écrite **quatre fois**, chacune de son
+côté : la pastille de la carte (`ouverte && premierNoeud !== null`), `prochaineSortie`
+(`region.noeuds.length > 0`), la sonde de QA de H3 (`if (noeuds.length === 0) continue`)… et
+**pas** dans la liste « Où veux-tu aller ? », qui produisait donc un bouton
+« Partir vers Le Marais Jumeau » dont l'`onClick` ne fait rien.
+
+C'est D48 mot pour mot — « compter les éléments interactifs n'est pas compter les sorties ». La
+règle vit désormais dans `regionsOuvertes`, au seul endroit qui décide de ce que le doigt peut
+toucher, et le filtre de l'écran s'aligne sur la condition du gestionnaire.
+
+**La région reste `ouverte`** : le voile se lève, elle se voit sur la carte. `ouvrirCeQuiDoitLEtre`
+n'est pas touché — la fenêtre glisse exactement comme avant. C'est la tapabilité qui change, pas
+la progression.
+
+### Q-INTH-4 — Une violation de R16 livrée par H2, mesurée par la QA E2E
+
+```
+[cible] écran « dashboard » · geste button « Le profil » :
+        input «  » mesure 13×13 px, minimum 64 px (R16)
+```
+
+Le bouton radio de portée de `ReinitialiserProfil.tsx` prenait sa taille par défaut du
+navigateur. Le `label` portait bien `minBlockSize: 4rem`, **mais c'est le bouton qu'on vise du
+doigt, pas son étiquette**. `ReglagesParent.tsx` avait déjà payé exactement cette confusion sur
+ses deux cases à cocher ; sa correction (`inlineSize`/`blockSize` à `var(--cible-min)`) est
+reprise telle quelle.
+
+### Q-INTH-5 — LE DÉPÔT N'AVAIT PAS UN SEUL ÉCRIVAIN, et c'est mesuré
+
+Le brief de cette intégration affirmait « **tu es seul sur le dépôt** ». **C'est faux**, et il
+faut que ce soit écrit : une seconde campagne a écrit dans le dépôt **pendant** l'intégration.
+Mesuré par horodatage de fichier, pas déduit :
+
+```
+11:34 Docs/audit-qa.md                        11:54 tests/unitaires/propriete-maitrise-bornee.test.ts
+11:51 les 17 specs de tests/e2e/ réécrites    12:14 tests/e2e/parcours-zz-invariants.spec.ts
+12:00 serveur/src/routes/tentatives.ts        12:21 tests/e2e/invariants.ts
+12:27 client/src/ecrans/EcranCarte.tsx        12:28 partage/src/monde/carte.ts
+```
+
+Conséquences **payées** pendant cette session, toutes diagnostiquées à tort au départ :
+
+1. **Trois exécutions E2E perdues** sur des serveurs orphelins et des `EADDRINUSE` en 8099 —
+   l'autre campagne utilisait le même port. J'ai d'abord cru à un défaut de mon correctif.
+2. **Un échec E2E imputé à mon changement.** Il a fallu une **expérience témoin** — annuler mes
+   deux changements, recompiler, relancer la suite entière — pour établir que
+   `parcours-zz-invariants.spec.ts` échouait **aussi sans eux**. Et pour cause : **ce fichier
+   n'existait pas** quand j'ai commencé, il a été créé à 12:14 par l'autre campagne.
+3. **Une erreur ESLint** dans `tests/unitaires/propriete-maitrise-bornee.test.ts`
+   (`'modesVus' is never reassigned. Use 'const' instead`) — fichier créé à 11:54, qui ne
+   m'appartient pas.
+
+> **Ce que ça coûte, et la règle qui en sort.** « Un seul écrivain par fichier » n'est pas une
+> politesse entre agents : c'est ce qui rend une expérience témoin inutile. Sans elle, toute
+> mesure d'intégration doit d'abord prouver **de qui** est le rouge qu'elle observe — et c'est
+> le mode d'échec le plus cher, parce que la conclusion flatteuse (« c'est un flake ») est
+> toujours disponible et coûte zéro effort.
+
+**Ce commit ne porte donc QUE les fichiers des lots H1, H2, H3 et de leur intégration.** Les
+fichiers de l'autre campagne restent dans l'arbre de travail, à elle de les livrer.
+
+### Q-INTH-6 — Ce qui reste à décider
+
+1. **Faut-il lever le voile sur une région vide ?** `marais-jumeau` et `foret-muette` sont
+   `ouverte = 1` et ne portent aucun nœud : l'enfant voit deux lieux nommés où l'on ne peut pas
+   aller. Ils ne sont plus tapables (Q-INTH-3), donc ce n'est plus un contrôle mort — mais
+   devraient-ils rester **voilés** jusqu'à ce que du contenu y arrive ? C'est une décision de
+   mise en scène, pas de code : une condition dans `ouvrirCeQuiDoitLEtre`.
+
+2. **Quand tout est terminé, faut-il rejouer ou proposer une révision ?** Le repli renvoie
+   aujourd'hui sur le **premier nœud** de la région conquise. Le Leitner sait déjà quelles
+   compétences sont dues (route `/revisions`, vérifiée par la fixture V4) : une sortie
+   « révision » serait pédagogiquement meilleure qu'un rejeu depuis le début. Non fait — ce
+   serait inventer une règle que rien dans `Docs/` ne porte.
+
+3. **`tests/e2e/parcours-zz-invariants.spec.ts` échoue dans la suite complète et passe seul**
+   (cas « défaut n° 4 », 2,5 s en isolement). Il appartient à l'autre campagne ; signalé, non
+   corrigé — ce n'est pas mon fichier.
+
+
+---
+
+# Lot Q2 — modèle de navigation et explorateur (2026-08-02)
+
+Un modèle de navigation en données (`tests/modele/modele-navigation.ts`) et un explorateur
+déterministe (`tests/modele/explorateur.tsx`) qui parcourt l'application réelle et compare son
+comportement au modèle. Le chiffre du lot : **13 états déclarés · 26 transitions · 11 écrans
+atteints par interaction · 502 gestes joués · 85 montages · profondeur 4 · 0 transition
+manquante · 0 transition non déclarée**, après correction du seul écart trouvé.
+
+## Ce que le lot a corrigé lui-même
+
+**`HoteCampement` ne câblait pas `surRejouerOuverture`.** Mesuré avant correction, sortie citée :
+
+    $ grep -rn "surRejouerOuverture" client/src
+    client/src/ecrans/EcranCampement.tsx:58   (déclaration de la propriété)
+    client/src/ecrans/EcranCampement.tsx:92   (déstructuration)
+    client/src/ecrans/EcranCampement.tsx:234  (garde de rendu)
+    client/src/ecrans/EcranCampement.tsx:241  (onClick)
+    → AUCUNE ligne dans client/src/routeur.tsx
+
+`EcranCampement` ne rend son bouton « Revoir l'histoire » que si le rappel lui est donné —
+« un bouton qui ne mènerait nulle part serait pire que son absence ». Personne ne le lui
+donnait : **D35 point 3, « rejouable ; un enfant qui n'a pas suivi la première fois doit
+pouvoir y revenir SEUL », n'existait pas côté campement**, alors que le commentaire de
+`CHEMINS.ouverture` dans `routeur.tsx` annonçait que « c'est par cette constante que le
+campement rejoue l'ouverture ». Aucune suite ne pouvait le voir : l'audit de site exige de
+chaque écran UNE sortie, et le campement en avait deux — **un contrôle ABSENT ne se compte
+pas**. Correction : trois lignes strictement additives dans `HoteCampement`, aucune
+destination inventée. Le défaut a été ré-injecté pour prouver que le test rougit :
+`campement : prise « [data-vers="ouverture"] » absente`.
+
+## À trancher par le père
+
+### Q2-1. `/reglages-lecture` est une route montée que personne ne vise
+
+Mesuré : `11 routes montées · 8 visées par un naviguer · 4 poussées par le miroir du magasin ·
+1 orpheline`. La route `/reglages-lecture` et son hôte `HoteReglagesLecture` existent ;
+**aucun `naviguer({ to: … })` ne les vise**. L'écran `reglages-lecture` est bien atteignable,
+mais par un autre chemin : `EcranProfils` le rend LUI-MÊME quand `reglagesPour !== null`, sans
+passer par le routeur. La route, son hôte et la sortie qu'il câble (« Retour » → `/`) sont donc
+du code que personne n'exécute. C'est la forme statique du défaut des Galeries, en moins grave :
+personne ne s'y retrouve coincé, parce que personne n'y arrive.
+
+Deux issues, et c'est une décision de conception, pas de QA : **lui donner une entrée** (une
+porte « Comment je lis » ailleurs que sur la carte de l'enfant), ou **la retirer**. En attendant,
+`tests/unitaires/modele-navigation-coherence.test.ts` exige l'égalité STRICTE entre les routes
+orphelines mesurées et la liste `ROUTES_ORPHELINES_CONNUES` : une nouvelle orpheline fait rougir,
+et le jour où celle-ci sera réparée, le test rougira aussi pour qu'on retire la ligne. Ce n'est
+pas une exemption, c'est une dette datée.
+
+### Q2-2. La zone parent demande TROIS fois quel enfant suivre
+
+`HoteDashboard` et `HoteGalerieParent` tiennent chacun leur PROPRE `profilSuivi` en état local
+(`client/src/routeur.tsx`). Le choix fait dans l'un est invisible dans l'autre. Parcours mesuré
+par l'explorateur, sur une installation neuve :
+
+    profils → [espace des parents] → code-parent → [code à 4 chiffres]
+      → choix-profil-parent → [Voir le suivi de Nino]      ← choix n° 1
+      → dashboard → [onglet Les exercices] → [plein écran]
+      → choix-profil-parent → [Voir le suivi de Nino]      ← choix n° 2
+      → galerie-parent → [Retour au suivi]
+      → choix-profil-parent → [Voir le suivi de Nino]      ← choix n° 3
+
+Ce n'est **pas une impasse** : la sortie existe partout, R14 est tenue. C'est une friction, et
+elle touche le seul écran que le père utilise. Le remède est de partager le profil suivi entre
+les deux hôtes ; c'est une décision d'état, pas un câblage oublié, et le lot Q2 n'y a pas touché.
+En attendant, la transition `galerie-parent → choix-profil-parent` est MARQUÉE `defaut` dans le
+modèle, et la liste des transitions marquées est asservie à l'égalité stricte : le défaut ne peut
+ni s'ajouter ni se corriger en silence.
+
+### Q2-3. L'exploration coûte ~28 s, contre ~8 s pour les 96 autres fichiers réunis
+
+`tests/composants/exploration-modele.test.tsx` monte l'application 85 fois et joue 502 gestes.
+C'est le prix d'une QA qui PARCOURT l'application au lieu de monter des fragments, et c'est le
+seul fichier du dépôt qui le paie. Mesuré : suite complète **113 fichiers · 1745 tests · 31 s**.
+Si ce coût devient gênant au `pre-commit`, la sortie propre est un projet Vitest à part
+(`vitest.config.ts` appartient à un autre lot) plutôt qu'un `skip` — qui reste interdit.
+
+### Q2-4. Le modèle ne distingue pas deux écrans qui portent le même `data-ecran`
+
+`choix-profil-parent` est rendu par DEUX hôtes (`HoteDashboard` et `HoteGalerieParent`) et ses
+sorties diffèrent selon l'hôte. Le modèle, qui identifie un état par son `data-ecran`, ne peut
+pas les séparer : c'est la limite connue de ce genre de modèle, et c'est aussi ce qui a rendu
+Q2-2 visible. Si un troisième hôte apparaît, il faudra soit un second attribut (`data-hote`),
+soit un état par hôte. Rien à faire aujourd'hui ; à savoir avant d'ajouter un écran partagé.
+
+## Ce que l'explorateur ne couvre pas, et qui le couvre à sa place
+
+`recompense` et les trois transitions qui la touchent (`noeud → recompense`,
+`recompense → carte`, `recompense → noeud`) sont **hors de portée** : on n'y entre qu'en
+TERMINANT un exercice, et aucune suite de taps aveugles ne clôt `colorie` — mesuré, les huit
+godets sont rendus APRÈS les trente-et-une régions (`#1..#31` régions, `#32..#39` couleurs),
+donc un balayage dans l'ordre du DOM peint toujours avec la même couleur. Reproduire la logique
+des quatorze moteurs dans l'explorateur reviendrait à tester le modèle contre lui-même.
+La dérogation est NOMMÉE, motivée, et les quatre fichiers E2E qui la couvrent
+(`parcours-nominal`, `parcours-cascade`, `cassecou`, `parcours-trace`) sont vérifiés sur disque :
+ils doivent exister et nommer `data-ecran="recompense"`. La liste des dérogations est asservie à
+l'égalité stricte — elle ne peut pas s'élargir sans qu'on le voie.
+
+## Limite énoncée avant les résultats
+
+L'explorateur parle à un **double de réseau** (`tests/modele/serveur-double.ts`), pas au vrai
+serveur : sous `happy-dom`, `serveur/src/configuration.ts:33` fait
+`fileURLToPath(new URL('../../', import.meta.url))` et l'import échoue —
+`[sonde] ECHEC configuration : The URL must be of scheme file`. Ce lot ne prouve donc RIEN sur
+le serveur ; c'est le travail de `tests/api/**`. Le double porte trois gardes pour qu'il ne
+puisse pas affamer un écran en silence : aucun chemin ignoré, aucune route inventée (les
+gestionnaires sont indexés par `CHEMINS_API.motifs`, 22 sur 22 servis), aucune donnée inventée
+(les formes viennent des constructeurs de `partage/`, les contenus du disque). Le garde a servi
+dès l'écriture : une forme de catalogue fabriquée à la main faisait disparaître le `data-ecran`
+de l'onglet « Les exercices », et l'explorateur l'a signalé comme « écran sans issue ».

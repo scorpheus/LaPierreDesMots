@@ -74,6 +74,8 @@ import {
   trancherRelecture
 } from '../depots/parent.js';
 import { enregistrerRoutesParentGalerie } from './parent-galerie.js';
+// AJOUT H2 — les deux routes « profil » de la zone parent (etat reel, remise a zero).
+import { enregistrerRoutesParentProfil } from './parent-profil.js';
 import {
   appliquerEchec,
   deriverCode,
@@ -429,4 +431,11 @@ export function enregistrerRoutesParent(app: FastifyInstance, contexte: Contexte
   // `jetonValide` lui est passe tel quel : la galerie est protegee par le MEME garde que le
   // dashboard, sans qu'aucune seconde implantation ne puisse deriver de la premiere.
   enregistrerRoutesParentGalerie(app, contexte, jetonValide);
+
+  // ───────────────── GET /api/parent/:profil/etat et POST .../reinitialiser — lot H2
+  //
+  // Meme raison, meme garde, meme fichier d'enregistrement. Elle vaut d'autant plus ici que
+  // l'une de ces deux routes EFFACE : un second magasin de jetons pour une route destructrice
+  // serait le pire endroit du depot ou laisser deux implantations deriver.
+  enregistrerRoutesParentProfil(app, contexte, jetonValide);
 }

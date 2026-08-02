@@ -35,12 +35,16 @@ import type { ComparaisonTypographie, ReglagesLecture } from '@pierre/partage/le
 import type { CodeCompagnon, EtatMaitrise, ItemLeitner, PlanSortie } from '@pierre/partage/pedagogie';
 import type { CodeObjetCampement, EtatMonde } from '@pierre/partage/monde';
 import type {
+  ApercuReinitialisation,
   CatalogueGalerie,
   CodeExport,
   DecisionRelecture,
   EntreeRelecture,
   EtatPorteParent,
+  EtatProfil,
   OuvertureParent,
+  PorteeReinitialisation,
+  RapportReinitialisation,
   ResumeDashboard
 } from '@pierre/partage/parent';
 import { ENTETE_JETON_PARENT } from '@pierre/partage/parent';
@@ -307,6 +311,55 @@ export function trancherRelectureContenu(
 ): Promise<EntreeRelecture> {
   return demander<EntreeRelecture>(CHEMINS_API.parentRelecture(exercice), {
     ...corpsJson(decision),
+    headers: entetesParent()
+  });
+}
+
+// ─────────────────────────────── H2 — l'état réel d'un profil, et sa remise à zéro
+
+/**
+ * Ce que le profil a RÉELLEMENT fait : nœuds terminés sur le total, étoiles, régions
+ * **stockées ET recalculées avec leur écart**, dernières tentatives.
+ *
+ * C'est l'appel qui aurait rendu visible sans SQL le défaut du 2026-08-02 — deux régions à
+ * 100 % pour 3 nœuds joués sur 18, et plus aucun monde cliquable pour l'enfant.
+ */
+export function lireEtatProfilParent(profil: IdProfil): Promise<EtatProfil> {
+  return demander<EtatProfil>(CHEMINS_API.parentEtatProfil(profil), {
+    headers: entetesParent()
+  });
+}
+
+/**
+ * Ce qu'une remise à zéro effacerait, table par table, **sans rien effacer**.
+ *
+ * L'écran de confirmation l'appelle avant de demander quoi que ce soit : un parent doit lire
+ * des comptes réels, pas une promesse générique. Aucune confirmation n'est requise — il n'y a
+ * rien à confirmer pour compter.
+ */
+export function apercuReinitialisationProfil(
+  profil: IdProfil,
+  portee: PorteeReinitialisation
+): Promise<ApercuReinitialisation> {
+  return demander<ApercuReinitialisation>(CHEMINS_API.parentReinitialiser(profil), {
+    ...corpsJson({ portee, apercu: true }),
+    headers: entetesParent()
+  });
+}
+
+/**
+ * Efface pour de bon. `confirmation` est **le prénom de l'enfant, retapé par le parent** :
+ * le serveur le vérifie et répond 409 sinon. La garde n'existe pas qu'à l'écran — la commande
+ * hors interface passe par la même porte, et une garde qui n'existerait qu'en React ne
+ * garderait rien.
+ */
+export function reinitialiserProfilParent(
+  profil: IdProfil,
+  portee: PorteeReinitialisation,
+  confirmation: string
+): Promise<RapportReinitialisation> {
+  return demander<RapportReinitialisation>(CHEMINS_API.parentReinitialiser(profil), {
+    ...corpsJson({ portee, confirmation }),
     headers: entetesParent()
   });
 }

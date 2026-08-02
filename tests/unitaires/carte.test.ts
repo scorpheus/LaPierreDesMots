@@ -134,10 +134,22 @@ describe('regionsOuvertes — les deux régions sont ouvertes d’emblée (D38)'
     expect(regionsOuvertes(neuve())).not.toContain('marais-jumeau');
   });
 
-  it('fait glisser la fenêtre quand un Éclat est obtenu', () => {
-    const ouvertes = regionsOuvertes(apresEclats(1));
-    expect(ouvertes).toHaveLength(PARALLELE);
-    expect(ouvertes).toEqual(['galeries', 'marais-jumeau']);
+  /**
+   * La fenêtre glisse — et ce cas dit désormais LES DEUX moitiés du fait, séparément.
+   *
+   * Il affirmait `toEqual(['galeries', 'marais-jumeau'])`. Le Marais Jumeau ne porte AUCUN nœud
+   * livré (mesuré par `tests/api/profils-vecus.test.ts` : les quatre régions qui suivent les
+   * Galeries en déclarent zéro) : le proposer produisait un bouton « Partir vers Le Marais
+   * Jumeau » dont l'`onClick` ne fait rien — l'indice corrélé que D48 interdit d'asserter.
+   *
+   * Rien n'est perdu : l'ouverture EST vérifiée, sur `carte.regions` où elle vit réellement,
+   * et l'assertion sur ce qui est proposé reste une égalité exacte.
+   */
+  it('fait glisser la fenêtre quand un Éclat est obtenu — le voile se lève sur le Marais', () => {
+    const carte = apresEclats(1);
+    const marais = carte.regions.find((region) => region.region === 'marais-jumeau')!;
+    expect(marais.ouverte, 'la fenêtre n’a pas glissé : le Marais est resté voilé').toBe(true);
+    expect(regionsOuvertes(carte)).toEqual(['galeries']);
   });
 
   it('ne propose jamais plus que le parallélisme déclaré, même très avancé', () => {
@@ -146,14 +158,56 @@ describe('regionsOuvertes — les deux régions sont ouvertes d’emblée (D38)'
     }
   });
 
-  it('ne propose plus rien quand les six Éclats sont obtenus — et ne lève pas', () => {
-    expect(regionsOuvertes(apresEclats(DEFINITIONS.length))).toEqual([]);
+  /**
+   * ── DEUX CAS DÉPLACÉS SUR LA NOUVELLE LOI — intégration H ────────────────────────────────
+   *
+   * Ils affirmaient `regionsOuvertes(apresEclats(6)) === []` et « une région dont l'Éclat est
+   * obtenu n'est JAMAIS reproposée », y compris sur `apresEclats(2)` — l'état d'un enfant qui a
+   * terminé les deux seules régions portant du contenu. Ils décrivaient donc **une carte sans
+   * aucune prise comme le comportement correct**.
+   *
+   * C'est un état sans issue, et deux règles opposables l'interdisent :
+   *   • R14 / v2 § 5.4 — « aucun écran d'échec, aucun état sans issue, un acquis n'est jamais
+   *     repris » ; rejouer une région finie ne reprend rien, c'est gratuit ;
+   *   • D46 § 1 — « partir en sortie doit se faire en UN TAP », sans écran intermédiaire.
+   *
+   * Le défaut a été MESURÉ, pas déduit : `tests/api/profils-vecus.test.ts` › V2 › « L'ENFANT
+   * PEUT FAIRE QUELQUE CHOSE » rendait `expected [] to not have a length of +0` sur un profil
+   * qui avait honnêtement terminé les 18 nœuds livrés. Le code de l'écran allait déjà dans
+   * l'autre sens (`reprise`, EcranCarte.tsx : « une région entièrement terminée renvoie sur son
+   * premier nœud plutôt que sur rien ») — c'est `regionsOuvertes` qui le défaisait en amont.
+   *
+   * Comme pour D38 plus haut, les assertions ne sont pas ASSOUPLIES mais DÉPLACÉES : on garde
+   * une égalité exacte sur une liste nommée région par région, et on ajoute le cas qui interdit
+   * au repli de préempter du contenu neuf — sans quoi « rejouer » deviendrait la règle au lieu
+   * d'être la sortie de secours.
+   */
+  it('replie sur les régions déjà conquises quand les six Éclats sont obtenus (R14)', () => {
+    // Les quatre dernières régions ne portent AUCUN nœud livré : les proposer serait offrir
+    // une prise qui ne mène nulle part (D48). Restent les deux qui portent les 18 nœuds.
+    expect(regionsOuvertes(apresEclats(DEFINITIONS.length))).toEqual(['clairiere', 'galeries']);
   });
 
-  it('ne propose jamais une région dont l’Éclat est déjà obtenu', () => {
-    const carte = apresEclats(2);
-    expect(regionsOuvertes(carte)).not.toContain('clairiere');
-    expect(regionsOuvertes(carte)).not.toContain('galeries');
+  it('laisse toujours au moins une sortie, à TOUS les rangs d’avancement (R14)', () => {
+    // L'invariant du lot, posé sur la seule fonction qui décide de ce qui est tapable. Il ne
+    // peut pas être satisfait par accident : `apresEclats(2)` à `apresEclats(6)` sont
+    // exactement les états où la fenêtre de progression ne porte plus rien.
+    for (let rang = 0; rang <= DEFINITIONS.length; rang += 1) {
+      const ouvertes = regionsOuvertes(apresEclats(rang));
+      expect(ouvertes.length, `aucune sortie après ${String(rang)} Éclat(s)`).toBeGreaterThan(0);
+      // Et jamais une région vide : une sortie qui ne répond pas n'est pas une sortie (D48).
+      for (const code of ouvertes) {
+        const region = apresEclats(rang).regions.find((entree) => entree.region === code)!;
+        expect(region.noeuds.length, `la région ${String(code)} est proposée sans nœud`)
+          .toBeGreaterThan(0);
+      }
+    }
+  });
+
+  it('ne repropose PAS une région terminée tant qu’il reste du contenu neuf ailleurs', () => {
+    // Le garde-fou du repli. Après le seul Éclat de la Clairière, les Galeries ont encore
+    // douze nœuds : la Clairière ne doit pas revenir dans la liste pour autant.
+    expect(regionsOuvertes(apresEclats(1))).not.toContain('clairiere');
   });
 });
 

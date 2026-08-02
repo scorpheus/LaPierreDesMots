@@ -131,9 +131,43 @@ function parOrdre(regions: readonly EtatRegion[]): readonly EtatRegion[] {
   return [...regions].sort((gauche, droite) => gauche.ordre - droite.ordre);
 }
 
-/** Vrai quand la région est ouverte et que son Éclat n'a pas encore été obtenu. */
+/**
+ * Vrai quand la région est ouverte et qu'il lui reste quelque chose à recolorier.
+ *
+ * ── CE QUI A CHANGÉ, ET POURQUOI — lot H1 ─────────────────────────────────────────────────
+ * Le critère était `region.eclatObtenuLe === null`, c'est-à-dire : **une région dont l'Éclat
+ * est posé n'est plus jamais proposée**. Tant que le catalogue ne bouge pas, l'Éclat et les
+ * 100 % sont la même chose et les deux critères sont interchangeables. Ils divergent
+ * exactement dans un cas — celui que le père a rencontré :
+ *
+ *     profil réel `prf-0fbbeba7fb27d3f7`, mesuré dans `donnees/pierre.db` :
+ *       clairiere  Éclat obtenu quand la région déclarait 1 nœud → elle en déclare 6
+ *       galeries   Éclat obtenu quand la région déclarait 2 nœuds → elle en déclare 12
+ *
+ * Seize nœuds se sont ajoutés APRÈS les Éclats. Avec l'ancien critère, les deux régions
+ * restaient closes pour toujours, les deux suivantes ne portaient aucun nœud livré, et
+ * **plus aucun monde n'était cliquable sur la carte**.
+ *
+ * L'Éclat est un TROPHÉE — il ne se reprend jamais (R14), et `appliquerEclat` le garde. Ce
+ * n'est pas un verrou : ce qui décide qu'une région a encore quelque chose à offrir, c'est
+ * sa recoloration, qui se recalcule depuis le journal et le contenu COURANT.
+ *
+ * Rien n'est perdu du comportement d'origine : `appliquerEclat` porte `pourcentageColorie`
+ * à 1, donc une région close sur un catalogue stable reste hors jeu, exactement comme avant.
+ */
 function enCours(region: EtatRegion): boolean {
-  return region.ouverte && region.eclatObtenuLe === null;
+  return region.ouverte && region.pourcentageColorie < 1;
+}
+
+/**
+ * Vrai quand la région porte au moins un nœud LIVRÉ — donc quand elle peut répondre.
+ *
+ * Une région déclarée au référentiel mais sans nœud n'est pas une destination : c'est un nom
+ * sur une carte. La proposer, c'est offrir une prise qui ne mène nulle part, et D48 a déjà payé
+ * ce raisonnement : « compter les éléments interactifs n'est pas compter les sorties ».
+ */
+function porteDuContenu(region: EtatRegion): boolean {
+  return region.noeuds.length > 0;
 }
 
 /**
@@ -164,10 +198,58 @@ function enCours(region: EtatRegion): boolean {
  *
  * Le parallélisme reste une DONNÉE (`ouvertesEnParallele`, contenu/monde/regions.json), jamais
  * un littéral : passer à trois régions se fait dans le JSON, sans toucher à ce fichier.
+ *
+ * ── CE QUI A CHANGÉ, ET POURQUOI — intégration H (second défaut, trouvé par H3) ────────────
+ * La fenêtre de progression pouvait ne contenir QUE des régions sans nœud, et la fonction les
+ * rendait quand même. Mesuré par `tests/api/profils-vecus.test.ts` sur la fixture V2, un enfant
+ * qui a honnêtement terminé les 18 nœuds livrés :
+ *
+ *     clairiere 100 % · galeries 100 %          → exclues par `enCours`
+ *     marais-jumeau et foret-muette ouvertes    → 0 nœud livré, donc 0 sortie
+ *     → `sortiesQuiRepondent` rendait []  ·  « expected [] to not have a length of +0 »
+ *
+ * Zéro exercice jouable : l'enfant qui a tout réussi se retrouvait aussi bloqué que celui dont
+ * la base mentait. C'est l'état sans issue que R14 interdit, et D46 § 1 le dit en positif —
+ * « partir en sortie doit se faire en UN TAP », depuis n'importe quel état.
+ *
+ * La fonction rend donc, dans cet ordre :
+ *   1. la fenêtre de progression — les `ouvertesEnParallele` premières régions en cours —
+ *      **restreinte à celles qui portent un nœud livré** ;
+ *   2. si cette fenêtre ne peut rien offrir, les régions ouvertes qui portent des nœuds,
+ *      c'est-à-dire celles qu'il a déjà conquises. **Rejouer est gratuit et ne reprend aucun
+ *      acquis** (R14) ; `reprise` (EcranCarte.tsx) et `prochaineSortie` (PastilleSortie.tsx)
+ *      sont écrites pour ce cas depuis toujours — « une région entièrement terminée renvoie sur
+ *      son premier nœud plutôt que sur rien ». Leur intention était défaite ICI, en amont.
+ *
+ * Le repli ne se déclenche JAMAIS tant qu'il reste quelque chose de neuf : c'est une sortie de
+ * secours, pas une préférence.
+ *
+ * ── POURQUOI LE FILTRE APPARTIENT À CETTE FONCTION, ET PAS À SES QUATRE APPELANTS ──────────
+ * « Une région sans nœud n'est pas tapable » était déjà écrite QUATRE fois, chacune de son
+ * côté : la pastille de la carte (`ouverte && premierNoeud !== null`), la liste « Où veux-tu
+ * aller ? », `prochaineSortie` (`region.noeuds.length > 0`) et la sonde de QA. Quatre copies
+ * d'une même règle finissent par diverger — et c'est déjà arrivé : la liste des départs, elle,
+ * ne l'avait pas, et produisait un bouton « Partir vers Le Marais Jumeau » strictement inerte.
+ *
+ * La règle vit donc ici, au seul endroit qui décide de ce que le doigt peut toucher. La région
+ * reste `ouverte` — le voile se lève, elle se voit sur la carte ; elle n'est simplement pas
+ * proposée tant qu'aucun nœud n'y est livré. L'ouverture (`ouvrirCeQuiDoitLEtre`) n'est pas
+ * touchée : la fenêtre glisse exactement comme avant.
  */
 export function regionsOuvertes(carte: EtatCarte): readonly CodeRegion[] {
-  const ouvertes = parOrdre(carte.regions.filter(enCours));
-  return ouvertes.slice(0, Math.max(1, carte.ouvertesEnParallele)).map((region) => region.region);
+  const parallele = Math.max(1, carte.ouvertesEnParallele);
+  // Le `slice` AVANT le filtre : on ne va pas chercher du contenu au-delà de la fenêtre
+  // déclarée, sans quoi `ouvertesEnParallele` cesserait d'être un plafond.
+  const fenetre = parOrdre(carte.regions.filter(enCours)).slice(0, parallele);
+  const offrables = fenetre.filter(porteDuContenu);
+  if (offrables.length > 0) {
+    return offrables.map((region) => region.region);
+  }
+
+  const rejouables = parOrdre(
+    carte.regions.filter((region) => region.ouverte && porteDuContenu(region))
+  );
+  return rejouables.slice(0, parallele).map((region) => region.region);
 }
 
 /**
@@ -250,9 +332,17 @@ export function recalculerRecoloration(
   return { ...region, pourcentageColorie: Math.max(region.pourcentageColorie, taux) };
 }
 
-/** Ce que `data-region-etat` porte pour cette région — `carte.spec.ts` n'a pas d'autre prise. */
+/**
+ * Ce que `data-region-etat` porte pour cette région — `carte.spec.ts` n'a pas d'autre prise.
+ *
+ * H1 — « terminée » demande les DEUX : l'Éclat posé ET la région entièrement recoloriée. Le
+ * seul Éclat ne suffit plus, pour la même raison qu'en `enCours` ci-dessus : une région dont
+ * le contenu a grandi depuis son Éclat n'est plus terminée, et l'annoncer « terminee » à
+ * l'enfant pendant que la carte y montre encore du gris serait un mensonge visible à l'œil.
+ * Sur un catalogue stable les deux conditions coïncident, et le classement ne change pas.
+ */
 export function etatAfficheRegion(region: EtatRegion): EtatAfficheRegion {
-  if (region.eclatObtenuLe !== null) {
+  if (region.eclatObtenuLe !== null && region.pourcentageColorie >= 1) {
     return 'terminee';
   }
   return region.ouverte ? 'ouverte' : 'voilee';
