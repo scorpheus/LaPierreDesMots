@@ -242,7 +242,23 @@ describe('moteur eclair', () => {
       const visible = (): string | null =>
         container.querySelector('[data-plateau="eclair"]')?.getAttribute('data-visible') ?? null;
 
-      expect(visible(), 'le mot doit être là à l’arrivée sur l’exercice').toBe('oui');
+      // ⚠ CE CAS A CHANGÉ AVEC R11, ET C'EST UNE DÉCISION, PAS UNE RÉGRESSION.
+      //
+      // Il exigeait le mot visible DÈS L'ARRIVÉE. C'était le comportement, et c'était le
+      // défaut : « rien n'annonçait le mot », donc l'enfant qui lisait encore la consigne
+      // ratait l'éclair sans que rien ne le lui dise. Une durée d'exposition n'a de sens que
+      // si l'on regardait au moment où elle court.
+      //
+      // L'éclair attend maintenant que l'enfant tape « Prêt ? ». L'assertion est donc
+      // RETOURNÉE : elle exige le silence avant le tap, et le mot après.
+      expect(visible(), 'l’éclair ne doit PAS partir avant que l’enfant soit prêt').toBe('non');
+      expect(
+        container.querySelector('[data-action="pret"]'),
+        'sans porte, l’enfant ne peut pas rater l’éclair « en connaissance de cause »'
+      ).not.toBeNull();
+
+      taper(container, ['[data-action="pret"]']);
+      expect(visible(), 'après le tap, le mot part').toBe('oui');
 
       // Bien au-delà de l'exposition la plus longue du contenu livré (1 800 ms).
       act(() => {
@@ -269,6 +285,9 @@ describe('moteur eclair', () => {
 
   it('revoir ne coûte rien : aucune erreur, aucun palier d’aide, comme réécouter (R15)', () => {
     const { container } = render(<Harnais />);
+    // « Revoir » n'existe qu'une fois la porte ouverte : avant le premier éclair, il n'y a
+    // rien à revoir, et proposer les deux boutons ensemble brouillerait le geste.
+    taper(container, ['[data-action="pret"]']);
     taper(container, ['[data-action="revoir"]', '[data-action="revoir"]']);
     const h = harnais(container);
     expect(h.getAttribute('data-erreurs')).toBe('0');

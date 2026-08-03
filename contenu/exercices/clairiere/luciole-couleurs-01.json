@@ -3,14 +3,24 @@
   "id": "clairiere-luciole-couleurs-01",
   "version": 2,
   "titre": "Les lucioles de couleur",
-  "competences": ["flu.mot.court", "lex.couleur"],
+  "competences": [
+    "flu.mot.court",
+    "lex.couleur"
+  ],
   "difficulte": 1,
   "jeu": {
     "moteur": "eclair",
     "habillage": "clairiere.luciole",
     "noeud": "clairiere-02",
-    "etoiles": { "sansAide": true, "sansErreur": true },
-    "aideGobi": ["relire-consigne", "souffle-syllabe", "montre-couleur"],
+    "etoiles": {
+      "sansAide": true,
+      "sansErreur": true
+    },
+    "aideGobi": [
+      "relire-consigne",
+      "souffle-syllabe",
+      "montre-couleur"
+    ],
     "contenu": {
       "consignes": [
         {
@@ -20,9 +30,17 @@
           "forme": "imperative",
           "audio": null,
           "expositionMs": 1800,
-          "options": ["luciole-rouge", "luciole-grise", "luciole-bleue"],
+          "options": [
+            "luciole-rouge",
+            "luciole-grise",
+            "luciole-bleue"
+          ],
           "reponse": "luciole-rouge",
-          "motsCles": ["touche", "luciole", "couleur"]
+          "motsCles": [
+            "touche",
+            "luciole",
+            "couleur"
+          ]
         },
         {
           "id": "c2",
@@ -31,9 +49,17 @@
           "forme": "imperative",
           "audio": null,
           "expositionMs": 1800,
-          "options": ["luciole-bleue", "luciole-noire", "luciole-verte"],
+          "options": [
+            "luciole-bleue",
+            "luciole-noire",
+            "luciole-verte"
+          ],
           "reponse": "luciole-bleue",
-          "motsCles": ["touche", "luciole", "couleur"]
+          "motsCles": [
+            "touche",
+            "luciole",
+            "couleur"
+          ]
         },
         {
           "id": "c3",
@@ -42,9 +68,17 @@
           "forme": "imperative",
           "audio": null,
           "expositionMs": 1800,
-          "options": ["luciole-verte", "luciole-grise", "luciole-jaune"],
+          "options": [
+            "luciole-verte",
+            "luciole-grise",
+            "luciole-jaune"
+          ],
           "reponse": "luciole-verte",
-          "motsCles": ["touche", "luciole", "couleur"]
+          "motsCles": [
+            "touche",
+            "luciole",
+            "couleur"
+          ]
         },
         {
           "id": "c4",
@@ -53,9 +87,17 @@
           "forme": "imperative",
           "audio": null,
           "expositionMs": 1800,
-          "options": ["luciole-jaune", "luciole-noire", "luciole-rose"],
+          "options": [
+            "luciole-jaune",
+            "luciole-noire",
+            "luciole-rose"
+          ],
           "reponse": "luciole-jaune",
-          "motsCles": ["touche", "luciole", "couleur"]
+          "motsCles": [
+            "touche",
+            "luciole",
+            "couleur"
+          ]
         },
         {
           "id": "c5",
@@ -64,9 +106,17 @@
           "forme": "imperative",
           "audio": null,
           "expositionMs": 1800,
-          "options": ["luciole-rose", "luciole-grise", "luciole-brune"],
+          "options": [
+            "luciole-rose",
+            "luciole-grise",
+            "luciole-brune"
+          ],
           "reponse": "luciole-rose",
-          "motsCles": ["touche", "luciole", "couleur"]
+          "motsCles": [
+            "touche",
+            "luciole",
+            "couleur"
+          ]
         },
         {
           "id": "c6",
@@ -75,20 +125,76 @@
           "forme": "imperative",
           "audio": null,
           "expositionMs": 1800,
-          "options": ["luciole-brune", "luciole-noire", "luciole-grise"],
+          "options": [
+            "luciole-brune",
+            "luciole-noire",
+            "luciole-grise"
+          ],
           "reponse": "luciole-brune",
-          "motsCles": ["touche", "luciole", "couleur"]
+          "motsCles": [
+            "touche",
+            "luciole",
+            "couleur"
+          ]
         }
       ],
       "options": [
-        { "id": "luciole-rouge", "libelle": "la luciole rouge", "bonne": true, "confusionAvec": "rose" },
-        { "id": "luciole-bleue", "libelle": "la luciole bleue", "bonne": true, "confusionAvec": "blé" },
-        { "id": "luciole-verte", "libelle": "la luciole verte", "bonne": true, "confusionAvec": "ver" },
-        { "id": "luciole-jaune", "libelle": "la luciole jaune", "bonne": true, "confusionAvec": "jeune" },
-        { "id": "luciole-rose", "libelle": "la luciole rose", "bonne": true, "confusionAvec": "rouge" },
-        { "id": "luciole-brune", "libelle": "la luciole brune", "bonne": true, "confusionAvec": "brume" },
-        { "id": "luciole-grise", "libelle": "la luciole grise", "bonne": false, "confusionAvec": null },
-        { "id": "luciole-noire", "libelle": "la luciole noire", "bonne": false, "confusionAvec": null }
+        {
+          "id": "luciole-rouge",
+          "libelle": "rouge",
+          "bonne": true,
+          "confusionAvec": "rose",
+          "couleur": "rouge"
+        },
+        {
+          "id": "luciole-bleue",
+          "libelle": "bleu",
+          "bonne": true,
+          "confusionAvec": "blé",
+          "couleur": "bleu"
+        },
+        {
+          "id": "luciole-verte",
+          "libelle": "vert",
+          "bonne": true,
+          "confusionAvec": "ver",
+          "couleur": "vert"
+        },
+        {
+          "id": "luciole-jaune",
+          "libelle": "jaune",
+          "bonne": true,
+          "confusionAvec": "jeune",
+          "couleur": "jaune"
+        },
+        {
+          "id": "luciole-rose",
+          "libelle": "rose",
+          "bonne": true,
+          "confusionAvec": "rouge",
+          "couleur": "rose"
+        },
+        {
+          "id": "luciole-brune",
+          "libelle": "brun",
+          "bonne": true,
+          "confusionAvec": "brume",
+          "couleur": "brun"
+        },
+        {
+          "id": "luciole-grise",
+          "libelle": "gris",
+          "bonne": false,
+          "confusionAvec": null,
+          "couleur": "gris"
+        },
+        {
+          "id": "luciole-noire",
+          "libelle": "noir",
+          "bonne": false,
+          "confusionAvec": null,
+          "couleur": "noir"
+        }
       ],
       "competence": "lex.couleur"
     }

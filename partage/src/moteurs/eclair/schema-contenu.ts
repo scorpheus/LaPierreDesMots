@@ -68,6 +68,19 @@ export const SCHEMA_CONTENU_ECLAIR: SchemaJson = {
           libelle: LIBELLE,
           bonne: { type: 'boolean' },
           confusionAvec: { type: ['string', 'null'] },
+          // R11 — la couleur À MONTRER quand l'option en désigne une. FACULTATIVE, et c'est
+          // délibéré : quatre des six exercices `eclair` proposent le mot nu (`bol`, `dos`),
+          // ce qui est juste. L'exiger partout obligerait à inventer une couleur pour `bol`.
+          //
+          // Énumération fermée sur la palette (v2 § 9.2) plutôt que chaîne libre : une couleur
+          // hors palette serait acceptée par le schéma, rendue en gris par le code, et
+          // personne ne saurait pourquoi.
+          couleur: {
+            enum: [
+              'rouge', 'orange', 'jaune', 'vert', 'bleu', 'violet',
+              'rose', 'brun', 'noir', 'blanc', 'gris',
+            ],
+          },
         },
       },
     },

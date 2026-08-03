@@ -19,6 +19,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
+import { hexDeCouleur } from '@pierre/partage';
 import type { ActionEclair, ContenuEclair, EtatEclair } from '@pierre/partage';
 import { ZoneDeLecture } from '../../lecture/ZoneDeLecture.js';
 import type { ProprietesMoteur } from '../types.js';
@@ -132,14 +133,43 @@ export function MoteurEclair(
   // corrige, et il serait tout aussi silencieux.
   // ══════════════════════════════════════════════════════════════════════════════════════════
   const dureeMs = consigne === null ? 0 : consigne.expositionMs;
-  const nbRevues = etape === undefined ? 0 : etape.nbEcoutes;
-  const [eclairVisible, fixerEclairVisible] = useState(true);
+  const [eclairVisible, fixerEclairVisible] = useState(false);
+
+  /**
+   * ══════════════════════════════════════════════════════════════════════════════════════════
+   * R11 — L'ÉCLAIR NE PART PLUS SANS PRÉVENIR
+   *
+   * Le père, en jouant : « c'est pas bien expliqué, et comme deuxième exercice c'est assez
+   * rude ». Il avait raison sur les deux, et le premier point était mesurable : **rien
+   * n'annonçait le mot**. `grep` sur ce fichier ne rendait aucun décompte, aucun « regarde
+   * bien », aucun signal. Le mot apparaissait dès l'ARRIVÉE sur l'écran — donc pendant que
+   * l'enfant lisait encore la consigne — et disparaissait au bout de 1,4 à 1,8 s. S'il
+   * regardait ailleurs, il n'avait rien vu **et rien ne le lui disait**.
+   *
+   * Une durée d'exposition n'a de sens que si l'on regardait au moment où elle court. Ce
+   * compteur est donc la porte : l'éclair ne part qu'au tap de l'enfant, et « Revoir »
+   * l'incrémente aussi. C'est LUI qui décide quand il est prêt — la même idée que « c'est
+   * l'enfant qui choisit sa difficulté » (R15).
+   *
+   * La mesure de D18 n'est pas touchée : `finExposition` reste émise à la fin de la première
+   * exposition et le réducteur ignore toujours les suivantes.
+   * ══════════════════════════════════════════════════════════════════════════════════════════
+   */
+  const [demarrages, fixerDemarrages] = useState(0);
 
   const refEmettre = useRef(emettre);
   refEmettre.current = emettre;
 
+  // Nouvelle consigne : on referme la porte. Sans ça, l'éclair de l'étape suivante partirait
+  // tout seul dans la seconde qui suit une bonne réponse — exactement ce que le père a vécu
+  // (« ça écrit jaune et disparait »).
   useEffect(() => {
-    if (consigne === null) return undefined;
+    fixerDemarrages(0);
+    fixerEclairVisible(false);
+  }, [consigne]);
+
+  useEffect(() => {
+    if (consigne === null || demarrages === 0) return undefined;
     fixerEclairVisible(true);
     // Le `setTimeout` vit ICI, dans le rendu, jamais dans la logique (§ 4.8, règle 3).
     const identifiant = setTimeout(() => {
@@ -149,7 +179,7 @@ export function MoteurEclair(
     return () => {
       clearTimeout(identifiant);
     };
-  }, [consigne, dureeMs, nbRevues]);
+  }, [consigne, dureeMs, demarrages]);
 
   return (
     <div
@@ -174,16 +204,44 @@ export function MoteurEclair(
         ) : null}
       </div>
 
-      <button
-        type="button"
-        data-action="revoir"
-        style={STYLE_CIBLE}
-        onClick={() => {
-          emettre({ type: 'revoirEclair' } as ActionEclair);
-        }}
-      >
-        Revoir
-      </button>
+      {/* LA PORTE. Tant que l'enfant n'a pas tapé, aucun mot ne part — il ne peut donc plus
+          rater l'éclair sans le savoir. Une fois l'exposition passée, la même place porte
+          « Revoir », qui rouvre la porte autant de fois qu'il veut. */}
+      {demarrages === 0 ? (
+        <button
+          type="button"
+          data-action="pret"
+          className="cible cible-appel"
+          style={STYLE_CIBLE}
+          onClick={() => {
+            fixerDemarrages((rang) => rang + 1);
+          }}
+        >
+          Prêt&nbsp;? Montre-moi le mot
+        </button>
+      ) : (
+        <div style={{ display: 'grid', gap: '0.25rem', justifyItems: 'start' }}>
+          <button
+            type="button"
+            data-action="revoir"
+            style={STYLE_CIBLE}
+            onClick={() => {
+              // Les deux, et dans cet ordre : le réducteur compte la revue (R15, elle ne coûte
+              // rien), la porte se rouvre pour que le mot reparte vraiment. Compter sans
+              // remontrer était exactement le défaut d'avant.
+              emettre({ type: 'revoirEclair' } as ActionEclair);
+              fixerDemarrages((rang) => rang + 1);
+            }}
+          >
+            Revoir le mot
+          </button>
+          {/* R15 rendue LISIBLE. Elle était vraie dans le code et écrite nulle part : le père
+              a pris « Revoir » pour un bouton parmi d'autres et ne s'en est jamais servi. */}
+          <small data-note="revoir-gratuit" style={{ opacity: 0.8 }}>
+            Tu peux le revoir autant de fois que tu veux, ça ne coûte rien.
+          </small>
+        </div>
+      )}
 
       <div data-plateau="options" style={{ display: 'flex', flexWrap: 'wrap' }}>
         {(consigne === null ? [] : consigne.options).map((id) => {
@@ -194,11 +252,37 @@ export function MoteurEclair(
               key={id}
               type="button"
               data-option={id}
+              data-option-couleur={option.couleur ?? undefined}
               style={STYLE_CIBLE}
               onClick={(evenement) => {
                 jouer({ type: 'repondre', option: id }, evenement);
               }}
             >
+              {/* R11 — UNE COULEUR SE MONTRE, ELLE NE SE LIT PAS.
+                  Le libellé était « la luciole rouge » : dix-sept caractères pour répondre à un
+                  mot flashé de cinq. La pastille porte la couleur, le mot reste à côté d'elle
+                  pour ceux qui veulent le lire, et l'étiquette accessible garde la phrase
+                  entière — un lecteur d'écran ne voit pas une pastille.
+                  Sans `couleur`, rien ne change : les quatre autres exercices `eclair`
+                  proposent le mot nu, ce qui est déjà juste. */}
+              {option.couleur === undefined ? null : (
+                <span
+                  aria-hidden="true"
+                  data-pastille={option.couleur}
+                  style={{
+                    display: 'inline-block',
+                    inlineSize: '2.25rem',
+                    blockSize: '2.25rem',
+                    marginInlineEnd: '0.5rem',
+                    verticalAlign: 'middle',
+                    borderRadius: '50%',
+                    background: hexDeCouleur(option.couleur),
+                    // Le trait de la palette, pour que `blanc` et `jaune` restent visibles sur
+                    // le parchemin — une pastille sans contour disparaîtrait sur le fond.
+                    border: '3px solid var(--trait, #1B2440)'
+                  }}
+                />
+              )}
               {option.libelle}
             </button>
           );

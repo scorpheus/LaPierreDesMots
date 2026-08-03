@@ -71,6 +71,31 @@ interface Socle {
 const socle = SOCLE as Socle;
 const lexique = LEXIQUE_CE1 as readonly string[];
 const auLexique = estAuLexique as (mot: string) => boolean;
+
+/**
+ * Les graphèmes que le socle de phonologie DÉCLARE — `a`, `i`, `o`, `u`, `é`, `è`, et les
+ * unités des cinq régions.
+ *
+ * Ils ne sont pas au lexique CE1, et ils n'ont pas à y être : ce ne sont pas des mots, ce sont
+ * les objets que l'enfant apprend à lire. L'ensemble est CONSTRUIT depuis le socle, jamais
+ * écrit à la main — une liste tenue à part deviendrait fausse au premier graphème ajouté, et
+ * ouvrirait alors un vrai trou dans le contrôle lexical.
+ */
+const GRAPHEMES_DU_SOCLE: ReadonlySet<string> = new Set(
+  Object.values(SOCLE as Record<string, Record<string, unknown>>).flatMap((region) =>
+    Object.values(region).flatMap((categorie) =>
+      Array.isArray(categorie)
+        ? categorie
+            .map((unite: unknown) =>
+              typeof unite === 'object' && unite !== null && 'forme' in unite
+                ? String((unite as { forme: unknown }).forme)
+                : ''
+            )
+            .filter((forme) => forme !== '')
+        : []
+    )
+  )
+);
 const verifierSocle = verifier as (socle?: unknown) => readonly string[];
 const cv = syllabesCV as () => readonly { forme: string; consonne: string; voyelle: string }[];
 const mots = recenserMots as (socle?: unknown) => readonly (readonly [string, string])[];
@@ -232,6 +257,21 @@ describe('LE CHIFFRE DU LOT — 100 % du vocabulaire est au lexique CE1 déclar�
         for (const item of items) {
           const libelle = item['libelle'];
           if (typeof libelle !== 'string' || libelle.includes(' ')) continue;
+          // ── UN GRAPHÈME N'EST PAS UN MOT ────────────────────────────────────────────────
+          //
+          // R11 a raccourci les options de `luciole-voyelles-01` : « le son a » est devenu
+          // « a ». Le libellé était plus long que le mot flashé, ce qui triplait la charge de
+          // lecture sur l'exercice dont tout l'objet est de ne PAS déchiffrer.
+          //
+          // Ce cas s'est alors allumé sur `i`, `o`, `u`, `é`, `è` — et il avait raison de
+          // regarder : ce ne sont pas des mots du lexique CE1. Ce sont des GRAPHÈMES, et ce
+          // sont précisément ceux que l'exercice enseigne. Les exiger au lexique reviendrait à
+          // interdire d'écrire à l'enfant le son qu'on lui apprend à lire.
+          //
+          // L'exemption est étroite et VÉRIFIÉE : seules les formes que le socle de phonologie
+          // DÉCLARE passent. Une chaîne arbitraire de deux lettres ne passe pas — c'est ce qui
+          // distingue une exemption d'un trou.
+          if (GRAPHEMES_DU_SOCLE.has(libelle)) continue;
           audites += 1;
           if (!auLexique(libelle)) hors.push(`${exercice.id} : ${libelle}`);
         }
