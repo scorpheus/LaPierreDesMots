@@ -14,11 +14,23 @@
 //      référentiel donne la position, `minInlineSize`/`minBlockSize` garantissent le plancher.
 //   4. **Un vrai `<button>`**, pas un `<g>` cliquable : le clavier, le lecteur d'écran et
 //      `axe-core` y ont prise sans qu'on invente un rôle.
+//
+// ── CE QUE LE LOT S5 A CHANGÉ, ET POURQUOI ──────────────────────────────────────────────────
+// Ce composant posait `data-animation-unique="oui"` sur quatorze points et leur donnait à tous
+// **le même** `scale(1.06)`. L'attribut était compté par deux recettes ; le mouvement, par
+// aucune. R11 ne demande pas quatorze attributs, elle demande dix mouvements distincts —
+// c'est ce qui sépare un lieu d'un menu (D45). Le mouvement vient désormais de
+// `animations-campement.ts`, il est nommé, et `data-animation` le rend comptable.
+//
+// Deuxième changement, et c'est celui de R18 : ces trente prises étaient **invisibles**
+// (`background: transparent`, `border: none`) sur une image de fond. Rien ne disait à l'enfant
+// qu'elles répondaient. Une invitation déphasée passe maintenant sur chacune à son tour.
 import { useCallback, useState } from 'react';
-import type { ReactElement } from 'react';
+import type { AnimationEvent as AnimationEventReact, ReactElement } from 'react';
 import type { PointInteraction } from '@pierre/partage';
 import { useServices } from '../etat/services.js';
 import { direTexte } from '../services/voix-navigateur.js';
+import { animationDuPoint, classeAnimation, phaseInvite } from './animations-campement.js';
 
 export interface ProprietesPointLibre {
   readonly point: PointInteraction;
@@ -46,6 +58,10 @@ export function PointLibre({
 
   const [x, y, largeur, hauteur] = point.zone;
 
+  // Le mouvement du point : éditorial d'abord, empreinte en repli. Jamais `undefined`, donc
+  // aucun point ne peut se retrouver sans réaction visible.
+  const animation = animationDuPoint(point.id);
+
   const toucher = useCallback((): void => {
     fixerReaction('reagit');
     surVisite?.(point);
@@ -59,12 +75,36 @@ export function PointLibre({
     }
   }, [point, services, surVisite]);
 
+  /**
+   * Le retour au repos.
+   *
+   * `onTransitionEnd` seul ne suffit plus : le mouvement est maintenant une ANIMATION. Et le
+   * garde `target === currentTarget` n'est pas de la prudence gratuite — sous
+   * `prefers-reduced-motion`, la règle globale ramène l'invitation à une itération, donc elle
+   * FINIT et son `animationend` remonte jusqu'ici. Sans ce garde, le point reviendrait au repos
+   * à cause d'une animation qui n'est pas la sienne.
+   */
+  const finDeMouvement = useCallback(
+    (evenement: AnimationEventReact<HTMLButtonElement>): void => {
+      if (evenement.target !== evenement.currentTarget) return;
+      fixerReaction('repos');
+    },
+    []
+  );
+
   return (
     <button
       type="button"
-      className="cible"
+      className={
+        reaction === 'reagit' && !animationsDesactivees
+          ? `cible point-libre ${classeAnimation(animation)}`
+          : 'cible point-libre'
+      }
       data-interaction="libre"
       data-point={point.id}
+      // Le mouvement est NOMMÉ dans le DOM. C'est ce qui rend R11 mesurable sur la propriété
+      // (« combien de mouvements distincts ») et non plus sur l'indice (« combien d'attributs »).
+      data-animation={animation}
       // Les deux attributs de comptage ne sont posés QUE quand ils sont vrais : un
       // `data-animation-unique="non"` serait compté par un sélecteur d'attribut mal écrit.
       {...(point.animationUnique && point.reaction !== 'aucune'
@@ -77,6 +117,7 @@ export function PointLibre({
       onTransitionEnd={() => {
         fixerReaction('repos');
       }}
+      onAnimationEnd={finDeMouvement}
       style={{
         position: 'absolute',
         insetInlineStart: `${String((x / largeurScene) * 100)}%`,
@@ -91,11 +132,27 @@ export function PointLibre({
         border: 'none',
         borderRadius: 'var(--rayon-carte, 12px)',
         // Aucun rouge, aucune alerte : la seule marque est un halo doux quand on touche.
+        // Il reste posé en ligne parce qu'il porte sur `box-shadow`, tandis que le mouvement
+        // nommé porte sur `transform` : deux propriétés disjointes, donc aucun arbitrage entre
+        // une règle en ligne et une animation qui court.
         boxShadow: reaction === 'reagit' ? '0 0 0 6px var(--soleil)' : 'none',
-        transform: reaction === 'reagit' && !animationsDesactivees ? 'scale(1.06)' : 'none',
-        transition: animationsDesactivees ? 'none' : 'transform 160ms ease-out, box-shadow 160ms'
+        transition: animationsDesactivees ? 'none' : 'box-shadow 160ms'
       }}
     >
+      {/* ── L'INVITATION AU REPOS — R18 ────────────────────────────────────────────────────
+          Elle vit sur un enfant, jamais sur le bouton : le bouton porte déjà le halo de
+          réaction, et deux animations de `box-shadow` sur le même élément s'écraseraient.
+          `pointer-events: none` : elle ne prend rien au doigt, jamais. Elle n'existe pas du
+          tout quand les animations sont coupées — un halo figé serait un cadre permanent,
+          c'est-à-dire le menu déguisé que D45 refuse. */}
+      {animationsDesactivees ? null : (
+        <span
+          className="point-libre-invite"
+          data-invite="oui"
+          aria-hidden="true"
+          style={{ animationDelay: `${String(phaseInvite(point.id))}s` }}
+        />
+      )}
       <span className="lecture-accessible">{point.libelle}</span>
     </button>
   );

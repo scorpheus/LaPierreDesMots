@@ -6430,3 +6430,1013 @@ sortie est utilisable tel quel.
   régions), et aucun autre lot ne les a repris. **C'est le seul endroit du jeu où D35 est servi par
   un dessin de dépannage.** À commander comme un lot d'assets à part entière, avec la même DA que
   M6 et M7.
+
+---
+
+# Lot S1 — les trois trous de la QA (2026-08-03)
+
+Ce lot exécute **QA-1** de `Docs/audit-qa.md` § 7 : fermer les trois défauts qui traversaient
+toute la QA sans un bruit — M18 (la flèche du ductus), M26 (l'animation dans le champ de
+lecture), M20 (la clé d'idempotence). Trois fichiers neufs, aucun fichier existant modifié,
+aucun fichier supprimé.
+
+| Fichier créé | Ce qu'il ferme | Cas |
+|---|---|---|
+| `tests/composants/trace-guidage-sens.test.tsx` | § 4.1 — l'ANGLE de `[data-guide="sens"]` sur les 45 traits des 26 minuscules | 5 |
+| `tests/unitaires/lecture-immobile.test.ts` | § 4.2 — aucune animation sous `[data-lecture="oui"]`, DOM **et** source CSS | 8 |
+| `tests/unitaires/idempotence-cle.test.ts` | § 4.3 — les 4 entrées de la clé épinglées une à une, sur trois chemins de calcul | 20 |
+
+**Contrat de sortie du lot, tenu :** les trois mutations ré-injectées passent à `DETECTEE`.
+Banc reproductible dans `bac-a-sable/banc-mutation-qa1.mjs`, sortie citée :
+
+```
+BASE  VERTE  5 passed (5)    tests/composants/trace-guidage-sens.test.tsx
+BASE  VERTE  8 passed (8)    tests/unitaires/lecture-immobile.test.ts
+BASE  VERTE  20 passed (20)  tests/unitaires/idempotence-cle.test.ts
+
+M18   DETECTEE  2 failed | 3 passed (5)      restauré=oui
+M18b  DETECTEE  1 failed | 4 passed (5)      restauré=oui
+M26   DETECTEE  3 failed | 5 passed (8)      restauré=oui
+M26b  DETECTEE  1 failed | 7 passed (8)      restauré=oui
+M26c  DETECTEE  2 failed | 6 passed (8)      restauré=oui
+M20   DETECTEE  8 failed | 12 passed (20)    restauré=oui
+M20b  DETECTEE  6 failed | 14 passed (20)    restauré=oui
+N1..N5  SURVIT (5/5)                          ← les cinq contrôles négatifs restent verts
+```
+
+## S1-1. Ce que j'ai tranché seul
+
+| # | Arbitrage | Décidé |
+|---|---|---|
+| S1-A | **`deriverIdentifiant` n'est pas exporté** par `serveur/src/depots/tentatives.ts`. L'audit § 4.3 demandait d'épingler l'identifiant `tnt-…`. Deux voies : exporter la fonction pour la tester, ou l'observer là où elle produit un effet. **Je n'ai pas touché au code de production** : le test enregistre deux tentatives sur une base `:memory:` migrée et lit leurs `id`. Un test qui force un module à s'ouvrir pour être testable déplace le contrat au lieu de le vérifier | 0 ligne de production modifiée |
+| S1-B | **L'audit demandait la formule ; j'ai ajouté le comportement.** Épingler `deriverCleIdempotence` entrée par entrée attrape M20 sur la fonction. Le troisième étage du fichier va plus loin : deux nœuds joués par le même profil, à la même milliseconde, avec la même graine, doivent produire **deux** tentatives au journal. Sous M20 la seconde est avalée — c'est la forme exacte du défaut n° 4 du père, « l'enfant termine, rien n'est sauvé », et c'est la seule assertion du lot qui parle de l'enfant plutôt que d'un hachage | 3 cas ajoutés, dont un contrôle négatif (le vrai double tap reste un doublon) |
+| S1-C | **Le repli déterministe du client est éprouvé, `crypto.subtle` retiré.** Ce n'est pas un artifice : `crypto.subtle` n'existe qu'en contexte sécurisé et le jeu est servi en HTTP clair quand mkcert n'a pas été installé. Un repli qui perdrait `noeudId` serait M20 côté client, invisible autrement. Rien ne reliait non plus les deux implantations — le test croisé le fait, sur les cinq quadruplets | 3 chemins de calcul × 4 entrées = 12 entrées épinglées |
+| S1-D | **Le vrai garde de M26 est dans la feuille de style, et rien ne l'exigeait.** `global.css` porte `.zone-lecture-v2, .zone-lecture-v2 * { animation: none !important }` : c'est ce `!important` qui neutralise en production l'animation en ligne de la mutation. Le supprimer était une régression silencieuse à une ligne, et aucune assertion ne s'y opposait. Le test l'exige désormais nommément (mutation M26b) | garde CSS sous assertion |
+| S1-E | **Les classes animées sont ÉNUMÉRÉES depuis `global.css`, jamais écrites en dur** (D48, auditer les objets et non les occurrences). Bénéfice mesuré le jour même : le lot du campement a ajouté 19 classes animées pendant ce lot, et le recensement est passé de **2 à 21 sans qu'une ligne de test change**. Une liste en dur aurait vieilli en une heure | recensement automatique |
+| S1-F | **Le lexique de syllabation est injecté, pas chargé.** Monté sans `fixerLexiqueSyllabation`, `TexteSyllabe` part en `fetch` vers `localhost:3000` et rend un `ECONNREFUSED`. L'annexe T § 2.3 l'interdit ; le point d'injection existe pour ça | 0 socket ouverte |
+
+## S1-2. Un défaut trouvé par le contrat de sortie, dans mon propre test
+
+Signalé parce qu'il vaut plus que sa correction. La première exécution de
+`lecture-immobile.test.ts` a échoué sur `expected 0 to be greater than 0` : j'avais écrit
+`REGLES.filter(toucheLaLecture)`, or `Array.filter` passe l'**objet** règle au prédicat, jamais
+son sélecteur. Le test aurait été **vert sur zéro sélecteur examiné** — exactement le mode de
+défaillance que l'audit § 6 appelle un test trompeur, dans le fichier écrit pour le corriger.
+
+**C'est le plancher de population qui l'a attrapé, pas moi.** Sans
+`expect(examines).toBeGreaterThan(0)`, ce fichier serait entré au dépôt en donnant une garantie
+qu'il ne finançait pas. Le point à retenir dépasse ce lot : *un audit qui énumère doit imprimer
+sa population et échouer si elle est nulle* — c'est déjà écrit dans l'audit § 7 comme contrat
+de sortie des lots QA-1 et QA-3, et cette exécution en est la première preuve empirique.
+
+## S1-3. Ce que ce lot n'a PAS fait — à traiter comme non su
+
+- **Je n'ai pas exécuté les E2E**, pour la raison de l'audit § 1 : ils exigent un build, le jeton
+  de compilation appartient à l'orchestrateur (D10), et plusieurs campagnes écrivaient le source
+  pendant ce lot. Les sept survivants « couverts sur pièce » de l'audit § 3 restent à re-vérifier
+  **en exécutant**.
+- **Je n'ai pas touché aux lots QA-2 à QA-5.** La zone aveugle des écrans (2/12) et le garde-fou
+  `couverture-ecrans.test.ts` restent ouverts ; une campagne parallèle écrivait
+  `tests/composants/Ecran*.test.tsx` pendant ce lot.
+- **Je n'ai pas vérifié l'angle rendu par un NAVIGATEUR.** Le test lit l'attribut `transform` du
+  DOM, pas la matrice appliquée à l'écran. Un `transform` correct annulé par une transformation
+  parente resterait invisible ici. C'est la zone aveugle § 5.3 de l'audit — « ce qui est montré
+  par opposition à ce qui est validé » — et seul `test:visuel`, à l'arrêt, la couvre.
+- **`bac-a-sable/banc-mutation-qa1.mjs` n'est pas `outils/mutation/banc.mjs`.** Le lot QA-5 de
+  l'audit demande un banc généralisé et versionné ; celui-ci porte les sept recettes de QA-1 et
+  ses cinq contrôles négatifs, rien de plus. Il reste dans `bac-a-sable/` pour que la session
+  suivante le retrouve au lieu de le réécrire.
+
+## S1-4. Une question pour le père
+
+**Faut-il un garde qui recense les règles non négociables et exige que chacune nomme son test ?**
+C'est le lot QA-3b de l'audit (`tests/unitaires/regles-gardees.test.ts`). Ce lot vient d'en
+fournir la démonstration par l'exemple : « aucune animation dans le champ de lecture » était une
+règle non négociable écrite dans CLAUDE.md, appliquée avec soin dans `global.css` **et sans
+aucun test** pendant sept commits. Rien ne dit qu'elle était la seule ; l'audit § 5.5 le
+soupçonne sans l'avoir mesuré. La mesure coûte un fichier.
+
+---
+
+# Lot S5 — le campement, l'étagère et l'interface (campagne sans GPU, 2026-08-03)
+
+> Périmètre écrit : `client/src/monde/{animations-campement.ts, Butin.tsx, PointLibre.tsx}`,
+> `client/src/ecrans/{EcranCampement, EcranCoffre}.tsx`, `client/src/styles/global.css`,
+> `tests/unitaires/campement-animations-uniques.test.ts`,
+> `tests/composants/{campement-affordance, butin-du-campement}.test.tsx`. Aucun autre.
+> Toutes les valeurs citées ici sortent d'une commande.
+
+## Q-S5-1. R11 comptait un ATTRIBUT ; le campement ne bougeait que d'une seule façon
+
+**Le fait, mesuré avant d'écrire une ligne.** `contenu/monde/campement.json` déclare
+`animationUnique: true` sur **14 points**, et `PointLibre.tsx` posait fidèlement
+`data-animation-unique="oui"` sur ces quatorze-là. Deux recettes les comptaient —
+`tests/composants/EcranCampement.test.tsx:137` dans le DOM monté et
+`tests/e2e/parcours-campement.spec.ts:80` dans le navigateur — et les deux étaient vertes.
+
+Les quatorze faisaient **exactement le même mouvement** : `transform: scale(1.06)` et un halo de
+soleil, écrits en dur dans le composant.
+
+```
+points déclarant animationUnique         = 14
+animations distinctes réellement rendues =  1
+exigées par R11                          = 10
+```
+
+C'est le mode de défaillance que CLAUDE.md nomme « un détecteur qui déclare un poids qu'il
+n'applique jamais », et c'est le cousin exact du survivant **M11b** de `Docs/audit-qa.md` : un
+garde qui mesure l'indice au lieu de la propriété ne s'arme jamais. R11 ne demande pas quatorze
+attributs, elle demande que le campement **réponde différemment selon ce qu'on touche** — c'est
+la seule chose qui sépare un lieu d'un menu (D45).
+
+**Après.** Dix-huit mouvements nommés, dix-huit `@keyframes` dans `global.css`, un mouvement par
+objet choisi sur ce que l'objet EST (le carillon se balance, la bannière ondule, la grenouille
+bondit, l'étoile file). Sortie citée :
+
+```
+[S5] 14 point(s) animationUnique → 14 mouvement(s) distinct(s) : balancier, bascule, bouillon,
+     deroulement, envol, etirement, filante, flottement, glissade, gonflement, ondulation,
+     pulsation, scintillement, sursaut
+[S5] 18 nom(s) de mouvement, 0 sans définition CSS
+```
+
+La deuxième ligne est le garde qui empêche ce lot d'être creux à son tour : il suffirait
+d'inventer dix-huit noms pour rendre le compte vert en laissant le campement immobile.
+`campement-animations-uniques.test.ts` lit `global.css` et exige, pour chaque nom, son
+`@keyframes`, sa classe **et** sa branche `animation-name`. Il vérifie aussi le sens inverse —
+aucune classe orpheline — et qu'aucun keyframe n'emploie de couleur : un refus est un mouvement,
+jamais une teinte.
+
+## Q-S5-2. L'affordance était NULLE, et c'est ça que le père n'a pas compris
+
+D45 dit « à rejuger une fois le graphisme refait, et pas avant ». M8 a refait le graphisme.
+Mesuré sur le résultat : les trente prises du campement sont des `<button>` en
+`background: transparent`, `border: none`, posés sur une image de fond. **Rien, absolument rien,
+ne disait à l'enfant que ces objets répondent au doigt.** Le défaut n'était donc pas le dessin —
+il était que le dessin n'avait aucune prise visible. R18 (« ça se comprend sans qu'un adulte
+explique ») ne peut pas tenir contre une affordance nulle.
+
+**Tranché seul : un halo qui passe, et non un contour qui reste.** Trente contours permanents
+auraient résolu l'affordance en créant le défaut de D45 — la grille de boutons. Trente halos
+**déphasés** sur un cycle de neuf secondes en laissent deux ou trois allumés à la fois : le
+campement a l'air vivant, et l'enfant apprend en trois secondes que ce qui brille se touche, puis
+que tout se touche.
+
+La finesse de la grille de phases a été **mesurée, pas supposée**. Une première version tirait la
+phase sur quarante crans :
+
+```
+30 point(s) → 20 phase(s) distinctes     ← dix objets clignotaient à l'unisson
+30 point(s) → 30 phase(s) distinctes     ← grille au millième, retenue
+```
+
+Le test exige l'égalité stricte sur le fichier réel : une collision qui apparaîtrait un jour est
+le début de la grille de boutons, et il vaut mieux la voir en rouge qu'à l'écran.
+
+L'invitation **disparaît entièrement** quand les animations sont coupées (D21) : un halo figé sur
+trente objets serait précisément le menu déguisé. Elle vit sur un `<span>` `aria-hidden` en
+`pointer-events: none` : elle ne prend jamais le doigt.
+
+## Q-S5-3. Six récompenses existaient dans les données et n'atteignaient aucun écran
+
+**Le fait.** `contenu/monde/campement.json` déclare six objets rapportés, un par région. Le
+serveur les sert depuis toujours (`serveur/src/depots/monde.ts:503`), le type les porte
+(`ObjetCampement.placeLe`), et :
+
+```
+rendus au campement   = 0 sur 6     `EcranCampement.tsx` ne les montrait nulle part
+dessinés au coffre    = 0 sur 6     une seule besace grise pour les six
+asset déclaré         = `habillages/campement/campement.svg` pour les six — le décor entier
+```
+
+Autrement dit : l'enfant termine la Clairière, en rapporte le fanion, revient au campement — et
+**rien n'a changé**. C'est le hub d'Adibou privé de la seule chose qui donne envie d'y revenir
+(v2 § 3.4, D25 point 3). Le coffre montrait bien six cases, mais six besaces identiques : « deux
+formes identiques ne se collectionneraient pas » (D44) valait pour les six comme pour les deux —
+M8 avait séparé les deux collections, pas les six pièces de l'une d'elles.
+
+**Après** : `client/src/monde/Butin.tsx`, monté au campement **et** au coffre, donc un objet
+dessiné une fois et montré deux fois.
+
+```
+[S5] 6 objet(s) déclaré(s) · 6 dessiné(s) · 0 sur le repli
+silhouettes distinctes = 6 sur 6
+```
+
+Les six cases sont visibles **dès le premier jour**, celles qui manquent comprises, en pointillé
+et en Grisaille — la règle de l'étagère, appliquée, pas réinventée. Aucune prise : c'est un album,
+pas un menu, donc il n'y a rien à rater (R14).
+
+## Q-S5-4. Trois choix tranchés seuls, et ce qu'il faudra en faire
+
+**1. La table des mouvements est ÉDITORIALE, avec une empreinte en repli.** Déclarer l'animation
+dans `contenu/monde/campement.json` aurait été la forme pure de « zéro ligne de code pour ajouter
+un habillage » — mais elle demande de modifier `contenu/schemas/monde.schema.json`
+(`additionalProperties: false`), et une campagne voisine écrivait sur la carte, qui partage ce
+schéma. Une empreinte seule a été essayée et **mesurée** : 11 mouvements distincts sur 14, marge
+d'un seul point, et surtout *une tente tremblait comme un papillon*. Le mouvement d'un objet n'est
+pas une valeur de hachage. La table est donc écrite en code, l'empreinte n'en est plus que le
+repli — un point neuf ajouté au fichier de contenu bouge quand même, sans ligne de code.
+**À rouvrir** le jour où un lot possède `campement.json` : la table y a sa place, une ligne par
+point.
+
+**2. Les six butins sont dessinés EN LIGNE, pas en fichiers d'asset.** Six SVG sous `contenu/`
+demanderaient leur entrée au registre, leur passage à `verifier-regions-fermees`, et une
+modification de `campement.json` — un fichier qu'aucun lot ne possède (Q-M8-1). Le dépôt a le
+précédent : `Compagnon.tsx` et `EcranCoffre.tsx` dessinent déjà leurs silhouettes en ligne.
+**Se défait en une passe** le jour où le fichier de contenu a un propriétaire.
+
+**3. Les fichiers de test portent des noms qui ne sont PAS `Ecran*.test.tsx`.** Un autre lot de
+cette campagne écrit les écrans nus ; `campement-affordance.test.tsx` et
+`butin-du-campement.test.tsx` ne peuvent donc collider avec lui. Vérifié après coup dans
+`git status` : les fichiers apparus sous `tests/composants/Ecran*.test.tsx` pendant ce lot sont
+ceux de l'autre lot, et aucun n'est de moi.
+
+## Q-S5-5. Ce que ce lot a mesuré sans y toucher
+
+**L'étagère à cases vides (D44) était déjà tenue**, et ce lot ne l'a pas refaite — il l'a
+vérifiée. `contenu/monde/gobi-stades.json` déclare **25 formes** ; `tests/unitaires/etagere.test.ts`
+(17 cas) garde le modèle, `tests/composants/Etagere.test.tsx` garde que l'écran dessine bien
+`nbTotal` cases et non les seules gagnées. Le brief du lot la redemandait ; la mesure dit qu'elle
+existe. Ce qui manquait à côté, c'était le butin — Q-S5-3.
+
+**L'habillage général au trait épais**, mesuré sur les neuf composants de récompense et de monde :
+
+```
+éléments dessinés portant un trait = 8      dont stroke="var(--trait)" = 7
+                                            le huitième est stroke="none" (légitime)
+épaisseurs employées               = 3 px (×2), 4 px (×4)   — la DA en autorise 3 à 5
+couleurs en dur hors palette       = 0
+```
+
+Rien à corriger : les deux traits à 3 px sont des détails intérieurs (le cristal en creux de
+l'étagère, la flamme du chaudron) et la v2 § 9.1 les autorise. Les normaliser aurait déplacé un
+contraste qu'axe-core a déjà mesuré, sans défaut à l'appui.
+
+**« Un tap depuis l'ouverture jusqu'à la sortie » (D46) n'a pas bougé, et ce n'est pas une
+opinion** : `client/src/routeur.tsx`, `client/src/ecrans/EcranOuverture.tsx` et
+`client/src/monde/PastilleSortie.tsx` ne sont pas dans le diff de ce lot, et aucun fichier écrit
+ici n'appelle `naviguer(` (0 occurrence sur les trois fichiers neufs). Le lot n'a ajouté ni écran,
+ni route, ni bouton de destination.
+
+## Q-S5-6. Le banc de mutation du lot — la preuve que ces tests peuvent rougir
+
+`bac-a-sable/s5-campement/banc-de-mutation.mjs` abîme le code de production, un défaut plausible à
+la fois, et remet le fichier à l'octet près.
+
+```
+S5-M1  tous les points reprennent le même mouvement (le défaut d'origine)   DÉTECTÉE  3 rouges
+S5-M2  un nom de mouvement perd son @keyframes — la classe devient inerte   DÉTECTÉE  1 rouge
+S5-M3  l'invitation au repos disparaît — l'affordance retombe à zéro        DÉTECTÉE  3 rouges
+S5-M4  les invitations partent toutes en phase — clignotement en bloc       DÉTECTÉE  2 rouges
+S5-M5  les six butins retombent sur la besace                               DÉTECTÉE  1 rouge
+S5-M6  le garde de la remontée d'animationend saute                         DÉTECTÉE  1 rouge
+S5-M7  le butin cache les cases non rapportées — « rien n'est caché » tombe DÉTECTÉE  4 rouges
+S5-M8  CONTRÔLE NÉGATIF (un commentaire ajouté)                             VERT
+
+CONTRAT S5 : 7 mutation(s) qui valent · 7 détectée(s) · 0 survivante(s) · contrôle négatif vert
+```
+
+Résidus recherchés après coup dans tout `client/` — la marque du contrôle négatif, le keyframes
+renommé, les deux branches neutralisées — **aucun résultat**.
+
+## Q-S5-7. Ce que ce lot n'a PAS pu vérifier — à traiter comme non su
+
+- **Les suites e2e n'ont pas tourné.** `~/AppData/Local/ms-playwright` est **vide** : aucun
+  navigateur n'est installé, et l'installer est une dépendance qui se demande (D4).
+  `parcours-campement.spec.ts`, `parcours-campement-sans-texte.spec.ts`, `parcours-un-tap.spec.ts`
+  et `a11y-tout-le-site.spec.ts` restent donc non exécutés sur ce lot. C'est **la même limite
+  qu'au lot M8** (Q-M8-6), et elle n'a pas bougé.
+- **Le rendu réel.** Aucune image n'a été regardée : les dix-huit mouvements et le halo déphasé
+  sont décrits par leurs keyframes et vérifiés par leur existence, jamais par leur allure. Le
+  jugement esthétique appartient au parent (D50) — et **le rythme de l'invitation est
+  précisément ce qui se juge à l'œil** : neuf secondes de cycle et 0,7 d'opacité sont des valeurs
+  posées, pas mesurées. Si le campement paraît agité, c'est la durée du cycle qu'il faut
+  allonger, pas les mouvements qu'il faut retirer.
+- **`test:visuel` reste rouge et aucune référence n'a été figée** (D39). `global.css` gagne
+  dix-neuf `@keyframes` et deux règles de case : les captures divergeront, c'est attendu, et aucun
+  lot ne lance `--maj` de sa propre initiative.
+- **Un rouge de la suite ne vient pas de ce lot** :
+  `tests/unitaires/exercices-attribution-competence.test.ts` échoue sur les compétences déclarées
+  par `contenu/exercices/**`, que la campagne voisine réécrit au moment où ces lignes sont
+  écrites. Aucun fichier de ce lot ne le touche.
+
+---
+
+# Lot S3 — « les neuf exercices placeholder » : la prémisse était périmée, le défaut était ailleurs
+
+Ajouté le 2026-08-03. Ce lot avait pour brief : « `grep -rl PLACEHOLDER contenu/exercices` rend
+**9 fichiers**. Réécris-les en contenu réel. » Les neuf fichiers étaient **déjà du contenu réel**,
+réécrits par le lot M1 ; le mot ne survivait que dans la prose de leur `$commentaire`, où il
+racontait leur état ANTÉRIEUR. On avait compté les **occurrences d'un mot** au lieu des **objets
+qui portent l'état** — exactement D48, pris par l'autre bout.
+
+En cherchant ce que ces neuf fichiers avaient encore de faux, on a trouvé autre chose, et de bien
+plus lourd. Tout ce qui suit est **mesuré**, jamais affirmé : les scripts sont dans
+`bac-a-sable/audit-devinette.mjs`, `bac-a-sable/audit-sortie-reelle.mjs`,
+`bac-a-sable/audit-sortie-point-fixe.mjs` et `bac-a-sable/audit-deverrouillage.mjs`, ils montent
+les **vrais** moteurs et appellent le **vrai** `composerSortie`.
+
+## S3-Q1 — Une compétence déclarée en position ≥ 1 ne reçoit JAMAIS une réussite. Trois restent muettes.
+
+**Le mécanisme, cité :**
+
+```
+serveur/src/routes/tentatives.ts:270    const competences = [...exercice.competences];
+serveur/src/routes/tentatives.ts:272    validerTentative(requete.body, competences[0] ?? '');
+serveur/src/depots/tentatives.ts:352    etape.confusion?.competence ?? competenceParDefaut
+                                        (= pedagogie.competences[0])
+```
+
+Une réussite n'observe aucune confusion : elle est imputée à `competences[0]`, et à elle seule.
+Le second canal — `jeu.contenu.competence` — n'existe que sur une **erreur** avec `confusionAvec`.
+
+Or `tests/unitaires/moteurs-couverture.test.ts` mesure R12 en parcourant **toutes** les
+compétences déclarées (`for (const competence of exercice.competences)`). Une compétence citée
+uniquement en position ≥ 1 est donc **verte pour R12 — trois moteurs distincts la travaillent —
+et son journal reste vide pour toujours** : maîtrise bloquée à 0, aucun acquis possible, rien
+dans le tableau de bord du parent. C'est le « détecteur qui déclare un poids qu'il n'applique
+jamais » de CLAUDE.md, vu depuis le contenu.
+
+**Mesuré sur les 76 exercices livrés : quatre compétences dans ce cas.** Deux sont corrigées par
+ce lot, parce que le fichier lui-même disait déjà laquelle des deux compétences il travaille :
+
+| Fichier | Avant | Après | Ce qui le justifie |
+|---|---|---|---|
+| `clairiere/luciole-couleurs-01.json` | `["lex.couleur","flu.mot.court"]` | `["flu.mot.court","lex.couleur"]` | son propre commentaire : « l'exposition bornée mesure exactement la fluence » |
+| `clairiere/guirlande-phrase-01.json` | `["lex.couleur","mot.outil.frequent"]` | `["mot.outil.frequent","lex.couleur"]` | `jeu.contenu.competence` valait DÉJÀ `mot.outil.frequent` : réussites et confusions nourrissaient deux compétences différentes |
+
+**Restent muettes, et c'est l'arbitrage demandé** : `gph.rare.gn`, `gph.rare.ph`,
+`comp.consigne.multiple`. Aucune ne se corrige par un échange de position, et c'est pourquoi ce
+lot s'est **arrêté** au lieu de rendre le test vert par un geste :
+
+- `gn` est déclarée par `volcan-coulee-chemin-01` (« la troisième rangée ouvre `gn` », un seul
+  mot), `volcan-fresque-chrono-01` et `volcan-wagons-tri-02` (deux consignes sur sept). Dans les
+  trois, le sujet principal est `ill` ou `ch-qu`. **Il n'existe aucun exercice consacré à `gn`** ;
+  le promouvoir en position 0 ferait mentir le tableau de bord dans l'autre sens.
+- `ph` : même forme, derrière `ch-qu` dans les trois cas.
+- `comp.consigne.multiple` est déclarée par **quinze** exercices et n'est le sujet d'aucun.
+
+**Proposition** : écrire un exercice dédié à `gn` et un à `ph` (il faut un nœud pour chacun, donc
+un arbitrage sur la carte du Volcan) ; et pour `comp.consigne.multiple`, décider si elle est une
+compétence à part entière — auquel cas un exercice doit la porter en position 0 — ou une
+**étiquette descriptive**, auquel cas elle n'a rien à faire dans `competences` et devrait vivre
+ailleurs dans le schéma.
+
+## S3-Q2 — « Partir en sortie » ne sait proposer que 10 nœuds sur 76, et quatre régions sur six lui répondent 409
+
+C'est le point le plus lourd trouvé par ce lot, et il n'appartient pas au contenu seul.
+
+**Mesuré avec le vrai `composerSortie`, profil neuf, les six régions demandées une par une :**
+
+```
+cite-des-histoires   REFUS — 0 nœud(s) éligible(s), il en faut au moins 2
+clairiere            OK — 3 nœud(s)
+foret-muette         REFUS — 0 nœud(s) éligible(s), il en faut au moins 2
+galeries             OK — 4 nœud(s)
+marais-jumeau        REFUS — 0 nœud(s) éligible(s), il en faut au moins 2
+volcan               REFUS — 0 nœud(s) éligible(s), il en faut au moins 2
+```
+
+**Et en simulant un enfant PARFAIT jusqu'au point fixe** (dès qu'un nœud est proposable, sa
+compétence en position 0 passe à `p = 1`), avec cinq graines pour ne pas dépendre du tirage —
+stabilité vérifiée : 1 graine rend 9, puis 5, 20, 100 et 400 graines rendent toutes **10** :
+
+```
+nœuds que « partir en sortie » peut atteindre, AU MIEUX : 10 / 76
+cite-des-histoires 0/14 · clairiere 3/12 · foret-muette 0/12
+galeries 6/14 · marais-jumeau 0/12 · volcan 0/12
+```
+
+**Le mécanisme** : `partage/src/pedagogie/selecteur.ts:194` retient un candidat si
+`candidat.competences.every((code) => competenceEligible(...))`, et `competenceEligible` exige que
+**tous** les prérequis soient à `p >= seuilPrerequis` (0,60). `maitriseDe` rend **0** pour une
+compétence absente du journal. Un exercice précoce qui déclare, **en compétence secondaire**, un
+code situé plus loin dans la chaîne de prérequis **se ferme donc lui-même**, et ferme du même coup
+la compétence qu'il était le seul à pouvoir faire monter. Les verrous sont circulaires :
+`clairiere-ecole-01` est le seul à porter `comp.consigne.simple` en position 0, et il déclare
+`comp.consigne.multiple`, qui a `comp.consigne.simple` en prérequis.
+
+**Ce que ce constat ne dit PAS, et il faut le dire** : les 76 nœuds restent **jouables** quand on
+les adresse directement. `tests/api/sortie-sur-disque.test.ts`, cas « LA MARCHE », les joue tous
+par `POST /api/tentatives` et montre les six régions finir par offrir une sortie. Le défaut porte
+sur la **composition automatique**, pas sur l'accès à un nœud depuis la carte.
+
+**Ce que le test voisin acceptait déjà** : `sortie-sur-disque.test.ts` assert
+`repondent.length >= 2`. Il a été écrit pour distinguer *zéro* de *deux* — c'était le défaut
+précédent — et il ne borne pas le reste. Quatre régions muettes lui conviennent.
+
+**Deux remèdes possibles, et le choix n'est pas de la compétence d'un lot de contenu :**
+
+1. **Côté contenu** — n'autoriser un exercice à déclarer que des compétences du même étage de la
+   chaîne. Mesuré (`bac-a-sable/audit-deverrouillage.mjs`) : retirer trois compétences
+   secondaires (`comp.consigne.multiple` de 15 exercices, `syl.cv` de 2, `flu.mot.court` de 3)
+   fait passer les exercices bloqués de 66 à 17. **Mais cela casse R12** : `syl.cv` et
+   `flu.mot.court` tombent à 2 moteurs déclarants. Les deux règles sont **mécaniquement
+   incompatibles** sur une progression étagée — R12 pousse à déclarer large, `every` punit
+   exactement cela.
+2. **Côté sélecteur** — juger l'éligibilité sur la compétence que le nœud **travaille**
+   (`competences[0]`), et non sur toutes celles qu'il **touche**. La v2 § 12.1 dit « aucune
+   compétence n'est **proposée** si un prérequis est sous 60 % » : « proposée » désigne
+   plausiblement la compétence visée, pas les compétences effleurées. C'est une révision de
+   `partage/src/pedagogie/selecteur.ts` et de la propriété **P11**, donc un arbitrage.
+
+**Ce lot n'a tranché ni l'un ni l'autre** : le premier dégrade R12, le second modifie une
+propriété opposable dans un fichier qu'il ne possède pas. Le nombre est **borné par un test** au
+lieu d'être oublié — `tests/unitaires/exercices-attribution-competence.test.ts` assert
+exactement 10, donc il échoue **dans les deux sens** : à la baisse quand une compétence
+secondaire ferme un nœud de plus, à la hausse le jour où l'arbitrage est appliqué et qu'il faut
+remonter le chiffre.
+
+## S3-Q3 — Onze compétences ne peuvent jamais satisfaire la quatrième clause de D13
+
+`estAcquise` (D13, `partage/src/pedagogie/bkt.ts`) exige quatre conditions, dont
+`nbTentativesFaibleDevinette >= 2` à `p_devinette <= 0,10`. Les modes qui passent sous ce seuil
+sont `place` (0,05), `colorie` (0,02), `trace` (0,02), `saisie` (0,01), et `ordre`/`appariement`
+seulement à partir de **4 éléments** (1/4! = 0,042 ; à 3 éléments, 0,167 ; à 2, 0,50).
+
+Mesuré en montant les vrais moteurs sur les 76 exercices et en lisant le `modeReponse` et le
+`nbElements` qu'ils produisent : **onze compétences ne reçoivent aucune étape à faible
+devinette**, donc `acquise_le` restera `NULL` pour elles quoi que fasse l'enfant, et la colonne
+« acquise » du tableau de bord (`serveur/src/services/indicateurs.ts:180`) ne passera jamais à
+vrai. Parmi elles : `syl.cvc` (5 étapes, toutes `ordre:2`), `gph.confusion.sourde-sonore`
+(22 étapes, aucune faible), `gph.voyelle.orale`, `enc.pluriel.s`, `comp.litteral`.
+
+Ce n'est **pas** un état sans issue pour l'enfant — le sélecteur juge sur `p`, pas sur
+`acquise_le` — mais c'est un indicateur qui ne peut pas dire la vérité au parent.
+
+**Proposition** : pour chaque compétence concernée, prévoir au moins un exercice `grave`
+(`saisie`), `colorie`, `place` ou un `ordre` à 4 éléments. Deux exercices suffisent par
+compétence. **À arbitrer** : est-ce du contenu à ajouter, ou `seuilFaibleDevinette` (0,10) est-il
+trop sévère devant un catalogue où `qcm-4` vaut 0,25 ?
+
+## Ce que ce lot a écrit, et ce qu'il n'a pas touché
+
+**Écrit** : les neuf `$commentaire` (la marque de bouchon retirée du texte, l'histoire gardée),
+deux ordres de `competences` (S3-Q1), et
+`tests/unitaires/exercices-attribution-competence.test.ts`.
+
+**Pas touché** : aucun fichier de `partage/`, `serveur/`, `client/` ; aucun autre exercice ;
+aucun document de référence. Les quatre scripts de mesure restent dans `bac-a-sable/` pour que
+la session suivante les relance au lieu de les réécrire.
+
+---
+
+## Lot S4 — la carte du monde, en SVG fait main
+
+Écrit le 2026-08-03. **Le contrat de sortie de ce lot est une correction, pas un dessin.** Le
+lot était intitulé « la carte du monde, en SVG fait main » ; la carte v3 existait déjà, elle est
+riche, et son propre contrôle (`node scripts/verifier-carte-monde.mjs`) rendait **0 anomalie**
+avant que ce lot ne commence. Chercher à la redessiner aurait été refaire du travail acquis.
+Le lot a donc cherché ce que ce contrôle **ne mesure pas** — et a trouvé que l'écran signature
+du jeu ne montrait pas un seul pixel gris.
+
+### S4-1 — TRANCHÉ. Le voile de Grisaille redessinait chaque région dans SA PROPRE couleur
+
+**C'est le défaut le plus grave que ce lot a rencontré, et il n'est pas cosmétique : c'est la
+mécanique entière du jeu qui n'existait pas à l'écran.**
+
+`VoileGrisaille` posait `<use href="#clairiere" fill="var(--grisaille)" stroke="none"/>`.
+L'intention se lisait dans le code. Le rendu était son inverse exact : en SVG, `<use>` **clone**
+l'élément référencé, et un attribut de présentation porté par le clone l'emporte sur la valeur
+**héritée** du `<use>`. Les six territoires de `carte-monde-v3.svg` portent leur `fill` en dur.
+Le « voile » repeignait donc chaque territoire de sa propre couleur, par-dessus ses ornements.
+
+Conséquence pour l'enfant : « un monde gris que l'enfant rallume » (CLAUDE.md) n'était visible
+nulle part, et une région voilée se distinguait d'une région terminée par **l'absence de ses
+ornements** — le signal exactement opposé à celui qu'on voulait. Aucun test ne le voyait :
+happy-dom ne rend pas `<use>`, et les deux références de `tests/visuel/carte.spec.ts` figeaient
+le défaut au lieu de le dénoncer.
+
+Mesuré, jamais supposé — `node bac-a-sable/s4-carte/mesurer-voile.mjs`, pixel lu au centre de
+chaque territoire dans Chrome, voile à 100 % :
+
+```
+voile AVANT S4 (<use> re-rempli)
+  clairiere            → #3DDC97   chroma 159 ✗ COLORÉ
+  galeries             → #2FA8E0   chroma 177 ✗ COLORÉ
+  marais-jumeau        → #8FD6F2   chroma  99 ✗ COLORÉ
+  foret-muette         → #C98B4B   chroma 126 ✗ COLORÉ
+  volcan               → #C0453A   chroma 134 ✗ COLORÉ
+  cite-des-histoires   → #FFC93C   chroma 195 ✗ COLORÉ
+  régions dont le voile plein est encore COLORÉ     : 6 / 6
+
+voile APRÈS S4 (plaque découpée), nappes à 0.18
+  clairiere            → #A2A8B3   chroma  17     contraste au parchemin  79
+  galeries             → #A2A8B3   chroma  17     contraste au parchemin  79
+  marais-jumeau        → #A2A8B3   chroma  17     contraste au parchemin  79
+  foret-muette         → #ABB0B8   chroma  13     contraste au parchemin  71
+  volcan               → #9AA1AE   chroma  20     contraste au parchemin  86
+  cite-des-histoires   → #9AA1AE   chroma  20     contraste au parchemin  86
+  régions dont le voile plein est encore COLORÉ     : 0 / 6
+  régions dont le voile ne SE VOIT pas sur le papier : 0 / 6
+```
+
+« Gris » se juge à la **chroma** (max − min des composantes), jamais à la distance au jeton : la
+brume éclaircit le voile sans le colorer, et un critère de distance confondrait « éclairci » avec
+« coloré ». Repères mesurés : `--grisaille #8E97A8` a une chroma de 26, `--parchemin #FFF6E3` de
+28, et les six territoires peints de 99 à 195.
+
+**Ce qui a été tranché.** Le voile ne remplit plus une copie de la région : il **découpe** une
+plaque de Grisaille à la silhouette, par `clip-path: url(#clip-<région>)`. Ces `clipPath`
+existaient déjà dans l'asset — ce sont eux qui détourent les signes d'ambiance, et le contrôle
+de M7 vérifie déjà les six. La plaque n'hérite de rien et ne clone rien : sa couleur ne peut
+donc plus être écrasée par l'asset, **quelle que soit la retouche future du dessin**. C'est la
+même famille de correction que « les régions coloriables sont les régions fermées de la
+vectorisation » : correct par construction, pas par vigilance.
+
+**Corollaire, et il vaut au-delà de ce lot.** `<use href="#X" fill="…">` ne recolore un élément
+que si `#X` ne porte pas son propre `fill`. Le dépôt s'en sert ailleurs (les `clipPath` de la
+carte, et tout décor qui réutiliserait une silhouette) : **repeindre par `<use>` est une
+technique à ne pas reprendre.** Découper une plaque, oui.
+
+**Deux effets de bord assumés, tous deux mesurés.**
+
+1. L'animation portait `translateX(6px) scale(1.02)` sur la forme voilante : c'est la
+   **frontière** de la région qui glissait, découvrant un liseré de couleur. Avec un découpage,
+   déplacer la plaque déplacerait aussi son découpage. Le mouvement est donc passé **à
+   l'intérieur** du découpage — quatre nappes claires qui dérivent en sens contraires — et le
+   bord ne bouge plus d'un pixel. « Le décor s'agite, le texte jamais » : et ici, la frontière
+   non plus.
+2. La densité des nappes est **réglée par la mesure**, pas à l'œil : à 0,42 le voile monte à
+   `#CDCCC9` et s'efface contre le parchemin ; à 0,12 la brume ne se voit plus. **0,18 retenu**,
+   table complète dans `client/src/monde/VoileGrisaille.tsx`. Les images-clés font respirer
+   l'opacité entre 0,12 et 0,20, de sorte que la bande mesurée reste vraie **pendant** toute
+   l'animation, et pas seulement sur l'image d'arrêt.
+
+### S4-2 — TRANCHÉ. Le décor injecté parlait au lecteur d'écran, en double et sans accents
+
+`EcranCarte` injecte le décor dans un `<g data-decor="carte">`. L'asset porte **sept `<title>`**
+(un pour la carte, six pour les territoires), et un `<title>` donne un **nom accessible**. Les
+six territoires devenaient donc six nœuds nommés de plus, en doublon des six prises
+`role="button"` qui portent déjà « La Clairière — voilee ».
+
+Mesuré dans Chrome, arbre d'accessibilité lu par CDP
+(`node bac-a-sable/s4-carte/mesurer-arbre-a11y.mjs`) :
+
+```
+décor SANS aria-hidden → 16 nœuds nommés
+  group « La carte du monde » ×2 · button ×2
+  graphics-symbol « La Clairiere » « Les Galeries » « Le Marais Jumeau »
+                  « La Foret Muette » « Le Volcan » « La Cite des Histoires » — chacun DEUX fois
+décor AVEC aria-hidden →  3 nœuds nommés
+  group « La carte du monde » · button « La Clairière — ouverte » · button « Les Galeries — ouverte »
+```
+
+**Tranché :** le décor porte `aria-hidden="true"`. C'est un **dessin** ; tout ce qui répond au
+doigt est posé à côté, en clair, par l'écran. Le masquer ne retire aucune information — il
+retire treize répétitions, dont trois fautes d'accent.
+
+Les trois `<title>` fautifs (« La Clairiere », « La Foret Muette », « La Cite des Histoires »)
+sont **corrigés dans l'asset** malgré tout : ils ne s'entendent plus, mais un fichier français
+ne porte pas trois fautes.
+
+### S4-3 — TRANCHÉ. Le chemin d'encre n'arrivait pas où le code affirmait qu'il arrivait
+
+`EcranCarte` affirmait en toutes lettres : « Terminer la Clairière remplit **exactement** le
+premier cinquième et pose l'encre jusqu'aux Galeries ». C'était faux. `CheminEncre` posait une
+moyenne sur **un seul** tracé en `pathLength="1"`, donc sur la longueur **totale** — ce qui
+suppose cinq routes de même longueur. Mesuré à 4000 pas
+(`node bac-a-sable/s4-carte/mesurer-geometrie.mjs`) :
+
+```
+longueurs d arc des 5 segments    321,4 · 308,0 · 396,3 · 343,3 · 315,1   (± 17,7 %)
+fin de route (où est le marqueur)  0,191 · 0,374 · 0,609 · 0,813 · 1,000
+encre posée après k régions        0,200 · 0,400 · 0,600 · 0,800 · 1,000
+écart max                          0,026 de la longueur totale, soit ≈ 44 unités
+```
+
+Quarante-quatre unités, c'est **deux fois le rayon d'un marqueur** : l'encre d'une région finie
+dépassait sur la route suivante, celle d'une autre s'arrêtait avant d'arriver.
+
+**Tranché :** cinq tracés, un par route, chacun avec sa part. L'hypothèse d'égalité **disparaît**
+au lieu d'être corrigée — il n'y a plus rien à re-mesurer si une ancre bouge un jour. La prise
+`data-chemin-avancement` que lit `tests/visuel/carte.spec.ts` survit, mais elle est désormais
+**dérivée** du dessin au lieu de le commander : les deux ne peuvent plus diverger.
+
+Ce composant n'avait **aucun test** avant ce lot — mesuré : une recherche de `CheminEncre` et de
+`data-chemin` sur `tests/` et `client/src` ne rendait que ses deux fichiers de production et une
+assertion `avancement > 0` dans un test visuel. Un chemin qui n'arrive nulle part passait ce test.
+
+### S4-4 — TRANCHÉ pour trois teintes, **EN ATTENTE pour sept**
+
+`partage/src/palette.ts` est la source des couleurs du dépôt. Mesuré sur `carte-monde-v3.svg` :
+
+```
+occurrences de couleur littérale : 83
+couleurs distinctes             : 17
+hors palette + nuancier         : 10 / 17
+```
+
+Trois de ces dix n'étaient pas des teintes nouvelles : c'était le nuancier, **recopié de mémoire
+à quelques points près**. Ramenées sans rien décider, parce que c'est exactement la dérive que
+« une palette cohérente sur 600 assets » doit empêcher, et qu'elle ne se voit sur aucun écran —
+il faut deux fichiers côte à côte :
+
+| dérive | jeton officiel | occurrences | ce qu'elle peint |
+|---|---|---|---|
+| `#2FAE4E` | `vert #2FB344` | 9 | feuillages, herbe, nénuphars |
+| `#F5821F` | `orange #F76707` | 5 | coulée de lave, feuilles, braises |
+| `#E4342B` | `rouge #E03131` | 2 | houppier roux, feuille tombée |
+
+**EN ATTENTE — question pour le parent.** Les **sept** autres ne recopient aucun jeton : elles
+nomment des matières que le nuancier ne couvre pas.
+
+| teinte | ce qu'elle nomme |
+|---|---|
+| `#C9B48A` | le papier vieilli — bord, grain, pliures, brûlures, lit de la route |
+| `#8FD6F2` | l'eau claire — territoire du Marais Jumeau, stalactites |
+| `#1F6F9B` | la roche des Galeries |
+| `#123A52` | le noir des bouches de grotte |
+| `#C98B4B` | l'ocre d'automne — territoire de la Forêt Muette |
+| `#C0453A` | la roche volcanique — territoire du Volcan |
+| `#7A3A2E` | le cône du volcan, plus sombre que son territoire |
+
+Les hisser en jetons de palette **est une décision de palette**, et « ne pas modifier la palette
+sans validation explicite ». Elles sont donc **gelées nommément** dans
+`tests/unitaires/carte-monde-couleurs-et-noms.test.ts` : le test ne compte pas les écarts, il les
+**nomme**, et une huitième teinte qui naîtrait sans décision fait échouer la suite. Trois d'entre
+elles (`#8FD6F2`, `#C98B4B`, `#C0453A`) sont les **aplats de trois territoires** : les changer est
+un choix visible, qui appartient au parent, pas à un agent.
+
+### S4-5 — SIGNALÉ, pas corrigé : `scripts/verifier-carte-monde.mjs` n'est appelé par personne
+
+Mesuré : une recherche de `verifier-carte-monde` sur tout le dépôt hors `node_modules` ne rend
+que des mentions en documentation. Le script n'est **ni dans `package.json`, ni dans
+`scripts/verifier.mjs`**. C'est un contrôle de vingt-cinq mesures qui ne tourne que si quelqu'un
+y pense — donc, en pratique, jamais. Et c'est précisément le contrôle qui garde l'écran signature.
+
+Il n'a pas été branché ici : `package.json` et `scripts/verifier.mjs` appartiennent à la chaîne
+de vérification, pas à ce lot, et deux campagnes écrivent en parallèle. **Proposition** : une
+entrée `"verifier:carte": "node scripts/verifier-carte-monde.mjs"` et une étape dans
+`verifier.mjs`, au même titre que `verifier-regions-fermees.mjs`.
+
+### Ce que S4 n'a PAS touché, et pourquoi
+
+- **La géométrie de l'asset.** Aucun `d`, aucun centre, aucun `id`, aucun `viewBox` n'a bougé —
+  vérifié après coup : `node scripts/verifier-carte-monde.mjs` rend toujours **0 anomalie**, dont
+  « centres de marqueur : écart à `carte-monde-v2.svg` = 0 » et « segments du chemin : 5 / 5
+  identiques ».
+- **Les références de `test:visuel`.** Les deux captures figeaient le défaut S4-1 : elles vont
+  diverger, **c'est le comportement attendu**, et aucun agent ne lance `--maj` de sa propre
+  initiative (CLAUDE.md). Elles sont à régénérer par l'orchestrateur **après** avoir regardé
+  `bac-a-sable/s4-carte/carte-monde-v3-trois-rendus.png` : la vignette montre les trois rendus sur
+  une seule image, ce qu'aucune description ne remplace (D50).
+- **`client/src/monde/Parchemin.tsx`, `NomDeRegion.tsx`, `PointLibre.tsx`** et les quatre
+  documents de référence, et le journal des décisions.
+
+### Les outils de mesure, laissés en place
+
+Ils vivent dans `bac-a-sable/s4-carte/` et se relancent seuls. Ils pilotent le **Chrome du
+système** (`channel: 'chrome'`) parce que le Chromium de Playwright n'est pas téléchargé sur
+cette machine et que le dépôt n'installe rien (D9) :
+
+| script | ce qu'il mesure |
+|---|---|
+| `mesurer-voile.mjs [--corrige] [--nappe=x]` | la chroma et le contraste du voile, pixel par pixel, avant et après |
+| `mesurer-arbre-a11y.mjs [--corrige]` | les nœuds nommés de l'arbre d'accessibilité, lus par CDP |
+| `mesurer-geometrie.mjs` | chevauchements de territoires, de prises et de cartouches ; longueurs d'arc du chemin |
+| `vignette-carte.mjs` | la planche des trois rendus, pour le jugement du parent |
+
+`mesurer-geometrie.mjs` rend par ailleurs une bonne nouvelle qu'il valait mieux mesurer
+qu'espérer : **0 paire de territoires qui se chevauchent, 0 paire de prises tactiles qui se
+recouvrent, 0 prise débordant sur une autre région, 0 paire de cartouches qui se recouvrent,
+0 cartouche sortant du parchemin.** La géométrie de M7 était juste ; c'est son rendu qui ne
+l'était pas.
+
+---
+
+# Lot S2 — les écrans nus (plan QA-2 de `Docs/audit-qa.md` § 7)
+
+Section **ajoutée** en fin de fichier, jamais réécrite : plusieurs campagnes écrivent ici en
+parallèle, et le § 8 de l'audit avait justement refusé d'écrire dans ce fichier pour cette
+raison. J'y écris parce que mon brief me le demande nommément, et en ajout seul.
+
+## Le chiffre du lot
+
+Commande exécutée, sortie citée :
+
+```
+$ python -c "…"   (énumération des OBJETS : un fichier client/src/ecrans/*.tsx, un fichier
+                   tests/composants/<même nom>.test.tsx)
+ecrans de client/src/ecrans/    avec un test de composant : 12 / 12
+nus : (aucun)
+```
+
+Départ mesuré par l'audit : **2 / 12**. Dix fichiers écrits, tous les écrans couverts.
+
+**Preuve que ces tests peuvent échouer** — `python bac-a-sable/qa2-preuve-de-rougeur.py`,
+sortie citée :
+
+```
+DETECTEE  M2  — la sortie du nœud retirée                        Tests 3 failed | 3 passed
+DETECTEE  M23 — les six pastilles annoncées « bouton »           Tests 2 failed | 11 passed
+DETECTEE  M24 — les étoiles figées à 3                           Tests 4 failed | 5 passed
+DETECTEE  M25 — la carte de profil ne répond plus au tap         Tests 2 failed | 7 passed
+DETECTEE  S2-a — la sortie du coffre retirée                     Tests 2 failed | 6 passed
+DETECTEE  S2-b — la cible du coffre perd sa déclaration 64 px    Tests 1 failed | 7 passed
+mutations injectées : 6 · DETECTEE : 6 · SURVIVANTE : 0
+sources restaurées : 5 / 5   (sha256 avant / après, INTACT sur les cinq)
+```
+
+Le contrat de sortie du lot QA-2 — « M2, M23, M24, M25 passent à `DETECTEE` » — est donc tenu,
+et mesuré plutôt qu'affirmé.
+
+## Les arbitrages que j'ai tranchés seuls
+
+**S2-1. L'audit R16 est un audit de DÉCLARATION, et il exclut le moteur monté.**
+happy-dom ne calcule aucune mise en page : `getBoundingClientRect()` y rend des zéros, et un
+test qui prétendrait mesurer des pixels mentirait. `tests/composants/exigences-ecrans.ts`
+accepte donc trois moyens de déclaration, et **aucun autre** : la classe `.cible` (déclaration
+unique de R16 dans `global.css`), un `min-*-size` en ligne à `var(--cible-min)` ou ≥ 64 px, un
+rayon SVG ≥ 32 unités. Il exclut le sous-arbre `[data-moteur]`, pour deux raisons mesurées :
+les godets de `colorie` déclarent `COTE_GODET_PX = 72` par une classe locale (donc conformes, et
+un audit qui les relèverait crierait sur du code juste), et les quatorze moteurs ont déjà leur
+test de composant. **À arbitrer :** faut-il hisser cette exclusion en règle générale, ou
+demander aux moteurs de porter `.cible` comme le reste du dépôt ?
+
+**S2-2. Une région TERMINÉE n'est plus une porte sur la carte tant qu'une autre est en cours.**
+Mesuré, pas supposé : `regionsOuvertes` (`partage/src/monde/carte.ts:239`) n'offre que les
+régions `enCours` — `ouverte && pourcentageColorie < 1` (lot H1) — et ne retombe sur les
+régions rejouables que si **aucune** ne l'est. Conséquence à l'écran : une Clairière finie
+perd son `role="button"` pendant que les Galeries avancent. Le test dit ce que le code fait
+(`EcranCarte.test.tsx`), et il garde le filet : quand tout est terminé, la carte redevient
+tapable — elle n'est jamais inerte. **À arbitrer par le père :** un enfant qui veut rejouer une
+région finie n'a aucun chemin depuis la carte. La v2 § 6.2 dit pourtant « rejouer un nœud déjà
+à trois étoiles reste possible : c'est du plaisir ». Deux issues possibles, aucune prise ici :
+laisser la règle (la carte montre ce qui reste à faire) ou rendre les régions finies tapables en
+permanence.
+
+**S2-3. Les prises de région de `colorie` sont sous 64 unités `viewBox`.** Mesuré sur
+`clairiere-ecole-01`, huit prises entre **25,7 et 30,9 de rayon**, soit un diamètre de 51 à 62
+unités. Le rapport unité/pixel du décor n'est pas connu du niveau composant, donc je ne tranche
+pas : ce peut être parfaitement conforme après mise à l'échelle. **À vérifier par
+`tests/qualite/a11y.spec.ts`**, qui mesure de vrais pixels — c'est le seul endroit qui puisse
+répondre.
+
+**S2-4. Une réponse tardive de `GET /api/profils/:id/reglages` écrase un réglage tout juste
+changé.** Trouvé en écrivant `EcranReglagesLecture.test.tsx` : le `useEffect` sur
+`enregistres.data` repose les réglages du serveur sans regarder si l'enfant a touché à quelque
+chose entre-temps. En usage réel la requête est locale et répond avant le premier tap, donc le
+risque est faible ; il est réel sur une tablette au bout du LAN, qui est précisément le cas
+d'usage. **Non corrigé** — le fichier appartient à un autre lot. À arbitrer.
+
+**S2-5. `choix-profil-parent` n'a aucun test de composant, et n'est pas un écran de
+`client/src/ecrans/`.** Il vit dans `client/src/routeur.tsx` (`ChoixProfilParent`). Les 13
+valeurs de `data-ecran` déclarées dans `client/src` ne se ramènent donc pas aux 12 fichiers
+d'écran : `chargement` (couvert par `EcranChargement.test.tsx`) et `choix-profil-parent` sont
+déclarés ailleurs. **Point d'attention pour le lot QA-3a** (`couverture-ecrans.test.ts`) : son
+écart ne sera nul que s'il énumère les `data-ecran` ET accepte que deux d'entre eux soient
+couverts par des fichiers qui ne portent pas le nom d'un écran.
+
+## Deux fichiers de soutien, et pourquoi ils ne sont pas des suites
+
+`vitest.config.ts` ne collecte que `tests/composants/**/*.test.{ts,tsx}` :
+
+- `tests/composants/exigences-ecrans.ts` — l'exigence commune du plan QA-2, écrite **une fois**
+  et donnée par son chemin. Elle porte `exigerUneSortieQuiRepond` (qui ESSAIE chaque objet
+  tapable, un montage neuf par objet, au lieu de les compter — D48) et `exigerCibles64` ;
+- `tests/composants/donnees-ecrans.ts` — le monde de référence, partagé par la carte, le coffre
+  et la pastille de sortie. Trois mondes distincts auraient dérivé.
+
+Si le lot QA-3a énumère les fichiers de `tests/composants/`, il doit les compter comme du
+soutien, pas comme des suites sans assertion.
+
+## Trois pièges rencontrés, écrits pour la session suivante
+
+1. **Attendre le mauvais état rend un fichier vert à tort.** `EcranCarte` rend ses six
+   `[data-region]` depuis une table, **avant** toute donnée. Un `waitFor` sur leur présence
+   n'attend rien : les six sortaient `voilee`, aucun départ n'existait. On attend `[data-decor]`
+   et `[data-depart]`, qui ne peuvent venir que des requêtes.
+2. **Un bouchon dont la signature dérive teste un écran qui n'existe pas.** `ErreurReseau` prend
+   `(statut, cheminAppele, message, corps)`. Avec trois arguments, le corps du 423 partait dans
+   `message` et l'écran affichait « il rouvre vers un moment » au lieu de l'heure.
+3. **Un bouchon qui ment sur la FORME fait passer le test et casse le programme.** Un paquet de
+   nœud avec `contenu: {}` laissait `moteurColorie.creerEtat` lever, en rejet non géré, dans une
+   suite pourtant verte. Les paquets viennent du disque.
+
+---
+
+# Intégration de la campagne sans GPU — vérification adverse (2026-08-03)
+
+Ce que fait cette section : (1) **reporter les arbitrages orphelins** de `Docs/audit-qa.md` § 8,
+que leur auteur n'a délibérément pas écrits ici ; (2) consigner ce que la vérification adverse des
+cinq lots a trouvé — y compris ce qu'aucun des cinq rapports ne disait.
+
+Aucune autre campagne n'était en vol : la raison qui avait fait renoncer l'auteur de l'audit
+n'existe plus.
+
+## Q-INT-1. Les arbitrages de l'audit par mutation, reportés tels quels
+
+`Docs/audit-qa.md` § 8 dit : *« À reporter dans `questions-en-attente.md` par l'orchestrateur,
+quand la campagne H aura posé sa plume. »* Elle a posé sa plume. Voici la table, **recopiée sans
+la réécrire** — ce sont les arbitrages de son auteur, pas les miens.
+
+| # | Arbitrage | Décidé |
+|---|---|---|
+| A-1 | **Le mutant équivalent M12 est retiré du dénominateur.** Un défaut qui ne change aucun comportement observable ne peut pas être « raté » par une QA | 27 injectées, **26 qui valent** |
+| A-2 | **Les 7 survivants couverts par une assertion E2E lue mais non exécutée sont comptés comme attrapés**, et signalés comme tels. Les compter comme trous aurait exagéré le problème ; les taire l'aurait caché | 12 % de survie, avec la limite écrite |
+| A-3 | **L'auteur n'a pas compilé** — ni `tsc -b`, ni build client. Le jeton de compilation appartient à l'orchestrateur (D10) et une campagne écrivait le source | E2E non exécutés |
+| A-4 | **Rien n'a été supprimé**, y compris `parcours-issues-de-secours.spec.ts` (§ 6.5) et les fichiers de la sonde d'une autre campagne | 0 fichier supprimé |
+| A-5 | La mutation n° 7 du brief est **dédoublée** : la constante d'un moteur et le jeton CSS global ne sont pas le même défaut, et leur couverture diffère | 7a et 7b |
+
+Les trois questions « à trancher par le père » du même § 8 étaient, elles, **déjà reportées** (voir
+plus haut, points 5 et 6 de la liste du lot H, et le point 3 de la liste des fichiers non touchés).
+Seule la table ci-dessus manquait. A-3 est **levé** : la compilation a été faite ici, code 0.
+
+## Q-INT-2. Le linter jugeait des fichiers qui ne seront jamais livrés
+
+Trouvé en lançant `npx eslint .` comme le brief le demande, pas en le supposant.
+
+```
+$ npx eslint .                                       → 8 erreurs, code 1
+$ npx eslint . --ignore-pattern "bac-a-sable/**"     → 0 erreur, 17 avertissements, code 0
+```
+
+Les 8 erreurs venaient **toutes** de `bac-a-sable/`, que `.gitignore` (lignes 57-58) exclut à
+l'exception de son `LISEZ-MOI.md`. `npm run lint` est la **première étape de `npm run verifier`**,
+donc du crochet `pre-push` : sa porte dépendait de fichiers absents de tout clone. Un dépôt
+fraîchement cloné était **vert** là où la machine de l'auteur était **rouge**, sur un code
+identique — et l'inverse est tout aussi possible.
+
+**Tranché seul** : `bac-a-sable/**` rejoint les ignorés de `eslint.config.js`, à côté de
+`outils/**`, `donnees/**`, `contenu/brouillons/**` et `tests/rapports/**` — la même catégorie,
+celle du non-livré. La raison est écrite dans le fichier, avec les deux sorties ci-dessus.
+
+Ce que cela **n'excuse pas** : deux scripts du bac à sable ne passeraient pas le linter
+(`campagne-sans-gpu.js`, qui utilise les fonctions injectées par le lanceur de campagne, et
+`s4-carte/mesurer-voile.mjs`, qui écrit du code destiné au navigateur). Ils restent du code qu'on
+relit ; ils ne sont simplement plus opposables à la livraison.
+
+## Q-INT-3. Les tests neufs de la campagne dépassaient le plafond des tests trompeurs — de 17 exactement
+
+Aucun des cinq rapports ne mentionne `npm run qa:trompeurs`. Il sortait **rouge**.
+
+```
+avertissements  83   (plafond : 66)
+```
+
+Réparti par fichier, le chiffre est sans ambiguïté :
+
+```
+avertissements dans les fichiers NEUFS  : 17
+avertissements dans les fichiers ANCIENS: 66      ← exactement le plafond
+dépassement                             : 17
+```
+
+La dette antérieure valait **exactement** le plafond ; le dépassement était **entièrement** le
+travail de cette campagne. Le plafond n'a donc **pas** été monté — c'eût été le seul geste
+malhonnête disponible. Les 17 ont été corrigés dans les 10 fichiers concernés, et le détecteur
+revient à `66 / 66`, code 0.
+
+**Ces corrections ne sont pas cosmétiques**, et c'était le risque : on fait taire ce détecteur
+sans rien renforcer, en cessant simplement d'imprimer. Trois d'entre elles ont donc été mises à
+l'épreuve par un banc de mutation (`bac-a-sable/banc-durcissement-integration.mjs`), qui casse la
+**production** à l'endroit que l'assertion prétend garder :
+
+```
+I1  la sortie du pavé parent meurt aussi sous verrou (impasse, R14)   DETECTEE   1 failed | 10 passed
+I2  le groupe « police » perd son bouton d'écoute (R15)               DETECTEE   1 failed | 10 passed
+I3  l'invitation ne se pose plus qu'un point sur deux (R18)           DETECTEE   3 failed |  9 passed
+mutations : 3 · DETECTEE : 3 · SURVIVANTE : 0 · sources restaurées : 3 / 3 (sha256)
+```
+
+Deux corrections méritent d'être connues parce qu'elles ont changé un test **faux**, pas un test
+muet :
+
+- **`EcranCodeParent`** affirmait dans son message « le SEUL contrôle vivant » et n'assertait que
+  `vivants.length > 0`. Un second contrôle resté vivant sous verrou — un « valider » actif, par
+  exemple — rendrait le verrou décoratif et passerait au vert. C'est maintenant `toBe(1)`.
+- **`EcranReglagesLecture`** imprimait « groupes : 6, boutons d'écoute : 6 ». La remédiation
+  évidente était d'asserter l'égalité des deux comptes. **Elle aurait été un mensonge vert** :
+  l'un des six boutons d'écoute est celui du **titre**, qui n'appartient à aucun groupe, et le
+  groupe des bascules n'en porte **aucun**. Le cas énumère désormais les OBJETS (D48) et nomme
+  l'exception. Voir Q-INT-5.
+
+## Q-INT-4. Trois compétences ne peuvent JAMAIS recevoir une réussite — et R12 les déclare vertes
+
+Le lot S3 a trouvé ce défaut et en a corrigé deux cas sur cinq. **Le défaut de code est intact**,
+et il est structurel. Mesuré, pas supposé :
+
+`serveur/src/depots/tentatives.ts:347` — `const competenceParDefaut = pedagogie.competences[0] ?? null;`
+puis `const competence = etape.confusion?.competence ?? competenceParDefaut;`. Une **réussite**
+n'observe aucune confusion : elle est donc imputée à `competences[0]`, et à lui seul. Même forme à
+`serveur/src/routes/tentatives.ts:270-272`.
+
+Recensement par OBJET sur les 76 exercices :
+
+```
+compétences distinctes déclarées        : 29
+  jamais en position 0                  :  3
+  ... nommées par une confusion         :  0
+  ... AFFAMÉES (aucune réussite jamais) :  3   comp.consigne.multiple · gph.rare.gn · gph.rare.ph
+```
+
+Et `tests/unitaires/moteurs-couverture.test.ts:70` compte une compétence comme couverte dès qu'un
+exercice la **déclare**, à n'importe quelle position. **Les trois sont donc vertes pour R12 avec un
+journal vide pour toujours** : BKT et Leitner ne les verront jamais monter.
+
+**Je n'ai pas corrigé le code, et c'est délibéré.** Changer l'imputation — répartir une réussite
+sur toutes les compétences déclarées, ou pondérer — est une décision **pédagogique** : elle change
+ce que BKT et Leitner reçoivent, donc les journaux de référence du rejeu. CLAUDE.md l'interdit sans
+arbitrage : *« Ne jamais mettre à jour une référence de rejeu de sa propre initiative. […]
+s'arrêter, expliquer l'écart pédagogique en clair, attendre l'arbitrage. »*
+
+**À trancher par le père.** Trois options, du moins au plus intrusif :
+1. **Contenu** — continuer comme S3 : réordonner `competences` pour que la compétence à nourrir
+   passe en tête. Gratuit, sans effet sur le rejeu, mais ne tient qu'une compétence par exercice et
+   se défait au prochain exercice écrit.
+2. **Garde de contenu** — refuser à `test:contenu` un exercice dont une compétence n'est en tête
+   nulle part. Rend le défaut impossible à réintroduire, ne répare pas les trois.
+3. **Code** — imputer la réussite à toutes les compétences déclarées. Le plus juste
+   pédagogiquement, et le seul qui touche le rejeu.
+
+Note d'honnêteté sur le périmètre : les 76 nœuds restent **jouables**, aucun écran d'échec, aucune
+impasse. Ce défaut ne se voit pas de la tablette ; il se voit dans le tableau du parent.
+
+## Q-INT-5. Un groupe de réglages n'a pas de bouton d'écoute — R15 s'applique-t-il aux bascules ?
+
+Mesuré sur `client/src/ecrans/EcranReglagesLecture.tsx` : cinq des six groupes portent un
+`data-ecouter`. Le sixième — `data-groupe-reglage="options"`, les bascules « Aides à la lecture » —
+n'en porte aucun. Ses contrôles sont des boutons qui portent leur propre intitulé
+(« Fond sombre », …).
+
+R15 dit : *« Aucune consigne n'existe uniquement à l'écrit. »* Un intitulé de bascule est-il une
+consigne ? Le test fige aujourd'hui l'état mesuré et **nomme** l'exception
+(`GROUPE_SANS_ECOUTE = 'options'`) plutôt que de la cacher derrière une égalité de comptes. Si le
+père tranche que R15 couvre aussi les bascules, la correction est un bouton d'écoute de plus et une
+constante à retirer.
+
+## Q-INT-6. Ce que cette vérification a CONFIRMÉ — exécuté, pas cru sur parole
+
+Contre-poids nécessaire : tout ce qui suit a été ré-exécuté, pas cru sur parole.
+
+- **Les trois trous de la QA sont bouchés.** Les sept mutations de `banc-mutation-qa1.mjs`
+  ré-injectées : **7 DETECTEE, 0 survivante**, 5 contrôles négatifs verts. Les cinq sources ont été
+  hachées en SHA-256 **avant et après** par la vérification elle-même, pas par le banc :
+  `diff` vide, 5/5 identiques à l'octet.
+- **12 écrans sur 12** ont un test de composant dédié (2/12 au départ de l'audit).
+- **0 exercice PLACEHOLDER.** Le mot ne figure plus nulle part dans `contenu/exercices` ; les 9
+  fichiers que S3 a touchés ne l'ont été que dans leur `$commentaire`, plus deux lignes
+  `competences` réordonnées. Aucun contenu d'exercice modifié — vérifié par `git diff -U0` groupé
+  par clé JSON : `9 × $commentaire`, `2 × competences`, rien d'autre.
+- **0 fichier supprimé** sur les 25 commits : `git log --diff-filter=D --name-only` ne rend
+  **aucune ligne**.
+- **Aucun `skip`, `only`, `todo`, `failing`** dans `tests/` : la recherche ne rend aucun résultat.
+- **R14 / R16 / aucun état sans issue** : 372 recettes E2E vertes, dont le casse-cou (40 réponses
+  fausses de suite) et le singe (5 000 taps aléatoires).
+
+## Q-INT-7. `npm run verifier` peut rougir sans qu'aucun test n'échoue
+
+Observé une fois, et il faut le savoir avant de croire une porte rouge.
+
+```
+→ test … ❌  77,7 s        dans la chaîne `npm run verifier`
+→ test:visuel … ❌  38,5 s  (attendu, D39)
+❌ ROUGE — 2 étape(s) en échec sur 11.
+```
+
+Le journal de l'étape (`tests/rapports/artefacts/journaux/test.log`) dit pourtant :
+
+```
+Test Files  136 passed (136)
+Statements : 94.22% ( 13409/14231 )    ← seuils par zone tenus
+⎯⎯ Unhandled Errors ⎯⎯
+Error: [vitest-worker]: Timeout calling "onTaskUpdate"
+```
+
+**Aucun test n'a échoué.** Vitest compte une erreur non rattrapée comme un échec de la course, et
+celle-ci est un délai d'attente de communication entre le fil principal et un ouvrier — le fil
+principal, saturé par l'instrumentation de couverture et par le volume de `console.log` des suites
+d'exploration, ne répond plus à temps.
+
+Relancée seule sur une machine au repos, la même commande sort à **0** :
+
+```
+$ npm run test -- --coverage --reporter=default
+Test Files  136 passed (136) · Tests  1975 passed (1975) · 54,18 s     → code 0
+```
+
+Contre 77,7 s dans la chaîne. C'est donc une **intermittence de charge**, pas un défaut de code.
+Elle ne change rien au verdict d'aujourd'hui — `verifier` est de toute façon rouge tant que
+`test:visuel` attend les yeux du père. Mais **le jour où le père figera les captures, cette
+intermittence pourra le maintenir rouge sans raison**, et c'est le pire moment pour découvrir
+qu'une porte ment.
+
+Piste, non appliquée parce qu'elle touche la configuration de test d'un dépôt calme :
+`teardownTimeout` / le délai RPC de Vitest, ou l'allègement des `console.log` des deux suites les
+plus bavardes (`exploration-modele.test.tsx` tenait 30 s à lui seul avant couverture).
+
+## Q-INT-8. Ce que cette campagne n'a PAS pu faire — le GPU
+
+À traiter comme non su, et c'est la seule chose que la contrainte de la campagne rendait
+impossible :
+
+- **Aucun asset par diffusion.** ComfyUI est resté arrêté. Tout ce qui a été produit ici est du
+  SVG écrit à la main, du CSS ou du code. Les décors de région, les déclinaisons de Gobi et les
+  vignettes d'exercice qui manqueraient encore attendent une session GPU.
+- **`npm run test:visuel` reste rouge (D39)** et **aucune référence n'a été figée** : elles
+  attendent le jugement esthétique du père (D50), pas celui d'un agent.
+- **La carte du monde v3** est du SVG fait main. Le voile de Grisaille est désormais correct par
+  construction (Q-S4), mais la question « est-ce que ça donne envie ? » n'a pas été posée à un
+  humain.

@@ -390,6 +390,247 @@ body {
   animation: pierre-halo 900ms ease-in-out infinite;
 }
 
+/* ------------------------------------------------------------------ le campement (S5)
+   R11 : « au moins 25 points d'interaction gratuits, dont 10 ANIMATIONS UNIQUES ».
+
+   Ce que ce bloc solde, mesuré avant de l'écrire : les quatorze points qui portaient
+   `data-animation-unique="oui"` faisaient tous le MÊME `scale(1.06)` écrit en dur dans
+   `PointLibre.tsx`. Deux recettes comptaient l'attribut, aucune ne regardait le mouvement.
+
+       animations distinctes rendues = 1        exigées = 10
+
+   Les dix-huit `@keyframes` ci-dessous sont la contrepartie des dix-huit noms de
+   `client/src/monde/animations-campement.ts`. La correspondance est VÉRIFIÉE :
+   `tests/unitaires/campement-animations-uniques.test.ts` lit ce fichier et échoue si un nom
+   du module n'y a pas à la fois son `@keyframes` et sa classe. Un nom sans keyframes serait
+   une classe inerte — le défaut d'origine sous un autre habit.
+
+   Aucun de ces mouvements n'entre dans une zone de lecture : le campement n'en porte aucune,
+   et `.zone-lecture-v2 *` coupe de toute façon toute animation (« le décor s'agite, le texte
+   jamais », v2 § 9.3). Aucun ne change de COULEUR : un refus est un mouvement, jamais une
+   teinte — et ici il n'y a même rien à refuser. */
+
+/* ── l'invitation au repos : l'affordance, c'est-à-dire R18 ────────────────────────────────
+   Les trente prises sont des boutons transparents posés sur l'image de fond ; rien ne disait
+   qu'elles répondaient au doigt. Un halo passe sur chacune à son tour, déphasé par
+   `phaseInvite()`, ce qui en laisse deux ou trois allumées à la fois : le campement a l'air
+   vivant sans devenir une grille de boutons (D45). Il n'intercepte jamais le doigt. */
+@keyframes pierre-campement-invite {
+  0%, 86%, 100% { opacity: 0; }
+  91% { opacity: 0.7; }
+  96% { opacity: 0; }
+}
+
+.point-libre-invite {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  box-shadow: 0 0 0 5px var(--soleil);
+  animation: pierre-campement-invite 9s ease-in-out infinite;
+}
+
+/* ── les dix-huit mouvements ─────────────────────────────────────────────────────────────
+   Durée courte et une seule itération : la réaction se voit et s'efface, on peut retoucher
+   aussitôt. Rien ici ne désactive la prise — « on peut y revenir sans fin » (R14). */
+.anim-campement-sursaut,
+.anim-campement-balancier,
+.anim-campement-bascule,
+.anim-campement-pulsation,
+.anim-campement-bouillon,
+.anim-campement-gonflement,
+.anim-campement-deroulement,
+.anim-campement-etirement,
+.anim-campement-glissade,
+.anim-campement-flottement,
+.anim-campement-ondulation,
+.anim-campement-scintillement,
+.anim-campement-envol,
+.anim-campement-filante,
+.anim-campement-secousse,
+.anim-campement-rebond,
+.anim-campement-frisson,
+.anim-campement-bond {
+  animation-duration: 540ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  animation-iteration-count: 1;
+}
+
+@keyframes pierre-campement-sursaut {
+  0%, 100% { transform: translateY(0); }
+  35% { transform: translateY(-14px); }
+  70% { transform: translateY(2px); }
+}
+.anim-campement-sursaut { animation-name: pierre-campement-sursaut; }
+
+@keyframes pierre-campement-balancier {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-13deg); }
+  60% { transform: rotate(9deg); }
+  85% { transform: rotate(-4deg); }
+}
+.anim-campement-balancier { animation-name: pierre-campement-balancier; }
+
+@keyframes pierre-campement-bascule {
+  0%, 100% { transform: rotate(0deg) translateY(0); }
+  40% { transform: rotate(11deg) translateY(-4px); }
+  75% { transform: rotate(-5deg) translateY(0); }
+}
+.anim-campement-bascule { animation-name: pierre-campement-bascule; }
+
+@keyframes pierre-campement-pulsation {
+  0%, 100% { transform: scale(1); }
+  30% { transform: scale(1.16); }
+  60% { transform: scale(0.96); }
+}
+.anim-campement-pulsation { animation-name: pierre-campement-pulsation; }
+
+@keyframes pierre-campement-bouillon {
+  0%, 100% { transform: translateY(0) scale(1, 1); }
+  25% { transform: translateY(-5px) scale(0.95, 1.08); }
+  55% { transform: translateY(3px) scale(1.07, 0.94); }
+  80% { transform: translateY(-2px) scale(0.99, 1.02); }
+}
+.anim-campement-bouillon { animation-name: pierre-campement-bouillon; }
+
+@keyframes pierre-campement-gonflement {
+  0%, 100% { transform: scale(1, 1); }
+  45% { transform: scale(1.1, 1.14); }
+  75% { transform: scale(0.98, 0.97); }
+}
+.anim-campement-gonflement { animation-name: pierre-campement-gonflement; }
+
+@keyframes pierre-campement-deroulement {
+  0%, 100% { transform: scaleX(1); }
+  40% { transform: scaleX(1.22); }
+  75% { transform: scaleX(0.94); }
+}
+.anim-campement-deroulement { animation-name: pierre-campement-deroulement; }
+
+@keyframes pierre-campement-etirement {
+  0%, 100% { transform: scaleY(1) translateY(0); }
+  45% { transform: scaleY(1.2) translateY(-6px); }
+  80% { transform: scaleY(0.95) translateY(1px); }
+}
+.anim-campement-etirement { animation-name: pierre-campement-etirement; }
+
+@keyframes pierre-campement-glissade {
+  0%, 100% { transform: translateX(0); }
+  35% { transform: translateX(13px); }
+  70% { transform: translateX(-6px); }
+}
+.anim-campement-glissade { animation-name: pierre-campement-glissade; }
+
+@keyframes pierre-campement-flottement {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  30% { transform: translateY(-9px) rotate(-3deg); }
+  65% { transform: translateY(5px) rotate(3deg); }
+}
+.anim-campement-flottement { animation-name: pierre-campement-flottement; }
+
+@keyframes pierre-campement-ondulation {
+  0%, 100% { transform: skewX(0deg); }
+  25% { transform: skewX(-11deg); }
+  55% { transform: skewX(8deg); }
+  80% { transform: skewX(-3deg); }
+}
+.anim-campement-ondulation { animation-name: pierre-campement-ondulation; }
+
+/* Le seul mouvement qui touche l'opacité : des lucioles s'allument, elles ne bougent pas.
+   Il ne descend jamais sous 0,45 — un objet qui disparaît se lirait comme une perte (R14). */
+@keyframes pierre-campement-scintillement {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  25% { opacity: 0.45; transform: scale(1.05); }
+  55% { opacity: 1; transform: scale(0.98); }
+  80% { opacity: 0.6; transform: scale(1.03); }
+}
+.anim-campement-scintillement { animation-name: pierre-campement-scintillement; }
+
+@keyframes pierre-campement-envol {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  30% { transform: translate(7px, -13px) rotate(-12deg); }
+  60% { transform: translate(-5px, -7px) rotate(10deg); }
+  85% { transform: translate(2px, -2px) rotate(-4deg); }
+}
+.anim-campement-envol { animation-name: pierre-campement-envol; }
+
+@keyframes pierre-campement-filante {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  35% { transform: translate(16px, -12px) scale(1.12); }
+  70% { transform: translate(-6px, 4px) scale(0.95); }
+}
+.anim-campement-filante { animation-name: pierre-campement-filante; }
+
+@keyframes pierre-campement-secousse {
+  0%, 100% { transform: translateX(0) rotate(0deg); }
+  20% { transform: translateX(-7px) rotate(-3deg); }
+  45% { transform: translateX(6px) rotate(3deg); }
+  70% { transform: translateX(-4px) rotate(-2deg); }
+  90% { transform: translateX(2px) rotate(1deg); }
+}
+.anim-campement-secousse { animation-name: pierre-campement-secousse; }
+
+@keyframes pierre-campement-rebond {
+  0%, 100% { transform: translateY(0) scale(1, 1); }
+  25% { transform: translateY(-12px) scale(0.92, 1.12); }
+  55% { transform: translateY(0) scale(1.12, 0.9); }
+  80% { transform: translateY(-4px) scale(0.98, 1.03); }
+}
+.anim-campement-rebond { animation-name: pierre-campement-rebond; }
+
+@keyframes pierre-campement-frisson {
+  0%, 100% { transform: rotate(0deg) translateX(0); }
+  15% { transform: rotate(2deg) translateX(-3px); }
+  35% { transform: rotate(-2deg) translateX(3px); }
+  55% { transform: rotate(2deg) translateX(-2px); }
+  75% { transform: rotate(-1deg) translateX(1px); }
+}
+.anim-campement-frisson { animation-name: pierre-campement-frisson; }
+
+@keyframes pierre-campement-bond {
+  0%, 100% { transform: translateY(0) scale(1, 1); }
+  20% { transform: translateY(0) scale(1.14, 0.86); }
+  55% { transform: translateY(-20px) scale(0.9, 1.14); }
+  85% { transform: translateY(0) scale(1.06, 0.95); }
+}
+.anim-campement-bond { animation-name: pierre-campement-bond; }
+
+/* ── le butin : ce que l'enfant a rapporté de chaque région (S5) ───────────────────────────
+   Même règle que l'étagère de D44 : la case NON rapportée garde le même contour, en pointillé.
+   Jamais un cadenas, jamais un vide, jamais une couleur d'alerte. Le creux porte sur le
+   DESSIN, jamais sur l'étiquette — c'est le défaut d'a11y déjà mesuré par M8 sur les cases de
+   l'étagère (#767c8c sur #fff6e3, ratio 3,88 pour 4,5 exigé) et il ne se reproduit pas ici. */
+.case-butin {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  inline-size: 8rem;
+  min-block-size: 8.5rem;
+  padding: 0.5rem;
+  border-radius: var(--rayon-carte);
+  border: var(--epaisseur-trait) dashed var(--trait);
+  background-color: transparent;
+}
+
+.case-butin[data-rapporte="oui"] {
+  border-style: solid;
+  background-color: var(--parchemin);
+}
+
+/* Le creux, aux DEUX endroits où le butin se montre : la section du campement et la collection
+   du coffre. Une seule règle, donc une seule valeur — le même dessin voilé de deux façons
+   différentes sur deux écrans serait deux styles. Et le voile est bien CONDITIONNEL : posé
+   inconditionnellement, il repeindrait la case gagnée en gris, c'est-à-dire qu'il annulerait
+   exactement la récompense (le défaut mesuré par M8, Q-M8-3). */
+.case-butin[data-rapporte="non"] .dessin-butin,
+[data-collection][data-obtenue="non"] .dessin-butin {
+  opacity: 0.6;
+  filter: saturate(0);
+}
+
 /* ------------------------------------------------------------------ animations calmes
    Deux interrupteurs, une seule règle. `prefers-reduced-motion` vient du système ;
    `[data-animations="desactivees"]` vient de « animations calmes » et de

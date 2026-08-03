@@ -123,6 +123,18 @@ export default tseslint.config(
       'tests/rapports/**',
       'playwright-report/**',
       'coverage/**',
+      // `bac-a-sable/` est ignoré par git (`.gitignore`, `bac-a-sable/*` sauf `LISEZ-MOI.md`).
+      // Le linter le lisait quand même — et c'est un défaut de MESURE, pas de confort : le
+      // verdict de `npm run lint`, donc la première étape de `npm run verifier`, donc le
+      // crochet `pre-push`, dépendait alors de fichiers qui ne seront jamais poussés. Mesuré
+      // le 2026-08-03 : `npx eslint .` sortait à 8 erreurs, `npx eslint . --ignore-pattern
+      // "bac-a-sable/**"` à 0 — un dépôt fraîchement cloné était donc VERT là où la machine
+      // de l'auteur était ROUGE, sur un code identique. Une porte qui juge ce qu'elle ne
+      // livre pas ne dit rien de ce qu'elle livre.
+      //
+      // Ce que cela n'excuse pas : les scripts de mesure du bac à sable restent du code qu'on
+      // relit. Ils ne sont simplement plus opposables à la livraison.
+      'bac-a-sable/**',
       '**/*.d.ts'
     ]
   },

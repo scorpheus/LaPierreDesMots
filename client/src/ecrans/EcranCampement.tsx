@@ -29,6 +29,7 @@ import { lireMonde, urlAsset } from '../api/client.js';
 import { Compagnon } from '../composants/Compagnon.js';
 import { Gobi } from '../composants/Gobi.js';
 import { useEtatJeu, useMagasin } from '../etat/services.js';
+import { Butin } from '../monde/Butin.js';
 import { Chaudron } from '../monde/Chaudron.js';
 import { Etagere, useCatalogueFormes } from '../monde/Etagere.js';
 import { MurDesNoms } from '../monde/MurDesNoms.js';
@@ -324,6 +325,15 @@ export function EcranCampement({
           mur des noms parce qu'elle répond à la question que le mur ne répond pas — « combien
           y en a-t-il en tout ? ». Le mur grave l'acquis, l'étagère montre le reste. */}
       <Etagere etagere={etagere} titre="L’étagère de Gobi" />
+
+      {/* ── CE QUE L'ENFANT A RAPPORTÉ — lot S5 ──────────────────────────────────────────────
+          Six objets déclarés dans `contenu/monde/campement.json`, un par région, servis par le
+          serveur depuis toujours — et rendus NULLE PART. L'enfant conquérait la Clairière, en
+          rapportait le fanion, revenait au campement, et rien n'avait changé : le hub perdait
+          la seule chose qui donne envie d'y revenir (v2 § 3.4). Les six cases sont visibles
+          dès le premier jour, celles qui manquent comprises — c'est la règle de l'étagère
+          (D44), et c'est la raison de revenir. */}
+      <Butin objets={monde?.campement ?? []} />
 
       <MurDesNoms noms={noms} />
 

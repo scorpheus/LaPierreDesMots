@@ -297,34 +297,39 @@ export function EcranCarte({
   );
 
   /**
-   * Le chemin d'encre avance SEGMENT PAR SEGMENT — v2 § 9.4, contrat v4 § 2, point 4 de M7.
+   * Le chemin d'encre avance ROUTE PAR ROUTE — v2 § 9.4, contrat v4 § 2, point 4 de M7,
+   * corrigé par S4.
    *
    * « … et le chemin qui se dessine à l'encre au fur et à mesure. »
    *
-   * L'ancienne formule prenait la moyenne des six recolorations. Elle avançait donc d'un
-   * sixième de sixième à chaque nœud, uniformément, et ne montrait JAMAIS un segment se
-   * fermer : l'enfant voyait un trait grandir sans jamais atteindre la région suivante.
+   * Le chemin relie six étapes par CINQ routes, et la route `i` est celle que l'on quitte :
+   * elle s'encre à mesure que la région `i` se rallume, et elle est complète quand la région
+   * l'est. La sixième région n'a pas de route qui en parte — d'où les cinq premières seulement.
    *
-   * Le chemin relie six étapes par CINQ segments, et le segment `i` est la route que l'on
-   * quitte : il s'encre à mesure que la région `i` se rallume, et il est complet quand elle
-   * l'est. D'où la moyenne sur les CINQ PREMIÈRES régions — la sixième n'a pas de route qui
-   * en parte. Terminer la Clairière remplit exactement le premier cinquième et pose l'encre
-   * jusqu'aux Galeries : le geste de l'enfant et le dessin disent la même chose.
+   * ── POURQUOI CINQ VALEURS ET NON PLUS UNE MOYENNE ─────────────────────────────────────────
+   * M7 passait déjà la moyenne des cinq régions, et cet écran affirmait ici que « terminer la
+   * Clairière remplit exactement le premier cinquième ». C'était faux : `CheminEncre` posait
+   * cette fraction sur un tracé unique en `pathLength=1`, donc sur la LONGUEUR TOTALE, ce qui
+   * suppose cinq routes de même longueur. Mesuré — `node bac-a-sable/s4-carte/mesurer-geometrie.mjs` :
+   *
+   *   longueurs d arc des 5 segments  321,4 · 308,0 · 396,3 · 343,3 · 315,1  (± 17,7 %)
+   *   écart max entre l encre posée et le marqueur visé : 0,026 de la longueur totale, ≈ 44 u
+   *
+   * Quarante-quatre unités, c'est deux fois le rayon d'un marqueur : l'encre d'une région finie
+   * dépassait sur la route suivante, celle d'une autre s'arrêtait avant d'arriver. Chaque route
+   * porte donc maintenant SA part, et l'hypothèse d'égalité disparaît au lieu d'être corrigée.
    *
    * C'est une DÉRIVÉE de la progression, jamais un état à part : rien à synchroniser, rien
    * qui puisse mentir, rien à remettre à zéro — le chemin ne se dépeint pas (R14).
    */
-  const avancement = useMemo(() => {
-    const depart = ANCRES.slice(0, -1)
-      .map(([code]) => parCode.get(String(code)))
-      .filter((region): region is EtatRegion => region !== undefined);
-    if (depart.length === 0) {
-      return 0;
-    }
-    return (
-      depart.reduce((total, region) => total + region.pourcentageColorie, 0) / (ANCRES.length - 1)
-    );
-  }, [parCode]);
+  const partsDuChemin = useMemo(
+    () =>
+      ANCRES.slice(0, -1).map(([code]) => {
+        const region: EtatRegion | undefined = parCode.get(String(code));
+        return region?.pourcentageColorie ?? 0;
+      }),
+    [parCode]
+  );
 
   const entrer = useCallback(
     (noeud: IdNoeud): void => {
@@ -423,13 +428,38 @@ export function EcranCarte({
           </text>
         ) : (
           /* Le décor est un fichier de contenu DU DÉPÔT, servi par le serveur local : il n'y a
-             ni tiers, ni saisie utilisateur dans ce balisage. */
-          <g data-decor="carte" dangerouslySetInnerHTML={{ __html: requeteDecor.data }} />
+             ni tiers, ni saisie utilisateur dans ce balisage.
+
+             ── `aria-hidden`, AJOUTÉ PAR S4, ET CE N'EST PAS UNE PRÉCAUTION DE STYLE ─────────
+             `carte-monde-v3.svg` porte SEPT `<title>` : un pour la carte, six pour les
+             territoires. Un `<title>` donne un NOM ACCESSIBLE à son élément. Injectés tels
+             quels, les six territoires devenaient donc six nœuds nommés de plus, en doublon des
+             six prises `role="button"` qui portent déjà « La Clairière — voilee ».
+
+             Mesuré dans Chrome, arbre d'accessibilité lu par CDP
+             (`node bac-a-sable/s4-carte/mesurer-arbre-a11y.mjs`) :
+
+               décor SANS aria-hidden → 16 nœuds nommés
+                 group « La carte du monde » ×2, button ×2,
+                 graphics-symbol « La Clairiere », « Les Galeries », « Le Marais Jumeau »,
+                 « La Foret Muette », « Le Volcan », « La Cite des Histoires » — chacun DEUX fois
+               décor AVEC aria-hidden →  3 nœuds nommés
+                 group « La carte du monde », button « La Clairière — ouverte »,
+                 button « Les Galeries — ouverte »
+
+             Le décor est un DESSIN : tout ce qui répond au doigt est posé à côté, en clair, par
+             cet écran. Le masquer ne retire donc aucune information — il retire treize
+             répétitions, dont six sans leurs accents. */
+          <g
+            data-decor="carte"
+            aria-hidden="true"
+            dangerouslySetInnerHTML={{ __html: requeteDecor.data }}
+          />
         )}
 
         <CheminEncre
           etapes={ANCRES.map(([, x, y]) => [x, y] as const)}
-          avancement={avancement}
+          parts={partsDuChemin}
           animationsDesactivees={animationsDesactivees}
         />
 

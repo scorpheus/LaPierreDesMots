@@ -18,6 +18,7 @@ import type { EtatMonde } from '@pierre/partage';
 import { construireEtagere } from '@pierre/partage/monde';
 import { lireMonde, urlAsset } from '../api/client.js';
 import { useEtatJeu } from '../etat/services.js';
+import { DessinButin } from '../monde/Butin.js';
 import { Etagere, useCatalogueFormes } from '../monde/Etagere.js';
 
 export interface ProprietesEcranCoffre {
@@ -54,17 +55,20 @@ export const NOM_DE_REGION: Readonly<Record<string, string>> = {
 };
 
 /**
- * Les deux dessins en creux des collections — lot M8.
+ * Le dessin en creux des Éclats — lot M8.
  *
- * Les Éclats et les objets partageaient le MÊME losange gris : deux collections que rien ne
- * distinguait à l'œil, sur un écran dont tout l'intérêt est de montrer ce qui manque. « Deux
- * formes identiques ne se collectionneraient pas » (D44). L'Éclat est un cristal pointu, un
- * objet rapporté est une besace ; chacun garde le trait épais et la Grisaille du non-conquis.
+ * ── CE QUE S5 A CORRIGÉ ICI. M8 avait séparé les DEUX collections : un cristal pointu pour
+ * l'Éclat, une besace pour l'objet rapporté. Mais à l'INTÉRIEUR de la collection des objets,
+ * les six pièces partageaient encore la même besace — le fanion de la Clairière, la géode des
+ * Galeries et le livre de la Cité étaient trois fois le même sac gris. « Deux formes
+ * identiques ne se collectionneraient pas » (D44) valait pour les six comme pour les deux.
+ * Les objets passent donc à `DessinButin` (`client/src/monde/Butin.tsx`), qui les dessine un
+ * par un et sert AUSSI au campement : les deux écrans montrent le même objet, jamais deux.
+ *
+ * Les Éclats gardent leur silhouette ici : ce sont des pièces de région, pas du butin, et
+ * `contenu/monde/regions.json` ne leur déclare aucun dessin.
  */
-const SILHOUETTE: Readonly<Record<string, string>> = {
-  eclat: 'M24 3l13 15-5 19-8 10-8-10-5-19z',
-  objet: 'M10 18h28l4 24H6zM17 18a7 7 0 0 1 14 0'
-};
+const SILHOUETTE_ECLAT = 'M24 3l13 15-5 19-8 10-8-10-5-19z';
 
 /** Une case de collection : pleine ou en creux, jamais absente. */
 function Case({
@@ -94,7 +98,12 @@ function Case({
         // `opacity` / `filter` ne sont plus ici : voir l'encadré sur le dessin, ci-dessous.
       }}
     >
-      {asset === null ? (
+      {categorie === 'objet' ? (
+        // Le butin, dessiné pièce par pièce. Le voile du creux est porté par la feuille de
+        // style (`[data-collection][data-obtenue="non"] .dessin-butin`), donc par la MÊME
+        // règle qu'au campement : une seule valeur de voile dans le dépôt.
+        <DessinButin code={cle} />
+      ) : asset === null ? (
         <svg
           width="48"
           height="48"
@@ -119,7 +128,7 @@ function Case({
           style={obtenu ? undefined : { opacity: 0.55, filter: 'saturate(0)' }}
         >
           <path
-            d={SILHOUETTE[categorie] ?? SILHOUETTE.eclat!}
+            d={SILHOUETTE_ECLAT}
             // La case GAGNÉE prend l'aplat de sa collection ; la case en creux garde la
             // Grisaille. C'est le contraste gris / couleur qui porte tout le jeu (v2 § 9.1) :
             // sans lui, obtenir un Éclat ne se verrait pas.

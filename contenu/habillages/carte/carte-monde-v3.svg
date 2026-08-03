@@ -30,8 +30,11 @@
          elle-même. Un ornement ne peut donc PAS déborder de son territoire, quelle que soit
          la retouche future : c'est la même logique que « les régions coloriables sont les
          régions fermées de la vectorisation » — correct par construction, pas par vigilance.
-         C'est aussi ce qui rend le voile de Grisaille exact : le voile est un `<use>` de la
-         même silhouette, il couvre donc exactement ce que les signes remplissent.
+         C'est aussi ce qui rend le voile de Grisaille exact : depuis S4, le voile DÉCOUPE une
+         plaque de Grisaille par ce même `clipPath`, il couvre donc exactement ce que les signes
+         remplissent. (Il posait avant un `<use>` de la silhouette, re-rempli en gris — mais un
+         `<use>` clone l'élément, et le `fill` du clone l'emporte : le « voile » redessinait le
+         territoire dans sa PROPRE couleur. Mesuré 6 / 6, voir `VoileGrisaille.tsx`.)
 
     ── CE QUI NE BOUGE PAS, ET C'EST OPPOSABLE (contrat § 2, M7) ──────────────────────────────
       • les six `id`, dans le MÊME ORDRE — l'ordre EST la progression phonologique ;
@@ -58,6 +61,36 @@
     la grise et qui s'efface à mesure que l'enfant rallume. Un seul asset, trois rendus.
     Aucun territoire n'est peint dans un gris proche du jeton `grisaille` : le gris reste le
     signe univoque de « pas encore rallumé ».
+
+    ── CE QUE S4 A CHANGÉ, ET RIEN D'AUTRE ───────────────────────────────────────────────────
+    Aucune géométrie n'a bougé : ni un `d`, ni un centre, ni un `id`, ni le `viewBox`. Deux
+    familles de retouches seulement, toutes deux mesurées.
+
+    1. LES TROIS `<title>` SANS ACCENT SONT ACCENTUÉS. « La Clairiere », « La Foret Muette »,
+       « La Cite des Histoires » devenaient des NOMS ACCESSIBLES : mesuré dans Chrome, le décor
+       injecté ajoutait 13 nœuds nommés à l'arbre d'accessibilité de la carte, dont ces trois
+       fautes. `EcranCarte` masque désormais le décor entier (`aria-hidden`) — la faute ne
+       s'entend donc plus, mais un fichier français ne la porte pas pour autant.
+
+    2. TROIS TEINTES QUI DÉRIVAIENT DU NUANCIER Y SONT RAMENÉES. `partage/src/palette.ts` est
+       la source des couleurs du dépôt (« la couleur vient du code »). Mesuré sur ce fichier :
+
+         $ 17 couleurs distinctes, 10 hors palette+nuancier
+
+       Trois de ces dix n'étaient pas des teintes nouvelles : c'était le nuancier, recopié de
+       mémoire à quelques points près. C'est la dérive exacte que « une palette cohérente sur
+       600 assets » doit empêcher, et elle se corrige sans rien décider :
+
+         #2FAE4E → #2FB344  (nuancier `vert`)    9 occurrences — feuillages, herbe, nénuphars
+         #F5821F → #F76707  (nuancier `orange`)  5 occurrences — coulée, feuilles, braises
+         #E4342B → #E03131  (nuancier `rouge`)   2 occurrences — houppier roux, feuille
+
+       Les SEPT autres restent : elles ne recopient aucun jeton, elles nomment des matières que
+       le nuancier ne couvre pas (`#C9B48A` le papier vieilli, `#8FD6F2` l'eau claire, `#1F6F9B`
+       et `#123A52` la roche et le noir des grottes, `#C98B4B` l'ocre d'automne, `#C0453A` et
+       `#7A3A2E` la roche volcanique). Les hisser en jetons est une décision de palette, et
+       « ne pas modifier la palette sans validation explicite » : c'est consigné dans
+       `Docs/questions-en-attente.md`, pas tranché ici.
   -->
 
   <defs>
@@ -169,12 +202,12 @@
       cite-des-histoires une enceinte CRÉNELÉE, à créneaux droits — la seule à angles droits
   -->
   <g id="calque-regions" stroke="#1B2440" stroke-width="5" stroke-linejoin="round">
-    <path id="clairiere" data-region-svg="clairiere" d="M190,524 L226,536 L262,530 L288,556 L318,570 L328,606 L318,640 L330,672 L306,700 L296,732 L258,738 L226,760 L190,746 L154,758 L124,738 L92,736 L74,706 L58,676 L68,644 L58,610 L84,586 L98,554 L136,548 L162,530 Z" fill="#3DDC97"><title>La Clairiere</title></path>
+    <path id="clairiere" data-region-svg="clairiere" d="M190,524 L226,536 L262,530 L288,556 L318,570 L328,606 L318,640 L330,672 L306,700 L296,732 L258,738 L226,760 L190,746 L154,758 L124,738 L92,736 L74,706 L58,676 L68,644 L58,610 L84,586 L98,554 L136,548 L162,530 Z" fill="#3DDC97"><title>La Clairière</title></path>
     <path id="galeries" data-region-svg="galeries" d="M450,354 L478,382 L506,360 L524,392 L560,384 L566,418 L596,438 L574,466 L590,498 L556,510 L546,544 L512,538 L486,566 L458,548 L426,570 L406,542 L372,548 L364,516 L336,496 L358,468 L342,436 L376,424 L386,390 L420,398 Z" fill="#2FA8E0"><title>Les Galeries</title></path>
     <path id="marais-jumeau" data-region-svg="marais-jumeau" d="M240,196 L268,166 L306,148 L346,158 L372,186 L378,224 L364,258 L376,290 L358,322 L318,344 L276,340 L246,318 L240,286 L234,318 L204,342 L162,346 L124,326 L106,294 L118,260 L104,226 L116,190 L146,164 L188,152 L216,168 Z" fill="#8FD6F2"><title>Le Marais Jumeau</title></path>
-    <path id="foret-muette" data-region-svg="foret-muette" d="M620,48 L652,64 L682,50 L706,72 L738,74 L748,104 L768,130 L746,156 L754,190 L722,204 L706,234 L672,232 L644,256 L612,242 L580,254 L556,232 L522,228 L512,196 L492,170 L514,144 L506,110 L538,96 L554,66 L588,68 Z" fill="#C98B4B"><title>La Foret Muette</title></path>
+    <path id="foret-muette" data-region-svg="foret-muette" d="M620,48 L652,64 L682,50 L706,72 L738,74 L748,104 L768,130 L746,156 L754,190 L722,204 L706,234 L672,232 L644,256 L612,242 L580,254 L556,232 L522,228 L512,196 L492,170 L514,144 L506,110 L538,96 L554,66 L588,68 Z" fill="#C98B4B"><title>La Forêt Muette</title></path>
     <path id="volcan" data-region-svg="volcan" d="M900,214 L932,262 L974,262 L1002,290 L1032,318 L1030,358 L1042,396 L1006,414 L978,446 L936,442 L900,458 L862,444 L822,448 L796,418 L786,382 L802,350 L792,312 L822,288 L846,258 L876,262 Z" fill="#C0453A"><title>Le Volcan</title></path>
-    <path id="cite-des-histoires" data-region-svg="cite-des-histoires" d="M896,548 L946,528 L946,552 L1000,516 L1052,536 L1052,512 L1104,540 L1150,574 L1156,626 L1148,676 L1156,716 L1108,734 L1060,756 L1002,750 L954,760 L920,730 L890,692 L898,644 L884,600 Z" fill="#FFC93C"><title>La Cite des Histoires</title></path>
+    <path id="cite-des-histoires" data-region-svg="cite-des-histoires" d="M896,548 L946,528 L946,552 L1000,516 L1052,536 L1052,512 L1104,540 L1150,574 L1156,626 L1148,676 L1156,716 L1108,734 L1060,756 L1002,750 L954,760 L920,730 L890,692 L898,644 L884,600 Z" fill="#FFC93C"><title>La Cité des Histoires</title></path>
   </g>
 
   <!-- ═════════════════════════════════════ 4. LES SIGNES D'AMBIANCE, DÉTOURÉS PAR LEUR RÉGION -->
@@ -182,14 +215,14 @@
 
     <!-- ── LA CLAIRIÈRE : prairie, arbre-maison, lisière (v2 § 3.3). ─────────────────────── -->
     <g clip-path="url(#clip-clairiere)">
-      <path id="signe-clairiere-prairie" d="M46,690 Q140,662 216,690 Q292,718 340,692 L340,776 L46,776 Z" fill="#2FAE4E" opacity="0.55" stroke="none"/>
+      <path id="signe-clairiere-prairie" d="M46,690 Q140,662 216,690 Q292,718 340,692 L340,776 L46,776 Z" fill="#2FB344" opacity="0.55" stroke="none"/>
       <path id="signe-clairiere-lisiere-tronc" d="M264,606 L282,606 L286,644 L260,644 Z" fill="#7A5230"/>
-      <path id="signe-clairiere-lisiere-houppier" d="M306,580 A17,17 0 0 1 289,609.4 A17,17 0 0 1 255,609.4 A17,17 0 0 1 238,580 A17,17 0 0 1 255,550.6 A17,17 0 0 1 289,550.6 A17,17 0 0 1 306,580 Z" fill="#2FAE4E"/>
+      <path id="signe-clairiere-lisiere-houppier" d="M306,580 A17,17 0 0 1 289,609.4 A17,17 0 0 1 255,609.4 A17,17 0 0 1 238,580 A17,17 0 0 1 255,550.6 A17,17 0 0 1 289,550.6 A17,17 0 0 1 306,580 Z" fill="#2FB344"/>
       <path id="signe-clairiere-arbre-maison-tronc" d="M92,630 L128,630 L136,734 L84,734 Z" fill="#7A5230"/>
-      <path id="signe-clairiere-arbre-maison-houppier" d="M170,600 A30,30 0 0 1 140,652 A30,30 0 0 1 80,652 A30,30 0 0 1 50,600 A30,30 0 0 1 80,548 A30,30 0 0 1 140,548 A30,30 0 0 1 170,600 Z" fill="#2FAE4E"/>
+      <path id="signe-clairiere-arbre-maison-houppier" d="M170,600 A30,30 0 0 1 140,652 A30,30 0 0 1 80,652 A30,30 0 0 1 50,600 A30,30 0 0 1 80,548 A30,30 0 0 1 140,548 A30,30 0 0 1 170,600 Z" fill="#2FB344"/>
       <path id="signe-clairiere-arbre-maison-porte" d="M99,734 L99,690 A11,11 0 0 1 121,690 L121,734 Z" fill="#7A5230" stroke="#1B2440"/>
       <circle id="signe-clairiere-arbre-maison-fenetre" cx="110" cy="584" r="13" fill="#FFC93C" stroke="#1B2440" stroke-width="4"/>
-      <path id="signe-clairiere-herbe" d="M228,730 L235,702 L242,730 L250,700 L258,730 L266,704 L274,730 Z" fill="#2FAE4E"/>
+      <path id="signe-clairiere-herbe" d="M228,730 L235,702 L242,730 L250,700 L258,730 L266,704 L274,730 Z" fill="#2FB344"/>
       <circle id="signe-clairiere-fleur-1" cx="300" cy="650" r="12" fill="#FF5D8F" stroke="#1B2440" stroke-width="4"/>
       <circle id="signe-clairiere-fleur-2" cx="238" cy="558" r="10" fill="#FFC93C" stroke="#1B2440" stroke-width="4"/>
     </g>
@@ -210,24 +243,24 @@
     <g clip-path="url(#clip-marais-jumeau)">
       <ellipse id="signe-marais-jumeau-mare-gauche" cx="172" cy="252" rx="58" ry="42" fill="#2FA8E0"/>
       <ellipse id="signe-marais-jumeau-mare-droite" cx="310" cy="252" rx="58" ry="42" fill="#2FA8E0"/>
-      <path id="signe-marais-jumeau-nenuphar-1" d="M166,192 L186,186 A20,20 0 1 1 180,210 Z" fill="#2FAE4E"/>
-      <path id="signe-marais-jumeau-nenuphar-2" d="M316,192 L336,186 A20,20 0 1 1 330,210 Z" fill="#2FAE4E"/>
-      <path id="signe-marais-jumeau-nenuphar-3" d="M190,316 L212,309 A22,22 0 1 1 205,336 Z" fill="#2FAE4E"/>
-      <path id="signe-marais-jumeau-nenuphar-4" d="M296,314 L314,308 A18,18 0 1 1 309,330 Z" fill="#2FAE4E"/>
-      <path id="signe-marais-jumeau-roseaux" d="M130,318 L136,266 M148,324 L150,274 M166,320 L176,270 M316,322 L322,272 M338,316 L346,274" fill="none" stroke="#2FAE4E" stroke-width="6" stroke-linecap="round"/>
+      <path id="signe-marais-jumeau-nenuphar-1" d="M166,192 L186,186 A20,20 0 1 1 180,210 Z" fill="#2FB344"/>
+      <path id="signe-marais-jumeau-nenuphar-2" d="M316,192 L336,186 A20,20 0 1 1 330,210 Z" fill="#2FB344"/>
+      <path id="signe-marais-jumeau-nenuphar-3" d="M190,316 L212,309 A22,22 0 1 1 205,336 Z" fill="#2FB344"/>
+      <path id="signe-marais-jumeau-nenuphar-4" d="M296,314 L314,308 A18,18 0 1 1 309,330 Z" fill="#2FB344"/>
+      <path id="signe-marais-jumeau-roseaux" d="M130,318 L136,266 M148,324 L150,274 M166,320 L176,270 M316,322 L322,272 M338,316 L346,274" fill="none" stroke="#2FB344" stroke-width="6" stroke-linecap="round"/>
       <path id="signe-marais-jumeau-brume" d="M126,182 Q172,170 218,182 Q264,194 310,182 M144,216 Q182,206 220,216" fill="none" stroke="#FFF6E3" stroke-width="8" stroke-linecap="round" opacity="0.8"/>
     </g>
 
     <!-- ── LA FORÊT MUETTE : des arbres ROUX à houppier lobé, et les feuilles déjà tombées. ── -->
     <g clip-path="url(#clip-foret-muette)">
       <path id="signe-foret-muette-arbre-1-tronc" d="M536,160 L558,160 L562,220 L532,220 Z" fill="#7A5230"/>
-      <path id="signe-foret-muette-arbre-1-houppier" d="M586,132 A20,20 0 0 1 566,166.6 A20,20 0 0 1 526,166.6 A20,20 0 0 1 506,132 A20,20 0 0 1 526,97.4 A20,20 0 0 1 566,97.4 A20,20 0 0 1 586,132 Z" fill="#E4342B"/>
+      <path id="signe-foret-muette-arbre-1-houppier" d="M586,132 A20,20 0 0 1 566,166.6 A20,20 0 0 1 526,166.6 A20,20 0 0 1 506,132 A20,20 0 0 1 526,97.4 A20,20 0 0 1 566,97.4 A20,20 0 0 1 586,132 Z" fill="#E03131"/>
       <path id="signe-foret-muette-arbre-2-tronc" d="M694,152 L716,152 L720,214 L690,214 Z" fill="#7A5230"/>
-      <path id="signe-foret-muette-arbre-2-houppier" d="M748,120 A22,22 0 0 1 726,158.1 A22,22 0 0 1 682,158.1 A22,22 0 0 1 660,120 A22,22 0 0 1 682,81.9 A22,22 0 0 1 726,81.9 A22,22 0 0 1 748,120 Z" fill="#F5821F"/>
+      <path id="signe-foret-muette-arbre-2-houppier" d="M748,120 A22,22 0 0 1 726,158.1 A22,22 0 0 1 682,158.1 A22,22 0 0 1 660,120 A22,22 0 0 1 682,81.9 A22,22 0 0 1 726,81.9 A22,22 0 0 1 748,120 Z" fill="#F76707"/>
       <path id="signe-foret-muette-arbre-3-tronc" d="M608,238 L628,238 L630,262 L606,262 Z" fill="#7A5230"/>
       <path id="signe-foret-muette-arbre-3-houppier" d="M650,216 A16,16 0 0 1 634,243.7 A16,16 0 0 1 602,243.7 A16,16 0 0 1 586,216 A16,16 0 0 1 602,188.3 A16,16 0 0 1 634,188.3 A16,16 0 0 1 650,216 Z" fill="#FFC93C"/>
-      <path id="signe-foret-muette-feuille-1" d="M512,224 Q526,212 540,224 Q526,236 512,224 Z" fill="#E4342B"/>
-      <path id="signe-foret-muette-feuille-2" d="M668,238 Q682,226 696,238 Q682,250 668,238 Z" fill="#F5821F"/>
+      <path id="signe-foret-muette-feuille-1" d="M512,224 Q526,212 540,224 Q526,236 512,224 Z" fill="#E03131"/>
+      <path id="signe-foret-muette-feuille-2" d="M668,238 Q682,226 696,238 Q682,250 668,238 Z" fill="#F76707"/>
       <path id="signe-foret-muette-feuille-3" d="M548,198 Q560,188 572,198 Q560,208 548,198 Z" fill="#FFC93C"/>
     </g>
 
@@ -235,11 +268,11 @@
     <g clip-path="url(#clip-volcan)">
       <path id="signe-volcan-cone" d="M806,452 L868,278 L900,262 L932,278 L994,452 Z" fill="#7A3A2E"/>
       <path id="signe-volcan-cratere" d="M868,282 L900,268 L932,282 L918,300 L882,300 Z" fill="#1B2440"/>
-      <path id="signe-volcan-coulee-1" d="M894,286 L910,286 L922,344 L908,396 L924,452 L892,452 L884,392 L898,342 Z" fill="#F5821F"/>
+      <path id="signe-volcan-coulee-1" d="M894,286 L910,286 L922,344 L908,396 L924,452 L892,452 L884,392 L898,342 Z" fill="#F76707"/>
       <path id="signe-volcan-coulee-2" d="M872,298 L884,306 L864,356 L856,414 L836,452 L828,380 L850,344 Z" fill="#FFC93C"/>
       <path id="signe-volcan-braise-1" d="M900,222 L906,232 L900,242 L894,232 Z" fill="#FFC93C"/>
-      <path id="signe-volcan-braise-2" d="M884,250 L890,260 L884,270 L878,260 Z" fill="#F5821F"/>
-      <path id="signe-volcan-braise-3" d="M918,250 L924,260 L918,270 L912,260 Z" fill="#F5821F"/>
+      <path id="signe-volcan-braise-2" d="M884,250 L890,260 L884,270 L878,260 Z" fill="#F76707"/>
+      <path id="signe-volcan-braise-3" d="M918,250 L924,260 L918,270 L912,260 Z" fill="#F76707"/>
     </g>
 
     <!-- ── LA CITÉ DES HISTOIRES : deux tours, un pont fait de livres. ───────────────────── -->

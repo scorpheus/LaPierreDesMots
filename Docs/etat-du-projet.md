@@ -1,201 +1,135 @@
-# État du projet — 2026-08-02, fin de journée
+# État du projet — 2026-08-03, campagne sans GPU
 
-Trois minutes de lecture. Tout ce qui suit a été **exécuté**, pas supposé.
-
----
-
-## LA CHOSE À FAIRE EN PREMIER, ce matin, avant tout le reste
-
-**Ferme la Pierre et relance-la.** Double-clic sur `arreter.bat`, puis sur `demarrer.bat`.
-
-C'est tout. La réparation se fait toute seule au démarrage : le serveur applique la migration
-`010`, recalcule la recoloration de chaque profil, et l'écrit. Tu verras passer cette ligne :
-
-```
-[pierre] migrations appliquees : 10 (schema en version 10)
-[pierre] recoloration recalculee pour 1 profil(s).
-```
-
-Tant que le serveur n'est pas relancé, **Ezékiel reste bloqué** : celui qui tourne en ce moment a
-été démarré hier soir à 23:17 et ne connaît pas le correctif. Rien n'est perdu au passage — ni ses
-étoiles, ni ses deux Éclats.
+Trois minutes de lecture. Tout ce qui suit a été **exécuté**, pas supposé. Les commandes et leurs
+codes de sortie sont dans le tableau plus bas ; quand un chiffre est cité, il vient d'une sortie
+réelle.
 
 ---
 
-## Le bug que tu as rencontré : mesuré, corrigé, vérifié sur TA base
+## Si tu ne l'as pas encore fait hier soir
 
-Le pourcentage de coloriage de chaque région était *calculé une fois puis figé en base*. Quand
-Ezékiel a fini `clairiere-01`, la Clairière ne comptait qu'un seul nœud : elle est passée à 100 %.
-Seize nœuds se sont ajoutés depuis, personne n'a recalculé, et **plus aucun monde n'était
-cliquable**. Vérifié sur une copie de sa base, jamais sur l'originale :
-
-| Région | Avant | Après | Nœuds faits | Éclat |
-|---|---|---|---|---|
-| Clairière | **100 %** | **16,67 %** | 1 / 6 | conservé |
-| Galeries | **100 %** | **16,67 %** | 2 / 12 | conservé |
-
-Un **second blocage** a été trouvé au passage, que tu aurais rencontré : l'enfant qui termine
-honnêtement les 18 nœuds livrés se retrouvait devant deux régions vides. La carte repropose
-désormais les régions déjà conquises, et une région sans exercice n'est plus jamais proposée.
+**Ferme la Pierre et relance-la** (`arreter.bat`, puis `demarrer.bat`). C'est la réparation du bug
+de coloriage figé, décrite dans la version d'hier de cette page. Elle se fait toute seule au
+démarrage. Si tu as déjà relancé depuis hier, il n'y a rien à faire.
 
 ---
 
-## CE QUE LA QA GARANTIT — la section à lire si tu n'en lis qu'une
+## Ce que cette campagne a fait
 
-Tu as demandé « un super QA, c'est comme ça qu'on gagnera du temps ». Voici ce qu'elle vaut,
-mesuré en la cassant exprès : on abîme le code de production, un défaut à la fois, et on regarde si
-la suite hurle. C'est la seule mesure honnête — *une QA qu'on ne teste pas est une QA qu'on croit
-sur parole.*
+Le GPU n'était pas disponible : **aucune image n'a été générée**. Tout ce qui suit est du SVG écrit
+à la main, du CSS, du code ou du test.
 
-### Le chiffre
-
-```
-                                          AVANT ce lot     APRÈS ce lot
-mutations qui valent                           27               27
-détectées                                      16               18
-survivantes                                    11                9
-   dont un test E2E nommé les attrape           7                5
-   dont PERSONNE ne les voit                    4                4
-taux de survie                                41 %             33 %
-contrôles négatifs verts                      5 / 5            5 / 5
-base verte avant ET après le banc              oui              oui
-```
-
-Les deux mesures ont tourné sur le **même code**, à quelques minutes d'écart : la seule différence
-est la suite de tests. `npm run qa:mutations` rejoue tout et refuse de publier un chiffre si sa
-propre base n'est pas verte.
-
-**Les deux défauts nouvellement attrapés sont ceux qui t'ont coûté le plus cher** :
-
-- le bouton « La carte » qui disparaît de l'écran du nœud — **ton défaut n° 1**, un écran sans
-  issue. Il passait ; il est maintenant attrapé **sans build**, en huit secondes ;
-- la carte de profil qui ne répond plus au tap — la porte du jeu.
-
-### Ce qu'elle attrape aujourd'hui, et qui ne l'était pas
-
-- **Les impasses, mesurées sur la propriété et non sur l'indice.** Une sentinelle vit dans la page
-  et regarde chaque image peinte : quel geste a fait changer d'écran, depuis quel écran.
-  12 écrans habités, **12 à sortie prouvée, 0 impasse**. Compter les boutons ne suffisait pas —
-  c'est exactement ce qui avait laissé passer ton défaut n° 1.
-- **La perte silencieuse d'une tentative, en plein parcours.** Un contrôle permanent coupe
-  `POST /api/tentatives` au réseau : l'enfant voit ses étoiles, le journal reste vide, la QA le dit.
-- **Le sens du ductus sur 43 traits** au lieu de 23.
-- **29 propriétés** (1 000 cas chacune, graine fixée) dont l'échec est *démontré* : 12 mutations
-  sur 12 les font rougir.
-- **Deux fuzzers** : 25 100 cas de contenu, 2 019 cas d'API, 29 routes sur 29, **aucun 5xx**.
-  Cinq plantages trouvés, cinq corrigés.
-- **Les tests qui rassurent sans rien prouver.** `npm run qa:trompeurs` tourne au `pre-commit` :
-  un test désactivé, un cas sans assertion, un « 14 sur 14 » asserté `> 0` — c'est **ton défaut
-  n° 6** — font échouer le commit. Vérifié en le réinjectant : 2 bloquants nommés, code 1.
-
-### Ce qu'elle ne peut PAS attraper — les quatre trous connus, et ils sont réels
-
-Ils sont nommés, chiffrés, et le banc les réimprime à chaque exécution. Une lacune connue vaut
-mieux qu'une garantie fausse.
-
-| # | Le défaut | Pourquoi personne ne le voit |
-|---|---|---|
-| M18 | **La flèche du guidage du ductus pointe à l'envers** | La flèche est vérifiée *présente*, jamais *orientée*. L'enfant obéit à ce qu'il voit et le moteur le punit. C'est ton défaut n° 3, déplacé d'un cran — **et c'est le plus grave des quatre.** |
-| M26 | **Une animation entre dans le champ de lecture** | « Le décor s'agite, le texte jamais » n'a aucune traduction mécanique. Une règle non négociable sans test est une intention. |
-| M11b | La marque `data-clip` disparaît | Le seul garde de D42 est un `toHaveCount(0)` : quand l'attribut n'existe plus, le sélecteur ne désigne plus rien et l'assertion reste verte. Le garde se désarme tout seul. |
-| M20 | La clé d'idempotence oublie le nœud | La fonction qui décide si une tentative est un doublon n'est appelée par aucun test. Sévérité faible en usage réel, coût du test : dix lignes. |
-
-**Zones aveugles par nature**, en clair : la QA est excellente sur ce que le DOM porte comme
-**donnée** (`data-*`) et sur les fonctions pures ; elle est presque aveugle à ce que l'enfant
-**voit** — un angle, une couleur, une taille rendue par le CSS, une animation. Le seul outil qui
-couvre ça est `test:visuel`, à l'arrêt en attendant tes yeux (D39). **Dix écrans sur douze n'ont
-toujours pas de test à leur nom** ; l'explorateur de navigation en monte onze à travers le routeur,
-ce qui n'est pas la même chose.
-
-### L'épreuve de généralisation : cinq défauts que personne n'avait anticipés
-
-Rejouer les mutations d'un audit mesure qu'on n'a pas régressé, pas qu'on sait chercher. Cinq
-défauts neufs ont donc été inventés après coup, dans cinq organes qu'aucune recette existante ne
-touchait. **Quatre sur cinq attrapés. Le cinquième était un vrai trou, et il est fermé.**
-
-| Le défaut injecté | Sort |
-|---|---|
-| `Alea.melanger` ne mélange plus : la bonne réponse ne bouge plus de place | attrapé |
-| La coupe syllabique se décale d'une lettre — l'enfant lit « mam-man » | attrapé |
-| `Horloge.avancer` n'avance que de moitié : **le temps simulé ment à toute la QA** | attrapé |
-| La normalisation replie l'apostrophe à l'envers : l'enfant a raison, l'appli dit non | attrapé |
-| **La zone de lecture perd Andika et retombe sur Verdana** | **SURVIVAIT — corrigé** |
-
-Le dernier mérite trois lignes, parce qu'il dit ce qui reste fragile. Le dépôt contenait
-**quatre** assertions portant le mot « Andika ». Aucune ne gardait la règle : l'une lisait la pile
-d'*OpenDyslexic*, les trois autres vérifiaient le *code* `'andika'`, jamais ce que ce code désigne.
-La police que l'enfant lit pouvait devenir Verdana sans qu'une ligne rougisse.
-`tests/unitaires/polices-piles.test.ts` le ferme, et la fermeture est prouvée en réinjectant le
-défaut.
+1. **Les trois défauts que la QA ne voyait pas sont bouchés.** L'audit par mutation avait trouvé
+   trois défauts qu'*aucun* test du dépôt n'aurait attrapés. Les trois ont maintenant leur garde,
+   et ces gardes ont été mises à l'épreuve : on réinjecte le défaut, le test doit hurler.
+2. **Les douze écrans ont un test.** Il y en avait deux sur douze. C'était la plus grande zone
+   aveugle du projet : un écran sans test peut cesser de répondre au doigt sans que rien ne le
+   dise.
+3. **La carte du monde ne montrait aucun gris.** « Un monde gris que l'enfant rallume » est la
+   promesse du jeu ; le voile de Grisaille repeignait en fait chaque région dans *sa propre
+   couleur*. Six régions sur six étaient colorées sous le voile ; elles sont zéro sur six
+   aujourd'hui.
+4. **Le campement répond enfin au doigt.** Les trente prises étaient des boutons transparents sans
+   aucun signe qu'on peut les toucher — c'est ça que tu n'avais pas compris, pas le dessin. Les
+   quatorze points qui *promettaient* un mouvement unique faisaient tous exactement le même.
+5. **Les six objets rapportés existaient dans les données et n'atteignaient aucun écran.** L'enfant
+   terminait la Clairière, en rapportait le fanion, revenait au campement — et rien n'avait changé.
 
 ---
 
 ## Les chiffres des commandes
 
-Mesurés sur un dépôt **calme**, entre 12:37 et 13:25.
+Mesurés le 2026-08-03, sur un dépôt dont je suis le seul écrivain.
 
-| Commande | Sortie | Résultat |
+| Commande | Code | Résultat |
 |---|---|---|
 | `npx tsc -b` | **0** | — |
 | `npx eslint .` | **0** | 0 erreur, 17 avertissements (variables inutilisées) |
-| `npx vitest run` | **0** | **1745 tests, 113 fichiers, 0 échec** |
-| `npm run test:contenu` | **0** | **226 contrôles, 0 problème** |
+| `npx vitest run` | **0** | **1 975 tests, 136 fichiers, 0 échec** (1 787 la veille) |
+| `npm run test:contenu` | **0** | **590 contrôles, 0 problème** |
+| `npm run test:e2e` | **0** | **372 verts, 0 rouge** |
 | `npm run test:rejeu` | **0** | vert |
-| `npm run test:e2e` | **0** | **198 verts, 0 rouge** |
-| `npm run qa:mutations` | **0** | 27 mutations, 18 détectées, 9 survivantes, 4 trous |
-| `npm run qa:trompeurs` | **0** | 0 bloquant, 66 avertissements (plafond gelé à 66) |
-| `npm run verifier` | **1** | rouge tant que `test:visuel` attend tes yeux (D39) |
+| `npm run test:qualite` | **0** | vert, budget de bundle tenu |
+| `npm run qa:trompeurs` | **0** | 0 bloquant, **66** avertissements (plafond gelé à 66) |
+| `npm run verifier` | **1** | **9 étapes vertes sur 11** — voir « ce qui reste rouge » |
+
+Couverture, mesurée avec les seuils par zone de l'annexe T : **94,2 % des instructions**,
+85,8 % des branches.
+
+Le dépôt : **25 commits**, **76 exercices** pour **76 nœuds** cités par la carte (écart nul),
+**656 clips audio**, **115 SVG** tous contrôlés en régions fermées, **10 migrations**,
+**164 fichiers de test**.
 
 ---
 
 ## Ce qui reste rouge
 
-**`test:visuel`** — rouge **par décision** (D39) : le décor et Gobi vont être refaits, figer des
-références maintenant serait les refaire aussitôt. Ça se lève en regardant les images
+**`test:visuel`** — rouge **par décision** (D39), inchangé. Le décor et Gobi vont être refaits ;
+figer des références maintenant serait les refaire aussitôt. **Aucune référence n'a été figée par
+cette campagne** — elles attendent tes yeux. Ça se lève en regardant les images
 (`tests/rapports/artefacts/`), puis `npm run test:visuel -- --maj`.
 
-**La moitié du contenu est un brouillon.** 9 exercices sur 18 portent la marque
-`PLACEHOLDER — À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ`. C'est toujours le vrai reste à faire.
+**L'étape `test` de `npm run verifier`** — rouge **une fois sur deux, sans qu'aucun test
+n'échoue.** Le journal dit `136 passed (136)` et, plus bas,
+`Error: [vitest-worker]: Timeout calling "onTaskUpdate"` : c'est un délai de communication interne
+à l'outil de test quand la machine est chargée, pas un défaut du jeu. Relancée seule, la même
+commande sort à **0** en 54 s contre 78 s dans la chaîne. Ça ne change rien aujourd'hui — mais **le
+jour où tu figeras les captures, ça pourra maintenir `verifier` rouge sans raison**, et c'est le
+plus mauvais moment pour découvrir qu'une porte ment. Détail et piste de correction dans
+`questions-en-attente.md`, Q-INT-7.
+
+---
+
+## Ce qui attend le GPU — la seule chose que cette campagne ne pouvait pas faire
+
+ComfyUI est resté **arrêté** de bout en bout. Rien de ce qui suit n'a été tenté, et il faut le
+traiter comme **non su**, pas comme fait :
+
+- **Les décors des six régions** en trait noir vectorisé, et leurs déclinaisons.
+- **Gobi décliné** — les stades, les formes de graphèmes, les animations : ce qui existe
+  aujourd'hui est du SVG fait main, suffisant pour jouer et pour tester, pas une direction
+  artistique arrêtée.
+- **Les vignettes d'exercice** et les pages de coloriage produites par diffusion.
+- **La vérification esthétique elle-même.** D50 est clair : le jugement esthétique t'appartient.
+  Aucun agent n'a regardé une planche pour dire « c'est joli » — ce qui a été vérifié, ce sont des
+  grandeurs : saturation, épaisseur de trait, régions fermées, empreintes.
+- **`potrace` est toujours absent** du dépôt, et il sera nécessaire à la vectorisation
+  (annexe P § 3.2).
+
+La chaîne voix (Piper) et `faster-whisper` tournent sur le processeur : elles n'étaient pas
+bloquées, et les 656 clips sont là.
 
 ---
 
 ## Ce que tu dois savoir, même si ça n'est pas agréable
 
-**Trois campagnes ont écrit sur ce dépôt aujourd'hui, en même temps.** Chaque brief disait « tu es
-seul sur le dépôt » ; c'était faux à chaque fois. Mesuré, pas ressenti : un `npm run verifier`
-lancé par une autre session à 12:38, une campagne Playwright concurrente à 12:47 qui a fait tomber
-trois recettes innocentes, deux commits étrangers à 12:48 et 12:54, puis une passe de contenu de
-**159 fichiers** commencée vers 13:56 et encore en vol au moment où j'écris.
+**Trois compétences ne peuvent JAMAIS recevoir une réussite, et le contrôle R12 les déclare
+vertes.** Quand l'enfant réussit une étape, le serveur impute cette réussite à la *première*
+compétence déclarée par l'exercice, et à elle seule. Une compétence qui n'est jamais en première
+position n'apparaît donc jamais dans le journal — mais le contrôle « ≥ 3 moteurs par compétence »
+la compte comme couverte, parce qu'il regarde ce qui est *déclaré*, pas ce qui est *joué*.
+Trois compétences sont dans ce cas (`comp.consigne.multiple`, `gph.rare.gn`, `gph.rare.ph`) : leur
+suivi restera vide pour toujours.
 
-**Ce que ça change pour toi, concrètement** : au moment où cette page est écrite, `npx vitest run`
-rend **25 rouges**, tous dans des tests qui lisent `contenu/` — nœuds cités mais pas encore livrés,
-consignes sans clip, compétences sans exercice. **Ce n'est pas une régression, c'est un chantier de
-contenu à moitié posé.** Il se refermera quand cette campagne aura fini. Les chiffres du tableau
-ci-dessus ont été pris avant qu'elle ne commence, sur un dépôt calme, et le banc de mutation refuse
-par construction de publier quoi que ce soit sur une base rouge.
+**Je ne l'ai pas corrigé, exprès.** Changer cette imputation modifie ce que reçoivent le BKT et le
+Leitner, donc les journaux de rejeu — c'est une décision pédagogique, pas une correction technique,
+et la règle du projet dit d'attendre ton arbitrage. Trois options chiffrées dans
+`questions-en-attente.md`, Q-INT-4.
 
-**Six fichiers de cette campagne sont PRÊTS mais PAS ENCORE COMMITÉS**, et il faut que tu le
-saches. Le crochet `pre-commit` lance `eslint .` et la suite entière : l'un et l'autre sont rouges
-à cause du chantier de contenu ci-dessus (une erreur de lint dans `scripts/generer-phonologie.mjs`,
-18 fichiers de test rouges). **Je n'ai pas utilisé `--no-verify`** — c'est une règle, et la
-contourner aurait été exactement le genre de raccourci que cette campagne combat. Les six fichiers
-sont donc **posés dans l'index** (`git status` les montre en `A`/`M`, distincts des 274 autres) et
-partiront au prochain commit qui passe :
+**Ça ne se voit pas depuis la tablette** : les 76 nœuds sont jouables, aucun écran d'échec, aucune
+impasse. Ça se voit dans ton tableau de suivi.
 
-```
-scripts/qa/recettes.mjs                          (cliquet resserré sur M2 et M25)
-scripts/qa/recettes-nouvelles.mjs                (les 5 mutations neuves)
-tests/unitaires/polices-piles.test.ts            (ferme le trou trouvé)
-tests/unitaires/qa-navigation-en-memoire.test.ts (garde le défaut n° 2)
-Docs/etat-du-projet.md · Docs/questions-en-attente.md
-```
+**Le linter jugeait des fichiers qui ne seront jamais livrés.** `npm run lint` — première étape de
+`verifier`, donc du crochet de poussée — lisait `bac-a-sable/`, que git ignore. Un dépôt fraîchement
+cloné était **vert** là où cette machine était **rouge**, sur un code identique. Corrigé, avec les
+deux mesures écrites dans `eslint.config.js`.
 
-Chacun a été vérifié **seul** et rend vert : `2 fichiers, 10 tests, 0 échec`.
-
-**Une leçon d'outillage, notée pour la prochaine fois** : le banc de mutation restaure le fichier
-qu'il abîme dans un `finally` — mais un `finally` ne survit pas à un processus tué. Une
-interruption a laissé `partage/src/pedagogie/leitner.ts` muté sur le disque. Repéré par
-`git status`, restauré. C'est le genre d'accident qui finit dans un commit si personne ne regarde.
+**Les tests neufs de la campagne dépassaient le plafond des « tests trompeurs » — de 17
+exactement.** La dette antérieure valait *exactement* le plafond (66) ; le dépassement était
+*entièrement* le travail de cette campagne. Le plafond n'a pas été monté : les 17 ont été corrigés.
+Deux d'entre eux ne se contentaient pas d'être muets, ils étaient **faux** — dont un qui aurait pu
+« prouver » une correspondance entre groupes de réglages et boutons d'écoute qui n'existe pas.
+Détail en Q-INT-3.
 
 ---
 
@@ -205,12 +139,15 @@ Détail et mesures dans **`Docs/questions-en-attente.md`**.
 
 1. **Les captures visuelles** — les regarder, puis figer ou refuser. C'est ce qui débloque
    `npm run verifier`.
-2. **Les quatre trous de QA ci-dessus** — M18 (la flèche du ductus) est le seul qui mérite un lot à
-   lui seul, et il coûte une quarantaine de lignes. Les trois autres sont écrits et chiffrés.
-3. **Quand tout est terminé, rejouer ou réviser ?** Aujourd'hui la carte renvoie sur le *premier*
-   nœud de la région conquise. Le Leitner sait déjà quelles compétences sont dues.
-4. **Faut-il montrer les régions vides ?** Elles ne sont plus cliquables, donc plus trompeuses.
-5. **Le seuil de couverture lexicale CE1** (Q-INT-2), inchangé : 93,0 % des mots lus y figurent.
+2. **Les trois compétences muettes** (Q-INT-4) — contenu, garde, ou code. C'est la décision qui a
+   le plus d'effet sur ce que tu liras dans le suivi.
+3. **Le seuil de couverture lexicale CE1**, inchangé : 93,0 % des mots lus en jeu figurent dans la
+   liste. Les 4 absents sont `b`, `d` (les graphèmes travaillés, D23), `gobi` et `voit`. Exiger
+   100 % interdirait D23 ; choisir 90 % serait inventer une loi.
+4. **R15 couvre-t-il les bascules ?** Cinq des six groupes de réglages ont un bouton d'écoute ; le
+   sixième — les bascules « Aides à la lecture » — n'en a pas, ses contrôles portant leur propre
+   intitulé (Q-INT-5).
+5. **Quand tout est terminé, rejouer ou réviser ?** Inchangé depuis hier.
 
 ---
 
@@ -218,11 +155,16 @@ Détail et mesures dans **`Docs/questions-en-attente.md`**.
 
 | Commande | Ce qu'elle te dit |
 |---|---|
-| `npm run qa:mutations` | Casse le code exprès, 33 fois, et mesure ce que la QA rate. ~20 min |
+| `npm run qa:mutations` | Casse le code exprès et mesure ce que la QA rate. ~20 min |
 | `npm run qa:trompeurs` | Les tests qui rassurent sans rien prouver. 2 s, tourne au `pre-commit` |
 | `npm run qa:tableau` | Une page : moteurs gardés, écrans gardés, survivants, trous |
 | `npm run profil:reinitialiser` | Remet un profil à zéro. Sauvegarde la base avant d'écrire |
 
-L'onglet **« Le profil »** de l'espace parent montre, pour chaque région, ce que la base *stocke*
-et ce que le journal *dit vraiment*, avec l'écart — c'est ce qui aurait rendu ton bug visible en
-dix secondes.
+**Un piège d'outillage, à connaître avant de lancer le banc de mutation** : il **exclut de chaque
+essai les tests que git ne suit pas encore**. C'est une protection — un test non commité peut
+appartenir à une autre campagne en vol — mais ça veut dire qu'un banc lancé *avant* de commiter
+mesure la QA *sans* le travail du jour, et rend donc de faux survivants. **On commite, puis on
+mesure.**
+
+L'onglet **« Le profil »** de l'espace parent montre, pour chaque région, ce que la base *stocke* et
+ce que le journal *dit vraiment*, avec l'écart.
