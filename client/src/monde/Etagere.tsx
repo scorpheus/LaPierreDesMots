@@ -23,7 +23,10 @@ import type { ReactElement } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { formesDuDocument } from '@pierre/partage/monde';
 import type { CaseEtagere, CatalogueFormes, Etagere as ModeleEtagere } from '@pierre/partage/monde';
+import { useState } from 'react';
+
 import { urlAsset } from '../api/client.js';
+import { FicheCase } from './FicheCase.js';
 
 export interface ProprietesEtagere {
   /** L'étagère complète, cases vides comprises. Construite par `construireEtagere`. */
@@ -33,18 +36,43 @@ export interface ProprietesEtagere {
 }
 
 /** Le contour d'une case : plein quand elle est gagnée, en creux sinon. Jamais de cadenas. */
-function Vignette({ une }: { readonly une: CaseEtagere }): ReactElement {
+function Vignette({
+  une,
+  surOuvrir
+}: {
+  readonly une: CaseEtagere;
+  readonly surOuvrir: () => void;
+}): ReactElement {
   return (
     <li
       data-case-etagere={String(une.grapheme)}
       data-rang={String(une.rang)}
       data-obtenue={une.obtenue ? 'oui' : 'non'}
+      // R24 — CHAQUE CASE S'OUVRE, GAGNÉE OU NON.
+      //
+      // « même si on ne les a pas, tous les items à récupérer devraient être affichés en grand
+      // dans un popup avec une description de ce qu'on peut gagner, et on aura la couleur. »
+      //
+      // L'étagère montrait déjà les cases VIDES (D44, D25 point 3) — mais une case vide ne
+      // disait pas CE QU'ELLE ATTEND. Elle est maintenant une prise, et les deux états ouvrent
+      // la même fiche : un enfant ne doit pas apprendre que « les cases grises ne répondent
+      // pas », sinon il cesse de les toucher et le vide cesse de donner envie.
+      role="button"
+      tabIndex={0}
+      onClick={surOuvrir}
+      onKeyDown={(evenement) => {
+        if (evenement.key === 'Enter' || evenement.key === ' ') {
+          evenement.preventDefault();
+          surOuvrir();
+        }
+      }}
       aria-label={
         une.obtenue
-          ? `${une.libelle}, gagnée`
-          : `${une.libelle}, case ${String(une.rang)} encore libre`
+          ? `${une.libelle}, gagnée — voir sa fiche`
+          : `${une.libelle}, case ${String(une.rang)} encore libre — voir ce qu’elle attend`
       }
       style={{
+        cursor: 'pointer',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -108,6 +136,7 @@ function Vignette({ une }: { readonly une: CaseEtagere }): ReactElement {
 
 export function Etagere({ etagere, titre = 'L’étagère de Gobi' }: ProprietesEtagere): ReactElement {
   const vides = etagere.nbTotal - etagere.nbObtenues;
+  const [ouverte, fixerOuverte] = useState<CaseEtagere | null>(null);
 
   return (
     <section
@@ -134,9 +163,27 @@ export function Etagere({ etagere, titre = 'L’étagère de Gobi' }: Proprietes
         }}
       >
         {etagere.cases.map((une) => (
-          <Vignette key={`${String(une.rang)}-${String(une.grapheme)}`} une={une} />
+          <Vignette
+            key={`${String(une.rang)}-${String(une.grapheme)}`}
+            une={une}
+            surOuvrir={() => {
+              fixerOuverte(une);
+            }}
+          />
         ))}
       </ul>
+
+      {/* R24 — la fiche, montée UNE fois pour toute l'étagère : deux fiches ouvertes en même
+          temps n'auraient aucun sens, et un panneau par case coûterait 25 nœuds inutiles. */}
+      {ouverte === null ? null : (
+        <FicheCase
+          une={ouverte}
+          commentLObtenir={null}
+          surFermer={() => {
+            fixerOuverte(null);
+          }}
+        />
+      )}
     </section>
   );
 }
