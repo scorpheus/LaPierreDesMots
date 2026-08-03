@@ -88,14 +88,38 @@ describe('la QA navigue en TAPANT, jamais par URL — défaut historique n° 2',
     ).toBeGreaterThanOrEqual(15);
   });
 
-  it('le routeur du client est bien un historique EN MÉMOIRE — la prémisse du garde ci-dessus', () => {
-    // Si un jour le routeur passait à un historique de navigateur, le garde ci-dessus
-    // deviendrait une contrainte gratuite. On vérifie donc la raison, pas seulement la règle.
-    const routeur = readFileSync(`${RACINE}client/src/routeur.tsx`, 'utf8');
+  /**
+   * ⚠ LA PRÉMISSE A CHANGÉ LE 2026-08-03, ET ELLE RENFORCE LA RÈGLE AU LIEU DE L'ANNULER.
+   *
+   * Ce cas exigeait `createMemoryHistory`, avec ce commentaire : « si un jour le routeur passait
+   * à un historique de navigateur, le garde ci-dessus deviendrait une contrainte gratuite ».
+   *
+   * Le routeur EST passé à un historique de navigateur, sur demande du père — l'historique en
+   * mémoire n'écrivait aucune entrée, donc « retour » sortait du site et un rafraîchissement
+   * repartait de zéro (R21, R22).
+   *
+   * Et l'anticipation était à l'envers. Avec un historique en mémoire, un `page.goto('/campement')`
+   * ne demandait PAS le campement : il rechargeait `/`, et la recette auditait l'accueil en
+   * croyant auditer le campement — un chiffre faux, jamais une erreur. Avec l'historique du
+   * navigateur, ce `goto` **fonctionne** : la recette atteint bien le campement, **sans jamais
+   * prouver qu'un enfant peut y aller au doigt**. Le mensonge de couverture change de forme et
+   * devient plus difficile à voir, puisque l'écran audité est le bon.
+   *
+   * La règle « jamais de goto profond » n'est donc pas devenue gratuite : elle est devenue la
+   * SEULE chose qui garde encore cette propriété. Ce cas vérifie ce qui la motive aujourd'hui —
+   * qu'un autre fichier mesure bien l'atteignabilité au doigt — plutôt que le type d'historique,
+   * qui n'en était qu'un proxy.
+   */
+  it('l’atteignabilité AU DOIGT reste mesurée ailleurs — la raison de la règle ci-dessus', () => {
+    const modele = readFileSync(
+      `${RACINE}tests/composants/exploration-modele.test.tsx`,
+      'utf8',
+    );
     expect(
-      routeur,
-      'le routeur n’est plus en mémoire : la règle « jamais de goto profond » est à rediscuter, ' +
-        'pas à contourner',
-    ).toContain('createMemoryHistory');
+      modele,
+      'plus personne ne mesure qu’un écran est atteignable par des taps : « jamais de goto ' +
+        'profond » deviendrait alors une règle sans raison, et la couverture pourrait mentir ' +
+        'de nouveau — en auditant le BON écran, atteint par une URL que nul enfant ne tape',
+    ).toContain('aucun écran déclaré et inatteignable');
   });
 });

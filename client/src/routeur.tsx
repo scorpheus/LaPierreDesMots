@@ -29,7 +29,7 @@ import type { ReactElement } from 'react';
 import {
   Outlet,
   RouterProvider,
-  createMemoryHistory,
+  createBrowserHistory,
   createRootRoute,
   createRoute,
   createRouter,
@@ -497,7 +497,29 @@ function construireRouteur() {
 
   return createRouter({
     routeTree: arbre,
-    history: createMemoryHistory({ initialEntries: ['/'] }),
+    /**
+     * ══════════════════════════════════════════════════════════════════════════════════════
+     * R21 / R22 — HISTORIQUE DU NAVIGATEUR, ET NON PLUS EN MÉMOIRE.
+     *
+     * L'ancien commentaire disait : « Historique EN MÉMOIRE, volontairement : le jeu est une
+     * borne sur tablette. L'URL n'est ni partagée, ni mise en favori, ni rechargée à la main,
+     * et un retour navigateur au milieu d'un exercice n'a aucun sens pour un enfant de 7 ans. »
+     *
+     * Le père a mesuré la conséquence en jouant, et elle est l'inverse de l'intention :
+     *
+     *     « quand on appuie dans le navigateur sur rafraîchir ou sur retour en arrière, ça
+     *       enlève le site. Et ça, faudrait pouvoir revenir en arrière justement. »
+     *
+     * Un historique en mémoire n'écrit AUCUNE entrée dans celui du navigateur : le bouton
+     * « retour » de la tablette sort donc du site, et le rafraîchissement repart de `/`.
+     * L'hypothèse « l'enfant n'appuiera pas » était fausse — un enfant de 7 ans appuie sur
+     * tout, et c'est précisément pour lui qu'un état sans issue est le pire des défauts.
+     *
+     * Avec l'historique du navigateur, « retour » remonte D'UN écran de jeu, et un
+     * rafraîchissement recharge la page où l'on était (avec le bon joueur, voir R21).
+     * ══════════════════════════════════════════════════════════════════════════════════════
+     */
+    history: createBrowserHistory(),
     defaultPreload: false
   });
 }
@@ -516,11 +538,49 @@ export function Routeur(): ReactElement {
 
     aller(magasin.getState().ecran);
 
-    return magasin.subscribe((etat, precedent) => {
+    const arreterMagasin = magasin.subscribe((etat, precedent) => {
       if (etat.ecran !== precedent.ecran) {
         aller(etat.ecran);
       }
     });
+
+    /**
+     * ══════════════════════════════════════════════════════════════════════════════════════
+     * R22 — LE MIROIR REGARDE MAINTENANT DANS LES DEUX SENS.
+     *
+     * Il ne suivait que le magasin. Un retour navigateur changeait donc l'URL SANS que le
+     * magasin le sache : l'écran affiché redevenait la carte, et `etat.ecran` valait encore
+     * `noeud`. Les deux se contredisaient, et la suite en découle —
+     *
+     *     if (etat.ecran !== precedent.ecran) aller(etat.ecran);
+     *
+     * — ne déclenche RIEN quand on repart vers le même code d'écran. Choisir une autre région
+     * après un retour arrière ne poussait donc aucune navigation : le père voyait « le même
+     * exercice ».
+     *
+     * On écoute donc aussi l'historique. Seuls les chemins que le magasin POSSÈDE sont
+     * réconciliés : `/campement`, `/coffre` ou la zone parent ont leur propre route et ne
+     * doivent pas être ramenés de force vers l'écran de jeu courant.
+     * ══════════════════════════════════════════════════════════════════════════════════════
+     */
+    const cheminsDuMagasin = new Map<string, CodeEcran>(
+      (Object.entries(CHEMIN_PAR_ECRAN) as readonly (readonly [CodeEcran, string])[]).map(
+        ([ecran, chemin]) => [chemin, ecran]
+      )
+    );
+
+    const arreterHistorique = routeur.history.subscribe(() => {
+      const ecranDuChemin = cheminsDuMagasin.get(routeur.history.location.pathname);
+      if (ecranDuChemin === undefined) return;
+      if (magasin.getState().ecran !== ecranDuChemin) {
+        magasin.getState().naviguer(ecranDuChemin);
+      }
+    });
+
+    return () => {
+      arreterMagasin();
+      arreterHistorique();
+    };
   }, [magasin, routeur]);
 
   return <RouterProvider router={routeur} />;

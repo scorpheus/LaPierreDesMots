@@ -163,13 +163,35 @@ const ETOILE_ECLAT =
   'M0,-22 L6.5,-7 L22,-6 L10,4 L14,20 L0,11 L-14,20 L-10,4 L-22,-6 L-6.5,-7 Z';
 
 /** Corps du nom de région, en unités `viewBox`. */
-const CORPS_NOM = 22;
+/**
+ * R23 — LE NOM DES TERRITOIRES, AGRANDI. Demandé le 2026-08-03 : « il faudrait que le nom des
+ * monde soit un peu plus grand ».
+ *
+ * La carte est « l'écran qu'on ouvre en premier, celui qu'on montre à ses parents » (v2 § 9.4),
+ * et son nom de territoire y était plus petit qu'un texte courant.
+ *
+ * **34 et non 40, et le choix est mesuré.** Les six cartouches ont été calculés pour chaque
+ * corps de 22 à 36, et confrontés à deux choses : entre eux, et aux six PRISES tactiles de
+ * rayon 46 :
+ *
+ *     corps  22 24 26 28 30 32 34 36  →  chevauchements entre cartouches : 0 partout
+ *     corps  30 32 34 36              →  conflits avec les prises voisines : aucun
+ *
+ * Rien ne se chevauche même à 36 — les ancres sont largement séparées. On s'arrête donc à 34,
+ * un cran sous la dernière valeur éprouvée : un nom plus long ajouté demain (une région
+ * renommée) garde ainsi de la marge avant de toucher la prise du voisin, et une prise
+ * recouverte serait un tap qui n'arrive pas.
+ */
+const CORPS_NOM = 34;
 
-/** Chasse moyenne mesurée du corps ci-dessus : ≈ 0,52 em pour Andika et Atkinson. */
-const CHASSE_NOM = 12.5;
+/** Chasse moyenne mesurée : ≈ 0,52 em pour Andika et Atkinson, donc proportionnelle au corps. */
+const CHASSE_NOM = (12.5 * CORPS_NOM) / 22;
 
-/** Marge intérieure du cartouche, de part et d'autre du nom. */
-const MARGE_NOM = 30;
+/** Marge intérieure du cartouche, de part et d'autre du nom. Proportionnelle, comme la chasse. */
+const MARGE_NOM = (30 * CORPS_NOM) / 22;
+
+/** Hauteur du cartouche. Elle suit le corps, sinon le nom déborderait de son propre cadre. */
+const HAUTEUR_NOM = (32 * CORPS_NOM) / 22;
 
 /**
  * Le cartouche du nom, borné au parchemin.
@@ -640,7 +662,7 @@ export function EcranCarte({
                   x={nom.x}
                   y={y + 52}
                   width={nom.largeur}
-                  height={32}
+                  height={HAUTEUR_NOM}
                   rx={10}
                   fill="var(--parchemin)"
                   stroke="var(--trait)"
@@ -649,7 +671,7 @@ export function EcranCarte({
               </g>
               <text
                 x={nom.x + nom.largeur / 2}
-                y={y + 75}
+                y={y + 52 + HAUTEUR_NOM * 0.72}
                 textAnchor="middle"
                 fontSize={CORPS_NOM}
                 fill="var(--trait)"
