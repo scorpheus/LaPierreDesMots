@@ -1,10 +1,10 @@
 {
   "id": "clairiere-07",
   "region": "clairiere",
-  "ordre": 7,
+  "ordre": 8,
   "exercice": "clairiere-collier-syllabes-01",
   "prerequis": [
-    "clairiere-06"
+    "clairiere-02"
   ],
-  "temps": "presentation"
+  "temps": "developpement"
 }

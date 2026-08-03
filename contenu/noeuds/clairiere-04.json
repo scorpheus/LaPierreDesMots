@@ -1,10 +1,10 @@
 {
   "id": "clairiere-04",
   "region": "clairiere",
-  "ordre": 4,
+  "ordre": 3,
   "exercice": "clairiere-ecole-02-place",
   "prerequis": [
     "clairiere-03"
   ],
-  "temps": "retournement"
+  "temps": "developpement"
 }

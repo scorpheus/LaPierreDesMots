@@ -1,10 +1,10 @@
 {
   "id": "clairiere-08",
   "region": "clairiere",
-  "ordre": 8,
+  "ordre": 6,
   "exercice": "clairiere-lianes-voyelles-01",
   "prerequis": [
-    "clairiere-07"
+    "clairiere-06"
   ],
-  "temps": "developpement"
+  "temps": "maitrise"
 }

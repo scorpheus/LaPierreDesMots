@@ -1,7 +1,7 @@
 {
   "id": "clairiere-06",
   "region": "clairiere",
-  "ordre": 6,
+  "ordre": 5,
   "exercice": "clairiere-lucioles-attrape-01",
   "prerequis": [
     "clairiere-05"

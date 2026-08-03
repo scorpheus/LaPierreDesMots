@@ -1,10 +1,10 @@
 {
   "id": "clairiere-02",
   "region": "clairiere",
-  "ordre": 2,
+  "ordre": 7,
   "exercice": "clairiere-luciole-couleurs-01",
   "prerequis": [
-    "clairiere-01"
+    "clairiere-08"
   ],
-  "temps": "developpement"
+  "temps": "presentation"
 }
