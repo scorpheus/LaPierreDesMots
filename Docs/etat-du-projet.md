@@ -43,7 +43,7 @@ Chacun porte sa mesure et son état dans **[retours-de-jeu.md](retours-de-jeu.md
 | **R17** | Gobi ne répond pas dans certains exercices | ouvert |
 | **R18** | La carte ne montre ni l'avancement ni le lien entre régions | ouvert |
 | **R19** | L'histoire de la Pierre passe seule (6 s/panneau) | ouvert — mesuré |
-| **R20** | Il faut faire défiler alors que l'écran est assez grand | ouvert |
+| **R20** | Il faut faire défiler alors que l'écran est assez grand | corrigé (89 cas verts) — reste 378 px au campement, **arbitrage** |
 | **R21** | Rafraîchir ou revenir en arrière perd la partie | ouvert |
 | **R22** | Changer de région ramène au même exercice | à reproduire |
 | **R23** | Le nom des régions est trop petit sur la carte | ouvert |

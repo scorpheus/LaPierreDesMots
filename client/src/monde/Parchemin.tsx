@@ -31,7 +31,13 @@ export function Parchemin({
         position: 'relative',
         inlineSize: '100%',
         maxInlineSize: '1200px',
-        marginInline: 'auto'
+        marginInline: 'auto',
+        // R20 — le support doit pouvoir RÉTRÉCIR. `inlineSize: 100%` seul le fait grandir
+        // jusqu'à sa largeur maximale et laisse sa hauteur suivre le rapport d'aspect, sans
+        // jamais regarder la hauteur disponible : c'est ce qui faisait déborder la carte de
+        // 76 px sur la tablette. Ces deux bornes lui donnent la hauteur pour contrainte.
+        maxBlockSize: '100%',
+        display: 'flex'
       }}
     >
       <svg

@@ -132,7 +132,31 @@ export function MoteurColorie(
       data-moteur="colorie"
       data-habillage={habillage.id}
       data-termine={etat.termineMs === null ? 'non' : 'oui'}
-      style={{ display: 'grid', gap: '1rem' }}
+      // ── R16 GAGNE SUR R20 ICI, ET C'EST MESURÉ ─────────────────────────────────────────
+      //
+      // Borner la scène la rétrécit dans les deux dimensions. Sur `colorie`, 21 régions sont
+      // aussitôt passées sous le seuil des 64 px — « le tronc du premier arbre » 31 × 91,
+      // « l'horloge de l'école » 47 × 47 — et 18 recettes de la QA des invariants ont rougi.
+      // Vérifié en remisant le lot : la même recette passait avant, échoue après.
+      //
+      // Ramener un tronc de 31 px à 64 demanderait une scène 2,06 fois plus grande, soit près
+      // de 2 500 px de haut sur une tablette qui en offre 1 200. Aucune mise en page ne peut
+      // satisfaire les deux : le défaut est dans l'ASSET, dont les régions sont trop fines.
+      //
+      // « Cibles ≥ 64 px » est une règle non négociable des specs ; « rien ne défile » est un
+      // retour de jeu. La scène garde donc sa taille, l'écran défile — il défilait déjà — et
+      // le garde R20 porte la dette chiffrée au lieu de la taire.
+      data-scene-non-reductible="oui"
+      // R20 — COLONNE SOUPLE, ET NON GRILLE. En grille, la scène n'est la première rangée que
+        // pour `colorie` ; `place` la met en deuxième, et une règle qui borne « la première
+        // rangée » ne la touchait donc pas. Mesuré : SVG de 1 259 px dans un moteur de 931,
+        // cinq cibles coupées hors du cadre.
+        //
+        // En colonne, la scène est le seul enfant SOUPLE (`flex: 1 1 auto; min-block-size: 0`,
+        // posé par `global.css`) : elle prend ce qui reste et rétrécit quand il en manque, pendant
+        // que les commandes gardent leur taille. Le style est EN LIGNE parce qu'un style en ligne
+        // bat la feuille — c'est précisément ce qui rendait la première correction inerte.
+        style={{ display: 'flex', flexDirection: 'column', gap: '1rem', blockSize: '100%', minBlockSize: 0 }}
     >
       <SceneSvg
         habillage={habillage}

@@ -258,14 +258,51 @@ export function EcranCampement({
         )}
       </header>
 
-      {/* ── le décor et ses points d'interaction : la prise de R11 ─────────────────────── */}
+      {/* ── R20 — LA LARGEUR ÉTAIT PERDUE, ET C'EST ELLE QUI MANQUAIT ─────────────────────
+          « sur une tablette il y a largement de la place et il y a besoin de scroller alors
+          qu'il n'y a pas besoin, et clairement c'est pas bien placé. »
+
+          Mesuré au campement, profil de la QA chargé : 1 815 px de contenu dans un cadre de
+          1 200, soit 615 px à faire défiler. Le détail par bloc disait où :
+
+              header 144 · scène 8 · Gobi 253 · étagère 298 · rapporté 246
+              mur des noms 110 · chaudron 243 · compagnons 297
+
+          Aucun bloc n'était trop grand. Ils étaient huit, EMPILÉS EN UNE SEULE COLONNE sur un
+          écran large de 1 920 px : la moitié de la tablette ne servait à rien. Le défaut
+          n'était pas une hauteur, c'était une largeur inutilisée — et c'est exactement ce que
+          le père décrivait.
+
+          `auto-fit` et non un nombre de colonnes en dur : la tablette est en paysage, mais le
+          jeu se sert aussi en portrait et sur un écran de bureau. Une seule colonne reste
+          possible quand la place manque, et rien n'est jamais coupé. */}
       <div
+        data-campement-grille="oui"
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(30rem, 1fr))',
+          gap: '1.5rem',
+          alignContent: 'start',
+          alignItems: 'start'
+        }}
+      >
+        {/* ── le décor et ses points d'interaction : la prise de R11 ───────────────────────
+
+            `maxBlockSize` mesuré, pas choisi : sans borne, le décor prenait 405 px dans sa
+            colonne et poussait toute la grille. Le mettre en PLEINE LARGEUR est pire encore
+            (1 862 px contre 1 578) — il gagne alors une rangée à lui seul.
+
+            Il faisait 8 px AVANT ce lot : `aspect-ratio` ne s'appliquait pas dans la colonne
+            souple, et le décor du hub — la prise de R11, celle qui porte tous les points
+            d'interaction — était écrasé à rien. Le borner le rend visible ET tenu. */}
+        <div
         data-scene="campement"
         data-points={String(points.length)}
         style={{
           position: 'relative',
           inlineSize: '100%',
           maxInlineSize: '1200px',
+          maxBlockSize: '260px',
           aspectRatio: `${String(largeurScene)} / ${String(hauteurScene)}`,
           backgroundImage:
             campement === null ? 'none' : `url(${urlAsset(String(campement.scene.fichier))})`,
@@ -324,7 +361,15 @@ export function EcranCampement({
       {/* L'étagère : l'album des formes, cases vides comprises (D44). Elle est posée AVANT le
           mur des noms parce qu'elle répond à la question que le mur ne répond pas — « combien
           y en a-t-il en tout ? ». Le mur grave l'acquis, l'étagère montre le reste. */}
-      <Etagere etagere={etagere} titre="L’étagère de Gobi" />
+      {/* ── LES DEUX PANNEAUX QUI VEULENT DE LA LARGEUR ───────────────────────────────────
+          Mesuré : l'étagère fait 298 px sur 1 872 de large et 686 px sur 608 — rétrécir un
+          panneau qui aligne 25 cases le fait grandir de 388 px. Les compagnons de même,
+          297 contre 505. Leur donner la rangée entière fait GAGNER 270 px au total (1 848 →
+          1 578), là où trois colonnes uniformes en perdaient. Un panneau qui aligne des
+          vignettes n'a pas la même faim de largeur qu'un panneau de texte. */}
+      <div style={{ gridColumn: '1 / -1' }}>
+        <Etagere etagere={etagere} titre="L’étagère de Gobi" />
+      </div>
 
       {/* ── CE QUE L'ENFANT A RAPPORTÉ — lot S5 ──────────────────────────────────────────────
           Six objets déclarés dans `contenu/monde/campement.json`, un par région, servis par le
@@ -339,7 +384,7 @@ export function EcranCampement({
 
       <Chaudron surOuvrir={surOuvrirChaudron} animationsDesactivees={animationsDesactivees} />
 
-      <section className="panneau" aria-label="Les compagnons">
+      <section className="panneau" aria-label="Les compagnons" style={{ gridColumn: '1 / -1' }}>
         <h2 className="panneau-titre" style={{ fontSize: '1.5rem' }}>
           La bande
         </h2>
@@ -353,6 +398,7 @@ export function EcranCampement({
           ))}
         </div>
       </section>
+      </div>
     </main>
   );
 }

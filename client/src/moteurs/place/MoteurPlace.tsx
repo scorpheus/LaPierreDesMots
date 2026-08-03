@@ -175,7 +175,16 @@ export function MoteurPlace(
         data-habillage={habillage.id}
         data-termine={etat.termineMs === null ? 'non' : 'oui'}
         data-consigne={etatConsigne?.id ?? ''}
-        style={{ display: 'grid', gap: '1rem' }}
+        // R20 — COLONNE SOUPLE, ET NON GRILLE. En grille, la scène n'est la première rangée que
+        // pour `colorie` ; `place` la met en deuxième, et une règle qui borne « la première
+        // rangée » ne la touchait donc pas. Mesuré : SVG de 1 259 px dans un moteur de 931,
+        // cinq cibles coupées hors du cadre.
+        //
+        // En colonne, la scène est le seul enfant SOUPLE (`flex: 1 1 auto; min-block-size: 0`,
+        // posé par `global.css`) : elle prend ce qui reste et rétrécit quand il en manque, pendant
+        // que les commandes gardent leur taille. Le style est EN LIGNE parce qu'un style en ligne
+        // bat la feuille — c'est précisément ce qui rendait la première correction inerte.
+        style={{ display: 'flex', flexDirection: 'column', gap: '1rem', blockSize: '100%', minBlockSize: 0 }}
       >
         <p data-consigne-texte="oui" role="status" aria-live="polite">
           {consigne?.texte ?? ''}

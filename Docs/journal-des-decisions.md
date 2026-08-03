@@ -957,6 +957,97 @@ plutôt qu'un rayon inventé.
 
 ---
 
+### D52. « Il faut défiler » et « c'est hors d'atteinte » sont DEUX griefs, et un seul est exemptable
+
+**Établi le 2026-08-03 en corrigeant R20**, après m'être fait prendre par ma propre mesure.
+
+**Ce qui s'est passé.** Le premier correctif posait `overflow: hidden` sur `[data-ecran]`. Le
+débordement mesuré est tombé à zéro d'un coup, sur les vingt écrans. C'était faux : `hidden` rend
+`scrollHeight === clientHeight`, **que le contenu tienne vraiment ou qu'il soit coupé**. La mesure
+n'était pas devenue bonne, elle était devenue **incapable d'échouer** — et derrière ce zéro, dix
+commandes étaient coupées (« le pot de couleur », « Colorier en rouge »), puis trois écrans entiers,
+dont cent seize boutons du dashboard parent.
+
+**La règle qui en sort.** Un écran se juge sur deux grandeurs distinctes, et les confondre fait
+disparaître la pire des deux :
+
+| grief | comment il se mesure | exemptable ? |
+|---|---|---|
+| **il faut défiler** | on interroge TOUT conteneur défilable, pas seulement le document — depuis `overflow: auto`, c'est `[data-ecran]` qui défile et le document reste à sa taille | oui, si c'est nommé et justifié |
+| **c'est hors d'atteinte** | on demande au navigateur d'amener la commande à l'écran (`scrollIntoView`) et on regarde si elle y arrive — on le CONSTATE, on ne le déduit pas d'un calcul de boîtes qu'un conteneur imbriqué rendrait faux | **jamais** |
+
+Le second est le grave : un bouton qu'aucun défilement ne rejoint est **introuvable**, alors qu'un
+bouton sous la ligne de flottaison est seulement pénible. Il n'a donc aucune exemption, pas même
+dans la zone parent.
+
+**Corollaire sur `overflow: hidden`.** Il FORÇAIT le résultat au lieu de le produire. Ce qui fait
+tenir un écran, c'est le dimensionnement — ici, faire de la scène l'unique enfant souple de son
+moteur. `auto` ne fait plus rien quand tout tient, et garde le contenu atteignable quand ça
+dépasse. **Toute propriété qui rend une mesure incapable d'échouer est à traiter comme un défaut,
+même quand elle affiche le bon chiffre.**
+
+**Corollaire sur la portée d'une règle.** « Rien ne défile » est la règle du JEU, sur la tablette de
+l'enfant. L'appliquer telle quelle au dashboard parent — dont la liste de brouillons est non bornée
+par nature — reviendrait à exiger qu'il n'y ait jamais plus de six brouillons, et rendrait la règle
+creuse. Une exemption se **nomme**, se **justifie**, et ne dispense **que du grief qu'elle vise**.
+
+**Contrat de sortie.** `tests/qualite/mise-en-page-tablette.spec.ts`, 89 cas. Il n'écrit aucune
+liste : il reprend `recettesDEcrans()` (87 recettes — 11 écrans plus une par nœud livré, soit les 14
+moteurs). Ma sonde artisanale en couvrait 20, **quatre fois moins**. Il porte un contrôle positif
+qui fabrique un débordement de 3 000 px et exige de le voir ; celui-ci a gagné ses frais à sa
+première exécution en désignant le harnais plutôt que la mise en page.
+
+**Dette ouverte.** Le campement déborde encore de 378 px, tenue en **cliquet** dans `DETTE_MESUREE` :
+la valeur ne peut que descendre, le garde échoue si l'écran grandit d'un pixel. Le résorber demande
+de retirer ou déplacer du contenu — arbitrage du père, voir `retours-de-jeu.md` § R20.
+
+---
+
+### D53. Quand une règle des specs et un retour de jeu s'opposent, la règle gagne, et la dette se chiffre
+
+**Établi le 2026-08-03**, levé non par une relecture mais par la QA des invariants — **49 recettes
+rouges d'un coup**.
+
+Borner une scène pour la faire tenir la rétrécit dans les **deux** dimensions : le rapport d'aspect
+est conservé. Sur `colorie`, 21 régions coloriables sont aussitôt passées sous les 64 px de R16.
+Sortie citée :
+
+```
+path « le tronc du premier arbre »   31 × 91
+path « l'horloge de l'école »        47 × 47
+path « la porte de l'école »         45 × 86
+```
+
+Ramener un tronc de 31 px à 64 demande une scène **2,06 fois** plus grande, soit près de 2 500 px de
+haut sur une tablette qui en offre 1 200 : **aucune mise en page ne peut satisfaire les deux**. Le
+défaut n'est donc pas dans la disposition, il est dans l'**asset**.
+
+**La règle.** « Cibles ≥ 64 px, aucune coordination fine exigée » est une règle non négociable des
+specs ; « rien ne défile » est un retour de jeu, donc un confort. La règle l'emporte, et la dette du
+confort se **chiffre** dans le garde plutôt que de disparaître dans une exemption muette.
+
+**Trois corollaires, chacun payé une fois ce jour-là.**
+
+1. **Vérifier qu'un défaut vient bien de son lot avant de le corriger.** Le lot remisé, la recette
+   passe ; remis, elle échoue. Sans cette vérification j'aurais pu passer des heures sur une cause
+   qui n'était pas la mienne — ou pire, m'exonérer à tort.
+2. **Un correctif qui ne déplace pas le chiffre n'a pas touché la cause.** Retirer `max-block-size`
+   seul n'a rien changé : les mêmes 21 régions, au pixel près. Ce n'était pas la borne qui mordait
+   mais `flex: 1 1 auto` conjugué à `min-block-size: 0`. Un chiffre identique après correctif est un
+   **signal**, jamais un hasard.
+3. **Une mesure dont on change la définition doit reprouver qu'elle sait échouer.** La définition du
+   grief « hors d'atteinte » a changé en cours de route ; le contrôle positif ajouté au même moment
+   l'a réfutée à sa première exécution — `scrollIntoView` traverse un `overflow: hidden`, qui
+   empêche le DOIGT de défiler mais pas le script. Le grief se mesure désormais par la géométrie :
+   une commande est hors d'atteinte quand un ancêtre qui rogne la laisse entièrement hors de sa
+   boîte.
+
+**Trois instruments menteurs dans un seul lot**, et aucun trouvé par relecture : `overflow: hidden`
+qui rend `scrollHeight === clientHeight`, `page.evaluate` recevant une chaîne qui n'appelle jamais
+la fonction, `scrollIntoView` qui traverse ce qui rogne. Voir D52 pour les deux premiers.
+
+---
+
 ## Points encore ouverts
 
 | # | Point | Source | Bloque quoi |

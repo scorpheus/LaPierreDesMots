@@ -346,14 +346,149 @@ symétrique de R11 — on avance au tap, jamais au chronomètre — plus un reto
 
 ---
 
-## R20. Tout devrait tenir sur un écran, sans défilement — **ouvert**
+## R20. Tout devrait tenir sur un écran, sans défilement — **corrigé, sauf le campement**
 
 « sur une tablette il y a largement de la place et il y a besoin de scroller alors qu'il n'y a pas
 besoin, et clairement c'est pas bien placé. »
 
 Cible : Galaxy Tab S10 FE, 1920 × 1200. Un enfant de 7 ans qui doit faire défiler pour trouver le
-bouton perd le fil de l'exercice. Refonte de mise en page à faire écran par écran, avec une
-recette qui MESURE l'absence de défilement à cette résolution — sans quoi elle reviendra.
+bouton perd le fil de l'exercice.
+
+### Mesuré avant de toucher à quoi que ce soit
+
+Sonde `bac-a-sable/r20-mise-en-page/mesurer-debordement.mjs`, à la résolution réelle :
+
+```
+7 écrans sur 20 obligent à faire défiler
+carte · campement · coffre · ouverture · reglages-lecture   →  76 px  (chiffre CONSTANT)
+noeud:place                                                 → 470 px
+noeud:colorie                                               → 873 px
+```
+
+Le **76 revenant cinq fois** désignait une cause partagée, et non cinq défauts : les scènes se
+dimensionnent par leur LARGEUR et laissent leur hauteur suivre le rapport d'aspect du `viewBox`,
+sans jamais regarder la hauteur disponible.
+
+### Le piège qui compte plus que la correction
+
+Mon premier correctif posait `overflow: hidden` sur `[data-ecran]`. Le débordement mesuré est tombé
+à **zéro d'un coup** — parce que `hidden` rend `scrollHeight === clientHeight`, **que le contenu
+tienne vraiment ou qu'il soit COUPÉ**. La mesure était devenue creuse, et j'allais annoncer « 0 px
+de débordement » sur un jeu cassé.
+
+La sonde renforcée a trouvé aussitôt dix cibles coupées : « le pot de couleur », « Colorier en
+rouge », « un ballon »… puis trois écrans entiers — « Ouvrir le chaudron à couleurs » au campement,
+cent seize boutons « Valider »/« Rejeter » au dashboard, la galerie complète.
+
+**Un bouton coupé est pire qu'un bouton qu'on atteint en faisant défiler** : le premier est
+introuvable, le second seulement pénible. `overflow: hidden` a été remplacé par `overflow: auto` :
+ce qui fait tenir les écrans, c'est le dimensionnement, pas le rognage.
+
+### Deux griefs, et un seul est exemptable
+
+| grief | ce qu'il mesure | portée |
+|---|---|---|
+| **il faut défiler** | tout conteneur défilable, pas seulement le document | le jeu ; toléré sur `dashboard` et `galerie-parent` |
+| **c'est hors d'atteinte** | on demande au navigateur d'amener la commande à l'écran, et on regarde si elle y arrive | **partout, sans exception** |
+
+L'exemption des deux écrans parent est nommée et justifiée : ce sont des consoles d'administration
+dont les listes sont non bornées par nature. Exiger qu'elles tiennent dans 1 200 px reviendrait à
+exiger qu'il n'y ait jamais plus de six brouillons à valider. Elles restent tenues par le second
+grief, qui est celui qui compte.
+
+### Ce qui a été corrigé
+
+- Les scènes de moteur deviennent l'**unique enfant souple** de leur moteur, où qu'elles soient
+  dans l'ordre. La première version bornait « la première rangée de la grille » — vrai pour
+  `colorie`, faux pour `place`, qui met sa consigne devant : son SVG restait à 1 259 px dans un
+  moteur de 931.
+- `[data-ecran]` passe en `overflow: auto`.
+- Le campement passe en grille responsive ; son décor, **qui était écrasé à 8 px** parce que
+  `aspect-ratio` ne s'appliquait pas dans une colonne souple, est de nouveau visible.
+
+### Le garde
+
+`tests/qualite/mise-en-page-tablette.spec.ts`, **89 cas, tous verts**. Il n'écrit aucune liste
+d'écrans : il reprend `recettesDEcrans()` — **87 recettes**, les 11 écrans plus une par nœud livré,
+soit les 14 moteurs. Ma sonde artisanale en couvrait 20 : **quatre fois moins**. Un écran ou un
+moteur ajouté demain entre dans le garde tout seul.
+
+Il porte un **contrôle positif** qui fabrique un débordement de 3 000 px et exige de le voir. Il a
+gagné ses frais à sa première exécution : les sept premiers cas ont échoué d'un coup, contrôle
+positif compris, ce qui a immédiatement désigné le harnais — `page.evaluate` recevant une chaîne
+évalue la fonction fléchée sans jamais l'appeler — et non la mise en page.
+
+### Le conflit que ce lot a révélé : R16 contre R20, et R16 gagne
+
+C'est la trouvaille qui compte le plus, et elle n'est venue d'aucune relecture — c'est la QA des
+invariants qui l'a levée, **49 recettes rouges d'un coup**.
+
+Borner une scène pour la faire tenir la rétrécit dans les **deux** dimensions : le rapport d'aspect
+est conservé. Sur `colorie`, 21 régions coloriables sont aussitôt passées sous les 64 px des specs.
+Sortie citée :
+
+```
+path « le tronc du premier arbre »       31 × 91
+path « l'horloge de l'école »            47 × 47
+path « la porte de l'école »             45 × 86
+path « la première fenêtre de l'école »  54 × 45
+```
+
+Vérifié plutôt que supposé : le lot remisé, la même recette passe ; le lot remis, elle échoue. C'est
+bien cette borne, et rien d'autre.
+
+Ramener un tronc de 31 px à 64 demande une scène **2,06 fois** plus grande, soit près de 2 500 px de
+haut sur une tablette qui en offre 1 200. **Aucune mise en page ne peut satisfaire les deux.** Le
+défaut n'est donc pas dans la disposition : il est dans l'**asset**, dont les régions sont trop fines
+pour un écran de 1 200 px.
+
+« Cibles ≥ 64 px, aucune coordination fine exigée » est une règle non négociable des specs ; « rien
+ne défile » est un retour de jeu. **La règle l'emporte sur le confort** : `colorie` garde sa scène,
+son écran défile — il défilait déjà — et le garde porte la dette au lieu de la taire.
+
+### Trois fois où l'instrument mentait, et ce que ça coûte de ne pas le vérifier
+
+Ce lot a produit **trois** mesures qui affichaient le bon chiffre en ne mesurant rien. Aucune n'a été
+trouvée par relecture ; les trois l'ont été par un contrôle positif ou par une suite existante.
+
+1. **`overflow: hidden`** rend `scrollHeight === clientHeight` : « 0 px de débordement » sur dix
+   commandes coupées.
+2. **`page.evaluate` recevant une chaîne** évalue la fonction fléchée sans jamais l'appeler et rend
+   `undefined` : les sept premiers cas ont échoué d'un coup, ce qui a désigné le harnais et non la
+   mise en page.
+3. **`scrollIntoView`** traverse un `overflow: hidden` — la propriété empêche le DOIGT de défiler,
+   pas le script. L'instrument censé constater l'atteignabilité déclarait donc atteignable
+   exactement ce qui ne l'est pas. Le grief se mesure désormais par la **géométrie** : une commande
+   est hors d'atteinte quand un ancêtre qui rogne la laisse entièrement hors de sa boîte.
+
+Le garde porte **deux** contrôles positifs, un par grief. Le second n'existait pas au départ ; il a
+été ajouté au moment où la définition du grief a changé, et il a réfuté la nouvelle définition à sa
+première exécution. **Une mesure dont on modifie la définition sans lui redemander de prouver
+qu'elle sait échouer est une mesure qu'on vient de perdre.**
+
+### Ce qui reste, et pourquoi c'est un arbitrage et non un défaut
+
+**Le campement déborde encore de 378 px.** Balayage complet, sortie citée :
+
+```
+une colonne (état d'origine, décor rendu)      2 607 px
+3 colonnes de 608                              1 848 px
+2 colonnes de 924                              2 209 px
+4 colonnes                                     1 903 px
+décor en pleine largeur                        1 862 px
+3 col + étagère et compagnons pleine largeur   1 578 px   ← état actuel
+cadre de la tablette                           1 200 px
+```
+
+Aucun assemblage ne descend sous 1 578, et la raison est mesurable : **rétrécir un panneau
+l'ALLONGE** — l'étagère fait 298 px sur 1 872 de large et 686 px sur 608. Il reste huit blocs pour
+1 200 px de haut. Les 378 px restants demandent de **retirer ou de déplacer du contenu**, ce qui
+touche une règle écrite en tête de `EcranCampement.tsx` : « Rien n'est caché. Un compagnon non
+rallié, un objet non rapporté : visibles et gris. » **Cet arbitrage appartient au père.**
+
+En attendant, le garde tient la valeur exacte en **cliquet** (`DETTE_MESUREE`) : elle ne peut que
+descendre, elle échoue si le campement grandit d'un pixel, et sa ligne disparaît le jour où
+l'arbitrage est rendu.
 
 ---
 

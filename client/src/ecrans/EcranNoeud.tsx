@@ -403,7 +403,10 @@ export function EcranNoeud(): ReactElement {
         flexDirection: 'column',
         gap: '1rem',
         padding: '1rem',
-        minBlockSize: '100vh'
+        // R20 — une hauteur DÉFINIE, pas un minimum. `minBlockSize` laisse la colonne grandir
+        // avec son contenu : la scène du coloriage réclamait alors 2 073 px pour un cadre de
+        // 1 200. Avec `blockSize`, c'est la scène qui s'adapte au reste, et non l'inverse.
+        blockSize: '100dvh'
       }}
     >
       {/* ---------------------------------------------------------- barre de consigne

@@ -363,7 +363,16 @@ export function EcranCarte({
   return (
     <main
       data-ecran="carte"
-      style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}
+      // R20 — l'écran prend la hauteur du cadre, et c'est le parchemin qui s'adapte au reste.
+      // Mesuré avant : 1276 px pour un cadre de 1200, parce que le parchemin se dimensionne par
+      // sa largeur et laisse sa hauteur suivre le rapport d'aspect.
+      style={{
+        padding: '1.5rem',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '1.25rem',
+        blockSize: '100dvh'
+      }}
     >
       <header style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
         <h1 className="titre" style={{ fontSize: '2.25rem', margin: 0 }}>
@@ -440,6 +449,11 @@ export function EcranCarte({
         </button>
       )}
 
+      {/* R20 — la scène prend ce qui reste, et jamais plus. `data-scene-adaptative` porte la
+          règle partagée de `global.css` : `flex: 1`, `min-block-size: 0`, et un SVG borné en
+          hauteur ET en largeur. Sans `min-block-size: 0`, un enfant flex refuse de descendre
+          sous sa taille de contenu et toute la règle serait inerte. */}
+      <div data-scene-adaptative="carte">
       <Parchemin>
         {/* Le décor. Absent, la carte le dit calmement et reste utilisable — jamais d'erreur. */}
         {requeteDecor.data === undefined ? (
@@ -742,6 +756,7 @@ export function EcranCarte({
           );
         })}
       </Parchemin>
+      </div>
 
       {/* Ce qu'on peut jouer maintenant. Deux régions en parallèle dès la troisième (v2 § 3.3). */}
       <section aria-label="Où aller">

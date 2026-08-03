@@ -655,3 +655,153 @@ body {
   transition-duration: 1ms !important;
   scroll-behavior: auto !important;
 }
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════════
+   R20 — TOUT TIENT DANS L'ÉCRAN, SANS DÉFILEMENT
+
+   « sur une tablette il y a largement de la place et il y a besoin de scroller alors qu'il n'y a
+   pas besoin, et clairement c'est pas bien placé. »
+
+   MESURÉ AVANT D'ÉCRIRE UNE RÈGLE, sur la résolution réelle de la cible (Galaxy Tab S10 FE,
+   1920 × 1200, la même que `playwright.config.ts`) :
+
+       7 écrans sur 20 obligent à faire défiler
+       carte · campement · coffre · ouverture · reglages-lecture   →  76 px  (chiffre CONSTANT)
+       noeud:place                                                 → 470 px
+       noeud:colorie                                               → 873 px
+
+   Le 76 revenant cinq fois désignait une cause partagée, et elle a été nommée plutôt que
+   supposée : `<main data-ecran="carte">` mesurait 1276 px avec `box-sizing: border-box`. Le
+   parchemin est dimensionné par sa LARGEUR et sa hauteur suit le rapport d'aspect — il ignore
+   donc complètement la hauteur disponible. À 1920 de large, un `viewBox` 1200×800 réclame
+   1248 px de haut, plus l'en-tête et le panneau du bas.
+
+   La règle ci-dessous inverse la contrainte : l'écran prend EXACTEMENT la hauteur du cadre, et
+   c'est la scène qui s'adapte au reste. `min-block-size: 0` sur l'élément souple n'est pas un
+   détail — sans lui, un enfant flex refuse de descendre sous sa taille de contenu, et toute la
+   règle ne sert à rien.
+
+   Pourquoi cela compte, et ce n'est pas une question de goût : un enfant de 7 ans qui doit faire
+   défiler pour trouver le bouton perd le fil de son exercice. Le contrôle des cibles de 64 px
+   (R16) suppose lui aussi qu'elles soient VISIBLES.
+   ══════════════════════════════════════════════════════════════════════════════════════════════ */
+
+[data-ecran] {
+  /* `dvh` et non `vh` : sur tablette, la barre du navigateur peut apparaître et disparaître, et
+     `vh` fige la hauteur d'avant. */
+  max-block-size: 100dvh;
+
+  /* ── `auto`, ET SURTOUT PAS `hidden` ────────────────────────────────────────────────────────
+     Ma première version posait `overflow: hidden` ici. Le débordement mesuré est tombé à zéro
+     d'un coup — parce que `hidden` rend `scrollHeight === clientHeight`, que le contenu tienne
+     VRAIMENT ou qu'il soit COUPÉ. La mesure était devenue creuse, et trois écrans réels y ont
+     perdu des commandes pour de bon : « Ouvrir le chaudron à couleurs » au campement, cent
+     seize boutons « Valider »/« Rejeter » au dashboard, la galerie entière.
+
+     `hidden` FORÇAIT le résultat au lieu de le produire. Ce qui fait vraiment tenir les écrans,
+     c'est le dimensionnement juste en dessous — la scène souple qui rend la hauteur qu'elle n'a
+     pas. `auto` ne fait plus rien quand tout tient (aucune barre, aucun défilement) et garde le
+     contenu ATTEIGNABLE quand il dépasse. Le garde `tests/qualite/mise-en-page-tablette.spec.ts`
+     sépare exactement ces deux griefs : « il faut défiler » et « c'est hors d'atteinte ». */
+  overflow: auto;
+}
+
+/* La scène d'un écran : elle prend ce qui reste, et jamais plus. */
+[data-ecran] [data-scene-adaptative] {
+  flex: 1 1 auto;
+  min-block-size: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* Un SVG posé dans une scène adaptative se borne AUX DEUX dimensions. Sans la borne de hauteur,
+   il ne connaît que sa largeur et redevient trop grand. */
+[data-ecran] [data-scene-adaptative] > svg,
+[data-ecran] [data-scene-adaptative] > * > svg {
+  max-inline-size: 100%;
+  max-block-size: 100%;
+  block-size: auto;
+  inline-size: auto;
+}
+
+/* Les scènes des moteurs se dimensionnaient par leur LARGEUR — `width: 100%; height: auto` —
+   et laissaient leur hauteur suivre le rapport d'aspect du `viewBox`. Mesuré sur la tablette :
+   `noeud:colorie` réclamait 2 073 px pour un cadre de 1 200, `noeud:place` 1 670.
+
+   ⚠ ET LE PREMIER CORRECTIF A ÉTÉ PIRE QUE LE MAL. Poser `overflow: hidden` sur l'écran faisait
+   tomber le débordement mesuré à zéro — parce que `scrollHeight` devient `clientHeight`, que le
+   contenu tienne ou qu'il soit COUPÉ. La sonde a été renforcée pour compter les COMMANDES hors
+   cadre, et elle a immédiatement trouvé 5 cibles coupées sur `colorie` et 5 sur `place` : « le
+   pot de couleur », « Colorier en rouge », « un ballon »… Un bouton coupé est pire qu'un bouton
+   qu'on atteint en faisant défiler.
+
+   La borne ci-dessous fait donc RÉTRÉCIR la scène au lieu de la rogner. */
+/* TOUTE la chaîne doit autoriser le rétrécissement, pas seulement le SVG. Un seul ancêtre qui
+   refuse de descendre sous sa taille de contenu — c'est le défaut par défaut d'un enfant de
+   grille ou de flex, `min-block-size: auto` — et la borne du SVG ne sert à rien. C'est
+   exactement ce qui s'est passé au premier essai : la borne était posée, les cibles restaient
+   coupées. */
+[data-ecran="noeud"] [data-moteur] > * {
+  min-block-size: 0;
+  min-inline-size: 0;
+  /* Les commandes gardent leur taille : seule la scène est souple, juste en dessous. */
+  flex: 0 0 auto;
+}
+
+/* LA SCÈNE EST LE SEUL ENFANT SOUPLE, où qu'elle soit dans l'ordre. La première version bornait
+   « la première rangée de la grille » — vrai pour `colorie`, faux pour `place`, qui met sa
+   consigne devant. Un sélecteur qui vise l'OBJET plutôt que sa position ne se trompe plus. */
+[data-ecran="noeud"] [data-moteur] > svg.pierre-scene,
+[data-ecran="noeud"] [data-moteur] > svg[data-scene] {
+  flex: 1 1 auto;
+}
+
+[data-ecran="noeud"] svg.pierre-scene,
+[data-ecran="noeud"] svg[data-scene] {
+  max-inline-size: 100%;
+  max-block-size: 100%;
+  inline-size: auto;
+  block-size: auto;
+  /* Centrée dans la place qu'on lui laisse, plutôt que collée en haut à gauche. */
+  margin-inline: auto;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════════
+   QUAND R16 ET R20 S'OPPOSENT, R16 GAGNE — ET IL A GAGNÉ UNE FOIS, MESURÉ
+
+   Borner la scène la rétrécit dans les DEUX dimensions (le rapport d'aspect est conservé). Sur
+   `colorie`, la QA des invariants a immédiatement rougi — 18 cas, 21 régions passées sous le
+   seuil, sortie citée :
+
+       path « le tronc du premier arbre »       31 × 91
+       path « l'horloge de l'école »            47 × 47
+       path « la porte de l'école »             45 × 86
+
+   Vérifié plutôt que supposé : la même recette passait avant ce lot et échoue après. C'est bien
+   cette borne qui l'a cassée.
+
+   Pour ramener un tronc de 31 px à 64, il faudrait une scène 2,06 fois plus grande, soit près de
+   2 500 px de haut sur une tablette qui en offre 1 200. **Aucune mise en page ne peut satisfaire
+   les deux** : le défaut n'est pas dans la disposition, il est dans l'ASSET — la scène `ecole`
+   porte des régions trop fines pour être jouée sur un écran de 1 200 px.
+
+   « Cibles ≥ 64 px, aucune coordination fine exigée » est une règle non négociable des specs
+   (R16) ; « rien ne défile » est un retour de jeu (R20). La règle l'emporte sur le confort, et
+   la scène garde sa taille. Le garde de R20 porte alors la dette, chiffrée, dans `DETTE_MESUREE`.
+
+   Ce qui l'éteindra n'est pas du CSS : c'est un asset dont les régions coloriables sont plus
+   généreuses. Consigné dans `Docs/retours-de-jeu.md` § R20.
+   ══════════════════════════════════════════════════════════════════════════════════════════════ */
+[data-ecran="noeud"] [data-moteur][data-scene-non-reductible] svg.pierre-scene,
+[data-ecran="noeud"] [data-moteur][data-scene-non-reductible] svg[data-scene] {
+  /* Les TROIS ensemble, et pas seulement la borne. Retirer `max-block-size` seul n'a rien
+     changé — mesuré, les mêmes 21 régions restaient sous le seuil au pixel près : c'est
+     `flex: 1 1 auto` conjugué à `min-block-size: 0` qui autorisait la scène à descendre sous
+     sa taille de contenu, et la borne n'était pas la limite qui mordait. Un correctif qui ne
+     déplace pas le chiffre n'a pas touché la cause. */
+  max-block-size: none;
+  min-block-size: auto;
+  flex: 0 0 auto;
+}
