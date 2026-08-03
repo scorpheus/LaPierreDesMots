@@ -21,6 +21,7 @@ import { Gobi } from '../composants/Gobi.js';
 import { BoutonEcouter } from '../composants/BoutonEcouter.js';
 import { JaugePalier } from '../composants/JaugePalier.js';
 import { variablesHabillage } from '../habillages/chargeur.js';
+import { DecorDeFond } from '../habillages/DecorDeFond.js';
 import { useEtatJeu, useMagasin, useServices } from '../etat/services.js';
 import { INVITE_LIBRE } from '../moteurs/libre/MoteurLibre.js';
 import { obtenirRendu } from '../moteurs/registre-rendu.js';
@@ -485,15 +486,44 @@ export function EcranNoeud(): ReactElement {
       </header>
 
       {/* ---------------------------------------------------------- le moteur */}
-      <div style={{ flex: '1 1 auto', minBlockSize: 0 }}>
-        <ComposantMoteurMonte
-          contenu={paquet.exercice.jeu.contenu}
-          habillage={paquet.habillage}
-          etat={etatMoteur}
-          emettre={emettre}
-          services={services}
-          animationsDesactivees={animationsDesactivees}
-        />
+      {/*
+        LE DÉCOR EST MONTÉ ICI, UNE FOIS, POUR LES QUATORZE MOTEURS — R9, arbitré par le père
+        le 2026-08-03 : « oui fait comme ça, une seule fois dans EcranNoeud ».
+
+        Avant : deux moteurs sur quatorze montaient leur scène (`colorie`, `place`). Les douze
+        autres déclaraient un habillage et n'en affichaient rien — l'enfant jouait douze des
+        quatorze types de jeu sur un fond vide, et R13 (« jamais deux fois le même habillage
+        dans une sortie ») devenait inobservable, puisque deux habillages différents rendaient
+        un écran identique.
+
+        L'alternative était de reprendre les douze moteurs un par un : douze fois le coût, et
+        douze intégrations qui divergeraient. Ici, la scène retrouve la place que l'axe
+        « moteur × habillage × contenu » lui donne — l'habillage est le DÉCOR, le moteur est la
+        mécanique, et le moteur n'a pas à savoir dessiner.
+
+        `DecorDeFond` s'efface de lui-même pour les moteurs qui ont besoin d'un décor
+        ACTIONNABLE et montent le leur ; la liste est gardée par un test qui la croise avec le
+        code des moteurs, parce qu'une liste tenue à la main finit toujours par mentir.
+
+        `position: relative` porte le fond : sans lui, `inset: 0` se réfèrerait au bloc
+        contenant le plus proche, qui n'est pas celui-ci.
+      */}
+      <div style={{ flex: '1 1 auto', minBlockSize: 0, position: 'relative' }}>
+        <DecorDeFond habillage={paquet.habillage} moteur={codeMoteur} />
+        {/* Le moteur passe DEVANT le fond. `zIndex` seul ne suffirait pas sur un élément non
+            positionné : sans `position: relative`, il resterait dans le même plan que le fond
+            et l'ordre du document déciderait — ce qui marche par accident aujourd'hui et
+            cesserait de marcher au premier moteur qui positionne un de ses enfants. */}
+        <div style={{ position: 'relative', zIndex: 1, blockSize: '100%' }}>
+          <ComposantMoteurMonte
+            contenu={paquet.exercice.jeu.contenu}
+            habillage={paquet.habillage}
+            etat={etatMoteur}
+            emettre={emettre}
+            services={services}
+            animationsDesactivees={animationsDesactivees}
+          />
+        </div>
       </div>
 
       {/* ---------------------------------------------------------- Gobi */}
