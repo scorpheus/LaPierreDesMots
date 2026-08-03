@@ -267,7 +267,14 @@ export function MoteurEclair(
       )}
 
       <div data-plateau="options" style={{ display: 'flex', flexWrap: 'wrap' }}>
-        {(consigne === null ? [] : consigne.options).map((id) => {
+        {/* L'ORDRE VIENT DE L'ÉTAT, PAS DU FICHIER — R15 bis.
+            `consigne.options` est l'ordre d'écriture, et la bonne réponse y était en première
+            position sur 34 consignes sur 34 : taper le premier bouton suffisait à gagner sans
+            lire. `etape.ordreOptions` est tiré une seule fois par `Alea`, à la création de
+            l'état : les boutons ne dansent pas sous le doigt, et le rejeu reste exact.
+            Repli sur l'ordre du fichier si l'étape manque — un état incomplet ne doit jamais
+            faire disparaître les réponses. */}
+        {(etape?.ordreOptions ?? (consigne === null ? [] : consigne.options)).map((id) => {
           const option = contenu.options.find((o) => o.id === id);
           if (option === undefined) return null;
           return (

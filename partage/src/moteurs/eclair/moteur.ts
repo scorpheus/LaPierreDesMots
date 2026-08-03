@@ -188,6 +188,12 @@ export const moteurEclair: Moteur<ContenuEclair, EtatEclair, ActionEclair> = {
     const instant = entree.horloge.maintenantMs();
     const etapes = entree.contenu.consignes.map(
       (etape, index): EtatEtapeEclair => ({
+        // R15 bis — L'ORDRE EST TIRÉ, PAS RECOPIÉ. Mesuré sur les 76 exercices livrés : la
+        // bonne réponse était en première position sur 34 consignes sur 34. Un enfant qui
+        // tapait toujours le premier bouton gagnait sans lire, et l'exercice ne mesurait plus
+        // rien. Le tirage passe par `Alea` — donc reproductible à la graine près, et le rejeu
+        // (annexe T § T2) reste exact.
+        ordreOptions: entree.alea.melanger(etape.options),
         identifiant: etape.id,
         restantes: [etape.reponse],
         nbErreurs: 0,

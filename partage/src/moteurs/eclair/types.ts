@@ -80,6 +80,24 @@ export interface RefusEclair {
 }
 
 export interface EtatEtapeEclair {
+  /**
+   * L'ORDRE D'AFFICHAGE des options de cette étape — mélangé, jamais celui du fichier.
+   *
+   * LE DÉFAUT QU'IL CORRIGE, mesuré sur les 76 exercices livrés :
+   *
+   *     consignes à options : 34   dont la bonne réponse en PREMIÈRE position : 34  (100 %)
+   *
+   * Trente-quatre sur trente-quatre. Un enfant qui tape toujours le premier bouton gagnait à
+   * tous les coups **sans lire une seule lettre** — l'exercice ne mesurait rien, et pire, il
+   * apprenait une stratégie de position. Le père l'a vu en jouant : « ça sélectionne toujours
+   * le premier ».
+   *
+   * L'ordre vit dans l'ÉTAT et non dans le rendu, parce qu'il doit être tiré une seule fois :
+   * mélanger à chaque rendu ferait danser les boutons sous le doigt de l'enfant. Il est tiré
+   * par `Alea`, donc reproductible à la graine près — le rejeu (annexe T § T2) reste exact.
+   */
+  readonly ordreOptions: readonly IdOptionEclair[];
+
   /** `identifiant`, et non `id` : c'est le nom qu'`EtapeGenerique` (L2-C) impose. */
   readonly identifiant: IdConsigne;
   /** Ce qu'il reste à faire sur cette étape. Vide = étape close. */
