@@ -56,3 +56,16 @@ dist-types/
 # (le LISEZ-MOI reste versionne, il porte la regle)
 bac-a-sable/*
 !bac-a-sable/LISEZ-MOI.md
+
+# Polices de lecture — TÉLÉCHARGÉES, JAMAIS VERSIONNÉES (D9).
+# `client/public/polices/LICENCES.md` le dit depuis toujours : « un dépôt de code n'est pas un
+# miroir de distribution ». Mais rien ne l'appliquait — les binaires apparaissaient en
+# non-suivis, prêts à être emportés par un `git add` large. Les empreintes SHA-256 sont épinglées
+# dans `scripts/telecharger-polices.mjs`, qui refuse d'écrire un fichier divergent.
+client/public/polices/*.woff2
+client/public/polices/*.woff
+client/public/polices/*.ttf
+
+# Archives des habillages-bouchons remplacés par `scripts/dessiner-decors.mjs`. Ce sont des
+# copies de sauvegarde du générateur, pas des sources.
+production/archives/habillages-bouchons/

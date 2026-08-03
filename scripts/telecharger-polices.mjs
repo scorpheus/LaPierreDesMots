@@ -57,7 +57,10 @@ const POLICES = [
     auteur: 'SIL Global',
     page: 'https://software.sil.org/andika/',
     url: 'https://cdn.jsdelivr.net/npm/@fontsource/andika@5.2.5/files/andika-latin-400-normal.woff2',
-    sha256: null,
+    // Épinglée le 2026-08-03. Provenance : paquet npm `@fontsource/andika@5.2.5`, servi par
+    // jsDelivr. Une version npm publiée est immuable — l'empreinte d'un fichier d'une version
+    // donnée est donc stable, et c'est ce qui rend l'épinglage légitime plutôt que circulaire.
+    sha256: '319cc7dee0e22c4cfb68864a254c1ceabfa2df25437aa9d8c3814bfc967fd379',
     note: 'Police par défaut de toute zone de lecture (v2 § 9.3). Conçue pour l’alphabétisation : « a » et « g » à une boucle, comme dans les manuels.'
   },
   {
@@ -68,7 +71,7 @@ const POLICES = [
     auteur: 'SIL Global',
     page: 'https://software.sil.org/andika/',
     url: 'https://cdn.jsdelivr.net/npm/@fontsource/andika@5.2.5/files/andika-latin-700-normal.woff2',
-    sha256: null,
+    sha256: '7741c884c7aaf187b9cfcdb07ae6cf20017aa050ba60423cee6b56813e8f90ac',
     note: 'Graisse des mots cibles d’une consigne. La graisse marque, elle n’insiste pas.'
   },
   {
@@ -79,7 +82,7 @@ const POLICES = [
     auteur: 'Abbie Gonzalez',
     page: 'https://opendyslexic.org/',
     url: 'https://cdn.jsdelivr.net/npm/@fontsource/opendyslexic@5.2.5/files/opendyslexic-latin-400-normal.woff2',
-    sha256: null,
+    sha256: 'f007004af3cda5d8076e57c943f8cc8d00a0da25988b1ae1048683d60e7cac1a',
     note: 'Embarquée pour l’ADHÉSION, jamais présentée comme un remède (D19). Wery & Diliberto 2017 ne mesure aucune amélioration chez l’enfant.'
   },
   {
