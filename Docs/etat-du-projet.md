@@ -30,6 +30,9 @@ Chacun porte sa mesure et son état dans **[retours-de-jeu.md](retours-de-jeu.md
 | **R4** | Une étoile sans qu'on dise pourquoi | ouvert |
 | **R5** | Particules qui resteraient à l'écran | **non reproduit** — ma mesure était invalide |
 | **R6** | Montrer Gobi quand il évolue | demandé |
+| **R7** | La maîtresse avait la tête dans le sol | ✅ corrigé (`8aa1fc6`) |
+| **R8** | Aucune police sur le disque — jamais d'Andika | ✅ 6/8 (`839febc`, `524019a`) |
+| **R9** | **12 moteurs sur 14 ne dessinent aucun décor** | ouvert — structurel |
 
 ---
 

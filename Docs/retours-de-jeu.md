@@ -170,6 +170,83 @@ nom du stade. Interruptible d'un tap comme tout le reste (v2 § 8, « aucune ani
 
 ---
 
+## R8. Aucune police n'était sur le disque — **corrigé, 6 sur 8**
+
+Trouvé dans sa console, pas par un test : `OTS parsing error: invalid sfntVersion: 1008821359`.
+**1008821359 = 0x3C21444F = « <!DO »** : les requêtes de police recevaient la page HTML, par le
+repli SPA du serveur, parce que le fichier n'existait pas.
+
+```
+$ find . -name "*.woff2" -not -path "./node_modules/*"
+(aucun résultat)
+```
+
+**Aucune police n'a jamais été téléchargée.** L'enfant a lu tous ses exercices dans la police
+système, jamais en Andika — alors que « fond parchemin, police Andika » est une règle non
+négociable, et qu'Andika est choisie pour l'alphabétisation (« a » et « g » à une boucle, comme
+dans ses manuels).
+
+Puis un second défaut, de même nature, sous le premier. Les polices vivaient dans **deux listes
+que rien ne rapprochait** :
+
+```
+réclamées par les feuilles de style : 8   (global.css 3, polices.css 5)
+connues de telecharger-polices.mjs  : 5
+intersection                        : 5   → 3 que RIEN n'allait jamais chercher
+```
+
+**État** : 6 / 8 téléchargées et vérifiées, empreintes épinglées. Luciole et Belle Allure GS
+restent absentes — pas de source établie, et la redistribution de Belle Allure n'est pas acquise ;
+elles ne servent que la matrice de l'écran de réglages. Garde posé :
+`tests/unitaires/polices-declarees.test.ts` croise les deux listes dans les deux sens.
+
+**Ce que ça dit de la QA** : `tests/visuel/polices.spec.ts` capture cinq polices et ses cinq cas
+**passaient**. Ils ne pouvaient rien prouver — les cinq rendaient dans la même police de repli, et
+les références ont été figées sur cet état.
+
+---
+
+## R9. Douze moteurs sur quatorze ne dessinent aucun décor — **ouvert, et c'est structurel**
+
+Trouvé en cherchant pourquoi la luciole restait invisible après avoir été dessinée. Elle l'est
+bel et bien : le SVG la porte, l'habillage la déclare (surface 7 152, centroïde [300, 252]). Mais
+**`MoteurEclair` ne monte jamais la scène.** Il rend la consigne, l'éclair du mot, le bouton
+« Revoir » et les options. L'habillage ne lui sert qu'à remplir `data-habillage`.
+
+Recensé sur les OBJETS — les quatorze moteurs — et non sur les occurrences d'un mot-clé :
+
+```
+moteur       monte son décor ?
+assemble     non        histoire     non
+attrape      non        libre        non
+chemin       non        paires       non
+chrono       non        phrase       non
+eclair       non        trace        non
+grave        non        tri          non
+colorie      OUI (SceneSvg)
+place        OUI (ScenePlace)
+```
+
+**2 sur 14.** Vérifié aussi que le décor n'est pas monté *autour* du moteur : `EcranNoeud`
+n'utilise l'habillage que pour poser ses jetons de palette en variables CSS
+(`variablesHabillage`), jamais pour afficher la scène.
+
+**Pourquoi c'est grave, et pas seulement laid.** « Moteur × habillage × contenu » est l'axe qui
+porte la promesse de variété — R12 (≥ 3 moteurs par compétence) et R13 (jamais deux fois le même
+habillage dans une sortie). Un habillage qui ne s'affiche pas rend R13 **inobservable** : deux
+sorties « avec des habillages différents » sont identiques à l'écran. Et l'enfant joue douze des
+quatorze types de jeu sur un fond vide, avec des boutons et du texte.
+
+C'est aussi la vraie réponse à « il faut commencer à rendre le jeu beau » : le décor existe, il
+est mesuré, il est validé — et personne ne le montre.
+
+**À trancher** : les douze moteurs sont-ils repris un par un, ou le décor est-il monté **une
+fois** par `EcranNoeud` derrière tous les moteurs, chaque moteur restant libre de le surcharger ?
+La seconde voie règle les douze d'un coup et remet la scène là où l'axe la place — mais elle
+touche un fichier que tous les moteurs partagent.
+
+---
+
 ## Ce que la QA doit apprendre de ces six
 
 Trois recettes manquantes, formulées comme des propriétés et non comme des captures :
