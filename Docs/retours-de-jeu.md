@@ -381,6 +381,42 @@ exercice. Il faudrait plutôt avoir des changements d'exercice en fonction des m
 
 ---
 
+## R23. Le nom des régions est trop petit sur la carte — **ouvert**
+
+Demandé le 2026-08-03. La carte est « l'écran qu'on ouvre en premier, celui qu'on montre à ses
+parents » (v2 § 9.4) ; le nom du territoire y est un cartouche discret. À agrandir, en gardant la
+règle « le décor s'agite, le texte jamais » : le cartouche est posé sur parchemin et ne bouge pas.
+
+---
+
+## R24. Voir TOUT ce qu'il y a à gagner, même ce qu'on n'a pas — **ouvert**
+
+« même si on ne les a pas, tous les items à récupérer devraient être affichés en grand dans un
+popup avec une description de ce qu'on peut gagner, et on aura la couleur, et avec une croix ou un
+bouton retour — pour voir tous les items à gagner dans le campement et dans le coffre. »
+
+**Ce qui existe déjà**, mesuré : `Etagere.tsx` montre bien les cases VIDES — D44 et D25 point 3,
+« ce qui donne envie, c'est de voir la case suivante encore vide ». Il n'y a aucune branche
+`if (obtenue)` autour d'une case, seulement autour de son remplissage.
+
+**Ce qui manque** : la case vide ne dit pas CE QU'ELLE ATTEND. Elle est en Grisaille, sans nom,
+sans description, sans la couleur qu'elle prendra. L'enfant voit qu'il manque quelque chose, jamais
+quoi ni pourquoi.
+
+À faire, dans les deux écrans :
+
+```
+campement : 6 objets déclarés   (contenu/monde/campement.json)
+coffre    : 10 stades / formes  (contenu/monde/gobi-stades.json)
+```
+
+Un panneau plein format au tap d'une case — obtenue ou non — avec le nom, la description, la
+couleur qu'elle prendra, et une sortie évidente. **Montrer la couleur d'un objet non obtenu est le
+seul endroit du jeu où la Grisaille se lève par avance** : c'est une promesse, pas une récompense,
+et c'est exactement ce que D25 point 3 appelle « le vide restant ».
+
+---
+
 ## Ce que la QA doit apprendre de ces six
 
 Trois recettes manquantes, formulées comme des propriétés et non comme des captures :

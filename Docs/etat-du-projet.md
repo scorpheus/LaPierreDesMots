@@ -46,6 +46,8 @@ Chacun porte sa mesure et son état dans **[retours-de-jeu.md](retours-de-jeu.md
 | **R20** | Il faut faire défiler alors que l'écran est assez grand | ouvert |
 | **R21** | Rafraîchir ou revenir en arrière perd la partie | ouvert |
 | **R22** | Changer de région ramène au même exercice | à reproduire |
+| **R23** | Le nom des régions est trop petit sur la carte | ouvert |
+| **R24** | Voir tout ce qu'il y a à gagner, même non obtenu | ouvert |
 
 ---
 
