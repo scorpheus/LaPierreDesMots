@@ -119,6 +119,8 @@ export interface EtatTrace {
   readonly gesteEnCours: readonly EchantillonGeste[];
   readonly nbErreurs: number;
   readonly niveauAide: NiveauAide;
+  /** R15 — le palier que l'enfant a RÉCLAMÉ. Seul lui compte dans le journal. */
+  readonly aideDemandee: NiveauAide;
   readonly aide: AideTrace | null;
   readonly dernierRefus: RefusTrace | null;
   /** L'axe effectivement confondu, quand il l'a été. Alimente le top 10 du dashboard (D23). */

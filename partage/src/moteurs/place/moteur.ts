@@ -76,6 +76,8 @@ function etapeDe(consigne: EtatConsignePlace): EtapeGenerique {
     identifiant: consigne.id,
     nbErreurs: consigne.nbErreurs,
     niveauAide: consigne.niveauAide,
+    // R15 — ce que l'enfant a DEMANDE, transporte tel quel : c'est lui que le journal retient.
+    aideDemandee: consigne.aideDemandee,
     nbEcoutes: consigne.nbEcoutes,
     debutMs: consigne.debutMs,
     finMs: consigne.finMs,
@@ -152,6 +154,7 @@ function creerEtat(entree: EntreeMoteur<ContenuPlace>): EtatPlace {
       depotsRestants: [...consigne.depots],
       nbErreurs: 0,
       niveauAide: 'aucune',
+        aideDemandee: 'aucune',
       nbEcoutes: 0,
       debutMs: index === 0 ? instant : 0,
       finMs: null,
@@ -332,10 +335,18 @@ function reduire(etat: EtatPlace, action: ActionPlace, contexte: ContexteMoteur)
       // chose qu'un palier automatique : ni plus, ni moins (contrat v1 § 5.6).
       const consigne = etat.consignes[etat.indexConsigne];
       if (consigne === undefined || etat.termineMs !== null) return etat;
+      // R15 + R17 — LA DEMANDE EST ENREGISTREE MEME SI LE PALIER NE BOUGE PAS.
+      //
+      // Avant, la ligne suivante rendait l'etat inchange des que le palier etait DEJA monte
+      // tout seul (45 s d'inactivite). Taper sur Gobi ne produisait alors RIEN a l'ecran, et
+      // le journal retenait quand meme une aide jamais demandee. Deux defauts signales
+      // separement par le pere, une seule cause.
       const niveau = aideLaPlusHaute(consigne.niveauAide, 'indice');
-      if (niveau === consigne.niveauAide) return etat;
+      const demandee = aideLaPlusHaute(consigne.aideDemandee, 'indice');
+      if (niveau === consigne.niveauAide && demandee === consigne.aideDemandee) return etat;
       const majConsigne: EtatConsignePlace = {
         ...consigne,
+        aideDemandee: demandee,
         niveauAide: niveau,
         derniereActionMs: instant,
         instantIndiceMs: consigne.instantIndiceMs ?? instant,

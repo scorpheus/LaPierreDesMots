@@ -68,6 +68,7 @@ export const moteurLibre: Moteur<ContenuLibre, EtatLibre, ActionLibre> = {
       restantes: [],
       nbErreurs: 0,
       niveauAide: 'aucune',
+        aideDemandee: 'aucune',
       nbEcoutes: 0,
       debutMs: instant,
       finMs: null,

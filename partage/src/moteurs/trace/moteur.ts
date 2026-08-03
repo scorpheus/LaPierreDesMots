@@ -126,6 +126,10 @@ function etapeDe(etat: EtatTrace): EtapeGenerique {
     identifiant: lettre?.lettre ?? 'trace',
     nbErreurs: etat.nbErreurs,
     niveauAide: etat.niveauAide,
+    // R15 — `trace` porte son aide sur l'ETAT et non sur une etape : le champ suit donc le
+    // meme chemin. Il vaut `aucune` tant que l'enfant n'a pas tape sur Gobi, meme si le palier
+    // a monte tout seul.
+    aideDemandee: etat.aideDemandee,
     nbEcoutes: 0,
     debutMs: etat.demarreMs,
     finMs: etat.termineMs,
@@ -145,6 +149,8 @@ function etapesDeProgression(etat: EtatTrace): readonly EtapeGenerique[] {
     identifiant: trait.id,
     nbErreurs: 0,
     niveauAide: 'aucune' as const,
+    // Pseudo-etape de PROGRESSION, jamais journalisee : aucune aide n'y est demandee.
+    aideDemandee: 'aucune' as const,
     nbEcoutes: 0,
     debutMs: etat.demarreMs,
     finMs: trait.termine ? etat.derniereActionMs : null,
@@ -218,6 +224,7 @@ function creerEtat(entree: EntreeMoteur<ContenuTrace>): EtatTrace {
     gesteEnCours: [],
     nbErreurs: 0,
     niveauAide: 'aucune',
+        aideDemandee: 'aucune',
     aide: null,
     dernierRefus: null,
     axeConfondu: null,
@@ -405,12 +412,20 @@ function reduire(etat: EtatTrace, action: ActionTrace, contexte: ContexteMoteur)
     case 'demanderAide': {
       // L'appel volontaire de Gobi produit EXACTEMENT le palier `indice`, au même coût.
       if (etat.termineMs !== null) return etat;
+      // R15 + R17 — LA DEMANDE EST ENREGISTREE MEME SI LE PALIER NE BOUGE PAS.
+      //
+      // Avant, la ligne suivante rendait l'etat inchange des que le palier etait DEJA monte
+      // tout seul (45 s d'inactivite). Taper sur Gobi ne produisait alors RIEN a l'ecran, et
+      // le journal retenait quand meme une aide jamais demandee. Deux defauts signales
+      // separement par le pere, une seule cause.
       const niveau = aideLaPlusHaute(etat.niveauAide, 'indice');
-      if (niveau === etat.niveauAide) return etat;
+      const demandee = aideLaPlusHaute(etat.aideDemandee, 'indice');
+      if (niveau === etat.niveauAide && demandee === etat.aideDemandee) return etat;
       const trait = traitAttendu(etat);
       return {
         ...etat,
         niveauAide: niveau,
+        aideDemandee: demandee,
         derniereActionMs: instant,
         instantIndiceMs: etat.instantIndiceMs ?? instant,
         aide: construireAideTrace(niveau, trait),

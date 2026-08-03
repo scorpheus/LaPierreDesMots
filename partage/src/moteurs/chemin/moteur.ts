@@ -192,6 +192,7 @@ export const moteurChemin: Moteur<ContenuChemin, EtatChemin, ActionChemin> = {
         restantes: [...etape.parcours],
         nbErreurs: 0,
         niveauAide: 'aucune',
+        aideDemandee: 'aucune',
         nbEcoutes: 0,
         debutMs: index === 0 ? instant : 0,
         finMs: null,
@@ -266,10 +267,18 @@ export const moteurChemin: Moteur<ContenuChemin, EtatChemin, ActionChemin> = {
         // chose qu'un palier automatique : ni plus, ni moins (contrat v1 § 5.6).
         if (etape === undefined || etat.termineMs !== null) return etat;
         const niveau = aideLaPlusHaute(etape.niveauAide, 'indice');
-        if (niveau === etape.niveauAide) return etat;
+        // R15 + R17 — LA DEMANDE EST ENREGISTRÉE MÊME SI LE PALIER NE BOUGE PAS.
+        //
+        // Avant : `if (niveau === etape.niveauAide) return etat;` — donc quand l'aide était
+        // DÉJÀ montée toute seule (45 s d'inactivité), taper sur Gobi ne produisait RIEN à
+        // l'écran, et le journal retenait quand même une aide jamais demandée. Deux défauts
+        // signalés séparément par le père, une seule cause.
+        const demandee = aideLaPlusHaute(etape.aideDemandee, 'indice');
+        if (niveau === etape.niveauAide && demandee === etape.aideDemandee) return etat;
         const maj: EtatEtapeChemin = {
           ...etape,
           niveauAide: niveau,
+          aideDemandee: demandee,
           instantIndiceMs: etape.instantIndiceMs ?? instant,
           derniereActionMs: instant,
         };

@@ -164,6 +164,7 @@ function creerEtat(entree: EntreeMoteur<ContenuColorie>): EtatColorie {
       ciblesRestantes: [...consigne.cibles],
       nbErreurs: 0,
       niveauAide: 'aucune',
+        aideDemandee: 'aucune',
       nbEcoutes: 0,
       debutMs: index === 0 ? instant : 0,
       finMs: null,
@@ -296,10 +297,18 @@ function reduire(
       // même chose qu'un palier automatique : ni plus, ni moins (contrat § 5.6).
       const consigne = etat.consignes[etat.indexConsigne];
       if (consigne === undefined || etat.termineMs !== null) return etat;
+      // R15 + R17 — LA DEMANDE EST ENREGISTRÉE MÊME SI LE PALIER NE BOUGE PAS.
+      //
+      // Avant, la ligne suivante rendait l'état inchangé dès que le palier était DÉJÀ monté
+      // tout seul (45 s d'inactivité). Taper sur Gobi ne produisait alors RIEN à l'écran, et
+      // le journal retenait quand même une aide jamais demandée. Deux défauts signalés
+      // séparément par le père, une seule cause.
       const niveau = aideLaPlusHaute(consigne.niveauAide, 'indice');
-      if (niveau === consigne.niveauAide) return etat;
+      const demandee = aideLaPlusHaute(consigne.aideDemandee, 'indice');
+      if (niveau === consigne.niveauAide && demandee === consigne.aideDemandee) return etat;
       const majConsigne: EtatConsigne = {
         ...consigne,
+        aideDemandee: demandee,
         niveauAide: niveau,
         derniereActionMs: instant
       };

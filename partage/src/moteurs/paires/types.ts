@@ -63,6 +63,8 @@ export interface EtatEtapePaires {
   readonly restantes: readonly string[];
   readonly nbErreurs: number;
   readonly niveauAide: NiveauAide;
+  /** R15 — le palier que l'enfant a RÉCLAMÉ. Seul lui compte dans le journal. */
+  readonly aideDemandee: NiveauAide;
   readonly nbEcoutes: number;
   readonly debutMs: number;
   readonly finMs: number | null;

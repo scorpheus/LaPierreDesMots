@@ -60,7 +60,10 @@ export function EcranOuverture({
   const [sequence, fixerSequence] = useState<SequenceOuverture | null>(sequenceInjectee);
   const [indice, fixerIndice] = useState(0);
   /** Passé à `true` au premier geste : l'enfant a pris la main, l'automate se tait pour de bon. */
-  const [pilotageEnfant, fixerPilotageEnfant] = useState(false);
+  // `pilotageEnfant` a été RETIRÉ avec le minuteur (R19). Il n'existait que pour arrêter
+  // l'enchaînement automatique au premier geste de l'enfant ; sans minuteur, il ne répond plus
+  // à aucune question. Un drapeau que plus personne ne lit est un drapeau qui finit par mentir
+  // — et le linter l'a dit avant moi.
   /** Garde-fou : `surFin` n'est appelé qu'une fois, même si deux gestes se croisent. */
   const termine = useRef(false);
 
@@ -101,7 +104,6 @@ export function EcranOuverture({
   );
 
   const avancer = useCallback((): void => {
-    fixerPilotageEnfant(true);
     if (dernier) {
       finir(false);
       return;
@@ -213,7 +215,6 @@ export function EcranOuverture({
             data-retour="ouverture"
             aria-label="Revoir le tableau précédent"
             onClick={() => {
-              fixerPilotageEnfant(true);
               fixerIndice((precedent) => Math.max(0, precedent - 1));
             }}
           >
@@ -234,7 +235,6 @@ export function EcranOuverture({
             data-passer="ouverture"
             aria-label="Passer l’histoire et partir jouer"
             onClick={() => {
-              fixerPilotageEnfant(true);
               finir(true);
             }}
           >

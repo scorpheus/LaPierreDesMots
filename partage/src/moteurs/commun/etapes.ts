@@ -22,7 +22,33 @@ import { RANG_AIDE } from './aide.js';
 export interface EtapeGenerique {
   readonly identifiant: string;
   readonly nbErreurs: number;
+  /**
+   * Le palier que Gobi MONTRE. Il monte tout seul après un délai d'inactivité ou des erreurs
+   * — c'est le compagnon qui propose, et il doit continuer à le faire (D26, D28).
+   */
   readonly niveauAide: NiveauAide;
+  /**
+   * ═══════════════════════════════════════════════════════════════════════════════════════
+   * Le palier que l'enfant a RÉCLAMÉ. C'est LUI qui compte, et lui seul — R15.
+   *
+   * LE DÉFAUT, trouvé en jouant : « ça met, tu n'as que deux étoiles parce que Gobi a aidé,
+   * alors que c'est pas vrai, on l'a fait sans ». Mesuré dans `commun/delais.ts` :
+   *
+   *     indiceMs : 45 000     →  45 s d'INACTIVITÉ et le palier monte tout seul
+   *     erreursAvantIndice : 2
+   *
+   * `niveauAide` servait aux DEUX usages : ce que Gobi montre, et ce que le journal retient.
+   * Un enfant qui réfléchit plus de quarante-cinq secondes était donc enregistré comme aidé —
+   * une étoile en moins, un BKT et un Leitner nourris d'une information fausse. Et depuis
+   * R11, la porte « Prêt ? » ajoute encore du temps de lecture avant le premier geste.
+   *
+   * « L'aide de Gobi ne coûte rien et n'est jamais présentée comme un échec ; elle change
+   * seulement le nombre d'étoiles » suppose un CHOIX. Une proposition spontanée n'en est pas
+   * un — la punir revient à punir la lenteur, c'est-à-dire exactement l'enfant que ce jeu
+   * vise (D14).
+   * ═══════════════════════════════════════════════════════════════════════════════════════
+   */
+  readonly aideDemandee: NiveauAide;
   readonly nbEcoutes: number;
   readonly debutMs: number;
   readonly finMs: number | null;
@@ -95,7 +121,8 @@ export function resumeEtapeDepuis(etape: EtapeGenerique, finMs: number): ResumeE
   return {
     identifiant: etape.identifiant,
     nbErreurs: etape.nbErreurs,
-    aideUtilisee: etape.niveauAide,
+    // R15 — ce que l'enfant a DEMANDÉ, jamais ce que Gobi a proposé de lui-même.
+    aideUtilisee: etape.aideDemandee,
     nbEcoutes: etape.nbEcoutes,
     dureeMs: Math.max(0, fin - etape.debutMs),
     modeReponse: etape.modeReponse,
@@ -119,7 +146,7 @@ export function resumeDepuisEtapes(
 ): ResumeTentative {
   let aideUtilisee: NiveauAide = 'aucune';
   for (const etape of etapes) {
-    if (RANG_AIDE[etape.niveauAide] > RANG_AIDE[aideUtilisee]) aideUtilisee = etape.niveauAide;
+    if (RANG_AIDE[etape.aideDemandee] > RANG_AIDE[aideUtilisee]) aideUtilisee = etape.aideDemandee;
   }
 
   return {

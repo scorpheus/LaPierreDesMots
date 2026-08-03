@@ -198,6 +198,7 @@ export const moteurEclair: Moteur<ContenuEclair, EtatEclair, ActionEclair> = {
         restantes: [etape.reponse],
         nbErreurs: 0,
         niveauAide: 'aucune',
+        aideDemandee: 'aucune',
         nbEcoutes: 0,
         debutMs: index === 0 ? instant : 0,
         finMs: null,
@@ -291,11 +292,19 @@ export const moteurEclair: Moteur<ContenuEclair, EtatEclair, ActionEclair> = {
         // L'appel volontaire de Gobi produit EXACTEMENT le palier `indice`, et coûte la même
         // chose qu'un palier automatique : ni plus, ni moins (contrat v1 § 5.6).
         if (etape === undefined || etat.termineMs !== null) return etat;
+        // R15 + R17 — LA DEMANDE EST ENREGISTRÉE MÊME SI LE PALIER NE BOUGE PAS.
+        //
+        // Avant, la ligne suivante rendait l'état inchangé dès que le palier était DÉJÀ monté
+        // tout seul (45 s d'inactivité). Taper sur Gobi ne produisait alors RIEN à l'écran, et
+        // le journal retenait quand même une aide jamais demandée. Deux défauts signalés
+        // séparément par le père, une seule cause.
         const niveau = aideLaPlusHaute(etape.niveauAide, 'indice');
-        if (niveau === etape.niveauAide) return etat;
+        const demandee = aideLaPlusHaute(etape.aideDemandee, 'indice');
+        if (niveau === etape.niveauAide && demandee === etape.aideDemandee) return etat;
         const maj: EtatEtapeEclair = {
           ...etape,
           niveauAide: niveau,
+          aideDemandee: demandee,
           instantIndiceMs: etape.instantIndiceMs ?? instant,
           derniereActionMs: instant,
         };
