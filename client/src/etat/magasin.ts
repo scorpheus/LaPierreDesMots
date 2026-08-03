@@ -24,6 +24,7 @@ import type {
 } from '@pierre/partage';
 import { ETAT_CASCADE_VIDE, appliquerEtoiles } from '@pierre/partage/recompenses';
 import type { PaquetNoeudAttendu } from '../api/client.js';
+import { memoriserProfil, oublierProfil } from './profil-memorise.js';
 import type { ServicesJeu } from '../moteurs/types.js';
 import { maintenantIso } from './services.js';
 
@@ -184,10 +185,19 @@ export function creerMagasin(
 
     choisirProfil(profil: Profil): void {
       // Un tap suffit, aucun mot de passe (v2 § 11).
+      //
+      // R21 — ON RETIENT QUI JOUE. Le profil ne vivait que dans ce magasin, donc en mémoire :
+      // un rafraîchissement sur `/carte` rechargeait la carte SANS savoir quel enfant joue, et
+      // renvoyait au choix de profil. Les routes existaient pourtant toutes ; c'est le JOUEUR
+      // qui manquait, pas l'URL.
+      memoriserProfil(String(profil.id));
       fixer({ profil, ecran: 'carte' });
     },
 
     quitterProfil(): void {
+      // Changer de joueur EFFACE la mémoire : sans ça, le prochain démarrage rouvrirait la
+      // partie de l'enfant précédent, ce qui est pire que de redemander.
+      oublierProfil();
       fixer({
         profil: null,
         ecran: 'profils',

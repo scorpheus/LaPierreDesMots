@@ -322,6 +322,45 @@ export const TRANSITIONS: readonly TransitionModele[] = [
     prise: { selecteur: '[data-passer="ouverture"]' },
     motif: 'D46 — la sortie immédiate, sans condition et sans « es-tu sûr ? »'
   },
+  /**
+   * R19 — LES DEUX PRISES DU RÉCIT, déclarées depuis que le minuteur a été retiré.
+   *
+   * L'enchaînement automatique avançait le récit tout seul toutes les six secondes ; le père
+   * l'a fait retirer (« on n'a pas le temps de lire, ça passe directement »). L'explorateur
+   * n'avait donc PLUS AUCUN moyen d'avancer dans l'histoire, et sept écrans sur onze sont
+   * devenus inatteignables d'un coup — ce que ce fichier a signalé immédiatement, et c'est
+   * exactement son travail.
+   *
+   * Les deux prises restent sur `ouverture` : le récit se parcourt tableau par tableau, et
+   * seule la dernière page fait sortir. Une transition sur soi-même n'est pas un artifice —
+   * c'est ce qu'est un livre qu'on feuillette.
+   */
+  {
+    depuis: 'ouverture',
+    vers: 'ouverture',
+    prise: { selecteur: '[data-suite="ouverture"]' },
+    motif: 'R19 — on avance au tap, jamais au chronomètre',
+    horsPorteeExplorateur: {
+      motif:
+        'L’explorateur compare des ÉCRANS ; une transition sur soi-même ne change pas d’écran, ' +
+        'donc il ne peut ni la distinguer d’un tap sans effet, ni voir que le TABLEAU a changé.',
+      verifiePar: ['tests/composants/EcranOuverture.test.tsx']
+    }
+  },
+  {
+    depuis: 'ouverture',
+    vers: 'ouverture',
+    prise: { selecteur: '[data-retour="ouverture"]' },
+    motif: 'R19 — « un tout petit bouton pour revenir en arrière au cas où »',
+    horsPorteeExplorateur: {
+      motif:
+        'Prise CONDITIONNELLE : absente du premier tableau, parce qu’un retour qui ne mène ' +
+        'nulle part est un bouton qui ment. L’explorateur exige qu’une prise déclarée existe ' +
+        'sur son écran — il a raison en général, et cette exception se vérifie ailleurs, plus ' +
+        'finement : présence, absence au premier tableau, et retour effectif au précédent.',
+      verifiePar: ['tests/composants/EcranOuverture.test.tsx']
+    }
+  },
 
   // ── depuis un exercice ────────────────────────────────────────────────────────────────
   {

@@ -11,6 +11,9 @@ import type { ContexteJeu } from './etat/services.js';
 import type { MagasinJeu } from './etat/magasin.js';
 import type { ServicesJeu } from './moteurs/types.js';
 import { Particules } from './composants/Particules.js';
+import { lireProfil } from './api/client.js';
+import { lireProfilMemorise, oublierProfil } from './etat/profil-memorise.js';
+import type { IdProfil } from '@pierre/partage';
 import { Routeur } from './routeur.js';
 
 /**
@@ -63,12 +66,45 @@ export function Application({
   const [file] = useState(() => fileDAttente ?? creerFileDAttente());
   const [contexte] = useState<ContexteJeu>(() => ({ magasin, services }));
 
-  // Sortie de l'écran de chargement : le magasin naît en `chargement` pour que rien ne
-  // clignote avant que React n'ait monté. Un seul pas, et une seule fois.
+  // ══════════════════════════════════════════════════════════════════════════════════════════
+  // R21 — ON REPREND AVEC LE MÊME JOUEUR APRÈS UN RAFRAÎCHISSEMENT
+  //
+  // « quand on appuie sur rafraîchir ou sur retour en arrière, ça enlève le site… sinon on perd
+  // carrément tout. » Les routes existaient toutes (`/carte`, `/noeud`, `/recompense`, …) et
+  // l'URL suivait bien l'écran : ce n'est pas la route qui se perdait, c'est le JOUEUR. Mesuré :
+  // `localStorage` ne servait qu'aux réglages du foyer, jamais au profil choisi.
+  //
+  // On relit donc l'identifiant retenu et on recharge le profil. Trois garde-fous, et chacun a
+  // sa raison :
+  //   • un identifiant périmé — profil effacé depuis — est OUBLIÉ plutôt que réessayé en boucle ;
+  //   • l'échec réseau retombe sur le choix de profil, jamais sur un écran vide ;
+  //   • l'exercice en cours n'est PAS restauré : son état vit dans le moteur, et le journal
+  //     porte des tentatives, pas des frappes. On perd un exercice, jamais la partie.
+  // ══════════════════════════════════════════════════════════════════════════════════════════
   useEffect(() => {
-    if (magasin.getState().ecran === 'chargement') {
-      magasin.getState().naviguer('profils');
+    if (magasin.getState().ecran !== 'chargement') {
+      return undefined;
     }
+    const memorise = lireProfilMemorise();
+    if (memorise === null) {
+      magasin.getState().naviguer('profils');
+      return undefined;
+    }
+    let vivant = true;
+    void lireProfil(memorise as IdProfil)
+      .then((profil) => {
+        if (!vivant) return;
+        magasin.getState().choisirProfil(profil);
+      })
+      .catch(() => {
+        if (!vivant) return;
+        // Profil disparu (base remise à zéro, autre appareil) : on oublie et on redemande.
+        oublierProfil();
+        magasin.getState().naviguer('profils');
+      });
+    return () => {
+      vivant = false;
+    };
   }, [magasin]);
 
   // Les seuils de la cascade sont **chargés au démarrage** (convention C2, D13) : ils vivent

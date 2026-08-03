@@ -214,7 +214,13 @@ describe('chaque dérogation est nommée, motivée, ET couverte par un fichier q
       .map((transition) => `${transition.depuis} → ${transition.vers}`)
       .sort();
     expect(horsPortee).toEqual([
+      // R19 — les deux prises du récit d'ouverture. Elles sont sur SOI-MÊME : l'explorateur
+      // compare des écrans, donc il ne peut ni les distinguer d'un tap sans effet, ni voir que
+      // le TABLEAU a changé. Et « ← Revoir » est en plus CONDITIONNELLE, absente du premier
+      // tableau. Les deux sont vérifiées plus finement dans `EcranOuverture.test.tsx`.
       'noeud → recompense',
+      'ouverture → ouverture',
+      'ouverture → ouverture',
       'recompense → carte',
       'recompense → noeud'
     ]);
@@ -232,9 +238,20 @@ describe('chaque dérogation est nommée, motivée, ET couverte par un fichier q
       for (const fichier of derogation.verifiePar) {
         if (!existsSync(join(RACINE_DEPOT, fichier))) {
           manques.push(`${transition.depuis} → ${transition.vers} : ${fichier} n’existe pas`);
-        } else if (!lireTexte(fichier).includes('data-ecran="recompense"')) {
+          // ⚠ CE CONTRÔLE ÉTAIT CREUX POUR TOUTE TRANSITION AUTRE QUE `recompense`.
+          //
+          // Il cherchait `data-ecran="recompense"` EN DUR, quelle que soit la transition. Tant
+          // que les trois dérogations concernaient la récompense, il disait vrai par accident.
+          // À la première dérogation sur un autre écran — les deux prises du récit d'ouverture,
+          // R19 — il a exigé qu'un fichier d'ouverture nomme l'écran de récompense.
+          //
+          // C'est la même faute que celles corrigées ailleurs cette semaine : une règle écrite
+          // pour un cas, appliquée aveuglément à tous. Elle vise maintenant l'écran DE LA
+          // TRANSITION, ce qu'elle a toujours voulu dire.
+        } else if (!lireTexte(fichier).includes(`data-ecran="${transition.depuis}"`)) {
           manques.push(
-            `${transition.depuis} → ${transition.vers} : ${fichier} ne nomme pas l’écran`
+            `${transition.depuis} → ${transition.vers} : ${fichier} ne nomme pas ` +
+              `data-ecran="${transition.depuis}"`
           );
         }
       }

@@ -232,6 +232,30 @@ function rendreLeFetchDOrigine(): void {
 }
 
 function ouvrirSession(): Session {
+  /**
+   * ══════════════════════════════════════════════════════════════════════════════════════════
+   * UN APPAREIL NEUF À CHAQUE SESSION — R21.
+   *
+   * Depuis que l'application RETIENT qui joue (`localStorage`, clé `pierre.joueur`), deux
+   * explorations successives ne partent plus du même état : la seconde retrouve le profil de
+   * la première et saute l'écran de choix. Ce fichier l'a signalé tout de suite, et de la
+   * meilleure façon possible — « le rejeu a divergé » et quatre écrans devenus inatteignables.
+   *
+   * C'est un vrai changement de comportement, voulu par le père (« quand on fait rafraîchir,
+   * que ça rafraîchit la même page, sinon on perd carrément tout »). Ce qu'il coûte à
+   * l'exploration est une CONDITION DE DÉPART, pas une assertion : un explorateur qui hérite
+   * de l'appareil de la session précédente ne mesure plus ce qu'il croit mesurer.
+   *
+   * On repart donc d'un appareil vierge. Le déterminisme du modèle redevient vrai, et il le
+   * reste le jour où une autre préférence d'appareil sera ajoutée.
+   * ══════════════════════════════════════════════════════════════════════════════════════════
+   */
+  try {
+    globalThis.localStorage?.clear();
+  } catch {
+    // Pas de stockage dans cet environnement : rien à nettoyer, et surtout rien à faire
+    // échouer — l'absence de `localStorage` est un cas que le produit gère déjà.
+  }
   poserLAiguillage();
   doubleCourant = creerDoubleDeReseau();
   const file = new QueryClient({

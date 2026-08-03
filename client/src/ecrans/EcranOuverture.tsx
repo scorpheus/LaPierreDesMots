@@ -110,26 +110,29 @@ export function EcranOuverture({
   }, [dernier, finir]);
 
   /**
-   * L'enchaînement automatique — et ce qu'il ne fait JAMAIS.
+   * ══════════════════════════════════════════════════════════════════════════════════════════
+   * R19 — L'ENCHAÎNEMENT AUTOMATIQUE EST RETIRÉ. On avance au tap, jamais au chronomètre.
    *
-   * Il n'enchaîne pas le DERNIER tableau : la séquence ne se termine jamais toute seule, elle
-   * attend l'enfant. Et il s'arrête définitivement au premier geste — un enfant de sept ans
-   * qui déchiffre (D14) ne doit pas voir sa phrase partir pendant qu'il en est au milieu.
+   * Le père, en jouant : « dans l'histoire de la pierre, il faut enlever le chronomètre parce
+   * qu'on n'a pas le temps de lire, ça passe directement. On peut changer de panneau que si on
+   * a cliqué. »
    *
-   * `animationsDesactivees` (réglage foyer « animations calmes ») le coupe entièrement : c'est
-   * exactement la population pour qui un changement non demandé est le plus coûteux.
+   * Mesuré sur `contenu/monde/ouverture.json`, durées déclarées :
+   *
+   *     6000 · 6000 · 6000 · 6000 · 5000 ms
+   *
+   * **Six secondes par panneau pour un enfant qui déchiffre** (D14). Le minuteur portait
+   * pourtant trois garde-fous justes — il n'enchaînait pas le dernier tableau, il s'arrêtait au
+   * premier geste, et « animations calmes » le coupait. Ils ne suffisaient pas : l'enfant qui
+   * lit ne fait AUCUN geste, donc aucun garde-fou ne se déclenche, et c'est très exactement lui
+   * qu'on voulait protéger.
+   *
+   * C'est le même raisonnement que R11 sur l'éclair, au même endroit : **une durée n'a de sens
+   * que si l'on a fini de lire**, et seul le lecteur sait quand. `dureeMs` reste dans les
+   * données — elle décrit le rythme voulu du récit, et servira à une lecture à voix haute — mais
+   * elle ne pousse plus personne.
+   * ══════════════════════════════════════════════════════════════════════════════════════════
    */
-  useEffect(() => {
-    if (tableau === null || dernier || pilotageEnfant || animationsDesactivees) {
-      return;
-    }
-    const minuteur = setTimeout(() => {
-      fixerIndice((precedent) => (precedent === indice ? precedent + 1 : precedent));
-    }, tableau.dureeMs);
-    return () => {
-      clearTimeout(minuteur);
-    };
-  }, [tableau, dernier, pilotageEnfant, animationsDesactivees, indice]);
 
   return (
     <main
@@ -192,6 +195,31 @@ export function EcranOuverture({
         >
           {dernier ? 'On y va !' : 'Et après ?'}
         </button>
+
+        {/*
+          R19 — LE RETOUR EN ARRIÈRE, « un tout petit bouton pour revenir en arrière au cas où ».
+
+          Discret et SECONDAIRE : il ne concurrence pas la prise principale. Absent sur le
+          premier tableau, parce qu'un bouton qui ne mène nulle part est un bouton qui ment —
+          et parce qu'un enfant qui le trouve inerte cesse d'essayer les autres.
+
+          Il marque aussi le pilotage par l'enfant : à partir du moment où il revient en
+          arrière, c'est lui qui mène le récit.
+        */}
+        {indice === 0 ? null : (
+          <button
+            type="button"
+            className="cible cible-secondaire"
+            data-retour="ouverture"
+            aria-label="Revoir le tableau précédent"
+            onClick={() => {
+              fixerPilotageEnfant(true);
+              fixerIndice((precedent) => Math.max(0, precedent - 1));
+            }}
+          >
+            ← Revoir
+          </button>
+        )}
 
         {/*
           LA SORTIE IMMÉDIATE. Elle saute tout le récit, sans condition, sans confirmation,

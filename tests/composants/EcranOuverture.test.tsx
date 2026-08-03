@@ -145,17 +145,67 @@ describe('la séquence se déroule, et se termine sur un geste de l’enfant', (
   });
 });
 
-describe('l’enchaînement automatique respecte un enfant qui déchiffre (D14)', () => {
-  it('enchaîne tout seul après `dureeMs` tant que l’enfant n’a rien touché', () => {
+describe('l’histoire attend le lecteur — R19', () => {
+  /**
+   * ⚠ CE CAS EST RETOURNÉ, ET C'EST UNE DÉCISION DU PÈRE, PAS UNE RÉGRESSION.
+   *
+   * Il exigeait l'inverse : « enchaîne tout seul après `dureeMs` tant que l'enfant n'a rien
+   * touché ». C'était le comportement, et c'était le défaut, trouvé en jouant :
+   *
+   *     « il faut enlever le chronomètre parce qu'on n'a pas le temps de lire, ça passe
+   *       directement. On peut changer de panneau que si on a cliqué. »
+   *
+   * Mesuré sur `contenu/monde/ouverture.json` : 6000 · 6000 · 6000 · 6000 · 5000 ms. **Six
+   * secondes par panneau pour un enfant qui déchiffre** (D14).
+   *
+   * Le minuteur portait pourtant trois garde-fous justes — il n'enchaînait pas le dernier
+   * tableau, il s'arrêtait au premier geste, « animations calmes » le coupait. Ils ne
+   * suffisaient pas, et la raison mérite d'être retenue : **l'enfant qui LIT ne fait aucun
+   * geste**, donc aucun garde-fou ne se déclenche — et c'est exactement lui qu'on protégeait.
+   *
+   * Même raisonnement que R11 sur l'éclair : une durée n'a de sens que si l'on a fini de lire,
+   * et seul le lecteur sait quand.
+   */
+  it('LE DÉFAUT CORRIGÉ — rien ne bouge tant que l’enfant n’a pas tapé, même très longtemps', () => {
     vi.useFakeTimers();
     monter({ sequence: SEQUENCE });
     const ecran = (): Element => document.querySelector('[data-ecran="ouverture"]')!;
 
     expect(ecran().getAttribute('data-tableau-courant')).toBe('pierre');
     act(() => {
-      vi.advanceTimersByTime(SEQUENCE.tableaux[0]!.dureeMs);
+      // Vingt fois la durée déclarée du premier tableau. Un enfant lent doit pouvoir relire.
+      vi.advanceTimersByTime(SEQUENCE.tableaux[0]!.dureeMs * 20);
     });
+    expect(
+      ecran().getAttribute('data-tableau-courant'),
+      'la phrase est partie sous les yeux de l’enfant'
+    ).toBe('pierre');
+  });
+
+  it('et il avance dès qu’il tape — la porte n’est pas condamnée', () => {
+    // Retirer le minuteur ne doit pas bloquer le récit : le CONTRÔLE POSITIF de la règle
+    // ci-dessus. Sans lui, un écran figé passerait le premier cas sans rien prouver.
+    monter({ sequence: SEQUENCE });
+    const ecran = (): Element => document.querySelector('[data-ecran="ouverture"]')!;
+    fireEvent.click(document.querySelector('[data-suite="ouverture"]')!);
     expect(ecran().getAttribute('data-tableau-courant')).toBe('grisaille');
+  });
+
+  it('« ← Revoir » ramène au tableau précédent, et n’existe pas sur le premier', () => {
+    // Demandé avec R19 : « il faudrait un tout petit bouton pour faire revenir en arrière au
+    // cas où ». Absent au premier tableau — un bouton qui ne mène nulle part est un bouton qui
+    // ment, et un enfant qui le trouve inerte cesse d'essayer les autres.
+    monter({ sequence: SEQUENCE });
+    const retour = (): Element | null => document.querySelector('[data-retour="ouverture"]');
+    const ecran = (): Element => document.querySelector('[data-ecran="ouverture"]')!;
+
+    expect(retour(), 'un retour au premier tableau ne mènerait nulle part').toBeNull();
+    fireEvent.click(document.querySelector('[data-suite="ouverture"]')!);
+    expect(ecran().getAttribute('data-tableau-courant')).toBe('grisaille');
+
+    expect(retour()).not.toBeNull();
+    fireEvent.click(retour()!);
+    expect(ecran().getAttribute('data-tableau-courant')).toBe('pierre');
   });
 
   it('SE TAIT DÉFINITIVEMENT dès que l’enfant a touché quoi que ce soit', () => {
