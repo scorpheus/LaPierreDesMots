@@ -95,6 +95,28 @@ function Harnais(): ReactElement {
           .join(',')
       }
     >
+      {/* PRISES DU HARNAIS — R10. « Écouter » et « Gobi » ont quitté les moteurs : ils
+          appartiennent à l'écran, qui monte les VRAIS (BoutonEcouter joue le clip et disparaît
+          sans clip, D42 ; <Gobi> porte la même prise data-action="aide"). Les onze boutons que
+          les moteurs rendaient étaient muets — leur onClick n'appelait jamais le service de
+          voix. Ces deux prises-ci gardent les propriétés du RÉDUCTEUR, qui n'ont pas changé :
+          réécouter ne coûte ni erreur ni palier (R15), l'aide s'escalade sans sauter. Elles
+          sont nommées data-harnais-action pour qu'on ne les confonde jamais avec un contrôle
+          du produit. */}
+      <button
+        type="button"
+        data-harnais-action="ecouter"
+        onClick={() => {
+          emettre({ type: 'ecouterConsigne' } as never);
+        }}
+      />
+      <button
+        type="button"
+        data-harnais-action="aide"
+        onClick={() => {
+          emettre({ type: 'demanderAide' } as never);
+        }}
+      />
       <MoteurChemin
         contenu={contenu}
         habillage={habillage}
@@ -167,12 +189,12 @@ describe('moteur chemin', () => {
 
   it('aide de Gobi : exactement le palier `indice`, jamais davantage', () => {
     const { container } = render(<Harnais />);
-    taper(container, ['[data-action="aide"]']);
+    taper(container, ['[data-harnais-action="aide"]']);
     expect(container.querySelector('[data-moteur="chemin"]')?.getAttribute('data-aide')).toBe(
       'indice',
     );
     // Deuxième appel : l'escalade est monotone, elle ne saute pas au palier suivant.
-    taper(container, ['[data-action="aide"]']);
+    taper(container, ['[data-harnais-action="aide"]']);
     expect(container.querySelector('[data-moteur="chemin"]')?.getAttribute('data-aide')).toBe(
       'indice',
     );
@@ -186,7 +208,7 @@ describe('moteur chemin', () => {
 
   it('réécouter est gratuit : aucune erreur, aucun palier d’aide', () => {
     const { container } = render(<Harnais />);
-    taper(container, ['[data-action="ecouter"]', '[data-action="ecouter"]']);
+    taper(container, ['[data-harnais-action="ecouter"]', '[data-harnais-action="ecouter"]']);
     const h = harnais(container);
     expect(h.getAttribute('data-erreurs')).toBe('0');
     expect(h.getAttribute('data-aide-resume')).toBe('aucune');

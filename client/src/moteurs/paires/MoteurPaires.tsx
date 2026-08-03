@@ -134,31 +134,17 @@ export function MoteurPaires(
           </button>
         ))}
       </div>
+      {/* ── LES DEUX CONTRÔLES SONT PORTÉS PAR L'ÉCRAN, PAS PAR LE MOTEUR (R10) ──────────────
+          Ce moteur rendait ici son propre « Écouter » et son propre « Gobi, aide-moi ». Les
+          deux étaient MUETS : leur `onClick` émettait une action et n'appelait jamais le
+          service de voix. Le père a tapé dessus et n'a rien eu — onze moteurs sur quatorze
+          faisaient pareil, alors que « tout est audible en un tap » n'est pas négociable.
 
-      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-        {/* R15 : réécouter est gratuit, sans limite, et ne coûte aucune étoile. */}
-        <button
-          type="button"
-          data-action="ecouter"
-          style={STYLE_CIBLE}
-          onClick={() => {
-            emettre({ type: 'ecouterConsigne' } as ActionPaires);
-          }}
-        >
-          Écouter
-        </button>
-        {/* L'aide de Gobi ne coûte rien et n'est jamais présentée comme un échec. */}
-        <button
-          type="button"
-          data-action="aide"
-          style={STYLE_CIBLE}
-          onClick={() => {
-            emettre({ type: 'demanderAide' } as ActionPaires);
-          }}
-        >
-          Gobi, aide-moi
-        </button>
-      </div>
+          `EcranNoeud` monte le vrai `BoutonEcouter` (qui joue le clip, et DISPARAÎT quand il
+          n'y en a pas — D42) et le vrai `<Gobi>`, qui porte la même prise `data-action="aide"`.
+          Un moteur ne peut pas héberger le vrai bouton d'écoute : il lui faudrait la clé
+          `<exercice>/<consigne>`, et `ProprietesMoteur` ne porte pas l'identifiant d'exercice.
+          Seul l'écran le connaît. */}
 
       <p
         role="status"
