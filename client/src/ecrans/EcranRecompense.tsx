@@ -16,10 +16,14 @@ import {
   enregistrerTentative,
   lireMonde,
   lirePaquetNoeud,
-  lireProgression
+  lireProgression,
+  urlAsset
 } from '../api/client.js';
+import { stadesDuDocument } from '@pierre/partage/monde';
 import { CascadeRecompense } from '../composants/CascadeRecompense.js';
+import { detailDesEtoiles } from '../composants/detail-etoiles.js';
 import { Etoiles } from '../composants/Etoiles.js';
+import { EvolutionGobi } from '../composants/EvolutionGobi.js';
 import { useEtatJeu, useMagasin, useServices } from '../etat/services.js';
 import { noeudSuivant } from '../monde/reprise.js';
 import { jouerEffet } from '../services/audio-tone.js';
@@ -46,6 +50,7 @@ export function EcranRecompense(): ReactElement {
   const termineLe = useEtatJeu((etat) => etat.termineLe);
   const dejaEnvoyee = useEtatJeu((etat) => etat.tentativeEnvoyee);
   const dernierGain = useEtatJeu((etat) => etat.dernierGain);
+  const animationsDesactivees = useEtatJeu((etat) => etat.animationsDesactivees);
 
   // Garde locale EN PLUS du drapeau du magasin : `StrictMode` monte deux fois en
   // développement, et le POST partirait deux fois avant que le premier n'ait répondu.
@@ -116,6 +121,10 @@ export function EcranRecompense(): ReactElement {
         await enregistrerTentative(charge);
         magasin.getState().marquerTentativeEnvoyee();
         await fileDAttente.invalidateQueries({ queryKey: ['progression', profilId] });
+        // R6 — le monde AUSSI. Gobi évolue en fonction des formes qu'il vient de gagner, et
+        // sans cette invalidation la carte comme l'écran garderaient le Gobi d'avant : son
+        // évolution n'aurait jamais pu se voir, puisqu'on ne rechargeait jamais ce qui la porte.
+        await fileDAttente.invalidateQueries({ queryKey: ['monde', String(profil.id)] });
       } catch (cause) {
         // Une écriture perdue ne doit JAMAIS gâcher la fin de partie de l'enfant : l'écran
         // reste une réussite, la trace part dans la console pour le parent.
@@ -166,10 +175,27 @@ export function EcranRecompense(): ReactElement {
    */
   const region = paquet?.noeud.region ?? null;
   const requeteMonde = useQuery({
-    queryKey: ['monde', profil?.id],
+    // MÊME CLÉ que la carte, le campement et le coffre. Une clé différente ferait deux
+    // caches du même monde, et l'invalidation d'après-tentative n'en toucherait qu'un :
+    // Gobi aurait grandi ici et pas là.
+    queryKey: ['monde', profil === null ? null : String(profil.id)],
     queryFn: () => lireMonde(profil?.id as IdProfil),
     enabled: profil !== null
   });
+  // Le référentiel des stades — MÊME CLÉ que le campement (`['monde', 'stades']`) : c'est le
+  // même document, et deux clés en feraient deux lectures à faire diverger. On n'y lit que le
+  // LIBELLÉ ; le stade lui-même est décidé par le serveur.
+  const requeteStades = useQuery({
+    queryKey: ['monde', 'stades'],
+    queryFn: async () => {
+      const reponse = await fetch(urlAsset('monde/gobi-stades.json'), {
+        headers: { Accept: 'application/json' }
+      });
+      if (!reponse.ok) throw new Error('Référentiel des stades introuvable.');
+      return stadesDuDocument((await reponse.json()) as unknown);
+    }
+  });
+
   const requeteProgression = useQuery({
     queryKey: ['progression', profil?.id],
     queryFn: () => lireProgression(profil?.id as IdProfil),
@@ -189,6 +215,41 @@ export function EcranRecompense(): ReactElement {
     return noeudSuivant(laRegion.noeuds, faits, paquet.noeud.id);
   }, [paquet, region, requeteMonde.data, requeteProgression.data]);
 
+  /**
+   * ══════════════════════════════════════════════════════════════════════════════════════════
+   * R6 — « quand on gagne assez de point et que tu dis goby a évolué, montre la goby, fait une
+   * petite animation de transition »
+   *
+   * Gobi évolue en dix stades (D43), et son évolution est le SEUL moment du jeu où le compagnon
+   * change. Elle passait entièrement inaperçue : le stade s'écrivait en base, la carte le
+   * montrait au prochain passage, et rien ne le célébrait. Pire, `EcranRecompense` n'invalidait
+   * que la progression après le POST — donc l'écran gardait le Gobi d'AVANT, et le changement
+   * ne pouvait même pas être observé.
+   *
+   * ── COMMENT LE CHANGEMENT EST DÉTECTÉ, SANS RIEN INVENTER ─────────────────────────────────
+   * La référence retient le PREMIER stade vu, c'est-à-dire celui d'avant l'enregistrement : la
+   * requête du monde est déjà en cache quand on arrive ici, depuis la carte. Le POST invalide
+   * ensuite `['monde']`, la requête revient, et si le stade a changé c'est que Gobi a grandi.
+   *
+   * Aucun calcul dupliqué : le stade est décidé par le serveur (`stadeApresFormes`, une
+   * fonction des formes collectées) et l'écran ne fait que COMPARER. Le recalculer ici serait
+   * la seconde source de vérité que le projet refuse partout ailleurs.
+   * ══════════════════════════════════════════════════════════════════════════════════════════
+   */
+  const stadeCourant = requeteMonde.data?.gobi.stade ?? null;
+  const refStadeAvant = useRef<string | null>(null);
+  if (refStadeAvant.current === null && stadeCourant !== null) {
+    refStadeAvant.current = stadeCourant;
+  }
+  const [evolutionVue, fixerEvolutionVue] = useState(false);
+  const evolution =
+    stadeCourant !== null &&
+    refStadeAvant.current !== null &&
+    stadeCourant !== refStadeAvant.current &&
+    !evolutionVue
+      ? { avant: refStadeAvant.current, apres: stadeCourant }
+      : null;
+
   const [chargementSuivant, fixerChargementSuivant] = useState(false);
   const allerAuSuivant = useCallback((): void => {
     if (suivant === null) return;
@@ -206,6 +267,25 @@ export function EcranRecompense(): ReactElement {
   }, [suivant, magasin]);
 
   return (
+    <>
+      {/* R6 — l'évolution passe DEVANT l'écran de récompense, elle ne s'y glisse pas au milieu.
+          C'est le seul moment du jeu où le compagnon change ; le noyer entre les étoiles et la
+          cascade le rendrait invisible une seconde fois. Un tap le referme (v2 § 8, « aucune
+          animation bloquante »), et il ne revient pas — `evolutionVue` est à sens unique. */}
+      {evolution === null ? null : (
+        <EvolutionGobi
+          avant={evolution.avant as never}
+          apres={evolution.apres as never}
+          libelle={
+            (requeteStades.data ?? []).find((stade) => stade.code === evolution.apres)?.libelle ??
+            'Gobi a changé'
+          }
+          animationsDesactivees={animationsDesactivees}
+          surFin={() => {
+            fixerEvolutionVue(true);
+          }}
+        />
+      )}
     <main
       data-ecran="recompense"
       // Une seule valeur possible, aujourd'hui et toujours.
@@ -234,6 +314,63 @@ export function EcranRecompense(): ReactElement {
       <p className="zone-lecture" style={{ fontSize: '1.5rem', padding: '1rem', margin: 0 }}>
         {FELICITATIONS[nombreEtoiles] ?? FELICITATIONS[1]}
       </p>
+
+      {/*
+        ══════════════════════════════════════════════════════════════════════════════════════
+        R4 — « j'ai eu qu'une seule étoile alors que tout est bon ppk ? »
+
+        Le barème avait raison. Relevé dans son journal :
+
+            clairiere-01   nb_erreurs = 2   aide_utilisee = indice   etoiles = 1
+
+        `calculerEtoiles` rend `1 + sansAide + sansErreur` : deux erreurs et une aide donnent
+        bien une étoile. **Le défaut n'était pas le calcul, c'était le SILENCE.** La couleur
+        fautive s'écoule (D16), l'image finit juste, et l'enfant conclut « tout est bon ». Rien
+        ne reliait son étoile unique à ce qui s'était passé.
+
+        ── CE QUI REND CE BLOC DIFFICILE, ET COMMENT IL S'EN SORT ────────────────────────────
+        « Aucun écran d'échec, jamais » et « l'aide de Gobi ne coûte rien et n'est JAMAIS
+        présentée comme un échec ». Un tableau « raté / réussi » violerait les deux.
+
+        Alors ce bloc ne dit jamais ce qui a manqué : il dit CE QU'OUVRE chaque étoile, au
+        présent pour celles qui sont là, et comme une porte ouverte pour les autres. Pas de
+        « tu as fait 2 erreurs », pas de rouge, pas de croix. Les étoiles non acquises portent
+        leur condition, et c'est tout : l'enfant apprend la règle du jeu au lieu de recevoir
+        une note.
+
+        Et la ligne de Gobi est retournée exprès : quand il a aidé, on le dit comme un fait
+        heureux — c'est gratuit, il peut redemander. Jamais comme la raison d'une étoile en
+        moins.
+        ══════════════════════════════════════════════════════════════════════════════════════
+      */}
+      {resume === null ? null : (
+        <ul
+          data-detail-etoiles="oui"
+          style={{
+            listStyle: 'none',
+            margin: 0,
+            padding: '0.75rem 1rem',
+            display: 'grid',
+            gap: '0.4rem',
+            justifyItems: 'start',
+            maxInlineSize: '34rem'
+          }}
+        >
+          {detailDesEtoiles(resume).map((ligne) => (
+            <li
+              key={ligne.rang}
+              data-etoile-detail={String(ligne.rang)}
+              data-acquise={ligne.acquise ? 'oui' : 'non'}
+              style={{ display: 'flex', alignItems: 'baseline', gap: '0.6rem' }}
+            >
+              <span aria-hidden="true" style={{ fontSize: '1.4rem', opacity: ligne.acquise ? 1 : 0.35 }}>
+                ★
+              </span>
+              <span style={{ opacity: ligne.acquise ? 1 : 0.8 }}>{ligne.texte}</span>
+            </li>
+          ))}
+        </ul>
+      )}
 
       {/* ─────────────────────────────────────────────────────────────────────────────────
           LA CASCADE DE D25 REMPLACE LE SEUL DÉCOMPTE D'ÉTOILES.
@@ -275,5 +412,6 @@ export function EcranRecompense(): ReactElement {
         </button>
       </div>
     </main>
+    </>
   );
 }

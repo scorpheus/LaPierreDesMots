@@ -92,7 +92,17 @@ const INVITE_PAR_DEFAUT = 'Si tu veux, je peux t’aider. Ça ne coûte rien.';
  * même mécanisme que `SceneSvg`, `ScenePlace`, `EcranCarte` et `TableauOuverture` emploient
  * déjà pour servir un habillage.
  */
-function DessinDeGobi({
+/**
+ * EXPORTÉ pour R6 — l'écran d'évolution montre Gobi en grand, sans le panneau d'aide.
+ *
+ * `Gobi` est le compagnon COMPLET : dessin, bulle, bouton d'aide, bouton de réécoute. Le
+ * réutiliser tel quel dans l'écran d'évolution y ferait apparaître un bouton « Gobi, aide-moi »
+ * au milieu d'une célébration — et il faudrait lui inventer un `surDemande` qui ne mène nulle
+ * part. On exporte donc le DESSIN seul, qui est ce dont l'évolution a besoin.
+ *
+ * Il rend un `<g>` : il vit dans un `<svg viewBox={GOBI_VUE}>`, jamais à la racine.
+ */
+export function DessinDeGobi({
   stade,
   animation
 }: {
