@@ -50,6 +50,7 @@
  */
 
 import { readdirSync } from 'node:fs';
+import { repriseDeRegion } from '@client/monde/reprise.js';
 import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
@@ -183,9 +184,35 @@ describe('la sonde d’invariant ne dérive pas de `EcranCarte`', () => {
     expect(ecran).toContain('regionsOuvertes(monde.carte)');
   });
 
-  it('une région sans nœud rend encore un nœud de reprise `null`', () => {
-    expect(ecran).toContain('if (noeuds.length === 0)');
-    expect(ecran).toContain('return { noeud: null, rang: 0 };');
+  /**
+   * ⚠ CE CAS A CHANGÉ DE NATURE, ET C'EST UN PROGRÈS — R3, 2026-08-03.
+   *
+   * Il relisait le TEXTE de `EcranCarte.tsx` pour vérifier qu'une règle recopiée dans la sonde
+   * n'avait pas dérivé de l'écran. La justification, écrite juste au-dessus, disait : « ces
+   * deux règles sont des closures locales de l'écran, **non exportables** ».
+   *
+   * Elle ne l'est plus. La règle de reprise a été extraite dans `client/src/monde/reprise.ts`
+   * parce que l'écran de récompense en avait besoin lui aussi — il lui fallait le nœud SUIVANT,
+   * et la recopier une deuxième fois aurait donné deux règles pour un même choix.
+   *
+   * Surveiller une dérive par `grep` n'a plus de sens quand la dérive est devenue impossible :
+   * on vérifie donc que l'écran **appelle la règle partagée** plutôt qu'il n'en garde une
+   * copie. Un retour en arrière — une règle réécrite à la main dans l'écran — fait rougir ce
+   * cas, exactement comme avant, mais pour la bonne raison.
+   */
+  it('la carte n’a plus SA règle de reprise : elle appelle la règle partagée', () => {
+    expect(ecran, 'l’écran devrait appeler `repriseDeRegion`').toContain('repriseDeRegion(');
+    expect(
+      ecran,
+      'une copie locale de la règle est réapparue dans l’écran : elle divergera de celle de ' +
+        'l’écran de récompense, et les deux proposeront des nœuds différents'
+    ).not.toContain('return { noeud: null, rang: 0 };');
+  });
+
+  it('et la règle partagée rend bien `null` quand la région n’a aucun nœud', () => {
+    // La propriété que l'ancien `grep` cherchait à garantir, désormais VÉRIFIÉE au lieu d'être
+    // lue dans une chaîne de caractères.
+    expect(repriseDeRegion([], new Set())).toEqual({ noeud: null, rang: 0 });
   });
 
   it('une prise n’est un bouton que si elle est ouverte ET porte un nœud', () => {

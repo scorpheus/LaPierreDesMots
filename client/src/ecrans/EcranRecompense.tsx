@@ -7,14 +7,21 @@
 //
 // C'est aussi le seul endroit du client qui ÉCRIT dans le journal : un `POST /api/tentatives`
 // idempotent (§ 6.3). Le journal fait foi ; l'écran, lui, ne calcule rien.
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
-import type { TentativeAEnregistrer } from '@pierre/partage';
-import { calculerCleIdempotence, enregistrerTentative } from '../api/client.js';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import type { IdNoeud, IdProfil, TentativeAEnregistrer } from '@pierre/partage';
+import {
+  calculerCleIdempotence,
+  enregistrerTentative,
+  lireMonde,
+  lirePaquetNoeud,
+  lireProgression
+} from '../api/client.js';
 import { CascadeRecompense } from '../composants/CascadeRecompense.js';
 import { Etoiles } from '../composants/Etoiles.js';
 import { useEtatJeu, useMagasin, useServices } from '../etat/services.js';
+import { noeudSuivant } from '../monde/reprise.js';
 import { jouerEffet } from '../services/audio-tone.js';
 
 /** Une phrase par nombre d'étoiles. Aucune ne compare, aucune ne juge, aucune ne regrette. */
@@ -138,6 +145,66 @@ export function EcranRecompense(): ReactElement {
     magasin.getState().naviguer('carte');
   }, [magasin]);
 
+  /**
+   * ══════════════════════════════════════════════════════════════════════════════════════════
+   * R3 — « il n'y a pas d'autres exercice dans la clairiere ? »
+   *
+   * Il y en a DOUZE, et la carte l'affiche même (« Étape 1 sur 12 »). Mais cet écran n'offrait
+   * que *Rejouer* et *Retour à la carte* : rien ne menait au nœud suivant. Pour qui ne
+   * repassait pas par la carte, le jeu s'arrêtait au premier exercice — et c'est exactement ce
+   * qui est arrivé au père, deux fois, avant qu'il ne le signale.
+   *
+   * La règle du « nœud d'après » vit dans `monde/reprise.js`, la même que celle dont la carte
+   * se sert pour dire où reprendre. Deux règles pour un même choix finiraient par proposer deux
+   * nœuds différents, et l'enfant ne comprendrait ni l'une ni l'autre.
+   *
+   * Le bouton n'apparaît QUE si un nœud reste à faire dans la région (voir `noeudSuivant`) :
+   * une région entière renvoie `null`, et proposer alors un exercice déjà à trois étoiles
+   * ferait croire à une progression qui n'existe plus. Revenir à la carte est le bon geste —
+   * c'est là que le rallumage de la région se voit (D51).
+   * ══════════════════════════════════════════════════════════════════════════════════════════
+   */
+  const region = paquet?.noeud.region ?? null;
+  const requeteMonde = useQuery({
+    queryKey: ['monde', profil?.id],
+    queryFn: () => lireMonde(profil?.id as IdProfil),
+    enabled: profil !== null
+  });
+  const requeteProgression = useQuery({
+    queryKey: ['progression', profil?.id],
+    queryFn: () => lireProgression(profil?.id as IdProfil),
+    enabled: profil !== null
+  });
+
+  const suivant = useMemo((): IdNoeud | null => {
+    if (paquet === null || region === null || requeteMonde.data === undefined) return null;
+    const laRegion = requeteMonde.data.carte.regions.find((une) => une.region === region);
+    if (laRegion === undefined) return null;
+    // Le nœud qu'on vient de finir compte comme fait, même si la progression du serveur n'est
+    // pas encore revenue : sans ça, le bouton reproposerait l'exercice qu'on quitte.
+    const faits = new Set(
+      (requeteProgression.data ?? []).map((ligne) => String(ligne.noeud))
+    );
+    faits.add(String(paquet.noeud.id));
+    return noeudSuivant(laRegion.noeuds, faits, paquet.noeud.id);
+  }, [paquet, region, requeteMonde.data, requeteProgression.data]);
+
+  const [chargementSuivant, fixerChargementSuivant] = useState(false);
+  const allerAuSuivant = useCallback((): void => {
+    if (suivant === null) return;
+    fixerChargementSuivant(true);
+    void lirePaquetNoeud(suivant)
+      .then((paquetSuivant) => {
+        magasin.getState().demarrerNoeud(paquetSuivant);
+      })
+      .catch(() => {
+        // Un nœud qu'on n'arrive pas à charger ne laisse jamais l'enfant sur un bouton mort :
+        // on le ramène à la carte, d'où tout reste atteignable.
+        fixerChargementSuivant(false);
+        magasin.getState().naviguer('carte');
+      });
+  }, [suivant, magasin]);
+
   return (
     <main
       data-ecran="recompense"
@@ -181,7 +248,26 @@ export function EcranRecompense(): ReactElement {
       <CascadeRecompense gain={dernierGain} />
 
       <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
-        <button type="button" className="cible cible-appel" onClick={rejouer}>
+        {/* L'APPEL PRINCIPAL, quand il reste quelque chose à faire. « Rejouer » perd sa classe
+            d'appel dans ce cas : c'est « continuer » que l'enfant doit voir en premier, et
+            deux boutons qui appellent également n'appellent plus. */}
+        {suivant === null ? null : (
+          <button
+            type="button"
+            className="cible cible-appel"
+            data-action="exercice-suivant"
+            data-noeud-suivant={String(suivant)}
+            disabled={chargementSuivant}
+            onClick={allerAuSuivant}
+          >
+            {chargementSuivant ? 'On y va…' : 'Exercice suivant'}
+          </button>
+        )}
+        <button
+          type="button"
+          className={suivant === null ? 'cible cible-appel' : 'cible'}
+          onClick={rejouer}
+        >
           Rejouer
         </button>
         <button type="button" className="cible" onClick={retourCarte}>

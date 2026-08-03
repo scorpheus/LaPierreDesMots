@@ -37,6 +37,7 @@ import { lireMonde, lireProgression, lirePaquetNoeud, urlAsset } from '../api/cl
 import { useEtatJeu, useMagasin } from '../etat/services.js';
 import { CheminEncre } from '../monde/CheminEncre.js';
 import { Parchemin } from '../monde/Parchemin.js';
+import { repriseDeRegion } from '../monde/reprise.js';
 import { VoileGrisaille } from '../monde/VoileGrisaille.js';
 
 /**
@@ -285,13 +286,10 @@ export function EcranCarte({
    */
   const reprise = useCallback(
     (region: EtatRegion | undefined): { readonly noeud: IdNoeud | null; readonly rang: number } => {
-      const noeuds = region?.noeuds ?? [];
-      if (noeuds.length === 0) {
-        return { noeud: null, rang: 0 };
-      }
-      const index = noeuds.findIndex((noeud) => !noeudsFaits.has(String(noeud)));
-      const choisi = index === -1 ? 0 : index;
-      return { noeud: noeuds[choisi] ?? null, rang: choisi + 1 };
+      // La règle vit dans `monde/reprise.ts`, partagée avec l'écran de récompense. Elle était
+      // ici seule ; l'y laisser aurait obligé le bouton « exercice suivant » à la recopier, et
+      // deux règles pour un même choix finissent toujours par proposer deux nœuds différents.
+      return repriseDeRegion(region?.noeuds ?? [], noeudsFaits);
     },
     [noeudsFaits]
   );
