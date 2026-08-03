@@ -896,6 +896,67 @@ jugé beau part chez le parent, en planche contact.
 
 ---
 
+### D51. Le rallumage se fait par PALIERS et par ZONES, jamais par éclaircissement uniforme
+
+**Arbitré par l'utilisateur le 2026-08-03**, sur retour de jeu réel : « rallume une zone dans la
+clairiere ça se voit mieux. les 12 paliers c'est bien ».
+
+**Le défaut, mesuré sur sa base de jeu, jamais supposé.** Le voile de Grisaille s'effaçait par une
+opacité linéaire, `opacite = 1 − pourcentageColorie`. Après son premier exercice :
+
+```
+clairiere : pourcentage_colorie = 0,0833   (1 nœud sur 12)
+voile      : opacité = 1 − 0,0833 = 0,917
+```
+
+Un exercice réussi levait **8 % d'un gris uniforme**. Ses mots : « j'ai fait un peu de clairiere,
+2/12 écrit en bas, je ne vois aucun changement au gris de la clairiere ». La promesse centrale du
+jeu — la recoloration qui est SIMULTANÉMENT la barre de progression, la récompense et la
+justification narrative (v2 § 3.2) — était **exacte dans la base et invisible à l'écran**. Ce
+n'était pas un défaut de rendu : la boucle de récompense ne se fermait pas.
+
+**La décision.** On garde N paliers (N = le nombre de nœuds de la région : 12 en Clairière, 14 aux
+Galeries et à la Cité). Chaque palier retire une ZONE entière de Grisaille, par un halo qui naît à
+l'ancre du marqueur — l'endroit où l'enfant vient de jouer — et s'étend. Le halo est un **masque**,
+jamais un disque peint par-dessus : ce qui apparaît est le dessin en couleur déjà présent, comme
+« la couleur vient du code » l'impose partout ailleurs.
+
+**Et la loi du rayon est MESURÉE, parce que la loi calculée était fausse.** Première version :
+`rayon = R·√(k/N)`, qui donne une aire de DISQUE constante. Elle a l'air juste et elle ne l'est
+pas — mesurée sur les six silhouettes :
+
+```
+clairiere          palier 1 = 19,5 %   palier 12 = 0,0 %
+galeries           palier 1 = 23,3 %   palier 14 = 0,0 %
+foret-muette       palier 1 = 24,1 %   palier 12 = 0,0 %
+cite-des-histoires palier 1 = 15,5 %   palier 14 = 0,0 %
+```
+
+Le disque couvrait tout le territoire bien avant le dernier palier : **les huit derniers exercices
+de la Clairière n'auraient rien rallumé.** Soit le défaut corrigé, déplacé de la première moitié du
+parcours vers la seconde — et invisible à la relecture, parce qu'une aire de disque constante
+*ressemble* à une part de territoire constante.
+
+Il n'existe pas de formule fermée pour un polygone concave dont l'ancre n'est pas le centre. La loi
+est donc une **table de quantiles mesurés** : `client/src/monde/rallumage.gen.ts`, engendrée par
+`node scripts/generer-rallumage.mjs` depuis `carte-monde-v3.svg`. Le quantile à 25 % **est** le
+rayon qui contient le quart du territoire ; la promesse devient vraie par construction.
+
+Des quantiles, et non des rayons par palier : **le nombre de nœuds d'une région change à mesure que
+le contenu s'écrit**. Une table indexée par palier serait fausse au prochain exercice ajouté, en
+silence.
+
+**Ce qui garde la décision** : `tests/composants/VoileGrisaille.test.tsx` ne fait pas confiance à la
+table — il recompte les points intérieurs des silhouettes dans le décor et vérifie ce que les rayons
+rallument vraiment. Une table fausse le fait rougir. Il vérifie aussi qu'**aucun palier ne rallume
+rien**, qui est le défaut exact corrigé ici, et qu'une région absente de la table rend un rayon nul
+plutôt qu'un rayon inventé.
+
+**Portée** : à relancer après toute retouche de `carte-monde-v3.svg` ou de la table `ANCRES` de
+`EcranCarte.tsx`. Le générateur refuse d'écrire si une ancre tombe hors de sa silhouette.
+
+---
+
 ## Points encore ouverts
 
 | # | Point | Source | Bloque quoi |

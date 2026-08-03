@@ -38,7 +38,7 @@
 import { cleanup, render } from '@testing-library/react';
 import { afterEach, describe, expect, test } from 'vitest';
 
-import { VoileGrisaille } from '@client/monde/VoileGrisaille.js';
+import { rayonDuPalier, VoileGrisaille } from '@client/monde/VoileGrisaille.js';
 
 import { lireTexte } from '../configuration/preparation.js';
 
@@ -189,5 +189,168 @@ describe('le voile de Grisaille grise, et il ne re-peint jamais un clone', () =>
     const voile = poser();
     expect(voile.style.pointerEvents).toBe('none');
     expect(voile.getAttribute('aria-hidden')).toBe('true');
+  });
+});
+
+/**
+ * ══════════════════════════════════════════════════════════════════════════════════════════════
+ * LE RALLUMAGE PAR PALIERS — ce que ces cas gardent, et le défaut qui les a fait écrire.
+ *
+ * Mesuré sur la base de jeu réelle, après le premier exercice du père :
+ * `pourcentage_colorie = 0,0833` en Clairière, donc un voile à `1 − 0,0833 = 0,917`. **Un
+ * exercice réussi levait 8 % d'un gris uniforme** — invisible. La récompense existait dans la
+ * base et nulle part à l'écran.
+ *
+ * Ces cas ne mesurent aucun pixel : happy-dom ne rend ni masque ni dégradé. Ils gardent la LOI,
+ * qui est ce qui a été trouvé faux — l'aire rallumée par palier — et l'invariant de structure
+ * qui empêche la correction de se retourner en son contraire, comme le `<use>` du lot S4.
+ * ══════════════════════════════════════════════════════════════════════════════════════════════
+ */
+describe('chaque palier rallume une ZONE, et toujours la même part du TERRITOIRE', () => {
+  const carte = lireTexte(CHEMIN_CARTE);
+
+  /** Ancres, reprises de `EcranCarte`. Un écart ferait naître le halo hors du territoire. */
+  const ANCRES: Readonly<Record<string, readonly [number, number]>> = {
+    clairiere: [190, 640],
+    galeries: [450, 460],
+    'marais-jumeau': [240, 240],
+    'foret-muette': [620, 150],
+    volcan: [900, 340],
+    'cite-des-histoires': [1020, 630],
+  };
+
+  /** Sommets du territoire, lus dans le décor. Géométrie polygonale : M/L/Z uniquement. */
+  function sommets(code: string): readonly (readonly [number, number])[] {
+    const trouve = new RegExp(`<path id="${code}"[^>]*\\sd="([^"]+)"`, 'u').exec(carte);
+    expect(trouve, `silhouette introuvable : ${code}`).not.toBeNull();
+    const nombres = ((trouve as RegExpExecArray)[1].match(/-?\d+(?:\.\d+)?/gu) ?? []).map(Number);
+    const points: [number, number][] = [];
+    for (let index = 0; index + 1 < nombres.length; index += 2) {
+      points.push([nombres[index] as number, nombres[index + 1] as number]);
+    }
+    return points;
+  }
+
+  function dansLePolygone(x: number, y: number, points: readonly (readonly [number, number])[]) {
+    let dedans = false;
+    for (let i = 0, j = points.length - 1; i < points.length; j = i, i += 1) {
+      const [xi, yi] = points[i] as readonly [number, number];
+      const [xj, yj] = points[j] as readonly [number, number];
+      if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) dedans = !dedans;
+    }
+    return dedans;
+  }
+
+  /** Distances de l'ancre à chaque point intérieur. Pas de 2 : assez fin, et rapide. */
+  function distancesInterieures(code: string): readonly number[] {
+    const points = sommets(code);
+    const xs = points.map((point) => point[0]);
+    const ys = points.map((point) => point[1]);
+    const [ax, ay] = ANCRES[code] as readonly [number, number];
+    const distances: number[] = [];
+    for (let x = Math.min(...xs); x <= Math.max(...xs); x += 2) {
+      for (let y = Math.min(...ys); y <= Math.max(...ys); y += 2) {
+        if (dansLePolygone(x, y, points)) distances.push(Math.hypot(x - ax, y - ay));
+      }
+    }
+    return distances;
+  }
+
+  test.each([
+    ['clairiere', 12],
+    ['galeries', 14],
+    ['cite-des-histoires', 14],
+  ])(
+    'LE DÉFAUT CORRIGÉ — %s : chaque palier rallume la même part du territoire, mesurée sur le décor',
+    (code, paliers) => {
+      // Ce cas NE FAIT PAS CONFIANCE à la table engendrée : il recompte les points intérieurs
+      // dans le décor et vérifie ce que les rayons rallument VRAIMENT. C'est ce qui le rend non
+      // circulaire — une table fausse le ferait rougir.
+      //
+      // La loi jetée (`R·√(k/N)`, aire de DISQUE constante) donnait, mesurée de cette façon :
+      // palier 1 à 19,5 % et palier 12 à 0,0 %. Les derniers exercices ne rallumaient RIEN.
+      const distances = distancesInterieures(code);
+      const total = distances.length;
+      expect(total, 'silhouette vide').toBeGreaterThan(1000);
+
+      const cumule = (franchis: number): number =>
+        distances.filter((distance) => distance <= rayonDuPalier(franchis, paliers, code)).length /
+        total;
+
+      const pas = Array.from(
+        { length: paliers },
+        (_, rang) => cumule(rang + 1) - cumule(rang)
+      );
+      const attendu = 1 / paliers;
+      for (const [rang, part] of pas.entries()) {
+        // Tolérance de 2 points de pourcentage : la table est quantilée à 5 % et interpolée, et
+        // la grille de contrôle est deux fois plus grossière que celle du générateur.
+        expect(part, `${code} palier ${String(rang + 1)} rallume ${(part * 100).toFixed(1)} %`)
+          .toBeCloseTo(attendu, 1.5);
+      }
+      // Et surtout : AUCUN palier ne rallume rien. C'est le défaut exact qu'on corrige.
+      expect(Math.min(...pas), `${code} — un palier ne rallume rien`).toBeGreaterThan(0.02);
+    }
+  );
+
+  test('rien de franchi ⇒ aucun halo ; tout franchi ⇒ le territoire est entièrement rallumé', () => {
+    for (const code of SIX) {
+      expect(rayonDuPalier(0, 12, code), code).toBe(0);
+      const distances = distancesInterieures(code);
+      const rayonFinal = rayonDuPalier(12, 12, code);
+      const restant = distances.filter((distance) => distance > rayonFinal).length;
+      expect(restant, `${code} — ${String(restant)} points restent gris au dernier palier`).toBe(0);
+      // Et il ne décroît jamais — même invariant que `pourcentageColorie` (R14).
+      for (let franchis = 1; franchis <= 12; franchis += 1) {
+        expect(rayonDuPalier(franchis, 12, code)).toBeGreaterThan(
+          rayonDuPalier(franchis - 1, 12, code)
+        );
+      }
+    }
+  });
+
+  test('une région absente de la table mesurée ne rallume RIEN — jamais un rayon inventé', () => {
+    // Un territoire ajouté au décor sans que `scripts/generer-rallumage.mjs` ait été relancé.
+    // Un halo faux rallumerait la mauvaise part du monde en silence ; un halo absent se voit au
+    // premier exercice joué.
+    expect(rayonDuPalier(6, 12, 'territoire-qui-n-existe-pas')).toBe(0);
+  });
+
+  test('le halo RETIRE la Grisaille par un masque — il ne peint jamais par-dessus', () => {
+    // C'est la même famille de défaut que le `<use>` du lot S4 : un disque couleur parchemin
+    // posé sur le territoire cacherait le dessin au lieu de le découvrir, et se lirait comme
+    // une tache. Le halo doit donc vivre dans un `<mask>`, et le groupe découpé s'y référer.
+    const voile = poser({ paliers: 12, franchis: 3, centre: [190, 640] });
+    const halo = voile.querySelector('[data-voile-halo="rallumage"]');
+    expect(halo, 'aucun halo rendu alors que la région déclare ses paliers').not.toBeNull();
+    expect(halo?.closest('mask'), 'le halo doit être DANS un masque').not.toBeNull();
+
+    const decoupe = voile.querySelector('[clip-path]');
+    expect(decoupe?.getAttribute('mask')).toBe('url(#masque-rallumage-clairiere)');
+  });
+
+  test('la Grisaille garde sa densité PLEINE sous les paliers : les deux effets ne se cumulent pas', () => {
+    // Sans cette règle, un territoire à moitié rallumé serait en plus à moitié transparent, et
+    // on retomberait exactement sur l'éclaircissement invisible qu'on corrige.
+    const voile = poser({ opacite: 0.5, paliers: 12, franchis: 6, centre: [190, 640] });
+    expect(voile.querySelector('[clip-path]')?.getAttribute('opacity')).toBe('1');
+  });
+
+  test('sans `paliers`, le composant retombe exactement sur le voile uniforme d’avant', () => {
+    const voile = poser({ opacite: 0.4 });
+    expect(voile.querySelector('[data-voile-halo="rallumage"]')).toBeNull();
+    expect(voile.querySelector('[clip-path]')?.getAttribute('mask')).toBeNull();
+    expect(voile.querySelector('[clip-path]')?.getAttribute('opacity')).toBe('0.4');
+  });
+
+  test('`animationsDesactivees` coupe aussi la croissance du halo (D21, garde-fou 2)', () => {
+    const voile = poser({
+      paliers: 12,
+      franchis: 4,
+      centre: [190, 640],
+      animationsDesactivees: true
+    });
+    const halo = voile.querySelector<SVGElement>('[data-voile-halo="rallumage"]');
+    expect(halo?.style.transition ?? '').toBe('');
   });
 });

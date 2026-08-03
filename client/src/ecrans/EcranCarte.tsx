@@ -477,14 +477,31 @@ export function EcranCarte({
         */}
         {requeteDecor.data === undefined
           ? null
-          : ANCRES.map(([code]) => {
+          : ANCRES.map(([code, ancreX, ancreY]) => {
               const region = parCode.get(String(code));
               const opacite = region === undefined ? 1 : 1 - region.pourcentageColorie;
+              // ── LE RALLUMAGE PAR PALIERS (arbitrage du père, 2026-08-03) ────────────────────
+              //
+              // `paliers` est le nombre de NŒUDS de la région, et `franchis` s'en déduit par
+              // `pourcentageColorie`, qui est la seule source qui fait foi : elle se recalcule
+              // depuis le journal (`tentatives`), là où un compteur tenu à part serait une
+              // seconde vérité — exactement le défaut que le lot N a corrigé sur ce même
+              // pourcentage.
+              //
+              // Une région sans nœud rend `paliers = 0` : le voile retombe alors sur l'opacité
+              // uniforme, plein et immobile, ce qui est le bon rendu pour un territoire dont le
+              // contenu n'est pas encore écrit.
+              const paliers = region?.noeuds.length ?? 0;
+              const franchis =
+                region === undefined ? 0 : Math.round(region.pourcentageColorie * paliers);
               return (
                 <VoileGrisaille
                   key={`voile-${String(code)}`}
                   forme={String(code)}
                   opacite={opacite}
+                  paliers={paliers}
+                  franchis={franchis}
+                  centre={[ancreX, ancreY]}
                   animationsDesactivees={animationsDesactivees}
                 />
               );
