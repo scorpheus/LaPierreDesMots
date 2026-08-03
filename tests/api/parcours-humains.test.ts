@@ -190,7 +190,19 @@ describe('parcours 3 — il tape deux fois parce que ça ne va pas assez vite', 
            WHERE tentative_id IN (SELECT id FROM tentatives WHERE profil_id = ?)`
         )
         .get(profil) as unknown as { n: number };
-      expect(Number(etapes.n)).toBe(1);
+      // Ce que ce cas garde, c'est qu'un DOUBLE TAP ne compte pas deux fois — pas un nombre de
+      // lignes. Depuis Q-INT-4 une étape produit une ligne par compétence déclarée : on compte
+      // donc les étapes DISTINCTES (tentative, rang), qui est l'unité qu'un tap produit.
+      const distinctes = atelier.base
+        .prepare(
+          `SELECT COUNT(*) AS n FROM (
+             SELECT DISTINCT tentative_id, rang FROM etapes_tentative
+             WHERE tentative_id IN (SELECT id FROM tentatives WHERE profil_id = ?)
+           )`
+        )
+        .get(profil) as unknown as { n: number };
+      expect(Number(distinctes.n)).toBe(1);
+      expect(Number(etapes.n)).toBeGreaterThanOrEqual(1);
     } finally {
       await atelier.fermer();
     }

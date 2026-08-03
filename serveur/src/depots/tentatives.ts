@@ -344,13 +344,31 @@ function alimenterPedagogie(
     return { journalisees: 0, ecartees: 0 };
   }
 
-  const competenceParDefaut = pedagogie.competences[0] ?? null;
+  /**
+   * ARBITRAGE Q-INT-4, tranché par le parent — option « code ».
+   *
+   * Une réussite est désormais imputée à **toutes** les compétences déclarées par l'exercice,
+   * et non plus à `competences[0]` seule. Le recensement par objet avait mesuré, sur les 76
+   * exercices, **3 compétences sur 29 qui ne pouvaient jamais recevoir la moindre réussite**
+   * — `comp.consigne.multiple`, `gph.rare.gn`, `gph.rare.ph`. Elles restaient vertes pour R12,
+   * qui compte le déclaré, avec un journal vide pour toujours : le BKT et le Leitner ne les
+   * auraient jamais vues monter, et le tableau du parent aurait affiché un progrès imaginaire.
+   *
+   * **Une confusion observée, elle, ne se dilue pas.** Elle NOMME sa compétence : c'est un
+   * signal précis sur une paire de lettres, l'imputer aux autres compétences de l'exercice le
+   * noierait. Elle reste donc seule créditée.
+   */
+  const competencesDeclarees = pedagogie.competences
+    .map((competence) => competence.trim())
+    .filter((competence) => competence !== '');
 
   let ecartees = 0;
   const aJournaliser: EtapeAJournaliser[] = [];
   validee.resume.etapes.forEach((etape, rang) => {
-    const competence = etape.confusion?.competence ?? competenceParDefaut;
-    if (competence === null || competence.trim() === '') {
+    const nommeeParLaConfusion = etape.confusion?.competence?.trim() ?? '';
+    const cibles =
+      nommeeParLaConfusion !== '' ? [nommeeParLaConfusion] : competencesDeclarees;
+    if (cibles.length === 0) {
       return;
     }
     if (
@@ -360,23 +378,25 @@ function alimenterPedagogie(
       ecartees += 1;
       return;
     }
-    aJournaliser.push({
-      tentativeId,
-      profilId: validee.profil,
-      rang,
-      identifiant: etape.identifiant,
-      competence,
-      modeReponse: etape.modeReponse,
-      // R14 : `ResumeTentative.reussi` vaut toujours `true`, une etape finit toujours par
-      // aboutir. Ce qui informe le BKT, c'est de savoir si elle a abouti SANS erreur.
-      reussi: etape.nbErreurs === 0,
-      nbErreurs: etape.nbErreurs,
-      aideUtilisee: etape.aideUtilisee,
-      dureeMs: etape.dureeMs,
-      latenceMs: etape.latenceMs,
-      nbElements: etape.nbElements ?? null,
-      confusion: etape.confusion
-    });
+    for (const competence of cibles) {
+      aJournaliser.push({
+        tentativeId,
+        profilId: validee.profil,
+        rang,
+        identifiant: etape.identifiant,
+        competence,
+        modeReponse: etape.modeReponse,
+        // R14 : `ResumeTentative.reussi` vaut toujours `true`, une etape finit toujours par
+        // aboutir. Ce qui informe le BKT, c'est de savoir si elle a abouti SANS erreur.
+        reussi: etape.nbErreurs === 0,
+        nbErreurs: etape.nbErreurs,
+        aideUtilisee: etape.aideUtilisee,
+        dureeMs: etape.dureeMs,
+        latenceMs: etape.latenceMs,
+        nbElements: etape.nbElements ?? null,
+        confusion: etape.confusion
+      });
+    }
   });
 
   const inserees = journaliserEtapes(base, aJournaliser, validee.termineLe);
@@ -386,11 +406,35 @@ function alimenterPedagogie(
 
   // On relit le journal plutot que de reutiliser les objets en memoire : les projections
   // doivent voir EXACTEMENT ce que le recalcul integral verra, colonnes bornees comprises.
+  //
+  // ⚠ LES DEUX PROJECTIONS N'ONT PAS LA MEME CLE, et depuis Q-INT-4 cela decide de leur
+  // justesse :
+  //   · la MAITRISE est indexee par COMPETENCE — chaque ligne l'alimente, c'est le but meme
+  //     de l'arbitrage : trois competences declarees, trois maitrises nourries ;
+  //   · le LEITNER est indexe par ITEM ATOMIQUE (`etape.identifiant`) — un grapheme, un mot.
+  //     La competence n'y entre pas.
+  //
+  // Une etape produisant desormais une ligne PAR competence, appeler `appliquerRevue` sur
+  // chacune promouvrait le MEME item plusieurs fois pour une seule reussite : de la boite 1 a
+  // la boite 3 d'un coup, soit J+1 devenu J+7. La revision espacee se serait deregle en
+  // silence — mesure a l'ecriture : `tests/api/parcours-humains.test.ts` (« a des revisions a
+  // faire a J+3 ») et `pedagogie.test.ts` (« ne rend que les items dus ») sont tombes ensemble.
+  //
+  // On dedoublonne donc par item : **une etape vaut une revision**, quel que soit le nombre de
+  // competences creditees.
+  // Meme critere que `recalculerLeitner` — (tentative, rang) et non l'identifiant seul : c'est
+  // l'ETAPE qui vaut une revision. Les deux chemins doivent dedoublonner a l'identique, sinon
+  // le recalcul integral diverge de l'incrementale et le rejeu le signale.
+  const etapesRevues = new Set<number>();
   for (const etape of listerEtapes(base, validee.profil)) {
     if (etape.tentativeId !== tentativeId) {
       continue;
     }
     appliquerObservation(base, validee.profil, observationDeLEtape(etape), pedagogie.parametres);
+    if (etapesRevues.has(etape.rang)) {
+      continue;
+    }
+    etapesRevues.add(etape.rang);
     appliquerRevue(
       base,
       validee.profil,

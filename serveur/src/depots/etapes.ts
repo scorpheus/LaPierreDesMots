@@ -79,13 +79,19 @@ const CHAMPS = `id, tentative_id, profil_id, rang, identifiant, competence, mode
   conf_attendu, conf_rendu, conf_axe, journalise_le`;
 
 /**
- * Identifiant derive de (tentative, rang) : rejouer le meme envoi ne cree pas une seconde
- * ligne, il retombe sur la meme cle primaire. L'idempotence de `POST /api/tentatives` se
- * propage ainsi au journal fin sans qu'il ait a la connaitre.
+ * Identifiant derive de (tentative, rang, **competence**) : rejouer le meme envoi ne cree pas
+ * une seconde ligne, il retombe sur la meme cle primaire. L'idempotence de
+ * `POST /api/tentatives` se propage ainsi au journal fin sans qu'il ait a la connaitre.
+ *
+ * **La competence entre dans la matiere depuis l'arbitrage Q-INT-4** : une reussite est
+ * desormais imputee a TOUTES les competences declarees par l'exercice, donc un meme rang
+ * produit plusieurs lignes. Sans elle, l'insertion se fait en `INSERT OR IGNORE` sur la meme
+ * cle primaire et **toutes les competences sauf la premiere seraient silencieusement
+ * avalees** — le defaut aurait survecu a son propre correctif, sans rien afficher.
  */
-function deriverIdentifiant(tentativeId: string, rang: number): string {
+function deriverIdentifiant(tentativeId: string, rang: number, competence: string): string {
   const empreinte = createHash('sha256')
-    .update(`etape|${tentativeId}|${String(rang)}`, 'utf8')
+    .update(`etape|${tentativeId}|${String(rang)}|${competence}`, 'utf8')
     .digest('hex');
   return `etp-${empreinte.slice(0, 16)}`;
 }
@@ -147,7 +153,7 @@ export function journaliserEtapes(
   let inserees = 0;
   for (const etape of etapes) {
     const resultat = inserer.run(
-      deriverIdentifiant(etape.tentativeId, etape.rang),
+      deriverIdentifiant(etape.tentativeId, etape.rang, etape.competence),
       etape.tentativeId,
       etape.profilId,
       Math.max(0, Math.trunc(etape.rang)),

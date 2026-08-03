@@ -151,7 +151,20 @@ export function recalculerLeitner(
   base.prepare('DELETE FROM items_leitner WHERE profil_id = ?').run(profilId);
 
   const items = new Map<string, ItemLeitner>();
+  // Depuis l'arbitrage Q-INT-4, une etape produit une ligne PAR competence declaree. Le
+  // Leitner, lui, est indexe par ITEM ATOMIQUE : deux lignes de la meme etape sont la meme
+  // revision, pas deux. Sans ce dedoublonnage, un item sauterait autant de boites que
+  // l'exercice declare de competences — et surtout ce recalcul divergerait de l'incrementale
+  // de `alimenterPedagogie`, qui dedoublonne, lui. L'egalite des deux chemins est ce que
+  // verifie le test de rejeu (annexe T § T2) : c'est le filet contre les regressions
+  // silencieuses du Leitner.
+  const etapesVues = new Set<string>();
   for (const etape of listerEtapes(base, profilId)) {
+    const cleEtape = `${etape.tentativeId}|${String(etape.rang)}`;
+    if (etapesVues.has(cleEtape)) {
+      continue;
+    }
+    etapesVues.add(cleEtape);
     const courant =
       items.get(etape.identifiant) ?? itemLeitnerInitial(etape.identifiant, etape.journaliseLe);
     items.set(

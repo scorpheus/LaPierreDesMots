@@ -406,9 +406,20 @@ describe.each(CAS.map((cas) => [cas.code, cas] as const))(
       expect(progression?.nbTentatives).toBe(1);
 
       // Un moteur qui produit des étapes doit en journaliser autant, et faire avancer le BKT.
+      //
+      // ARBITRAGE Q-INT-4 — une réussite est imputée à TOUTES les compétences déclarées par
+      // l'exercice, plus seulement à `competences[0]`. Le journal fin porte donc une ligne par
+      // (étape × compétence). Auparavant trois compétences sur vingt-neuf ne pouvaient jamais
+      // recevoir la moindre réussite, tout en étant comptées vertes par R12.
+      //
+      // L'attendu se DÉRIVE de l'exercice réellement servi : coder « × 3 » en dur ferait
+      // recasser ce test au prochain exercice dont on change les compétences, et pour une
+      // raison qui n'aurait rien à voir avec ce qu'il vérifie.
       if (resume.etapes.length > 0) {
+        const exerciceServi = lireJson<Exercice>('contenu/exercices/clairiere/ecole-01.json');
+        const nbCompetences = exerciceServi.competences.length;
         expect(compterEtapes(contexte.base, profil), `${code} : journal fin vide`).toBe(
-          resume.etapes.length,
+          resume.etapes.length * nbCompetences,
         );
         expect(lireMaitrises(contexte.base, profil).length, `${code} : BKT non alimenté`)
           .toBeGreaterThan(0);
@@ -480,8 +491,16 @@ describe('A1 — filet : une étape mal formée ne fait plus perdre la tentative
 
     // L'étape saine est journalisée ; la fautive est ÉCARTÉE, jamais complétée d'un défaut
     // inventé — un `p_devinette` supposé ferait monter la maîtrise sur des réponses au hasard.
-    expect(compterEtapes(contexte.base, profil)).toBe(1);
-    expect(listerEtapes(contexte.base, profil)[0]?.identifiant).toBe('phrase-02');
+    //
+    // Depuis Q-INT-4, l'étape saine produit une ligne par compétence déclarée. Ce que ce test
+    // garde n'est PAS un nombre de lignes, c'est que **la fautive n'a laissé aucune trace** :
+    // on l'exprime donc par les identifiants distincts présents, seule formulation qui reste
+    // vraie quel que soit le nombre de compétences de l'exercice.
+    const identifiants = new Set(
+      listerEtapes(contexte.base, profil).map((ligne) => ligne.identifiant),
+    );
+    expect([...identifiants]).toEqual(['phrase-02']);
+    expect(compterEtapes(contexte.base, profil)).toBeGreaterThan(0);
   });
 
   it('le recalcul intégral reste possible : le journal n’est jamais empoisonné', async () => {

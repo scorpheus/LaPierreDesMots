@@ -192,12 +192,20 @@ describe('POST /api/tentatives alimente le journal d’étapes', () => {
     expect(reponse.statusCode).toBe(201);
 
     const { compterEtapes, compterConfusions, listerEtapes } = await import('@serveur/depots/etapes');
-    expect(compterEtapes(contexte.base, profil)).toBe(2);
 
+    // Depuis Q-INT-4, une étape produit une ligne PAR compétence déclarée. On ne peut donc plus
+    // désigner « la deuxième étape » par `etapes[1]` : cet index tombe désormais sur la seconde
+    // COMPÉTENCE de la première étape. On cherche par rang, qui identifie l'étape elle-même.
     const etapes = listerEtapes(contexte.base, profil);
-    expect(etapes[0]?.latenceMs).toBe(2_400);
-    expect(etapes[0]?.confusion).toBeNull();
-    expect(etapes[1]?.confusion?.axe).toBe('gauche-droite');
+    const rangs = new Set(etapes.map((ligne) => ligne.rang));
+    expect(rangs.size, 'deux étapes envoyées, deux rangs journalisés').toBe(2);
+    expect(compterEtapes(contexte.base, profil)).toBeGreaterThanOrEqual(rangs.size);
+
+    const premiere = etapes.filter((ligne) => ligne.rang === 0);
+    const seconde = etapes.filter((ligne) => ligne.rang === 1);
+    expect(premiere[0]?.latenceMs).toBe(2_400);
+    expect(premiere.every((ligne) => ligne.confusion === null)).toBe(true);
+    expect(seconde.some((ligne) => ligne.confusion?.axe === 'gauche-droite')).toBe(true);
 
     // D23 : une confusion journalisée porte son AXE. Un moteur qui rendrait `null` partout
     // viderait le top 10 du dashboard sans que personne ne s'en aperçoive.
@@ -256,6 +264,11 @@ describe('idempotence de la mise à jour', () => {
 
     const premier = await envoyerTentative(profil, etapes);
     expect(premier.statusCode).toBe(201);
+
+    // Ce que le premier envoi a produit fait référence : c'est sa NON-CROISSANCE qu'on garde.
+    const { compterEtapes: compterApresPremier } = await import('@serveur/depots/etapes');
+    const etapesApresPremier = compterApresPremier(contexte.base, profil);
+    expect(etapesApresPremier).toBeGreaterThan(0);
     const apresPremier = await lireMaitrise(profil);
 
     const second = await envoyerTentative(profil, etapes);
@@ -263,7 +276,10 @@ describe('idempotence de la mise à jour', () => {
     expect((second.json() as { deja: boolean }).deja).toBe(true);
 
     const { compterEtapes } = await import('@serveur/depots/etapes');
-    expect(compterEtapes(contexte.base, profil)).toBe(2);
+    // L'idempotence se mesure par l'ABSENCE de croissance, pas par un nombre fixe : le second
+    // envoi ne doit rien ajouter, quel que soit le nombre de lignes que le premier a produit
+    // (Q-INT-4 : une ligne par compétence déclarée).
+    expect(compterEtapes(contexte.base, profil)).toBe(etapesApresPremier);
     expect(await lireMaitrise(profil)).toEqual(apresPremier);
   });
 });

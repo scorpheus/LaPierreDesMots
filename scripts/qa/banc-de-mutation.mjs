@@ -34,15 +34,34 @@
  * 5. **Base verte AVANT et APRÈS.** Une base rouge avant : toute détection est un faux positif.
  *    Une base rouge après : une restauration a échoué, et le dépôt est sale.
  *
+ * 6. **UN ROUGE QUI N'EST PAS ATTRIBUABLE N'EST PAS UNE DÉTECTION** — lot P0, 2026-08-03.
+ *    Le banc comptait tout code de sortie non nul comme `DETECTEE`. Un rouge spontané — la
+ *    machine chargée, ou une campagne voisine qui écrit dans `serveur/src/` pendant l'essai —
+ *    était donc indiscernable d'une vraie détection, et **gonflait le score de la QA**.
+ *    Observé, pas redouté : `M11b` est passée `DETECTEE` puis `SURVIT` entre deux exécutions
+ *    du même banc, `M2` avant elle (Q-INT-9). Deux gardes, et il faut les deux :
+ *
+ *      · **l'empreinte de l'arbre** est relevée avant la mutation et après la restauration
+ *        (`empreinte-arbre.mjs`). Si elle a bougé, quelqu'un d'autre a écrit pendant l'essai :
+ *        le verdict porterait sur un code que ce banc n'a pas choisi → `INDECIS` ;
+ *      · **la confirmation par restauration** : un rouge causé par la mutation DISPARAÎT quand
+ *        la mutation disparaît. Les fichiers de test qui ont rougi sont donc rejoués sur le
+ *        code restauré ; s'ils rougissent encore, le rouge vient d'ailleurs → `INDECIS`.
+ *
+ *    Un essai `INDECIS` sort du dénominateur — il n'est ni une détection ni une survie — et il
+ *    fait sortir le banc en 1 : mieux vaut refuser un chiffre que d'en publier un que le bruit
+ *    a fabriqué.
+ *
  * ── LA RÈGLE D'ÉCHEC ────────────────────────────────────────────────────────────────────
  *
- * Le banc sort en 1 dès qu'un de ces cinq faits est vrai :
+ * Le banc sort en 1 dès qu'un de ces six faits est vrai :
  *
  *   • une mutation attendue `DETECTEE` a **survécu** → la QA a régressé ;
  *   • un contrôle négatif a rougi → la mesure ne vaut rien ;
  *   • la base n'était pas verte, avant ou après ;
  *   • un ancrage a été perdu → une recette pourrit sans le dire ;
- *   • une collision d'écriture a été détectée.
+ *   • une collision d'écriture a été détectée ;
+ *   • **un essai est resté `INDECIS`** → la mesure n'est pas opposable (invariant 6).
  *
  * Une mutation attendue `SURVIT` qui se fait DÉTECTER n'échoue pas : c'est une **AMÉLIORATION**
  * (un lot a fermé le trou). Le banc l'imprime en toutes lettres avec la ligne exacte à changer
@@ -67,6 +86,8 @@ import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+
+import { empreinteArbre, empreinteCourte, fichiersQuiOntBouge } from './empreinte-arbre.mjs';
 
 /**
  * `--recettes=<chemin>` charge un autre jeu de recettes.
@@ -171,8 +192,48 @@ function testsNonSuivis() {
 
 const VITEST = join(RACINE, 'node_modules', 'vitest', 'vitest.mjs');
 
-/** L'étage 1 : `npm run test` moins les tests que d'autres campagnes écrivent. */
-function etageVitest() {
+/**
+ * Le rapport machine de l'étage Vitest — dans le dossier du banc, jamais dans
+ * `tests/rapports/` à la racine : plusieurs campagnes écrivent en parallèle (D10), et un banc
+ * qui écrase le rapport de `npm run verifier` ferait mentir le tableau de bord d'un autre lot.
+ */
+const RAPPORT_VITEST_BANC = join(DOSSIER_QA, 'banc-vitest.json');
+
+/**
+ * Les FICHIERS de test en échec, lus dans le rapport machine.
+ *
+ * C'est ce qui rend la confirmation bon marché : rejouer trois fichiers coûte deux secondes,
+ * rejouer la suite entière en coûte trente-trois. Sans cette liste, confirmer chaque détection
+ * doublerait la durée du banc — et un banc qu'on ne lance plus ne mesure rien.
+ */
+function fichiersEnEchec() {
+  if (!existsSync(RAPPORT_VITEST_BANC)) return [];
+  let rapport;
+  try {
+    rapport = JSON.parse(readFileSync(RAPPORT_VITEST_BANC, 'utf8'));
+  } catch {
+    return [];
+  }
+  const fichiers = new Set();
+  for (const fichier of rapport.testResults ?? []) {
+    const enEchec = (fichier.assertionResults ?? []).some((c) => c.status === 'failed');
+    if (!enEchec && fichier.status !== 'failed') continue;
+    const chemin = String(fichier.name ?? '').replace(/\\/g, '/');
+    const relatif = chemin.startsWith(RACINE.replace(/\\/g, '/'))
+      ? chemin.slice(RACINE.replace(/\\/g, '/').length)
+      : chemin;
+    if (relatif.length > 0) fichiers.add(relatif.replace(/^\/+/, ''));
+  }
+  return [...fichiers].sort();
+}
+
+/**
+ * L'étage 1 : `npm run test` moins les tests que d'autres campagnes écrivent.
+ *
+ * @param {string[]} [seulement] restreint la course à ces fichiers — sert à la CONFIRMATION
+ *   d'une détection sur le code restauré, jamais à la mesure elle-même.
+ */
+function etageVitest(seulement) {
   const exclusions = testsNonSuivis().flatMap((f) => ['--exclude', f]);
   const { code, sortie } = lancer(process.execPath, [
     VITEST,
@@ -180,7 +241,14 @@ function etageVitest() {
     '--project', 'unitaires',
     '--project', 'composants',
     '--project', 'api',
-    ...exclusions
+    ...exclusions,
+    // Le rapport lisible reste affiché ; le rapport machine s'ajoute et sert à NOMMER les
+    // fichiers fautifs. Sans nom, une détection n'est qu'un code de sortie — et un code de
+    // sortie ne dit pas QUI a rougi, donc ne se confirme pas.
+    '--reporter=default',
+    '--reporter=json',
+    `--outputFile.json=${RAPPORT_VITEST_BANC}`,
+    ...(seulement ?? [])
   ]);
   // Les couleurs sont coupées par `FORCE_COLOR: 0`, mais une version de Vitest peut les
   // remettre : on désarme les séquences ANSI avant de lire le compte.
@@ -190,7 +258,12 @@ function etageVitest() {
   // dans ce fichier jusqu'à ce qu'ESLint le refuse (`no-control-regex`), et il avait raison.
   const ansi = new RegExp(String.fromCharCode(27) + '\\[[0-9;]*m', 'g');
   const compte = /Tests\s+(?:\S+\s+)?(\d+)\s+passed/.exec(sortie.replace(ansi, ''));
-  return { code, sortie, nbTests: compte === null ? null : Number(compte[1]) };
+  return {
+    code,
+    sortie,
+    nbTests: compte === null ? null : Number(compte[1]),
+    fichiersFautifs: code === 0 ? [] : fichiersEnEchec()
+  };
 }
 
 /** Étage 2 : la validation du contenu. Script Node, aucune compilation. */
@@ -211,9 +284,12 @@ function etageRejeu() {
  * l'assertion sont NOMMÉS, ce qui rend la couverture vérifiable à la lecture.
  */
 const ETAGES = [
-  { nom: 'vitest', executer: etageVitest },
-  { nom: 'contenu', executer: etageContenu },
-  { nom: 'rejeu', executer: etageRejeu }
+  // `rejouer` sert à la CONFIRMATION : le même étage, relancé sur le code RESTAURÉ. Pour
+  // Vitest il se restreint aux fichiers qui ont rougi ; les deux autres étages sont des
+  // scripts de quelques secondes et se rejouent en entier.
+  { nom: 'vitest', executer: etageVitest, rejouer: (fautifs) => etageVitest(fautifs) },
+  { nom: 'contenu', executer: etageContenu, rejouer: () => etageContenu() },
+  { nom: 'rejeu', executer: etageRejeu, rejouer: () => etageRejeu() }
 ];
 
 // ───────────────────────────────────────────────────────── application d'une mutation
@@ -295,7 +371,20 @@ function essayer(recette) {
   }
   const octetsMutes = Buffer.from(mute, 'utf8');
 
+  // ── INVARIANT 6 (lot P0) : L'ARBRE QUI A JUGÉ EST RELEVÉ, PAS SUPPOSÉ ────────────────────
+  //
+  // Le relevé se prend AVANT la mutation et se reprend APRÈS la restauration : les deux
+  // portent donc le contenu d'origine du fichier-cible, et toute différence entre eux vient
+  // de QUELQU'UN D'AUTRE. Mesuré le 2026-08-03 : trois exécutions rouges d'affilée, identiques
+  // à la ligne près, pendant qu'une campagne voisine appliquait l'arbitrage Q-INT-4 dans
+  // `serveur/src/depots/tentatives.ts`. Ni le `git status` d'avant ni celui d'après ne le
+  // voyaient — voir l'en-tête de `empreinte-arbre.mjs`.
+  const empreinteAvant = empreinteArbre();
+
   let verdict = 'SURVIT';
+  /** L'étage qui a rougi, et les fichiers de test qu'il a nommés. Sert à la confirmation. */
+  let etageFautif = null;
+  let fichiersFautifs = [];
   const etagesJoues = [];
   try {
     writeFileSync(chemin, octetsMutes);
@@ -304,6 +393,8 @@ function essayer(recette) {
       etagesJoues.push({ etage: etage.nom, code: resultat.code, nbTests: resultat.nbTests ?? null });
       if (resultat.code !== 0) {
         verdict = 'DETECTEE';
+        etageFautif = etage;
+        fichiersFautifs = resultat.fichiersFautifs ?? [];
         break; // détecté au premier étage qui parle : les suivants ne diraient rien de plus
       }
     }
@@ -324,7 +415,58 @@ function essayer(recette) {
     }
   }
 
-  return { verdict, etagesJoues };
+  if (collision !== null) {
+    return { verdict: 'INDECIS', etagesJoues, detail: collision.message };
+  }
+
+  // ── 1. L'arbre a-t-il bougé sous l'essai ? ───────────────────────────────────────────────
+  const empreinteApres = empreinteArbre();
+  if (empreinteApres.empreinte !== empreinteAvant.empreinte) {
+    const bouges = fichiersQuiOntBouge(empreinteAvant, empreinteApres);
+    return {
+      verdict: 'INDECIS',
+      etagesJoues,
+      empreinteAvant: empreinteAvant.empreinte,
+      empreinteApres: empreinteApres.empreinte,
+      detail:
+        `l’arbre a changé PENDANT l’essai ${recette.id} — ${bouges.join(', ')}. ` +
+        'Le verdict porterait sur un code que ce banc n’a pas choisi : il n’est pas rendu. ' +
+        'Relancer sur un dépôt calme (voir Q-INT-10).'
+    };
+  }
+
+  // ── 2. Un rouge qui survit à la restauration n'est pas une détection ─────────────────────
+  //
+  // C'est la DÉFINITION même de « détecté » : un échec causé par la mutation disparaît quand
+  // la mutation disparaît. Le banc comptait jusqu'ici tout code de sortie non nul comme
+  // `DETECTEE` — donc un rouge spontané GONFLAIT le score de la QA. Observé, pas redouté :
+  // `M11b` est passée `DETECTEE` puis `SURVIT` entre deux exécutions du même banc, et `M2`
+  // avant elle (Q-INT-9).
+  //
+  // La confirmation ne coûte que les fichiers qui ont rougi, pas la suite entière.
+  let confirmation = null;
+  if (verdict === 'DETECTEE' && etageFautif !== null) {
+    const rejeu = etageFautif.rejouer(fichiersFautifs);
+    if (rejeu.code !== 0) {
+      return {
+        verdict: 'INDECIS',
+        etagesJoues,
+        detail:
+          `l’étage « ${etageFautif.nom} » rougit ENCORE une fois ${recette.fichier} restauré ` +
+          `(${fichiersFautifs.join(', ') || 'étage entier'}). Ce rouge n’est donc pas causé par ` +
+          `la mutation ${recette.id} : le compter comme une détection gonflerait le score de la QA.`
+      };
+    }
+    // La confirmation est TRACÉE, pas seulement effectuée : un garde qu'on ne voit jamais
+    // s'exécuter est un garde dont personne ne sait s'il est branché.
+    confirmation = {
+      etage: etageFautif.nom,
+      fichiersRejoues: fichiersFautifs,
+      redevenuVert: true
+    };
+  }
+
+  return { verdict, etagesJoues, fichiersFautifs, confirmation };
 }
 
 // ─────────────────────────────────────────────────────────────────────────── plan
@@ -396,12 +538,30 @@ if (exclusInitiales.length > 0) {
   console.log('');
 }
 
+// L'arbre est RELEVÉ avant de commencer, et le relevé est imprimé : un rapport de banc qui ne
+// dit pas sur quel code il a tourné n'est pas comparable à celui d'hier. `propre` veut dire
+// « rigoureusement la tête » ; tout le reste est nommé.
+const arbreAuDepart = empreinteArbre();
+console.log(
+  `Arbre au départ : ${empreinteCourte(arbreAuDepart.empreinte)} · tête ${arbreAuDepart.tete.slice(0, 8)} · ` +
+    (arbreAuDepart.propre
+      ? 'PROPRE'
+      : `${arbreAuDepart.ecarts.length} fichier(s) s’écartent de la tête`)
+);
+if (!arbreAuDepart.propre) {
+  for (const ecart of arbreAuDepart.ecarts) console.log(`   · ${ecart.chemin}`);
+}
+console.log('');
+
 process.stdout.write('BASE  avant … ');
 const baseAvant = etageVitest();
 console.log(
   baseAvant.code === 0
     ? `VERTE   ${baseAvant.nbTests ?? '?'} tests`
-    : `ROUGE   ← toute détection qui suit serait un faux positif`
+    : `ROUGE   ← toute détection qui suit serait un faux positif` +
+        (baseAvant.fichiersFautifs.length > 0
+          ? `\n        fichiers en échec : ${baseAvant.fichiersFautifs.join(', ')}`
+          : '')
 );
 
 /** @type {{id: string, verdict: string, attendu: string, detail?: string}[]} */
@@ -411,23 +571,35 @@ if (baseAvant.code === 0) {
   for (const recette of recettes) {
     process.stdout.write(`${recette.id.padEnd(5)} ${recette.fichier.padEnd(48).slice(0, 48)} … `);
     const debutEssai = Date.now();
-    const { verdict, detail, etagesJoues } = essayer(recette);
+    const { verdict, detail, etagesJoues, confirmation } = essayer(recette);
     const dureeMs = Date.now() - debutEssai;
 
+    // Un essai `INDECIS` n'est JAMAIS conforme : il ne rend aucun verdict, il dit qu'il n'a
+    // pas pu en rendre un. Le traiter comme conforme reviendrait à publier un chiffre qu'on
+    // sait creux — exactement ce que ce banc existe pour empêcher.
     const conforme =
-      verdict === recette.attendu ||
-      (recette.attendu === 'SURVIT' && verdict === 'DETECTEE'); // amélioration
+      verdict !== 'INDECIS' &&
+      (verdict === recette.attendu ||
+        (recette.attendu === 'SURVIT' && verdict === 'DETECTEE')); // amélioration
     const symbole =
-      verdict === 'ANCRAGE-PERDU'
-        ? '🔧'
-        : verdict === recette.attendu
-          ? verdict === 'DETECTEE' ? '✅' : '➖'
-          : verdict === 'DETECTEE'
-            ? '🎉'
-            : '❌';
+      verdict === 'INDECIS'
+        ? '⚠'
+        : verdict === 'ANCRAGE-PERDU'
+          ? '🔧'
+          : verdict === recette.attendu
+            ? verdict === 'DETECTEE' ? '✅' : '➖'
+            : verdict === 'DETECTEE'
+              ? '🎉'
+              : '❌';
 
     console.log(`${symbole} ${verdict.padEnd(14)} ${(dureeMs / 1000).toFixed(1)} s`);
     if (detail !== undefined) console.log(`      ${detail}`);
+    if (confirmation != null) {
+      console.log(
+        `      ↻ confirmée : « ${confirmation.etage} » redevient VERT une fois le fichier ` +
+          `restauré (${confirmation.fichiersRejoues.join(', ') || 'étage entier'})`
+      );
+    }
 
     resultats.push({
       id: recette.id,
@@ -441,6 +613,9 @@ if (baseAvant.code === 0) {
       assertionE2E: recette.assertionE2E ?? null,
       regle: recette.regle ?? null,
       pourquoi: recette.pourquoi ?? null,
+      // La preuve que l'invariant 6 s'est exécuté sur CET essai — `null` quand il n'y avait
+      // rien à confirmer (mutation survivante), un objet nommé sinon.
+      confirmation: confirmation ?? null,
       detail: detail ?? null,
       dureeMs,
       etages: etagesJoues ?? []
@@ -465,7 +640,15 @@ restaurerRapports(sauvegardeRapports);
 
 const joues = resultats.filter((r) => !r.negatif);
 const negatifs = resultats.filter((r) => r.negatif);
-const quiValent = joues.filter((r) => r.couvertPar !== 'equivalent');
+/**
+ * Les essais qui n'ont RIEN pu conclure — arbre bougé sous l'essai, rouge qui survit à la
+ * restauration, collision d'écriture. Ils sortent du dénominateur : un taux de survie calculé
+ * sur des essais indécis est un chiffre fabriqué par le bruit.
+ */
+const indecis = resultats.filter((r) => r.verdict === 'INDECIS');
+const quiValent = joues.filter(
+  (r) => r.couvertPar !== 'equivalent' && r.verdict !== 'INDECIS'
+);
 
 const regressions = joues.filter((r) => r.attendu === 'DETECTEE' && r.verdict === 'SURVIT');
 const ameliorations = joues.filter((r) => r.attendu === 'SURVIT' && r.verdict === 'DETECTEE');
@@ -495,6 +678,12 @@ if (ancragesPerdus.length > 0)
   echecs.push(
     `${ancragesPerdus.length} ancrage(s) perdu(s) : ${ancragesPerdus.map((r) => r.id).join(', ')}`
   );
+if (indecis.length > 0)
+  echecs.push(
+    `${indecis.length} essai(s) INDÉCIS (${indecis.map((r) => r.id).join(', ')}) — la mesure ` +
+      'n’est pas opposable. Un essai indécis n’est ni une détection ni une survie : le banc a ' +
+      'jugé un code qu’il n’avait pas choisi, ou un rouge qui ne vient pas de sa mutation.'
+  );
 if (collision !== null) echecs.push(collision.message);
 if (!MODE_LISTE && recettes.length > 0 && resultats.length === 0)
   echecs.push('aucune recette n’a été jouée — un banc vide ne prouve rien');
@@ -502,7 +691,8 @@ if (!MODE_LISTE && recettes.length > 0 && resultats.length === 0)
 console.log('');
 console.log('── Contrat de sortie ──────────────────────────────────────────────');
 console.log(`mutations jouées                 ${joues.length}`);
-console.log(`mutants équivalents (hors compte) ${joues.length - quiValent.length}`);
+console.log(`essais INDÉCIS (hors compte)      ${indecis.length}${indecis.length > 0 ? ` (${indecis.map((r) => r.id).join(', ')})` : ''}`);
+console.log(`mutants équivalents (hors compte) ${joues.filter((r) => r.couvertPar === 'equivalent' && r.verdict !== 'INDECIS').length}`);
 console.log(`mutations qui valent              ${quiValent.length}`);
 console.log(`détectées                         ${detectees.length}`);
 console.log(`survivantes                       ${survivantsObserves.length}`);
@@ -549,10 +739,20 @@ const rapport = {
   commande: `npm run qa:mutations${arguments_.length > 0 ? ` -- ${arguments_.join(' ')}` : ''}`,
   baseVerteAvant: baseAvant.code === 0,
   baseVerteApres: baseApres.code === 0,
+  // L'arbre qui a produit ces chiffres. Deux rapports ne se comparent que si ces deux
+  // empreintes sont égales — c'est la leçon de Q-INT-10.
+  empreinteArbreAuDepart: arbreAuDepart.empreinte,
+  empreinteArbreALaFin: empreinteArbre().empreinte,
+  teteAuDepart: arbreAuDepart.tete,
+  arbrePropreAuDepart: arbreAuDepart.propre,
+  ecartsAuDepart: arbreAuDepart.ecarts.map((e) => e.chemin),
   nbTestsBase: baseAvant.nbTests,
   testsExclus: exclusInitiales,
   mutationsJouees: joues.length,
-  mutantsEquivalents: joues.length - quiValent.length,
+  essaisIndecis: indecis.map((r) => ({ id: r.id, detail: r.detail })),
+  mutantsEquivalents: joues.filter(
+    (r) => r.couvertPar === 'equivalent' && r.verdict !== 'INDECIS'
+  ).length,
   mutationsQuiValent: quiValent.length,
   detectees: detectees.length,
   survivantes: survivantsObserves.length,
