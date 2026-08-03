@@ -14,6 +14,25 @@ démarrage. Si tu as déjà relancé depuis hier, il n'y a rien à faire.
 
 ---
 
+## Tes six retours du 2026-08-03 — où ils sont écrits
+
+Vingt minutes de jeu réel, **six défauts**. La QA en comptait alors 2 498 cas automatisés et n'en
+avait trouvé **aucun** — non par faiblesse, mais parce qu'elle vérifie que le code fait ce qu'il
+dit, là où ces six défauts sont tous « le code fait ce qu'il dit, et l'enfant ne voit rien ».
+
+Chacun porte sa mesure et son état dans **[retours-de-jeu.md](retours-de-jeu.md)** :
+
+| | | état |
+|---|---|---|
+| **R1** | Le rallumage levait 8 % d'un gris — invisible | ✅ corrigé (**D51**, `32b20f8`) |
+| **R2** | La luciole n'est pas dessinée dans son SVG | ouvert |
+| **R3** | Fin d'exercice sans chemin vers le suivant | ouvert |
+| **R4** | Une étoile sans qu'on dise pourquoi | ouvert |
+| **R5** | Particules qui resteraient à l'écran | **non reproduit** — ma mesure était invalide |
+| **R6** | Montrer Gobi quand il évolue | demandé |
+
+---
+
 ## Ce que cette campagne a fait
 
 Le GPU n'était pas disponible : **aucune image n'a été générée**. Tout ce qui suit est du SVG écrit
