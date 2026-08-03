@@ -60,7 +60,7 @@ function servicesJeuDeTest(): ServicesJeu {
 
 const services = servicesJeuDeTest();
 
-import { contenuEclair as contenu } from '../fixtures/moteurs/eclair.js';
+import { contenuEclair as contenu, contenuEclairDeuxEtapes } from '../fixtures/moteurs/eclair.js';
 
 /**
  * Le harnais expose le résumé et la progression en `data-*`. C'est volontaire : les
@@ -119,6 +119,34 @@ function Harnais(): ReactElement {
       />
       <MoteurEclair
         contenu={contenu}
+        habillage={habillage}
+        etat={etat}
+        emettre={emettre}
+        services={services}
+        animationsDesactivees
+      />
+    </div>
+  );
+}
+
+/**
+ * Le MÊME harnais, sur un contenu à DEUX étapes.
+ *
+ * Il existe parce que la fixture principale n'en porte qu'une : répondre y termine l'exercice,
+ * et le passage d'une consigne à la suivante — l'état où vivait le défaut trouvé en jouant —
+ * n'était traversé par aucun test du dépôt.
+ */
+function HarnaisDeuxEtapes(): ReactElement {
+  const [etat, setEtat] = useState<EtatEclair>(() =>
+    moteurEclair.creerEtat({ contenu: contenuEclairDeuxEtapes, habillage, alea, horloge }),
+  );
+  const emettre = useCallback((action: ActionEclair) => {
+    setEtat((precedent) => moteurEclair.reduire(precedent, action, { alea, horloge }));
+  }, []);
+  return (
+    <div data-harnais="oui" data-etapes-finies={String(etat.etapes.filter((e) => e.finMs !== null).length)}>
+      <MoteurEclair
+        contenu={contenuEclairDeuxEtapes}
         habillage={habillage}
         etat={etat}
         emettre={emettre}
@@ -278,6 +306,71 @@ describe('moteur eclair', () => {
         vi.advanceTimersByTime(5000);
       });
       expect(visible(), 'le mot revu doit repartir comme le premier').toBe('non');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  /**
+   * ════════════════════════════════════════════════════════════════════════════════════════
+   * LE DÉFAUT QUE J'AI MOI-MÊME INTRODUIT AVEC R11, ET QUE MON TEST N'A PAS VU.
+   *
+   * Trouvé en jouant, le 2026-08-03 : « quand tu cliques sur la bonne couleur, ça affiche le
+   * mot suivant directement ET ça te met le bouton montre-moi le mot, qui est déjà affiché ».
+   *
+   * Cause : DEUX effets réagissaient au changement de consigne dans le même commit.
+   *
+   *     effet A (consigne change) → referme la porte, `demarrages` = 0
+   *     effet B (consigne change) → lit ENCORE `demarrages` = 1, du rendu précédent
+   *                              → lance l'éclair de l'étape suivante
+   *
+   * B voyait la valeur du rendu en cours de commit, pas celle que A venait de poser. Le mot
+   * partait donc tout seul, ET la porte s'affichait — les deux à la fois, ce qui est
+   * exactement ce qu'il décrit.
+   *
+   * ── POURQUOI MON TEST NE L'A PAS ATTRAPÉ, ET C'EST LE VRAI ENSEIGNEMENT ─────────────────
+   * Le cas de R11 n'exerçait que la PREMIÈRE consigne : ouvrir la porte, voir le mot, le voir
+   * disparaître, le revoir. Il ne répondait jamais. Or le défaut ne vit qu'au PASSAGE d'une
+   * consigne à la suivante — un état qu'aucun de mes cas ne traversait.
+   *
+   * C'est la même famille que tout ce que cette journée a corrigé : on teste ce qui est
+   * facile à mettre en place, pas ce qui arrive. Ce cas-ci répond, puis regarde l'étape
+   * d'après.
+   * ════════════════════════════════════════════════════════════════════════════════════════
+   */
+  it('LE DÉFAUT — après une bonne réponse, l’éclair suivant ATTEND, il ne part pas tout seul', () => {
+    vi.useFakeTimers();
+    try {
+      const { container } = render(<HarnaisDeuxEtapes />);
+      const visible = (): string | null =>
+        container.querySelector('[data-plateau="eclair"]')?.getAttribute('data-visible') ?? null;
+      const porte = (): Element | null => container.querySelector('[data-action="pret"]');
+
+      // Première étape, jouée jusqu'au bout : porte, éclair, réponse.
+      taper(container, ['[data-action="pret"]']);
+      expect(visible()).toBe('oui');
+      act(() => {
+        vi.advanceTimersByTime(5000);
+      });
+      expect(visible()).toBe('non');
+      taper(container, ['[data-option="opt-roue"]']);
+
+      // ÉTAPE SUIVANTE. C'est ici que tout se joue.
+      expect(
+        visible(),
+        'le mot de l’étape suivante est parti tout seul : l’enfant l’a raté sans le savoir'
+      ).toBe('non');
+      expect(porte(), 'la porte doit être là, et elle doit être la SEULE chose à faire').not.toBeNull();
+
+      // Et la porte marche encore : elle n'est pas un bouton mort une fois la première passée.
+      taper(container, ['[data-action="pret"]']);
+      expect(visible(), 'la porte de la deuxième étape ne montre rien').toBe('oui');
+
+      // Le mot repart bien pour sa durée, il ne reste pas figé.
+      act(() => {
+        vi.advanceTimersByTime(5000);
+      });
+      expect(visible()).toBe('non');
     } finally {
       vi.useRealTimers();
     }

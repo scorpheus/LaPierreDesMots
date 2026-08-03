@@ -155,21 +155,46 @@ export function MoteurEclair(
    * exposition et le réducteur ignore toujours les suivantes.
    * ══════════════════════════════════════════════════════════════════════════════════════════
    */
-  const [demarrages, fixerDemarrages] = useState(0);
+  /**
+   * ── LA PORTE PORTE L'IDENTITÉ DE SA CONSIGNE, ET C'EST TOUT LE CORRECTIF ──────────────────
+   *
+   * Défaut trouvé EN JOUANT le lendemain de R11, et introduit PAR R11 : « quand tu cliques sur
+   * la bonne couleur, ça affiche le mot suivant directement ET ça te met le bouton montre-moi
+   * le mot, qui est déjà affiché ».
+   *
+   * La première version tenait la porte dans un compteur nu, refermé par un effet :
+   *
+   *     effet A (la consigne change) → referme la porte, `demarrages` = 0
+   *     effet B (la consigne change) → lit ENCORE `demarrages` = 1, du rendu précédent
+   *                                  → lance l'éclair de l'étape suivante
+   *
+   * Les deux tournaient dans le même commit, et B voyait la valeur du rendu en cours, pas
+   * celle que A venait de poser. Le mot partait donc tout seul ET la porte s'affichait.
+   *
+   * La correction ne consiste pas à ordonner les effets — ce serait tenir un équilibre — mais
+   * à supprimer la course : **la porte retient l'identifiant de la consigne qui l'a ouverte**.
+   * Si la consigne affichée n'est plus celle-là, la porte est refermée, et c'est CALCULÉ AU
+   * RENDU. Il n'y a plus d'instant où deux vérités coexistent, donc plus rien à synchroniser.
+   */
+  const idConsigne = consigne === null ? null : String(consigne.id);
+  const [porte, fixerPorte] = useState<{ readonly id: string | null; readonly tours: number }>(
+    () => ({ id: idConsigne, tours: 0 })
+  );
+  const tours = porte.id === idConsigne ? porte.tours : 0;
+  const ouvrirLaPorte = useCallback(() => {
+    fixerPorte({ id: idConsigne, tours: tours + 1 });
+  }, [idConsigne, tours]);
 
   const refEmettre = useRef(emettre);
   refEmettre.current = emettre;
 
-  // Nouvelle consigne : on referme la porte. Sans ça, l'éclair de l'étape suivante partirait
-  // tout seul dans la seconde qui suit une bonne réponse — exactement ce que le père a vécu
-  // (« ça écrit jaune et disparait »).
   useEffect(() => {
-    fixerDemarrages(0);
-    fixerEclairVisible(false);
-  }, [consigne]);
-
-  useEffect(() => {
-    if (consigne === null || demarrages === 0) return undefined;
+    if (consigne === null || tours === 0) {
+      // Porte fermée — nouvelle consigne, ou pas encore tapé. Rien ne s'affiche, et surtout
+      // aucune minuterie ne court : c'est ce silence qui manquait.
+      fixerEclairVisible(false);
+      return undefined;
+    }
     fixerEclairVisible(true);
     // Le `setTimeout` vit ICI, dans le rendu, jamais dans la logique (§ 4.8, règle 3).
     const identifiant = setTimeout(() => {
@@ -179,7 +204,7 @@ export function MoteurEclair(
     return () => {
       clearTimeout(identifiant);
     };
-  }, [consigne, dureeMs, demarrages]);
+  }, [consigne, dureeMs, tours]);
 
   return (
     <div
@@ -207,15 +232,13 @@ export function MoteurEclair(
       {/* LA PORTE. Tant que l'enfant n'a pas tapé, aucun mot ne part — il ne peut donc plus
           rater l'éclair sans le savoir. Une fois l'exposition passée, la même place porte
           « Revoir », qui rouvre la porte autant de fois qu'il veut. */}
-      {demarrages === 0 ? (
+      {tours === 0 ? (
         <button
           type="button"
           data-action="pret"
           className="cible cible-appel"
           style={STYLE_CIBLE}
-          onClick={() => {
-            fixerDemarrages((rang) => rang + 1);
-          }}
+          onClick={ouvrirLaPorte}
         >
           Prêt&nbsp;? Montre-moi le mot
         </button>
@@ -230,7 +253,7 @@ export function MoteurEclair(
               // rien), la porte se rouvre pour que le mot reparte vraiment. Compter sans
               // remontrer était exactement le défaut d'avant.
               emettre({ type: 'revoirEclair' } as ActionEclair);
-              fixerDemarrages((rang) => rang + 1);
+              ouvrirLaPorte();
             }}
           >
             Revoir le mot
