@@ -7440,3 +7440,84 @@ impossible :
 - **La carte du monde v3** est du SVG fait main. Le voile de Grisaille est désormais correct par
   construction (Q-S4), mais la question « est-ce que ça donne envie ? » n'a pas été posée à un
   humain.
+
+## Q-INT-9. La suite n'est pas déterministe — et la cause n'est pas l'outillage, c'est la falaise de S3
+
+Trouvé après le commit d'intégration, en relançant la même commande sur un arbre **propre et
+commité**. C'est le résultat le plus important de cette vérification, et il corrige en partie
+Q-INT-7.
+
+### La mesure : sept exécutions du même commit, trois rouges
+
+Aucun fichier n'a changé entre elles — `git status` vide à chaque fois.
+
+| # | Commande | Code | Détail |
+|---|---|---|---|
+| 1 | `npx vitest run` | **0** | 1 975 / 1 975 |
+| 2 | `npm run test -- --coverage` | **0** | 1 975 / 1 975, seuils tenus |
+| 3 | étape `test` de `npm run verifier` | **1** | 136 fichiers verts + `Timeout calling "onTaskUpdate"` |
+| 4 | `npx vitest run` | **1** | **2 échecs** |
+| 5 | `npx vitest run` | **0** | 1 975 / 1 975 |
+| 6 | `vitest run --project unitaires --project composants --project api` | **1** | **3 échecs** |
+| 7 | la même | **0** | 1 975 / 1 975 |
+
+### Les trois cas qui tombent sont toujours les mêmes, et ils ont un point commun
+
+```
+× propriete-sortie-jouee     — chaque étape jouée rend `reussi` et au moins une étoile
+× propriete-tentative-coherente — attrape : 1000 séquences engendrées, invariants tenus
+× sortie-sur-disque          — les six régions demandées, AU MOINS DEUX répondent
+```
+
+Les trois passent par **`composerSortie`**. Et le troisième porte, écrite noir sur blanc, la
+raison :
+
+```ts
+expect(repondent.length, `sorties servies : …`).toBeGreaterThanOrEqual(2);
+```
+
+Or le lot S3 a mesuré (S3-Q2) que pour un profil neuf, **deux régions sur six répondent** —
+`clairiere` et `galeries` ; les quatre autres rendent un 409 « 0 nœud(s) éligible(s) ». Cette
+assertion est donc posée **exactement sur son propre plancher, avec zéro marge**. Il suffit que
+la composition d'une seule région bascule pour qu'on passe à 1, et le cas devient rouge.
+
+**Ce n'est pas un test fragile qu'il faudrait détendre. C'est un test honnête posé au bord d'une
+falaise produit**, et la falaise est déjà consignée : `selecteur.ts:194` exige
+`candidat.competences.every(competenceEligible)`, donc un exercice précoce qui déclare en
+secondaire un code plus avancé **se ferme lui-même**. 10 nœuds sur 76 au mieux.
+
+### Ce que ça coûte, et pourquoi ça compte plus que le désagrément
+
+**Le banc de mutation compte tout code de sortie non nul comme `DETECTEE`.** Un rouge
+intermittent est donc indiscernable d'une détection réelle : il **gonfle** le score de la QA.
+
+C'est observé, pas redouté. `M11b` est passée `DETECTEE` puis `SURVIT` entre deux exécutions du
+même banc à quarante minutes d'écart, sans qu'une ligne change. Le banc porte lui-même
+l'avertissement — il avait déjà vu le phénomène sur `M2` le 2026-08-02 — et il a raison :
+
+> ⚠ NE RESSERRE PAS LE CLIQUET SUR CETTE SEULE MESURE.
+
+**Je n'ai donc PAS resserré le cliquet**, alors que le banc le proposait pour M18, M20, M23, M24
+et M26. Les faire passer de `SURVIT` à `DETECTEE` dans `scripts/qa/recettes.mjs` demande une
+mesure propre, et la mesure n'est pas propre tant que la suite peut rougir toute seule. Ce qui est
+solide en revanche, et indépendant du banc du dépôt : le banc dédié du lot S1
+(`bac-a-sable/banc-mutation-qa1.mjs`) rend **7 DETECTEE sur 7 avec 5 contrôles négatifs verts**,
+et mon banc d'intégration **3 sur 3** — deux mesures ciblées, restaurations vérifiées par SHA-256.
+
+### Ce qu'il faut faire, dans cet ordre
+
+1. **Trancher S3-Q2** (le verrou circulaire du sélecteur). Tant que « partir en sortie » ne
+   propose que 10 nœuds sur 76 et que 4 régions sur 6 refusent, ces trois recettes resteront au
+   bord du vide — et la QA restera bruyante.
+2. **Ensuite seulement**, relancer `npm run qa:mutations` sur un dépôt calme et resserrer le
+   cliquet sur les cinq recettes ci-dessus. Fait dans l'autre ordre, on grave un chiffre que le
+   bruit a fabriqué.
+3. Accessoirement, l'étage `test` du banc et de `verifier` gagnerait à **relancer une fois** un
+   échec avant de le déclarer, ou à exiger deux rouges concordants. Un banc qui confond « le code
+   est mauvais » et « la machine était chargée » ne mesure pas ce qu'il croit.
+
+### Ce que ça ne remet PAS en cause
+
+Les 1 975 tests passent sur une machine calme, code 0, plusieurs fois de suite. Aucun des trois
+cas ne rougit pour une raison de produit fausse : ils disent tous la vérité sur un système qui
+n'a pas de marge. Et les 372 recettes E2E — dont le casse-cou et le singe — sont vertes.

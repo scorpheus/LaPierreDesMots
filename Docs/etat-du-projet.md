@@ -51,10 +51,35 @@ Mesurés le 2026-08-03, sur un dépôt dont je suis le seul écrivain.
 | `npm run test:rejeu` | **0** | vert |
 | `npm run test:qualite` | **0** | vert, budget de bundle tenu |
 | `npm run qa:trompeurs` | **0** | 0 bloquant, **66** avertissements (plafond gelé à 66) |
+| `npm run qa:mutations` | **0** | voir juste en dessous |
 | `npm run verifier` | **1** | **9 étapes vertes sur 11** — voir « ce qui reste rouge » |
 
 Couverture, mesurée avec les seuils par zone de l'annexe T : **94,2 % des instructions**,
 85,8 % des branches.
+
+### Ce que la QA attrape, mesuré en cassant le code exprès
+
+```
+                              AVANT ce lot     APRÈS ce lot
+mutations qui valent               27               27
+détectées                          18               23
+survivantes                         9                4
+   dont un test E2E les attrape     5                3
+   dont PERSONNE ne les voit        4                1
+taux de survie                     33 %             15 %
+contrôles négatifs verts          5 / 5            5 / 5
+```
+
+**Les trois trous visés sont fermés** — M18 (la flèche du ductus), M20 (la clé d'idempotence),
+M26 (l'animation dans le champ de lecture) — plus M23 et M24, fermés par les tests d'écran. Il
+reste **un** défaut que rien ne voit : M11b, la marque `data-clip` qui disparaît sans que la
+preuve de D42 s'en aperçoive.
+
+**Un avertissement sur ce chiffre**, et il compte : le banc a été lancé une première fois *avant*
+le commit et déclarait alors les trois trous encore ouverts — il **exclut les tests que git ne
+suit pas encore**. Les chiffres ci-dessus sont ceux d'après le commit. Et M11b a basculé
+« détectée » puis « survivante » entre deux exécutions : voir Q-INT-9, c'est un vrai problème de
+mesure, pas une coquetterie.
 
 Le dépôt : **25 commits**, **76 exercices** pour **76 nœuds** cités par la carte (écart nul),
 **656 clips audio**, **115 SVG** tous contrôlés en régions fermées, **10 migrations**,
@@ -69,14 +94,25 @@ figer des références maintenant serait les refaire aussitôt. **Aucune référ
 cette campagne** — elles attendent tes yeux. Ça se lève en regardant les images
 (`tests/rapports/artefacts/`), puis `npm run test:visuel -- --maj`.
 
-**L'étape `test` de `npm run verifier`** — rouge **une fois sur deux, sans qu'aucun test
-n'échoue.** Le journal dit `136 passed (136)` et, plus bas,
-`Error: [vitest-worker]: Timeout calling "onTaskUpdate"` : c'est un délai de communication interne
-à l'outil de test quand la machine est chargée, pas un défaut du jeu. Relancée seule, la même
-commande sort à **0** en 54 s contre 78 s dans la chaîne. Ça ne change rien aujourd'hui — mais **le
-jour où tu figeras les captures, ça pourra maintenir `verifier` rouge sans raison**, et c'est le
-plus mauvais moment pour découvrir qu'une porte ment. Détail et piste de correction dans
-`questions-en-attente.md`, Q-INT-7.
+**La suite peut rougir toute seule** — mesuré : sept exécutions du **même commit**, sur un arbre
+propre, **trois rouges**. Et ce n'est pas un caprice d'outillage, c'est le signal d'un vrai
+problème de conception que le lot S3 avait déjà trouvé.
+
+Les trois mêmes cas tombent à chaque fois, et ils passent tous par le composeur de sortie. Le plus
+parlant est celui-ci : *« les six régions demandées, au moins deux répondent »*. Or pour un profil
+neuf, **exactement deux régions sur six répondent** — les quatre autres refusent avec
+« 0 nœud éligible ». L'assertion est donc posée **sur son propre plancher, sans un millimètre de
+marge** : il suffit qu'une région bascule pour qu'elle passe au rouge.
+
+Ce n'est pas un test à détendre. C'est un test honnête **posé au bord d'une falaise** : « partir en
+sortie » ne sait proposer que **10 nœuds sur 76**, parce qu'un exercice qui déclare en compétence
+secondaire un code plus avancé se ferme lui-même. Tant que ce point n'est pas tranché (S3-Q2), ces
+trois recettes resteront au bord du vide.
+
+**Ce que ça coûte** : le banc de mutation compte tout échec comme « la QA a détecté le défaut ». Un
+rouge intermittent gonfle donc son score. C'est pour ça que je **n'ai pas resserré le cliquet** sur
+les cinq mutations que le banc proposait de graver : on ne grave pas un chiffre qu'un bruit a
+fabriqué. Détail complet en Q-INT-9.
 
 ---
 
@@ -139,15 +175,18 @@ Détail et mesures dans **`Docs/questions-en-attente.md`**.
 
 1. **Les captures visuelles** — les regarder, puis figer ou refuser. C'est ce qui débloque
    `npm run verifier`.
-2. **Les trois compétences muettes** (Q-INT-4) — contenu, garde, ou code. C'est la décision qui a
+2. **Le verrou du composeur de sortie** (S3-Q2) — c'est devenu la décision la plus urgente : elle
+   commande à la fois ce que l'enfant peut jouer (10 nœuds sur 76 en sortie) et la fiabilité de
+   toute la QA (Q-INT-9).
+3. **Les trois compétences muettes** (Q-INT-4) — contenu, garde, ou code. C'est la décision qui a
    le plus d'effet sur ce que tu liras dans le suivi.
-3. **Le seuil de couverture lexicale CE1**, inchangé : 93,0 % des mots lus en jeu figurent dans la
+4. **Le seuil de couverture lexicale CE1**, inchangé : 93,0 % des mots lus en jeu figurent dans la
    liste. Les 4 absents sont `b`, `d` (les graphèmes travaillés, D23), `gobi` et `voit`. Exiger
    100 % interdirait D23 ; choisir 90 % serait inventer une loi.
-4. **R15 couvre-t-il les bascules ?** Cinq des six groupes de réglages ont un bouton d'écoute ; le
+5. **R15 couvre-t-il les bascules ?** Cinq des six groupes de réglages ont un bouton d'écoute ; le
    sixième — les bascules « Aides à la lecture » — n'en a pas, ses contrôles portant leur propre
    intitulé (Q-INT-5).
-5. **Quand tout est terminé, rejouer ou réviser ?** Inchangé depuis hier.
+6. **Quand tout est terminé, rejouer ou réviser ?** Inchangé depuis hier.
 
 ---
 
