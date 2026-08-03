@@ -19,58 +19,85 @@
         "role": "coloriable",
         "regions": [
           {
-            "id": "luciole-haute",
-            "libelle": "la luciole du haut",
+            "id": "nuit-claire",
+            "libelle": "la nuit claire",
             "centroide": [
-              190.0,
-              190.0
+              240,
+              137
             ],
-            "surface": 32000.0
-          },
-          {
-            "id": "luciole-basse",
-            "libelle": "la luciole du bas",
-            "centroide": [
-              480.0,
-              190.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "buisson",
-            "libelle": "le buisson",
-            "centroide": [
-              770.0,
-              190.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "herbe-haute",
-            "libelle": "l’herbe haute",
-            "centroide": [
-              190.0,
-              420.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "lune",
-            "libelle": "la lune",
-            "centroide": [
-              480.0,
-              420.0
-            ],
-            "surface": 32000.0
+            "surface": 247680
           },
           {
             "id": "sentier",
             "libelle": "le sentier",
             "centroide": [
-              770.0,
-              420.0
+              740.8,
+              505.3
             ],
-            "surface": 32000.0
+            "surface": 41993
+          },
+          {
+            "id": "herbe-haute",
+            "libelle": "l’herbe haute",
+            "centroide": [
+              250,
+              550
+            ],
+            "surface": 28990.8
+          },
+          {
+            "id": "buisson",
+            "libelle": "le buisson",
+            "centroide": [
+              762,
+              468
+            ],
+            "surface": 18934.9
+          },
+          {
+            "id": "lune",
+            "libelle": "la lune",
+            "centroide": [
+              813.8,
+              120
+            ],
+            "surface": 4217.5
+          },
+          {
+            "id": "luciole-haute",
+            "libelle": "la luciole du haut",
+            "centroide": [
+              316,
+              211.1
+            ],
+            "surface": 8481.2
+          },
+          {
+            "id": "luciole-basse",
+            "libelle": "la luciole du bas",
+            "centroide": [
+              472,
+              344.6
+            ],
+            "surface": 4559.6
+          },
+          {
+            "id": "luciole-lointaine",
+            "libelle": "la luciole lointaine",
+            "centroide": [
+              669,
+              236.1
+            ],
+            "surface": 2151.7
+          },
+          {
+            "id": "fleur-de-nuit",
+            "libelle": "la fleur de nuit",
+            "centroide": [
+              120,
+              300
+            ],
+            "surface": 2037.2
           }
         ]
       },

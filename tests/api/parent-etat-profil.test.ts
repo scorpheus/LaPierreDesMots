@@ -25,11 +25,19 @@
  * 404 (sortie citée au rapport de H2).
  * ═════════════════════════════════════════════════════════════════════════════════════════
  */
+import { readdirSync } from 'node:fs';
+import { join } from 'node:path';
+
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { ENTETE_JETON_PARENT } from '@partage/parent/types';
 
-import { INSTANT_DE_REFERENCE, monterApplication } from '../configuration/preparation.js';
+import {
+  INSTANT_DE_REFERENCE,
+  RACINE_DEPOT,
+  lireJson,
+  monterApplication,
+} from '../configuration/preparation.js';
 
 import type { EtatProfil } from '@pierre/partage/parent';
 import type { ApplicationDeTest } from '../configuration/preparation.js';
@@ -37,8 +45,30 @@ import type { ApplicationDeTest } from '../configuration/preparation.js';
 const CODE = '4271';
 const PRENOM = 'Ezékiel';
 
-/** Relevé sur `contenu/monde/regions.json` le 2026-08-02. Recompté par le premier cas. */
-const NOEUDS_LIVRES_ATTENDUS = 18;
+/**
+ * Les nœuds réellement livrés, COMPTÉS SUR DISQUE — `contenu/noeuds/*.json`.
+ *
+ * ⚠ C'ÉTAIT LE LITTÉRAL `18`, « relevé sur `contenu/monde/regions.json` le 2026-08-02 ». Un
+ * relevé daté est juste le jour où on le prend et faux le lendemain : les lots de contenu ont
+ * porté le catalogue à 76 nœuds, et ce fichier a rougi sur un écart qui n'en était pas un.
+ *
+ * Le compte est pris sur les FICHIERS de nœud, pas sur `regions.json`, et c'est délibéré :
+ * `regions.json` est la source que le serveur lit pour répondre. Compter les fichiers garde
+ * donc deux sources distinctes de part et d'autre de l'assertion — un nœud livré et jamais
+ * cité par sa région ferait encore rougir ce cas, ce qu'une lecture du même document
+ * n'attraperait plus jamais.
+ */
+const FICHIERS_DE_NOEUD = readdirSync(join(RACINE_DEPOT, 'contenu', 'noeuds')).filter((f) =>
+  f.endsWith('.json'),
+);
+const NOEUDS_LIVRES_ATTENDUS = FICHIERS_DE_NOEUD.length;
+
+/** Les nœuds livrés d'une région, comptés sur les fichiers eux-mêmes. */
+function noeudsLivresDe(region: string): number {
+  return FICHIERS_DE_NOEUD.filter(
+    (f) => lireJson<{ region: string }>(`contenu/noeuds/${f}`).region === region,
+  ).length;
+}
 
 let contexte: ApplicationDeTest;
 
@@ -161,20 +191,30 @@ describe('GET /api/parent/:profil/etat — le profil VÉCU du 2026-08-02', () =>
 
     expect(etat.regionsIncoherentes).toBe(2);
 
+    // Les dénominateurs sont COMPTÉS sur `contenu/noeuds/*.json`, jamais écrits en dur : ils
+    // valaient 6 et 12 le jour où ce cas a été écrit, 12 et 14 depuis les lots de contenu. Ce
+    // qui est vérifié n'a pas bougé d'un pouce — un pourcentage figé à 100 % par un catalogue
+    // plus petit reste faux, et l'écran doit le dire.
+    const livresClairiere = noeudsLivresDe('clairiere');
     const clairiere = etat.regions.find((r) => r.region === 'clairiere');
     expect(clairiere?.pourcentageStocke).toBe(1);
     expect(clairiere?.noeudsTermines).toBe(1);
-    expect(clairiere?.noeudsLivres).toBe(6);
-    // 1 nœud sur 6 : le recalcul vaut un sixième, et l'écart vaut le reste.
-    expect(clairiere?.pourcentageRecalcule).toBeCloseTo(1 / 6, 6);
-    expect(clairiere?.ecart).toBeCloseTo(5 / 6, 6);
+    expect(clairiere?.noeudsLivres).toBe(livresClairiere);
+    // 1 nœud sur ceux que la région porte : le recalcul vaut cette fraction, l'écart le reste.
+    expect(clairiere?.pourcentageRecalcule).toBeCloseTo(1 / livresClairiere, 6);
+    expect(clairiere?.ecart).toBeCloseTo(1 - 1 / livresClairiere, 6);
 
+    const livresGaleries = noeudsLivresDe('galeries');
     const galeries = etat.regions.find((r) => r.region === 'galeries');
     expect(galeries?.pourcentageStocke).toBe(1);
     expect(galeries?.noeudsTermines).toBe(2);
-    expect(galeries?.noeudsLivres).toBe(12);
-    expect(galeries?.pourcentageRecalcule).toBeCloseTo(2 / 12, 6);
-    expect(galeries?.ecart).toBeCloseTo(10 / 12, 6);
+    expect(galeries?.noeudsLivres).toBe(livresGaleries);
+    expect(galeries?.pourcentageRecalcule).toBeCloseTo(2 / livresGaleries, 6);
+    expect(galeries?.ecart).toBeCloseTo(1 - 2 / livresGaleries, 6);
+    // Contrat de sortie : sans ce plancher, une région vide rendrait les deux fractions nulles
+    // et l'écart nul — le cas passerait en ne mesurant rien.
+    expect(livresClairiere, 'la Clairière ne porte aucun nœud').toBeGreaterThan(2);
+    expect(livresGaleries, 'les Galeries ne portent aucun nœud').toBeGreaterThan(2);
   });
 
   it('l’écran CONSTATE et ne répare pas — la projection reste fausse après lecture', async () => {

@@ -1,0 +1,67 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Lot M1, nœud clairiere-07 — premier nœud du second cycle de la Clairière, et première apparition de `syl.cv` dans le jeu. TROIS CONTRAINTES MESURÉES DANS LE MOTEUR. (1) `partage/src/moteurs/assemble/validation.ts` refuse tout bloc déjà inscrit dans `acquis`, et `acquis` n'est jamais remis à zéro entre deux consignes : les huit blocs utiles appartiennent chacun à UNE seule consigne. (2) Deux blocs portant le même libellé feraient payer une erreur non commise — `bloc-hors-ordre` compte une erreur —, donc `papa` et `bébé`, dont les deux syllabes sont identiques, sont ÉCARTÉS malgré leur simplicité de lecture. Les quatre mots retenus (midi, moto, vélo, télé) donnent huit syllabes deux à deux distinctes. (3) `client/src/moteurs/assemble/MoteurAssemble.tsx` rend `contenu.blocs` EN ENTIER : neuf tuiles à l'écran, le plafond déjà retenu par `guirlande-phrase-01`. D'où quatre consignes, pas six. LE POINT QUI BLOQUE LA CHAÎNE, ET IL EST SIGNALÉ PLUTÔT QUE CONTOURNÉ : `scripts/valider-brouillons.mjs` audite `blocs[].libelle` comme un MOT de vocabulaire. Une syllabe n'est jamais dans une liste de vocabulaire — le script le dit lui-même pour les brouillons (« mi, pa, fé sont des syllabes justes »), via `natureDesFormes`, mais l'audit côté exercice n'a pas l'équivalent. Aucun exercice `assemble` ne peut donc passer la porte aujourd'hui, et c'est pourquoi `stalagmites-assemble-01` la faisait rougir depuis son écriture. Voir Docs/questions-en-attente.md, section M1.",
+  "id": "clairiere-collier-syllabes-01",
+  "version": 1,
+  "titre": "Le collier de syllabes",
+  "competences": ["syl.cv", "flu.mot.court"],
+  "difficulte": 2,
+  "jeu": {
+    "moteur": "assemble",
+    "habillage": "clairiere.collier",
+    "noeud": "clairiere-07",
+    "etoiles": { "sansAide": true, "sansErreur": true },
+    "aideGobi": ["relire-consigne", "souffle-syllabe", "montre-cible"],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Assemble les syllabes pour écrire le mot.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "midi",
+          "solution": ["bloc-mi", "bloc-di"],
+          "motsCles": ["assemble", "syllabes", "mot"]
+        },
+        {
+          "id": "c2",
+          "texte": "Assemble les syllabes pour écrire le mot.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "moto",
+          "solution": ["bloc-mo", "bloc-to"],
+          "motsCles": ["assemble", "syllabes", "mot"]
+        },
+        {
+          "id": "c3",
+          "texte": "Assemble les syllabes pour écrire le mot.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "vélo",
+          "solution": ["bloc-ve", "bloc-lo"],
+          "motsCles": ["assemble", "syllabes", "mot"]
+        },
+        {
+          "id": "c4",
+          "texte": "Assemble les syllabes pour écrire le mot.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "télé",
+          "solution": ["bloc-te", "bloc-le"],
+          "motsCles": ["assemble", "syllabes", "mot"]
+        }
+      ],
+      "blocs": [
+        { "id": "bloc-mi", "libelle": "mi", "intrus": false, "confusionAvec": "ni" },
+        { "id": "bloc-di", "libelle": "di", "intrus": false, "confusionAvec": "bi" },
+        { "id": "bloc-mo", "libelle": "mo", "intrus": false, "confusionAvec": "no" },
+        { "id": "bloc-to", "libelle": "to", "intrus": false, "confusionAvec": "do" },
+        { "id": "bloc-ve", "libelle": "vé", "intrus": false, "confusionAvec": "fé" },
+        { "id": "bloc-lo", "libelle": "lo", "intrus": false, "confusionAvec": "la" },
+        { "id": "bloc-te", "libelle": "té", "intrus": false, "confusionAvec": "dé" },
+        { "id": "bloc-le", "libelle": "lé", "intrus": false, "confusionAvec": "le" },
+        { "id": "bloc-pa", "libelle": "pa", "intrus": true, "confusionAvec": null }
+      ],
+      "competence": "syl.cv"
+    }
+  }
+}

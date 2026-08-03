@@ -19,58 +19,85 @@
         "role": "coloriable",
         "regions": [
           {
-            "id": "halo",
-            "libelle": "le halo",
-            "centroide": [
-              190.0,
-              190.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "feuille-large",
-            "libelle": "la feuille large",
-            "centroide": [
-              480.0,
-              190.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "tige",
-            "libelle": "la tige",
-            "centroide": [
-              770.0,
-              190.0
-            ],
-            "surface": 32000.0
-          },
-          {
             "id": "nuit",
             "libelle": "la nuit",
             "centroide": [
-              190.0,
-              420.0
+              360,
+              158.9
             ],
-            "surface": 32000.0
-          },
-          {
-            "id": "rocher-plat",
-            "libelle": "le rocher plat",
-            "centroide": [
-              480.0,
-              420.0
-            ],
-            "surface": 32000.0
+            "surface": 288000
           },
           {
             "id": "herbe-courte",
             "libelle": "l’herbe courte",
             "centroide": [
-              770.0,
-              420.0
+              210,
+              554.7
             ],
-            "surface": 32000.0
+            "surface": 40135.2
+          },
+          {
+            "id": "rocher-plat",
+            "libelle": "le rocher plat",
+            "centroide": [
+              799.1,
+              481
+            ],
+            "surface": 13036
+          },
+          {
+            "id": "tige",
+            "libelle": "la tige",
+            "centroide": [
+              298.2,
+              521.8
+            ],
+            "surface": 3386
+          },
+          {
+            "id": "feuille-large",
+            "libelle": "la feuille large",
+            "centroide": [
+              423,
+              344
+            ],
+            "surface": 15030.1
+          },
+          {
+            "id": "halo",
+            "libelle": "le halo",
+            "centroide": [
+              300,
+              250
+            ],
+            "surface": 10630.2
+          },
+          {
+            "id": "lune-fine",
+            "libelle": "la lune fine",
+            "centroide": [
+              799.8,
+              112.9
+            ],
+            "surface": 3535.8
+          },
+          {
+            "id": "etoile-du-soir",
+            "libelle": "l’étoile du soir",
+            "centroide": [
+              140,
+              110
+            ],
+            "surface": 1145.6
+          },
+          {
+            "id": "souche-basse",
+            "libelle": "la souche basse",
+            "centroide": [
+              91.8,
+              550
+            ],
+            "surface": 8596.8
           }
         ]
       },

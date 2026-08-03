@@ -1,0 +1,205 @@
+{
+  "id": "foret.tapis",
+  "moteurs": [
+    "colorie"
+  ],
+  "libelle": "Le tapis de feuilles",
+  "region": "foret-muette",
+  "scene": {
+    "fichier": "habillages/foret-muette/tapis.svg",
+    "viewBox": "0 0 960 600",
+    "calques": [
+      {
+        "id": "calque-fond",
+        "role": "fond",
+        "regions": []
+      },
+      {
+        "id": "calque-zones",
+        "role": "coloriable",
+        "regions": [
+          {
+            "id": "ciel-entre-troncs",
+            "libelle": "le ciel entre les troncs",
+            "centroide": [
+              180,
+              35.5
+            ],
+            "surface": 61440
+          },
+          {
+            "id": "ciel",
+            "libelle": "le ciel",
+            "centroide": [
+              240,
+              117.5
+            ],
+            "surface": 111360
+          },
+          {
+            "id": "sol-nu",
+            "libelle": "le sol nu",
+            "centroide": [
+              720,
+              546
+            ],
+            "surface": 96000
+          },
+          {
+            "id": "tronc-un",
+            "libelle": "le premier tronc",
+            "centroide": [
+              47,
+              345
+            ],
+            "surface": 19140
+          },
+          {
+            "id": "tronc-deux",
+            "libelle": "le deuxième tronc",
+            "centroide": [
+              466,
+              350
+            ],
+            "surface": 23040
+          },
+          {
+            "id": "tronc-trois",
+            "libelle": "le troisième tronc",
+            "centroide": [
+              916,
+              343
+            ],
+            "surface": 17368
+          },
+          {
+            "id": "arbre",
+            "libelle": "l’arbre",
+            "centroide": [
+              656,
+              225.6
+            ],
+            "surface": 20072.2
+          },
+          {
+            "id": "chat",
+            "libelle": "le chat",
+            "centroide": [
+              319.3,
+              327.1
+            ],
+            "surface": 11109.3
+          },
+          {
+            "id": "rat",
+            "libelle": "le rat",
+            "centroide": [
+              182.2,
+              386.7
+            ],
+            "surface": 6281.3
+          },
+          {
+            "id": "nid",
+            "libelle": "le nid",
+            "centroide": [
+              826,
+              305.3
+            ],
+            "surface": 4359.5
+          },
+          {
+            "id": "gland-du-tapis",
+            "libelle": "le gland du tapis",
+            "centroide": [
+              441,
+              426.2
+            ],
+            "surface": 3376.4
+          },
+          {
+            "id": "feuille-du-tapis-un",
+            "libelle": "la première feuille du tapis",
+            "centroide": [
+              211,
+              491
+            ],
+            "surface": 9412.8
+          },
+          {
+            "id": "feuille-du-tapis-deux",
+            "libelle": "la deuxième feuille du tapis",
+            "centroide": [
+              376,
+              529
+            ],
+            "surface": 5963.7
+          },
+          {
+            "id": "feuille-du-tapis-trois",
+            "libelle": "la troisième feuille du tapis",
+            "centroide": [
+              641,
+              501
+            ],
+            "surface": 12145.9
+          },
+          {
+            "id": "feuille-du-tapis-quatre",
+            "libelle": "la quatrième feuille du tapis",
+            "centroide": [
+              798,
+              534
+            ],
+            "surface": 4381
+          },
+          {
+            "id": "feuille-basse",
+            "libelle": "la feuille basse",
+            "centroide": [
+              92,
+              545
+            ],
+            "surface": 5086.1
+          },
+          {
+            "id": "feuille-haute",
+            "libelle": "la feuille haute",
+            "centroide": [
+              905,
+              479
+            ],
+            "surface": 3813.1
+          }
+        ]
+      },
+      {
+        "id": "calque-trait",
+        "role": "trait",
+        "regions": []
+      }
+    ]
+  },
+  "palette": {
+    "jetons": {},
+    "nuancier": [
+      "vert",
+      "brun",
+      "gris",
+      "noir",
+      "blanc",
+      "jaune"
+    ]
+  },
+  "timings": {
+    "appuiMs": 60,
+    "relachementMs": 120,
+    "refusMs": 180,
+    "recolorationMs": 800,
+    "interEtoilesMs": 180
+  },
+  "sons": {
+    "ambiance": null,
+    "effets": {}
+  }
+}

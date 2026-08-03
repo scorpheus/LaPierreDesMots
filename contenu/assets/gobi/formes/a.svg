@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Gobi-A">
   <title>Gobi-A</title>
-  <desc>Le cristal du grapheme « a » — Gobi-A. C est LUI qui porte la declinaison, jamais le corps (D20, D36). Sa silhouette et sa teinte sont propres a ce grapheme : deux formes identiques ne se collectionneraient pas (D44). Le viewBox fait 64 unites, ce qui est la cible tapable minimale de R16.</desc>
+  <desc>Le cristal du grapheme « a » — Gobi-A : une goutte large dont la pointe se recourbe. C est LUI qui porte la declinaison, jamais le corps (D20, D36). Sa SILHOUETTE lui est propre et elle est mesuree : le recouvrement avec les 24 autres cristaux ne depasse pas 0.71 (plafond 0.9), sans quoi scripts/gobi-formes.mjs refuse d ecrire — deux formes identiques ne se collectionneraient pas (D44). Les teintes viennent de la palette mesuree sur les pixels de la canonique et consignee dans production/personnages/gobi/gobi.lock.json ; aucune n est choisie a la main. Le temoin de production est production/personnages/gobi/formes/a.png, obtenu par inpainting regional sous masque depuis la canonique — profondeur de chaine 1 (D32). Le viewBox fait 64 unites, ce qui est la cible tapable minimale de R16.</desc>
   <g id="cristal">
-    <path id="cristal-face" d="M32,18 L38.72,33.6 L37.89,58 L26.11,58 L25.28,33.6 Z" fill="#BEE5F5" stroke="#4B2207" stroke-width="3" stroke-linejoin="round"/>
-    <path id="cristal-facette" d="M32,18 L37.89,58 L26.11,58 Z" fill="#8FCDE6" stroke="none" opacity="0.8"/>
-    <path id="cristal-eclat" d="M29.15,30 L30.86,42.8" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" opacity="0.85" fill="none"/>
+    <path class="cristal-face" d="M40,6 L46,14 L52,28 L50,44 L38,55 L22,53 L13,40 L15,24 L26,13 Z" fill-rule="evenodd" fill="#C5EAFA" stroke="#4B2207" stroke-width="3" stroke-linejoin="round"/>
+    <path class="cristal-ombre" d="M34.45,8.77 L40,6 L46,14 L52,28 L50,44 L38,55 L34.45,54.56 Z" fill-rule="evenodd" fill="#ADC8E0" stroke="none" opacity="0.75"/>
+    <path class="cristal-eclat" d="M34.45,12.86 L34.45,36.38" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" opacity="0.85" fill="none"/>
   </g>
 </svg>

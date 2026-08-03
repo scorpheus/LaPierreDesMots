@@ -1,16 +1,37 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" width="960" height="600" role="img" aria-label="Les lianes">
+  <title>Les lianes</title>
+  <desc>Une branche épaisse en travers, trois lianes de longueurs différentes qui en pendent, deux houppiers lobés, un champignon au sol.</desc>
+  <!--
+    DÉCOR — lot M6, contrat du monde v4 § 2. Trait noir sur blanc, la COULEUR VIENT DU CODE
+    (annexe P § 2) : les régions sortent d'ici en grisaille #8E97A8, qui est leur état
+    par défaut et non un choix graphique. Géométrie 100 % polygonale (M, L, Z — aucun arc) :
+    surface et centroïde sont donc calculables exactement et opposables aux valeurs déclarées
+    par le .habillage.json, que scripts/verifier-regions-fermees.mjs --strict recalcule.
+
+    Chaque région est un ENFANT DIRECT de #calque-zones : SceneSvg.tsx sélectionne
+    "#calque-zones > [id]", et un tracé niché dans un sous-groupe échapperait au tap sans
+    qu'aucun message ne le dise.
+
+    ÉCRIT PAR scripts/dessiner-decors.mjs — ne pas retoucher à la main : la scène est décrite
+    dans scripts/decors/decors.mjs, et l'émetteur refuse d'écrire si la mesure est mauvaise.
+  -->
   <g id="calque-fond">
-    <rect id="fond" x="0" y="0" width="960" height="600" fill="#f4f1e6"/>
+    <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
   </g>
-  <g id="calque-zones">
-    <rect id="liane-un" x="90" y="110" width="200" height="160" rx="12"/>
-    <rect id="liane-deux" x="380" y="110" width="200" height="160" rx="12"/>
-    <rect id="liane-trois" x="670" y="110" width="200" height="160" rx="12"/>
-    <rect id="branche" x="90" y="340" width="200" height="160" rx="12"/>
-    <rect id="feuillage" x="380" y="340" width="200" height="160" rx="12"/>
-    <rect id="clairiere-sol" x="670" y="340" width="200" height="160" rx="12"/>
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round">
+    <path id="jour-entre-branches" class="zone" data-region-svg="jour-entre-branches" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L960,0 L960,118 L933.3,124.4 L906.7,127.8 L880,126.7 L853.3,121.4 L826.7,114.6 L800,109.3 L773.3,108.2 L746.7,111.6 L720,118 L693.3,124.4 L666.7,127.8 L640,126.7 L613.3,121.4 L586.7,114.6 L560,109.3 L533.3,108.2 L506.7,111.6 L480,118 L453.3,124.4 L426.7,127.8 L400,126.7 L373.3,121.4 L346.7,114.6 L320,109.3 L293.3,108.2 L266.7,111.6 L240,118 L213.3,124.4 L186.7,127.8 L160,126.7 L133.3,121.4 L106.7,114.6 L80,109.3 L53.3,108.2 L26.7,111.6 L0,118 Z"/>
+    <path id="clairiere-sol" class="zone" data-region-svg="clairiere-sol" fill="#8E97A8" fill-rule="evenodd" d="M0,500 L26.7,507 L53.3,512.1 L80,514 L106.7,512.1 L133.3,507 L160,500 L186.7,493 L213.3,487.9 L240,486 L266.7,487.9 L293.3,493 L320,500 L346.7,507 L373.3,512.1 L400,514 L426.7,512.1 L453.3,507 L480,500 L506.7,493 L533.3,487.9 L560,486 L586.7,487.9 L613.3,493 L640,500 L666.7,507 L693.3,512.1 L720,514 L746.7,512.1 L773.3,507 L800,500 L826.7,493 L853.3,487.9 L880,486 L906.7,487.9 L933.3,493 L960,500 L960,600 L0,600 Z"/>
+    <path id="branche" class="zone" data-region-svg="branche" fill="#8E97A8" fill-rule="evenodd" d="M41.6,194.9 L300.3,163 L620.2,181 L931.2,152.9 L928.8,127.1 L619.8,155 L299.7,137 L38.4,169.1 Z"/>
+    <path id="liane-un" class="zone" data-region-svg="liane-un" fill="#8E97A8" fill-rule="evenodd" d="M172.2,178.4 L162,230.2 L174,280 L162,330.2 L176,380 L162,427.6 L172.2,471.9 L187.8,468.1 L178,428.4 L192,380 L178,329.8 L190,280 L178,229.8 L187.8,181.6 Z"/>
+    <path id="liane-deux" class="zone" data-region-svg="liane-deux" fill="#8E97A8" fill-rule="evenodd" d="M430.4,170.8 L446,222 L430,276.2 L448,330.2 L432,384 L448,434.2 L434.5,475 L453.5,481 L468,433.8 L452,384 L468,329.8 L450,275.8 L466,222 L449.6,165.2 Z"/>
+    <path id="liane-trois" class="zone" data-region-svg="liane-trois" fill="#8E97A8" fill-rule="evenodd" d="M713.7,172.5 L699.5,232 L713.5,289.9 L697.5,347.9 L711.5,406 L697.5,447.8 L709.8,488 L722.2,484 L710.5,448.2 L724.5,406 L710.5,348.1 L726.5,290.1 L712.5,232 L726.3,175.5 Z"/>
+    <path id="feuillage" class="zone" data-region-svg="feuillage" fill="#8E97A8" fill-rule="evenodd" d="M881.6,122.5 L870.2,131.2 L848.9,135.5 L829.8,137.6 L820.3,142 L818.6,152 L816,165.4 L805.9,175.7 L788.9,177.4 L770.9,170.3 L757,160.5 L746,155.3 L732.5,157.5 L713.4,163.3 L692.2,165.6 L677.6,160.1 L675,148.3 L681.3,135.3 L686.2,125.7 L680.4,119.4 L664.1,113 L647.3,104.1 L642.4,93.5 L653.8,84.8 L675.1,80.5 L694.2,78.4 L703.7,74 L705.4,64 L708,50.6 L718.1,40.3 L735.1,38.6 L753.1,45.7 L767,55.5 L778,60.7 L791.5,58.5 L810.6,52.7 L831.8,50.4 L846.4,55.9 L849,67.7 L842.7,80.7 L837.8,90.3 L843.6,96.6 L859.9,103 L876.7,111.9 Z"/>
+    <path id="houppier-gauche" class="zone" data-region-svg="houppier-gauche" fill="#8E97A8" fill-rule="evenodd" d="M229.7,138.6 L216.8,140.3 L202.6,138.3 L190,134.5 L180,131.7 L170.6,131.7 L159.6,134.2 L145.9,137.1 L131.4,137.5 L119.8,134.2 L114,127.4 L114.2,119.2 L117.1,111.8 L118.1,106 L114.1,101.2 L105.7,96 L96.9,89.4 L92.9,81.9 L96.8,75.1 L108,70.5 L122.4,68.5 L135.6,67.8 L145.2,66.2 L151.9,62.1 L158.6,55.8 L167.8,49.4 L180,45.7 L193,46.6 L203.7,51.7 L210.9,58.8 L216,65.2 L222.3,69.2 L232.3,71.1 L245.8,72.8 L259.4,76.1 L268.1,81.8 L268.9,89 L262.1,96 L251.7,101.7 L243,106.2 L239.1,110.9 L239.5,117 L240.6,124.9 L238,132.9 Z"/>
+    <path id="champignon-du-sol" class="zone" data-region-svg="champignon-du-sol" fill="#8E97A8" fill-rule="evenodd" d="M130,474.7 L156.9,483.7 L177,506.1 L186,524 L150.2,528.5 L147.9,564.3 L154.6,575.5 L105.4,575.5 L112.1,564.3 L109.8,528.5 L74,524 L83,506.1 L103.1,483.7 Z"/>
+    <path id="pierre-mousse" class="zone" data-region-svg="pierre-mousse" fill="#8E97A8" fill-rule="evenodd" d="M921.1,558.1 L913.7,562.9 L903.6,565.5 L893.5,566.7 L884.6,567.8 L876.1,569.8 L866.6,572.1 L855.7,573.1 L845.2,571.5 L837.1,567 L832.8,561 L830.8,554.9 L829,549.6 L825.7,544.5 L821.9,538.8 L820.1,532.2 L822.9,525.9 L830.3,521.1 L840.4,518.5 L850.5,517.3 L859.4,516.2 L867.9,514.2 L877.4,511.9 L888.3,510.9 L898.8,512.5 L906.9,517 L911.2,523 L913.2,529.1 L915,534.4 L918.3,539.5 L922.1,545.2 L923.9,551.8 Z"/>
   </g>
-  <g id="calque-trait">
-    <path id="cadre" d="M20 20 H940 V580 H20 Z" fill="none" stroke="#2b2b2b" stroke-width="4"/>
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path class="trait" d="M40,196 L930,158"/>
+    <path class="trait" d="M120,540 L860,528"/>
   </g>
 </svg>

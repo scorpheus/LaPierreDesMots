@@ -1,16 +1,35 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" width="960" height="600" role="img" aria-label="Les stalagmites à empiler">
+  <title>Les stalagmites à empiler</title>
+  <desc>Trois socles trapézoïdaux de trois largeurs, deux stalagmites facettées à poser dessus, une stalactite qui pend de la voûte et une flaque au sol.</desc>
+  <!--
+    DÉCOR — lot M6, contrat du monde v4 § 2. Trait noir sur blanc, la COULEUR VIENT DU CODE
+    (annexe P § 2) : les régions sortent d'ici en grisaille #8E97A8, qui est leur état
+    par défaut et non un choix graphique. Géométrie 100 % polygonale (M, L, Z — aucun arc) :
+    surface et centroïde sont donc calculables exactement et opposables aux valeurs déclarées
+    par le .habillage.json, que scripts/verifier-regions-fermees.mjs --strict recalcule.
+
+    Chaque région est un ENFANT DIRECT de #calque-zones : SceneSvg.tsx sélectionne
+    "#calque-zones > [id]", et un tracé niché dans un sous-groupe échapperait au tap sans
+    qu'aucun message ne le dise.
+
+    ÉCRIT PAR scripts/dessiner-decors.mjs — ne pas retoucher à la main : la scène est décrite
+    dans scripts/decors/decors.mjs, et l'émetteur refuse d'écrire si la mesure est mauvaise.
+  -->
   <g id="calque-fond">
-    <rect id="fond" x="0" y="0" width="960" height="600" fill="#f4f1e6"/>
+    <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
   </g>
-  <g id="calque-zones">
-    <rect id="socle-gauche" x="90" y="110" width="200" height="160" rx="12"/>
-    <rect id="socle-milieu" x="380" y="110" width="200" height="160" rx="12"/>
-    <rect id="socle-droit" x="670" y="110" width="200" height="160" rx="12"/>
-    <rect id="stalagmite-un" x="90" y="340" width="200" height="160" rx="12"/>
-    <rect id="stalagmite-deux" x="380" y="340" width="200" height="160" rx="12"/>
-    <rect id="sol-de-la-grotte" x="670" y="340" width="200" height="160" rx="12"/>
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round">
+    <path id="voute-basse" class="zone" data-region-svg="voute-basse" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L960,0 L960,138 L933.3,144 L906.7,148.4 L880,150 L853.3,148.4 L826.7,144 L800,138 L773.3,132 L746.7,127.6 L720,126 L693.3,127.6 L666.7,132 L640,138 L613.3,144 L586.7,148.4 L560,150 L533.3,148.4 L506.7,144 L480,138 L453.3,132 L426.7,127.6 L400,126 L373.3,127.6 L346.7,132 L320,138 L293.3,144 L266.7,148.4 L240,150 L213.3,148.4 L186.7,144 L160,138 L133.3,132 L106.7,127.6 L80,126 L53.3,127.6 L26.7,132 L0,138 Z"/>
+    <path id="sol-de-la-grotte" class="zone" data-region-svg="sol-de-la-grotte" fill="#8E97A8" fill-rule="evenodd" d="M0,520 L26.7,525.8 L53.3,528.9 L80,527.8 L106.7,523.1 L133.3,516.9 L160,512.2 L186.7,511.1 L213.3,514.2 L240,520 L266.7,525.8 L293.3,528.9 L320,527.8 L346.7,523.1 L373.3,516.9 L400,512.2 L426.7,511.1 L453.3,514.2 L480,520 L506.7,525.8 L533.3,528.9 L560,527.8 L586.7,523.1 L613.3,516.9 L640,512.2 L666.7,511.1 L693.3,514.2 L720,520 L746.7,525.8 L773.3,528.9 L800,527.8 L826.7,523.1 L853.3,516.9 L880,512.2 L906.7,511.1 L933.3,514.2 L960,520 L960,600 L0,600 Z"/>
+    <path id="socle-gauche" class="zone" data-region-svg="socle-gauche" fill="#8E97A8" fill-rule="evenodd" d="M130,440 L270,440 L301,520 L99,520 Z"/>
+    <path id="socle-milieu" class="zone" data-region-svg="socle-milieu" fill="#8E97A8" fill-rule="evenodd" d="M410,430 L530,430 L561,522 L379,522 Z"/>
+    <path id="socle-droit" class="zone" data-region-svg="socle-droit" fill="#8E97A8" fill-rule="evenodd" d="M661,450 L823,450 L853,520 L631,520 Z"/>
+    <path id="stalagmite-un" class="zone" data-region-svg="stalagmite-un" fill="#8E97A8" fill-rule="evenodd" d="M200,218 L246,280.2 L235.9,408.9 L200,440 L164.1,408.9 L154,280.2 Z"/>
+    <path id="stalagmite-deux" class="zone" data-region-svg="stalagmite-deux" fill="#8E97A8" fill-rule="evenodd" d="M470,248 L506,299 L498.1,404.5 L470,430 L441.9,404.5 L434,299 Z"/>
+    <path id="stalactite-pendante" class="zone" data-region-svg="stalactite-pendante" fill="#8E97A8" fill-rule="evenodd" d="M340,58 L354,157.8 L361.1,163.5 L365.9,171.3 L367.9,180.2 L367,189.2 L363.3,197.6 L357,204.2 L349,208.5 L340,210 L331,208.5 L323,204.2 L316.7,197.6 L313,189.2 L312.1,180.2 L314.1,171.3 L318.9,163.5 L326,157.8 Z"/>
+    <path id="flaque-du-sol" class="zone" data-region-svg="flaque-du-sol" fill="#8E97A8" fill-rule="evenodd" d="M710.4,551.2 L700.1,554.6 L684.4,556.2 L669,556.8 L657.7,557.8 L649.5,560.3 L640.7,564.1 L628.6,567.5 L613.8,568.7 L599.9,566.8 L589.8,562.8 L583.4,558.6 L576.7,555.7 L566.1,554.1 L551.3,552.8 L536.7,550.4 L528.5,546.5 L530.2,542 L539.7,537.9 L551.1,534.7 L558.3,531.9 L560,528.4 L559.6,523.8 L562.7,518.9 L572.4,515.3 L587.4,514.4 L603.3,515.9 L616.8,518.1 L627.9,519.3 L639.6,518.7 L654.2,517.2 L670.7,516.6 L684.9,518.2 L692.4,522.2 L692.7,527.2 L689.7,531.8 L689.3,535.3 L694.9,538.4 L704.3,542.1 L711.4,546.6 Z"/>
   </g>
-  <g id="calque-trait">
-    <path id="cadre" d="M20 20 H940 V580 H20 Z" fill="none" stroke="#2b2b2b" stroke-width="4"/>
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path class="trait" d="M120,522 L860,510"/>
   </g>
 </svg>

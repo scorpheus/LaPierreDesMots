@@ -30,6 +30,58 @@ const NATURE_DITE: Readonly<Record<NatureRecompense, string>> = {
   'zone-recoloriee': 'une zone qui reprend ses couleurs'
 };
 
+/**
+ * Le pictogramme de chaque palier — lot M8, R18.
+ *
+ * « Le jeu se comprend sans qu'un adulte explique quoi que ce soit » : l'enfant qui ne
+ * déchiffre pas encore doit VOIR ce qu'il vient de gagner. Les trois dessins sont tracés ici,
+ * en trait épais et en aplat, plutôt que pris à une fonte d'émoji : un émoji change de dessin
+ * d'un système à l'autre, et celui-ci est la seule prise non écrite de l'écran.
+ *
+ * Ils sont `aria-hidden` : la phrase les dit déjà, et l'annoncer deux fois ferait un écho.
+ */
+const PICTOGRAMME: Readonly<Record<CodePalier, { readonly d: string; readonly fill: string }>> = {
+  // Une étoile à cinq branches.
+  etoile: {
+    d: 'M24 4l5.8 11.8L43 17.7l-9.5 9.2 2.2 13L24 33.7 12.3 39.9l2.2-13L5 17.7l13.2-1.9z',
+    fill: 'var(--soleil)'
+  },
+  // Un cristal facetté : ce que Gobi porte sur la crête (D20).
+  intermediaire: {
+    d: 'M24 3l13 13-4 20-9 9-9-9-4-20z',
+    fill: 'var(--framboise)'
+  },
+  // Une portion de monde qui reprend ses couleurs : une colline et son soleil.
+  rare: {
+    d: 'M4 40l10-16 8 8 9-14 13 22z',
+    fill: 'var(--menthe)'
+  }
+};
+
+function Pictogramme({ palier }: { readonly palier: CodePalier }): ReactElement {
+  const { d, fill } = PICTOGRAMME[palier];
+  return (
+    <svg
+      width="40"
+      height="40"
+      viewBox="0 0 48 48"
+      aria-hidden="true"
+      focusable="false"
+      data-pictogramme-palier={palier}
+      style={{ flex: '0 0 auto' }}
+    >
+      <path
+        d={d}
+        fill={fill}
+        stroke="var(--trait)"
+        strokeWidth={4}
+        strokeLinejoin="round"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 export interface ProprietesCascadeRecompense {
   /** `null` tant que la cascade n'a pas été appliquée — l'écran reste alors sans jauge. */
   readonly gain: GainCascade | null;
@@ -73,15 +125,27 @@ export function CascadeRecompense({ gain }: ProprietesCascadeRecompense): ReactE
               data-recompense={recompense.palier}
               className="zone-lecture"
               style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.75rem',
                 margin: 0,
                 padding: '0.5rem 1rem',
                 fontSize: '1.35rem',
                 border: 'var(--epaisseur-trait) solid var(--trait)',
-                borderRadius: 'var(--rayon-carte)'
+                borderRadius: 'var(--rayon-carte)',
+                // Le relief de BD (M8). Aucune animation : cette ligne se LIT, et le texte ne
+                // s'agite jamais (v2 § 9.3).
+                boxShadow: 'var(--ombre-bd)'
               }}
             >
-              {ANNONCE[recompense.palier]}{' '}
-              <span style={{ opacity: 0.8 }}>({NATURE_DITE[recompense.nature]})</span>
+              <Pictogramme palier={recompense.palier} />
+              <span>
+                {ANNONCE[recompense.palier]}{' '}
+                {/* `opacity: 0.8` a disparu : sur `--lecture-fond`, elle faisait tomber
+                    l'encre sous le ratio de 4,5 exigé, et c'est justement la parenthèse qui
+                    dit CE QU'ON A GAGNÉ. La hiérarchie passe par la taille, pas par le voile. */}
+                <span style={{ fontSize: '0.85em' }}>({NATURE_DITE[recompense.nature]})</span>
+              </span>
             </li>
           ))}
         </ul>

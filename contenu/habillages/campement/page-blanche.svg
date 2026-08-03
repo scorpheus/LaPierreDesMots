@@ -1,16 +1,34 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" width="960" height="600" role="img" aria-label="La page blanche">
+  <title>La page blanche</title>
+  <desc>Décor de COLORIAGE : trait noir sur blanc, régions fermées par construction, couleur appliquée par le code depuis les jetons de palette (annexe P § 2). Chaque région est un enfant DIRECT de #calque-zones — SceneSvg sélectionne « #calque-zones &gt; [id] » et un tracé niché dans un sous-groupe échapperait au tap sans qu’aucun message ne le dise. Les centroïdes et surfaces du .habillage.json sont recalculés par le générateur, jamais écrits à la main.</desc>
   <g id="calque-fond">
-    <rect id="fond" x="0" y="0" width="960" height="600" fill="#f4f1e6"/>
+    <path id="mur-atelier" d="M0,0 L960,0 L960,430 L0,430 Z" fill="#FFF6E3"/>
+    <path id="plancher-atelier" d="M0,430 L960,430 L960,600 L0,600 Z" fill="#FFF6E3"/>
   </g>
-  <g id="calque-zones">
-    <rect id="page" x="90" y="110" width="200" height="160" rx="12"/>
-    <rect id="marge" x="380" y="110" width="200" height="160" rx="12"/>
-    <rect id="coin-corne" x="670" y="110" width="200" height="160" rx="12"/>
-    <rect id="encrier" x="90" y="340" width="200" height="160" rx="12"/>
-    <rect id="plume-posee" x="380" y="340" width="200" height="160" rx="12"/>
-    <rect id="pupitre-bois" x="670" y="340" width="200" height="160" rx="12"/>
+  <g id="calque-zones" stroke="#1B2440" stroke-width="4" stroke-linejoin="round">
+    <path id="pupitre-bois" d="M118,402 L846,372 L872,424 L820,442 L140,470 L96,442 Z" fill="#8E97A8"/>
+    <path id="pupitre-pied" d="M430,442 L536,436 L556,552 L640,574 L636,596 L330,596 L326,574 L412,552 Z" fill="#8E97A8"/>
+    <path id="page" d="M186,118 L636,86 L666,350 L214,388 L178,260 Z" fill="#8E97A8"/>
+    <path id="bordure-page" d="M168,106 L648,72 L682,360 L656,366 L628,96 L196,128 L204,172 L178,174 Z" fill="#8E97A8"/>
+    <path id="marge" d="M240,112 L268,110 L296,380 L268,384 Z" fill="#8E97A8"/>
+    <path id="coin-corne" d="M604,300 L666,350 L612,356 L596,340 Z" fill="#8E97A8"/>
+    <path id="tache-encre" d="M470,250 L512,236 L546,258 L540,296 L502,312 L464,296 L452,270 Z" fill="#8E97A8"/>
+    <path id="encrier" d="M706,322 L812,314 L828,348 L820,402 L790,424 L734,428 L706,404 L694,350 Z" fill="#8E97A8"/>
+    <path id="col-encrier" d="M724,292 L800,286 L816,316 L702,326 L694,302 Z" fill="#8E97A8"/>
+    <path id="plume-tige" d="M888,84 L906,98 L772,300 L746,288 Z" fill="#8E97A8"/>
+    <path id="plume-posee" d="M886,66 L922,90 L906,138 L864,182 L820,224 L780,268 L748,292 L756,254 L790,214 L830,168 L862,122 Z" fill="#8E97A8"/>
+    <path id="bougie" d="M60,268 L122,264 L134,314 L128,420 L96,438 L66,432 L52,400 L50,312 Z" fill="#8E97A8"/>
+    <path id="flamme-bougie" d="M92,176 L112,210 L102,232 L120,254 L92,272 L62,252 L80,230 L70,208 Z" fill="#8E97A8"/>
+    <path id="tabouret-atelier" d="M762,470 L910,462 L916,492 L886,496 L900,580 L872,582 L854,498 L812,500 L800,584 L772,584 L788,498 L758,500 Z" fill="#8E97A8"/>
   </g>
-  <g id="calque-trait">
-    <path id="cadre" d="M20 20 H940 V580 H20 Z" fill="none" stroke="#2b2b2b" stroke-width="4"/>
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M214,166 L604,140"/>
+    <path d="M218,202 L606,176"/>
+    <path d="M222,238 L452,222"/>
+    <path d="M560,262 L610,258"/>
+    <path d="M228,310 L600,284"/>
+    <path d="M232,346 L520,326"/>
+    <path d="M886,74 L752,286"/>
+    <path d="M176,442 L812,414"/>
   </g>
 </svg>

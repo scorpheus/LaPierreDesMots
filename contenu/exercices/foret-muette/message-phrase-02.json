@@ -1,0 +1,116 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Nœud de maîtrise : quatre des neuf étiquettes portent une lettre finale muette — chat, petit, rat, nid —, et elles sont assemblées en phrase, donc lues à voix haute d’un bout à l’autre. Neuf boutons, le plafond mesuré. Toutes les étiquettes sont distinctes MOT COMPRIS.",
+  "id": "foret-muette-message-phrase-02",
+  "version": 1,
+  "titre": "Les mots qui gardent une lettre",
+  "competences": [
+    "gph.finale.muette",
+    "comp.consigne.simple"
+  ],
+  "difficulte": 4,
+  "jeu": {
+    "moteur": "phrase",
+    "habillage": "foret.message",
+    "noeud": "foret-muette-12",
+    "etoiles": {
+      "sansAide": true,
+      "sansErreur": true
+    },
+    "aideGobi": [
+      "relire-consigne",
+      "souffle-syllabe",
+      "surligne-graphene"
+    ],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Range les mots pour lire : mon chat est petit.",
+          "forme": "imperative",
+          "audio": null,
+          "phrase": "Mon chat est petit.",
+          "ordre": [
+            "mot-mon",
+            "mot-chat",
+            "mot-est",
+            "mot-petit"
+          ],
+          "motsCles": [
+            "range",
+            "mot",
+            "chat",
+            "petit"
+          ]
+        },
+        {
+          "id": "c2",
+          "texte": "Range les mots pour lire : ton rat a un nid.",
+          "forme": "imperative",
+          "audio": null,
+          "phrase": "Ton rat a un nid.",
+          "ordre": [
+            "mot-ton",
+            "mot-rat",
+            "mot-a",
+            "mot-un",
+            "mot-nid"
+          ],
+          "motsCles": [
+            "range",
+            "mot",
+            "rat",
+            "nid"
+          ]
+        }
+      ],
+      "etiquettes": [
+        {
+          "id": "mot-mon",
+          "mot": "Mon",
+          "intrus": false
+        },
+        {
+          "id": "mot-chat",
+          "mot": "chat",
+          "intrus": false
+        },
+        {
+          "id": "mot-est",
+          "mot": "est",
+          "intrus": false
+        },
+        {
+          "id": "mot-petit",
+          "mot": "petit.",
+          "intrus": false
+        },
+        {
+          "id": "mot-ton",
+          "mot": "Ton",
+          "intrus": false
+        },
+        {
+          "id": "mot-rat",
+          "mot": "rat",
+          "intrus": false
+        },
+        {
+          "id": "mot-a",
+          "mot": "a",
+          "intrus": false
+        },
+        {
+          "id": "mot-un",
+          "mot": "un",
+          "intrus": false
+        },
+        {
+          "id": "mot-nid",
+          "mot": "nid.",
+          "intrus": false
+        }
+      ],
+      "competence": "gph.finale.muette"
+    }
+  }
+}

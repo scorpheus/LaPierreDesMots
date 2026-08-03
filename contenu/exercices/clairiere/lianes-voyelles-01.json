@@ -1,0 +1,149 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Lot M1, nœud clairiere-08. LE PLATEAU EST DESSINÉ POUR QUE LE CHOIX EXISTE, et ce n'est pas un détail de mise en page : `modeReponseChemin` (partage/src/moteurs/chemin/validation.ts) DÉRIVE p_devinette du branchement réel — « une valeur tabulée mentirait sur un plateau en couloir, où il n'y a qu'un seul choix possible » (D13). Quatre lianes parallèles reliées ligne à ligne donnent un branchement maximal de 4, donc `qcm-4` : à chaque pas l'enfant a réellement quatre pierres sous les yeux et doit LIRE laquelle porte la voyelle demandée. Un couloir aurait rendu l'exercice vert sans rien prouver. TROIS AUTRES FAITS MESURÉS. (1) `acquis[case]` n'est jamais remis à zéro : les douze cases de parcours sont réparties en quatre lots disjoints. (2) `case-deja-franchie` et `case-non-adjacente` ne comptent PAS d'erreur — un enfant qui repose le doigt sur une case déjà prise ne paie rien, et le pion ne bouge pas : aucun état sans issue. (3) `etat.position` est remis à `departs[indexEtape]` à chaque changement de consigne (chemin/moteur.ts ligne 246) : les quatre consignes partent donc toutes de `depart-arbre`, qui n'est jamais tapé et n'entre donc jamais dans `acquis`. Les douze mots sont pris au brouillon `contenu/brouillons/phonologie/clairiere/voyelles.json` ; aucun ne porte deux des quatre voyelles travaillées, ce qui fait que la bonne réponse est toujours unique.",
+  "id": "clairiere-lianes-voyelles-01",
+  "version": 1,
+  "titre": "Les lianes des voyelles",
+  "competences": ["gph.voyelle.orale", "syl.cv", "comp.consigne.multiple"],
+  "difficulte": 2,
+  "jeu": {
+    "moteur": "chemin",
+    "habillage": "clairiere.lianes",
+    "noeud": "clairiere-08",
+    "etoiles": { "sansAide": true, "sansErreur": true },
+    "aideGobi": ["relire-consigne", "souffle-syllabe", "surligne-graphene"],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Suis les mots où tu lis un a.",
+          "forme": "imperative",
+          "audio": null,
+          "depart": "depart-arbre",
+          "parcours": ["case-chat", "case-papa", "case-lac"],
+          "motsCles": ["suis", "mots", "lis"]
+        },
+        {
+          "id": "c2",
+          "texte": "Suis les mots où tu lis un i.",
+          "forme": "imperative",
+          "audio": null,
+          "depart": "depart-arbre",
+          "parcours": ["case-lit", "case-midi", "case-riz"],
+          "motsCles": ["suis", "mots", "lis"]
+        },
+        {
+          "id": "c3",
+          "texte": "Suis les mots où tu lis un o.",
+          "forme": "imperative",
+          "audio": null,
+          "depart": "depart-arbre",
+          "parcours": ["case-dos", "case-moto", "case-pot"],
+          "motsCles": ["suis", "mots", "lis"]
+        },
+        {
+          "id": "c4",
+          "texte": "Suis les mots où tu lis un u.",
+          "forme": "imperative",
+          "audio": null,
+          "depart": "depart-arbre",
+          "parcours": ["case-mur", "case-lune", "case-jus"],
+          "motsCles": ["suis", "mots", "lis"]
+        }
+      ],
+      "cases": [
+        {
+          "id": "depart-arbre",
+          "libelle": "l’arbre",
+          "position": [480, 60],
+          "voisines": ["case-chat", "case-lit", "case-dos", "case-mur"],
+          "confusionAvec": null
+        },
+        {
+          "id": "case-chat",
+          "libelle": "chat",
+          "position": [150, 200],
+          "voisines": ["depart-arbre", "case-papa", "case-lit"],
+          "confusionAvec": null
+        },
+        {
+          "id": "case-lit",
+          "libelle": "lit",
+          "position": [370, 200],
+          "voisines": ["depart-arbre", "case-midi", "case-chat", "case-dos"],
+          "confusionAvec": null
+        },
+        {
+          "id": "case-dos",
+          "libelle": "dos",
+          "position": [590, 200],
+          "voisines": ["depart-arbre", "case-moto", "case-lit", "case-mur"],
+          "confusionAvec": null
+        },
+        {
+          "id": "case-mur",
+          "libelle": "mur",
+          "position": [810, 200],
+          "voisines": ["depart-arbre", "case-lune", "case-dos"],
+          "confusionAvec": null
+        },
+        {
+          "id": "case-papa",
+          "libelle": "papa",
+          "position": [150, 360],
+          "voisines": ["case-chat", "case-lac", "case-midi"],
+          "confusionAvec": null
+        },
+        {
+          "id": "case-midi",
+          "libelle": "midi",
+          "position": [370, 360],
+          "voisines": ["case-lit", "case-riz", "case-papa", "case-moto"],
+          "confusionAvec": null
+        },
+        {
+          "id": "case-moto",
+          "libelle": "moto",
+          "position": [590, 360],
+          "voisines": ["case-dos", "case-pot", "case-midi", "case-lune"],
+          "confusionAvec": null
+        },
+        {
+          "id": "case-lune",
+          "libelle": "lune",
+          "position": [810, 360],
+          "voisines": ["case-mur", "case-jus", "case-moto"],
+          "confusionAvec": null
+        },
+        {
+          "id": "case-lac",
+          "libelle": "lac",
+          "position": [150, 510],
+          "voisines": ["case-papa", "case-riz"],
+          "confusionAvec": null
+        },
+        {
+          "id": "case-riz",
+          "libelle": "riz",
+          "position": [370, 510],
+          "voisines": ["case-midi", "case-lac", "case-pot"],
+          "confusionAvec": null
+        },
+        {
+          "id": "case-pot",
+          "libelle": "pot",
+          "position": [590, 510],
+          "voisines": ["case-moto", "case-riz", "case-jus"],
+          "confusionAvec": null
+        },
+        {
+          "id": "case-jus",
+          "libelle": "jus",
+          "position": [810, 510],
+          "voisines": ["case-lune", "case-pot"],
+          "confusionAvec": null
+        }
+      ],
+      "competence": "gph.voyelle.orale"
+    }
+  }
+}

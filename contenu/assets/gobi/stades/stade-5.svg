@@ -20,15 +20,13 @@
     </g>
   </g>
   <g id="gobi-parure">
-      <path d="M80,44.76 L86.6,54.04 L83.63,60.76 L76.37,60.76 L73.4,54.04 Z" fill="#C5EAFA" stroke="#4B2207" stroke-width="2.4" stroke-linejoin="round"/><path d="M80,44.76 L83.63,60.76 L76.37,60.76 Z" fill="#BEE5F5" stroke="none" opacity="0.85"/><path d="M78.68,49.24 L80.79,55.96" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" opacity="0.75" fill="none"/>
-      <path d="M100,29 L108.6,44.66 L104.73,56 L95.27,56 L91.4,44.66 Z" fill="#BEE5F5" stroke="#4B2207" stroke-width="2.4" stroke-linejoin="round"/><path d="M100,29 L104.73,56 L95.27,56 Z" fill="#ADC8E0" stroke="none" opacity="0.85"/><path d="M98.28,36.56 L101.03,47.9" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" opacity="0.75" fill="none"/>
-      <path d="M120,44.76 L126.6,54.04 L123.63,60.76 L116.37,60.76 L113.4,54.04 Z" fill="#C5EAFA" stroke="#4B2207" stroke-width="2.4" stroke-linejoin="round"/><path d="M120,44.76 L123.63,60.76 L116.37,60.76 Z" fill="#BEE5F5" stroke="none" opacity="0.85"/><path d="M118.68,49.24 L120.79,55.96" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" opacity="0.75" fill="none"/>
+    <path d="M79.08,34.57 L87.22,41.62 L88.94,62.33 L77.86,64 L73.38,43.71 Z" fill="#BEE5F5" stroke="#4B2207" stroke-width="2.6" stroke-linejoin="round"/><path d="M79.08,34.57 L87.22,41.62 L88.94,62.33 L83.4,63.16 Z" fill="#ADC8E0" stroke="none" opacity="0.75"/><path d="M78.31,40.76 L79.69,55.45" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" opacity="0.85" fill="none"/>
+    <path d="M100,21.16 L108.5,32.51 L106.8,61.27 L93.2,61.27 L91.5,32.51 Z" fill="#C5EAFA" stroke="#4B2207" stroke-width="2.6" stroke-linejoin="round"/><path d="M100,21.16 L108.5,32.51 L106.8,61.27 L100,61.27 Z" fill="#ADC8E0" stroke="none" opacity="0.75"/><path d="M97.96,29.48 L96.94,49.92" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" opacity="0.85" fill="none"/>
+    <path d="M121.08,33.49 L126.73,42.96 L122.13,64.07 L111.05,62.39 L112.89,40.86 Z" fill="#BEE5F5" stroke="#4B2207" stroke-width="2.6" stroke-linejoin="round"/><path d="M121.08,33.49 L126.73,42.96 L122.13,64.07 L116.59,63.23 Z" fill="#ADC8E0" stroke="none" opacity="0.75"/><path d="M118.49,39.41 L115.37,54.44" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" opacity="0.85" fill="none"/>
   </g>
   <g id="gobi-bras">
-    <path d="M56,112 L34,96" stroke="#4B2207" stroke-width="17" stroke-linecap="round" fill="none"/>
-    <path d="M144,112 L166,96" stroke="#4B2207" stroke-width="17" stroke-linecap="round" fill="none"/>
-    <path d="M56,112 L34,96" stroke="#FFDDA8" stroke-width="11" stroke-linecap="round" fill="none"/>
-    <path d="M144,112 L166,96" stroke="#FFDDA8" stroke-width="11" stroke-linecap="round" fill="none"/>
+    <path d="M64.06,114.92 L35.93,88.58 L32.64,86.88 L28.95,86.56 L25.42,87.68 L22.58,90.07 L20.88,93.36 L20.56,97.05 L21.68,100.58 L24.07,103.42 L55.94,125.08 Z" fill="#FFDDA8" stroke="#4B2207" stroke-width="3" stroke-linejoin="round"/><path d="M28.9,90.99 L34.39,95.38 M24.87,96.03 L30.36,100.42" stroke="#4B2207" stroke-width="2" stroke-linecap="round" fill="none"/>
+    <path d="M144.06,125.08 L175.93,103.42 L178.32,100.58 L179.44,97.05 L179.12,93.36 L177.42,90.07 L174.58,87.68 L171.05,86.56 L167.36,86.88 L164.07,88.58 L135.94,114.92 Z" fill="#FFDDA8" stroke="#4B2207" stroke-width="3" stroke-linejoin="round"/><path d="M175.13,96.03 L169.64,100.42 M171.1,90.99 L165.61,95.38" stroke="#4B2207" stroke-width="2" stroke-linecap="round" fill="none"/>
   </g>
   <g id="gobi-visage">
     <path d="M70,78 Q79,72 89,76" stroke="#945125" stroke-width="3.6" stroke-linecap="round" fill="none"/>

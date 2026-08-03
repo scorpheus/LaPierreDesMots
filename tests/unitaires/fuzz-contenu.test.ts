@@ -703,7 +703,18 @@ describe('rien ne plante — ni la validation, ni le moteur', () => {
     expect(casDeBloc, 'le bloc de jeu n’est plus éprouvé').toBeGreaterThanOrEqual(3_000);
     expect(plantagesDepuis(debut), 'la validation a levé sur une entrée hostile').toEqual([]);
     expect(echecs, 'un refus sans pointeur ni message').toEqual([]);
-  });
+    // ⚠ BUDGET DE TEMPS, PAS UNE ASSERTION ASSOUPLIE. Aucun plancher ci-dessus n'a bougé, et
+    // ils sont largement dépassés : 89 568 cas sur l'enveloppe et autant sur le bloc de jeu,
+    // MESURÉS, contre ≈ 30 000 quand ce cas a été écrit. La cause est le contenu — 76
+    // exercices là où il y en avait 26 —, et c'est exactement ce qu'on veut voir fuzzer.
+    //
+    // DEUX DURÉES MESURÉES, et c'est la seconde qui commande :
+    //   · `npx vitest run` seul .................... 4 809 ms
+    //   · `npm run verifier`, donc `--coverage` .... 33 001 ms
+    // L'instrumentation v8 de la couverture multiplie le coût par plus de six, et c'est la
+    // chaîne complète qui fait foi. Le délai par défaut de vitest est de 5 000 ms : le cas
+    // passait seul et échouait dans la chaîne. 180 000 ms laissent la marge du pire des deux.
+  }, 180_000);
 
   it('des documents tirés au sort : `validerExercice` refuse et ne lève jamais', () => {
     const debut = repere();

@@ -19,58 +19,85 @@
         "role": "coloriable",
         "regions": [
           {
-            "id": "panier-gauche",
-            "libelle": "le panier de gauche",
+            "id": "mur-du-fond",
+            "libelle": "le mur du fond",
             "centroide": [
-              190.0,
-              190.0
+              360,
+              88
             ],
-            "surface": 32000.0
-          },
-          {
-            "id": "panier-droit",
-            "libelle": "le panier de droite",
-            "centroide": [
-              480.0,
-              190.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "table",
-            "libelle": "la table",
-            "centroide": [
-              770.0,
-              190.0
-            ],
-            "surface": 32000.0
+            "surface": 161280
           },
           {
             "id": "nappe",
             "libelle": "la nappe",
             "centroide": [
-              190.0,
-              420.0
+              107.1,
+              435
             ],
-            "surface": 32000.0
+            "surface": 58940
+          },
+          {
+            "id": "table",
+            "libelle": "la table",
+            "centroide": [
+              107.1,
+              516
+            ],
+            "surface": 79304
+          },
+          {
+            "id": "panier-gauche",
+            "libelle": "le panier de gauche",
+            "centroide": [
+              270.7,
+              316.5
+            ],
+            "surface": 27398
+          },
+          {
+            "id": "panier-droit",
+            "libelle": "le panier de droite",
+            "centroide": [
+              643.9,
+              323
+            ],
+            "surface": 20789.8
           },
           {
             "id": "pomme",
             "libelle": "la pomme",
             "centroide": [
-              480.0,
-              420.0
+              496.2,
+              339.1
             ],
-            "surface": 32000.0
+            "surface": 6795.5
           },
           {
             "id": "poire",
             "libelle": "la poire",
             "centroide": [
-              770.0,
-              420.0
+              863,
+              342.1
             ],
-            "surface": 32000.0
+            "surface": 4607
+          },
+          {
+            "id": "prune",
+            "libelle": "la prune",
+            "centroide": [
+              122,
+              330
+            ],
+            "surface": 3350.1
+          },
+          {
+            "id": "bol",
+            "libelle": "le bol",
+            "centroide": [
+              473.5,
+              432
+            ],
+            "surface": 5640
           }
         ]
       },

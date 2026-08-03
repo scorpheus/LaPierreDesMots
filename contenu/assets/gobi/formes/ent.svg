@@ -1,9 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Gobi-ENT">
   <title>Gobi-ENT</title>
-  <desc>Le cristal du grapheme « ent » — Gobi-ENT. C est LUI qui porte la declinaison, jamais le corps (D20, D36). Sa silhouette et sa teinte sont propres a ce grapheme : deux formes identiques ne se collectionneraient pas (D44). Le viewBox fait 64 unites, ce qui est la cible tapable minimale de R16.</desc>
+  <desc>Le cristal du grapheme « ent » — Gobi-ENT : trois eclats en eventail sur une meme base. C est LUI qui porte la declinaison, jamais le corps (D20, D36). Sa SILHOUETTE lui est propre et elle est mesuree : le recouvrement avec les 24 autres cristaux ne depasse pas 0.62 (plafond 0.9), sans quoi scripts/gobi-formes.mjs refuse d ecrire — deux formes identiques ne se collectionneraient pas (D44). Les teintes viennent de la palette mesuree sur les pixels de la canonique et consignee dans production/personnages/gobi/gobi.lock.json ; aucune n est choisie a la main. Le temoin de production est production/personnages/gobi/formes/ent.png, obtenu par inpainting regional sous masque depuis la canonique — profondeur de chaine 1 (D32). Le viewBox fait 64 unites, ce qui est la cible tapable minimale de R16.</desc>
   <g id="cristal">
-    <path id="cristal-face" d="M32,12 L39.77,29.94 L40.99,58 L23.01,58 L24.23,29.94 Z" fill="#FACBEB" stroke="#4B2207" stroke-width="3" stroke-linejoin="round"/>
-    <path id="cristal-facette" d="M32,12 L40.99,58 L23.01,58 Z" fill="#EBA6D6" stroke="none" opacity="0.8"/>
-    <path id="cristal-eclat" d="M27.65,25.8 L30.26,40.52" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" opacity="0.85" fill="none"/>
+    <path class="cristal-face" d="M3.67,14.49 L26.67,54.49 L35.33,49.51 L12.33,9.51 Z" fill-rule="evenodd" fill="#BEE5F5" stroke="#4B2207" stroke-width="3" stroke-linejoin="round"/>
+    <path class="cristal-face" d="M27,4 L27,56 L37,56 L37,4 Z" fill-rule="evenodd" fill="#BEE5F5" stroke="#4B2207" stroke-width="3" stroke-linejoin="round"/>
+    <path class="cristal-face" d="M51.67,9.51 L28.67,49.51 L37.33,54.49 L60.33,14.49 Z" fill-rule="evenodd" fill="#BEE5F5" stroke="#4B2207" stroke-width="3" stroke-linejoin="round"/>
+    <path class="cristal-ombre" d="M21.08,44.77 L26.67,54.49 L35.33,49.51 L21.08,24.73 Z" fill-rule="evenodd" fill="#ADC8E0" stroke="none" opacity="0.75"/>
+    <path class="cristal-ombre" d="M32.5,4 L32.5,56 L37,56 L37,4 Z" fill-rule="evenodd" fill="#ADC8E0" stroke="none" opacity="0.75"/>
+    <path class="cristal-ombre" d="M51.67,9.51 L46.08,19.23 L46.08,39.27 L60.33,14.49 Z" fill-rule="evenodd" fill="#ADC8E0" stroke="none" opacity="0.75"/>
+    <path class="cristal-eclat" d="M21.08,15.81 L21.08,37.4" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" opacity="0.85" fill="none"/>
+    <path class="cristal-eclat" d="M32.5,11.28 L32.5,36.24" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" opacity="0.85" fill="none"/>
+    <path class="cristal-eclat" d="M46.08,15.81 L46.08,37.4" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" opacity="0.85" fill="none"/>
   </g>
 </svg>

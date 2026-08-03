@@ -19,58 +19,85 @@
         "role": "coloriable",
         "regions": [
           {
-            "id": "banniere-haute",
-            "libelle": "la bannière du haut",
+            "id": "ciel-de-la-cite",
+            "libelle": "le ciel de la cité",
             "centroide": [
-              190.0,
-              190.0
+              240,
+              68.5
             ],
-            "surface": 32000.0
-          },
-          {
-            "id": "banniere-basse",
-            "libelle": "la bannière du bas",
-            "centroide": [
-              480.0,
-              190.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "mat",
-            "libelle": "le mât",
-            "centroide": [
-              770.0,
-              190.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "balcon",
-            "libelle": "le balcon",
-            "centroide": [
-              190.0,
-              420.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "toit-tuile",
-            "libelle": "le toit de tuiles",
-            "centroide": [
-              480.0,
-              420.0
-            ],
-            "surface": 32000.0
+            "surface": 122880
           },
           {
             "id": "place",
             "libelle": "la place",
             "centroide": [
-              770.0,
-              420.0
+              720,
+              531
             ],
-            "surface": 32000.0
+            "surface": 124800
+          },
+          {
+            "id": "toit-tuile",
+            "libelle": "le toit de tuiles",
+            "centroide": [
+              480,
+              157.1
+            ],
+            "surface": 52002
+          },
+          {
+            "id": "balcon",
+            "libelle": "le balcon",
+            "centroide": [
+              322.5,
+              320.1
+            ],
+            "surface": 21360
+          },
+          {
+            "id": "mat",
+            "libelle": "le mât",
+            "centroide": [
+              132,
+              299
+            ],
+            "surface": 10136
+          },
+          {
+            "id": "banniere-haute",
+            "libelle": "la bannière du haut",
+            "centroide": [
+              479,
+              285.1
+            ],
+            "surface": 26026.3
+          },
+          {
+            "id": "banniere-basse",
+            "libelle": "la bannière du bas",
+            "centroide": [
+              681,
+              309.6
+            ],
+            "surface": 17007.9
+          },
+          {
+            "id": "fenetre-de-la-tour",
+            "libelle": "la fenêtre de la tour",
+            "centroide": [
+              250,
+              243.6
+            ],
+            "surface": 10286.5
+          },
+          {
+            "id": "lanterne-de-la-place",
+            "libelle": "la lanterne de la place",
+            "centroide": [
+              881,
+              353.4
+            ],
+            "surface": 8225.5
           }
         ]
       },

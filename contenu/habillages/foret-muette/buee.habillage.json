@@ -19,58 +19,85 @@
         "role": "coloriable",
         "regions": [
           {
-            "id": "vitre-embuee",
-            "libelle": "la vitre embuée",
-            "centroide": [
-              190.0,
-              190.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "doigt-trace",
-            "libelle": "le tracé du doigt",
-            "centroide": [
-              480.0,
-              190.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "cadre",
-            "libelle": "le cadre",
-            "centroide": [
-              770.0,
-              190.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "rideau-fin",
-            "libelle": "le rideau fin",
-            "centroide": [
-              190.0,
-              420.0
-            ],
-            "surface": 32000.0
-          },
-          {
             "id": "foret-dehors",
             "libelle": "la forêt dehors",
             "centroide": [
-              480.0,
-              420.0
+              240,
+              127
             ],
-            "surface": 32000.0
+            "surface": 228480
+          },
+          {
+            "id": "arbre-dehors",
+            "libelle": "l’arbre dehors",
+            "centroide": [
+              118,
+              190
+            ],
+            "surface": 15842.7
           },
           {
             "id": "rebord",
             "libelle": "le rebord",
             "centroide": [
-              770.0,
-              420.0
+              831.4,
+              487.2
             ],
-            "surface": 32000.0
+            "surface": 51028
+          },
+          {
+            "id": "cadre",
+            "libelle": "le cadre",
+            "centroide": [
+              270.3,
+              113.8
+            ],
+            "surface": 76000
+          },
+          {
+            "id": "vitre-embuee",
+            "libelle": "la vitre embuée",
+            "centroide": [
+              575,
+              280
+            ],
+            "surface": 171000
+          },
+          {
+            "id": "doigt-trace",
+            "libelle": "le tracé du doigt",
+            "centroide": [
+              367.7,
+              206.6
+            ],
+            "surface": 6010.8
+          },
+          {
+            "id": "rideau-fin",
+            "libelle": "le rideau fin",
+            "centroide": [
+              836,
+              289
+            ],
+            "surface": 26912
+          },
+          {
+            "id": "goutte-de-buee",
+            "libelle": "la goutte de buée",
+            "centroide": [
+              690,
+              279.5
+            ],
+            "surface": 1648.5
+          },
+          {
+            "id": "pot-sur-le-rebord",
+            "libelle": "le pot sur le rebord",
+            "centroide": [
+              180,
+              431.9
+            ],
+            "surface": 4216
           }
         ]
       },

@@ -26,27 +26,38 @@
  *     recoloration et non plus l'Éclat ; `pourcentage_colorie` a cessé de s'écrire en MAX).
  *     Ce cas reste le filet permanent de cette réparation.
  *
- *   • `tout-fini` — **TOUJOURS ROUGE.** Un SECOND défaut, indépendant du premier, trouvé par
- *     cette suite et que la réparation de H1 ne couvre pas. Quand l'enfant termine
- *     légitimement les 18 nœuds livrés, les deux régions qui portent du contenu atteignent
- *     100 %, `enCours` cesse donc de les rendre, et les deux que la carte ouvre à leur place
- *     ne déclarent AUCUN nœud. Zéro exercice jouable. L'enfant qui a tout réussi se retrouve
- *     exactement aussi bloqué que celui dont la base mentait.
+ *   • `tout-fini` — **ÉTAIT TOUJOURS ROUGE, ET C'EST LE CONTENU QUI L'A FERMÉ.** Un SECOND
+ *     défaut, indépendant du premier, trouvé par cette suite et que la réparation de H1 ne
+ *     couvrait pas. Quand l'enfant terminait légitimement les 18 nœuds alors livrés, les deux
+ *     régions qui portaient du contenu atteignaient 100 %, `enCours` cessait de les rendre, et
+ *     les deux que la carte ouvrait à leur place ne déclaraient AUCUN nœud. Zéro exercice
+ *     jouable : l'enfant qui avait tout réussi se retrouvait aussi bloqué que celui dont la
+ *     base mentait.
  *
- *     `EcranCarte.tsx` affirme pourtant l'inverse, mot pour mot : « Une région entièrement
+ *     `EcranCarte.tsx` affirmait pourtant l'inverse, mot pour mot : « Une région entièrement
  *     terminée renvoie sur son premier nœud plutôt que sur rien : un acquis n'est jamais
  *     repris (R14), rejouer est gratuit, et une prise qui cesserait de répondre serait un
- *     état sans issue — le pire défaut possible ici. » L'intention est juste ; elle est
- *     défaite en amont par `jouables`, qui ne contient plus la région terminée.
+ *     état sans issue — le pire défaut possible ici. » L'intention était juste ; elle était
+ *     défaite en amont par `jouables`, qui ne contenait plus la région terminée.
+ *
+ *     Les lots de contenu ont livré les six régions : la région qui s'ouvre derrière les deux
+ *     premières porte maintenant douze nœuds, et le cas passe. **Ce n'est pas le code qui a
+ *     changé, c'est le vide qui a été comblé** — la fragilité reste donc réelle le jour où une
+ *     région serait ouverte avant d'avoir son contenu, et c'est ce que garde le cas
+ *     « AUCUNE des six régions n'est vide » plus bas, qui la refuse par construction.
  *
  *     Ne pas assouplir cette assertion. Consigné dans `Docs/questions-en-attente.md`.
  */
+
+import { readdirSync } from 'node:fs';
+import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
 import {
   CATALOGUE_DU_JOUR_DE_EZEKIEL,
   catalogueDuDepot,
+  changerDeCatalogue,
   etatDuJourDeEzekiel,
   noeudsDeLaRegion,
   lireMondeHttp,
@@ -62,7 +73,29 @@ import {
 import type { EtatRegion } from '@pierre/partage';
 
 import type { AtelierVecu } from '../fixtures/profils-vecus/atelier-vecu.js';
-import { lireTexte } from '../configuration/preparation.js';
+import { RACINE_DEPOT, lireTexte } from '../configuration/preparation.js';
+
+/** Les six régions, lues sur le référentiel du monde. Aucune n'est nommée en dur. */
+const REGIONS_DECLAREES: readonly string[] = referentielComplet().regions.map((region) =>
+  String(region.region)
+);
+
+/**
+ * Le catalogue du jour où le lot H1 a réparé le critère d'ouverture : les deux premières
+ * régions portent leur contenu, les quatre suivantes sont VIDES.
+ *
+ * Ce n'est pas une commodité de test, c'est la condition du défaut. Le critère de l'Éclat ne
+ * bloquait l'enfant que parce que les régions suivantes n'avaient rien à offrir : dès qu'elles
+ * portent des nœuds, les deux critères rendent le même compte et le témoin cesse de mordre.
+ * Les lots de contenu ont comblé ce vide — tant mieux — et c'est pourquoi le cas qui prouve
+ * que la fixture MORD doit reconstruire l'état d'alors au lieu de suivre le contenu du jour.
+ */
+const CATALOGUE_DES_DEUX_PREMIERES_REGIONS: Readonly<Record<string, number>> = {
+  'marais-jumeau': 0,
+  'foret-muette': 0,
+  volcan: 0,
+  'cite-des-histoires': 0
+};
 
 interface LigneRegionLue {
   readonly region_code: string;
@@ -100,16 +133,32 @@ async function peutFaireQuelqueChose(vecu: ProfilInterrogeable): Promise<readonl
 // ═════════════════════════════════════════════ le catalogue mesuré, pas supposé
 
 describe('le catalogue livré, mesuré à chaque exécution', () => {
-  it('déclare 18 nœuds — 6 en Clairière, 12 aux Galeries', () => {
-    expect(catalogueDuDepot().noeuds).toHaveLength(18);
-    expect(noeudsDeLaRegion('clairiere')).toHaveLength(6);
-    expect(noeudsDeLaRegion('galeries')).toHaveLength(12);
+  it('déclare autant de nœuds que le dépôt en porte de fichiers', () => {
+    // ⚠ CE CAS EXIGEAIT `18`, `6`, `12` — les comptes du jour où il a été écrit. Un compte
+    // daté est faux le lendemain. Ce qui compte n'est pas la valeur mais l'ÉCART : le
+    // référentiel du monde et les fichiers de nœud doivent dire le même nombre, sinon un nœud
+    // livré n'est atteignable par personne, ou une région annonce un nœud qui n'existe pas.
+    const surDisque = readdirSync(join(RACINE_DEPOT, 'contenu', 'noeuds')).filter((f) =>
+      f.endsWith('.json'),
+    ).length;
+    expect(catalogueDuDepot().noeuds, `${String(surDisque)} fichier(s) de nœud`).toHaveLength(
+      surDisque,
+    );
+    expect(surDisque, 'aucun nœud sur disque : la mesure serait creuse').toBeGreaterThan(0);
   });
 
-  it('n’a livré aucun nœud dans les quatre régions suivantes', () => {
-    for (const code of ['marais-jumeau', 'foret-muette', 'volcan', 'cite-des-histoires']) {
-      expect(noeudsDeLaRegion(code), `la région ${code} n’est plus vide`).toHaveLength(0);
-    }
+  it('AUCUNE des six régions n’est vide — c’est l’invariant du contenu livré', () => {
+    // ⚠ CE CAS EXIGEAIT L'INVERSE, et il avait raison le jour où il a été écrit : quatre
+    // régions ne portaient aucun nœud, et c'est ce vide qui bloquait l'enfant dès qu'il avait
+    // terminé les deux premières. Les lots de contenu l'ont comblé. L'assertion est donc
+    // RETOURNÉE, pas assouplie : elle exige maintenant ce que le vide interdisait, et elle
+    // redeviendrait rouge le jour où une région repasserait à zéro.
+    const vides = REGIONS_DECLAREES.filter((code) => noeudsDeLaRegion(code).length === 0);
+    expect(
+      vides,
+      REGIONS_DECLAREES.map((c) => `${c}=${String(noeudsDeLaRegion(c).length)}`).join(' · '),
+    ).toEqual([]);
+    expect(REGIONS_DECLAREES.length, 'aucune région déclarée').toBe(6);
   });
 
   it('ouvre deux régions en parallèle (D38)', () => {
@@ -147,10 +196,16 @@ describe('la sonde d’invariant ne dérive pas de `EcranCarte`', () => {
 // ═════════════════════════════════════════════════════ V1 — le profil à mi-parcours
 
 describe('V1 — un profil à mi-parcours', () => {
-  it('a bien un passé : 10 nœuds terminés sur 18', async () => {
+  it('a bien un passé : toute la Clairière et quatre Galeries', async () => {
+    // Le compte se DÉDUIT de ce que la fixture joue — toute la Clairière, puis les quatre
+    // premiers nœuds des Galeries —, il ne se recopie pas. Ce n'est pas tautologique : ce qui
+    // est vérifié, c'est que chaque nœud joué a produit exactement une ligne de progression
+    // lisible par HTTP, en traversant les routes, la base et la projection.
+    const attendu = noeudsDeLaRegion('clairiere').length + 4;
     const vecu = await profilAMiParcours();
     try {
-      expect(await lireProgressionHttp(vecu.atelier, vecu.profil)).toHaveLength(10);
+      expect(await lireProgressionHttp(vecu.atelier, vecu.profil)).toHaveLength(attendu);
+      expect(attendu, 'la Clairière est vide : le profil n’a pas de passé').toBeGreaterThan(4);
     } finally {
       await vecu.atelier.fermer();
     }
@@ -182,10 +237,12 @@ describe('V1 — un profil à mi-parcours', () => {
 // ═══════════════════════════════════════════════ V2 — le profil qui a tout fini
 
 describe('V2 — un profil qui a terminé tout le contenu livré', () => {
-  it('a bien un passé : les 18 nœuds terminés', async () => {
+  it('a bien un passé : tous les nœuds des deux premières régions terminés', async () => {
+    const attendu = noeudsDeLaRegion('clairiere').length + noeudsDeLaRegion('galeries').length;
     const vecu = await profilQuiATOutFini();
     try {
-      expect(await lireProgressionHttp(vecu.atelier, vecu.profil)).toHaveLength(18);
+      expect(await lireProgressionHttp(vecu.atelier, vecu.profil)).toHaveLength(attendu);
+      expect(attendu, 'les deux premières régions sont vides').toBeGreaterThan(2);
       // La projection `progression_region` ne s'écrit qu'à la lecture de la carte
       // (`lireCarte`) : sans ce passage, la table serait vide et l'assertion mesurerait
       // l'absence d'écriture au lieu de l'état du profil.
@@ -344,7 +401,9 @@ describe('V5 — un état écrit par un catalogue de contenu plus petit', () => 
     }
   });
 
-  it('recalcule le pourcentage figé dès que le catalogue grandit — 100 % devient 1/6', async () => {
+  it('recalcule le pourcentage figé dès que le catalogue grandit', async () => {
+    const dansLaClairiere = noeudsDeLaRegion('clairiere').length;
+    const dansLesGaleries = noeudsDeLaRegion('galeries').length;
     const vecu = await profilDUnCataloguePlusPetit();
     try {
       // Le cache est réparé PARESSEUSEMENT : à la lecture de la carte, ou une fois au
@@ -353,11 +412,23 @@ describe('V5 — un état écrit par un catalogue de contenu plus petit', () => 
       // reproduit ici, et le mesurer sans lui mesurerait autre chose.
       await lireMondeHttp(vecu.atelier, vecu.profil);
       const parCode = new Map(lignesRegion(vecu).map((ligne) => [ligne.region_code, ligne]));
-      // 1 nœud sur 6, 2 nœuds sur 12 : la valeur figée à 100 % par le catalogue d'alors a été
-      // recalculée depuis le journal et le contenu COURANT. C'est la propriété fondatrice —
-      // « tout indicateur se recalcule depuis `tentatives` » (specs v2 § 13.3).
-      expect(Number(parCode.get('clairiere')?.pourcentage_colorie)).toBeCloseTo(1 / 6, 10);
-      expect(Number(parCode.get('galeries')?.pourcentage_colorie)).toBeCloseTo(2 / 12, 10);
+      // 1 nœud sur ce que porte la Clairière, 2 sur ce que portent les Galeries : la valeur
+      // figée à 100 % par le catalogue d'alors a été recalculée depuis le journal et le
+      // contenu COURANT. C'est la propriété fondatrice — « tout indicateur se recalcule depuis
+      // `tentatives` » (specs v2 § 13.3). Les dénominateurs sont lus sur disque : ils valaient
+      // 6 et 12 le jour où ce cas a été écrit, et la propriété ne dépend pas de leur valeur.
+      expect(Number(parCode.get('clairiere')?.pourcentage_colorie)).toBeCloseTo(
+        1 / dansLaClairiere,
+        10
+      );
+      expect(Number(parCode.get('galeries')?.pourcentage_colorie)).toBeCloseTo(
+        2 / dansLesGaleries,
+        10
+      );
+      // Sans ce plancher, un catalogue vide rendrait les deux fractions indéfinies et le cas
+      // passerait en ne mesurant rien.
+      expect(dansLaClairiere, 'la Clairière est vide').toBeGreaterThan(1);
+      expect(dansLesGaleries, 'les Galeries sont vides').toBeGreaterThan(2);
       // L'Éclat, lui, ne se reprend jamais : c'est un trophée, pas un verrou (R14).
       expect(parCode.get('clairiere')?.eclat_obtenu_le).not.toBeNull();
       expect(parCode.get('galeries')?.eclat_obtenu_le).not.toBeNull();
@@ -381,9 +452,26 @@ describe('V5 — un état écrit par un catalogue de contenu plus petit', () => 
    * fixture reproduit donc bien le blocage du père, et la sonde d'invariant l'aurait attrapé.
    * Si quelqu'un revenait un jour au critère de l'Éclat, la ligne du haut deviendrait la
    * réalité et `L'ENFANT PEUT FAIRE QUELQUE CHOSE` repasserait au rouge.
+   *
+   * ── POURQUOI CE CAS RECONSTRUIT LE CATALOGUE D'ALORS ──────────────────────────────────
+   * Le critère de l'Éclat ne bloquait l'enfant que parce que les quatre régions suivantes
+   * étaient VIDES : exclues du haut de la fenêtre, elles ne pouvaient rien offrir à la place.
+   * Les lots de contenu les ont remplies. Sur le contenu du jour, l'ancien critère rend donc
+   * 2 sorties comme le nouveau — non parce qu'il est devenu juste, mais parce que la
+   * condition de son défaut a disparu.
+   *
+   * Suivre ce chiffre aurait désarmé le témoin sans que rien ne le dise : il serait resté
+   * vert le jour où quelqu'un rétablirait le critère de l'Éclat. Le cas monte donc la même
+   * base sur le catalogue D'ALORS — deux régions pleines, quatre vides — et l'écart 0 contre 2
+   * redevient mesurable. C'est le seul endroit du fichier où le catalogue est tronqué, et
+   * c'est la raison d'être de `referentielTronque`.
    */
   it('AURAIT ÉTÉ ROUGE sous l’ancien critère d’ouverture — 0 sortie contre 2', async () => {
-    const vecu = await profilDUnCataloguePlusPetit();
+    const { atelier: petit, profil } = await etatDuJourDeEzekiel();
+    const vecu = {
+      atelier: await changerDeCatalogue(petit, CATALOGUE_DES_DEUX_PREMIERES_REGIONS),
+      profil
+    };
     try {
       const monde = await lireMondeHttp(vecu.atelier, vecu.profil);
       const progression = await lireProgressionHttp(vecu.atelier, vecu.profil);
@@ -409,18 +497,25 @@ describe('V5 — un état écrit par un catalogue de contenu plus petit', () => 
     }
   });
 
-  it('le catalogue a bien grandi sous le profil : 3 nœuds joués, 18 déclarés', async () => {
+  it('le catalogue a bien grandi sous le profil — les DEUX comptes et leur écart', async () => {
     const vecu = await profilDUnCataloguePlusPetit();
     try {
       const joues = Object.values(CATALOGUE_DU_JOUR_DE_EZEKIEL).reduce(
         (total, nombre) => total + nombre,
         0
       );
+      const declares = catalogueDuDepot().noeuds.length;
       expect(joues).toBe(3);
-      expect(catalogueDuDepot().noeuds.length).toBe(18);
+      // Ce qui prouve la migration n'est pas la VALEUR du second compte — elle a été 18, elle
+      // est autre chose aujourd'hui — c'est l'écart entre les deux : le référentiel a grandi
+      // sous un état déjà écrit.
+      expect(
+        declares,
+        `${String(joues)} nœud(s) au catalogue d’alors, ${String(declares)} aujourd’hui`
+      ).toBeGreaterThan(joues);
       const monde = await lireMondeHttp(vecu.atelier, vecu.profil);
       const galeries = monde.carte.regions.find((region) => region.region === 'galeries');
-      expect(galeries?.noeuds).toHaveLength(12);
+      expect(galeries?.noeuds).toHaveLength(noeudsDeLaRegion('galeries').length);
     } finally {
       await vecu.atelier.fermer();
     }

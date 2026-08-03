@@ -1,0 +1,10 @@
+{
+  "id": "marais-jumeau-10",
+  "region": "marais-jumeau",
+  "ordre": 10,
+  "exercice": "marais-jumeau-poissons-attrape-02",
+  "prerequis": [
+    "marais-jumeau-09"
+  ],
+  "temps": "developpement"
+}

@@ -1,0 +1,250 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Le plateau porte les MÊMES mots au singulier et au pluriel sur deux rangées voisines : rien ne les distingue que la lettre finale, et le pied du joueur doit choisir. Voisinage symétrique remesuré par le générateur ; parcours disjoints ; aucun départ dans un parcours. Un pas hors de portée est ignoré sans erreur (`case-non-adjacente`) : le geste n’est jamais puni, seule la lecture l’est.",
+  "id": "foret-muette-pas-japonais-chemin-01",
+  "version": 1,
+  "titre": "Les pierres du ruisseau",
+  "competences": [
+    "enc.pluriel.s"
+  ],
+  "difficulte": 3,
+  "jeu": {
+    "moteur": "chemin",
+    "habillage": "foret.pas-japonais",
+    "noeud": "foret-muette-05",
+    "etoiles": {
+      "sansAide": true,
+      "sansErreur": true
+    },
+    "aideGobi": [
+      "relire-consigne",
+      "souffle-syllabe",
+      "surligne-graphene",
+      "montre-cible"
+    ],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Marche sur les mots qui ont un s.",
+          "forme": "imperative",
+          "audio": null,
+          "depart": "case-chats",
+          "parcours": [
+            "case-fleurs",
+            "case-arbres",
+            "case-livres"
+          ],
+          "motsCles": [
+            "marche",
+            "mot",
+            "ont"
+          ]
+        },
+        {
+          "id": "c2",
+          "texte": "Marche sur les mots qui n'ont pas de s.",
+          "forme": "imperative",
+          "audio": null,
+          "depart": "case-chat",
+          "parcours": [
+            "case-fleur",
+            "case-arbre",
+            "case-livre"
+          ],
+          "motsCles": [
+            "marche",
+            "mot",
+            "ont",
+            "pas"
+          ]
+        },
+        {
+          "id": "c3",
+          "texte": "Marche aussi sur les mots qui ont un s.",
+          "forme": "imperative",
+          "audio": null,
+          "depart": "case-jours",
+          "parcours": [
+            "case-mots",
+            "case-amis",
+            "case-feuilles"
+          ],
+          "motsCles": [
+            "marche",
+            "mot",
+            "ont"
+          ]
+        }
+      ],
+      "cases": [
+        {
+          "id": "case-chats",
+          "libelle": "chats",
+          "position": [
+            120,
+            140
+          ],
+          "voisines": [
+            "case-fleurs",
+            "case-chat"
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "case-fleurs",
+          "libelle": "fleurs",
+          "position": [
+            340,
+            140
+          ],
+          "voisines": [
+            "case-chats",
+            "case-arbres",
+            "case-fleur"
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "case-arbres",
+          "libelle": "arbres",
+          "position": [
+            560,
+            140
+          ],
+          "voisines": [
+            "case-fleurs",
+            "case-livres",
+            "case-arbre"
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "case-livres",
+          "libelle": "livres",
+          "position": [
+            780,
+            140
+          ],
+          "voisines": [
+            "case-arbres",
+            "case-livre"
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "case-chat",
+          "libelle": "chat",
+          "position": [
+            120,
+            340
+          ],
+          "voisines": [
+            "case-fleur",
+            "case-chats",
+            "case-jours"
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "case-fleur",
+          "libelle": "fleur",
+          "position": [
+            340,
+            340
+          ],
+          "voisines": [
+            "case-chat",
+            "case-arbre",
+            "case-fleurs",
+            "case-mots"
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "case-arbre",
+          "libelle": "arbre",
+          "position": [
+            560,
+            340
+          ],
+          "voisines": [
+            "case-fleur",
+            "case-livre",
+            "case-arbres",
+            "case-amis"
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "case-livre",
+          "libelle": "livre",
+          "position": [
+            780,
+            340
+          ],
+          "voisines": [
+            "case-arbre",
+            "case-livres",
+            "case-feuilles"
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "case-jours",
+          "libelle": "jours",
+          "position": [
+            120,
+            540
+          ],
+          "voisines": [
+            "case-mots",
+            "case-chat"
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "case-mots",
+          "libelle": "mots",
+          "position": [
+            340,
+            540
+          ],
+          "voisines": [
+            "case-jours",
+            "case-amis",
+            "case-fleur"
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "case-amis",
+          "libelle": "amis",
+          "position": [
+            560,
+            540
+          ],
+          "voisines": [
+            "case-mots",
+            "case-feuilles",
+            "case-arbre"
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "case-feuilles",
+          "libelle": "feuilles",
+          "position": [
+            780,
+            540
+          ],
+          "voisines": [
+            "case-amis",
+            "case-livre"
+          ],
+          "confusionAvec": null
+        }
+      ],
+      "competence": "enc.pluriel.s"
+    }
+  }
+}

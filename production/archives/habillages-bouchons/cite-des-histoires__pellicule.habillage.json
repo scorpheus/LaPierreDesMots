@@ -1,0 +1,106 @@
+{
+  "id": "cite.pellicule",
+  "moteurs": [
+    "chrono"
+  ],
+  "libelle": "La pellicule",
+  "region": "cite-des-histoires",
+  "scene": {
+    "fichier": "habillages/cite-des-histoires/pellicule.svg",
+    "viewBox": "0 0 960 600",
+    "calques": [
+      {
+        "id": "calque-fond",
+        "role": "fond",
+        "regions": []
+      },
+      {
+        "id": "calque-zones",
+        "role": "coloriable",
+        "regions": [
+          {
+            "id": "image-un",
+            "libelle": "la première image",
+            "centroide": [
+              190.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "image-deux",
+            "libelle": "la deuxième image",
+            "centroide": [
+              480.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "image-trois",
+            "libelle": "la troisième image",
+            "centroide": [
+              770.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "bande",
+            "libelle": "la bande",
+            "centroide": [
+              190.0,
+              420.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "perforation",
+            "libelle": "la perforation",
+            "centroide": [
+              480.0,
+              420.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "mur-blanc",
+            "libelle": "le mur blanc",
+            "centroide": [
+              770.0,
+              420.0
+            ],
+            "surface": 32000.0
+          }
+        ]
+      },
+      {
+        "id": "calque-trait",
+        "role": "trait",
+        "regions": []
+      }
+    ]
+  },
+  "palette": {
+    "jetons": {},
+    "nuancier": [
+      "orange",
+      "jaune",
+      "rose",
+      "violet",
+      "blanc",
+      "brun"
+    ]
+  },
+  "timings": {
+    "appuiMs": 70,
+    "relachementMs": 140,
+    "refusMs": 190,
+    "recolorationMs": 900,
+    "interEtoilesMs": 190
+  },
+  "sons": {
+    "ambiance": null,
+    "effets": {}
+  }
+}

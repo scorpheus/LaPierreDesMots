@@ -1,0 +1,106 @@
+{
+  "id": "cite.cartes",
+  "moteurs": [
+    "paires"
+  ],
+  "libelle": "Les cartes de la cité",
+  "region": "cite-des-histoires",
+  "scene": {
+    "fichier": "habillages/cite-des-histoires/cartes.svg",
+    "viewBox": "0 0 960 600",
+    "calques": [
+      {
+        "id": "calque-fond",
+        "role": "fond",
+        "regions": []
+      },
+      {
+        "id": "calque-zones",
+        "role": "coloriable",
+        "regions": [
+          {
+            "id": "carte-un",
+            "libelle": "la première carte",
+            "centroide": [
+              190.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "carte-deux",
+            "libelle": "la deuxième carte",
+            "centroide": [
+              480.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "tapis",
+            "libelle": "le tapis",
+            "centroide": [
+              770.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "lanterne",
+            "libelle": "la lanterne",
+            "centroide": [
+              190.0,
+              420.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "colonne",
+            "libelle": "la colonne",
+            "centroide": [
+              480.0,
+              420.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "fresque-murale",
+            "libelle": "la fresque murale",
+            "centroide": [
+              770.0,
+              420.0
+            ],
+            "surface": 32000.0
+          }
+        ]
+      },
+      {
+        "id": "calque-trait",
+        "role": "trait",
+        "regions": []
+      }
+    ]
+  },
+  "palette": {
+    "jetons": {},
+    "nuancier": [
+      "orange",
+      "jaune",
+      "rose",
+      "violet",
+      "blanc",
+      "brun"
+    ]
+  },
+  "timings": {
+    "appuiMs": 60,
+    "relachementMs": 120,
+    "refusMs": 200,
+    "recolorationMs": 850,
+    "interEtoilesMs": 190
+  },
+  "sons": {
+    "ambiance": null,
+    "effets": {}
+  }
+}

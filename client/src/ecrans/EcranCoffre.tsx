@@ -26,6 +26,46 @@ export interface ProprietesEcranCoffre {
   readonly surRetour?: () => void;
 }
 
+/**
+ * Le nom lisible des six régions — lot M8.
+ *
+ * ── LE DÉFAUT QUE CECI SOLDE, et il était visible à l'écran. La section des Éclats rendait
+ * `libelle={String(region.region)}` : l'enfant lisait « clairiere », « cite-des-histoires »,
+ * sans accent, sans majuscule, avec des tirets. Un identifiant technique n'est pas un mot ;
+ * c'est même exactement le genre de chaîne qu'un enfant de CE1 ne peut pas déchiffrer, sur
+ * l'écran qui devrait lui donner envie d'y retourner.
+ *
+ * ── ÉCART DÉCLARÉ, PAS TU. C'est la TROISIÈME copie de cette table dans le client
+ * (`parent/CarteCouverture.tsx:20`, `parent/EtatProfil.tsx:33`). Elle n'est pas hissée dans un
+ * module commun ici parce qu'aucun lot du contrat du monde v4 ne possède `client/src/monde/`
+ * ni `partage/src/monde/`, et qu'un lot ne s'accorde pas un fichier qu'un autre pourrait être
+ * en train d'écrire. Consigné en question ouverte : la table appartient au référentiel des
+ * régions (`contenu/monde/regions.json`, propriété de M2), pas à trois écrans.
+ *
+ * Le repli rend le code brut plutôt que rien : une région neuve s'affiche laide, jamais vide.
+ */
+export const NOM_DE_REGION: Readonly<Record<string, string>> = {
+  clairiere: 'La Clairière',
+  galeries: 'Les Galeries',
+  'marais-jumeau': 'Le Marais Jumeau',
+  'foret-muette': 'La Forêt Muette',
+  volcan: 'Le Volcan',
+  'cite-des-histoires': 'La Cité des Histoires'
+};
+
+/**
+ * Les deux dessins en creux des collections — lot M8.
+ *
+ * Les Éclats et les objets partageaient le MÊME losange gris : deux collections que rien ne
+ * distinguait à l'œil, sur un écran dont tout l'intérêt est de montrer ce qui manque. « Deux
+ * formes identiques ne se collectionneraient pas » (D44). L'Éclat est un cristal pointu, un
+ * objet rapporté est une besace ; chacun garde le trait épais et la Grisaille du non-conquis.
+ */
+const SILHOUETTE: Readonly<Record<string, string>> = {
+  eclat: 'M24 3l13 15-5 19-8 10-8-10-5-19z',
+  objet: 'M10 18h28l4 24H6zM17 18a7 7 0 0 1 14 0'
+};
+
 /** Une case de collection : pleine ou en creux, jamais absente. */
 function Case({
   cle,
@@ -71,14 +111,24 @@ function Case({
           // parle du DESSIN. Le nom de la pièce, lui, est ce qui dit à l'enfant ce qu'il peut
           // encore trouver : c'est le texte le plus utile de l'écran, et il était le moins
           // lisible. Même correction que pour l'étagère (`client/src/monde/Etagere.tsx`).
-          style={{ opacity: 0.55, filter: 'saturate(0)' }}
+          //
+          // M8 : le voile est désormais CONDITIONNEL. Il ne l'était pas, et ça ne se voyait
+          // pas — le dessin était gris dans les deux cas, et un `saturate(0)` sur du gris ne
+          // change rien. Depuis que la case gagnée porte un aplat de soleil, un voile
+          // inconditionnel la repeindrait en gris : il annulerait exactement la récompense.
+          style={obtenu ? undefined : { opacity: 0.55, filter: 'saturate(0)' }}
         >
           <path
-            d="M24,4 L44,24 L24,44 L4,24 Z"
-            fill="var(--grisaille)"
+            d={SILHOUETTE[categorie] ?? SILHOUETTE.eclat!}
+            // La case GAGNÉE prend l'aplat de sa collection ; la case en creux garde la
+            // Grisaille. C'est le contraste gris / couleur qui porte tout le jeu (v2 § 9.1) :
+            // sans lui, obtenir un Éclat ne se verrait pas.
+            fill={obtenu ? 'var(--soleil)' : 'var(--grisaille)'}
             stroke="var(--trait)"
-            strokeWidth="3"
+            // 4 px — l'épaisseur de trait du projet (v2 § 9.1), et non 3.
+            strokeWidth="4"
             strokeLinejoin="round"
+            strokeLinecap="round"
           />
         </svg>
       ) : (
@@ -162,20 +212,22 @@ export function EcranCoffre({
           oublié, parce qu'il n'y a plus de liste où il serait absent.
           L'attribut `data-collection-titre="formes"` est CONSERVÉ : `parcours-campement.spec.ts`
           (L2-F) l'attend, et il n'appartient pas à ce lot. */}
-      <section aria-label="Les formes de Gobi" data-collection-titre="formes">
+      <section className="panneau" aria-label="Les formes de Gobi" data-collection-titre="formes">
         <Etagere etagere={etagere} titre="Les formes de Gobi" />
       </section>
 
-      <section aria-label="Les Éclats de Pierre" data-collection-titre="eclats">
-        <h2 className="titre" style={{ fontSize: '1.5rem', margin: '0 0 0.75rem' }}>
+      <section className="panneau" aria-label="Les Éclats de Pierre" data-collection-titre="eclats">
+        <h2 className="panneau-titre" style={{ fontSize: '1.5rem' }}>
           Les Éclats de Pierre — {nbEclats} sur {regions.length}
         </h2>
         <ul style={STYLE_LISTE}>
           {regions.map((region) => (
             <Case
               key={String(region.region)}
+              // `cle` reste l'IDENTIFIANT : `data-piece` est ce que la recette compte, et il
+              // ne se traduit pas. Seul le mot que l'enfant lit change.
               cle={String(region.region)}
-              libelle={String(region.region)}
+              libelle={NOM_DE_REGION[String(region.region)] ?? String(region.region)}
               asset={null}
               obtenu={region.eclatObtenuLe !== null}
               categorie="eclat"
@@ -184,8 +236,8 @@ export function EcranCoffre({
         </ul>
       </section>
 
-      <section aria-label="Les objets du campement" data-collection-titre="objets">
-        <h2 className="titre" style={{ fontSize: '1.5rem', margin: '0 0 0.75rem' }}>
+      <section className="panneau" aria-label="Les objets du campement" data-collection-titre="objets">
+        <h2 className="panneau-titre" style={{ fontSize: '1.5rem' }}>
           Ce que tu as rapporté —{' '}
           {objets.filter((objet) => objet.placeLe !== null).length} sur {objets.length}
         </h2>

@@ -1,16 +1,35 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" width="960" height="600" role="img" aria-label="Les nénuphars">
+  <title>Les nénuphars</title>
+  <desc>L’eau sombre, la rive au fond, trois nénuphars échancrés de trois tailles pour traverser, une libellule au-dessus, une grenouille posée et des roseaux au bord.</desc>
+  <!--
+    DÉCOR — lot M6, contrat du monde v4 § 2. Trait noir sur blanc, la COULEUR VIENT DU CODE
+    (annexe P § 2) : les régions sortent d'ici en grisaille #8E97A8, qui est leur état
+    par défaut et non un choix graphique. Géométrie 100 % polygonale (M, L, Z — aucun arc) :
+    surface et centroïde sont donc calculables exactement et opposables aux valeurs déclarées
+    par le .habillage.json, que scripts/verifier-regions-fermees.mjs --strict recalcule.
+
+    Chaque région est un ENFANT DIRECT de #calque-zones : SceneSvg.tsx sélectionne
+    "#calque-zones > [id]", et un tracé niché dans un sous-groupe échapperait au tap sans
+    qu'aucun message ne le dise.
+
+    ÉCRIT PAR scripts/dessiner-decors.mjs — ne pas retoucher à la main : la scène est décrite
+    dans scripts/decors/decors.mjs, et l'émetteur refuse d'écrire si la mesure est mauvaise.
+  -->
   <g id="calque-fond">
-    <rect id="fond" x="0" y="0" width="960" height="600" fill="#e8f0f2"/>
+    <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
   </g>
-  <g id="calque-zones">
-    <rect id="nenuphar-un" x="90" y="110" width="200" height="160" rx="12"/>
-    <rect id="nenuphar-deux" x="380" y="110" width="200" height="160" rx="12"/>
-    <rect id="nenuphar-trois" x="670" y="110" width="200" height="160" rx="12"/>
-    <rect id="eau-sombre" x="90" y="340" width="200" height="160" rx="12"/>
-    <rect id="rive" x="380" y="340" width="200" height="160" rx="12"/>
-    <rect id="libellule" x="670" y="340" width="200" height="160" rx="12"/>
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round">
+    <path id="ciel-du-marais" class="zone" data-region-svg="ciel-du-marais" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L960,0 L960,138 L933.3,143 L906.7,146.7 L880,148 L853.3,146.7 L826.7,143 L800,138 L773.3,133 L746.7,129.3 L720,128 L693.3,129.3 L666.7,133 L640,138 L613.3,143 L586.7,146.7 L560,148 L533.3,146.7 L506.7,143 L480,138 L453.3,133 L426.7,129.3 L400,128 L373.3,129.3 L346.7,133 L320,138 L293.3,143 L266.7,146.7 L240,148 L213.3,146.7 L186.7,143 L160,138 L133.3,133 L106.7,129.3 L80,128 L53.3,129.3 L26.7,133 L0,138 Z"/>
+    <path id="rive" class="zone" data-region-svg="rive" fill="#8E97A8" fill-rule="evenodd" d="M0,140 L960,118 L960,232 L0,252 Z"/>
+    <path id="eau-sombre" class="zone" data-region-svg="eau-sombre" fill="#8E97A8" fill-rule="evenodd" d="M0,250 L26.7,259 L53.3,263.8 L80,262.1 L106.7,254.8 L133.3,245.2 L160,237.9 L186.7,236.2 L213.3,241 L240,250 L266.7,259 L293.3,263.8 L320,262.1 L346.7,254.8 L373.3,245.2 L400,237.9 L426.7,236.2 L453.3,241 L480,250 L506.7,259 L533.3,263.8 L560,262.1 L586.7,254.8 L613.3,245.2 L640,237.9 L666.7,236.2 L693.3,241 L720,250 L746.7,259 L773.3,263.8 L800,262.1 L826.7,254.8 L853.3,245.2 L880,237.9 L906.7,236.2 L933.3,241 L960,250 L960,600 L0,600 Z"/>
+    <path id="nenuphar-un" class="zone" data-region-svg="nenuphar-un" fill="#8E97A8" fill-rule="evenodd" d="M244,406 L267,339.1 L309.3,351.3 L336.2,390.8 L328.5,436.4 L290.1,469.8 L232.5,479 L178.7,460.7 L151.8,421.2 L163.4,375.6 L205.6,345.2 L232.5,339.1 Z"/>
+    <path id="nenuphar-deux" class="zone" data-region-svg="nenuphar-deux" fill="#8E97A8" fill-rule="evenodd" d="M501,466 L520.4,407.9 L556.1,418.5 L578.8,452.8 L572.3,492.4 L539.9,521.4 L491.3,529.4 L445.9,513.5 L423.2,479.2 L433,439.6 L468.6,413.2 L491.3,407.9 Z"/>
+    <path id="nenuphar-trois" class="zone" data-region-svg="nenuphar-trois" fill="#8E97A8" fill-rule="evenodd" d="M750,398 L766.8,347 L797.6,356.2 L817.2,386.4 L811.6,421.2 L783.6,446.7 L741.6,453.7 L702.4,439.8 L682.8,409.6 L691.2,374.8 L722,351.6 L741.6,347 Z"/>
+    <path id="libellule" class="zone" data-region-svg="libellule" fill="#8E97A8" fill-rule="evenodd" d="M499,178 L510.4,185.3 L510.4,197.5 L533.1,190.2 L564.3,197.5 L570,214.6 L541.6,219.5 L513.2,217 L513.2,226.8 L544.4,231.7 L567.2,246.3 L555.8,261 L527.4,251.2 L510.4,241.4 L507.5,275.6 L501.8,300 L496.2,300 L490.5,275.6 L487.6,241.4 L470.6,251.2 L442.2,261 L430.8,246.3 L453.6,231.7 L484.8,226.8 L484.8,217 L456.4,219.5 L428,214.6 L433.7,197.5 L464.9,190.2 L487.6,197.5 L487.6,185.3 Z"/>
+    <path id="roseau-du-bord" class="zone" data-region-svg="roseau-du-bord" fill="#8E97A8" fill-rule="evenodd" d="M762,300 L769.5,266.1 L777.8,238.4 L783.8,238.4 L792.1,266.1 L799.6,300 L807.1,245.3 L815.4,200.6 L821.4,200.6 L829.7,245.3 L837.2,300 L844.7,259.2 L853,225.8 L859,225.8 L867.3,259.2 L874.8,300 L882.3,238.4 L890.6,188 L896.6,188 L904.9,238.4 L912.4,300 L919.9,252.3 L928.2,213.2 L934.2,213.2 L942.5,252.3 L950,300 L950,318 L762,318 Z"/>
+    <path id="grenouille-posee" class="zone" data-region-svg="grenouille-posee" fill="#8E97A8" fill-rule="evenodd" d="M218.2,312.5 L220.1,302.4 L227.4,298.1 L234.8,302.4 L236.6,308.2 L251.4,308.2 L253.2,302.4 L260.6,298.1 L267.9,302.4 L269.8,312.5 L279,318.2 L288.2,328.3 L290,338.4 L280.8,341.3 L275.3,332.6 L271.6,344.2 L262.4,352.8 L249.5,355.7 L238.5,355.7 L225.6,352.8 L216.4,344.2 L212.7,332.6 L207.2,341.3 L198,338.4 L199.8,328.3 L209,318.2 Z"/>
   </g>
-  <g id="calque-trait">
-    <path id="cadre" d="M20 20 H940 V580 H20 Z" fill="none" stroke="#2b2b2b" stroke-width="4"/>
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path class="trait" d="M0,252 L960,232"/>
   </g>
 </svg>

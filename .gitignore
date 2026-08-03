@@ -51,3 +51,8 @@ desktop.ini
 
 # --- types generes par `tsc -b` (artefacts, jamais versionnes)
 dist-types/
+
+# --- bac a sable des agents : brouillons, scripts d inspection, HTML d essai
+# (le LISEZ-MOI reste versionne, il porte la regle)
+bac-a-sable/*
+!bac-a-sable/LISEZ-MOI.md

@@ -1,0 +1,181 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Nœud d'entrée du Marais Jumeau (M2). Chaque couple oppose le son de `pont` à son JUMEAU : `pont`/`pain`, `maison`/`main`. Les cinq réponses sont des options DISTINCTES et aucune option ne reparaît d’une consigne à l'autre : `partage/src/moteurs/eclair/validation.ts:70` refuse en `option-deja-choisie` une option déjà touchée, et une réponse réemployée rendrait la consigne insoluble. `expositionMs` à 1800 comme au reste du dépôt : l’enfant déchiffre encore (D14), le mot éclair n’a d’intérêt que s’il a le temps d’être LU. Paramètre de données, recalibrable (D13).",
+  "id": "marais-jumeau-orage-eclair-01",
+  "version": 1,
+  "titre": "Les mots qui font le son de pont",
+  "competences": [
+    "gph.nasale.on"
+  ],
+  "difficulte": 2,
+  "jeu": {
+    "moteur": "eclair",
+    "habillage": "marais.orage",
+    "noeud": "marais-jumeau-01",
+    "etoiles": {
+      "sansAide": true,
+      "sansErreur": true
+    },
+    "aideGobi": [
+      "relire-consigne",
+      "souffle-syllabe",
+      "surligne-graphene"
+    ],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Touche le mot que tu as lu.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "ballon",
+          "expositionMs": 1800,
+          "options": [
+            "mot-ballon",
+            "mot-bille"
+          ],
+          "reponse": "mot-ballon",
+          "motsCles": [
+            "touche",
+            "mot",
+            "lu"
+          ]
+        },
+        {
+          "id": "c2",
+          "texte": "Touche le mot que tu as lu.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "citron",
+          "expositionMs": 1800,
+          "options": [
+            "mot-citron",
+            "mot-carotte"
+          ],
+          "reponse": "mot-citron",
+          "motsCles": [
+            "touche",
+            "mot",
+            "lu"
+          ]
+        },
+        {
+          "id": "c3",
+          "texte": "Touche le mot que tu as lu.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "pont",
+          "expositionMs": 1800,
+          "options": [
+            "mot-pont",
+            "mot-pain"
+          ],
+          "reponse": "mot-pont",
+          "motsCles": [
+            "touche",
+            "mot",
+            "lu"
+          ]
+        },
+        {
+          "id": "c4",
+          "texte": "Touche le mot que tu as lu.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "maison",
+          "expositionMs": 1800,
+          "options": [
+            "mot-maison",
+            "mot-main"
+          ],
+          "reponse": "mot-maison",
+          "motsCles": [
+            "touche",
+            "mot",
+            "lu"
+          ]
+        },
+        {
+          "id": "c5",
+          "texte": "Touche le mot que tu as lu.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "savon",
+          "expositionMs": 1800,
+          "options": [
+            "mot-savon",
+            "mot-sapin"
+          ],
+          "reponse": "mot-savon",
+          "motsCles": [
+            "touche",
+            "mot",
+            "lu"
+          ]
+        }
+      ],
+      "options": [
+        {
+          "id": "mot-ballon",
+          "libelle": "ballon",
+          "bonne": true,
+          "confusionAvec": "bille"
+        },
+        {
+          "id": "mot-bille",
+          "libelle": "bille",
+          "bonne": false,
+          "confusionAvec": "ballon"
+        },
+        {
+          "id": "mot-citron",
+          "libelle": "citron",
+          "bonne": true,
+          "confusionAvec": "carotte"
+        },
+        {
+          "id": "mot-carotte",
+          "libelle": "carotte",
+          "bonne": false,
+          "confusionAvec": "citron"
+        },
+        {
+          "id": "mot-pont",
+          "libelle": "pont",
+          "bonne": true,
+          "confusionAvec": "pain"
+        },
+        {
+          "id": "mot-pain",
+          "libelle": "pain",
+          "bonne": false,
+          "confusionAvec": "pont"
+        },
+        {
+          "id": "mot-maison",
+          "libelle": "maison",
+          "bonne": true,
+          "confusionAvec": "main"
+        },
+        {
+          "id": "mot-main",
+          "libelle": "main",
+          "bonne": false,
+          "confusionAvec": "maison"
+        },
+        {
+          "id": "mot-savon",
+          "libelle": "savon",
+          "bonne": true,
+          "confusionAvec": "sapin"
+        },
+        {
+          "id": "mot-sapin",
+          "libelle": "sapin",
+          "bonne": false,
+          "confusionAvec": "savon"
+        }
+      ],
+      "competence": "gph.nasale.on"
+    }
+  }
+}

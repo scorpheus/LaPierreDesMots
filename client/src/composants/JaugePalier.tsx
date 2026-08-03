@@ -56,7 +56,13 @@ function Cases({ jauge, taille }: { jauge: ModeleJauge; taille: number }): React
               // Acquise : soleil plein. Vide : le gris de « pas encore conquis ».
               // Jamais de rouge — l'échec n'a pas de couleur dans ce projet.
               background: acquise ? 'var(--soleil)' : 'transparent',
-              border: `2px solid ${acquise ? 'var(--trait)' : 'var(--grisaille)'}`
+              // 3 px et non 2 (M8, v2 § 9.1 : « contours épais, 3 à 5 px »). Sur une case de
+              // 20 px c'est le maximum lisible : à 4 px le creux central se refermerait, et
+              // c'est le creux qui dit « pas encore ».
+              border: `3px solid ${acquise ? 'var(--trait)' : 'var(--grisaille)'}`,
+              // Le relief de BD, sur la case GAGNÉE seulement. Une case vide en relief
+              // ressemblerait à un jeton déjà posé : le vide doit rester plat.
+              boxShadow: acquise ? '0 2px 0 0 var(--trait)' : 'none'
             }}
           />
         );
@@ -75,7 +81,7 @@ function Barre({ jauge, taille }: { jauge: ModeleJauge; taille: number }): React
         inlineSize: `${String(taille * 8)}px`,
         blockSize: `${String(taille)}px`,
         borderRadius: '999px',
-        border: '2px solid var(--grisaille)',
+        border: '3px solid var(--grisaille)',
         overflow: 'hidden'
       }}
     >

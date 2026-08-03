@@ -1,32 +1,94 @@
 {
   "id": "galeries.tracer-cristal",
-  "moteurs": ["trace"],
+  "moteurs": [
+    "trace"
+  ],
   "libelle": "Graver la lettre sur l’ardoise de cristal",
   "region": "galeries",
   "scene": {
     "fichier": "habillages/galeries/tracer-cristal.svg",
     "viewBox": "0 0 800 600",
     "calques": [
-      { "id": "calque-fond", "role": "fond", "regions": [] },
-      { "id": "calque-decor", "role": "decor", "regions": [] },
+      {
+        "id": "calque-fond",
+        "role": "fond",
+        "regions": []
+      },
       {
         "id": "calque-zones",
         "role": "coloriable",
         "regions": [
           {
+            "id": "paroi-gauche",
+            "libelle": "la paroi de gauche",
+            "centroide": [
+              110,
+              182.7
+            ],
+            "surface": 94600
+          },
+          {
+            "id": "paroi-droite",
+            "libelle": "la paroi de droite",
+            "centroide": [
+              689,
+              181.4
+            ],
+            "surface": 94378
+          },
+          {
+            "id": "cristal-gauche",
+            "libelle": "le cristal de gauche",
+            "centroide": [
+              110,
+              218.3
+            ],
+            "surface": 11901.9
+          },
+          {
+            "id": "cristal-droit",
+            "libelle": "le cristal de droite",
+            "centroide": [
+              700,
+              236.2
+            ],
+            "surface": 8744.8
+          },
+          {
+            "id": "sol-de-la-galerie",
+            "libelle": "le sol de la galerie",
+            "centroide": [
+              150,
+              556.1
+            ],
+            "surface": 64000
+          },
+          {
             "id": "ardoise",
             "libelle": "l’ardoise de cristal",
-            "centroide": [400.0, 290.0],
-            "surface": 120000.0
+            "centroide": [
+              400,
+              290
+            ],
+            "surface": 120000
           }
         ]
       },
-      { "id": "calque-trait", "role": "trait", "regions": [] }
+      {
+        "id": "calque-trait",
+        "role": "trait",
+        "regions": []
+      }
     ]
   },
   "palette": {
     "jetons": {},
-    "nuancier": ["bleu", "violet", "blanc", "gris"]
+    "nuancier": [
+      "bleu",
+      "violet",
+      "blanc",
+      "gris"
+    ]
   },
   "timings": {
     "appuiMs": 40,

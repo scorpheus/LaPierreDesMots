@@ -19,58 +19,85 @@
         "role": "coloriable",
         "regions": [
           {
-            "id": "eclair-blanc",
-            "libelle": "l’éclair blanc",
+            "id": "ciel-d-orage",
+            "libelle": "le ciel d’orage",
             "centroide": [
-              190.0,
-              190.0
+              360,
+              116.9
             ],
-            "surface": 32000.0
-          },
-          {
-            "id": "nuage-lourd",
-            "libelle": "le nuage lourd",
-            "centroide": [
-              480.0,
-              190.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "pluie",
-            "libelle": "la pluie",
-            "centroide": [
-              770.0,
-              190.0
-            ],
-            "surface": 32000.0
+            "surface": 209280
           },
           {
             "id": "marais-sombre",
             "libelle": "le marais sombre",
             "centroide": [
-              190.0,
-              420.0
+              720,
+              509
             ],
-            "surface": 32000.0
+            "surface": 163200
+          },
+          {
+            "id": "nuage-lourd",
+            "libelle": "le nuage lourd",
+            "centroide": [
+              318.5,
+              137
+            ],
+            "surface": 36271.5
+          },
+          {
+            "id": "eclair-blanc",
+            "libelle": "l’éclair blanc",
+            "centroide": [
+              550.3,
+              269.5
+            ],
+            "surface": 9834.2
+          },
+          {
+            "id": "pluie",
+            "libelle": "la pluie",
+            "centroide": [
+              735.5,
+              310.2
+            ],
+            "surface": 64416
           },
           {
             "id": "saule",
             "libelle": "le saule",
             "centroide": [
-              480.0,
-              420.0
+              824.1,
+              297.6
             ],
-            "surface": 32000.0
+            "surface": 24724.7
+          },
+          {
+            "id": "tronc-du-saule",
+            "libelle": "le tronc du saule",
+            "centroide": [
+              830.1,
+              515.8
+            ],
+            "surface": 3798
           },
           {
             "id": "barque",
             "libelle": "la barque",
             "centroide": [
-              770.0,
-              420.0
+              182.3,
+              503.9
             ],
-            "surface": 32000.0
+            "surface": 12463.9
+          },
+          {
+            "id": "roseau-courbe",
+            "libelle": "le roseau courbé",
+            "centroide": [
+              612.5,
+              549.8
+            ],
+            "surface": 13521.3
           }
         ]
       },

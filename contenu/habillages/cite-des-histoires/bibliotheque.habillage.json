@@ -19,58 +19,85 @@
         "role": "coloriable",
         "regions": [
           {
-            "id": "etagere-haute",
-            "libelle": "l’étagère du haut",
+            "id": "mur-du-fond",
+            "libelle": "le mur du fond",
             "centroide": [
-              190.0,
-              190.0
+              240,
+              63
             ],
-            "surface": 32000.0
-          },
-          {
-            "id": "etagere-basse",
-            "libelle": "l’étagère du bas",
-            "centroide": [
-              480.0,
-              190.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "pupitre",
-            "libelle": "le pupitre",
-            "centroide": [
-              770.0,
-              190.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "echelle",
-            "libelle": "l’échelle",
-            "centroide": [
-              190.0,
-              420.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "vitre",
-            "libelle": "la vitre",
-            "centroide": [
-              480.0,
-              420.0
-            ],
-            "surface": 32000.0
+            "surface": 113280
           },
           {
             "id": "parquet",
             "libelle": "le parquet",
             "centroide": [
-              770.0,
-              420.0
+              120,
+              542
             ],
-            "surface": 32000.0
+            "surface": 105600
+          },
+          {
+            "id": "etagere-haute",
+            "libelle": "l’étagère du haut",
+            "centroide": [
+              97.5,
+              169
+            ],
+            "surface": 39120
+          },
+          {
+            "id": "etagere-basse",
+            "libelle": "l’étagère du bas",
+            "centroide": [
+              97.5,
+              337.8
+            ],
+            "surface": 36520
+          },
+          {
+            "id": "pupitre",
+            "libelle": "le pupitre",
+            "centroide": [
+              799,
+              466.2
+            ],
+            "surface": 10259.6
+          },
+          {
+            "id": "echelle",
+            "libelle": "l’échelle",
+            "centroide": [
+              693.2,
+              289
+            ],
+            "surface": 24437.3
+          },
+          {
+            "id": "vitre",
+            "libelle": "la vitre",
+            "centroide": [
+              778.8,
+              135.1
+            ],
+            "surface": 17640
+          },
+          {
+            "id": "livre-ouvert",
+            "libelle": "le livre ouvert",
+            "centroide": [
+              416.5,
+              516.3
+            ],
+            "surface": 13112.3
+          },
+          {
+            "id": "lampe-de-lecture",
+            "libelle": "la lampe de lecture",
+            "centroide": [
+              97,
+              401.7
+            ],
+            "surface": 5215.4
           }
         ]
       },

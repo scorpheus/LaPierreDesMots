@@ -19,58 +19,85 @@
         "role": "coloriable",
         "regions": [
           {
-            "id": "nenuphar-un",
-            "libelle": "le premier nénuphar",
+            "id": "ciel-du-marais",
+            "libelle": "le ciel du marais",
             "centroide": [
-              190.0,
-              190.0
+              240,
+              74
             ],
-            "surface": 32000.0
-          },
-          {
-            "id": "nenuphar-deux",
-            "libelle": "le deuxième nénuphar",
-            "centroide": [
-              480.0,
-              190.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "nenuphar-trois",
-            "libelle": "le troisième nénuphar",
-            "centroide": [
-              770.0,
-              190.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "eau-sombre",
-            "libelle": "l’eau sombre",
-            "centroide": [
-              190.0,
-              420.0
-            ],
-            "surface": 32000.0
+            "surface": 132480
           },
           {
             "id": "rive",
             "libelle": "la rive",
             "centroide": [
-              480.0,
-              420.0
+              885,
+              176.6
             ],
-            "surface": 32000.0
+            "surface": 108480
+          },
+          {
+            "id": "eau-sombre",
+            "libelle": "l’eau sombre",
+            "centroide": [
+              180,
+              418.1
+            ],
+            "surface": 336000
+          },
+          {
+            "id": "nenuphar-un",
+            "libelle": "le premier nénuphar",
+            "centroide": [
+              200.8,
+              413.4
+            ],
+            "surface": 18578.4
+          },
+          {
+            "id": "nenuphar-deux",
+            "libelle": "le deuxième nénuphar",
+            "centroide": [
+              464.5,
+              474.3
+            ],
+            "surface": 13613.7
+          },
+          {
+            "id": "nenuphar-trois",
+            "libelle": "le troisième nénuphar",
+            "centroide": [
+              718.5,
+              405.4
+            ],
+            "surface": 10335.9
           },
           {
             "id": "libellule",
             "libelle": "la libellule",
             "centroide": [
-              770.0,
-              420.0
+              499,
+              208.5
             ],
-            "surface": 32000.0
+            "surface": 7297.9
+          },
+          {
+            "id": "roseau-du-bord",
+            "libelle": "le roseau du bord",
+            "centroide": [
+              856,
+              299.7
+            ],
+            "surface": 13361.7
+          },
+          {
+            "id": "grenouille-posee",
+            "libelle": "la grenouille posée",
+            "centroide": [
+              241.1,
+              332.3
+            ],
+            "surface": 3322.2
           }
         ]
       },

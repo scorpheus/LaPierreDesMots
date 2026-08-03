@@ -1,16 +1,36 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" width="960" height="600" role="img" aria-label="La veillée autour du feu">
+  <title>La veillée autour du feu</title>
+  <desc>Le ciel étoilé, une tente plantée à gauche, le feu en langues de flammes, la bûche posée à côté, la couverture étalée et la marmite à anse.</desc>
+  <!--
+    DÉCOR — lot M6, contrat du monde v4 § 2. Trait noir sur blanc, la COULEUR VIENT DU CODE
+    (annexe P § 2) : les régions sortent d'ici en grisaille #8E97A8, qui est leur état
+    par défaut et non un choix graphique. Géométrie 100 % polygonale (M, L, Z — aucun arc) :
+    surface et centroïde sont donc calculables exactement et opposables aux valeurs déclarées
+    par le .habillage.json, que scripts/verifier-regions-fermees.mjs --strict recalcule.
+
+    Chaque région est un ENFANT DIRECT de #calque-zones : SceneSvg.tsx sélectionne
+    "#calque-zones > [id]", et un tracé niché dans un sous-groupe échapperait au tap sans
+    qu'aucun message ne le dise.
+
+    ÉCRIT PAR scripts/dessiner-decors.mjs — ne pas retoucher à la main : la scène est décrite
+    dans scripts/decors/decors.mjs, et l'émetteur refuse d'écrire si la mesure est mauvaise.
+  -->
   <g id="calque-fond">
-    <rect id="fond" x="0" y="0" width="960" height="600" fill="#f4f1e6"/>
+    <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
   </g>
-  <g id="calque-zones">
-    <rect id="feu" x="90" y="110" width="200" height="160" rx="12"/>
-    <rect id="buche" x="380" y="110" width="200" height="160" rx="12"/>
-    <rect id="couverture" x="670" y="110" width="200" height="160" rx="12"/>
-    <rect id="ciel-etoile" x="90" y="340" width="200" height="160" rx="12"/>
-    <rect id="tente" x="380" y="340" width="200" height="160" rx="12"/>
-    <rect id="marmite" x="670" y="340" width="200" height="160" rx="12"/>
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round">
+    <path id="ciel-etoile" class="zone" data-region-svg="ciel-etoile" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L960,0 L960,300 L933.3,304.8 L906.7,309 L880,312.1 L853.3,313.8 L826.7,313.8 L800,312.1 L773.3,309 L746.7,304.8 L720,300 L693.3,295.2 L666.7,291 L640,287.9 L613.3,286.2 L586.7,286.2 L560,287.9 L533.3,291 L506.7,295.2 L480,300 L453.3,304.8 L426.7,309 L400,312.1 L373.3,313.8 L346.7,313.8 L320,312.1 L293.3,309 L266.7,304.8 L240,300 L213.3,295.2 L186.7,291 L160,287.9 L133.3,286.2 L106.7,286.2 L80,287.9 L53.3,291 L26.7,295.2 L0,300 Z"/>
+    <path id="sol-de-la-clairiere" class="zone" data-region-svg="sol-de-la-clairiere" fill="#8E97A8" fill-rule="evenodd" d="M0,498 L26.7,505.7 L53.3,509.8 L80,508.4 L106.7,502.1 L133.3,493.9 L160,487.6 L186.7,486.2 L213.3,490.3 L240,498 L266.7,505.7 L293.3,509.8 L320,508.4 L346.7,502.1 L373.3,493.9 L400,487.6 L426.7,486.2 L453.3,490.3 L480,498 L506.7,505.7 L533.3,509.8 L560,508.4 L586.7,502.1 L613.3,493.9 L640,487.6 L666.7,486.2 L693.3,490.3 L720,498 L746.7,505.7 L773.3,509.8 L800,508.4 L826.7,502.1 L853.3,493.9 L880,487.6 L906.7,486.2 L933.3,490.3 L960,498 L960,600 L0,600 Z"/>
+    <path id="tente" class="zone" data-region-svg="tente" fill="#8E97A8" fill-rule="evenodd" d="M208,250 L358,485 L274,485 L244,360 L208,415 L172,360 L142,485 L58,485 Z"/>
+    <path id="feu" class="zone" data-region-svg="feu" fill="#8E97A8" fill-rule="evenodd" d="M422,470 L425.3,445.7 L431.2,431.6 L434.5,406 L439.4,434.2 L444.8,450.8 L449.2,470 L452.5,421.4 L458.4,393.2 L461.7,342 L466.6,398.3 L472,431.6 L476.4,470 L479.7,433.5 L485.6,412.4 L488.9,374 L493.8,416.2 L499.2,441.2 L503.6,470 L506.9,445.7 L512.8,431.6 L516.1,406 L521,434.2 L526.4,450.8 L530.8,470 L534.1,421.4 L540,393.2 L543.3,342 L548.2,398.3 L553.6,431.6 L558,470 L558,492 L422,492 Z"/>
+    <path id="buche" class="zone" data-region-svg="buche" fill="#8E97A8" fill-rule="evenodd" d="M398,486 L580,470 L590,508 L404,524 Z"/>
+    <path id="couverture" class="zone" data-region-svg="couverture" fill="#8E97A8" fill-rule="evenodd" d="M640,468 L882,448 L904,530 L618,532 Z"/>
+    <path id="marmite" class="zone" data-region-svg="marmite" fill="#8E97A8" fill-rule="evenodd" d="M721.3,359.7 L739.5,359.7 L739.5,346.5 L812.5,346.5 L812.5,359.7 L830.7,359.7 L842.9,367.6 L833.8,375.5 L824.6,425.7 L800.3,452.1 L751.7,452.1 L727.4,425.7 L718.2,375.5 L709.1,367.6 Z"/>
+    <path id="lune-pleine" class="zone" data-region-svg="lune-pleine" fill="#8E97A8" fill-rule="evenodd" d="M914,110 L911.5,126.1 L904.1,140.6 L892.6,152.1 L878.1,159.5 L862,162 L845.9,159.5 L831.4,152.1 L819.9,140.6 L812.5,126.1 L810,110 L812.5,93.9 L819.9,79.4 L831.4,67.9 L845.9,60.5 L862,58 L878.1,60.5 L892.6,67.9 L904.1,79.4 L911.5,93.9 Z"/>
+    <path id="etoile-filante" class="zone" data-region-svg="etoile-filante" fill="#8E97A8" fill-rule="evenodd" d="M200,84 L208.2,106.7 L232.3,107.5 L213.3,122.3 L220,145.5 L200,132 L180,145.5 L186.7,122.3 L167.7,107.5 L191.8,106.7 Z"/>
   </g>
-  <g id="calque-trait">
-    <path id="cadre" d="M20 20 H940 V580 H20 Z" fill="none" stroke="#2b2b2b" stroke-width="4"/>
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path class="trait" d="M404,496 L584,480"/>
+    <path class="trait" d="M720,460 L820,460"/>
   </g>
 </svg>

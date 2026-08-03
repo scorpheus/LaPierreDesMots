@@ -19,58 +19,85 @@
         "role": "coloriable",
         "regions": [
           {
-            "id": "coquille-un",
-            "libelle": "le premier coquillage",
+            "id": "ciel-de-mer",
+            "libelle": "le ciel de mer",
             "centroide": [
-              190.0,
-              190.0
+              240,
+              84
             ],
-            "surface": 32000.0
-          },
-          {
-            "id": "coquille-deux",
-            "libelle": "le deuxième coquillage",
-            "centroide": [
-              480.0,
-              190.0
-            ],
-            "surface": 32000.0
+            "surface": 151680
           },
           {
             "id": "sable-mouille",
             "libelle": "le sable mouillé",
             "centroide": [
-              770.0,
-              190.0
+              180,
+              484.1
             ],
-            "surface": 32000.0
-          },
-          {
-            "id": "algue",
-            "libelle": "l’algue",
-            "centroide": [
-              190.0,
-              420.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "galet",
-            "libelle": "le galet",
-            "centroide": [
-              480.0,
-              420.0
-            ],
-            "surface": 32000.0
+            "surface": 211200
           },
           {
             "id": "ecume",
             "libelle": "l’écume",
             "centroide": [
-              770.0,
-              420.0
+              480,
+              368
             ],
-            "surface": 32000.0
+            "surface": 41128.3
+          },
+          {
+            "id": "coquille-un",
+            "libelle": "le premier coquillage",
+            "centroide": [
+              266.2,
+              487.7
+            ],
+            "surface": 17212.4
+          },
+          {
+            "id": "coquille-deux",
+            "libelle": "le deuxième coquillage",
+            "centroide": [
+              489.8,
+              494.2
+            ],
+            "surface": 10159.8
+          },
+          {
+            "id": "algue",
+            "libelle": "l’algue",
+            "centroide": [
+              761,
+              430
+            ],
+            "surface": 12727.5
+          },
+          {
+            "id": "galet",
+            "libelle": "le galet",
+            "centroide": [
+              830.2,
+              500
+            ],
+            "surface": 6163.6
+          },
+          {
+            "id": "etoile-de-mer",
+            "libelle": "l’étoile de mer",
+            "centroide": [
+              620,
+              500
+            ],
+            "surface": 3806.8
+          },
+          {
+            "id": "bois-flotte",
+            "libelle": "le bois flotté",
+            "centroide": [
+              96,
+              496.9
+            ],
+            "surface": 6810.2
           }
         ]
       },

@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600">
+  <!--
+    Décor BOUCHON (D2, § 8 n° 10) : trait noir sur blanc, régions fermées par construction.
+
+    Les Galeries : une paroi, des cristaux, et l'ARDOISE au centre — la surface sur laquelle
+    l'enfant grave sa lettre. L'ardoise est la seule région déclarée coloriable : c'est elle
+    qui s'allume quand la lettre est gravée.
+
+    LE DÉCOR NE S'AGITE PAS ICI, et c'est une règle, pas un choix d'auteur : « le décor
+    s'agite, le texte jamais » (CLAUDE.md). Une lettre à tracer est du déchiffrage ; le fond
+    reste calme, sans animation dans le champ du geste.
+  -->
+  <g id="calque-fond">
+    <path d="M 0 0 L 800 0 L 800 600 L 0 600 Z" fill="#FFFFFF" stroke="none"/>
+  </g>
+
+  <g id="calque-decor">
+    <!-- Cristaux de la paroi gauche. -->
+    <path d="M 60 200 L 100 130 L 140 200 L 100 290 Z" fill="none" stroke="#1B2440" stroke-width="3"/>
+    <path d="M 110 350 L 145 300 L 180 350 L 145 420 Z" fill="none" stroke="#1B2440" stroke-width="3"/>
+    <!-- Cristaux de la paroi droite. -->
+    <path d="M 660 220 L 700 150 L 740 220 L 700 310 Z" fill="none" stroke="#1B2440" stroke-width="3"/>
+    <path d="M 620 380 L 655 330 L 690 380 L 655 450 Z" fill="none" stroke="#1B2440" stroke-width="3"/>
+    <!-- Le sol de la galerie. -->
+    <path d="M 0 520 L 800 520 L 800 524 L 0 524 Z" fill="none" stroke="#1B2440" stroke-width="2"/>
+  </g>
+
+  <g id="calque-zones">
+    <path id="ardoise" d="M 250 90 L 550 90 L 550 490 L 250 490 Z" fill="none" stroke="#1B2440" stroke-width="4"/>
+  </g>
+
+  <g id="calque-trait">
+    <path d="M 2 2 L 798 2 L 798 598 L 2 598 Z" fill="none" stroke="#1B2440" stroke-width="2"/>
+  </g>
+</svg>

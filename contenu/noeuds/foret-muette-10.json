@@ -1,0 +1,10 @@
+{
+  "id": "foret-muette-10",
+  "region": "foret-muette",
+  "ordre": 10,
+  "exercice": "foret-muette-bestiaire-paires-02",
+  "prerequis": [
+    "foret-muette-09"
+  ],
+  "temps": "developpement"
+}

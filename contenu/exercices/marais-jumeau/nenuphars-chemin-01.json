@@ -1,0 +1,252 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Le plateau fait trois rangées de quatre, et le voisinage est SYMÉTRIQUE par construction (le générateur le remesure : un plateau asymétrique ferait un cul-de-sac invisible). Les cases intérieures ont quatre voisines, donc `modeReponseChemin` rend `qcm-4` et non `vrai-faux` : D13 nomme le vrai/faux comme le format le moins informatif, et un couloir à deux voisines n’aurait rien mesuré. Les trois parcours sont DISJOINTS et aucun départ n’entre dans un parcours. Un geste hors de portée est ignoré sans bruit (`case-non-adjacente`) : seule la LECTURE est jugée.",
+  "id": "marais-jumeau-nenuphars-chemin-01",
+  "version": 1,
+  "titre": "Les nénuphars du son de trou",
+  "competences": [
+    "gph.digramme.ou",
+    "gph.digramme.oi"
+  ],
+  "difficulte": 3,
+  "jeu": {
+    "moteur": "chemin",
+    "habillage": "marais.nenuphars",
+    "noeud": "marais-jumeau-04",
+    "etoiles": {
+      "sansAide": true,
+      "sansErreur": true
+    },
+    "aideGobi": [
+      "relire-consigne",
+      "souffle-syllabe",
+      "montre-cible"
+    ],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Marche sur les mots où tu entends le son de trou.",
+          "forme": "imperative",
+          "audio": null,
+          "depart": "case-boule",
+          "parcours": [
+            "case-jour",
+            "case-loup",
+            "case-poule"
+          ],
+          "motsCles": [
+            "marche",
+            "mot",
+            "son",
+            "trou"
+          ]
+        },
+        {
+          "id": "c2",
+          "texte": "Marche sur les mots où tu entends le son de noir.",
+          "forme": "imperative",
+          "audio": null,
+          "depart": "case-roi",
+          "parcours": [
+            "case-soir",
+            "case-toit",
+            "case-poire"
+          ],
+          "motsCles": [
+            "marche",
+            "mot",
+            "son",
+            "noir"
+          ]
+        },
+        {
+          "id": "c3",
+          "texte": "Marche aussi sur les mots où tu entends le son de trou.",
+          "forme": "imperative",
+          "audio": null,
+          "depart": "case-four",
+          "parcours": [
+            "case-tour",
+            "case-cour",
+            "case-route"
+          ],
+          "motsCles": [
+            "marche",
+            "mot",
+            "son",
+            "trou"
+          ]
+        }
+      ],
+      "cases": [
+        {
+          "id": "case-boule",
+          "libelle": "boule",
+          "position": [
+            120,
+            140
+          ],
+          "voisines": [
+            "case-jour",
+            "case-roi"
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "case-jour",
+          "libelle": "jour",
+          "position": [
+            340,
+            140
+          ],
+          "voisines": [
+            "case-boule",
+            "case-loup",
+            "case-soir"
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "case-loup",
+          "libelle": "loup",
+          "position": [
+            560,
+            140
+          ],
+          "voisines": [
+            "case-jour",
+            "case-poule",
+            "case-toit"
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "case-poule",
+          "libelle": "poule",
+          "position": [
+            780,
+            140
+          ],
+          "voisines": [
+            "case-loup",
+            "case-poire"
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "case-roi",
+          "libelle": "roi",
+          "position": [
+            120,
+            340
+          ],
+          "voisines": [
+            "case-soir",
+            "case-boule",
+            "case-four"
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "case-soir",
+          "libelle": "soir",
+          "position": [
+            340,
+            340
+          ],
+          "voisines": [
+            "case-roi",
+            "case-toit",
+            "case-jour",
+            "case-tour"
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "case-toit",
+          "libelle": "toit",
+          "position": [
+            560,
+            340
+          ],
+          "voisines": [
+            "case-soir",
+            "case-poire",
+            "case-loup",
+            "case-cour"
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "case-poire",
+          "libelle": "poire",
+          "position": [
+            780,
+            340
+          ],
+          "voisines": [
+            "case-toit",
+            "case-poule",
+            "case-route"
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "case-four",
+          "libelle": "four",
+          "position": [
+            120,
+            540
+          ],
+          "voisines": [
+            "case-tour",
+            "case-roi"
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "case-tour",
+          "libelle": "tour",
+          "position": [
+            340,
+            540
+          ],
+          "voisines": [
+            "case-four",
+            "case-cour",
+            "case-soir"
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "case-cour",
+          "libelle": "cour",
+          "position": [
+            560,
+            540
+          ],
+          "voisines": [
+            "case-tour",
+            "case-route",
+            "case-toit"
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "case-route",
+          "libelle": "route",
+          "position": [
+            780,
+            540
+          ],
+          "voisines": [
+            "case-cour",
+            "case-poire"
+          ],
+          "confusionAvec": null
+        }
+      ],
+      "competence": "gph.digramme.ou"
+    }
+  }
+}

@@ -1,0 +1,133 @@
+{
+  "id": "cite.enseigne",
+  "moteurs": [
+    "assemble"
+  ],
+  "libelle": "L’enseigne à composer",
+  "region": "cite-des-histoires",
+  "scene": {
+    "fichier": "habillages/cite-des-histoires/enseigne.svg",
+    "viewBox": "0 0 960 600",
+    "calques": [
+      {
+        "id": "calque-fond",
+        "role": "fond",
+        "regions": []
+      },
+      {
+        "id": "calque-zones",
+        "role": "coloriable",
+        "regions": [
+          {
+            "id": "facade",
+            "libelle": "la façade",
+            "centroide": [
+              240,
+              73
+            ],
+            "surface": 132480
+          },
+          {
+            "id": "rue",
+            "libelle": "la rue",
+            "centroide": [
+              720,
+              541
+            ],
+            "surface": 105600
+          },
+          {
+            "id": "enseigne-cadre",
+            "libelle": "le cadre de l’enseigne",
+            "centroide": [
+              479,
+              276.6
+            ],
+            "surface": 84554.8
+          },
+          {
+            "id": "potence",
+            "libelle": "la potence",
+            "centroide": [
+              179.3,
+              129
+            ],
+            "surface": 3937.4
+          },
+          {
+            "id": "lettre-a-poser-un",
+            "libelle": "la première plaque",
+            "centroide": [
+              184,
+              464
+            ],
+            "surface": 8464
+          },
+          {
+            "id": "lettre-a-poser-deux",
+            "libelle": "la deuxième plaque",
+            "centroide": [
+              319,
+              469
+            ],
+            "surface": 6724
+          },
+          {
+            "id": "lettre-a-poser-trois",
+            "libelle": "la troisième plaque",
+            "centroide": [
+              459,
+              463
+            ],
+            "surface": 10404
+          },
+          {
+            "id": "lettre-a-poser-quatre",
+            "libelle": "la quatrième plaque",
+            "centroide": [
+              596,
+              470
+            ],
+            "surface": 5184
+          },
+          {
+            "id": "lanterne-de-l-enseigne",
+            "libelle": "la lanterne de l’enseigne",
+            "centroide": [
+              804,
+              465.6
+            ],
+            "surface": 6374
+          }
+        ]
+      },
+      {
+        "id": "calque-trait",
+        "role": "trait",
+        "regions": []
+      }
+    ]
+  },
+  "palette": {
+    "jetons": {},
+    "nuancier": [
+      "orange",
+      "jaune",
+      "rose",
+      "violet",
+      "blanc",
+      "brun"
+    ]
+  },
+  "timings": {
+    "appuiMs": 60,
+    "relachementMs": 120,
+    "refusMs": 180,
+    "recolorationMs": 800,
+    "interEtoilesMs": 180
+  },
+  "sons": {
+    "ambiance": null,
+    "effets": {}
+  }
+}

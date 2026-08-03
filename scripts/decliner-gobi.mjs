@@ -29,13 +29,41 @@
  *   node scripts/decliner-gobi.mjs --tout          rend les 15 déclinaisons de la table
  *   node scripts/decliner-gobi.mjs repos joie      rend les déclinaisons nommées
  *   node scripts/decliner-gobi.mjs --verifier      ne soumet rien : contrôle le verrou seul
+ *   node scripts/decliner-gobi.mjs --formes        rend les 25 cristaux de graphème (lot M5)
+ *
+ * ── CE QUE LE LOT M5 AJOUTE, ET LA MESURE QUI L'A DÉCIDÉ ────────────────────────────────────
+ *
+ * Les 25 formes passent par `personnage-cristal.api.json` — inpainting régional Flux Fill sous
+ * le masque `production/personnages/gobi/masque-crete.png` —, comme le contrat du monde v4 § M5
+ * le prescrit. **Ce workflow porte une clause de style figée « black and white line art, no
+ * colour », et la canonique de Gobi est EN COULEUR (D29, D36).** Le risque de décoloration était
+ * réel au point de justifier, pour la déclinaison pleine image, un second workflow
+ * (`gobi-declinaison.api.json`, voir son `_commentaire`). MESURÉ avant d'écrire quoi que ce soit,
+ * un essai unique, graine 4201, `production/personnages/gobi/essais/essai-cristal-bw.png`,
+ * 21 s : **le corps, les couleurs et le cœur de Pierre sont intacts, et le cristal demandé
+ * apparaît.** L'inpainting reconstruit depuis le contexte de l'image, pas depuis la seule clause
+ * de texte. Le contrat est donc appliqué tel qu'il est écrit, et l'écart pressenti n'existe pas.
+ *
+ * ── LA RECOMPOSITION, ET POURQUOI ELLE N'EST PAS COSMÉTIQUE ─────────────────────────────────
+ *
+ * Le guide § 6.3 corrige l'état de l'art : hors du masque, la différence n'est PAS nulle, parce
+ * que le VAE ré-encode l'image entière — 0,31 % de pixels bougent. La voie qu'il recommande est
+ * de **recomposer** le résultat avec la canonique en se servant du masque : l'écart hors masque
+ * devient nul **par construction**, et non « sous un seuil ».
+ *
+ * S'y ajoute une seconde restauration, et elle a été rendue nécessaire par ce qu'on VOIT sur
+ * l'essai : dans le masque, le fond crème plat ressort avec un halo elliptique — la trace du
+ * masque lui-même. Un pixel du masque n'est donc conservé que s'il porte de l'encre **dans le
+ * résultat ou dans la canonique**. Un pixel qui était fond plat et le reste est restauré. Le
+ * cristal neuf, lui, est de l'encre : il passe. C'est la règle « on n'écrit que ce qu'on a
+ * mesuré » appliquée aux pixels.
  */
 
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { inflateSync } from 'node:zlib';
+import { crc32, deflateSync, inflateSync } from 'node:zlib';
 
 const RACINE = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const HOTE = process.env['COMFYUI_HOTE'] ?? '127.0.0.1:8188';
@@ -197,6 +225,172 @@ export const DECLINAISONS = [
     instruction: 'replace the crystal crown by nine crystals forming a wide even crown across the whole head, all softly glowing' }
 ];
 
+/**
+ * Les 25 cristaux de graphème — lot M5, contrat du monde v4 § M5.
+ *
+ * **L'ORDRE ET LES GRAPHÈMES VIENNENT DE `contenu/monde/gobi-stades.json`**, qui fait foi et
+ * qu'aucun lot de ce plan ne réécrit. Ils ne sont pas recopiés de mémoire : `--formes` relit ce
+ * fichier et refuse de tourner si un graphème de la table ci-dessous n'y est pas déclaré, ou
+ * l'inverse. Une table de production qui diverge de la table de contenu produirait 25 images
+ * pour des formes que le jeu ne connaît pas, et personne ne le verrait avant l'écran.
+ *
+ * **25 SILHOUETTES, PAS 25 TEINTES** (D44 : « deux formes identiques ne se collectionneraient
+ * pas »). Chaque description nomme donc une GÉOMÉTRIE — un anneau, une croix, un zigzag, trois
+ * aiguilles parallèles —, jamais une couleur ni une humeur. C'est aussi ce qui rend le contrat
+ * de sortie « recouvrement deux à deux ≤ 0,90 » atteignable : deux teintes d'un même pentagone
+ * se recouvrent à 1,00 quoi qu'on en dise.
+ */
+export const FORMES = [
+  { grapheme: 'a', graine: 4201,
+    cristal: 'one wide low crystal shaped like a rounded teardrop, its tip curling forward' },
+  { grapheme: 'e', graine: 4202,
+    cristal: 'one single faceted crystal shard curving to the left like a smooth blade' },
+  { grapheme: 'i', graine: 4203,
+    cristal: 'one very thin tall crystal needle with a small separate round crystal floating just above its tip' },
+  { grapheme: 'o', graine: 4204,
+    cristal: 'one crystal bent into a closed round ring, hollow at its centre' },
+  { grapheme: 'u', graine: 4205,
+    cristal: 'one wide crystal with two prongs joined at the bottom, shaped like a cup' },
+  { grapheme: 'b', graine: 4206,
+    cristal: 'one single tall faceted crystal column standing straight, with one round crystal ball resting against its lower right side' },
+  { grapheme: 'd', graine: 4207,
+    cristal: 'one single tall faceted crystal column standing straight, with one round crystal ball resting against its lower left side' },
+  { grapheme: 'p', graine: 4208,
+    cristal: 'one crystal spire pointing downwards with a round crystal bulb attached at its top on the right' },
+  { grapheme: 'q', graine: 4209,
+    cristal: 'one crystal spire pointing downwards with a round crystal bulb attached at its top on the left' },
+  { grapheme: 't', graine: 4210,
+    cristal: 'one tall crystal shard crossed near its top by a short horizontal crystal shard' },
+  { grapheme: 'on', graine: 4211,
+    cristal: 'two crystals merged into one wide smooth arch, like a bridge' },
+  { grapheme: 'an', graine: 4212,
+    cristal: 'one broad triangular crystal with a deep notch cut into its left slope' },
+  { grapheme: 'in', graine: 4213,
+    cristal: 'one slim crystal leaning to the right with a very small crystal resting against its side' },
+  { grapheme: 'ou', graine: 4214,
+    cristal: 'two round crystal domes side by side, touching each other' },
+  { grapheme: 'oi', graine: 4215,
+    cristal: 'one round crystal dome with a long crystal needle crossing over it' },
+  { grapheme: 's', graine: 4216,
+    cristal: 'one single faceted crystal bent twice into a soft S, like a frozen wave' },
+  { grapheme: 'x', graine: 4217,
+    cristal: 'two long crystal shards crossing each other at their middle' },
+  { grapheme: 'er', graine: 4218,
+    cristal: 'one crystal coiled into a flat spiral' },
+  { grapheme: 'ent', graine: 4219,
+    cristal: 'three crystal shards fanned out from a single base' },
+  { grapheme: 'ez', graine: 4220,
+    cristal: 'one crystal folded into a sharp zigzag' },
+  { grapheme: 'eau', graine: 4221,
+    cristal: 'one wide crystal with three rounded crests in a row, like a wave' },
+  { grapheme: 'ill', graine: 4222,
+    cristal: 'three tall crystal needles of exactly the same height, parallel and close together' },
+  { grapheme: 'gn', graine: 4223,
+    cristal: 'two thick faceted crystal rings linked together like two links of a chain' },
+  { grapheme: 'ph', graine: 4224,
+    cristal: 'one wide flat faceted crystal shaped like an open folding fan, its narrow point at the bottom' },
+  { grapheme: 'ch', graine: 4225,
+    cristal: 'two crystal shards meeting at a sharp peak, forming a chevron' }
+];
+
+const CHEMIN_MASQUE = 'production/personnages/gobi/masque-crete.png';
+const CHEMIN_WORKFLOW_CRISTAL = 'production/workflows/personnage-cristal.api.json';
+
+// ------------------------------------------------------------------- écriture PNG et recomposition
+
+/** Un PNG 8 bits RVB non entrelacé, filtre 0. Écrit sur `node:zlib` seul — D9 tenue. */
+export function ecrirePngRvb(cheminAbsolu, largeur, hauteur, rvb) {
+  const brut = Buffer.alloc(hauteur * (largeur * 3 + 1));
+  for (let ligne = 0; ligne < hauteur; ligne += 1) {
+    brut[ligne * (largeur * 3 + 1)] = 0;
+    rvb.copy(brut, ligne * (largeur * 3 + 1) + 1, ligne * largeur * 3, (ligne + 1) * largeur * 3);
+  }
+  const morceau = (type, donnees) => {
+    const nom = Buffer.from(type, 'ascii');
+    const taille = Buffer.alloc(4);
+    taille.writeUInt32BE(donnees.length);
+    const controle = Buffer.alloc(4);
+    controle.writeUInt32BE(crc32(Buffer.concat([nom, donnees])) >>> 0);
+    return Buffer.concat([taille, nom, donnees, controle]);
+  };
+  const entete = Buffer.alloc(13);
+  entete.writeUInt32BE(largeur, 0);
+  entete.writeUInt32BE(hauteur, 4);
+  entete[8] = 8;
+  entete[9] = 2;
+  writeFileSync(
+    cheminAbsolu,
+    Buffer.concat([
+      Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+      morceau('IHDR', entete),
+      morceau('IDAT', deflateSync(brut, { level: 9 })),
+      morceau('IEND', Buffer.alloc(0))
+    ])
+  );
+}
+
+/**
+ * Recompose un inpainting avec la canonique. **Rend l'écart hors masque nul par construction**
+ * (guide § 6.3), et retire le halo elliptique que le VAE laisse sur le fond plat.
+ *
+ * Rend les deux chiffres qui font le contrat, et il les CALCULE : la part de pixels hors masque
+ * que le modèle avait bougés (ce que la recomposition annule), et la part de la surface du
+ * masque que le cristal neuf occupe réellement. Un cristal à 0,0 % serait une image vide rendue
+ * avec un verdict vert.
+ */
+export function recomposer(canonique, produite, masque, seuilEncre = 24) {
+  const { largeur, hauteur, rvb: base } = canonique;
+  const sortie = Buffer.from(produite.rvb);
+  const fond = [base[0], base[1], base[2]];
+  const encre = (tampon, index) =>
+    Math.abs(tampon[index] - fond[0]) +
+    Math.abs(tampon[index + 1] - fond[1]) +
+    Math.abs(tampon[index + 2] - fond[2]) >
+    seuilEncre;
+
+  let horsMasque = 0;
+  let horsMasqueBouges = 0;
+  let dansMasque = 0;
+  let encreNeuve = 0;
+
+  for (let pixel = 0; pixel < largeur * hauteur; pixel += 1) {
+    const index = pixel * 3;
+    if (masque.rvb[index] < 128) {
+      horsMasque += 1;
+      if (
+        Math.abs(sortie[index] - base[index]) > 8 ||
+        Math.abs(sortie[index + 1] - base[index + 1]) > 8 ||
+        Math.abs(sortie[index + 2] - base[index + 2]) > 8
+      ) {
+        horsMasqueBouges += 1;
+      }
+      sortie[index] = base[index];
+      sortie[index + 1] = base[index + 1];
+      sortie[index + 2] = base[index + 2];
+      continue;
+    }
+    dansMasque += 1;
+    // Dans le masque : on ne garde que ce qui porte de l'encre. Un fond plat qui reste plat est
+    // restauré — c'est lui, et lui seul, qui portait le halo du masque.
+    if (encre(sortie, index) || encre(base, index)) {
+      encreNeuve += 1;
+    } else {
+      sortie[index] = base[index];
+      sortie[index + 1] = base[index + 1];
+      sortie[index + 2] = base[index + 2];
+    }
+  }
+
+  return {
+    rvb: sortie,
+    largeur,
+    hauteur,
+    horsMasqueBouges,
+    partHorsMasque: (100 * horsMasqueBouges) / horsMasque,
+    partEncreDansMasque: (100 * encreNeuve) / dansMasque
+  };
+}
+
 // -------------------------------------------------------------------------- pilotage ComfyUI
 
 async function poster(chemin, charge) {
@@ -223,8 +417,8 @@ async function televerser(cheminAbsolu, nomDistant) {
 }
 
 /** Retire les clés de commentaire, exactement comme `charger.py` (piège 3 du skill). */
-function chargerWorkflow() {
-  const brut = JSON.parse(readFileSync(join(RACINE, CHEMIN_WORKFLOW), 'utf8'));
+function chargerWorkflow(chemin = CHEMIN_WORKFLOW) {
+  const brut = JSON.parse(readFileSync(join(RACINE, chemin), 'utf8'));
   return Object.fromEntries(Object.entries(brut).filter(([cle]) => !cle.startsWith('_')));
 }
 
@@ -295,12 +489,119 @@ export function verifierSourceEstCanonique(verrou) {
   return mesure;
 }
 
+// ------------------------------------------------------------------------ les 25 cristaux
+
+/**
+ * Rend les 25 PNG de graphème par inpainting régional, puis les recompose avec la canonique.
+ *
+ * LA TABLE DE PRODUCTION EST CONFRONTÉE À LA TABLE DE CONTENU avant la première soumission —
+ * `contenu/monde/gobi-stades.json` fait foi, ce script ne fait pas foi. Un écart arrête tout :
+ * 25 images produites pour des graphèmes que le jeu ne déclare pas seraient 25 images
+ * irrécupérables, et l'écart ne se verrait qu'à l'écran.
+ */
+async function rendreFormes(verrou, journal, voulues) {
+  const document = JSON.parse(readFileSync(join(RACINE, 'contenu/monde/gobi-stades.json'), 'utf8'));
+  const declares = document.formes.map((forme) => forme.grapheme);
+  const produits = FORMES.map((forme) => forme.grapheme);
+  const manquants = declares.filter((code) => !produits.includes(code));
+  const surnumeraires = produits.filter((code) => !declares.includes(code));
+  if (manquants.length > 0 || surnumeraires.length > 0) {
+    throw new Error(
+      'REFUS — la table de production diverge de contenu/monde/gobi-stades.json.\n' +
+        `  déclarés sans production : ${manquants.join(', ') || '—'}\n` +
+        `  produits sans déclaration : ${surnumeraires.join(', ') || '—'}`
+    );
+  }
+  console.log(`table confrontée : ${String(declares.length)} graphèmes déclarés = produits, écart 0`);
+
+  const nomCanonique = await televerser(join(RACINE, CHEMIN_CANONIQUE), 'gobi-canonique.png');
+  const nomMasque = await televerser(join(RACINE, CHEMIN_MASQUE), 'gobi-masque-crete.png');
+  const gabarit = chargerWorkflow(CHEMIN_WORKFLOW_CRISTAL);
+  const canonique = pixelsRvbPng(readFileSync(join(RACINE, CHEMIN_CANONIQUE)));
+  const masque = pixelsRvbPng(readFileSync(join(RACINE, CHEMIN_MASQUE)));
+
+  // Une REPRISE ne rejoue pas les 25 : `--formes e b d s gn ph` ne refait que les six nommées.
+  // Le budget de l'annexe P § 3.5 est de 5 tentatives par asset **avec un correctif à chaque
+  // passe** ; rejouer les 25 pour en corriger 6 brûlerait du GPU sans rien apprendre, et
+  // changerait les 19 autres qui étaient bonnes.
+  const aRendre = voulues.length === 0 ? FORMES : FORMES.filter((forme) => voulues.includes(forme.grapheme));
+  if (aRendre.length === 0) {
+    throw new Error(`Aucun graphème connu parmi : ${voulues.join(', ')}.`);
+  }
+  console.log(`à rendre : ${String(aRendre.length)} / ${String(FORMES.length)}`);
+
+  for (const forme of aRendre) {
+    verifierSourceEstCanonique(verrou);
+
+    const graphe = JSON.parse(JSON.stringify(gabarit));
+    graphe['4'].inputs.image = nomCanonique;
+    graphe['5'].inputs.image = nomMasque;
+    graphe['6'].inputs.text = graphe['6'].inputs.text.replace('{CRISTAL}', forme.cristal);
+    graphe['11'].inputs.seed = forme.graine;
+    graphe['14'].inputs.filename_prefix = `gobi-forme-${forme.grapheme}`;
+    if (graphe['6'].inputs.text.includes('{CRISTAL}')) {
+      throw new Error('Le marqueur {CRISTAL} n’a pas été substitué : mauvais workflow.');
+    }
+
+    const relatif = `production/personnages/gobi/formes/${forme.grapheme}.png`;
+    const cible = join(RACINE, relatif);
+    process.stdout.write(`  ${forme.grapheme.padEnd(4)} … `);
+    const debut = Date.now();
+    await soumettre(graphe, cible);
+
+    const recomposee = recomposer(canonique, pixelsRvbPng(readFileSync(cible)), masque);
+    ecrirePngRvb(cible, recomposee.largeur, recomposee.hauteur, recomposee.rvb);
+    const produite = empreintePixels(cible);
+    console.log(
+      `${String(Math.round((Date.now() - debut) / 1000)).padStart(3)} s  ` +
+        `hors masque bougé avant recomposition ${recomposee.partHorsMasque.toFixed(2)} % → 0,00 % ; ` +
+        `encre dans le masque ${recomposee.partEncreDansMasque.toFixed(1)} %`
+    );
+
+    const entree = {
+      code: `forme-${forme.grapheme}`,
+      cible: relatif,
+      source: CHEMIN_CANONIQUE,
+      sourceEmpreintePixels: verrou.canonique.empreintePixels,
+      empreintePixels: produite.empreinte,
+      instruction: forme.cristal,
+      graine: forme.graine,
+      workflow: CHEMIN_WORKFLOW_CRISTAL,
+      masque: CHEMIN_MASQUE,
+      recompose: true,
+      partEncreDansMasque: Number(recomposee.partEncreDansMasque.toFixed(2))
+    };
+    const rang = journal.findIndex((connue) => connue.code === entree.code);
+    if (rang === -1) {
+      journal.push(entree);
+    } else {
+      journal[rang] = entree;
+    }
+  }
+}
+
 // ------------------------------------------------------------------------------ programme
 
 async function principal(arguments_) {
   const verrou = lireVerrou();
   const mesure = verifierSourceEstCanonique(verrou);
   console.log(`canonique vérifiée : ${mesure.empreinte} (${mesure.largeur}×${mesure.hauteur})`);
+
+  if (arguments_.includes('--formes')) {
+    const journal = [...(verrou.declinaisons ?? [])];
+    await rendreFormes(
+      verrou,
+      journal,
+      arguments_.filter((argument) => !argument.startsWith('--'))
+    );
+    writeFileSync(
+      join(RACINE, CHEMIN_VERROU),
+      `${JSON.stringify({ ...verrou, declinaisons: journal }, null, 2)}\n`,
+      'utf8'
+    );
+    console.log(`verrou mis à jour : ${String(journal.length)} déclinaisons, 0 enchaînée`);
+    return;
+  }
 
   if (arguments_.includes('--verifier')) {
     const enchainees = (verrou.declinaisons ?? []).filter(

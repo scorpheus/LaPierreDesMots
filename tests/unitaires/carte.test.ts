@@ -135,21 +135,31 @@ describe('regionsOuvertes — les deux régions sont ouvertes d’emblée (D38)'
   });
 
   /**
-   * La fenêtre glisse — et ce cas dit désormais LES DEUX moitiés du fait, séparément.
+   * La fenêtre glisse — et ce cas dit LES DEUX moitiés du fait, séparément.
    *
-   * Il affirmait `toEqual(['galeries', 'marais-jumeau'])`. Le Marais Jumeau ne porte AUCUN nœud
-   * livré (mesuré par `tests/api/profils-vecus.test.ts` : les quatre régions qui suivent les
-   * Galeries en déclarent zéro) : le proposer produisait un bouton « Partir vers Le Marais
-   * Jumeau » dont l'`onClick` ne fait rien — l'indice corrélé que D48 interdit d'asserter.
+   * ── L'ALLER-RETOUR DE CETTE ASSERTION, ET CE QU'IL ENSEIGNE ────────────────────────────
+   * Elle affirmait d'abord `['galeries', 'marais-jumeau']`. Un lot l'a ramenée à `['galeries']`
+   * seul, avec un motif juste au moment où il l'écrivait : le Marais Jumeau ne portait AUCUN
+   * nœud livré, et le proposer produisait un bouton « Partir vers Le Marais Jumeau » dont
+   * l'`onClick` ne fait rien.
    *
-   * Rien n'est perdu : l'ouverture EST vérifiée, sur `carte.regions` où elle vit réellement,
-   * et l'assertion sur ce qui est proposé reste une égalité exacte.
+   * Les lots de contenu ont livré les 12 nœuds du Marais. `porteDuContenu` — le prédicat qui
+   * décidait — est donc redevenu vrai, et la valeur attendue redevient celle du départ. **Ce
+   * n'est pas un aller-retour gratuit : c'est un test dont l'attendu SUIT le contenu livré, et
+   * c'est exactement ce qu'on lui demande.** Le bouton mort qu'il interdisait reste interdit —
+   * il l'est par `porteDuContenu`, pas par la liste écrite ici.
+   *
+   * Les deux moitiés restent séparées : l'ouverture est vérifiée sur `carte.regions`, où elle
+   * vit ; ce qui est PROPOSÉ est vérifié par une égalité exacte, jamais un `toContain`.
    */
   it('fait glisser la fenêtre quand un Éclat est obtenu — le voile se lève sur le Marais', () => {
     const carte = apresEclats(1);
     const marais = carte.regions.find((region) => region.region === 'marais-jumeau')!;
     expect(marais.ouverte, 'la fenêtre n’a pas glissé : le Marais est resté voilé').toBe(true);
-    expect(regionsOuvertes(carte)).toEqual(['galeries']);
+    // Le Marais porte maintenant du contenu : il est proposé, et le plafond de parallélisme
+    // (2) fait que la Clairière — close par son Éclat — sort de la fenêtre au même instant.
+    expect(marais.noeuds.length, 'le Marais est proposé mais vide').toBeGreaterThan(0);
+    expect(regionsOuvertes(carte)).toEqual(['galeries', 'marais-jumeau']);
   });
 
   it('ne propose jamais plus que le parallélisme déclaré, même très avancé', () => {

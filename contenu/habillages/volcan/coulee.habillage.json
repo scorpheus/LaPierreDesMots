@@ -1,0 +1,133 @@
+{
+  "id": "volcan.coulee",
+  "moteurs": [
+    "chemin"
+  ],
+  "libelle": "Les pierres à sauter sur la coulée",
+  "region": "volcan",
+  "scene": {
+    "fichier": "habillages/volcan/coulee.svg",
+    "viewBox": "0 0 960 600",
+    "calques": [
+      {
+        "id": "calque-fond",
+        "role": "fond",
+        "regions": []
+      },
+      {
+        "id": "calque-zones",
+        "role": "coloriable",
+        "regions": [
+          {
+            "id": "ciel-de-braise",
+            "libelle": "le ciel de braise",
+            "centroide": [
+              360,
+              79.4
+            ],
+            "surface": 142080
+          },
+          {
+            "id": "cone-du-volcan",
+            "libelle": "le cône du volcan",
+            "centroide": [
+              697.5,
+              134
+            ],
+            "surface": 35112
+          },
+          {
+            "id": "fumee-du-cone",
+            "libelle": "la fumée du cône",
+            "centroide": [
+              703.7,
+              35.4
+            ],
+            "surface": 6556.6
+          },
+          {
+            "id": "coulee-de-lave",
+            "libelle": "la coulée de lave",
+            "centroide": [
+              480,
+              380
+            ],
+            "surface": 162397
+          },
+          {
+            "id": "rive-de-roche",
+            "libelle": "la rive de roche",
+            "centroide": [
+              720,
+              545.5
+            ],
+            "surface": 96000
+          },
+          {
+            "id": "pierre-a-sauter-un",
+            "libelle": "la première pierre à sauter",
+            "centroide": [
+              200,
+              380
+            ],
+            "surface": 6475.6
+          },
+          {
+            "id": "pierre-a-sauter-deux",
+            "libelle": "la deuxième pierre à sauter",
+            "centroide": [
+              430,
+              350
+            ],
+            "surface": 8616.2
+          },
+          {
+            "id": "pierre-a-sauter-trois",
+            "libelle": "la troisième pierre à sauter",
+            "centroide": [
+              660,
+              390
+            ],
+            "surface": 5603.5
+          },
+          {
+            "id": "pierre-a-sauter-quatre",
+            "libelle": "la quatrième pierre à sauter",
+            "centroide": [
+              846,
+              344
+            ],
+            "surface": 4198.1
+          }
+        ]
+      },
+      {
+        "id": "calque-trait",
+        "role": "trait",
+        "regions": []
+      }
+    ]
+  },
+  "palette": {
+    "jetons": {},
+    "nuancier": [
+      "rouge",
+      "orange",
+      "jaune",
+      "noir",
+      "gris",
+      "brun"
+    ]
+  },
+  "timings": {
+    "appuiMs": 60,
+    "relachementMs": 120,
+    "refusMs": 180,
+    "recolorationMs": 800,
+    "interEtoilesMs": 180
+  },
+  "sons": {
+    "ambiance": null,
+    "effets": {}
+  }
+}

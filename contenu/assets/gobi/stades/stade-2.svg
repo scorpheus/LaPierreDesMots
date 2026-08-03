@@ -20,15 +20,11 @@
     </g>
   </g>
   <g id="gobi-parure">
-      <path d="M100,38 L107.2,48.44 L103.96,56 L96.04,56 L92.8,48.44 Z" fill="#C5EAFA" stroke="#4B2207" stroke-width="2.4" stroke-linejoin="round"/><path d="M100,38 L103.96,56 L96.04,56 Z" fill="#BEE5F5" stroke="none" opacity="0.85"/><path d="M98.56,43.04 L100.86,50.6" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" opacity="0.75" fill="none"/>
-      <path id="premiere-lueur" d="M100,50 L100,42" stroke="#FFFFFF" stroke-width="3.4" stroke-linecap="round" opacity="0.9" fill="none"/>
-      <path d="M92,54 L88,50 M108,54 L112,50" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" opacity="0.75" fill="none"/>
+    <path d="M100,34 L108.5,41.5 L106.8,60.5 L93.2,60.5 L91.5,41.5 Z" fill="#BEE5F5" stroke="#4B2207" stroke-width="2.6" stroke-linejoin="round"/><path d="M100,34 L108.5,41.5 L106.8,60.5 L100,60.5 Z" fill="#ADC8E0" stroke="none" opacity="0.75"/><path d="M97.96,39.5 L96.94,53" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" opacity="0.85" fill="none"/>
   </g>
   <g id="gobi-bras">
-    <path d="M56,112 L34,96" stroke="#4B2207" stroke-width="17" stroke-linecap="round" fill="none"/>
-    <path d="M144,112 L166,96" stroke="#4B2207" stroke-width="17" stroke-linecap="round" fill="none"/>
-    <path d="M56,112 L34,96" stroke="#FFDDA8" stroke-width="11" stroke-linecap="round" fill="none"/>
-    <path d="M144,112 L166,96" stroke="#FFDDA8" stroke-width="11" stroke-linecap="round" fill="none"/>
+    <path d="M64.06,114.92 L35.93,88.58 L32.64,86.88 L28.95,86.56 L25.42,87.68 L22.58,90.07 L20.88,93.36 L20.56,97.05 L21.68,100.58 L24.07,103.42 L55.94,125.08 Z" fill="#FFDDA8" stroke="#4B2207" stroke-width="3" stroke-linejoin="round"/><path d="M28.9,90.99 L34.39,95.38 M24.87,96.03 L30.36,100.42" stroke="#4B2207" stroke-width="2" stroke-linecap="round" fill="none"/>
+    <path d="M144.06,125.08 L175.93,103.42 L178.32,100.58 L179.44,97.05 L179.12,93.36 L177.42,90.07 L174.58,87.68 L171.05,86.56 L167.36,86.88 L164.07,88.58 L135.94,114.92 Z" fill="#FFDDA8" stroke="#4B2207" stroke-width="3" stroke-linejoin="round"/><path d="M175.13,96.03 L169.64,100.42 M171.1,90.99 L165.61,95.38" stroke="#4B2207" stroke-width="2" stroke-linecap="round" fill="none"/>
   </g>
   <g id="gobi-visage">
     <path d="M70,78 Q79,72 89,76" stroke="#945125" stroke-width="3.6" stroke-linecap="round" fill="none"/>

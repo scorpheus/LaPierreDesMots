@@ -19,58 +19,85 @@
         "role": "coloriable",
         "regions": [
           {
-            "id": "drap",
-            "libelle": "le drap",
+            "id": "fond-de-salle",
+            "libelle": "le fond de salle",
             "centroide": [
-              190.0,
-              190.0
+              240,
+              58
             ],
-            "surface": 32000.0
-          },
-          {
-            "id": "silhouette",
-            "libelle": "la silhouette",
-            "centroide": [
-              480.0,
-              190.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "bougie",
-            "libelle": "la bougie",
-            "centroide": [
-              770.0,
-              190.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "estrade",
-            "libelle": "l’estrade",
-            "centroide": [
-              190.0,
-              420.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "rideau",
-            "libelle": "le rideau",
-            "centroide": [
-              480.0,
-              420.0
-            ],
-            "surface": 32000.0
+            "surface": 103680
           },
           {
             "id": "gradin",
             "libelle": "le gradin",
             "centroide": [
-              770.0,
-              420.0
+              861.4,
+              508.6
             ],
-            "surface": 32000.0
+            "surface": 89816
+          },
+          {
+            "id": "estrade",
+            "libelle": "l’estrade",
+            "centroide": [
+              681.3,
+              430.1
+            ],
+            "surface": 51004
+          },
+          {
+            "id": "drap",
+            "libelle": "le drap",
+            "centroide": [
+              480,
+              254
+            ],
+            "surface": 119680
+          },
+          {
+            "id": "silhouette",
+            "libelle": "la silhouette",
+            "centroide": [
+              474,
+              240.8
+            ],
+            "surface": 15314.7
+          },
+          {
+            "id": "rideau",
+            "libelle": "le rideau",
+            "centroide": [
+              105,
+              148.3
+            ],
+            "surface": 182940
+          },
+          {
+            "id": "bougie",
+            "libelle": "la bougie",
+            "centroide": [
+              736,
+              312.7
+            ],
+            "surface": 2546.4
+          },
+          {
+            "id": "lanterne-de-scene",
+            "libelle": "la lanterne de scène",
+            "centroide": [
+              262,
+              225.6
+            ],
+            "surface": 6374
+          },
+          {
+            "id": "coussin-du-gradin",
+            "libelle": "le coussin du gradin",
+            "centroide": [
+              500,
+              520
+            ],
+            "surface": 6220.7
           }
         ]
       },

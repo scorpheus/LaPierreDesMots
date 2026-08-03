@@ -1,0 +1,149 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Le clavier porte les QUATRE graphies concurrentes du même son final — eau, au, ot, o — et rien d'autre : c'est exactement le choix que l'orthographe demande, et aucun tri au hasard n'y mène. Chaque position de trou est REMESURÉE par le générateur contre la chaîne du mot : `bateau` porte bien « eau » en position 3, `chapeau` en position 4.",
+  "id": "volcan-sable-grave-01",
+  "version": 1,
+  "titre": "Graver la fin de bateau",
+  "competences": [
+    "gph.rare.eau"
+  ],
+  "difficulte": 3,
+  "jeu": {
+    "moteur": "grave",
+    "habillage": "volcan.sable",
+    "noeud": "volcan-03",
+    "etoiles": {
+      "sansAide": true,
+      "sansErreur": true
+    },
+    "aideGobi": [
+      "relire-consigne",
+      "souffle-syllabe",
+      "surligne-graphene"
+    ],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Grave les lettres pour écrire ce mot.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "bateau",
+          "trous": [
+            {
+              "id": "trou-un",
+              "position": 3,
+              "attendu": "eau"
+            }
+          ],
+          "motsCles": [
+            "grave",
+            "lettre",
+            "mot"
+          ]
+        },
+        {
+          "id": "c2",
+          "texte": "Grave les lettres pour écrire ce mot.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "gâteau",
+          "trous": [
+            {
+              "id": "trou-deux",
+              "position": 3,
+              "attendu": "eau"
+            }
+          ],
+          "motsCles": [
+            "grave",
+            "lettre",
+            "mot"
+          ]
+        },
+        {
+          "id": "c3",
+          "texte": "Grave les lettres pour écrire ce mot.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "chapeau",
+          "trous": [
+            {
+              "id": "trou-trois",
+              "position": 4,
+              "attendu": "eau"
+            }
+          ],
+          "motsCles": [
+            "grave",
+            "lettre",
+            "mot"
+          ]
+        },
+        {
+          "id": "c4",
+          "texte": "Grave les lettres pour écrire ce mot.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "cadeau",
+          "trous": [
+            {
+              "id": "trou-quatre",
+              "position": 3,
+              "attendu": "eau"
+            }
+          ],
+          "motsCles": [
+            "grave",
+            "lettre",
+            "mot"
+          ]
+        },
+        {
+          "id": "c5",
+          "texte": "Grave les lettres pour écrire ce mot.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "rideau",
+          "trous": [
+            {
+              "id": "trou-cinq",
+              "position": 3,
+              "attendu": "eau"
+            }
+          ],
+          "motsCles": [
+            "grave",
+            "lettre",
+            "mot"
+          ]
+        },
+        {
+          "id": "c6",
+          "texte": "Grave les lettres pour écrire ce mot.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "drapeau",
+          "trous": [
+            {
+              "id": "trou-six",
+              "position": 4,
+              "attendu": "eau"
+            }
+          ],
+          "motsCles": [
+            "grave",
+            "lettre",
+            "mot"
+          ]
+        }
+      ],
+      "clavier": [
+        "eau",
+        "au",
+        "ot",
+        "o"
+      ],
+      "competence": "gph.rare.eau"
+    }
+  }
+}

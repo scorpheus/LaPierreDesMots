@@ -1,16 +1,37 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" width="960" height="600" role="img" aria-label="Les deux paniers">
+  <title>Les deux paniers</title>
+  <desc>Une table couverte d’une nappe, deux paniers à anse de deux tailles, et trois fruits qu’on distingue à la forme : la pomme ronde, la poire en poire, la prune petite.</desc>
+  <!--
+    DÉCOR — lot M6, contrat du monde v4 § 2. Trait noir sur blanc, la COULEUR VIENT DU CODE
+    (annexe P § 2) : les régions sortent d'ici en grisaille #8E97A8, qui est leur état
+    par défaut et non un choix graphique. Géométrie 100 % polygonale (M, L, Z — aucun arc) :
+    surface et centroïde sont donc calculables exactement et opposables aux valeurs déclarées
+    par le .habillage.json, que scripts/verifier-regions-fermees.mjs --strict recalcule.
+
+    Chaque région est un ENFANT DIRECT de #calque-zones : SceneSvg.tsx sélectionne
+    "#calque-zones > [id]", et un tracé niché dans un sous-groupe échapperait au tap sans
+    qu'aucun message ne le dise.
+
+    ÉCRIT PAR scripts/dessiner-decors.mjs — ne pas retoucher à la main : la scène est décrite
+    dans scripts/decors/decors.mjs, et l'émetteur refuse d'écrire si la mesure est mauvaise.
+  -->
   <g id="calque-fond">
-    <rect id="fond" x="0" y="0" width="960" height="600" fill="#f4f1e6"/>
+    <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
   </g>
-  <g id="calque-zones">
-    <rect id="panier-gauche" x="90" y="110" width="200" height="160" rx="12"/>
-    <rect id="panier-droit" x="380" y="110" width="200" height="160" rx="12"/>
-    <rect id="table" x="670" y="110" width="200" height="160" rx="12"/>
-    <rect id="nappe" x="90" y="340" width="200" height="160" rx="12"/>
-    <rect id="pomme" x="380" y="340" width="200" height="160" rx="12"/>
-    <rect id="poire" x="670" y="340" width="200" height="160" rx="12"/>
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round">
+    <path id="mur-du-fond" class="zone" data-region-svg="mur-du-fond" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L960,0 L960,168 L933.3,170.7 L906.7,173.1 L880,174.9 L853.3,175.9 L826.7,175.9 L800,174.9 L773.3,173.1 L746.7,170.7 L720,168 L693.3,165.3 L666.7,162.9 L640,161.1 L613.3,160.1 L586.7,160.1 L560,161.1 L533.3,162.9 L506.7,165.3 L480,168 L453.3,170.7 L426.7,173.1 L400,174.9 L373.3,175.9 L346.7,175.9 L320,174.9 L293.3,173.1 L266.7,170.7 L240,168 L213.3,165.3 L186.7,162.9 L160,161.1 L133.3,160.1 L106.7,160.1 L80,161.1 L53.3,162.9 L26.7,165.3 L0,168 Z"/>
+    <path id="nappe" class="zone" data-region-svg="nappe" fill="#8E97A8" fill-rule="evenodd" d="M80,400 L880,400 L922,470 L38,470 Z"/>
+    <path id="table" class="zone" data-region-svg="table" fill="#8E97A8" fill-rule="evenodd" d="M38,470 L922,470 L900,562 L60,562 Z"/>
+    <path id="panier-gauche" class="zone" data-region-svg="panier-gauche" fill="#8E97A8" fill-rule="evenodd" d="M191.3,247.8 L222.4,247.8 L226.8,213.9 L289,188.5 L351.2,213.9 L355.6,247.8 L386.7,247.8 L364.5,383.5 L213.5,383.5 Z M249,247.8 L329,247.8 L324.5,226.6 L289,213.9 L253.5,226.6 Z"/>
+    <path id="panier-droit" class="zone" data-region-svg="panier-droit" fill="#8E97A8" fill-rule="evenodd" d="M573.4,262.2 L600,262.2 L603.8,232.1 L657,209.5 L710.2,232.1 L714,262.2 L740.6,262.2 L721.6,382.5 L592.4,382.5 Z M622.8,262.2 L691.2,262.2 L687.4,243.4 L657,232.1 L626.6,243.4 Z"/>
+    <path id="pomme" class="zone" data-region-svg="pomme" fill="#8E97A8" fill-rule="evenodd" d="M487,302.3 L490.9,288 L502.7,286 L496.8,300.3 L518.4,302.3 L536,328.8 L530.1,365.6 L508.6,386 L487,375.8 L465.4,386 L443.9,365.6 L438,328.8 L455.6,302.3 L477.2,302.3 Z"/>
+    <path id="poire" class="zone" data-region-svg="poire" fill="#8E97A8" fill-rule="evenodd" d="M863,268 L871.6,275.1 L869.9,291.6 L881.9,308.1 L894,336.4 L892.2,364.8 L873.3,383.6 L852.7,383.6 L833.8,364.8 L832,336.4 L844.1,308.1 L856.1,291.6 L854.4,275.1 Z"/>
+    <path id="prune" class="zone" data-region-svg="prune" fill="#8E97A8" fill-rule="evenodd" d="M154,330 L152.1,341.6 L146.5,351.9 L138,359.4 L127.6,363.5 L116.4,363.5 L106,359.4 L97.5,351.9 L91.9,341.6 L90,330 L91.9,318.4 L97.5,308.1 L106,300.6 L116.4,296.5 L127.6,296.5 L138,300.6 L146.5,308.1 L152.1,318.4 Z"/>
+    <path id="bol" class="zone" data-region-svg="bol" fill="#8E97A8" fill-rule="evenodd" d="M430,402 L546,402 L524,462 L452,462 Z"/>
   </g>
-  <g id="calque-trait">
-    <path id="cadre" d="M20 20 H940 V580 H20 Z" fill="none" stroke="#2b2b2b" stroke-width="4"/>
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path class="trait" d="M100,562 L100,596"/>
+    <path class="trait" d="M860,562 L860,596"/>
+    <path class="trait" d="M38,470 L922,470"/>
   </g>
 </svg>

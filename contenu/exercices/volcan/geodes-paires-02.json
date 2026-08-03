@@ -1,0 +1,204 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Nœud de maîtrise : huit paires qui mêlent les TROIS graphèmes sans les annoncer, contrairement au tri n° 02 qui les séparait en trois wagons. C’est le troisième moteur de `ph`, celui qui rend R12 tenable sur ce code. Quatre consignes, paires disjointes, deux cartes par paire exactement.",
+  "id": "volcan-geodes-paires-02",
+  "version": 1,
+  "titre": "Les géodes du chat et du coq",
+  "competences": [
+    "gph.rare.ch-qu",
+    "gph.rare.ph"
+  ],
+  "difficulte": 4,
+  "jeu": {
+    "moteur": "paires",
+    "habillage": "volcan.geodes",
+    "noeud": "volcan-12",
+    "etoiles": {
+      "sansAide": true,
+      "sansErreur": true
+    },
+    "aideGobi": [
+      "relire-consigne",
+      "souffle-syllabe",
+      "montre-cible"
+    ],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Trouve le mot et son image.",
+          "forme": "imperative",
+          "audio": null,
+          "aApparier": [
+            "paire-cheval",
+            "paire-quille"
+          ],
+          "motsCles": [
+            "trouve",
+            "mot",
+            "image"
+          ]
+        },
+        {
+          "id": "c2",
+          "texte": "Trouve aussi le mot et son image.",
+          "forme": "imperative",
+          "audio": null,
+          "aApparier": [
+            "paire-cochon",
+            "paire-musique"
+          ],
+          "motsCles": [
+            "trouve",
+            "mot",
+            "image"
+          ]
+        },
+        {
+          "id": "c3",
+          "texte": "Trouve les mots et les images.",
+          "forme": "imperative",
+          "audio": null,
+          "aApparier": [
+            "paire-vache",
+            "paire-queue"
+          ],
+          "motsCles": [
+            "trouve",
+            "mot",
+            "image"
+          ]
+        },
+        {
+          "id": "c4",
+          "texte": "Trouve les derniers mots et les images.",
+          "forme": "imperative",
+          "audio": null,
+          "aApparier": [
+            "paire-phare",
+            "paire-dauphin"
+          ],
+          "motsCles": [
+            "trouve",
+            "mot",
+            "image"
+          ]
+        }
+      ],
+      "cartes": [
+        {
+          "id": "mot-cheval",
+          "libelle": "cheval",
+          "face": "mot",
+          "asset": null,
+          "paire": "paire-cheval"
+        },
+        {
+          "id": "image-cheval",
+          "libelle": "le cheval",
+          "face": "image",
+          "asset": null,
+          "paire": "paire-cheval"
+        },
+        {
+          "id": "mot-quille",
+          "libelle": "quille",
+          "face": "mot",
+          "asset": null,
+          "paire": "paire-quille"
+        },
+        {
+          "id": "image-quille",
+          "libelle": "la quille",
+          "face": "image",
+          "asset": null,
+          "paire": "paire-quille"
+        },
+        {
+          "id": "mot-cochon",
+          "libelle": "cochon",
+          "face": "mot",
+          "asset": null,
+          "paire": "paire-cochon"
+        },
+        {
+          "id": "image-cochon",
+          "libelle": "le cochon",
+          "face": "image",
+          "asset": null,
+          "paire": "paire-cochon"
+        },
+        {
+          "id": "mot-musique",
+          "libelle": "musique",
+          "face": "mot",
+          "asset": null,
+          "paire": "paire-musique"
+        },
+        {
+          "id": "image-musique",
+          "libelle": "la musique",
+          "face": "image",
+          "asset": null,
+          "paire": "paire-musique"
+        },
+        {
+          "id": "mot-vache",
+          "libelle": "vache",
+          "face": "mot",
+          "asset": null,
+          "paire": "paire-vache"
+        },
+        {
+          "id": "image-vache",
+          "libelle": "la vache",
+          "face": "image",
+          "asset": null,
+          "paire": "paire-vache"
+        },
+        {
+          "id": "mot-queue",
+          "libelle": "queue",
+          "face": "mot",
+          "asset": null,
+          "paire": "paire-queue"
+        },
+        {
+          "id": "image-queue",
+          "libelle": "la queue",
+          "face": "image",
+          "asset": null,
+          "paire": "paire-queue"
+        },
+        {
+          "id": "mot-phare",
+          "libelle": "phare",
+          "face": "mot",
+          "asset": null,
+          "paire": "paire-phare"
+        },
+        {
+          "id": "image-phare",
+          "libelle": "le phare",
+          "face": "image",
+          "asset": null,
+          "paire": "paire-phare"
+        },
+        {
+          "id": "mot-dauphin",
+          "libelle": "dauphin",
+          "face": "mot",
+          "asset": null,
+          "paire": "paire-dauphin"
+        },
+        {
+          "id": "image-dauphin",
+          "libelle": "le dauphin",
+          "face": "image",
+          "asset": null,
+          "paire": "paire-dauphin"
+        }
+      ],
+      "competence": "gph.rare.ch-qu"
+    }
+  }
+}

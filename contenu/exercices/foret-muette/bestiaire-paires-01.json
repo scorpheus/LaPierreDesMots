@@ -1,0 +1,160 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Chaque paire oppose le SINGULIER au PLURIEL du même mot : c’est la seule façon de faire porter l’attention sur le `s` plutôt que sur le mot. Six paires, douze cartes, deux par paire exactement ; trois consignes à paires disjointes (`acquis` indexé par `IdPaire`). Le `s` du pluriel ne s’ENTEND pas : l’aide `souffle-syllabe` de Gobi dit les deux formes à l’identique, et c’est précisément ce que la région enseigne.",
+  "id": "foret-muette-bestiaire-paires-01",
+  "version": 1,
+  "titre": "Un animal, plusieurs animaux",
+  "competences": [
+    "enc.pluriel.s"
+  ],
+  "difficulte": 2,
+  "jeu": {
+    "moteur": "paires",
+    "habillage": "foret.bestiaire",
+    "noeud": "foret-muette-02",
+    "etoiles": {
+      "sansAide": true,
+      "sansErreur": true
+    },
+    "aideGobi": [
+      "relire-consigne",
+      "souffle-syllabe",
+      "montre-cible"
+    ],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Trouve le mot et son image.",
+          "forme": "imperative",
+          "audio": null,
+          "aApparier": [
+            "paire-renard",
+            "paire-hibou"
+          ],
+          "motsCles": [
+            "trouve",
+            "mot",
+            "image"
+          ]
+        },
+        {
+          "id": "c2",
+          "texte": "Trouve aussi le mot et son image.",
+          "forme": "imperative",
+          "audio": null,
+          "aApparier": [
+            "paire-arbre",
+            "paire-feuille"
+          ],
+          "motsCles": [
+            "trouve",
+            "mot",
+            "image"
+          ]
+        },
+        {
+          "id": "c3",
+          "texte": "Trouve les derniers mots et les images.",
+          "forme": "imperative",
+          "audio": null,
+          "aApparier": [
+            "paire-oiseau",
+            "paire-fleur"
+          ],
+          "motsCles": [
+            "trouve",
+            "mot",
+            "image"
+          ]
+        }
+      ],
+      "cartes": [
+        {
+          "id": "mot-renard",
+          "libelle": "le renard",
+          "face": "mot",
+          "asset": null,
+          "paire": "paire-renard"
+        },
+        {
+          "id": "image-renards",
+          "libelle": "les renards",
+          "face": "image",
+          "asset": null,
+          "paire": "paire-renard"
+        },
+        {
+          "id": "mot-hibou",
+          "libelle": "le hibou",
+          "face": "mot",
+          "asset": null,
+          "paire": "paire-hibou"
+        },
+        {
+          "id": "image-hiboux",
+          "libelle": "les hiboux",
+          "face": "image",
+          "asset": null,
+          "paire": "paire-hibou"
+        },
+        {
+          "id": "mot-arbre",
+          "libelle": "l'arbre",
+          "face": "mot",
+          "asset": null,
+          "paire": "paire-arbre"
+        },
+        {
+          "id": "image-arbres",
+          "libelle": "les arbres",
+          "face": "image",
+          "asset": null,
+          "paire": "paire-arbre"
+        },
+        {
+          "id": "mot-feuille",
+          "libelle": "la feuille",
+          "face": "mot",
+          "asset": null,
+          "paire": "paire-feuille"
+        },
+        {
+          "id": "image-feuilles",
+          "libelle": "les feuilles",
+          "face": "image",
+          "asset": null,
+          "paire": "paire-feuille"
+        },
+        {
+          "id": "mot-oiseau",
+          "libelle": "l'oiseau",
+          "face": "mot",
+          "asset": null,
+          "paire": "paire-oiseau"
+        },
+        {
+          "id": "image-oiseaux",
+          "libelle": "les oiseaux",
+          "face": "image",
+          "asset": null,
+          "paire": "paire-oiseau"
+        },
+        {
+          "id": "mot-fleur",
+          "libelle": "la fleur",
+          "face": "mot",
+          "asset": null,
+          "paire": "paire-fleur"
+        },
+        {
+          "id": "image-fleurs",
+          "libelle": "les fleurs",
+          "face": "image",
+          "asset": null,
+          "paire": "paire-fleur"
+        }
+      ],
+      "competence": "enc.pluriel.s"
+    }
+  }
+}

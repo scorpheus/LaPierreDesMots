@@ -1,16 +1,35 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" width="960" height="600" role="img" aria-label="Les coquillages jumeaux">
+  <title>Les coquillages jumeaux</title>
+  <desc>Le sable mouillé bordé d’écume, deux coquillages cannelés de deux tailles, une algue découpée, un galet et une étoile de mer.</desc>
+  <!--
+    DÉCOR — lot M6, contrat du monde v4 § 2. Trait noir sur blanc, la COULEUR VIENT DU CODE
+    (annexe P § 2) : les régions sortent d'ici en grisaille #8E97A8, qui est leur état
+    par défaut et non un choix graphique. Géométrie 100 % polygonale (M, L, Z — aucun arc) :
+    surface et centroïde sont donc calculables exactement et opposables aux valeurs déclarées
+    par le .habillage.json, que scripts/verifier-regions-fermees.mjs --strict recalcule.
+
+    Chaque région est un ENFANT DIRECT de #calque-zones : SceneSvg.tsx sélectionne
+    "#calque-zones > [id]", et un tracé niché dans un sous-groupe échapperait au tap sans
+    qu'aucun message ne le dise.
+
+    ÉCRIT PAR scripts/dessiner-decors.mjs — ne pas retoucher à la main : la scène est décrite
+    dans scripts/decors/decors.mjs, et l'émetteur refuse d'écrire si la mesure est mauvaise.
+  -->
   <g id="calque-fond">
-    <rect id="fond" x="0" y="0" width="960" height="600" fill="#e8f0f2"/>
+    <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
   </g>
-  <g id="calque-zones">
-    <rect id="coquille-un" x="90" y="110" width="200" height="160" rx="12"/>
-    <rect id="coquille-deux" x="380" y="110" width="200" height="160" rx="12"/>
-    <rect id="sable-mouille" x="670" y="110" width="200" height="160" rx="12"/>
-    <rect id="algue" x="90" y="340" width="200" height="160" rx="12"/>
-    <rect id="galet" x="380" y="340" width="200" height="160" rx="12"/>
-    <rect id="ecume" x="670" y="340" width="200" height="160" rx="12"/>
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round">
+    <path id="ciel-de-mer" class="zone" data-region-svg="ciel-de-mer" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L960,0 L960,158 L933.3,163 L906.7,166.7 L880,168 L853.3,166.7 L826.7,163 L800,158 L773.3,153 L746.7,149.3 L720,148 L693.3,149.3 L666.7,153 L640,158 L613.3,163 L586.7,166.7 L560,168 L533.3,166.7 L506.7,163 L480,158 L453.3,153 L426.7,149.3 L400,148 L373.3,149.3 L346.7,153 L320,158 L293.3,163 L266.7,166.7 L240,168 L213.3,166.7 L186.7,163 L160,158 L133.3,153 L106.7,149.3 L80,148 L53.3,149.3 L26.7,153 L0,158 Z"/>
+    <path id="sable-mouille" class="zone" data-region-svg="sable-mouille" fill="#8E97A8" fill-rule="evenodd" d="M0,380 L26.7,387.7 L53.3,391.8 L80,390.4 L106.7,384.1 L133.3,375.9 L160,369.6 L186.7,368.2 L213.3,372.3 L240,380 L266.7,387.7 L293.3,391.8 L320,390.4 L346.7,384.1 L373.3,375.9 L400,369.6 L426.7,368.2 L453.3,372.3 L480,380 L506.7,387.7 L533.3,391.8 L560,390.4 L586.7,384.1 L613.3,375.9 L640,369.6 L666.7,368.2 L693.3,372.3 L720,380 L746.7,387.7 L773.3,391.8 L800,390.4 L826.7,384.1 L853.3,375.9 L880,369.6 L906.7,368.2 L933.3,372.3 L960,380 L960,600 L0,600 Z"/>
+    <path id="ecume" class="zone" data-region-svg="ecume" fill="#8E97A8" fill-rule="evenodd" d="M-5.9,388.1 L27.1,397.8 L62.1,404.1 L97.9,404.1 L132.9,397.8 L165.9,388.1 L196.9,379 L225.9,373.7 L254.1,373.7 L283.1,379 L314.1,388.1 L347.1,397.8 L382.1,404.1 L417.9,404.1 L452.9,397.8 L485.9,388.1 L516.9,379 L545.9,373.7 L574.1,373.7 L603.1,379 L634.1,388.1 L667.1,397.8 L702.1,404.1 L737.9,404.1 L772.9,397.8 L805.9,388.1 L836.9,379 L865.9,373.7 L894.1,373.7 L923.1,379 L954.1,388.1 L965.9,347.9 L932.9,338.2 L897.9,331.9 L862.1,331.9 L827.1,338.2 L794.1,347.9 L763.1,357 L734.1,362.3 L705.9,362.3 L676.9,357 L645.9,347.9 L612.9,338.2 L577.9,331.9 L542.1,331.9 L507.1,338.2 L474.1,347.9 L443.1,357 L414.1,362.3 L385.9,362.3 L356.9,357 L325.9,347.9 L292.9,338.2 L257.9,331.9 L222.1,331.9 L187.1,338.2 L154.1,347.9 L123.1,357 L94.1,362.3 L65.9,362.3 L36.9,357 L5.9,347.9 Z"/>
+    <path id="coquille-un" class="zone" data-region-svg="coquille-un" fill="#8E97A8" fill-rule="evenodd" d="M269,550 L236.2,539.7 L207.1,519 L187.1,484.6 L178,446.8 L192.6,429.6 L203.5,439.9 L218,419.3 L232.6,433 L250.8,412.4 L269,429.6 L287.2,412.4 L305.4,433 L320,419.3 L334.5,439.9 L345.4,429.6 L360,446.8 L350.9,484.6 L330.9,519 L301.8,539.7 Z"/>
+    <path id="coquille-deux" class="zone" data-region-svg="coquille-deux" fill="#8E97A8" fill-rule="evenodd" d="M492,542 L466.8,534.1 L444.4,518.2 L429,491.8 L422,462.8 L433.2,449.6 L441.6,457.5 L452.8,441.7 L464,452.2 L478,436.4 L492,449.6 L506,436.4 L520,452.2 L531.2,441.7 L542.4,457.5 L550.8,449.6 L562,462.8 L555,491.8 L539.6,518.2 L517.2,534.1 Z"/>
+    <path id="algue" class="zone" data-region-svg="algue" fill="#8E97A8" fill-rule="evenodd" d="M761,328 L773.2,339.5 L785.4,358.7 L795.2,366.4 L802.5,385.6 L809.8,397.1 L807.4,416.3 L812.2,435.5 L804.9,450.9 L802.5,473.9 L790.3,485.4 L778.1,500.8 L765.9,508.5 L765.9,520 L756.1,520 L756.1,508.5 L743.9,500.8 L731.7,485.4 L719.5,473.9 L717.1,450.9 L709.8,435.5 L714.6,416.3 L712.2,397.1 L719.5,385.6 L726.8,366.4 L736.6,358.7 L748.8,339.5 Z"/>
+    <path id="galet" class="zone" data-region-svg="galet" fill="#8E97A8" fill-rule="evenodd" d="M887.8,528.4 L877.7,532.4 L866.2,533.5 L855.2,533 L845.3,532.5 L835.4,532.8 L824.4,533.1 L812.8,531.7 L803,527.6 L797,521 L795.3,513.3 L796.1,506.1 L796.8,499.5 L796.3,493 L795.9,485.7 L797.9,478.1 L804.2,471.6 L814.3,467.6 L825.8,466.5 L836.8,467 L846.7,467.5 L856.6,467.2 L867.6,466.9 L879.2,468.3 L889,472.4 L895,479 L896.7,486.7 L895.9,493.9 L895.2,500.5 L895.7,507 L896.1,514.3 L894.1,521.9 Z"/>
+    <path id="etoile-de-mer" class="zone" data-region-svg="etoile-de-mer" fill="#8E97A8" fill-rule="evenodd" d="M620,446 L634.1,480.6 L671.4,483.3 L642.8,507.4 L651.7,543.7 L620,524 L588.3,543.7 L597.2,507.4 L568.6,483.3 L605.9,480.6 Z"/>
+    <path id="bois-flotte" class="zone" data-region-svg="bois-flotte" fill="#8E97A8" fill-rule="evenodd" d="M61.1,513 L219.6,499 L317.2,520.7 L322.8,495.3 L220.4,473 L58.9,487 Z"/>
   </g>
-  <g id="calque-trait">
-    <path id="cadre" d="M20 20 H940 V580 H20 Z" fill="none" stroke="#2b2b2b" stroke-width="4"/>
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path class="trait" d="M0,380 L960,366"/>
   </g>
 </svg>

@@ -1,0 +1,232 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Le jumeau du tri n° 03, un cran plus haut : ici les deux sons s’écrivent avec les MÊMES deux lettres dans l’autre ordre, `ou` et `oi`. Cinq consignes, dix éléments, tous disjoints.",
+  "id": "marais-jumeau-grenouilles-tri-02",
+  "version": 1,
+  "titre": "Les feuilles du trou et du noir",
+  "competences": [
+    "gph.digramme.ou",
+    "gph.digramme.oi",
+    "comp.consigne.multiple"
+  ],
+  "difficulte": 4,
+  "jeu": {
+    "moteur": "tri",
+    "habillage": "marais.grenouilles",
+    "noeud": "marais-jumeau-11",
+    "etoiles": {
+      "sansAide": true,
+      "sansErreur": true
+    },
+    "aideGobi": [
+      "relire-consigne",
+      "souffle-syllabe",
+      "surligne-graphene",
+      "montre-cible"
+    ],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Range les mots où tu entends le son de trou.",
+          "forme": "imperative",
+          "audio": null,
+          "aRanger": [
+            "mot-loup",
+            "mot-jour"
+          ],
+          "motsCles": [
+            "range",
+            "mot",
+            "son",
+            "trou"
+          ]
+        },
+        {
+          "id": "c2",
+          "texte": "Range aussi les mots où tu entends le son de trou.",
+          "forme": "imperative",
+          "audio": null,
+          "aRanger": [
+            "mot-boule",
+            "mot-four"
+          ],
+          "motsCles": [
+            "range",
+            "mot",
+            "son",
+            "trou"
+          ]
+        },
+        {
+          "id": "c3",
+          "texte": "Range les mots où tu entends le son de noir.",
+          "forme": "imperative",
+          "audio": null,
+          "aRanger": [
+            "mot-roi",
+            "mot-soir"
+          ],
+          "motsCles": [
+            "range",
+            "mot",
+            "son",
+            "noir"
+          ]
+        },
+        {
+          "id": "c4",
+          "texte": "Range aussi les mots où tu entends le son de noir.",
+          "forme": "imperative",
+          "audio": null,
+          "aRanger": [
+            "mot-noix",
+            "mot-toit"
+          ],
+          "motsCles": [
+            "range",
+            "mot",
+            "son",
+            "noir"
+          ]
+        },
+        {
+          "id": "c5",
+          "texte": "Range les derniers mots.",
+          "forme": "imperative",
+          "audio": null,
+          "aRanger": [
+            "mot-cour",
+            "mot-poire"
+          ],
+          "motsCles": [
+            "range",
+            "range",
+            "dernier",
+            "mot"
+          ]
+        }
+      ],
+      "receptacles": [
+        {
+          "id": "feuille-gauche",
+          "libelle": "la feuille de gauche",
+          "critere": "le son de trou",
+          "zone": [
+            [
+              60,
+              300
+            ],
+            [
+              420,
+              300
+            ],
+            [
+              420,
+              560
+            ],
+            [
+              60,
+              560
+            ]
+          ]
+        },
+        {
+          "id": "feuille-droite",
+          "libelle": "la feuille de droite",
+          "critere": "le son de noir",
+          "zone": [
+            [
+              540,
+              300
+            ],
+            [
+              900,
+              300
+            ],
+            [
+              900,
+              560
+            ],
+            [
+              540,
+              560
+            ]
+          ]
+        }
+      ],
+      "elements": [
+        {
+          "id": "mot-loup",
+          "libelle": "loup",
+          "asset": null,
+          "receptacleAttendu": "feuille-gauche",
+          "confusionAvec": "roi"
+        },
+        {
+          "id": "mot-jour",
+          "libelle": "jour",
+          "asset": null,
+          "receptacleAttendu": "feuille-gauche",
+          "confusionAvec": null
+        },
+        {
+          "id": "mot-boule",
+          "libelle": "boule",
+          "asset": null,
+          "receptacleAttendu": "feuille-gauche",
+          "confusionAvec": "poire"
+        },
+        {
+          "id": "mot-four",
+          "libelle": "four",
+          "asset": null,
+          "receptacleAttendu": "feuille-gauche",
+          "confusionAvec": "soir"
+        },
+        {
+          "id": "mot-cour",
+          "libelle": "cour",
+          "asset": null,
+          "receptacleAttendu": "feuille-gauche",
+          "confusionAvec": null
+        },
+        {
+          "id": "mot-roi",
+          "libelle": "roi",
+          "asset": null,
+          "receptacleAttendu": "feuille-droite",
+          "confusionAvec": "roue"
+        },
+        {
+          "id": "mot-soir",
+          "libelle": "soir",
+          "asset": null,
+          "receptacleAttendu": "feuille-droite",
+          "confusionAvec": "sous"
+        },
+        {
+          "id": "mot-noix",
+          "libelle": "noix",
+          "asset": null,
+          "receptacleAttendu": "feuille-droite",
+          "confusionAvec": "nous"
+        },
+        {
+          "id": "mot-toit",
+          "libelle": "toit",
+          "asset": null,
+          "receptacleAttendu": "feuille-droite",
+          "confusionAvec": "tour"
+        },
+        {
+          "id": "mot-poire",
+          "libelle": "poire",
+          "asset": null,
+          "receptacleAttendu": "feuille-droite",
+          "confusionAvec": "poule"
+        }
+      ],
+      "competence": "gph.digramme.oi"
+    }
+  }
+}

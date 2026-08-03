@@ -1,0 +1,10 @@
+{
+  "id": "cite-des-histoires-07",
+  "region": "cite-des-histoires",
+  "ordre": 7,
+  "exercice": "cite-des-histoires-ponts-chemin-01",
+  "prerequis": [
+    "cite-des-histoires-06"
+  ],
+  "temps": "retournement"
+}

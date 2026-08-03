@@ -1,0 +1,90 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Lot M1, nœud clairiere-12, dernier nœud de la région. Il rejoue `clairiere.paniers` du nœud 3 : neuf nœuds d'écart, R13 tenue. LA RÈGLE QUI TIENT LE CONTENU : aucun des douze mots ne porte à la fois un `a` et un `i`. C'est la transposition, sur l'axe des voyelles, de la règle que `miroir-gauche-droite.json` applique aux lettres miroir — un mot qui porterait les deux irait dans les deux paniers, et l'enfant qui se tromperait aurait eu raison. `tapis` est écarté pour cette seule raison, alors qu'il est au lexique et facile à lire. Trois faits mesurés : `acquis[element]` n'est jamais remis à zéro (quatre lots disjoints de trois éléments), `element-hors-consigne` ne compte pas d'erreur (ranger en avance ne coûte rien), et `MoteurTri.tsx` rend les douze tuiles en permanence — le plafond retenu pour un enfant de 7 ans. c3 et c4 ne nomment plus le panier : c'est là que l'enfant décide seul, et c'est ce qui fait de ce nœud une maîtrise et non une répétition.",
+  "id": "clairiere-paniers-voyelles-01",
+  "version": 1,
+  "titre": "Les paniers du a et du i",
+  "competences": ["gph.voyelle.orale", "flu.mot.court", "comp.consigne.multiple"],
+  "difficulte": 3,
+  "jeu": {
+    "moteur": "tri",
+    "habillage": "clairiere.paniers",
+    "noeud": "clairiere-12",
+    "etoiles": { "sansAide": true, "sansErreur": true },
+    "aideGobi": ["relire-consigne", "souffle-syllabe", "surligne-graphene"],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Range les mots où tu lis un a dans le panier de gauche.",
+          "forme": "imperative",
+          "audio": null,
+          "aRanger": ["mot-chat", "mot-papa", "mot-lac"],
+          "motsCles": ["range", "mots", "panier", "gauche"]
+        },
+        {
+          "id": "c2",
+          "texte": "Range les mots où tu lis un i dans le panier de droite.",
+          "forme": "imperative",
+          "audio": null,
+          "aRanger": ["mot-lit", "mot-riz", "mot-midi"],
+          "motsCles": ["range", "mots", "panier", "droite"]
+        },
+        {
+          "id": "c3",
+          "texte": "Range ces mots dans le bon panier.",
+          "forme": "imperative",
+          "audio": null,
+          "aRanger": ["mot-sac", "mot-ville", "mot-pic"],
+          "motsCles": ["range", "mots", "bon", "panier"]
+        },
+        {
+          "id": "c4",
+          "texte": "Range les derniers mots dans le bon panier.",
+          "forme": "imperative",
+          "audio": null,
+          "aRanger": ["mot-rat", "mot-banane", "mot-fil"],
+          "motsCles": ["range", "derniers", "bon", "panier"]
+        }
+      ],
+      "receptacles": [
+        {
+          "id": "panier-du-a",
+          "libelle": "le panier de gauche",
+          "critere": "les mots où tu lis un a",
+          "zone": [
+            [60, 300],
+            [420, 300],
+            [420, 560],
+            [60, 560]
+          ]
+        },
+        {
+          "id": "panier-du-i",
+          "libelle": "le panier de droite",
+          "critere": "les mots où tu lis un i",
+          "zone": [
+            [540, 300],
+            [900, 300],
+            [900, 560],
+            [540, 560]
+          ]
+        }
+      ],
+      "elements": [
+        { "id": "mot-chat", "libelle": "chat", "asset": null, "receptacleAttendu": "panier-du-a", "confusionAvec": "chien" },
+        { "id": "mot-papa", "libelle": "papa", "asset": null, "receptacleAttendu": "panier-du-a", "confusionAvec": "pipe" },
+        { "id": "mot-lac", "libelle": "lac", "asset": null, "receptacleAttendu": "panier-du-a", "confusionAvec": "lit" },
+        { "id": "mot-sac", "libelle": "sac", "asset": null, "receptacleAttendu": "panier-du-a", "confusionAvec": "sel" },
+        { "id": "mot-rat", "libelle": "rat", "asset": null, "receptacleAttendu": "panier-du-a", "confusionAvec": "riz" },
+        { "id": "mot-banane", "libelle": "banane", "asset": null, "receptacleAttendu": "panier-du-a", "confusionAvec": null },
+        { "id": "mot-lit", "libelle": "lit", "asset": null, "receptacleAttendu": "panier-du-i", "confusionAvec": "lac" },
+        { "id": "mot-riz", "libelle": "riz", "asset": null, "receptacleAttendu": "panier-du-i", "confusionAvec": "rat" },
+        { "id": "mot-midi", "libelle": "midi", "asset": null, "receptacleAttendu": "panier-du-i", "confusionAvec": null },
+        { "id": "mot-ville", "libelle": "ville", "asset": null, "receptacleAttendu": "panier-du-i", "confusionAvec": null },
+        { "id": "mot-pic", "libelle": "pic", "asset": null, "receptacleAttendu": "panier-du-i", "confusionAvec": "papa" },
+        { "id": "mot-fil", "libelle": "fil", "asset": null, "receptacleAttendu": "panier-du-i", "confusionAvec": null }
+      ],
+      "competence": "gph.voyelle.orale"
+    }
+  }
+}

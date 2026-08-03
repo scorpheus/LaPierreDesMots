@@ -1,0 +1,106 @@
+{
+  "id": "foret.pas-japonais",
+  "moteurs": [
+    "chemin"
+  ],
+  "libelle": "Les pas japonais",
+  "region": "foret-muette",
+  "scene": {
+    "fichier": "habillages/foret-muette/pas-japonais.svg",
+    "viewBox": "0 0 960 600",
+    "calques": [
+      {
+        "id": "calque-fond",
+        "role": "fond",
+        "regions": []
+      },
+      {
+        "id": "calque-zones",
+        "role": "coloriable",
+        "regions": [
+          {
+            "id": "pierre-un",
+            "libelle": "la première pierre",
+            "centroide": [
+              190.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "pierre-deux",
+            "libelle": "la deuxième pierre",
+            "centroide": [
+              480.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "pierre-trois",
+            "libelle": "la troisième pierre",
+            "centroide": [
+              770.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "ruisseau",
+            "libelle": "le ruisseau",
+            "centroide": [
+              190.0,
+              420.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "fougere",
+            "libelle": "la fougère",
+            "centroide": [
+              480.0,
+              420.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "tronc-couche",
+            "libelle": "le tronc couché",
+            "centroide": [
+              770.0,
+              420.0
+            ],
+            "surface": 32000.0
+          }
+        ]
+      },
+      {
+        "id": "calque-trait",
+        "role": "trait",
+        "regions": []
+      }
+    ]
+  },
+  "palette": {
+    "jetons": {},
+    "nuancier": [
+      "vert",
+      "brun",
+      "gris",
+      "noir",
+      "blanc",
+      "jaune"
+    ]
+  },
+  "timings": {
+    "appuiMs": 60,
+    "relachementMs": 110,
+    "refusMs": 170,
+    "recolorationMs": 750,
+    "interEtoilesMs": 170
+  },
+  "sons": {
+    "ambiance": null,
+    "effets": {}
+  }
+}

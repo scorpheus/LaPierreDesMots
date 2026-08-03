@@ -1,0 +1,100 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Lot M1, nœud galeries-14, dernier nœud de la région, temps `maitrise`. Il rejoue `galeries.cristal` du nœud 3 : onze nœuds d'écart, R13 tenue. LA QUESTION N'EST PLUS LA MÊME QU'AU NŒUD 3 — là l'enfant lisait une lettre miroir sous exposition bornée, ici il relit LE MOT ENTIER parmi trois mots qui ne diffèrent que d'une consonne. C'est la forme la plus exigeante du déchiffrage sous contrainte de temps, et c'est pour cela qu'elle clôt la région. LES SIX MOTS N'OPPOSENT QUE DES CONSONNES SANS RISQUE DE MIROIR : f/v, s/z, j/t/c. Aucun des douze mots ne porte de `b`, de `d`, de `p` ni de `q` — vérifié lettre à lettre. Même motif qu'à `grottes-fv-01` : `p`/`b` et `t`/`d` sont des couples sourde-sonore ET des couples miroir, et les mêler mettrait dans un seul compte du tableau de bord une confusion de son et une confusion de forme (D23). QUATRE FAITS MESURÉS. (1) `expositionMs` descend à 1400 ms, contre 1800 en Clairière et 1600 au nœud 11 de la Clairière : la progression est dans les données, jamais dans le code, et cette valeur se recalibre sur l'enfant (D13). (2) Les six réponses sont six options distinctes — `acquis` n'est jamais remis à zéro. (3) Aucune consigne n'offre en leurre une option déjà gagnée : `mer`, `verre`, `lac`, `riz`, `tour` et `cour` ne sont la réponse de personne, et leur `bonne` vaut `false` — c'est le seul fichier du lot où ce drapeau porte une information, les six autres options le mettant à `true`. (4) Trois options par consigne, donc `qcm-3` de bout en bout : p_devinette 0,33, jamais le 0,50 d'un vrai/faux déguisé.",
+  "id": "galeries-cristal-fv-01",
+  "version": 1,
+  "titre": "Les cristaux qui se ressemblent",
+  "competences": ["gph.confusion.sourde-sonore", "syl.cvc"],
+  "difficulte": 4,
+  "jeu": {
+    "moteur": "eclair",
+    "habillage": "galeries.cristal",
+    "noeud": "galeries-14",
+    "etoiles": { "sansAide": true, "sansErreur": true },
+    "aideGobi": ["relire-consigne", "souffle-syllabe", "surligne-graphene"],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "mot": "fer",
+          "texte": "Touche le mot que tu as lu.",
+          "forme": "imperative",
+          "audio": null,
+          "expositionMs": 1400,
+          "options": ["opt-fer", "opt-mer", "opt-ver"],
+          "reponse": "opt-fer",
+          "motsCles": ["touche", "mot", "lu"]
+        },
+        {
+          "id": "c2",
+          "mot": "ver",
+          "texte": "Touche le mot que tu as lu.",
+          "forme": "imperative",
+          "audio": null,
+          "expositionMs": 1400,
+          "options": ["opt-ver", "opt-mer", "opt-verre"],
+          "reponse": "opt-ver",
+          "motsCles": ["touche", "mot", "lu"]
+        },
+        {
+          "id": "c3",
+          "mot": "sac",
+          "texte": "Touche le mot que tu as lu.",
+          "forme": "imperative",
+          "audio": null,
+          "expositionMs": 1400,
+          "options": ["opt-sac", "opt-lac", "opt-zoo"],
+          "reponse": "opt-sac",
+          "motsCles": ["touche", "mot", "lu"]
+        },
+        {
+          "id": "c4",
+          "mot": "zoo",
+          "texte": "Touche le mot que tu as lu.",
+          "forme": "imperative",
+          "audio": null,
+          "expositionMs": 1400,
+          "options": ["opt-zoo", "opt-lac", "opt-riz"],
+          "reponse": "opt-zoo",
+          "motsCles": ["touche", "mot", "lu"]
+        },
+        {
+          "id": "c5",
+          "mot": "four",
+          "texte": "Touche le mot que tu as lu.",
+          "forme": "imperative",
+          "audio": null,
+          "expositionMs": 1400,
+          "options": ["opt-four", "opt-tour", "opt-jour"],
+          "reponse": "opt-four",
+          "motsCles": ["touche", "mot", "lu"]
+        },
+        {
+          "id": "c6",
+          "mot": "jour",
+          "texte": "Touche le mot que tu as lu.",
+          "forme": "imperative",
+          "audio": null,
+          "expositionMs": 1400,
+          "options": ["opt-jour", "opt-tour", "opt-cour"],
+          "reponse": "opt-jour",
+          "motsCles": ["touche", "mot", "lu"]
+        }
+      ],
+      "options": [
+        { "id": "opt-fer", "libelle": "fer", "bonne": true, "confusionAvec": "ver" },
+        { "id": "opt-ver", "libelle": "ver", "bonne": true, "confusionAvec": "fer" },
+        { "id": "opt-sac", "libelle": "sac", "bonne": true, "confusionAvec": "zoo" },
+        { "id": "opt-zoo", "libelle": "zoo", "bonne": true, "confusionAvec": "sac" },
+        { "id": "opt-four", "libelle": "four", "bonne": true, "confusionAvec": "jour" },
+        { "id": "opt-jour", "libelle": "jour", "bonne": true, "confusionAvec": "four" },
+        { "id": "opt-mer", "libelle": "mer", "bonne": false, "confusionAvec": null },
+        { "id": "opt-verre", "libelle": "verre", "bonne": false, "confusionAvec": null },
+        { "id": "opt-lac", "libelle": "lac", "bonne": false, "confusionAvec": null },
+        { "id": "opt-riz", "libelle": "riz", "bonne": false, "confusionAvec": null },
+        { "id": "opt-tour", "libelle": "tour", "bonne": false, "confusionAvec": null },
+        { "id": "opt-cour", "libelle": "cour", "bonne": false, "confusionAvec": null }
+      ],
+      "competence": "gph.confusion.sourde-sonore"
+    }
+  }
+}

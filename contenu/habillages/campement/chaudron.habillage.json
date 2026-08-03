@@ -19,58 +19,130 @@
         "role": "coloriable",
         "regions": [
           {
-            "id": "chaudron-ventre",
-            "libelle": "le ventre du chaudron",
+            "id": "sol-battu",
+            "libelle": "le sol battu",
             "centroide": [
-              190.0,
-              190.0
+              481,
+              505
             ],
-            "surface": 32000.0
-          },
-          {
-            "id": "anse",
-            "libelle": "l’anse",
-            "centroide": [
-              480.0,
-              190.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "flamme",
-            "libelle": "la flamme",
-            "centroide": [
-              770.0,
-              190.0
-            ],
-            "surface": 32000.0
+            "surface": 93058
           },
           {
             "id": "trepied",
             "libelle": "le trépied",
             "centroide": [
-              190.0,
-              420.0
+              481,
+              92.25
             ],
-            "surface": 32000.0
+            "surface": 53884
+          },
+          {
+            "id": "buche-gauche",
+            "libelle": "la bûche de gauche",
+            "centroide": [
+              196.31,
+              474.63
+            ],
+            "surface": 5904
+          },
+          {
+            "id": "buche-droite",
+            "libelle": "la bûche de droite",
+            "centroide": [
+              773.06,
+              471.88
+            ],
+            "surface": 7972
+          },
+          {
+            "id": "flamme",
+            "libelle": "la flamme",
+            "centroide": [
+              480,
+              464.63
+            ],
+            "surface": 11932
+          },
+          {
+            "id": "braise",
+            "libelle": "la braise",
+            "centroide": [
+              540.13,
+              517.91
+            ],
+            "surface": 11518
+          },
+          {
+            "id": "chaudron-ventre",
+            "libelle": "le ventre du chaudron",
+            "centroide": [
+              480,
+              325
+            ],
+            "surface": 69312
+          },
+          {
+            "id": "anse",
+            "libelle": "l’anse",
+            "centroide": [
+              221.5,
+              287.97
+            ],
+            "surface": 4944
+          },
+          {
+            "id": "col-du-chaudron",
+            "libelle": "le col du chaudron",
+            "centroide": [
+              271.06,
+              216
+            ],
+            "surface": 25276
+          },
+          {
+            "id": "mousse",
+            "libelle": "la mousse de couleurs",
+            "centroide": [
+              508.25,
+              179.91
+            ],
+            "surface": 16208
           },
           {
             "id": "bulle",
-            "libelle": "la bulle",
+            "libelle": "la grosse bulle",
             "centroide": [
-              480.0,
-              420.0
+              446.69,
+              108
             ],
-            "surface": 32000.0
+            "surface": 8148
           },
           {
-            "id": "sol-battu",
-            "libelle": "le sol battu",
+            "id": "bulle-petite",
+            "libelle": "la petite bulle",
             "centroide": [
-              770.0,
-              420.0
+              590.09,
+              123
             ],
-            "surface": 32000.0
+            "surface": 3112
+          },
+          {
+            "id": "louche",
+            "libelle": "la louche",
+            "centroide": [
+              830.19,
+              168.38
+            ],
+            "surface": 15418
+          },
+          {
+            "id": "pot-de-couleur",
+            "libelle": "le pot de couleur",
+            "centroide": [
+              99,
+              461.25
+            ],
+            "surface": 9398
           }
         ]
       },

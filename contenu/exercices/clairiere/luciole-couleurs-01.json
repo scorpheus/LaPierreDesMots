@@ -1,9 +1,9 @@
 {
-  "$commentaire": "PLACEHOLDER — À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Même motif que `paniers-couleurs-01.json` : le § 10.4 du contrat gelé fait de R12 le chiffre de sortie de L2-E, son § 3.5 ne confie les exercices des onze moteurs à aucun lot. Ce troisième moteur est celui qui rend `lex.couleur` conforme à R12. `expositionMs` est volontairement haut (1800 ms) : l'enfant déchiffre encore (D14), et le mot éclair n'a d'intérêt que s'il a le temps d'être LU. C'est un paramètre de données, à recalibrer sur l'enfant (D13), jamais une constante de code.",
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Lot M1 — réécriture du PLACEHOLDER posé à l'intégration v2 ; la marque tombe parce que le motif qui la justifiait est levé (le référentiel porte désormais `flu.mot.court`). Deux contraintes MESURÉES dans le moteur, pas supposées. (1) `partage/src/moteurs/eclair/validation.ts` refuse toute option déjà inscrite dans `acquis`, et `acquis` n'est JAMAIS remis à zéro entre deux consignes : les six réponses sont donc six options deux à deux distinctes, et aucune consigne n'offre en leurre une option déjà gagnée — `grise` et `noire` ne sont la réponse de personne, ce sont elles qui complètent les triplets de la fin. Sans cette précaution, `option-deja-choisie` rendrait un leurre inerte : pas une erreur comptée, mais un bouton mort sous le doigt. (2) `modeReponseEclair` dérive p_devinette du nombre d'options RÉELLEMENT offertes (D13) : trois par consigne, donc `qcm-3` de bout en bout, jamais un vrai/faux déguisé qui ferait monter la maîtrise estimée sur du hasard. `expositionMs` reste à 1800 ms — l'enfant déchiffre encore (D14) et le mot éclair n'a d'intérêt que s'il a le temps d'être LU ; c'est un paramètre de données à recalibrer sur l'enfant, jamais une constante de code. `flu.mot.court` s'ajoute à `lex.couleur` : ces six mots sont d'une ou deux syllabes et l'exposition bornée mesure exactement la fluence.",
   "id": "clairiere-luciole-couleurs-01",
-  "version": 1,
+  "version": 2,
   "titre": "Les lucioles de couleur",
-  "competences": ["lex.couleur"],
+  "competences": ["lex.couleur", "flu.mot.court"],
   "difficulte": 1,
   "jeu": {
     "moteur": "eclair",
@@ -20,7 +20,7 @@
           "forme": "imperative",
           "audio": null,
           "expositionMs": 1800,
-          "options": ["luciole-rouge", "luciole-bleue", "luciole-verte"],
+          "options": ["luciole-rouge", "luciole-grise", "luciole-bleue"],
           "reponse": "luciole-rouge",
           "motsCles": ["touche", "luciole", "couleur"]
         },
@@ -31,7 +31,7 @@
           "forme": "imperative",
           "audio": null,
           "expositionMs": 1800,
-          "options": ["luciole-bleue", "luciole-verte", "luciole-jaune"],
+          "options": ["luciole-bleue", "luciole-noire", "luciole-verte"],
           "reponse": "luciole-bleue",
           "motsCles": ["touche", "luciole", "couleur"]
         },
@@ -42,7 +42,7 @@
           "forme": "imperative",
           "audio": null,
           "expositionMs": 1800,
-          "options": ["luciole-verte", "luciole-jaune", "luciole-rouge"],
+          "options": ["luciole-verte", "luciole-grise", "luciole-jaune"],
           "reponse": "luciole-verte",
           "motsCles": ["touche", "luciole", "couleur"]
         },
@@ -53,36 +53,42 @@
           "forme": "imperative",
           "audio": null,
           "expositionMs": 1800,
-          "options": ["luciole-jaune", "luciole-rouge", "luciole-bleue"],
+          "options": ["luciole-jaune", "luciole-noire", "luciole-rose"],
           "reponse": "luciole-jaune",
+          "motsCles": ["touche", "luciole", "couleur"]
+        },
+        {
+          "id": "c5",
+          "mot": "rose",
+          "texte": "Touche la luciole de la couleur que tu as lue.",
+          "forme": "imperative",
+          "audio": null,
+          "expositionMs": 1800,
+          "options": ["luciole-rose", "luciole-grise", "luciole-brune"],
+          "reponse": "luciole-rose",
+          "motsCles": ["touche", "luciole", "couleur"]
+        },
+        {
+          "id": "c6",
+          "mot": "brun",
+          "texte": "Touche la luciole de la couleur que tu as lue.",
+          "forme": "imperative",
+          "audio": null,
+          "expositionMs": 1800,
+          "options": ["luciole-brune", "luciole-noire", "luciole-grise"],
+          "reponse": "luciole-brune",
           "motsCles": ["touche", "luciole", "couleur"]
         }
       ],
       "options": [
-        {
-          "id": "luciole-rouge",
-          "libelle": "la luciole rouge",
-          "bonne": true,
-          "confusionAvec": "rose"
-        },
-        {
-          "id": "luciole-bleue",
-          "libelle": "la luciole bleue",
-          "bonne": true,
-          "confusionAvec": "blé"
-        },
-        {
-          "id": "luciole-verte",
-          "libelle": "la luciole verte",
-          "bonne": true,
-          "confusionAvec": "ver"
-        },
-        {
-          "id": "luciole-jaune",
-          "libelle": "la luciole jaune",
-          "bonne": true,
-          "confusionAvec": "jeune"
-        }
+        { "id": "luciole-rouge", "libelle": "la luciole rouge", "bonne": true, "confusionAvec": "rose" },
+        { "id": "luciole-bleue", "libelle": "la luciole bleue", "bonne": true, "confusionAvec": "blé" },
+        { "id": "luciole-verte", "libelle": "la luciole verte", "bonne": true, "confusionAvec": "ver" },
+        { "id": "luciole-jaune", "libelle": "la luciole jaune", "bonne": true, "confusionAvec": "jeune" },
+        { "id": "luciole-rose", "libelle": "la luciole rose", "bonne": true, "confusionAvec": "rouge" },
+        { "id": "luciole-brune", "libelle": "la luciole brune", "bonne": true, "confusionAvec": "brume" },
+        { "id": "luciole-grise", "libelle": "la luciole grise", "bonne": false, "confusionAvec": null },
+        { "id": "luciole-noire", "libelle": "la luciole noire", "bonne": false, "confusionAvec": null }
       ],
       "competence": "lex.couleur"
     }

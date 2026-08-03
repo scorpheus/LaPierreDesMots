@@ -19,58 +19,85 @@
         "role": "coloriable",
         "regions": [
           {
-            "id": "poisson-rouge",
-            "libelle": "le poisson rouge",
+            "id": "ciel-au-dessus",
+            "libelle": "le ciel au-dessus",
             "centroide": [
-              190.0,
-              190.0
+              180,
+              63.5
             ],
-            "surface": 32000.0
-          },
-          {
-            "id": "poisson-plat",
-            "libelle": "le poisson plat",
-            "centroide": [
-              480.0,
-              190.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "roseau",
-            "libelle": "le roseau",
-            "centroide": [
-              770.0,
-              190.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "vase",
-            "libelle": "la vase",
-            "centroide": [
-              190.0,
-              420.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "nenuphar",
-            "libelle": "le nénuphar",
-            "centroide": [
-              480.0,
-              420.0
-            ],
-            "surface": 32000.0
+            "surface": 113280
           },
           {
             "id": "reflet",
             "libelle": "le reflet sur l’eau",
             "centroide": [
-              770.0,
-              420.0
+              480,
+              190
             ],
-            "surface": 32000.0
+            "surface": 44851.6
+          },
+          {
+            "id": "vase",
+            "libelle": "la vase",
+            "centroide": [
+              720,
+              545
+            ],
+            "surface": 96000
+          },
+          {
+            "id": "poisson-rouge",
+            "libelle": "le poisson rouge",
+            "centroide": [
+              292.5,
+              326
+            ],
+            "surface": 15136.4
+          },
+          {
+            "id": "poisson-plat",
+            "libelle": "le poisson plat",
+            "centroide": [
+              604,
+              376
+            ],
+            "surface": 6109.9
+          },
+          {
+            "id": "roseau",
+            "libelle": "le roseau",
+            "centroide": [
+              851,
+              471.1
+            ],
+            "surface": 18898.7
+          },
+          {
+            "id": "nenuphar",
+            "libelle": "le nénuphar",
+            "centroide": [
+              399.8,
+              495
+            ],
+            "surface": 11805.9
+          },
+          {
+            "id": "bulle",
+            "libelle": "la bulle",
+            "centroide": [
+              700,
+              220
+            ],
+            "surface": 2753.8
+          },
+          {
+            "id": "galet-du-fond",
+            "libelle": "le galet du fond",
+            "centroide": [
+              120,
+              540
+            ],
+            "surface": 4564.1
           }
         ]
       },

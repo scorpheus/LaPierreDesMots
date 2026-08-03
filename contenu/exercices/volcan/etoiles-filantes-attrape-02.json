@@ -1,0 +1,338 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Les deux intrus — lune, robe — ne portent AUCUN des trois sons demandés : sans eux, attraper tout serait juste. Six consignes, douze cibles, disjointes deux à deux. `phoque` est là exprès à côté de `coq` : deux graphies, un seul son final, et rien que la lecture pour les séparer.",
+  "id": "volcan-etoiles-filantes-attrape-02",
+  "version": 1,
+  "titre": "Les étoiles du chat et du coq",
+  "competences": [
+    "gph.rare.ch-qu",
+    "gph.rare.ph"
+  ],
+  "difficulte": 3,
+  "jeu": {
+    "moteur": "attrape",
+    "habillage": "volcan.etoiles-filantes",
+    "noeud": "volcan-09",
+    "etoiles": {
+      "sansAide": true,
+      "sansErreur": true
+    },
+    "aideGobi": [
+      "relire-consigne",
+      "souffle-syllabe",
+      "montre-cible"
+    ],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Attrape les mots où tu entends le son de chat.",
+          "forme": "imperative",
+          "audio": null,
+          "aAttraper": [
+            "etoile-cheval",
+            "etoile-cochon"
+          ],
+          "motsCles": [
+            "attrape",
+            "mot",
+            "son",
+            "chat"
+          ]
+        },
+        {
+          "id": "c2",
+          "texte": "Attrape aussi les mots où tu entends le son de chat.",
+          "forme": "imperative",
+          "audio": null,
+          "aAttraper": [
+            "etoile-bouche",
+            "etoile-vache"
+          ],
+          "motsCles": [
+            "attrape",
+            "mot",
+            "son",
+            "chat"
+          ]
+        },
+        {
+          "id": "c3",
+          "texte": "Attrape les mots où tu entends le son de coq.",
+          "forme": "imperative",
+          "audio": null,
+          "aAttraper": [
+            "etoile-quille",
+            "etoile-queue"
+          ],
+          "motsCles": [
+            "attrape",
+            "mot",
+            "son",
+            "coq"
+          ]
+        },
+        {
+          "id": "c4",
+          "texte": "Attrape aussi les mots où tu entends le son de coq.",
+          "forme": "imperative",
+          "audio": null,
+          "aAttraper": [
+            "etoile-musique",
+            "etoile-quatre"
+          ],
+          "motsCles": [
+            "attrape",
+            "mot",
+            "son",
+            "coq"
+          ]
+        },
+        {
+          "id": "c5",
+          "texte": "Attrape les mots où tu entends le son de photo.",
+          "forme": "imperative",
+          "audio": null,
+          "aAttraper": [
+            "etoile-phare",
+            "etoile-dauphin"
+          ],
+          "motsCles": [
+            "attrape",
+            "mot",
+            "son",
+            "photo"
+          ]
+        },
+        {
+          "id": "c6",
+          "texte": "Attrape aussi les mots où tu entends le son de photo.",
+          "forme": "imperative",
+          "audio": null,
+          "aAttraper": [
+            "etoile-phoque",
+            "etoile-elephant"
+          ],
+          "motsCles": [
+            "attrape",
+            "mot",
+            "son",
+            "photo"
+          ]
+        }
+      ],
+      "cibles": [
+        {
+          "id": "etoile-cheval",
+          "libelle": "cheval",
+          "bonne": true,
+          "asset": null,
+          "depart": [
+            120,
+            120
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "etoile-cochon",
+          "libelle": "cochon",
+          "bonne": true,
+          "asset": null,
+          "depart": [
+            320,
+            380
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "etoile-bouche",
+          "libelle": "bouche",
+          "bonne": true,
+          "asset": null,
+          "depart": [
+            520,
+            120
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": "boule"
+        },
+        {
+          "id": "etoile-vache",
+          "libelle": "vache",
+          "bonne": true,
+          "asset": null,
+          "depart": [
+            720,
+            380
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "etoile-quille",
+          "libelle": "quille",
+          "bonne": true,
+          "asset": null,
+          "depart": [
+            120,
+            380
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": "fille"
+        },
+        {
+          "id": "etoile-queue",
+          "libelle": "queue",
+          "bonne": true,
+          "asset": null,
+          "depart": [
+            720,
+            120
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "etoile-musique",
+          "libelle": "musique",
+          "bonne": true,
+          "asset": null,
+          "depart": [
+            320,
+            120
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "etoile-quatre",
+          "libelle": "quatre",
+          "bonne": true,
+          "asset": null,
+          "depart": [
+            520,
+            380
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "etoile-phare",
+          "libelle": "phare",
+          "bonne": true,
+          "asset": null,
+          "depart": [
+            920,
+            120
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": "fer"
+        },
+        {
+          "id": "etoile-dauphin",
+          "libelle": "dauphin",
+          "bonne": true,
+          "asset": null,
+          "depart": [
+            920,
+            380
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "etoile-phoque",
+          "libelle": "phoque",
+          "bonne": true,
+          "asset": null,
+          "depart": [
+            120,
+            620
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": "coq"
+        },
+        {
+          "id": "etoile-elephant",
+          "libelle": "éléphant",
+          "bonne": true,
+          "asset": null,
+          "depart": [
+            320,
+            620
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "etoile-lune",
+          "libelle": "lune",
+          "bonne": false,
+          "asset": null,
+          "depart": [
+            520,
+            620
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "etoile-robe",
+          "libelle": "robe",
+          "bonne": false,
+          "asset": null,
+          "depart": [
+            720,
+            620
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": null
+        }
+      ],
+      "competence": "gph.rare.ch-qu"
+    }
+  }
+}

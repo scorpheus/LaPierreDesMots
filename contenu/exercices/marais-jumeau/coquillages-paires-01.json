@@ -1,0 +1,161 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Six paires, douze cartes, DEUX cartes par paire exactement — le schéma ne sait pas compter et une paire orpheline rendrait l'exercice interminable. Les trois consignes portent sur des paires DISJOINTES (`acquis` indexé par `IdPaire`, jamais remis à zéro). Les six mots portent tous la nasale de `main`, avec ses trois graphies : `in` (lapin, matin, jardin, sapin), `ain` (main, pain). LIMITE CONNUE, la même que `echos-paires-01` : faute d’asset dessiné (`asset` vaut null, D2), la face « image » rend son libellé en clair — l’appariement reste une tâche de LECTURE, pas encore un memory à cartes retournées.",
+  "id": "marais-jumeau-coquillages-paires-01",
+  "version": 1,
+  "titre": "Les coquillages du son de main",
+  "competences": [
+    "gph.nasale.in"
+  ],
+  "difficulte": 3,
+  "jeu": {
+    "moteur": "paires",
+    "habillage": "marais.coquillages",
+    "noeud": "marais-jumeau-05",
+    "etoiles": {
+      "sansAide": true,
+      "sansErreur": true
+    },
+    "aideGobi": [
+      "relire-consigne",
+      "souffle-syllabe",
+      "surligne-graphene",
+      "montre-cible"
+    ],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Trouve le mot et son image.",
+          "forme": "imperative",
+          "audio": null,
+          "aApparier": [
+            "paire-lapin",
+            "paire-matin"
+          ],
+          "motsCles": [
+            "trouve",
+            "mot",
+            "image"
+          ]
+        },
+        {
+          "id": "c2",
+          "texte": "Trouve aussi le mot et son image.",
+          "forme": "imperative",
+          "audio": null,
+          "aApparier": [
+            "paire-jardin",
+            "paire-sapin"
+          ],
+          "motsCles": [
+            "trouve",
+            "mot",
+            "image"
+          ]
+        },
+        {
+          "id": "c3",
+          "texte": "Trouve les derniers mots et les images.",
+          "forme": "imperative",
+          "audio": null,
+          "aApparier": [
+            "paire-main",
+            "paire-pain"
+          ],
+          "motsCles": [
+            "trouve",
+            "mot",
+            "image"
+          ]
+        }
+      ],
+      "cartes": [
+        {
+          "id": "mot-lapin",
+          "libelle": "lapin",
+          "face": "mot",
+          "asset": null,
+          "paire": "paire-lapin"
+        },
+        {
+          "id": "image-lapin",
+          "libelle": "le lapin",
+          "face": "image",
+          "asset": null,
+          "paire": "paire-lapin"
+        },
+        {
+          "id": "mot-matin",
+          "libelle": "matin",
+          "face": "mot",
+          "asset": null,
+          "paire": "paire-matin"
+        },
+        {
+          "id": "image-matin",
+          "libelle": "le matin",
+          "face": "image",
+          "asset": null,
+          "paire": "paire-matin"
+        },
+        {
+          "id": "mot-jardin",
+          "libelle": "jardin",
+          "face": "mot",
+          "asset": null,
+          "paire": "paire-jardin"
+        },
+        {
+          "id": "image-jardin",
+          "libelle": "le jardin",
+          "face": "image",
+          "asset": null,
+          "paire": "paire-jardin"
+        },
+        {
+          "id": "mot-sapin",
+          "libelle": "sapin",
+          "face": "mot",
+          "asset": null,
+          "paire": "paire-sapin"
+        },
+        {
+          "id": "image-sapin",
+          "libelle": "le sapin",
+          "face": "image",
+          "asset": null,
+          "paire": "paire-sapin"
+        },
+        {
+          "id": "mot-main",
+          "libelle": "main",
+          "face": "mot",
+          "asset": null,
+          "paire": "paire-main"
+        },
+        {
+          "id": "image-main",
+          "libelle": "la main",
+          "face": "image",
+          "asset": null,
+          "paire": "paire-main"
+        },
+        {
+          "id": "mot-pain",
+          "libelle": "pain",
+          "face": "mot",
+          "asset": null,
+          "paire": "paire-pain"
+        },
+        {
+          "id": "image-pain",
+          "libelle": "le pain",
+          "face": "image",
+          "asset": null,
+          "paire": "paire-pain"
+        }
+      ],
+      "competence": "gph.nasale.in"
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "id": "volcan-07",
+  "region": "volcan",
+  "ordre": 7,
+  "exercice": "volcan-fresque-chrono-01",
+  "prerequis": [
+    "volcan-06"
+  ],
+  "temps": "retournement"
+}

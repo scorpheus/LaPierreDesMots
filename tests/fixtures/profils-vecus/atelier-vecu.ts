@@ -17,7 +17,9 @@
  *                          volcan / cite-des-histoires  : ouverte = 0
  *     progression_noeud  : 3 lignes — clairiere-01, galeries-01, galeries-02
  *     tentatives         : 6
- *     contenu livré      : 18 nœuds — clairiere 6, galeries 12
+ *     contenu livré      : 18 nœuds — clairiere 6, galeries 12 (le catalogue DE CE JOUR-LÀ ;
+ *                          les lots de contenu l'ont porté à 76 nœuds sur six régions, et
+ *                          aucun compte n'est plus écrit en dur dans ce module)
  *
  * Les deux régions se croient terminées à 100 % alors que 3 nœuds sur 18 ont été joués. Le
  * pourcentage a été calculé et FIGÉ EN BASE quand chaque région n'avait qu'un ou deux nœuds ;
@@ -563,11 +565,19 @@ export async function profilAMiParcours(): Promise<ProfilVecu> {
     await jouerNoeud(atelier, profil, noeud);
     atelier.horloge.avancer({ minutes: 4 });
   }
-  return { code: 'mi-parcours', libelle: 'à mi-parcours (10 nœuds sur 18)', atelier, profil };
+  const joues = noeudsDeLaRegion('clairiere').length + 4;
+  return {
+    code: 'mi-parcours',
+    libelle: `à mi-parcours (${String(joues)} nœuds sur ${String(referentielComplet().regions.reduce((total, region) => total + region.noeuds.length, 0))})`,
+    atelier,
+    profil
+  };
 }
 
 /**
- * **V2 — a tout fini.** Les 18 nœuds livrés, joués un par un, sur le catalogue COMPLET.
+ * **V2 — a tout fini.** Tous les nœuds des DEUX PREMIÈRES régions, joués un par un, sur le
+ * catalogue COMPLET. Elles en portaient 18 quand cette fixture a été écrite ; elle lit le
+ * catalogue et n'écrit plus aucun compte.
  * Aucune triche : c'est l'état qu'atteindra l'enfant s'il continue à ce rythme.
  */
 export async function profilQuiATOutFini(): Promise<ProfilVecu> {
@@ -579,7 +589,13 @@ export async function profilQuiATOutFini(): Promise<ProfilVecu> {
       atelier.horloge.avancer({ minutes: 4 });
     }
   }
-  return { code: 'tout-fini', libelle: 'a terminé les 18 nœuds livrés', atelier, profil };
+  const joues = noeudsDeLaRegion('clairiere').length + noeudsDeLaRegion('galeries').length;
+  return {
+    code: 'tout-fini',
+    libelle: `a terminé les ${String(joues)} nœuds des deux premières régions`,
+    atelier,
+    profil
+  };
 }
 
 /**
@@ -657,7 +673,7 @@ export async function etatDuJourDeEzekiel(): Promise<{
  * **V5 — état écrit par un catalogue plus petit.** LE cas qui vient de mordre.
  *
  * On joue les trois nœuds que le catalogue d'alors déclarait (1 Clairière + 2 Galeries),
- * puis on remonte l'application sur la même base avec le catalogue d'aujourd'hui (18 nœuds).
+ * puis on remonte l'application sur la même base avec le catalogue d'aujourd'hui.
  * Rien n'est écrit à la main : l'état de bascule est produit par les vraies routes.
  */
 export async function profilDUnCataloguePlusPetit(): Promise<ProfilVecu> {
@@ -665,7 +681,7 @@ export async function profilDUnCataloguePlusPetit(): Promise<ProfilVecu> {
   const grand = await changerDeCatalogue(petit);
   return {
     code: 'catalogue-agrandi',
-    libelle: 'état écrit par un catalogue de 3 nœuds, relu sur 18',
+    libelle: `état écrit par un catalogue de 3 nœuds, relu sur ${String(catalogueDuDepot().noeuds.length)}`,
     atelier: grand,
     profil
   };

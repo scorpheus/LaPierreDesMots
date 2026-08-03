@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" width="960" height="600" role="img" aria-label="Les ponts de livres">
+  <title>Les ponts de livres</title>
+  <desc>Deux tours crénelées de deux hauteurs ; entre elles, deux ponts en arc de deux portées, faits de livres. Deux livres posés en bas, une lanterne au milieu.</desc>
+  <!--
+    DÉCOR — lot M6, contrat du monde v4 § 2. Trait noir sur blanc, la COULEUR VIENT DU CODE
+    (annexe P § 2) : les régions sortent d'ici en grisaille #8E97A8, qui est leur état
+    par défaut et non un choix graphique. Géométrie 100 % polygonale (M, L, Z — aucun arc) :
+    surface et centroïde sont donc calculables exactement et opposables aux valeurs déclarées
+    par le .habillage.json, que scripts/verifier-regions-fermees.mjs --strict recalcule.
+
+    Chaque région est un ENFANT DIRECT de #calque-zones : SceneSvg.tsx sélectionne
+    "#calque-zones > [id]", et un tracé niché dans un sous-groupe échapperait au tap sans
+    qu'aucun message ne le dise.
+
+    ÉCRIT PAR scripts/dessiner-decors.mjs — ne pas retoucher à la main : la scène est décrite
+    dans scripts/decors/decors.mjs, et l'émetteur refuse d'écrire si la mesure est mauvaise.
+  -->
+  <g id="calque-fond">
+    <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
+  </g>
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round">
+    <path id="ciel-de-la-cite" class="zone" data-region-svg="ciel-de-la-cite" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L960,0 L960,148 L933.3,153 L906.7,156.7 L880,158 L853.3,156.7 L826.7,153 L800,148 L773.3,143 L746.7,139.3 L720,138 L693.3,139.3 L666.7,143 L640,148 L613.3,153 L586.7,156.7 L560,158 L533.3,156.7 L506.7,153 L480,148 L453.3,143 L426.7,139.3 L400,138 L373.3,139.3 L346.7,143 L320,148 L293.3,153 L266.7,156.7 L240,158 L213.3,156.7 L186.7,153 L160,148 L133.3,143 L106.7,139.3 L80,138 L53.3,139.3 L26.7,143 L0,148 Z"/>
+    <path id="place-du-bas" class="zone" data-region-svg="place-du-bas" fill="#8E97A8" fill-rule="evenodd" d="M0,500 L26.7,506.1 L53.3,507.9 L80,504 L106.7,497.3 L133.3,492.5 L160,493.1 L186.7,498.6 L213.3,505.1 L240,508 L266.7,505.1 L293.3,498.6 L320,493.1 L346.7,492.5 L373.3,497.3 L400,504 L426.7,507.9 L453.3,506.1 L480,500 L506.7,493.9 L533.3,492.1 L560,496 L586.7,502.7 L613.3,507.5 L640,506.9 L666.7,501.4 L693.3,494.9 L720,492 L746.7,494.9 L773.3,501.4 L800,506.9 L826.7,507.5 L853.3,502.7 L880,496 L906.7,492.1 L933.3,493.9 L960,500 L960,600 L0,600 Z"/>
+    <path id="tour-gauche" class="zone" data-region-svg="tour-gauche" fill="#8E97A8" fill-rule="evenodd" d="M169,118 L234.5,194.4 L220,194.4 L220,232.6 L234.5,232.6 L234.5,500 L103.5,500 L103.5,232.6 L118,232.6 L118,194.4 L103.5,194.4 Z"/>
+    <path id="tour-droite" class="zone" data-region-svg="tour-droite" fill="#8E97A8" fill-rule="evenodd" d="M786,148 L847.9,218.4 L834.2,218.4 L834.2,253.6 L847.9,253.6 L847.9,500 L724.1,500 L724.1,253.6 L737.8,253.6 L737.8,218.4 L724.1,218.4 Z"/>
+    <path id="pont-un" class="zone" data-region-svg="pont-un" fill="#8E97A8" fill-rule="evenodd" d="M248,304.2 L270.2,272.8 L314.6,250.4 L359,243.7 L403.4,250.4 L447.8,272.8 L470,304.2 L438.9,304.2 L416.7,279.5 L381.2,263.8 L336.8,263.8 L301.3,279.5 L279.1,304.2 Z"/>
+    <path id="pont-deux" class="zone" data-region-svg="pont-deux" fill="#8E97A8" fill-rule="evenodd" d="M428,411 L452.2,376.8 L500.6,352.4 L549,345.1 L597.4,352.4 L645.8,376.8 L670,411 L636.1,411 L611.9,384.1 L573.2,367 L524.8,367 L486.1,384.1 L461.9,411 Z"/>
+    <path id="livre-pose-un" class="zone" data-region-svg="livre-pose-un" fill="#8E97A8" fill-rule="evenodd" d="M326.5,442.7 L386.2,433.5 L391.8,433.5 L451.5,442.7 L451.5,509 L391.8,501.6 L386.2,501.6 L326.5,509 Z"/>
+    <path id="livre-pose-deux" class="zone" data-region-svg="livre-pose-deux" fill="#8E97A8" fill-rule="evenodd" d="M527.3,460.8 L578.6,452.8 L583.4,452.8 L634.7,460.8 L634.7,518.4 L583.4,512 L578.6,512 L527.3,518.4 Z"/>
+    <path id="lanterne-du-pont" class="zone" data-region-svg="lanterne-du-pont" fill="#8E97A8" fill-rule="evenodd" d="M591.1,178 L616.9,178 L609.5,192.6 L629.8,202.4 L637.1,219.5 L631.6,270.7 L640.8,282.9 L640.8,295.1 L567.2,295.1 L567.2,282.9 L576.4,270.7 L570.9,219.5 L578.2,202.4 L598.5,192.6 Z"/>
+  </g>
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path class="trait" d="M0,502 L960,494"/>
+  </g>
+</svg>

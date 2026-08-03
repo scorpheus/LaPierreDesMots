@@ -1,0 +1,10 @@
+{
+  "id": "marais-jumeau-08",
+  "region": "marais-jumeau",
+  "ordre": 8,
+  "exercice": "marais-jumeau-brume-colorie-01",
+  "prerequis": [
+    "marais-jumeau-07"
+  ],
+  "temps": "maitrise"
+}

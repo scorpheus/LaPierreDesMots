@@ -19,58 +19,85 @@
         "role": "coloriable",
         "regions": [
           {
-            "id": "panneau-un",
-            "libelle": "le premier panneau",
-            "centroide": [
-              190.0,
-              190.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "panneau-deux",
-            "libelle": "le deuxième panneau",
-            "centroide": [
-              480.0,
-              190.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "panneau-trois",
-            "libelle": "le troisième panneau",
-            "centroide": [
-              770.0,
-              190.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "bordure",
-            "libelle": "la bordure",
-            "centroide": [
-              190.0,
-              420.0
-            ],
-            "surface": 32000.0
-          },
-          {
             "id": "roche-noire",
             "libelle": "la roche noire",
             "centroide": [
-              480.0,
-              420.0
+              240,
+              79
             ],
-            "surface": 32000.0
+            "surface": 142080
           },
           {
             "id": "lueur",
             "libelle": "la lueur",
             "centroide": [
-              770.0,
-              420.0
+              512.4,
+              546.9
             ],
-            "surface": 32000.0
+            "surface": 32273.7
+          },
+          {
+            "id": "bordure",
+            "libelle": "la bordure",
+            "centroide": [
+              95.9,
+              205
+            ],
+            "surface": 85600
+          },
+          {
+            "id": "panneau-un",
+            "libelle": "le premier panneau",
+            "centroide": [
+              241,
+              341
+            ],
+            "surface": 44844
+          },
+          {
+            "id": "panneau-deux",
+            "libelle": "le deuxième panneau",
+            "centroide": [
+              491,
+              341
+            ],
+            "surface": 53724
+          },
+          {
+            "id": "panneau-trois",
+            "libelle": "le troisième panneau",
+            "centroide": [
+              733,
+              341
+            ],
+            "surface": 36764
+          },
+          {
+            "id": "socle-de-la-fresque",
+            "libelle": "le socle de la fresque",
+            "centroide": [
+              738.9,
+              515.8
+            ],
+            "surface": 45996
+          },
+          {
+            "id": "torche-de-la-fresque",
+            "libelle": "la torche de la fresque",
+            "centroide": [
+              48,
+              351
+            ],
+            "surface": 2525.9
+          },
+          {
+            "id": "eclat-de-roche",
+            "libelle": "l’éclat de roche",
+            "centroide": [
+              902,
+              337.4
+            ],
+            "surface": 3922.1
           }
         ]
       },

@@ -1,0 +1,230 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. LE nœud qui nomme la loi de la région, et il le fait sans un seul mot hors lexique : « où tu ENTENDS la dernière lettre » contre « où tu N'ENTENDS PAS la dernière lettre ». Les cinq mots de gauche finissent par une consonne prononcée (sac, bol, mur, bec, fil), les cinq de droite par une lettre muette (chat, lit, tapis, grand, noix). Éléments disjoints d'une consigne à l'autre.",
+  "id": "foret-muette-souche-tri-01",
+  "version": 1,
+  "titre": "Les deux trous de l'arbre",
+  "competences": [
+    "gph.finale.muette",
+    "comp.consigne.multiple"
+  ],
+  "difficulte": 3,
+  "jeu": {
+    "moteur": "tri",
+    "habillage": "foret.souche",
+    "noeud": "foret-muette-03",
+    "etoiles": {
+      "sansAide": true,
+      "sansErreur": true
+    },
+    "aideGobi": [
+      "relire-consigne",
+      "souffle-syllabe",
+      "surligne-graphene",
+      "montre-cible"
+    ],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Range les mots où tu entends la dernière lettre.",
+          "forme": "imperative",
+          "audio": null,
+          "aRanger": [
+            "mot-sac",
+            "mot-bol"
+          ],
+          "motsCles": [
+            "range",
+            "mot",
+            "entends",
+            "lettre"
+          ]
+        },
+        {
+          "id": "c2",
+          "texte": "Range aussi les mots où tu entends la dernière lettre.",
+          "forme": "imperative",
+          "audio": null,
+          "aRanger": [
+            "mot-mur",
+            "mot-bec"
+          ],
+          "motsCles": [
+            "range",
+            "mot",
+            "entends",
+            "lettre"
+          ]
+        },
+        {
+          "id": "c3",
+          "texte": "Range les mots où tu n'entends pas la dernière lettre.",
+          "forme": "imperative",
+          "audio": null,
+          "aRanger": [
+            "mot-chat",
+            "mot-lit"
+          ],
+          "motsCles": [
+            "range",
+            "mot",
+            "entends",
+            "lettre"
+          ]
+        },
+        {
+          "id": "c4",
+          "texte": "Range aussi les mots où tu n'entends pas la dernière lettre.",
+          "forme": "imperative",
+          "audio": null,
+          "aRanger": [
+            "mot-tapis",
+            "mot-grand"
+          ],
+          "motsCles": [
+            "range",
+            "mot",
+            "entends",
+            "lettre"
+          ]
+        },
+        {
+          "id": "c5",
+          "texte": "Range les derniers mots.",
+          "forme": "imperative",
+          "audio": null,
+          "aRanger": [
+            "mot-fil",
+            "mot-noix"
+          ],
+          "motsCles": [
+            "range",
+            "dernier",
+            "mot"
+          ]
+        }
+      ],
+      "receptacles": [
+        {
+          "id": "souche-gauche",
+          "libelle": "le trou de gauche",
+          "critere": "la dernière lettre se dit",
+          "zone": [
+            [
+              60,
+              300
+            ],
+            [
+              420,
+              300
+            ],
+            [
+              420,
+              560
+            ],
+            [
+              60,
+              560
+            ]
+          ]
+        },
+        {
+          "id": "souche-droite",
+          "libelle": "le trou de droite",
+          "critere": "la dernière lettre ne se dit pas",
+          "zone": [
+            [
+              540,
+              300
+            ],
+            [
+              900,
+              300
+            ],
+            [
+              900,
+              560
+            ],
+            [
+              540,
+              560
+            ]
+          ]
+        }
+      ],
+      "elements": [
+        {
+          "id": "mot-sac",
+          "libelle": "sac",
+          "asset": null,
+          "receptacleAttendu": "souche-gauche",
+          "confusionAvec": null
+        },
+        {
+          "id": "mot-bol",
+          "libelle": "bol",
+          "asset": null,
+          "receptacleAttendu": "souche-gauche",
+          "confusionAvec": null
+        },
+        {
+          "id": "mot-mur",
+          "libelle": "mur",
+          "asset": null,
+          "receptacleAttendu": "souche-gauche",
+          "confusionAvec": null
+        },
+        {
+          "id": "mot-bec",
+          "libelle": "bec",
+          "asset": null,
+          "receptacleAttendu": "souche-gauche",
+          "confusionAvec": null
+        },
+        {
+          "id": "mot-fil",
+          "libelle": "fil",
+          "asset": null,
+          "receptacleAttendu": "souche-gauche",
+          "confusionAvec": null
+        },
+        {
+          "id": "mot-chat",
+          "libelle": "chat",
+          "asset": null,
+          "receptacleAttendu": "souche-droite",
+          "confusionAvec": null
+        },
+        {
+          "id": "mot-lit",
+          "libelle": "lit",
+          "asset": null,
+          "receptacleAttendu": "souche-droite",
+          "confusionAvec": null
+        },
+        {
+          "id": "mot-tapis",
+          "libelle": "tapis",
+          "asset": null,
+          "receptacleAttendu": "souche-droite",
+          "confusionAvec": null
+        },
+        {
+          "id": "mot-grand",
+          "libelle": "grand",
+          "asset": null,
+          "receptacleAttendu": "souche-droite",
+          "confusionAvec": null
+        },
+        {
+          "id": "mot-noix",
+          "libelle": "noix",
+          "asset": null,
+          "receptacleAttendu": "souche-droite",
+          "confusionAvec": null
+        }
+      ],
+      "competence": "gph.finale.muette"
+    }
+  }
+}

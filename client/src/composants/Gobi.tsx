@@ -22,11 +22,39 @@
 // COMPATIBILITÉ : les trois propriétés de la v1 (`aide`, `niveau`, `surDemande`) sont
 // INCHANGÉES et restent obligatoires — `EcranNoeud` (L2-A) les passe telles quelles. Tout ce que
 // L2-F ajoute est optionnel et retombe sur le comportement v1 quand rien n'est fourni.
+//
+// ── CE QUE M5 CHANGE, ET POURQUOI C'ÉTAIT LE DÉFAUT CENTRAL ────────────────────────────────
+//
+// L'inventaire du contrat du monde v4 § 1.2 mesure le défaut et le nomme sans détour :
+// « La chaîne d'image a réussi et son résultat n'est pas branché. La canonique de Gobi est
+// bonne, ses stades et animations sont produits, et l'écran montre un rond framboise. »
+//
+// Ce fichier dessinait en effet un `<circle fill="var(--framboise)">` de 24 unités, deux ronds
+// pour les bras, deux ronds pour les yeux et des losanges bleus pour la crête. Le corps de la
+// canonique validée par le père (D36) est **crème** `#FFDDA8`, sa fourrure est dentelée, et le
+// **cœur de Pierre** — « la seule source lumineuse autorisée sur le personnage » — n'existait
+// pas du tout dans le composant. Ce n'était pas un dessin plus pauvre que l'asset : c'était un
+// autre personnage. Le Gobi que le père a validé n'avait jamais atteint l'écran.
+//
+// LE MOTIF DU DESSIN EN LIGNE EST CONSERVÉ, ET IL RESTE JUSTE : Gobi apparaît dans la bulle
+// d'aide de CHAQUE exercice ; un `fetch` par montage coûterait une requête là où le budget vise
+// une réponse sous 100 ms. Ce qui change, c'est la SOURCE de ce qui est dessiné. Le composant
+// ne redessine plus de mémoire : `scripts/gobi-dessin.mjs` EXTRAIT les groupes des quinze SVG
+// de `contenu/assets/gobi/` vers `gobi-dessin.gen.ts`, et c'est ce texte-là qui est monté.
+// `node scripts/gobi-dessin.mjs --verifier` recompare les deux et sort en 1 s'ils divergent :
+// « le dessin monté à l'écran est celui du fichier du stade » cesse d'être une promesse.
+//
+// Coût mesuré du module embarqué : 32 247 octets, **5 986 octets gzip** — 2,4 % d'un budget de
+// bundle initial fixé à 250 Ko gzip. C'est ce que la règle « le corps ne change jamais » fait
+// économiser : sans elle il aurait fallu embarquer 10 stades × 5 états = 50 dessins complets,
+// et non 1 corps + 10 parures + 5 gestes.
+import { useMemo } from 'react';
 import type { ReactElement } from 'react';
 import type {
   AideProposee, CheminAsset, CodeStadeGobi, EtatAnimationGobi, NiveauAide,
 } from '@pierre/partage';
 import { BoutonEcouter } from './BoutonEcouter.js';
+import { GOBI_CORPS, GOBI_GESTE, GOBI_PARURE, GOBI_VUE } from './gobi-dessin.gen.js';
 
 export interface ProprietesGobi {
   /** L'aide que le moteur propose, ou `null` quand il n'en propose aucune. */
@@ -51,127 +79,35 @@ export interface ProprietesGobi {
 const INVITE_PAR_DEFAUT = 'Si tu veux, je peux t’aider. Ça ne coûte rien.';
 
 /**
- * Le corps, par stade. **DIX dessins depuis N3** (D43), et la crête est tout ce qui change :
- * le reste est identique d'un stade à l'autre (D28, point 1).
+ * Le dessin monté, composé des groupes EXTRAITS des quinze SVG.
  *
- * Le corps est dessiné EN LIGNE parce que Gobi apparaît dans la bulle d'aide de chaque
- * exercice : un `fetch` par montage coûterait une requête là où le budget vise une réponse
- * sous 100 ms. C'est le seul motif de cette duplication, et elle a un prix — voir ci-dessous.
+ * L'ORDRE DES QUATRE GROUPES EST CELUI DES FICHIERS, et il porte l'empilement : le corps
+ * d'abord (ombre au sol, pieds, fourrure, ventre, cœur de Pierre), la parure du stade
+ * derrière/au-dessus de la tête, puis les bras, puis le visage — c'est le visage qui doit
+ * rester au-dessus de tout, sinon un bras levé le recouvre.
  *
- * MODIFIÉ PAR N3, HORS DE SON PÉRIMÈTRE DÉCLARÉ, ET C'EST SIGNALÉ. Le contrat de finition v3
- * § 5.7 fait passer `CodeStadeGobi` de 5 à 10 membres, mais son § 4.3 ne liste pas ce fichier
- * dans le lot. Or ce `Record` est exhaustif : à 5 clés pour 10 membres, **rien ne compile**,
- * et les vagues 2 et 3 seraient bloquées. Aucun des huit lots ne le possède — vérifié : le
- * contrat ne le cite nulle part —, donc il n'y a pas deux écrivains. Les dix crêtes sont
- * régénérées ensemble pour que le nombre de cristaux suive celui des SVG livrés
- * (`contenu/assets/gobi/stades/stade-{1..10}.svg`) : 1, 1, 1, 2, 3, 5, 6, 7, 8, 9. Les
- * conserver telles quelles aurait rendu la progression non monotone — `couronne` en aurait
- * porté plus que `equipe`, qui vient après.
- *
- * CE QUE CE FICHIER RESTE : une réduction. Elle double la donnée des SVG (convention C5) sans
- * qu'un test compare les deux, parce que l'un est un `path` de 64 unités et l'autre un dessin
- * de 200. Le seul lien vérifié est le NOMBRE de cristaux, ci-dessous.
+ * `dangerouslySetInnerHTML` est ici le contraire d'un raccourci : c'est ce qui garantit que le
+ * DOM porte **les octets du fichier**, sans traduction ni réinterprétation en JSX. Le contenu
+ * est une constante de compilation issue du dépôt, jamais une entrée d'utilisateur. C'est le
+ * même mécanisme que `SceneSvg`, `ScenePlace`, `EcranCarte` et `TableauOuverture` emploient
+ * déjà pour servir un habillage.
  */
-const CRETE_PAR_STADE: Readonly<Record<CodeStadeGobi, readonly string[]>> = {
-  oeuf: ['M32,8 L37,12.9 L32,17 L27,12.9 Z'],
-  fissure: ['M32,7 L37.5,12.5 L32,17 L26.5,12.5 Z', 'M32,6 L34.5,10 L32,14 L29.5,10 Z'],
-  boule: ['M32,2 L39,10.3 L32,17 L25,10.3 Z'],
-  'premier-cristal': [
-    'M24,9.4 L28.5,14.3 L24,18.4 L19.5,14.3 Z',
-    'M36,1.3 L43,10.1 L36,17.3 L29,10.1 Z'
-  ],
-  crete: [
-    'M20,10.2 L25,15.7 L20,20.2 L15,15.7 Z',
-    'M32,0 L39.5,9.3 L32,17 L24.5,9.3 Z',
-    'M44,10.2 L49,15.7 L44,20.2 L39,15.7 Z'
-  ],
-  couronne: [
-    'M13,18.3 L17,22.7 L13,26.3 L9,22.7 Z',
-    'M22,7.2 L27.5,13.8 L22,19.2 L16.5,13.8 Z',
-    'M32,-1 L39.5,8.9 L32,17 L24.5,8.9 Z',
-    'M42,7.2 L47.5,13.8 L42,19.2 L36.5,13.8 Z',
-    'M51,18.3 L55,22.7 L51,26.3 L47,22.7 Z'
-  ],
-  equipe: [
-    'M11,22.4 L14.5,26.3 L11,29.4 L7.5,26.3 Z',
-    'M20,9.2 L25,15.3 L20,20.2 L15,15.3 Z',
-    'M28,0.3 L35,9.7 L28,17.3 L21,9.7 Z',
-    'M37,1.5 L43.5,10.3 L37,17.5 L30.5,10.3 Z',
-    'M45,9.8 L50,15.9 L45,20.8 L40,15.9 Z',
-    'M53,22.4 L56.5,26.3 L53,29.4 L49.5,26.3 Z'
-  ],
-  besace: [
-    'M10,25.4 L13.2,28.7 L10,31.4 L6.8,28.7 Z',
-    'M17,12.3 L21.4,17.8 L17,22.3 L12.6,17.8 Z',
-    'M25,3 L31,11.3 L25,18 L19,11.3 Z',
-    'M32,-1 L39,8.9 L32,17 L25,8.9 Z',
-    'M39,3 L45,11.3 L39,18 L33,11.3 Z',
-    'M47,12.3 L51.4,17.8 L47,22.3 L42.6,17.8 Z',
-    'M54,25.4 L57.2,28.7 L54,31.4 L50.8,28.7 Z'
-  ],
-  veilleur: [
-    'M9,28.1 L12,31.4 L9,34.1 L6,31.4 Z',
-    'M15,15.1 L19,20.1 L15,24.1 L11,20.1 Z',
-    'M22,6.2 L27.2,13.3 L22,19.2 L16.8,13.3 Z',
-    'M29,-0.8 L36,9.1 L29,17.2 L22,9.1 Z',
-    'M36,1.3 L42.4,10.1 L36,17.3 L29.6,10.1 Z',
-    'M43,6.7 L48.2,13.8 L43,19.7 L37.8,13.8 Z',
-    'M49,15.1 L53,20.1 L49,24.1 L45,20.1 Z',
-    'M55,28.1 L58,31.4 L55,34.1 L52,31.4 Z'
-  ],
-  gardien: [
-    'M8,28.2 L11,32.1 L8,35.2 L5,32.1 Z',
-    'M13,16.3 L17,21.8 L13,26.3 L9,21.8 Z',
-    'M19,6.8 L24.4,14.5 L19,20.8 L13.6,14.5 Z',
-    'M26,-0.2 L32.6,9.7 L26,17.8 L19.4,9.7 Z',
-    'M33,-2 L40,8.4 L33,17 L26,8.4 Z',
-    'M40,0.4 L46.6,10.3 L40,18.4 L33.4,10.3 Z',
-    'M46,7.5 L51.4,15.2 L46,21.5 L40.6,15.2 Z',
-    'M52,17.7 L56,23.2 L52,27.7 L48,23.2 Z',
-    'M56,28.2 L59,32.1 L56,35.2 L53,32.1 Z'
-  ]
-};
-
-/** Le corps est le MÊME pour les dix stades : c'est la règle, pas une économie. */
-function CorpsDeGobi({ stade }: { readonly stade: CodeStadeGobi }): ReactElement {
-  return (
-    <g id="gobi-dessin">
-      <circle cx="32" cy="40" r="24" fill="var(--framboise)" stroke="var(--trait)" strokeWidth="4" />
-      <path
-        d="M32,32 C42,32 48,40 48,48 C48,56 40,62 32,62 C24,62 16,56 16,48 C16,40 22,32 32,32 Z"
-        fill="#FFC0D6"
-        stroke="var(--trait)"
-        strokeWidth="3"
-        strokeLinejoin="round"
-      />
-      {/* D24 : deux bras courts et robustes. Il peut montrer, tendre, applaudir. */}
-      <circle cx="9" cy="46" r="7" fill="var(--framboise)" stroke="var(--trait)" strokeWidth="3.5" />
-      <circle cx="55" cy="46" r="7" fill="var(--framboise)" stroke="var(--trait)" strokeWidth="3.5" />
-      <circle cx="24" cy="36" r="6" fill="var(--parchemin)" stroke="var(--trait)" strokeWidth="2.5" />
-      <circle cx="40" cy="36" r="6" fill="var(--parchemin)" stroke="var(--trait)" strokeWidth="2.5" />
-      <circle cx="25" cy="37" r="2.8" fill="var(--trait)" />
-      <circle cx="41" cy="37" r="2.8" fill="var(--trait)" />
-      <path
-        d="M25,48 C29,54 35,54 39,48 C36,58 28,58 25,48 Z"
-        fill="var(--trait)"
-        stroke="var(--trait)"
-        strokeWidth="2"
-        strokeLinejoin="round"
-      />
-      <g id="gobi-crete">
-        {CRETE_PAR_STADE[stade].map((d) => (
-          <path
-            key={d}
-            d={d}
-            fill="#2FA8E0"
-            stroke="var(--trait)"
-            strokeWidth="3.5"
-            strokeLinejoin="round"
-          />
-        ))}
-      </g>
-    </g>
+function DessinDeGobi({
+  stade,
+  animation
+}: {
+  readonly stade: CodeStadeGobi;
+  readonly animation: EtatAnimationGobi;
+}): ReactElement {
+  // MÉMORISÉ : `dangerouslySetInnerHTML` compare l'objet par référence. Un objet neuf à chaque
+  // rendu ferait ré-analyser 4 Ko de balisage à chaque frappe de l'enfant sur l'exercice.
+  const dessin = useMemo(
+    () => ({
+      __html: GOBI_CORPS + GOBI_PARURE[stade] + GOBI_GESTE[animation].bras + GOBI_GESTE[animation].visage
+    }),
+    [stade, animation]
   );
+  return <g id="gobi-dessin" dangerouslySetInnerHTML={dessin} />;
 }
 
 export function Gobi({
@@ -202,12 +138,14 @@ export function Gobi({
         padding: '0.75rem 1rem'
       }}
     >
-      {/* Gobi lui-même : une bouille framboise à structure cristalline, jamais un panneau
-          d'avertissement. Le corps ne change pas de stade en stade — seule la crête pousse. */}
+      {/* Gobi lui-même : le dessin de la canonique (D36) — corps crème duveteux à contour
+          dentelé, joues orangées, grands yeux ronds à deux reflets, et le cœur de Pierre
+          rayonnant au ventre. Le corps ne change pas de stade en stade — seule la parure
+          pousse, et seul le geste change d'un état d'animation à l'autre. */}
       <svg
         width={taille}
         height={taille}
-        viewBox="0 0 64 64"
+        viewBox={GOBI_VUE}
         role="img"
         aria-label={
           libelleForme === null ? `Gobi, stade ${stade}` : `Gobi, stade ${stade}, forme ${libelleForme}`
@@ -215,16 +153,20 @@ export function Gobi({
         focusable="false"
         style={{ overflow: 'visible' }}
       >
-        <CorpsDeGobi stade={stade} />
-        {/* LE CRISTAL, et lui seul, porte la déclinaison (D20). Il se superpose à la crête ;
-            aucun corps de rechange n'est jamais chargé. */}
+        <DessinDeGobi stade={stade} animation={animation} />
+        {/* LE CRISTAL, et lui seul, porte la déclinaison (D20). Il se pose au sommet de la
+            parure, comme le cristal que Gobi vient de gagner ; aucun corps de rechange n'est
+            jamais chargé. Le cadre fait 64 unités sur les 200 du dessin : c'est l'échelle à
+            laquelle un cristal de `contenu/assets/gobi/formes/` — dont le `viewBox` fait
+            précisément 64 — se lit comme un cristal de la crête et non comme un badge posé
+            dessus. */}
         {cristal === null ? null : (
           <image
             href={`/api/contenu/assets/${cristal}`}
-            x="20"
-            y="-6"
-            width="24"
-            height="24"
+            x="68"
+            y="-8"
+            width="64"
+            height="64"
             data-cristal={cristal}
             preserveAspectRatio="xMidYMid meet"
           />

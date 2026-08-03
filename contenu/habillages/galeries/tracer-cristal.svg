@@ -1,35 +1,33 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600" role="img" aria-label="Graver la lettre sur l’ardoise de cristal">
+  <title>Graver la lettre sur l’ardoise de cristal</title>
+  <desc>Deux pans de paroi, deux cristaux facettés qui les bordent, le sol de la galerie, et au centre l’ardoise de cristal, inchangée, sur laquelle la lettre se grave.</desc>
   <!--
-    Décor BOUCHON (D2, § 8 n° 10) : trait noir sur blanc, régions fermées par construction.
+    DÉCOR — lot M6, contrat du monde v4 § 2. Trait noir sur blanc, la COULEUR VIENT DU CODE
+    (annexe P § 2) : les régions sortent d'ici en grisaille #8E97A8, qui est leur état
+    par défaut et non un choix graphique. Géométrie 100 % polygonale (M, L, Z — aucun arc) :
+    surface et centroïde sont donc calculables exactement et opposables aux valeurs déclarées
+    par le .habillage.json, que scripts/verifier-regions-fermees.mjs --strict recalcule.
 
-    Les Galeries : une paroi, des cristaux, et l'ARDOISE au centre — la surface sur laquelle
-    l'enfant grave sa lettre. L'ardoise est la seule région déclarée coloriable : c'est elle
-    qui s'allume quand la lettre est gravée.
+    Chaque région est un ENFANT DIRECT de #calque-zones : SceneSvg.tsx sélectionne
+    "#calque-zones > [id]", et un tracé niché dans un sous-groupe échapperait au tap sans
+    qu'aucun message ne le dise.
 
-    LE DÉCOR NE S'AGITE PAS ICI, et c'est une règle, pas un choix d'auteur : « le décor
-    s'agite, le texte jamais » (CLAUDE.md). Une lettre à tracer est du déchiffrage ; le fond
-    reste calme, sans animation dans le champ du geste.
+    ÉCRIT PAR scripts/dessiner-decors.mjs — ne pas retoucher à la main : la scène est décrite
+    dans scripts/decors/decors.mjs, et l'émetteur refuse d'écrire si la mesure est mauvaise.
   -->
   <g id="calque-fond">
-    <path d="M 0 0 L 800 0 L 800 600 L 0 600 Z" fill="#FFFFFF" stroke="none"/>
+    <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L800,0 L800,600 L0,600 Z"/>
   </g>
-
-  <g id="calque-decor">
-    <!-- Cristaux de la paroi gauche. -->
-    <path d="M 60 200 L 100 130 L 140 200 L 100 290 Z" fill="none" stroke="#1B2440" stroke-width="3"/>
-    <path d="M 110 350 L 145 300 L 180 350 L 145 420 Z" fill="none" stroke="#1B2440" stroke-width="3"/>
-    <!-- Cristaux de la paroi droite. -->
-    <path d="M 660 220 L 700 150 L 740 220 L 700 310 Z" fill="none" stroke="#1B2440" stroke-width="3"/>
-    <path d="M 620 380 L 655 330 L 690 380 L 655 450 Z" fill="none" stroke="#1B2440" stroke-width="3"/>
-    <!-- Le sol de la galerie. -->
-    <path d="M 0 520 L 800 520 L 800 524 L 0 524 Z" fill="none" stroke="#1B2440" stroke-width="2"/>
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round">
+    <path id="paroi-gauche" class="zone" data-region-svg="paroi-gauche" fill="#8E97A8" fill-rule="evenodd" d="M0,60 L220,82 L210,500 L0,522 Z"/>
+    <path id="paroi-droite" class="zone" data-region-svg="paroi-droite" fill="#8E97A8" fill-rule="evenodd" d="M578,88 L800,56 L800,528 L592,494 Z"/>
+    <path id="cristal-gauche" class="zone" data-region-svg="cristal-gauche" fill="#8E97A8" fill-rule="evenodd" d="M110,150 L156,201 L145.9,306.5 L110,332 L74.1,306.5 L64,201 Z"/>
+    <path id="cristal-droit" class="zone" data-region-svg="cristal-droit" fill="#8E97A8" fill-rule="evenodd" d="M700,178 L738,223.4 L729.6,317.3 L700,340 L670.4,317.3 L662,223.4 Z"/>
+    <path id="sol-de-la-galerie" class="zone" data-region-svg="sol-de-la-galerie" fill="#8E97A8" fill-rule="evenodd" d="M0,520 L22.2,525.1 L44.4,527.9 L66.7,526.9 L88.9,522.7 L111.1,517.3 L133.3,513.1 L155.6,512.1 L177.8,514.9 L200,520 L222.2,525.1 L244.4,527.9 L266.7,526.9 L288.9,522.7 L311.1,517.3 L333.3,513.1 L355.6,512.1 L377.8,514.9 L400,520 L422.2,525.1 L444.4,527.9 L466.7,526.9 L488.9,522.7 L511.1,517.3 L533.3,513.1 L555.6,512.1 L577.8,514.9 L600,520 L622.2,525.1 L644.4,527.9 L666.7,526.9 L688.9,522.7 L711.1,517.3 L733.3,513.1 L755.6,512.1 L777.8,514.9 L800,520 L800,600 L0,600 Z"/>
+    <path id="ardoise" class="zone" data-region-svg="ardoise" fill="none" fill-rule="evenodd" d="M250,90 L550,90 L550,490 L250,490 Z"/>
   </g>
-
-  <g id="calque-zones">
-    <path id="ardoise" d="M 250 90 L 550 90 L 550 490 L 250 490 Z" fill="none" stroke="#1B2440" stroke-width="4"/>
-  </g>
-
-  <g id="calque-trait">
-    <path d="M 2 2 L 798 2 L 798 598 L 2 598 Z" fill="none" stroke="#1B2440" stroke-width="2"/>
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path class="trait" d="M250,130 L550,130"/>
+    <path class="trait" d="M0,522 L800,522"/>
   </g>
 </svg>

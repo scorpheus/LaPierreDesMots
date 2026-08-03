@@ -1,0 +1,181 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Chaque couple oppose `oi` à `ou` — roi/rouge, noir/nous, soir/souris, toit/tour, poire/poule. Ce sont les deux digrammes que la région appelle « jumeaux », et ils ne se distinguent QUE par la lecture : même longueur, même attaque, même silhouette. Cinq réponses distinctes, dix options distinctes, aucune option partagée entre deux consignes (`option-deja-choisie`).",
+  "id": "marais-jumeau-orage-eclair-02",
+  "version": 1,
+  "titre": "Les mots qui font le son de noir",
+  "competences": [
+    "gph.digramme.oi"
+  ],
+  "difficulte": 4,
+  "jeu": {
+    "moteur": "eclair",
+    "habillage": "marais.orage",
+    "noeud": "marais-jumeau-09",
+    "etoiles": {
+      "sansAide": true,
+      "sansErreur": true
+    },
+    "aideGobi": [
+      "relire-consigne",
+      "souffle-syllabe",
+      "surligne-graphene"
+    ],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Touche le mot que tu as lu.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "roi",
+          "expositionMs": 1800,
+          "options": [
+            "mot-roi",
+            "mot-rouge"
+          ],
+          "reponse": "mot-roi",
+          "motsCles": [
+            "touche",
+            "mot",
+            "lu"
+          ]
+        },
+        {
+          "id": "c2",
+          "texte": "Touche le mot que tu as lu.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "noir",
+          "expositionMs": 1800,
+          "options": [
+            "mot-noir",
+            "mot-nous"
+          ],
+          "reponse": "mot-noir",
+          "motsCles": [
+            "touche",
+            "mot",
+            "lu"
+          ]
+        },
+        {
+          "id": "c3",
+          "texte": "Touche le mot que tu as lu.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "soir",
+          "expositionMs": 1800,
+          "options": [
+            "mot-soir",
+            "mot-souris"
+          ],
+          "reponse": "mot-soir",
+          "motsCles": [
+            "touche",
+            "mot",
+            "lu"
+          ]
+        },
+        {
+          "id": "c4",
+          "texte": "Touche le mot que tu as lu.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "toit",
+          "expositionMs": 1800,
+          "options": [
+            "mot-toit",
+            "mot-tour"
+          ],
+          "reponse": "mot-toit",
+          "motsCles": [
+            "touche",
+            "mot",
+            "lu"
+          ]
+        },
+        {
+          "id": "c5",
+          "texte": "Touche le mot que tu as lu.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "poire",
+          "expositionMs": 1800,
+          "options": [
+            "mot-poire",
+            "mot-poule"
+          ],
+          "reponse": "mot-poire",
+          "motsCles": [
+            "touche",
+            "mot",
+            "lu"
+          ]
+        }
+      ],
+      "options": [
+        {
+          "id": "mot-roi",
+          "libelle": "roi",
+          "bonne": true,
+          "confusionAvec": "rouge"
+        },
+        {
+          "id": "mot-rouge",
+          "libelle": "rouge",
+          "bonne": false,
+          "confusionAvec": "roi"
+        },
+        {
+          "id": "mot-noir",
+          "libelle": "noir",
+          "bonne": true,
+          "confusionAvec": "nous"
+        },
+        {
+          "id": "mot-nous",
+          "libelle": "nous",
+          "bonne": false,
+          "confusionAvec": "noir"
+        },
+        {
+          "id": "mot-soir",
+          "libelle": "soir",
+          "bonne": true,
+          "confusionAvec": "souris"
+        },
+        {
+          "id": "mot-souris",
+          "libelle": "souris",
+          "bonne": false,
+          "confusionAvec": "soir"
+        },
+        {
+          "id": "mot-toit",
+          "libelle": "toit",
+          "bonne": true,
+          "confusionAvec": "tour"
+        },
+        {
+          "id": "mot-tour",
+          "libelle": "tour",
+          "bonne": false,
+          "confusionAvec": "toit"
+        },
+        {
+          "id": "mot-poire",
+          "libelle": "poire",
+          "bonne": true,
+          "confusionAvec": "poule"
+        },
+        {
+          "id": "mot-poule",
+          "libelle": "poule",
+          "bonne": false,
+          "confusionAvec": "poire"
+        }
+      ],
+      "competence": "gph.digramme.oi"
+    }
+  }
+}

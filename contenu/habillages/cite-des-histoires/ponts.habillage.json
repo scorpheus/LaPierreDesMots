@@ -1,0 +1,133 @@
+{
+  "id": "cite.ponts",
+  "moteurs": [
+    "chemin"
+  ],
+  "libelle": "Les ponts de livres",
+  "region": "cite-des-histoires",
+  "scene": {
+    "fichier": "habillages/cite-des-histoires/ponts.svg",
+    "viewBox": "0 0 960 600",
+    "calques": [
+      {
+        "id": "calque-fond",
+        "role": "fond",
+        "regions": []
+      },
+      {
+        "id": "calque-zones",
+        "role": "coloriable",
+        "regions": [
+          {
+            "id": "ciel-de-la-cite",
+            "libelle": "le ciel de la cité",
+            "centroide": [
+              240,
+              79
+            ],
+            "surface": 142080
+          },
+          {
+            "id": "place-du-bas",
+            "libelle": "la place du bas",
+            "centroide": [
+              720,
+              546
+            ],
+            "surface": 96000
+          },
+          {
+            "id": "tour-gauche",
+            "libelle": "la tour de gauche",
+            "centroide": [
+              169,
+              279.2
+            ],
+            "surface": 43930
+          },
+          {
+            "id": "tour-droite",
+            "libelle": "la tour de droite",
+            "centroide": [
+              786,
+              296.5
+            ],
+            "surface": 38255.4
+          },
+          {
+            "id": "pont-un",
+            "libelle": "le premier pont",
+            "centroide": [
+              279.2,
+              283.4
+            ],
+            "surface": 4901.7
+          },
+          {
+            "id": "pont-deux",
+            "libelle": "le deuxième pont",
+            "centroide": [
+              462,
+              388.3
+            ],
+            "surface": 5820.6
+          },
+          {
+            "id": "livre-pose-un",
+            "libelle": "le premier livre posé",
+            "centroide": [
+              387,
+              467.7
+            ],
+            "surface": 8405
+          },
+          {
+            "id": "livre-pose-deux",
+            "libelle": "le deuxième livre posé",
+            "centroide": [
+              579.3,
+              482.5
+            ],
+            "surface": 6276
+          },
+          {
+            "id": "lanterne-du-pont",
+            "libelle": "la lanterne du pont",
+            "centroide": [
+              604,
+              225.6
+            ],
+            "surface": 6374
+          }
+        ]
+      },
+      {
+        "id": "calque-trait",
+        "role": "trait",
+        "regions": []
+      }
+    ]
+  },
+  "palette": {
+    "jetons": {},
+    "nuancier": [
+      "orange",
+      "jaune",
+      "rose",
+      "violet",
+      "blanc",
+      "brun"
+    ]
+  },
+  "timings": {
+    "appuiMs": 60,
+    "relachementMs": 120,
+    "refusMs": 180,
+    "recolorationMs": 800,
+    "interEtoilesMs": 180
+  },
+  "sons": {
+    "ambiance": null,
+    "effets": {}
+  }
+}

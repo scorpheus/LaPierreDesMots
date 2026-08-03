@@ -1,0 +1,115 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. DEUX phrases et non quatre, huit étiquettes utiles et un intrus : `client/src/moteurs/phrase/MoteurPhrase.tsx` rend TOUTES les étiquettes en permanence, et `guirlande-phrase-01` mesure qu’à neuf boutons on est déjà au plafond de ce qu'un enfant de sept ans balaie du regard. Les neuf étiquettes sont deux à deux distinctes MOT COMPRIS — deux boutons portant « les » feraient payer une erreur que l'enfant n'a pas commise, et `etiquette-deja-placee` ne libère rien. L'intrus `pont` est le JUMEAU du son travaillé, pas un mot neutre : c’est lui qui oblige à lire la phrase modèle au lieu de prendre le mot qui reste.",
+  "id": "marais-jumeau-roseaux-phrase-01",
+  "version": 1,
+  "titre": "Les roseaux qui portent les mots",
+  "competences": [
+    "gph.nasale.an",
+    "comp.consigne.simple"
+  ],
+  "difficulte": 3,
+  "jeu": {
+    "moteur": "phrase",
+    "habillage": "marais.roseaux",
+    "noeud": "marais-jumeau-07",
+    "etoiles": {
+      "sansAide": true,
+      "sansErreur": true
+    },
+    "aideGobi": [
+      "relire-consigne",
+      "souffle-syllabe",
+      "montre-cible"
+    ],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Range les mots pour lire : le grand enfant danse.",
+          "forme": "imperative",
+          "audio": null,
+          "phrase": "Le grand enfant danse.",
+          "ordre": [
+            "mot-le",
+            "mot-grand",
+            "mot-enfant",
+            "mot-danse"
+          ],
+          "motsCles": [
+            "range",
+            "mot",
+            "grand",
+            "enfant"
+          ]
+        },
+        {
+          "id": "c2",
+          "texte": "Range les mots pour lire : maman range les gants.",
+          "forme": "imperative",
+          "audio": null,
+          "phrase": "Maman range les gants.",
+          "ordre": [
+            "mot-maman",
+            "mot-range",
+            "mot-les",
+            "mot-gants"
+          ],
+          "motsCles": [
+            "range",
+            "mot",
+            "maman",
+            "gant"
+          ]
+        }
+      ],
+      "etiquettes": [
+        {
+          "id": "mot-le",
+          "mot": "Le",
+          "intrus": false
+        },
+        {
+          "id": "mot-grand",
+          "mot": "grand",
+          "intrus": false
+        },
+        {
+          "id": "mot-enfant",
+          "mot": "enfant",
+          "intrus": false
+        },
+        {
+          "id": "mot-danse",
+          "mot": "danse.",
+          "intrus": false
+        },
+        {
+          "id": "mot-maman",
+          "mot": "Maman",
+          "intrus": false
+        },
+        {
+          "id": "mot-range",
+          "mot": "range",
+          "intrus": false
+        },
+        {
+          "id": "mot-les",
+          "mot": "les",
+          "intrus": false
+        },
+        {
+          "id": "mot-gants",
+          "mot": "gants.",
+          "intrus": false
+        },
+        {
+          "id": "mot-pont",
+          "mot": "pont",
+          "intrus": true
+        }
+      ],
+      "competence": "gph.nasale.an"
+    }
+  }
+}

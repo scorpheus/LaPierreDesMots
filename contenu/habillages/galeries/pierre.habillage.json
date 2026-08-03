@@ -19,58 +19,85 @@
         "role": "coloriable",
         "regions": [
           {
+            "id": "paroi-seche",
+            "libelle": "la paroi sèche",
+            "centroide": [
+              240,
+              94
+            ],
+            "surface": 170880
+          },
+          {
+            "id": "sol-de-la-salle",
+            "libelle": "le sol de la salle",
+            "centroide": [
+              720,
+              556
+            ],
+            "surface": 76800
+          },
+          {
             "id": "dalle",
             "libelle": "la dalle",
             "centroide": [
-              190.0,
-              190.0
+              631.5,
+              350.9
             ],
-            "surface": 32000.0
+            "surface": 150322
           },
           {
             "id": "sillon",
             "libelle": "le sillon",
             "centroide": [
-              480.0,
-              190.0
+              272.4,
+              318.3
             ],
-            "surface": 32000.0
+            "surface": 9760.8
           },
           {
             "id": "burin",
             "libelle": "le burin",
             "centroide": [
-              770.0,
-              190.0
+              809,
+              265
             ],
-            "surface": 32000.0
+            "surface": 3406.8
           },
           {
             "id": "eclat",
             "libelle": "l’éclat",
             "centroide": [
-              190.0,
-              420.0
+              120,
+              471
             ],
-            "surface": 32000.0
-          },
-          {
-            "id": "paroi-seche",
-            "libelle": "la paroi sèche",
-            "centroide": [
-              480.0,
-              420.0
-            ],
-            "surface": 32000.0
+            "surface": 5073.3
           },
           {
             "id": "torche",
             "libelle": "la torche",
             "centroide": [
-              770.0,
-              420.0
+              97,
+              147.6
             ],
-            "surface": 32000.0
+            "surface": 3916.1
+          },
+          {
+            "id": "copeau-de-pierre",
+            "libelle": "le copeau de pierre",
+            "centroide": [
+              881.7,
+              511.4
+            ],
+            "surface": 3612
+          },
+          {
+            "id": "goutte-sur-la-dalle",
+            "libelle": "la goutte sur la dalle",
+            "centroide": [
+              872,
+              361.5
+            ],
+            "surface": 1648.5
           }
         ]
       },

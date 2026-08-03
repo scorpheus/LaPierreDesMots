@@ -19,58 +19,94 @@
         "role": "coloriable",
         "regions": [
           {
-            "id": "liane-un",
-            "libelle": "la première liane",
+            "id": "jour-entre-branches",
+            "libelle": "le jour entre les branches",
             "centroide": [
-              190.0,
-              190.0
+              180,
+              63.9
             ],
-            "surface": 32000.0
-          },
-          {
-            "id": "liane-deux",
-            "libelle": "la deuxième liane",
-            "centroide": [
-              480.0,
-              190.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "liane-trois",
-            "libelle": "la troisième liane",
-            "centroide": [
-              770.0,
-              190.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "branche",
-            "libelle": "la branche",
-            "centroide": [
-              190.0,
-              420.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "feuillage",
-            "libelle": "le feuillage",
-            "centroide": [
-              480.0,
-              420.0
-            ],
-            "surface": 32000.0
+            "surface": 113280
           },
           {
             "id": "clairiere-sol",
             "libelle": "le sol de la clairière",
             "centroide": [
-              770.0,
-              420.0
+              240,
+              543
             ],
-            "surface": 32000.0
+            "surface": 96000
+          },
+          {
+            "id": "branche",
+            "libelle": "la branche",
+            "centroide": [
+              401.1,
+              155.7
+            ],
+            "surface": 23174
+          },
+          {
+            "id": "liane-un",
+            "libelle": "la première liane",
+            "centroide": [
+              176.1,
+              453.6
+            ],
+            "surface": 4659
+          },
+          {
+            "id": "liane-deux",
+            "libelle": "la deuxième liane",
+            "centroide": [
+              443.7,
+              180
+            ],
+            "surface": 6244.4
+          },
+          {
+            "id": "liane-trois",
+            "libelle": "la troisième liane",
+            "centroide": [
+              715.6,
+              192.2
+            ],
+            "surface": 4078.8
+          },
+          {
+            "id": "feuillage",
+            "libelle": "le feuillage",
+            "centroide": [
+              747.1,
+              103.7
+            ],
+            "surface": 19520.9
+          },
+          {
+            "id": "houppier-gauche",
+            "libelle": "le houppier de gauche",
+            "centroide": [
+              183.6,
+              90
+            ],
+            "surface": 10653.6
+          },
+          {
+            "id": "champignon-du-sol",
+            "libelle": "le champignon du sol",
+            "centroide": [
+              130,
+              506.2
+            ],
+            "surface": 5924
+          },
+          {
+            "id": "pierre-mousse",
+            "libelle": "la pierre moussue",
+            "centroide": [
+              863.9,
+              543.9
+            ],
+            "surface": 4778.7
           }
         ]
       },

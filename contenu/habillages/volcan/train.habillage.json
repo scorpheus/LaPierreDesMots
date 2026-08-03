@@ -19,58 +19,85 @@
         "role": "coloriable",
         "regions": [
           {
-            "id": "locomotive",
-            "libelle": "la locomotive",
+            "id": "ciel-cendre",
+            "libelle": "le ciel de cendre",
             "centroide": [
-              190.0,
-              190.0
+              240,
+              89
             ],
-            "surface": 32000.0
-          },
-          {
-            "id": "wagon-avant",
-            "libelle": "le wagon avant",
-            "centroide": [
-              480.0,
-              190.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "wagon-arriere",
-            "libelle": "le wagon arrière",
-            "centroide": [
-              770.0,
-              190.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "voie",
-            "libelle": "la voie",
-            "centroide": [
-              190.0,
-              420.0
-            ],
-            "surface": 32000.0
+            "surface": 161280
           },
           {
             "id": "lave",
             "libelle": "la lave",
             "centroide": [
-              480.0,
-              420.0
+              180,
+              529.1
             ],
-            "surface": 32000.0
+            "surface": 124800
           },
           {
-            "id": "ciel-cendre",
-            "libelle": "le ciel de cendre",
+            "id": "voie",
+            "libelle": "la voie",
             "centroide": [
-              770.0,
-              420.0
+              480,
+              429
             ],
-            "surface": 32000.0
+            "surface": 24973.2
+          },
+          {
+            "id": "locomotive",
+            "libelle": "la locomotive",
+            "centroide": [
+              312,
+              333.7
+            ],
+            "surface": 26011.5
+          },
+          {
+            "id": "wagon-avant",
+            "libelle": "le wagon avant",
+            "centroide": [
+              477.5,
+              353.3
+            ],
+            "surface": 12221.3
+          },
+          {
+            "id": "wagon-arriere",
+            "libelle": "le wagon arrière",
+            "centroide": [
+              711.4,
+              358.7
+            ],
+            "surface": 9672.6
+          },
+          {
+            "id": "tunnel",
+            "libelle": "le tunnel",
+            "centroide": [
+              859.2,
+              237.8
+            ],
+            "surface": 26078.7
+          },
+          {
+            "id": "fumee-du-train",
+            "libelle": "la fumée du train",
+            "centroide": [
+              178,
+              148
+            ],
+            "surface": 9897.7
+          },
+          {
+            "id": "braise-sur-la-voie",
+            "libelle": "la braise sur la voie",
+            "centroide": [
+              564.4,
+              499.7
+            ],
+            "surface": 3079.2
           }
         ]
       },

@@ -1,0 +1,10 @@
+{
+  "id": "volcan-09",
+  "region": "volcan",
+  "ordre": 9,
+  "exercice": "volcan-etoiles-filantes-attrape-02",
+  "prerequis": [
+    "volcan-08"
+  ],
+  "temps": "presentation"
+}

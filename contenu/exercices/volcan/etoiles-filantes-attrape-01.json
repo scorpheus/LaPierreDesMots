@@ -1,0 +1,272 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Nœud d'entrée du Volcan (M2). LES QUATRE INTRUS SONT DES SOSIES SONORES — moto, vélo, photo, dos finissent par le même son que bateau et ne s’écrivent pas de la même façon. Sans eux, l’oreille suffirait et la graphie ne serait jamais lue ; avec eux, seule la LECTURE tranche. C'est aussi pour cela que la consigne NOMME les mots au lieu de nommer le son : un exercice sur `eau` qui dirait « le son de veau » demanderait à l’oreille ce que seul l’œil peut voir.",
+  "id": "volcan-etoiles-filantes-attrape-01",
+  "version": 1,
+  "titre": "Les étoiles qui portent bateau",
+  "competences": [
+    "gph.rare.eau"
+  ],
+  "difficulte": 2,
+  "jeu": {
+    "moteur": "attrape",
+    "habillage": "volcan.etoiles-filantes",
+    "noeud": "volcan-01",
+    "etoiles": {
+      "sansAide": true,
+      "sansErreur": true
+    },
+    "aideGobi": [
+      "relire-consigne",
+      "souffle-syllabe",
+      "surligne-graphene",
+      "montre-cible"
+    ],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Attrape les mots bateau et gâteau.",
+          "forme": "imperative",
+          "audio": null,
+          "aAttraper": [
+            "etoile-bateau",
+            "etoile-gateau"
+          ],
+          "motsCles": [
+            "attrape",
+            "bateau",
+            "gâteau"
+          ]
+        },
+        {
+          "id": "c2",
+          "texte": "Attrape les mots chapeau et cadeau.",
+          "forme": "imperative",
+          "audio": null,
+          "aAttraper": [
+            "etoile-chapeau",
+            "etoile-cadeau"
+          ],
+          "motsCles": [
+            "attrape",
+            "chapeau",
+            "cadeau"
+          ]
+        },
+        {
+          "id": "c3",
+          "texte": "Attrape les mots seau et veau.",
+          "forme": "imperative",
+          "audio": null,
+          "aAttraper": [
+            "etoile-seau",
+            "etoile-veau"
+          ],
+          "motsCles": [
+            "attrape",
+            "seau",
+            "veau"
+          ]
+        },
+        {
+          "id": "c4",
+          "texte": "Attrape les mots drapeau et rideau.",
+          "forme": "imperative",
+          "audio": null,
+          "aAttraper": [
+            "etoile-drapeau",
+            "etoile-rideau"
+          ],
+          "motsCles": [
+            "attrape",
+            "drapeau",
+            "rideau"
+          ]
+        }
+      ],
+      "cibles": [
+        {
+          "id": "etoile-bateau",
+          "libelle": "bateau",
+          "bonne": true,
+          "asset": null,
+          "depart": [
+            120,
+            120
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": "moto"
+        },
+        {
+          "id": "etoile-gateau",
+          "libelle": "gâteau",
+          "bonne": true,
+          "asset": null,
+          "depart": [
+            320,
+            380
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "etoile-chapeau",
+          "libelle": "chapeau",
+          "bonne": true,
+          "asset": null,
+          "depart": [
+            520,
+            120
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "etoile-cadeau",
+          "libelle": "cadeau",
+          "bonne": true,
+          "asset": null,
+          "depart": [
+            720,
+            380
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "etoile-seau",
+          "libelle": "seau",
+          "bonne": true,
+          "asset": null,
+          "depart": [
+            120,
+            380
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": "dos"
+        },
+        {
+          "id": "etoile-veau",
+          "libelle": "veau",
+          "bonne": true,
+          "asset": null,
+          "depart": [
+            720,
+            120
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": "vélo"
+        },
+        {
+          "id": "etoile-drapeau",
+          "libelle": "drapeau",
+          "bonne": true,
+          "asset": null,
+          "depart": [
+            320,
+            120
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "etoile-rideau",
+          "libelle": "rideau",
+          "bonne": true,
+          "asset": null,
+          "depart": [
+            520,
+            380
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "etoile-moto",
+          "libelle": "moto",
+          "bonne": false,
+          "asset": null,
+          "depart": [
+            920,
+            120
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": "bateau"
+        },
+        {
+          "id": "etoile-velo",
+          "libelle": "vélo",
+          "bonne": false,
+          "asset": null,
+          "depart": [
+            920,
+            380
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": "veau"
+        },
+        {
+          "id": "etoile-photo",
+          "libelle": "photo",
+          "bonne": false,
+          "asset": null,
+          "depart": [
+            120,
+            620
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "etoile-dos",
+          "libelle": "dos",
+          "bonne": false,
+          "asset": null,
+          "depart": [
+            320,
+            620
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": "seau"
+        }
+      ],
+      "competence": "gph.rare.eau"
+    }
+  }
+}

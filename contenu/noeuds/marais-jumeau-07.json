@@ -1,0 +1,10 @@
+{
+  "id": "marais-jumeau-07",
+  "region": "marais-jumeau",
+  "ordre": 7,
+  "exercice": "marais-jumeau-roseaux-phrase-01",
+  "prerequis": [
+    "marais-jumeau-06"
+  ],
+  "temps": "retournement"
+}

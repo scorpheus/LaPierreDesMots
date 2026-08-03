@@ -1,0 +1,10 @@
+{
+  "id": "foret-muette-06",
+  "region": "foret-muette",
+  "ordre": 6,
+  "exercice": "foret-muette-buee-grave-01",
+  "prerequis": [
+    "foret-muette-05"
+  ],
+  "temps": "developpement"
+}

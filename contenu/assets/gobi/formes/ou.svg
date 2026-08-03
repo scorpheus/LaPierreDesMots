@@ -1,9 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Gobi-OU">
   <title>Gobi-OU</title>
-  <desc>Le cristal du grapheme « ou » — Gobi-OU. C est LUI qui porte la declinaison, jamais le corps (D20, D36). Sa silhouette et sa teinte sont propres a ce grapheme : deux formes identiques ne se collectionneraient pas (D44). Le viewBox fait 64 unites, ce qui est la cible tapable minimale de R16.</desc>
+  <desc>Le cristal du grapheme « ou » — Gobi-OU : deux domes cote a cote qui se touchent. C est LUI qui porte la declinaison, jamais le corps (D20, D36). Sa SILHOUETTE lui est propre et elle est mesuree : le recouvrement avec les 24 autres cristaux ne depasse pas 0.56 (plafond 0.9), sans quoi scripts/gobi-formes.mjs refuse d ecrire — deux formes identiques ne se collectionneraient pas (D44). Les teintes viennent de la palette mesuree sur les pixels de la canonique et consignee dans production/personnages/gobi/gobi.lock.json ; aucune n est choisie a la main. Le temoin de production est production/personnages/gobi/formes/ou.png, obtenu par inpainting regional sous masque depuis la canonique — profondeur de chaine 1 (D32). Le viewBox fait 64 unites, ce qui est la cible tapable minimale de R16.</desc>
   <g id="cristal">
-    <path id="cristal-face" d="M32,7 L37.02,20.26 L41.37,33.52 L40.37,58 L23.63,58 L22.63,33.52 L26.98,20.26 Z" fill="#C3EEDC" stroke="#4B2207" stroke-width="3" stroke-linejoin="round"/>
-    <path id="cristal-facette" d="M32,7 L40.37,58 L23.63,58 Z" fill="#95D6BC" stroke="none" opacity="0.8"/>
-    <path id="cristal-eclat" d="M27.95,22.3 L30.38,38.62" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" opacity="0.85" fill="none"/>
+    <path class="cristal-face" d="M21,20 L31.28,23.74 L36.76,33.22 L34.86,44 L26.47,51.04 L15.53,51.04 L7.14,44 L5.24,33.22 L10.72,23.74 Z" fill-rule="evenodd" fill="#BEE5F5" stroke="#4B2207" stroke-width="3" stroke-linejoin="round"/>
+    <path class="cristal-face" d="M44,20 L54.28,23.74 L59.76,33.22 L57.86,44 L49.47,51.04 L38.53,51.04 L30.14,44 L28.24,33.22 L33.72,23.74 Z" fill-rule="evenodd" fill="#BEE5F5" stroke="#4B2207" stroke-width="3" stroke-linejoin="round"/>
+    <path class="cristal-ombre" d="M22.58,20.57 L31.28,23.74 L36.76,33.22 L34.86,44 L26.47,51.04 L22.58,51.04 Z" fill-rule="evenodd" fill="#ADC8E0" stroke="none" opacity="0.75"/>
+    <path class="cristal-ombre" d="M45.58,20.57 L54.28,23.74 L59.76,33.22 L57.86,44 L49.47,51.04 L45.58,51.04 Z" fill-rule="evenodd" fill="#ADC8E0" stroke="none" opacity="0.75"/>
+    <path class="cristal-eclat" d="M22.58,24.35 L22.58,39.24" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" opacity="0.85" fill="none"/>
+    <path class="cristal-eclat" d="M45.58,24.35 L45.58,39.24" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" opacity="0.85" fill="none"/>
   </g>
 </svg>

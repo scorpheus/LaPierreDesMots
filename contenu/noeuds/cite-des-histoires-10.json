@@ -1,0 +1,10 @@
+{
+  "id": "cite-des-histoires-10",
+  "region": "cite-des-histoires",
+  "ordre": 10,
+  "exercice": "cite-des-histoires-fresque-murale-colorie-01",
+  "prerequis": [
+    "cite-des-histoires-09"
+  ],
+  "temps": "developpement"
+}

@@ -44,40 +44,50 @@
       "remplacePar": "assets/gobi/stades/stade-1.svg",
       "raison": "Stade v1, remplacé par les dix stades de D43. Le motif est écrit noir sur blanc dans `Docs/questions-en-attente.md` (§ N3-6) et il est dirimant : les cinq anciens sont des bouchons écrits AVANT D36, leur `<desc>` affirme encore « la forme canonique de Gobi n'est PAS validée » — faux depuis D36 —, leur corps est un ovale rose SANS le cœur de Pierre, et chacun diffère des autres, ce qui rend impossible l'invariant « `gobi-corps` identique octet pour octet » sur lequel repose tout le lot N3. Le contrat § 4.3 les annonçait réutilisés aux rangs 1, 3, 5, 7 et 10 ; N3 a écrit l'écart au lieu de le taire. ILS RESTENT SUR DISQUE : le choix se défait en changeant cinq chemins dans `contenu/monde/gobi-stades.json`.",
       "decision": "contrat de finition v3 § 4.3 (« aucune suppression ») ; écart N3-6 de Docs/questions-en-attente.md",
-      "encoreLuPar": ["tests/unitaires/svg-remplissage.test.ts"]
+      "encoreLuPar": [
+        "tests/unitaires/svg-remplissage.test.ts"
+      ]
     },
     {
       "fichier": "assets/gobi/stade-2-boule.svg",
       "remplacePar": "assets/gobi/stades/stade-3.svg",
       "raison": "Stade v1, code `boule`. Le code survit — il est au rang 3 des dix stades de D43, parce que `stade_gobi.stade_code` n'a AUCUNE contrainte CHECK en base et que renuméroter un code existant invaliderait en silence les états déjà écrits. C'est le DESSIN qui est remplacé, pour le motif de l'entrée précédente. Le fichier reste sur disque.",
       "decision": "contrat de finition v3 § 4.3 ; écart N3-6 de Docs/questions-en-attente.md",
-      "encoreLuPar": ["tests/unitaires/svg-remplissage.test.ts"]
+      "encoreLuPar": [
+        "tests/unitaires/svg-remplissage.test.ts"
+      ]
     },
     {
       "fichier": "assets/gobi/stade-3-crete.svg",
       "remplacePar": "assets/gobi/stades/stade-5.svg",
       "raison": "Stade v1, code `crete`, conservé au rang 5 des dix stades de D43. Dessin remplacé, code intact, fichier intact — même motif que les deux entrées précédentes.",
       "decision": "contrat de finition v3 § 4.3 ; écart N3-6 de Docs/questions-en-attente.md",
-      "encoreLuPar": ["tests/unitaires/svg-remplissage.test.ts"]
+      "encoreLuPar": [
+        "tests/unitaires/svg-remplissage.test.ts"
+      ]
     },
     {
       "fichier": "assets/gobi/stade-4-equipe.svg",
       "remplacePar": "assets/gobi/stades/stade-7.svg",
       "raison": "Stade v1, code `equipe`, conservé au rang 7 des dix stades de D43. Dessin remplacé, code intact, fichier intact.",
       "decision": "contrat de finition v3 § 4.3 ; écart N3-6 de Docs/questions-en-attente.md",
-      "encoreLuPar": ["tests/unitaires/svg-remplissage.test.ts"]
+      "encoreLuPar": [
+        "tests/unitaires/svg-remplissage.test.ts"
+      ]
     },
     {
       "fichier": "assets/gobi/stade-5-gardien.svg",
       "remplacePar": "assets/gobi/stades/stade-10.svg",
       "raison": "Stade v1, code `gardien`, conservé au rang 10 — le dernier, celui qui s'atteint quand la collection des vingt-cinq formes est complète. Dessin remplacé, code intact, fichier intact.",
       "decision": "contrat de finition v3 § 4.3 ; écart N3-6 de Docs/questions-en-attente.md",
-      "encoreLuPar": ["tests/unitaires/svg-remplissage.test.ts"]
+      "encoreLuPar": [
+        "tests/unitaires/svg-remplissage.test.ts"
+      ]
     },
     {
       "fichier": "habillages/carte/carte-monde.svg",
-      "remplacePar": "habillages/carte/carte-monde-v2.svg",
-      "raison": "La carte de la v1 : six hexagones identiques. Remplacée par `carte-monde-v2.svg`, que `contenu/monde/regions.json` déclare en `scene.fichier` et que `client/src/ecrans/EcranCarte.tsx` sert désormais (`SVG_CARTE`, mesuré à l'écriture de cette entrée). La v1 N'EST PAS un déchet : les deux fichiers portent les MÊMES six identifiants de région, dans le MÊME ordre, avec les MÊMES six centres de marqueur et le MÊME `viewBox` — `tests/unitaires/ids-regions-stables.test.ts` (constante `V1`) les compare fichier à fichier et échoue si l'un dérive de l'autre. La supprimer désarmerait ce test.",
+      "remplacePar": "habillages/carte/carte-monde-v3.svg",
+      "raison": "La carte de la v1 : six hexagones identiques. Remplacée par `carte-monde-v2.svg`, que `contenu/monde/regions.json` déclare en `scene.fichier` et que `client/src/ecrans/EcranCarte.tsx` sert désormais (`SVG_CARTE`, mesuré à l'écriture de cette entrée). La v1 N'EST PAS un déchet : les deux fichiers portent les MÊMES six identifiants de région, dans le MÊME ordre, avec les MÊMES six centres de marqueur et le MÊME `viewBox` — `tests/unitaires/ids-regions-stables.test.ts` (constante `V1`) les compare fichier à fichier et échoue si l'un dérive de l'autre. La supprimer désarmerait ce test. ── MIS À JOUR PAR M2 : le successeur nommé ici était `carte-monde-v2.svg`, elle-même archivée depuis que `scene.fichier` pointe la v3. Le contrôle P3.2 exige qu'un successeur soit DÉCLARÉ VIVANT (`estDeclareVivant`, scripts/test-contenu.mjs) : une archive qui en nomme une autre ferait une chaîne dont aucun maillon ne désigne le fichier réellement servi, et le registre aurait masqué trois fichiers au lieu d'un. Les trois cartes portent les MÊMES six identifiants de région, dans le MÊME ordre, avec les MÊMES six centres et le MÊME viewBox : nommer directement la v3 ne perd rien.",
       "decision": "lot A3 ; passage à la v2 consigné dans le $commentaire de contenu/monde/regions.json et dans l'en-tête de client/src/ecrans/EcranCarte.tsx",
       "encoreLuPar": [
         "tests/unitaires/ids-regions-stables.test.ts",
@@ -101,7 +111,18 @@
       "remplacePar": "habillages/galeries/grottes-v2.svg",
       "raison": "Décor bouchon D2 des Galeries, remplacé par `grottes-v2.svg`, seul déclaré par `contenu/habillages/galeries/grottes.habillage.json` (mesuré). La v1 déclarait six régions et ne portait AUCUN attribut `data-region-svg` — écart relevé par `tests/unitaires/ids-regions-stables.test.ts` : elle n'était donc pas jouable en l'état, et c'est bien la v2 qui l'a soldé. Fichier conservé comme trace de la génération de départ.",
       "decision": "lot A3 ; l'habillage `grottes.habillage.json` pointe sur la v2 depuis la campagne v2 (mesuré : `scene.fichier` = habillages/galeries/grottes-v2.svg)",
-      "encoreLuPar": ["tests/unitaires/ids-regions-stables.test.ts"]
+      "encoreLuPar": [
+        "tests/unitaires/ids-regions-stables.test.ts"
+      ]
+    },
+    {
+      "fichier": "habillages/carte/carte-monde-v2.svg",
+      "remplacePar": "habillages/carte/carte-monde-v3.svg",
+      "raison": "La carte de la campagne v2 : six décagones irréguliers en aplat, sans territoire dessiné. Remplacée par `carte-monde-v3.svg`, que `client/src/ecrans/EcranCarte.tsx` sert déjà et que `contenu/monde/regions.json` déclare désormais en `scene.fichier`. ── ENTRÉE ÉCRITE PAR M2, ET C'EST UNE CONSÉQUENCE MÉCANIQUE, PAS UNE INITIATIVE : le contrat du monde v4 § 2 confie à M2, et à lui seul, le pointeur `scene.fichier` (« M7 ne l'écrit pas ») ; le faire passer à la v3 — sans quoi la carte RÉELLEMENT AFFICHÉE n'était déclarée nulle part et échappait au contrôle P3.2 — laissait aussitôt la v2 orpheline et cassait l'archive de la v1, qui la nomme comme successeur. Archiver, c'est nommer ce qui a pris la place : c'est fait ici, aucun octet n'a été effacé. La v2 N'EST PAS un déchet : elle porte les MÊMES six identifiants de région, dans le MÊME ordre, avec les MÊMES six centres de marqueur et le MÊME viewBox 0 0 1200 800, et `tests/unitaires/ids-regions-stables.test.ts` compare les fichiers entre eux.",
+      "decision": "lot M2, contrat du monde v4 § 2 (tableau de M7) ; consigné dans Docs/questions-en-attente.md, section M2",
+      "encoreLuPar": [
+        "tests/unitaires/ids-regions-stables.test.ts"
+      ]
     }
   ]
 }

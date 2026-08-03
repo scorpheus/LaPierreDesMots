@@ -1,0 +1,170 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. ORIGINE : NIVEAU 5, fiche 5, « Les devoirs à la maison ». CORRIGÉ PRODUIT : les cinq étapes du PDF sont imprimées dans le désordre (« Sébastien écrit la réponse » y figure en 1, « Sébastien n’arrive pas à faire une addition » en 4) ; le texte source donne l’ordre réel — « Sébastien rentre de l’école… c’est une addition qu’il n’arrive pas à faire… Son papa s’assoit à côté de lui… il transforme les chiffres en jetons… Ensemble, ils écrivent la réponse dans le cahier ». Les neuf vignettes en descendent. `addition`, `jeton`, `chiffre` ne sont pas au lexique CE1 ; `compte` l’est, et c’est le même geste. Aucune vignette réemployée.",
+  "id": "cite-des-histoires-pellicule-chrono-02",
+  "version": 1,
+  "titre": "Le cahier de Gobi",
+  "origine": {
+    "source": "fiches-origine/NIVEAU 5.pdf",
+    "niveau": 5,
+    "fiche": 5
+  },
+  "competences": [
+    "comp.chronologie"
+  ],
+  "difficulte": 5,
+  "jeu": {
+    "moteur": "chrono",
+    "habillage": "cite.pellicule",
+    "noeud": "cite-des-histoires-13",
+    "etoiles": {
+      "sansAide": true,
+      "sansErreur": true
+    },
+    "aideGobi": [
+      "relire-consigne",
+      "souffle-syllabe",
+      "montre-cible"
+    ],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Range les images dans l'ordre de l'histoire.",
+          "forme": "imperative",
+          "audio": null,
+          "recit": "Gobi entre dans la maison. Il a un cahier. Papa montre le cahier.",
+          "ordre": [
+            "vignette-maison",
+            "vignette-cahier",
+            "vignette-papa"
+          ],
+          "motsCles": [
+            "range",
+            "image",
+            "ordre",
+            "histoire"
+          ]
+        },
+        {
+          "id": "c2",
+          "texte": "Range aussi les images dans l'ordre de l'histoire.",
+          "forme": "imperative",
+          "audio": null,
+          "recit": "Le cahier est sur la table. Gobi compte. Puis papa montre le dessin.",
+          "ordre": [
+            "vignette-table",
+            "vignette-compte",
+            "vignette-dessin"
+          ],
+          "motsCles": [
+            "range",
+            "image",
+            "ordre",
+            "histoire"
+          ]
+        },
+        {
+          "id": "c3",
+          "texte": "Range les dernières images dans l'ordre.",
+          "forme": "imperative",
+          "audio": null,
+          "recit": "Gobi range le cahier dans le sac. Puis Gobi joue dans le jardin. Le soir, Gobi est dans son lit.",
+          "ordre": [
+            "vignette-sac",
+            "vignette-jardin",
+            "vignette-lit"
+          ],
+          "motsCles": [
+            "range",
+            "image",
+            "ordre"
+          ]
+        }
+      ],
+      "vignettes": [
+        {
+          "id": "vignette-maison",
+          "libelle": "Gobi entre dans la maison.",
+          "asset": null,
+          "taille": [
+            220,
+            160
+          ]
+        },
+        {
+          "id": "vignette-cahier",
+          "libelle": "Il a un cahier.",
+          "asset": null,
+          "taille": [
+            220,
+            160
+          ]
+        },
+        {
+          "id": "vignette-papa",
+          "libelle": "Papa montre le cahier.",
+          "asset": null,
+          "taille": [
+            220,
+            160
+          ]
+        },
+        {
+          "id": "vignette-table",
+          "libelle": "Le cahier est sur la table.",
+          "asset": null,
+          "taille": [
+            220,
+            160
+          ]
+        },
+        {
+          "id": "vignette-compte",
+          "libelle": "Gobi compte.",
+          "asset": null,
+          "taille": [
+            220,
+            160
+          ]
+        },
+        {
+          "id": "vignette-dessin",
+          "libelle": "Puis papa montre le dessin.",
+          "asset": null,
+          "taille": [
+            220,
+            160
+          ]
+        },
+        {
+          "id": "vignette-sac",
+          "libelle": "Gobi range le cahier dans le sac.",
+          "asset": null,
+          "taille": [
+            220,
+            160
+          ]
+        },
+        {
+          "id": "vignette-jardin",
+          "libelle": "Puis Gobi joue dans le jardin.",
+          "asset": null,
+          "taille": [
+            220,
+            160
+          ]
+        },
+        {
+          "id": "vignette-lit",
+          "libelle": "Le soir, Gobi est dans son lit.",
+          "asset": null,
+          "taille": [
+            220,
+            160
+          ]
+        }
+      ],
+      "competence": "comp.chronologie"
+    }
+  }
+}

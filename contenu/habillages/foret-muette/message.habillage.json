@@ -19,58 +19,85 @@
         "role": "coloriable",
         "regions": [
           {
-            "id": "ecorce",
-            "libelle": "l’écorce",
-            "centroide": [
-              190.0,
-              190.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "entaille",
-            "libelle": "l’entaille",
-            "centroide": [
-              480.0,
-              190.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "mousse-verte",
-            "libelle": "la mousse verte",
-            "centroide": [
-              770.0,
-              190.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "racine",
-            "libelle": "la racine",
-            "centroide": [
-              190.0,
-              420.0
-            ],
-            "surface": 32000.0
-          },
-          {
             "id": "canopee",
             "libelle": "la canopée",
             "centroide": [
-              480.0,
-              420.0
+              240,
+              90.5
             ],
-            "surface": 32000.0
+            "surface": 161280
           },
           {
             "id": "rayon",
             "libelle": "le rayon de lumière",
             "centroide": [
-              770.0,
-              420.0
+              624.7,
+              506.3
             ],
-            "surface": 32000.0
+            "surface": 102600
+          },
+          {
+            "id": "mousse-verte",
+            "libelle": "la mousse verte",
+            "centroide": [
+              720,
+              540
+            ],
+            "surface": 105600
+          },
+          {
+            "id": "ecorce",
+            "libelle": "l’écorce",
+            "centroide": [
+              462.7,
+              325.3
+            ],
+            "surface": 143024
+          },
+          {
+            "id": "entaille",
+            "libelle": "l’entaille",
+            "centroide": [
+              484.5,
+              280.8
+            ],
+            "surface": 11940
+          },
+          {
+            "id": "racine",
+            "libelle": "la racine",
+            "centroide": [
+              271.5,
+              514.3
+            ],
+            "surface": 6527.4
+          },
+          {
+            "id": "houppier-gauche",
+            "libelle": "le houppier de gauche",
+            "centroide": [
+              126.2,
+              180.3
+            ],
+            "surface": 19197.1
+          },
+          {
+            "id": "champignon-au-pied",
+            "libelle": "le champignon au pied",
+            "centroide": [
+              729,
+              482.8
+            ],
+            "surface": 4913.3
+          },
+          {
+            "id": "feuille-tombee",
+            "libelle": "la feuille tombée",
+            "centroide": [
+              874,
+              544
+            ],
+            "surface": 5598.9
           }
         ]
       },

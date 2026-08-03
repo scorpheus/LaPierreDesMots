@@ -35,6 +35,11 @@ import { MurDesNoms } from '../monde/MurDesNoms.js';
 import type { NomDuMur } from '../monde/MurDesNoms.js';
 import { PastilleSortie } from '../monde/PastilleSortie.js';
 import { PointLibre } from '../monde/PointLibre.js';
+// La table des noms de région vit dans `EcranCoffre.tsx` — l'autre écran de ce même lot. Elle
+// n'est pas hissée dans un module commun parce qu'aucun lot du contrat du monde v4 ne possède
+// `client/src/monde/` : un lot ne s'accorde pas un fichier qu'un autre pourrait écrire. Sa
+// place définitive est le référentiel des régions (M2), et c'est consigné en question ouverte.
+import { NOM_DE_REGION } from './EcranCoffre.js';
 
 export interface ProprietesEcranCampement {
   /** Le référentiel du campement. Injecté par les tests ; chargé sinon. */
@@ -162,11 +167,14 @@ export function EcranCampement({
     [monde, stades]
   );
 
+  // « On le rencontre à clairiere. » — c'est ce que cet écran écrivait, en rendant le CODE de
+  // la région. Un identifiant technique n'est pas un mot : sans accent, sans majuscule, avec
+  // des tirets, c'est exactement la chaîne qu'un lecteur de CE1 ne peut pas déchiffrer.
   const libelleRegion = useCallback(
     (code: string): string | undefined =>
       monde?.carte.regions.find((region) => String(region.region) === code) === undefined
         ? undefined
-        : code,
+        : (NOM_DE_REGION[code] ?? code),
     [monde]
   );
 
@@ -264,7 +272,16 @@ export function EcranCampement({
           backgroundRepeat: 'no-repeat',
           backgroundPosition: 'center',
           backgroundColor: 'var(--parchemin)',
-          borderRadius: 'var(--rayon-carte)'
+          borderRadius: 'var(--rayon-carte)',
+          // ── LA CASE DE BD (M8) ────────────────────────────────────────────────────────
+          // Le décor était servi sans cadre : il se fondait dans le fond parchemin de la
+          // page, et le campement ressemblait à une image posée sur un document. Cerné du
+          // trait et posé sur son ombre en aplat, c'est une CASE — le registre que l'enfant
+          // lit déjà dans ses BD (v2 § 9.1). `overflow: hidden` fait suivre le décor au
+          // rayon du cadre plutôt que de laisser ses angles dépasser.
+          border: 'var(--epaisseur-trait) solid var(--trait)',
+          boxShadow: 'var(--ombre-bd)',
+          overflow: 'hidden'
         }}
       >
         {points.map((point) => (
@@ -279,7 +296,7 @@ export function EcranCampement({
       </div>
 
       {/* ── Gobi, au campement : le stade se VOIT, c'est tout l'intérêt de D28 ─────────── */}
-      <section aria-label="Gobi">
+      <section className="panneau" aria-label="Gobi">
         <Gobi
           aide={null}
           niveau="aucune"
@@ -312,8 +329,8 @@ export function EcranCampement({
 
       <Chaudron surOuvrir={surOuvrirChaudron} animationsDesactivees={animationsDesactivees} />
 
-      <section aria-label="Les compagnons">
-        <h2 className="titre" style={{ fontSize: '1.5rem', margin: '0 0 0.75rem' }}>
+      <section className="panneau" aria-label="Les compagnons">
+        <h2 className="panneau-titre" style={{ fontSize: '1.5rem' }}>
           La bande
         </h2>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>

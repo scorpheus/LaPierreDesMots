@@ -216,6 +216,74 @@ function consignesDe(exercice, racine = RACINE_PAR_DEFAUT) {
     }));
 }
 
+/**
+ * ═════════════════════════════════════════════════════════════════════════════════════════
+ * LES DEUX TEXTES QUE L'ENFANT DÉCHIFFRE ET QUE PERSONNE NE RECENSAIT — lot M4.
+ *
+ * C'est le mode de défaillance de D48 pour la troisième fois, et il se répète parce qu'on
+ * cherche les occurrences d'un champ (`"audio":`) au lieu d'énumérer les OBJETS qui affichent
+ * du texte à déchiffrer. L'audit qui trouve ceux-ci n'interroge pas les données : il énumère
+ * les appels de `ZoneDeLecture`, « le SEUL composant qui affiche du texte à déchiffrer »
+ * (§ 5.1), et demande de chacun « d'où vient ce texte, et le recense-t-on ? ».
+ *
+ * MESURÉ le 2026-08-02 sur les onze moteurs, sorties citées :
+ *
+ *   client/src/moteurs/histoire/MoteurHistoire.tsx:116
+ *       <ZoneDeLecture texte={contenu.recit} motsCles={[]} />          ← NON RECENSÉ
+ *   client/src/moteurs/tri/MoteurTri.tsx:155
+ *       <ZoneDeLecture texte={receptacle.critere} motsCles={[]} />     ← NON RECENSÉ
+ *
+ * ── 1. LE RÉCIT DE `histoire` ────────────────────────────────────────────────────────────
+ * Ce n'est pas une convention inventée ici : `partage/src/moteurs/histoire/types.ts:44` déclare
+ * `readonly audioRecit: CheminAsset | null`, et `schema-contenu.ts:32` le rend OBLIGATOIRE. La
+ * conception voulait donc que le récit soit audible. Mesuré : `grep -rn audioRecit` rend six
+ * lignes, dont **zéro dans `client/`** — le champ est exigé, rempli à `null`, et lu par
+ * personne. Le récit est le plus grand mur de lecture du jeu : la Cité des Histoires en portera
+ * huit et plus, de huit lignes chacun, devant un enfant qui déchiffre encore (D14).
+ *
+ * ── 2. LE CRITÈRE DES RÉCEPTACLES DE `tri` ───────────────────────────────────────────────
+ * Le type le dit lui-même, `partage/src/moteurs/tri/types.ts:20`, cité mot pour mot :
+ * « Le critère écrit sur le réceptacle. **C'est LUI que l'enfant déchiffre.** » Et
+ * `ReceptacleTri` ne porte AUCUN champ `audio` — donc aucune recherche sur `"audio":` ne
+ * pouvait le trouver. R15 ne fait aucune exception : « aucune consigne n'existe uniquement à
+ * l'écrit ». Un critère qu'on ne peut pas écouter est une consigne muette.
+ *
+ * ── LA CLÉ, ET POURQUOI CELLE-LÀ ─────────────────────────────────────────────────────────
+ * `EcranNoeud.tsx:474` construit `${paquet.exercice.id}/${etapeCourante.id}` : la convention du
+ * dépôt est `<idExercice>/<identifiant affiché>`. On la suit sans préfixe inventé, pour que le
+ * jour où le composant appellera `dire`, la clé qu'il construira naturellement soit celle qui
+ * existe. `recit` pour le récit, l'`id` du réceptacle pour son critère.
+ *
+ * ── CE QUE CE FICHIER NE PEUT PAS FAIRE ──────────────────────────────────────────────────
+ * Produire le clip ne le fait pas JOUER : `MoteurHistoire.tsx` et `MoteurTri.tsx` n'appellent
+ * pas `services.voix.dire`. Ces deux fichiers n'appartiennent à aucun lot du plan (§ 4), et M4
+ * n'écrit pas dans le répertoire d'un autre (§ 5, point 6). L'écart est donc SIGNALÉ à
+ * l'orchestrateur, et le clip est rendu d'avance : le jour où la ligne cliente est écrite,
+ * l'audio est déjà là au lieu de coûter une nouvelle passe de contrôle qualité.
+ * ═════════════════════════════════════════════════════════════════════════════════════════
+ *
+ * @returns {{ id: string, texte: string, motsCles: string[] }[]}
+ */
+export function textesDeLectureDe(exercice) {
+  const moteur = exercice?.jeu?.moteur;
+  const contenu = exercice?.jeu?.contenu ?? {};
+  const textes = [];
+
+  if (moteur === 'histoire' && typeof contenu.recit === 'string' && contenu.recit.length > 0) {
+    textes.push({ id: 'recit', texte: contenu.recit, motsCles: [] });
+  }
+
+  if (moteur === 'tri' && Array.isArray(contenu.receptacles)) {
+    for (const receptacle of contenu.receptacles) {
+      if (typeof receptacle?.critere !== 'string' || receptacle.critere.length === 0) continue;
+      if (typeof receptacle.id !== 'string' || receptacle.id.length === 0) continue;
+      textes.push({ id: receptacle.id, texte: receptacle.critere, motsCles: [] });
+    }
+  }
+
+  return textes;
+}
+
 /** Compte des OCCURRENCES du mot `audio` — l'autre chiffre, celui qu'on refuse d'appeler un audit. */
 function compterOccurrencesAudio(racine) {
   let total = 0;
@@ -239,16 +307,70 @@ export function recenser(racine = RACINE_PAR_DEFAUT) {
   const illisibles = [];
   /** Les mots cibles sont mutualisés : « luciole » n'est rendu qu'une fois pour tout le jeu. */
   const motsVus = new Set();
+  /**
+   * Les récits et critères, comptés À PART.
+   *
+   * Le plan gelé chiffre M4 en « consignes et questions » (≥ 304). Ces deux formes-ci n'en
+   * sont pas : les ajouter au même total rendrait le chiffre du plan incomparable au chiffre
+   * mesuré, et c'est exactement la faute que CLAUDE.md interdit — on rend LES DEUX COMPTES et
+   * leur écart, jamais un seul.
+   */
+  let nbTextesDeLecture = 0;
 
   // ── 1. Les consignes des exercices livrés ────────────────────────────────────────────
+  //
+  // LE `illisibles` MANQUAIT ICI, et il manquait à l'ENDROIT EXACT qui en avait besoin.
+  //
+  // La tolérance de `lireJson` avait été posée sur `campement.json` et `ouverture.json` — les
+  // deux fichiers qu'un autre lot écrivait le jour où le défaut est apparu. La boucle des
+  // exercices, elle, appelait `lireJson(chemin)` SANS son second argument : le `catch` faisait
+  // alors `undefined.push(…)` et le recensement mourait sur un `TypeError` qui ne nomme aucun
+  // fichier. Or `contenu/exercices/` est précisément là où M1 et M2 écrivent en parallèle de
+  // M4 — cinquante-huit fichiers neufs — pendant que ce recenseur tourne.
+  //
+  // MESURÉ le 2026-08-02 sur un faux dépôt portant un seul exercice tronqué à mi-écriture,
+  // sortie citée :
+  //
+  //     avant : CRASH :: TypeError :: Cannot read properties of undefined (reading 'push')
+  //     après : OK 0 illisibles [{"chemin":"…/moitie-ecrit.json","motif":"Expected …"}]
+  //
+  // Le fichier est maintenant SAUTÉ, NOMMÉ et COMPTÉ — jamais tu : un objet non recensé
+  // disparaît du dénominateur au lieu d'apparaître au numérateur, et la couverture du contrat
+  // de sortie monterait pour la mauvaise raison.
   for (const { region, chemin } of fichiersExercices(racine)) {
-    const exercice = lireJson(chemin);
+    const exercice = lireJson(chemin, illisibles);
     const origine = chemin.slice(racine.length + 1).replaceAll('\\', '/');
+    if (exercice === null) continue;
     sources.push(origine);
 
-    for (const consigne of consignesDe(exercice, racine)) {
+    // Les consignes, PUIS les textes de lecture que la coquille n'énumère pas (récit, critère).
+    // Les seconds passent par la même boucle : même locuteur, même rendu, même dossier — un
+    // texte à déchiffrer est un texte à déchiffrer, quel que soit l'endroit où il s'affiche.
+    const clesDeCetExercice = new Set();
+    const textesDeLecture = textesDeLectureDe(exercice);
+    const idsDeLecture = new Set(textesDeLecture.map((t) => t.id));
+    for (const consigne of [...consignesDe(exercice, racine), ...textesDeLecture]) {
+      const cle = `${exercice.id}/${consigne.id}`;
+
+      // CONVENTION C6 — refuser plutôt qu'émettre du faux. Deux textes DIFFÉRENTS sous la même
+      // clé, c'est un clip qui en écrase un autre : l'enfant entendrait le critère du bac en
+      // tapant « écouter » sur la consigne, sans qu'aucun test ne le voie. Le cas ne peut
+      // survenir que si un `id` de réceptacle vaut un `id` de consigne (`c1`, `c2`…) — donc il
+      // est ATTRAPÉ ici, nommé, et le fichier est compté illisible plutôt que mal recensé.
+      if (clesDeCetExercice.has(cle)) {
+        illisibles.push({
+          chemin: origine,
+          motif:
+            `clé audio en double : « ${cle} ». Un identifiant de réceptacle porte le même nom ` +
+            "qu'un identifiant de consigne ; le second clip écraserait le premier.",
+        });
+        continue;
+      }
+      clesDeCetExercice.add(cle);
+      if (idsDeLecture.has(consigne.id)) nbTextesDeLecture += 1;
+
       objets.push({
-        cle: `${exercice.id}/${consigne.id}`,
+        cle,
         texte: consigne.texte,
         locuteur: LOCUTEUR_DES_CONSIGNES,
         rendu: 'normal',
@@ -347,6 +469,8 @@ export function recenser(racine = RACINE_PAR_DEFAUT) {
     objets,
     nbObjets: objets.length,
     nbOccurrences: compterOccurrencesAudio(racine),
+    /** Récits de `histoire` et critères de réceptacles de `tri` — comptés à part, voir ci-dessus. */
+    nbTextesDeLecture,
     sources,
     illisibles,
   };
@@ -438,6 +562,14 @@ if (process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.a
     );
     process.stdout.write(
       `  clés à couvrir (rendu normal) : ${clesACouvrir(recensement).length}\n`,
+    );
+    // LES DEUX COMPTES ET LEUR ÉCART. Le plan gelé chiffre M4 en « consignes et questions » ;
+    // récits et critères sont un livrable de plus, jamais un gonflement du chiffre du plan.
+    process.stdout.write(
+      `      dont recits + criteres : ${String(recensement.nbTextesDeLecture)}` +
+        `  → consignes et questions seules : ${String(
+          clesACouvrir(recensement).length - recensement.nbTextesDeLecture,
+        )}\n`,
     );
     // Les fichiers qu'un autre lot écrivait au même instant. NOMMÉS, jamais tus : un objet
     // non recensé disparaît du dénominateur au lieu d'apparaître au numérateur, et le taux

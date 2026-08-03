@@ -1,16 +1,35 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" width="960" height="600" role="img" aria-label="Le sable noir">
+  <title>Le sable noir</title>
+  <desc>Une falaise à gauche, la mer sombre au fond, la plage noire devant. Le doigt y a laissé un tracé ; un galet chaud fume, une coquille noire et un rocher complètent la plage.</desc>
+  <!--
+    DÉCOR — lot M6, contrat du monde v4 § 2. Trait noir sur blanc, la COULEUR VIENT DU CODE
+    (annexe P § 2) : les régions sortent d'ici en grisaille #8E97A8, qui est leur état
+    par défaut et non un choix graphique. Géométrie 100 % polygonale (M, L, Z — aucun arc) :
+    surface et centroïde sont donc calculables exactement et opposables aux valeurs déclarées
+    par le .habillage.json, que scripts/verifier-regions-fermees.mjs --strict recalcule.
+
+    Chaque région est un ENFANT DIRECT de #calque-zones : SceneSvg.tsx sélectionne
+    "#calque-zones > [id]", et un tracé niché dans un sous-groupe échapperait au tap sans
+    qu'aucun message ne le dise.
+
+    ÉCRIT PAR scripts/dessiner-decors.mjs — ne pas retoucher à la main : la scène est décrite
+    dans scripts/decors/decors.mjs, et l'émetteur refuse d'écrire si la mesure est mauvaise.
+  -->
   <g id="calque-fond">
-    <rect id="fond" x="0" y="0" width="960" height="600" fill="#f6ece6"/>
+    <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
   </g>
-  <g id="calque-zones">
-    <rect id="plage-noire" x="90" y="110" width="200" height="160" rx="12"/>
-    <rect id="trace-doigt" x="380" y="110" width="200" height="160" rx="12"/>
-    <rect id="galet-chaud" x="670" y="110" width="200" height="160" rx="12"/>
-    <rect id="vapeur" x="90" y="340" width="200" height="160" rx="12"/>
-    <rect id="mer-sombre" x="380" y="340" width="200" height="160" rx="12"/>
-    <rect id="falaise" x="670" y="340" width="200" height="160" rx="12"/>
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round">
+    <path id="ciel-de-cendre" class="zone" data-region-svg="ciel-de-cendre" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L960,0 L960,138 L933.3,142.5 L906.7,145.8 L880,147 L853.3,145.8 L826.7,142.5 L800,138 L773.3,133.5 L746.7,130.2 L720,129 L693.3,130.2 L666.7,133.5 L640,138 L613.3,142.5 L586.7,145.8 L560,147 L533.3,145.8 L506.7,142.5 L480,138 L453.3,133.5 L426.7,130.2 L400,129 L373.3,130.2 L346.7,133.5 L320,138 L293.3,142.5 L266.7,145.8 L240,147 L213.3,145.8 L186.7,142.5 L160,138 L133.3,133.5 L106.7,130.2 L80,129 L53.3,130.2 L26.7,133.5 L0,138 Z"/>
+    <path id="mer-sombre" class="zone" data-region-svg="mer-sombre" fill="#8E97A8" fill-rule="evenodd" d="M0,240 L26.7,247.7 L53.3,249.8 L80,245 L106.7,236.6 L133.3,230.6 L160,231.3 L186.7,238.3 L213.3,246.4 L240,250 L266.7,246.4 L293.3,238.3 L320,231.3 L346.7,230.6 L373.3,236.6 L400,245 L426.7,249.8 L453.3,247.7 L480,240 L506.7,232.3 L533.3,230.2 L560,235 L586.7,243.4 L613.3,249.4 L640,248.7 L666.7,241.7 L693.3,233.6 L720,230 L746.7,233.6 L773.3,241.7 L800,248.7 L826.7,249.4 L853.3,243.4 L880,235 L906.7,230.2 L933.3,232.3 L960,240 L960,340 L0,340 Z"/>
+    <path id="plage-noire" class="zone" data-region-svg="plage-noire" fill="#8E97A8" fill-rule="evenodd" d="M0,340 L26.7,346.9 L53.3,346.9 L80,340 L106.7,333.1 L133.3,333.1 L160,340 L186.7,346.9 L213.3,346.9 L240,340 L266.7,333.1 L293.3,333.1 L320,340 L346.7,346.9 L373.3,346.9 L400,340 L426.7,333.1 L453.3,333.1 L480,340 L506.7,346.9 L533.3,346.9 L560,340 L586.7,333.1 L613.3,333.1 L640,340 L666.7,346.9 L693.3,346.9 L720,340 L746.7,333.1 L773.3,333.1 L800,340 L826.7,346.9 L853.3,346.9 L880,340 L906.7,333.1 L933.3,333.1 L960,340 L960,600 L0,600 Z"/>
+    <path id="falaise" class="zone" data-region-svg="falaise" fill="#8E97A8" fill-rule="evenodd" d="M0,110 L222,88 L282,300 L0,322 Z"/>
+    <path id="trace-doigt" class="zone" data-region-svg="trace-doigt" fill="#8E97A8" fill-rule="evenodd" d="M262.2,440.8 L419.3,409 L559.6,461 L724.6,420.7 L719.4,399.3 L560.4,439 L420.7,387 L257.8,419.2 Z"/>
+    <path id="galet-chaud" class="zone" data-region-svg="galet-chaud" fill="#8E97A8" fill-rule="evenodd" d="M860.5,500.1 L849.6,503.3 L837.5,503.6 L826.3,502.4 L816.2,501.3 L805.9,501 L794.6,500.6 L782.9,498.5 L773.4,493.9 L768.3,487.1 L767.7,479.6 L769.7,472.7 L771.5,466.4 L772,460 L772.7,453 L776,445.8 L783.5,439.9 L794.4,436.7 L806.5,436.4 L817.7,437.6 L827.8,438.7 L838.1,439 L849.4,439.4 L861.1,441.5 L870.6,446.1 L875.7,452.9 L876.3,460.4 L874.3,467.3 L872.5,473.6 L872,480 L871.3,487 L868,494.2 Z"/>
+    <path id="vapeur" class="zone" data-region-svg="vapeur" fill="#8E97A8" fill-rule="evenodd" d="M646.6,262.3 L633.1,260.9 L620.9,255.1 L612.1,249.2 L603.8,247.3 L592,249.6 L576.2,252.5 L561.2,252.1 L553.5,246.8 L555.3,238.8 L561.5,231.3 L563.5,226.1 L556.4,222.2 L543.4,217.4 L533.6,211 L534.7,204.5 L547.1,200.2 L563.8,198.7 L576.2,197.6 L581.3,193.8 L582.8,186.5 L587.2,178.4 L597.4,173.7 L610.9,175.1 L623.1,180.9 L631.9,186.8 L640.2,188.7 L652,186.4 L667.8,183.5 L682.8,183.9 L690.5,189.2 L688.7,197.2 L682.5,204.7 L680.5,209.9 L687.6,213.8 L700.6,218.6 L710.4,225 L709.3,231.5 L696.9,235.8 L680.2,237.3 L667.8,238.4 L662.7,242.2 L661.2,249.5 L656.8,257.6 Z"/>
+    <path id="rocher-de-la-plage" class="zone" data-region-svg="rocher-de-la-plage" fill="#8E97A8" fill-rule="evenodd" d="M237.2,490.1 L227.1,496.8 L212.1,500.2 L198.2,501.9 L188,505.2 L179.2,511.4 L168,518.1 L153.6,521.4 L139.3,518.9 L128.5,511.8 L121.2,504.1 L113.4,498.8 L101.7,495.5 L87.5,491.6 L76.4,485 L74,476.3 L80.6,467.6 L90.7,460.7 L97.8,454.7 L100,447.5 L101.3,438.3 L107,429.5 L119.1,424.4 L134.7,424.6 L149.3,428 L161.3,430.7 L173.2,430.4 L187.5,428.2 L203.4,427.9 L216.5,432.3 L222.5,440.8 L222.2,450.3 L221.1,458.4 L224.2,465.1 L231.8,472.3 L238.2,481 Z"/>
+    <path id="coquille-noire" class="zone" data-region-svg="coquille-noire" fill="#8E97A8" fill-rule="evenodd" d="M434,600 L413.8,593.9 L395.9,581.6 L383.6,561.2 L378,538.8 L387,528.6 L393.7,534.7 L402.6,522.5 L411.6,530.6 L422.8,518.4 L434,528.6 L445.2,518.4 L456.4,530.6 L465.4,522.5 L474.3,534.7 L481,528.6 L490,538.8 L484.4,561.2 L472.1,581.6 L454.2,593.9 Z"/>
   </g>
-  <g id="calque-trait">
-    <path id="cadre" d="M20 20 H940 V580 H20 Z" fill="none" stroke="#2b2b2b" stroke-width="4"/>
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path class="trait" d="M0,342 L960,334"/>
   </g>
 </svg>

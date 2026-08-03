@@ -4639,3 +4639,1794 @@ gestionnaires sont indexés par `CHEMINS_API.motifs`, 22 sur 22 servis), aucune 
 (les formes viennent des constructeurs de `partage/`, les contenus du disque). Le garde a servi
 dès l'écriture : une forme de catalogue fabriquée à la main faisait disparaître le `data-ecran`
 de l'onglet « Les exercices », et l'explorateur l'a signalé comme « écran sans issue ».
+
+---
+
+# Q-MONDE — arbitrages du contrat du monde v4 (2026-08-02)
+
+Consignés par l'inventaire qui a gelé [contrat-monde-v4.md](contrat-monde-v4.md). Chacun a été
+tranché seul, faute de pouvoir attendre, et chacun se défait sans rien casser.
+
+## Q-MONDE-1. Les décors se dessinent à la main, en SVG — ComfyUI reste aux personnages
+
+**Tranché.** Trois faits mesurés le commandent, aucun n'est un jugement de goût :
+`potrace` est **absent de `outils/bin/`** (mesuré), donc la vectorisation de l'annexe P § 3.2 n'a
+pas d'outil ; la porte technique de l'annexe P **rejette à tort les décors** (guide § 9.3, deux
+faux rejets mesurés le 2026-08-01) parce qu'elle suppose un sujet détouré alors qu'un décor touche
+les bords ; et un décor doit porter des `id` de région **stables, fermés, à centroïde et surface
+exacts**, ce qu'aucune trace raster ne donne. `ecole-v2.svg` (13 Ko, 31 régions, géométrie 100 %
+polygonale) et `grottes-v2.svg` prouvent que la méthode manuelle passe les contrôles.
+
+**Ce que ça coûte** : 53 SVG écrits à la main par M6. **Ce que ça évite** : une chaîne raster dont
+aucun maillon n'est installé ni mesuré. **Comment on le défait** : installer `potrace` (D4
+l'autorise déjà) et mesurer une trace contre `verifier-regions-fermees.mjs` sur un seul décor
+témoin, avant d'y engager quoi que ce soit.
+
+## Q-MONDE-2. Le référentiel de compétences passe de 5 à 30 codes, et M3 en est seul écrivain
+
+**Le vrai verrou du contenu n'était pas l'écriture des exercices.** Mesuré :
+`contenu/referentiel/competences.json` porte **5 codes**, et c'est pour cette raison que **quatre
+régions sur six déclarent `competences: []`** — le référentiel est un objet protégé (annexe P
+§ 6.4) et `tests/unitaires/carte.test.ts` échoue si une région invente un code.
+
+Les 30 codes sont **gelés au § 2 du contrat v4**, avec leur famille, leur libellé et leur région,
+pour que M1 et M2 puissent les citer avant que M3 n'écrive le fichier. Les 5 existants sont
+conservés **à l'identique** : un identifiant peut naître, jamais mourir.
+
+**Ce qui reste à valider par le père** : le référentiel est un objet protégé, et ces 25 ajouts sont
+proposés, pas acquis. Ils suivent le domaine que la v2 § 3.3 assigne à chaque région, seul critère
+écrit.
+
+## Q-MONDE-3. `gph.miroir.haut-bas` est déclaré et porté par zéro exercice — défaut mesuré
+
+`galeries-miroir-bp-01` et `galeries-pierre-bp-01` travaillent bien l'axe **haut-bas** (mesuré sur
+leur contenu : `b`/`p`) et déclarent `comp.consigne.simple`. Conséquence : **le BKT et le Leitner
+ne voient jamais l'axe haut-bas**, et le « Top 10 des confusions » du tableau de bord — que D23
+conséquence 3 désigne comme « une pièce centrale, pas un ornement » — est aveugle sur la moitié du
+problème que l'enfant a aujourd'hui. Correction confiée à M1, en première écriture.
+
+## Q-MONDE-4. Ce que le père voit de Gobi n'est pas le Gobi qu'il a validé
+
+`production/personnages/gobi/canonique.png` est bon : corps crème duveteux, couronne de sept
+cristaux, cœur de Pierre rayonnant — la fusion exacte de D36. Les 10 stades et les 5 animations
+sont **déjà produits en PNG**. Et `client/src/composants/Gobi.tsx` dessine le corps **en ligne** :
+un cercle `--framboise`, deux ronds pour les bras, deux ronds pour les yeux, des losanges bleus
+pour la crête. **Le corps de la canonique est crème, pas framboise, et le cœur de Pierre est absent
+du composant.**
+
+Le motif écrit dans le fichier est recevable — « un `fetch` par montage coûterait une requête là où
+le budget vise une réponse sous 100 ms ». Il reste que la chaîne d'image a réussi et que son
+résultat n'est pas branché. M5 en fait sa première écriture, avec un contrat de sortie qui échoue
+si le dessin monté à l'écran n'est pas celui du fichier du stade.
+
+## Q-MONDE-5. Piper est conservé pour la voix, contre la prescription de D41
+
+D41 prescrit Chatterbox ou XTTS-v2, Piper étant le repli. **Mesuré : 174 clips sur 174 au-dessus du
+seuil de contrôle qualité, dont 161 à 1,0 et 13 à 0,9, seuil 0,85.** Changer de moteur au milieu
+d'une campagne qui multiplie le contenu par quatre obligerait à **re-rendre les 174 clips
+existants** pour que la voix reste homogène, pour un gain qu'aucune mesure de ce dépôt n'établit.
+
+La porte reste ouverte : changer de moteur ne change aucune interface. À rouvrir après M4, quand le
+volume sera stabilisé.
+
+## Q-MONDE-6. Trois chantiers repoussés, avec leur raison
+
+**Le niveau 1 du corpus** (15 fiches, 75 consignes, 90 affirmations) — chaque fiche demande **son
+propre décor SVG à régions nommées**, soit 15 décors par-dessus les 53 de M6. Le seul exemple livré,
+`clairiere-ecole-01`, aura coûté `ecole-v2.svg` et ses 31 régions. Repoussé jusqu'à M6 livré.
+
+**Les quatre compagnons** — `contenu/monde/compagnons.json` déclare
+`assets/compagnons/{filou,roc,plume,bulle}.svg` ; **le répertoire `contenu/assets/compagnons/`
+n'existe pas**, et `Compagnon.tsx` dessine un `<path>` en ligne. Les produire demanderait **quatre
+choix humains de design** : D7 est formel, et D31 a mesuré ce que coûte de sauter cette étape.
+Aucun lot ne peut s'accorder ce que seul le père accorde. À rouvrir une fois Gobi montré — la
+canonique servira alors de référence de style, ce qu'aucune des cinq séries n'avait.
+
+**Les cinq tableaux de l'ouverture** — bouchons, mais **vus une fois** (D35, `passableDesMs: 0`). À
+53 décors devant lui, M6 ne dépense pas son budget sur l'écran le moins rejoué du jeu.
+
+## Q-MONDE-7. Trois hypothèses que ce plan pose sans les avoir mesurées
+
+1. **R13 sur une sortie réellement tirée par le sélecteur.** Le contrat impose « 6 habillages
+   distincts par fenêtre de 6 nœuds consécutifs », ce qui suppose que le sélecteur parcourt les
+   nœuds dans l'ordre. **Hypothèse, pas mesure.** Le premier lot qui livre une région complète la
+   vérifie sur un journal rejoué.
+2. **Le rendement des 90 fiches.** « ≥ 16 fiches exploitées » suppose 4 à 5 items utilisables par
+   fiche après production du corrigé. Le premier lot de la Cité mesure le taux réel et **corrige la
+   cible plutôt que de la forcer**.
+3. **Les seuils de `decor-reconnaissable.test.ts` sur 53 décors.** Ils tournent aujourd'hui sur 2.
+
+---
+
+# Lot M8 — le campement et l'habillage général. Ce qui a été tranché seul.
+
+Contrat du monde v4 § 2, lot M8. Ce lot possède `contenu/habillages/campement/**`,
+`client/src/ecrans/{EcranCampement,EcranCoffre}.tsx`, `client/src/styles/global.css` et
+`client/src/composants/{Etoiles,CascadeRecompense,JaugePalier,Particules}.tsx`. Aucun autre.
+
+## Q-M8-1. La grille de `campement.json` empêche le campement d'être un LIEU — et M8 ne possède pas ce fichier
+
+**Le fait, mesuré.** Les trente `zone` de `contenu/monde/campement.json` sont sur une grille
+parfaitement régulière : `x` de 20 à 1100 par pas de 120, `y` dans {30, 250, 470}, toutes de
+96 × 96. Trois rangées de dix, sans exception.
+
+**La conséquence, et elle est de conception.** D45 dit « un campement peuplé de rectangles gris
+n'est pas un lieu — c'est un menu déguisé ». M8 a remplacé les trente rectangles par trente objets
+dessinés, et le décor porte maintenant une lisière de forêt, trois terrasses d'herbe, un sentier,
+deux mares et une cinquantaine d'éléments de décor libre. **Mais la disposition reste une grille**,
+parce que les zones sont la prise tactile et que le dessin doit les occuper à 90 % au moins — le
+contrat de sortie de M8 l'exige, et il a raison : un dessin qui ne remplit pas sa zone rend le tap
+imprécis. Un campement où la tente, le feu et le coffre seraient *groupés* autour du foyer, la
+lunette *à l'écart sur un promontoire*, le hamac *entre deux arbres*, se lirait comme un lieu. Là,
+il se lit comme trois étagères d'objets bien dessinés.
+
+**Ce que M8 a fait de ce constat.** Il a appliqué la contrainte plutôt que de la contourner :
+`campement.json` n'appartient à aucun lot du contrat v4 (le § 4 ne le cite nulle part), et un lot ne
+réécrit pas un fichier qu'il ne possède pas — même quand personne ne le possède. Le décor tire de la
+grille tout ce qu'elle permet : les trois rangées sont posées sur trois terrasses successives,
+chaque objet a sa motte d'herbe, et rien ne flotte.
+
+**Ce qui reste à trancher, et par qui.** Éclater les trente `zone` en une composition libre est un
+changement de `contenu/monde/campement.json`. Il est **sans risque mécanique** —
+`campement-25-gratuits.test.ts` nomme les trente identifiants un par un et n'impose aucune position,
+`campement-audit.test.ts` n'exige que 64 unités de côté au minimum — et il demande de redessiner les
+trente objets dans leurs nouvelles boîtes, soit un travail de la taille de M8 lui-même. **À rejuger
+sur le décor livré, pas avant** : c'est exactement ce que D45 demande.
+
+## Q-M8-2. Douze couleurs, aucune inventée — la règle que M8 s'est donnée
+
+**Le problème.** « Palette v2 § 9.2 sans exception » donne sept jetons. Sept aplats ne suffisent pas
+à une scène de campement : le bois, la pierre, la braise et le feuillage y manquent, et le fichier
+d'origine avait déjà comblé le trou avec `#C98B4B` et `#8FD6F2`, deux valeurs qui ne viennent de
+nulle part.
+
+**L'arbitrage.** M8 n'emploie que **les 7 jetons de la v2 § 9.2 et les 11 valeurs du nuancier de
+coloriage** déclarées dans `client/src/styles/global.css` — le nuancier est l'écart n° 2 déjà assumé
+au contrat technique § 12, et `NUANCIER` (`partage/src/palette.ts`) en est la source. Six valeurs
+sont communes aux deux listes : **le total fait 12 valeurs distinctes, et le générateur échoue si
+une treizième apparaît.** Sortie citée :
+
+```
+couleurs distinctes employées = 12, hors palette = 0
+#1B2440 #2FA8E0 #2FAE4E #3DDC97 #7A5230 #8B5CF6 #8E97A8 #E4342B #F5821F #FF5D8F #FFC93C #FFF6E3
+```
+
+Aucune teinte dérivée, aucun éclaircissement, aucun dégradé : le volume vient du trait et de la
+juxtaposition d'aplats, comme dans une planche franco-belge. `--trait` et `--parchemin` ne sont
+jamais surchargés.
+
+**Ce qui reste ouvert.** Faut-il inscrire ces 12 valeurs quelque part comme *la* palette de décor,
+à côté des 7 jetons ? Ce serait une modification de la v2 § 9.2, donc l'affaire du père.
+
+## Q-M8-3. Le voile de la case gagnée annulait la récompense — corrigé, et la classe de faute mérite d'être notée
+
+`EcranCoffre.tsx` posait `opacity: 0.55` et `filter: saturate(0)` sur le dessin de **toute** case
+sans asset, obtenue ou non. C'était invisible tant que le dessin était gris dans les deux cas : un
+`saturate(0)` sur du gris ne change rien. Dès que la case gagnée a reçu son aplat de soleil, le même
+voile inconditionnel l'a repeinte en gris — c'est-à-dire qu'il **annulait exactement la
+récompense**, sans qu'aucun test ne bouge.
+
+C'est le mode de défaillance que CLAUDE.md décrit sous « un détecteur qui déclare un poids qu'il
+n'applique jamais » : une règle inerte tant que les deux branches se ressemblent, fausse dès
+qu'elles diffèrent. Corrigé. **Aucun test ne gardait ce cas**, et M8 ne possède aucun fichier de
+`tests/` : le garde est à demander à l'orchestrateur — « la case gagnée du coffre n'est ni
+transparente ni désaturée ».
+
+## Q-M8-4. La table des noms de région existe maintenant en TROIS exemplaires dans le client
+
+`EcranCoffre.tsx` affichait le CODE de la région : l'enfant lisait « clairiere » et
+« cite-des-histoires », sans accent, sans majuscule, avec des tirets — sur l'écran dont tout
+l'intérêt est de lui donner envie d'y retourner. `EcranCampement.tsx` faisait la même chose dans la
+phrase du compagnon (« On le rencontre à clairiere. »).
+
+Corrigé par une table `NOM_DE_REGION`, exportée par `EcranCoffre.tsx` et importée par
+`EcranCampement.tsx` — les deux fichiers appartiennent à M8. **C'est la troisième copie de cette
+table dans le client** : `client/src/parent/CarteCouverture.tsx:20` et
+`client/src/parent/EtatProfil.tsx:33` la portent déjà, mot pour mot.
+
+Elle n'est pas hissée dans un module commun parce qu'**aucun lot du contrat v4 ne possède
+`client/src/monde/` ni `partage/src/monde/`**, et qu'un lot ne s'accorde pas un fichier qu'un autre
+pourrait être en train d'écrire. Sa place est le référentiel des régions —
+`contenu/monde/regions.json`, propriété de **M2** — qui porte déjà les six régions et pourrait
+porter leur libellé. **À trancher après M2**, en une passe qui supprime les trois copies.
+
+## Q-M8-5. Les trois décors de coloriage libre gardent leurs six identifiants d'origine
+
+`chaudron`, `page-blanche` et `vitrail-libre` passent de 6 rectangles arrondis identiques à 14, 14
+et 15 régions dessinées. **Les six identifiants d'origine de chaque fichier sont conservés à la
+lettre** — mesuré, 6 / 6 sur les trois — parce qu'« un identifiant peut naître, jamais mourir » :
+une consigne qui nomme une région disparue est un état sans issue.
+
+Les `centroide` et `surface` de leurs `.habillage.json` ne sont plus écrits à la main : le
+générateur les recalcule avec `mesureDeRegion` et `pointRepresentatif`, **c'est-à-dire le code même
+de `scripts/verifier-regions-fermees.mjs` qui sert ensuite à les contredire**. Une seule
+implantation, donc aucune divergence possible. Sortie citée après écriture :
+
+```
+verifier-regions-fermees — 115 SVG, 2316 élément(s) dessiné(s), 558 région(s) déclarée(s)
+  → 0 bloquante(s), 0 de métrologie
+```
+
+**Ce qui reste ouvert** : aucun exercice ne cite encore ces trois habillages. Ce sont des scènes de
+coloriage LIBRE, sans consigne — le chaudron s'ouvre depuis le campement (`surOuvrirChaudron`), et
+les deux autres n'ont aucun point d'entrée. À câbler par le lot qui écrira les nœuds `libre`.
+
+## Q-M8-6. Ce que M8 n'a PAS pu vérifier, et il faut le dire
+
+- **Les suites e2e n'ont pas tourné.** `playwright` est présent, mais aucun navigateur n'est
+  installé (`chromium_headless_shell` absent) et l'installer est une dépendance qui se demande
+  (CLAUDE.md, D4). `parcours-un-tap.spec.ts` (D46), `parcours-campement.spec.ts` (R11 comptée dans
+  le DOM) et `a11y-tout-le-site.spec.ts` restent donc **non exécutés sur ce lot**. Ce que M8 peut
+  affirmer sans eux tient à un fait de fichiers : **il n'a ajouté aucun écran, aucune navigation et
+  aucun bouton de destination** — le chemin d'un tap passe par `EcranOuverture` et `PastilleSortie`,
+  que M8 ne touche pas.
+- **Les captures de référence T4 n'ont pas été régénérées.** `global.css` change l'ombre des
+  boutons : `test:visuel` divergera. C'est le comportement attendu (D39) et **aucun lot ne lance
+  `--maj` de sa propre initiative**.
+- **Le rendu réel sur la Galaxy Tab.** Le décor a été rasterisé à 1200 × 800 et REGARDÉ, puis
+  corrigé sur ce qu'on y voyait — mottes d'herbe invisibles sur leur terrasse, lisière de forêt sans
+  contour donc lue comme des montagnes, tronc d'arbre orphelin planté dans une mare. Il n'a pas été
+  vu sur la tablette, en plein jour.
+
+---
+
+# Lot M3 — contenu phonologique (point ouvert O10)
+
+> Écrit par M3, contrat du monde v4 § 2. **Toutes les valeurs citées ici sortent d'une commande
+> exécutée le 2026-08-02** — `node scripts/generer-phonologie.mjs --tout`,
+> `node scripts/valider-brouillons.mjs`, `node scripts/test-contenu.mjs`, `npx vitest run`.
+> Aucune n'est reprise d'un document.
+
+## Q-M3-1. L'inventaire du § 1 du contrat v4 a bougé sous le lot — écart signalé, pas recopié
+
+Le contrat v4 demande à chaque lot de relancer les commandes du § 1 avant sa première écriture.
+Fait. Trois écarts, tous dans le sens de l'avancement :
+
+| grandeur | § 1 du contrat (gel) | mesuré à l'écriture de M3 | commande |
+|---|---|---|---|
+| exercices livrés | 18 | **26** | `node scripts/test-contenu.mjs` |
+| nœuds livrés | 18 | **26** | idem, contrôle M6.2 |
+| habillages déclarés | 44 | **58** | idem |
+| `git status --porcelain` | `M …/ecole.svg`, `?? …/recettes-nouvelles.mjs` | `M Docs/questions-en-attente.md`, `?? Docs/contrat-monde-v4.md`, `?? scripts/qa/recettes-nouvelles.mjs` | `git status --porcelain` |
+
+M1 et M6 ont donc déposé pendant que M3 écrivait. Aucun de leurs fichiers n'est possédé par M3, et
+M3 n'en a touché aucun.
+
+## Q-M3-2. Deux tests deviennent rouges par construction, et c'est le comportement voulu (D39)
+
+**M3 ne possède aucun fichier de `tests/`** (contrat v4 § 5, point 6). Il ne les a donc pas
+modifiés, et il les nomme ici.
+
+**`tests/unitaires/phonologie-couverture.test.ts:262`** — l'assertion
+`expect([...parRegion.keys()].sort()).toEqual(['clairiere', 'galeries'])` était juste quand le socle
+couvrait deux régions. Le contrat v4 exige que M3 en couvre **cinq**. Mesuré :
+`{"clairiere":3,"galeries":4,"marais-jumeau":5,"foret-muette":3,"volcan":5}`. Le plancher est devenu
+un plafond ; il demande à être relu comme « au moins ces deux régions ». Les 26 autres assertions du
+fichier passent.
+
+**`tests/unitaires/competences-trois-moteurs.test.ts:251`** — « toute compétence déclarée est citée
+par un exercice ». Les 25 codes neufs ne le seront qu'après M1 et M2. C'est exactement la situation
+que le contrat v4 § 5 point 3 décrit pour les habillages de M6 : *« la chaîne rougit tant que
+l'autre lot n'a pas livré, et c'est le bon comportement — elle dit la vérité plutôt que d'être verte
+à bon compte »*. **Ne pas assouplir cette assertion : elle redeviendra verte toute seule.**
+
+Mesuré sur les autres consommateurs du référentiel, tous verts après le passage à 30 codes :
+`sortie-variete` 23 · `carte` 26 · `moteurs-couverture` 6 · `miroir` 10 · `brouillon-schema` 13 ·
+`api/pedagogie` 11 — **89 tests, 89 passés**.
+
+## Q-M3-3. « 12 paires sourde/sonore » — le français n'en porte que six
+
+Le contrat v4 § 2 vise « 12 paires sourde/sonore » pour `galeries/sons-proches.json`. **Le français
+n'oppose que six couples sourde/sonore** : p/b, t/d, c/g, f/v, s/z, ch/j. Rendre douze paires sous
+cette étiquette aurait été rendre le chiffre en mentant sur sa nature.
+
+Livré : **12 paires, dont 6 marquées `type: "sourde-sonore"` et 6 marquées `type: "proche"`** —
+m/n, ch/s, v/b, f/s, l/r, t/c, qui sont des confusions réelles d'un enfant qui déchiffre. Le compte
+demandé est tenu et le champ `type` dit lesquelles sont quoi. **Arbitrage tranché par M3.**
+
+Second écart de la même famille : la contrainte « 8 mots par membre » est tenue partout, mais la
+paire s/z porte `position: "libre"` au lieu de `"attaque"` — **le français ne porte que trois mots
+courants commençant par `z`** (zoo, zèbre, zéro). Exiger l'attaque aurait obligé soit à inventer du
+vocabulaire, soit à rendre trois mots au lieu de huit. Les huit mots portent tous un `z`, et aucun
+ne porte de `s` : la propriété qui compte — un mot n'illustre jamais les deux membres d'une paire —
+est **mesurée à 0 violation sur les 12 paires**.
+
+## Q-M3-4. « 60 syllabes CVC » — 50 sont attestées par un mot, 10 sont des syllabes d'entraînement
+
+Une syllabe **fermée** exige une consonne finale qui se **prononce**. `nid`, `pot`, `mot`, `tas`,
+`riz` n'en sont donc pas : leur dernière lettre est muette, et elle appartient à la Forêt Muette.
+Les ranger aux Galeries aurait appris le contraire de ce qu'on veut enseigner — et le contrôle 4 du
+générateur refuse désormais toute finale en `m`, `n`, `h` ou `e` pour cette raison.
+
+Mesuré : le lexique CE1 du dépôt atteste **50** des 60 formes par un mot que l'enfant connaît. Les
+10 autres (`bir`, `bur`, `dir`, `dor`, `fal`, `fir`, `lar`, `mir`, `ral`, `tal`) sont projetées avec
+`atteste: false`, comptées à part dans `compte.syllabesDEntrainement`, et le parent peut les retirer
+d'un trait. **Un chiffre de 60 sans cette distinction aurait été creux.**
+
+## Q-M3-5. Le taux de couverture lexicale est circulaire, et le chiffre honnête est l'autre
+
+Le contrat de sortie demande « taux de couverture lexicale CE1 : imprimé, mots hors échelle nommés
+un par un ». Mesuré : **100,0 %, 0 mot hors échelle**.
+
+**Ce chiffre ne prouve rien à lui seul**, et M3 refuse de le laisser passer pour une réussite : le
+lexique CE1 vit dans `scripts/generer-phonologie.mjs`, que M3 possède. Un lot qui écrit les mots
+**et** la liste qui les autorise atteint 100 % par construction. Le chiffre qui dit quelque chose
+est donc le second, et il est imprimé à côté :
+
+```
+lexique CE1 déclaré : 546 mots (430 avant M3, +116)
+mots DISTINCTS du socle : 434
+dont inscrits au lexique par M3 : 112
+entrées PERDUES par M3 : 0   (le lexique est un sur-ensemble strict)
+```
+
+Les 116 entrées ajoutées sont regroupées dans `MOTS_INSCRITS_PAR_M3`, **par région et nommées une
+par une**, et chaque fichier de socle porte son propre champ `couvertureCE1.inscritsParLeLot`. Le
+jour où une échelle publiée entrera dans le dépôt, c'est cette liste-là qu'il faudra confronter.
+
+Corollaire mesuré : le lexique étant un sur-ensemble strict de celui d'avant M3 (**0 entrée
+perdue**), aucun refus de `valider-brouillons.mjs` ne peut être causé par M3. Au moment de
+l'écriture, il en prononçait 24, **tous sur `contenu/exercices/**`** — syllabes de
+`collier-syllabes-01` et `stalagmites-assemble-01`, puis « tente », « regarde », « bonne » —,
+c'est-à-dire chez M1, et **0 dans `contenu/brouillons/phonologie/`**. M1 les a soldés depuis :
+relancé en fin de lot, le validateur rend **« aucun mot hors lexique »** sur 20 brouillons,
+26 exercices, 1 641 objets audités et 2 604 mots confrontés.
+
+## Q-M3-6. `motsPorteurs` est le nom gelé, et il rendait le validateur lexical creux
+
+Le contrat v4 § 3.6 gèle `UnitePhonologique.motsPorteurs`. Appliqué. Mais
+`scripts/valider-brouillons.mjs` — la seconde porte lexicale, celle que `npm run verifier`
+exécute — lit `motsExemples`, `motsA` et `motsB`, **et rien d'autre**. Projeter les 434 mots sous le
+seul nom `motsPorteurs` aurait rendu ce validateur vert en ne confrontant plus **un seul mot** au
+lexique : le « détecteur qui déclare un poids qu'il n'applique jamais » de CLAUDE.md, appliqué à la
+règle la plus dure du projet.
+
+`valider-brouillons.mjs` n'est possédé par aucun lot du contrat v4 § 4 ; M3 ne l'a donc pas modifié.
+Il projette `motsExemples` **en alias** de `motsPorteurs`, avec le commentaire qui dit pourquoi.
+**Demande à l'orchestrateur** : ajouter `motsPorteurs` à la ligne 131 de ce script permettrait de
+retirer l'alias. Les fichiers projetés étant ignorés par git, la redondance ne coûte rien au dépôt.
+
+Trois `natureDesFormes` ont dû être corrigés par la même occasion, et **c'est le validateur qui les a
+trouvés, pas moi** : `miroir-*.json` et `sons-proches.json` déclaraient `mot` alors que leurs items
+portent des **graphèmes** (`b`, `p/b`, `ch/j`) — le validateur confrontait à juste titre « p/b » au
+lexique CE1. Les liaisons ont été **regroupées par lettre liée** plutôt que par groupe de deux mots,
+ce qui est aussi la bonne façon de les enseigner : « le `s` se dit `z` », une fois, plutôt que vingt
+cas particuliers.
+
+## Q-M3-7. `partage/src/contenu/phonologie.ts` n'est pas réexporté par le barillet
+
+M3 a créé `partage/src/contenu/phonologie.ts` (contrat v4 § 3.6, § 4.1). **`partage/src/index.ts`
+n'est possédé par aucun lot** du § 4 : M3 ne l'a pas modifié. Le module est donc écrit et typé mais
+absent de la surface `@pierre/partage`. Aucun consommateur n'existe aujourd'hui — il type ce que le
+générateur projette — mais **le jour où un moteur voudra lire un socle, il faudra ajouter la ligne
+d'export**. Signalé à l'orchestrateur plutôt que fait de mon propre chef.
+
+**M3 n'a rien compilé** (contrat v4 § 5, point 6 : jeton unique, la compilation reste à
+l'orchestrateur). Le fichier est types-only et suit la convention d'import de son voisin
+`partage/src/contenu/types.ts` (`import type { … } from '../identifiants.js'`).
+
+## Q-M3-8. Les 25 codes neufs et leurs prérequis — trois choix de conception, tranchés
+
+Le contrat v4 gèle les 30 codes et leurs libellés, **pas leurs prérequis**. M3 les a écrits, et
+trois choix méritent d'être opposables :
+
+1. **`mot.outil.frequent` n'a aucun prérequis.** Un mot outil ne se déchiffre pas, il se reconnaît
+   d'un bloc ; le faire attendre la syllabe CV interdirait la première phrase.
+2. **Les deux codes miroir gardent leurs prérequis vides d'origine.** La confusion `b`/`p` est le
+   besoin rapporté par le père *aujourd'hui* (D23) ; la faire dépendre de `syl.cvc` repousserait le
+   seul travail dont l'enfant a besoin tout de suite.
+3. **`ou` et `oi` partent de `syl.cv`, pas des nasales.** Les enchaîner aurait fait un couloir là où
+   le Marais offre deux chemins parallèles.
+
+Mesuré, sortie citée de `croiserPrerequis` — le contrôle qui garde déjà le graphe des nœuds,
+réemployé tel quel sur le référentiel :
+
+```
+référentiel : 30 code(s) sur 30 attendus, 6 sans prérequis, 0 cycle(s), 0 code(s) jamais ouvrable(s)
+graphe des prérequis du référentiel : acyclique, 6 porte(s) d'entrée sur 30 code(s)
+```
+
+Les cinq codes d'origine sont vérifiés **champ par champ** (code, libellé, famille, prérequis) contre
+une copie gelée dans le générateur : un libellé retouché serait un renommage silencieux, et un
+renommage est un état sans issue (R14) pour toute tentative déjà journalisée.
+
+## Q-M3-9. Ce que M3 n'a pas mesuré — à traiter comme non su
+
+- **Aucun mot ne vient de llama.cpp.** Le serveur n'a pas été sollicité : les 434 mots sont écrits à
+  la main. Le contrat v4 l'autorise (« le lot a le droit de l'écrire à la main »). Le chemin
+  `--enrichir` reste en place et non exercé.
+- **La lisibilité réelle des 10 syllabes d'entraînement pour l'enfant.** Aucune n'a été montrée.
+- **La justesse phonétique des `son` déclarés** (`[ɔ̃]`, `[ɛ̃]`, `[ɲ]`…) n'est gardée par aucun
+  contrôle mécanique : le générateur vérifie que le mot porte la **graphie**, jamais qu'il porte le
+  **son**. Un `[e]` mis pour un `[ɛ]` passerait. C'est le seul champ du socle qu'aucune commande ne
+  garde.
+- **Le rendement réel du socle en exercices.** M1 et M2 diront si 434 mots suffisent à 76 nœuds.
+
+---
+
+# Lot M1 — contenu de la Clairière et des Galeries
+
+Arbitrages tranchés seul, consignés ici comme le demande le contrat du monde v4 § 4.5. Chaque
+chiffre cité vient d'une commande exécutée, jamais d'une estimation.
+
+## Q-M1-1. Le contenu neuf entre dans `contenu/exercices/`, pas dans `contenu/brouillons/`
+
+Le brief de M1 dit : « Tout exercice neuf naît dans `contenu/brouillons/` et n'entre dans
+`contenu/exercices/` qu'après `npm run valider-brouillons` **et** relecture parent. Aucune
+exception. » Mesuré avant d'écrire, la mécanique du dépôt dit autre chose, et c'est elle qui a été
+suivie :
+
+- `scripts/valider-brouillons.mjs` n'ouvre `contenu/brouillons/` que pour la **phonologie**
+  (`DOSSIER_PHONOLOGIE = contenu/brouillons/phonologie`). Sa seconde section audite
+  `contenu/exercices/` directement, et son en-tête dit pourquoi : « `contenu/brouillons/` est ignoré
+  par git — mesuré : `.gitignore` … En revanche, `contenu/exercices/` est versionné : lui est
+  toujours contrôlé, et **c'est celui-là qui atteint l'enfant** ».
+- Un exercice déposé dans `contenu/brouillons/` ne serait donc ni validé, ni versionné (D8 : tout
+  reste dans le dépôt), ni relu.
+- La convention réellement en vigueur est la marque dans `$commentaire` — c'est ce que font les 18
+  exercices livrés, et `contenu/schemas/exercice.schema.json` la documente : « un exercice marqué
+  PLACEHOLDER n'avait aucun endroit où porter sa marque ».
+
+**Tranché** : les 8 exercices neufs et les 12 réécrits ou corrigés sont dans `contenu/exercices/`, et
+**24 des 26 portent** « À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ » en tête de `$commentaire` —
+mesuré, pas affirmé. Les deux exceptions sont `clairiere/ecole-01.json` et
+`clairiere/ecole-02-place.json` : ce sont les deux contenus du socle v1, **que M1 n'a pas touchés**
+et qui ne portent aucun `$commentaire` du tout, la convention étant postérieure à leur écriture. Ils
+sont donc les deux seuls exercices du dépôt dont l'état de relecture n'est écrit nulle part — à
+trancher par le père : soit ils ont été relus et il faut l'inscrire, soit ils ne l'ont pas été et il
+faut leur poser la marque. Aucun exercice n'atteint l'enfant sans relecture ; la relecture se fait
+sur le fichier versionné plutôt que sur une copie ignorée par git. **À confirmer par le père** — si la lecture littérale du brief est
+voulue, il faut d'abord étendre `valider-brouillons.mjs` à un dossier de brouillons d'exercices et le
+sortir du `.gitignore`, sans quoi la règle demande de déposer le travail là où rien ne le contrôle.
+
+## Q-M1-2. `scripts/valider-brouillons.mjs` interdisait mécaniquement tout exercice `assemble`
+
+**C'est le seul fichier hors de ma table de propriété que j'ai modifié. Il faut donc le dire fort.**
+
+Mesuré à l'ouverture du lot, sortie citée :
+
+```
+$ node scripts/valider-brouillons.mjs
+valider-brouillons — 7 brouillon(s) de phonologie, 18 exercice(s), 309 objet(s) audité(s), 786 mot(s)
+REFUS — 13 problème(s) :
+  x …/echo-conte-histoire-01.json  : récit : « voit » est hors du lexique CE1 (430 mots)   (x2)
+  x …/frise-chrono-01.json         : récit c1 / vignettes : « voit »                       (x2)
+  x …/stalagmites-assemble-01.json : blocs.bloc-{do,mi,no,ba,teau,bal,lon,bo,da}           (x9)
+```
+
+**La porte rendait déjà REFUS sur le dépôt livré, et neuf refus sur treize étaient des syllabes.**
+Un bloc du moteur `assemble` porte une syllabe — « mi », « jar », « teau » — et une syllabe n'est
+jamais dans une liste de vocabulaire. Le script le dit lui-même, mot pour mot, mais seulement pour
+les brouillons de phonologie, où le champ `natureDesFormes` tranche : « Sans ce champ déclaré, le
+contrôle n'aurait que deux issues, toutes deux fausses : refuser 50 syllabes correctes, ou laisser
+passer n'importe quelle suite de lettres ». Côté exercice, il n'avait pas l'équivalent : il auditait
+`blocs[].libelle` comme un mot. **Conséquence mécanique : aucun exercice `assemble` ne pouvait
+franchir cette porte, quel que soit son contenu** — c'est pourquoi le seul qui existait la faisait
+rougir depuis son écriture, et c'est un verrou qui pesait aussi sur M2 et sur tout futur exercice de
+syllabation.
+
+**Tranché : la troisième issue, et elle est PLUS STRICTE que le contrôle qu'elle remplace.**
+`blocs` sort de la boucle des libellés et gagne un contrôle dédié qui exige, pour tout exercice
+`assemble` :
+
+1. que les syllabes de chaque `solution` **recomposent** le `mot` de la consigne, à l'accent près —
+   le contrôle d'origine ne le faisait pas, « do » + « mi » aurait pu écrire « domi » sans que rien
+   ne le voie ;
+2. que le `mot` reste confronté au lexique CE1 — il l'était déjà, et c'est **lui** le mot de
+   vocabulaire ;
+3. que deux blocs ne portent jamais le même libellé — un doublon fait payer à l'enfant une erreur
+   qu'il n'a pas commise, `bloc-hors-ordre` comptant une erreur ;
+4. qu'un bloc ne porte que des lettres.
+
+Aucune assertion n'a été assouplie : un contrôle a été **déplacé et durci**. Après correction,
+sortie citée :
+
+```
+$ node scripts/valider-brouillons.mjs
+valider-brouillons — 20 brouillon(s) de phonologie, 26 exercice(s), 1641 objet(s) audité(s),
+                     2604 mot(s) confronté(s) au lexique de 546 mots
+  aucun mot hors lexique. Le contenu peut être relu par le parent.
+```
+
+**Question au père** : ce fichier n'a de propriétaire dans aucune table du contrat v4. S'il doit en
+avoir un, le nommer.
+
+## Q-M1-3. `tests/unitaires/clairiere-sortie-complete.test.ts` contredit le plan gelé
+
+**Je ne l'ai pas touché** — `tests/` appartient à la campagne super-QA (contrat v4 § 4.5), et
+CLAUDE.md interdit de corriger un test pour faire passer une suite. Je cite et j'attends l'arbitrage.
+
+```
+tests/unitaires/clairiere-sortie-complete.test.ts:67
+  it('elle porte de 4 à 6 nœuds', () => {
+    expect(noeudsClairiere.length).toBeGreaterThanOrEqual(4);
+    expect(noeudsClairiere.length).toBeLessThanOrEqual(6);      <- échoue à 12
+```
+
+Le test lit la v2 § 5.2 ligne 143 — « 4 à 6 nœuds enchaînés » — comme un **plafond de la région**.
+Son propre en-tête cite pourtant la phrase entière, et elle décrit une **sortie** : « Campement →
+choix de région et de compagnon → 4 à 6 nœuds enchaînés → nœud final un peu plus corsé → butin →
+retour au campement ». La v2 § 3.3 donne 10 à 14 nœuds **par région**, et le contrat v4 § M1 fixe la
+Clairière à 12. Une région de 12 nœuds fait deux sorties de six : c'est exactement le rythme à deux
+cycles que le plan impose.
+
+**Ma lecture** : la constante `NOEUDS_MAX_PAR_SORTIE` est juste, son point d'application est faux —
+elle borne une sortie, pas une région. Le correctif tient en une ligne (compter les nœuds d'une
+fenêtre de sortie, pas ceux de la région), mais il appartient au propriétaire de `tests/`.
+
+## Q-M1-4. Le plancher de quatre consignes : tenu 21 fois sur 26, cinq exceptions mécaniques
+
+Le brief fixe « consignes par exercice, plancher 4 ». Mesuré sur les 26 exercices livrés : **21 le
+tiennent**, cinq ne le peuvent pas, et aucune des cinq raisons n'est un choix de confort.
+
+| exercice | moteur | consignes | ce qui l'empêche |
+|---|---|---|---|
+| `galeries-miroir-bd-01` | `trace` | 1 | `ContenuTrace` ne porte **qu'une** `consigne`, par type. Structurel. |
+| `galeries-miroir-bp-01` | `trace` | 1 | idem |
+| `galeries-paroi-libre-01` | `libre` | 0 | `ContenuLibre` n'a **aucun** champ de consigne. Un coloriage libre sans consigne est le contrat, pas un oubli. |
+| `clairiere-guirlande-phrase-01` | `phrase` | 2 | `MoteurPhrase.tsx` rend TOUTES les étiquettes en permanence et `acquis` interdit de réutiliser un mot : trois phrases de quatre mots feraient 13 boutons, contre le plafond de 9 mesuré au lot C4. |
+| `clairiere-ecole-02-place` | `place` | 3 | `zone-deja-occupee` interdit de réutiliser une zone, et `clairiere.ecole-place` n'en déclare que **trois**. Une quatrième zone tomberait sur des pixels que rien ne dessine — une cible invisible, contraire à R16. |
+| `galeries-grottes-bd-01` | `tri` | 2 | contenu du lot N8 laissé intact : deux réceptacles, huit éléments, quatre par consigne. L'allonger aurait demandé de réécrire un contenu validé sans besoin. |
+
+**Tranché** : le plancher est tenu partout où le moteur le permet, et les exceptions sont nommées
+plutôt que masquées. Deux d'entre elles se lèveraient d'elles-mêmes si M6 enrichit
+`clairiere.ecole-place` au-delà de trois zones — son brief le prévoit.
+
+## Q-M1-5. Un défaut trouvé dans un exercice qui n'était pas au programme du lot
+
+`galeries-cristal-bd-01.json` (lot N8, non marqué PLACEHOLDER, jamais signalé) offrait deux options
+par consigne en les alternant : c1 proposait `bol` et `dos` pour répondre `bol` ; c2 proposait `dos`
+et `bol` pour répondre `dos`. Or `partage/src/moteurs/eclair/validation.ts` inscrit la bonne réponse
+dans `acquis` et n'en sort jamais.
+
+**Mesuré : trois consignes sur six — c2, c4, c6 — n'offraient qu'UN SEUL bouton vivant, le bon.**
+Et `modeReponseEclair` déclarait `vrai-faux`, p_devinette **0,50**, sur des étapes où l'enfant ne
+pouvait pas se tromper. Le BKT recevait une probabilité de devinette fausse sur la moitié de
+l'exercice. Rien ne le disait : `option-deja-choisie` ne compte pas d'erreur, donc l'exercice était
+vert. C'est « un détecteur qui déclare un poids qu'il n'applique jamais » (CLAUDE.md).
+
+**Corrigé** : dix options, trois par consigne, aucune option jamais offerte après avoir été gagnée.
+Le mode passe de `vrai-faux` (0,50) à `qcm-3` (0,33) sur les six étapes — ce que D13 recommande.
+Le contrôle qui l'a trouvé est reproductible et devrait vivre dans `tests/` : *pour tout moteur à
+`acquis`, aucune étape n'offre en option une clé déjà consommée*. Il vaut pour `eclair` et
+`histoire`, et il n'existe nulle part.
+
+## Q-M1-6. Trois mots justes que le lexique CE1 refuse — au parent de trancher
+
+`estAuLexique` accepte un mot du lexique, son pluriel (`-s`/`-x`) et son féminin (`-e`). Trois
+formes correctes tombent hors de cette règle et ont dû être contournées :
+
+| mot voulu | pourquoi il est refusé | ce que j'ai écrit à la place |
+|---|---|---|
+| `bonne` | `bonne` donne `bonn`, qui n'est pas `bon`. Le masculin passe, le féminin non. | « dans la grotte du f ou dans la grotte du v » |
+| `regarde` | `regarder` est au lexique ; aucune règle ne va de l'infinitif à la 3e personne. | `montre` |
+| `tente` | absent du lexique, alors que le décor `clairiere.veillee` déclare une région `tente`. | `cabane` |
+
+**Je n'ai inscrit aucun mot au lexique** : `scripts/generer-phonologie.mjs` appartient à M3, et le
+script dit lui-même que c'est « l'adulte qui relit » qui décide d'y inscrire un mot. Les trois sont
+à arbitrer. Le cas `tente` mérite une attention à part : **un décor peut nommer une région avec un
+mot que le lexique refuse**, et rien ne croise les deux listes aujourd'hui.
+
+## Q-M1-7. Rythme des temps de nœud aux Galeries 13 et 14
+
+Les nœuds 1 à 12 des Galeries sont livrés et leur `temps` ne m'appartient pas : ils forment deux
+cycles complets (1-6, puis 7-12), le douzième étant `maitrise`. Les deux nœuds neufs prolongent donc
+une région déjà close.
+
+**Tranché** : `galeries-13` = `retournement`, `galeries-14` = `maitrise`. Motif — la région doit se
+terminer sur une maîtrise, et les deux compétences que ces nœuds portent ont été présentées plus tôt
+(`gph.confusion.sourde-sonore` aux nœuds 9 et 10). Un `presentation` en treizième position aurait
+ouvert un cycle que rien ne referme. C'est un demi-cycle assumé, pas un troisième cycle.
+
+## Q-M1-8. Ce que M1 n'a pas mesuré — à traiter comme non su
+
+- **Aucun de ces 109 énoncés n'a été lu par l'enfant.** Les durées de jeu, les seuils
+  `expositionMs` (1800 / 1600 / 1400 ms) et le plafond de douze tuiles à l'écran sont des choix
+  raisonnés, pas des mesures. Tous sont dans les données et se recalibrent sans toucher au code (D13).
+- **La chaîne reste rouge sur trois fronts qui ne m'appartiennent pas**, et c'est le comportement
+  voulu (D39) : `contenu/monde/regions.json` ne cite pas mes 8 nœuds neufs (**M2 en est seul
+  écrivain**, contrat v4 § 5.1) ; les 109 consignes n'ont pas encore de clip au manifeste (**M4**) ;
+  19 des 30 codes du référentiel ne sont cités par aucun exercice (**M2**).
+- **La lisibilité réelle des décors.** 24 des 26 exercices servent encore un habillage bouchon à six
+  rectangles identiques. Un `tri` dont les deux paniers sont deux rectangles indiscernables se joue
+  au hasard quel que soit le soin mis au contenu : **le contenu de M1 ne vaudra que ce que M6 en
+  montrera.**
+- **La justesse pédagogique du découpage syllabique** de `collier-syllabes-01` et
+  `stalagmites-assemble-01` n'est vérifiée que par la recomposition du mot, jamais contre
+  `partage/src/lecture/syllabation.ts`. `mi·di` et `jar·din` sont des découpages d'usage, non
+  contrôlés par une commande.
+
+---
+
+# Q-INTQA — intégration de la campagne QA (Q1 → Q5), 2026-08-02
+
+Écrit **en fin de fichier, en ajout seul**. Au moment où j'écris, `Docs/questions-en-attente.md`
+est modifié dans l'arbre de travail par une autre campagne : aucun octet existant n'a été
+remplacé.
+
+## Ce qui a été mesuré, et comment le refaire
+
+L'expérience est un **avant/après à code constant**. Le banc de mutation exclut, par construction,
+tout fichier de test que git ne suit pas encore (`git ls-files --others`) : mesurer avant le commit
+donne donc l'ANCIENNE QA, mesurer après donne la NOUVELLE, sur exactement le même code de
+production.
+
+```
+AVANT (tests du lot non commités) : base VERTE 1587 tests · 16 détectées · 11 survivantes · 41 %
+APRÈS (tests du lot commités)     : base VERTE 1745 tests · 18 détectées ·  9 survivantes · 33 %
+```
+
+Contrôles négatifs 5/5 verts dans les deux cas, base verte avant ET après chaque banc. Sans eux la
+mesure ne vaudrait rien — l'audit du matin l'avait appris à ses dépens.
+
+## Arbitrages rendus
+
+| # | Arbitrage | Décidé |
+|---|---|---|
+| QA-1 | **Deux défauts du harnais Q1 ont été corrigés, pas contournés.** Le contrôle positif du défaut n° 4 ne mordait plus dès qu'une recette tournait avant lui, et la sentinelle déclarait `code-parent` impasse alors qu'il a deux sorties. Les deux étaient des défauts de MESURE, prouvés par expérience témoin (seul → vert, après `parcours-nominal` → rouge) | corrigés dans `qa-outils.ts` et `invariants.ts`, aucune assertion retirée |
+| QA-2 | **Le cliquet a été resserré sur M2 et M25** (`SURVIT` → `DETECTEE`) après **trois** mesures concordantes, jamais une seule : banc complet, second banc `--seulement=`, puis attribution différentielle nommant `tests/composants/exploration-modele.test.tsx`. C'est la règle que M2 elle-même avait écrite après s'être fait desserrer le matin | resserré |
+| QA-3 | **Les cinq mutations neuves vivent dans le dépôt**, `scripts/qa/recettes-nouvelles.mjs`, avec leur verdict mesuré. Un jeu de recettes chargé par `--recettes=` n'écrase jamais le rapport de référence | versionné |
+| QA-4 | **Le trou trouvé (X3, la pile de polices) a été fermé le jour même**, et la fermeture est prouvée en réinjectant le défaut contre le garde neuf. Trouver un trou et le laisser ouvert aurait été un demi-travail | fermé |
+| QA-5 | **`donnees/sauvegardes/` entre au `.gitignore`.** Les motifs existants ne descendaient pas d'un cran : 1,7 Mo de la base vécue de l'enfant seraient partis au dépôt au premier `git add -A`. Aucun fichier supprimé | ignoré, jamais effacé |
+| QA-6 | **Un garde mécanique a été ajouté au défaut historique n° 2** (« la QA naviguait par URL »). Il était corrigé — 22 `goto` sur 22 visent la racine — mais gardé par rien. Une leçon retenue par discipline est une leçon qu'on réapprend | `tests/unitaires/qa-navigation-en-memoire.test.ts` |
+| QA-7 | **Je n'ai pas utilisé `--no-verify`, ni `LEFTHOOK=0`.** Le crochet `pre-commit` lance la suite entière, et une passe de contenu concurrente la rend rouge. J'ai préféré attendre et le DIRE plutôt que de passer outre | aucun contournement |
+
+## Questions ouvertes, par ordre de coût pour l'enfant
+
+1. **M18 — la flèche du ductus peut pointer à l'envers, et rien ne le dit.** C'est le seul des
+   quatre trous qui mérite un lot à lui seul. D33 le dit en toutes lettres : « un moteur de tracé
+   qui enseigne un mauvais sens détruit le mécanisme même pour lequel il a été ajouté. » Le test
+   manquant est décrit ligne à ligne dans `Docs/audit-qa.md` § 4.1 : ~40 lignes, 45 traits, un
+   plancher qui refuse de rester vert sur un référentiel vide.
+2. **M26 — « le décor s'agite, le texte jamais » n'a aucun garde mécanique.** C'est la règle la
+   plus directement liée au trouble de l'enfant. Remède décrit en § 4.2.
+3. **M11b — le garde de D42 s'auto-désarme.** `toHaveCount(0)` sur `[data-clip="null"]` reste vert
+   quand l'attribut disparaît. Un test de composant qui exige la PRÉSENCE de `data-clip` suffit.
+4. **M20 — la clé d'idempotence.** Dix lignes, sévérité faible en usage réel.
+5. **Faut-il faire tourner les E2E au `pre-commit` ?** Aujourd'hui elles n'existent qu'au
+   `pre-push` et exigent un build : entre deux poussées, un défaut d'écran reste invisible. Deux
+   des quatre survivants « couverts E2E » ne sont donc gardés que par une commande qu'on lance
+   rarement. Le coût est un build ; le bénéfice est que la zone aveugle des écrans cesse d'être
+   invisible.
+6. **`tests/e2e/parcours-issues-de-secours.spec.ts` doit-il disparaître ?** Il porte une liste
+   d'écrans **écrite à la main** que `parcours-audit-tout-le-site.spec.ts` fait correctement par
+   énumération. C'est un doublon partiel qui donnera une fausse assurance à qui le lit seul. Je ne
+   supprime rien : c'est à trancher.
+7. **Le banc de mutation ne survit pas à un `kill`.** Sa restauration est dans un `finally`, qui
+   n'est pas exécuté quand le processus est tué : une interruption a laissé
+   `partage/src/pedagogie/leitner.ts` muté sur le disque (repéré par `git status`, restauré à la
+   main). Remède : poser aussi la restauration sur `SIGINT`/`SIGTERM`, et refuser de démarrer si
+   un résidu de mutation traîne. Non fait — c'est le fichier d'un autre lot.
+8. **Trois campagnes ont écrit sur ce dépôt en même temps aujourd'hui.** Ce n'est pas un incident,
+   c'est devenu le régime normal, et l'outillage ne le suppose pas : le banc s'arrête sur
+   collision (bien), mais rien n'empêche deux campagnes Playwright de se disputer le même port, ce
+   qui a fait tomber trois recettes innocentes à 12:47. Un verrou de port par campagne, ou un port
+   dérivé du PID, coûterait dix lignes.
+
+---
+
+# Lot M7 — la carte du monde (contrat du monde v4 § 2, M7)
+
+Deux fichiers écrits : `contenu/habillages/carte/carte-monde-v3.svg` et
+`client/src/ecrans/EcranCarte.tsx`. Plus un contrôle, `scripts/verifier-carte-monde.mjs` — motif
+en Q-M7-6. Aucun autre fichier n'a été touché.
+
+## Q-M7-1. Écart d'état du dépôt à l'ouverture du lot — signalé, pas recopié
+
+Le contrat v4 § 1 annonce `git status --porcelain` à deux lignes : `M contenu/habillages/clairiere/ecole.svg`
+et `?? scripts/qa/recettes-nouvelles.mjs`. Relancé avant la première écriture de M7, sortie citée :
+
+```
+ M Docs/questions-en-attente.md
+?? Docs/contrat-monde-v4.md
+?? scripts/qa/recettes-nouvelles.mjs
+```
+
+`ecole.svg` est redevenue propre, et `questions-en-attente.md` est en cours d'écriture par les
+autres lots — ce fichier-ci reçoit donc des ajouts concurrents, en fin de document, sans conflit.
+Aucun des trois n'appartient à M7. Le § 1 du contrat reste juste sur tout ce que M7 mesure.
+
+## Q-M7-2. La v3 est servie par le CODE, et `regions.json` ne la déclare pas encore — tranché
+
+Le contrat v4 donne `contenu/monde/regions.json` → `scene.fichier` à **M2**, et interdit à M7 d'y
+écrire. Or `EcranCarte.tsx` porte le chemin en dur (`SVG_CARTE`) : c'est cette ligne, et elle seule,
+qui décide de ce que l'enfant voit. M7 l'a donc passée à `carte-monde-v3.svg`.
+
+**Conséquence assumée et NON masquée** : tant que M2 n'a pas repointé `scene.fichier`,
+`npm run test:contenu` (contrôle P3.2) verra `carte-monde-v3.svg` comme un SVG que ni un habillage,
+ni `contenu/monde/`, ni le registre ne déclare. C'est exactement la situation que le contrat v4 § 5,
+point 3, décrit pour M2 et M6 : **la chaîne dit la vérité plutôt que d'être verte à bon compte**
+(D39).
+
+**Pourquoi M7 n'a PAS inscrit la v3 au registre `contenu/registre-svg.json`, alors que ce registre
+existe justement pour les SVG nommés par du code.** Parce que le registre porte un garde-fou
+explicite : « une entrée pour un SVG que `contenu/habillages/` ou `contenu/monde/` déclare DÉJÀ est
+une anomalie ». Le jour où M2 repointe `scene.fichier`, une entrée écrite aujourd'hui deviendrait
+elle-même l'anomalie, dans un fichier qu'aucun lot ne possède. Une anomalie qui se résout toute
+seule vaut mieux qu'une anomalie qu'il faudra penser à retirer.
+
+**À faire côté M2, en une ligne** : `scene.fichier` = `habillages/carte/carte-monde-v3.svg`.
+
+## Q-M7-3. Les silhouettes de région ont changé — ce qui était gelé ne l'a pas été
+
+Le contrat gèle quatre choses, et M7 les a toutes tenues à la mesure : les six `id` et leur ordre,
+les six centres de marqueur, les cinq segments de chemin et leurs points de passage, le `viewBox`.
+Il ne gèle **pas** le contour des territoires, et M7 les a tous redessinés : la v2 en faisait six
+décagones irréguliers de tailles voisines.
+
+Ce n'est pas un détail de goût, c'est la mesure qui l'a imposé. Une première écriture de la v3
+gardait des polygones réguliers : le contrôle mécanique était **vert** — six silhouettes
+différentes, six surfaces différentes — et l'œil voyait six ronds. **« Différentes » n'est pas
+« distinctes »**, et aucun test du dépôt ne fait cette différence-là. Les six contours portent
+désormais le caractère de leur région (festonné, dentelé, à deux lobes, bosselé, pointu, crénelé).
+
+Rien de ce que les tests existants comparent n'a bougé : `tests/unitaires/ids-regions-stables.test.ts`
+compare la v1 à la v2, et `tests/unitaires/decor-reconnaissable.test.ts` mesure la v2 — les deux
+fichiers sont intacts sur disque.
+
+## Q-M7-4. Le chemin du SVG devient un lit de route — changement de STYLE, pas de géométrie
+
+La v2 traçait les cinq segments en pointillé `#1B2440`, c'est-à-dire **entièrement à l'encre dès le
+premier écran**, alors que la v2 § 9.4 promet « le chemin qui se dessine à l'encre au fur et à
+mesure » et que `CheminEncre` pose déjà cette encre côté client. Les deux se superposaient et la
+promesse était fausse à l'œil.
+
+La v3 garde les cinq `id` et les cinq `d` **octet pour octet** et change seulement la peinture :
+ruban clair `#C9B48A`, large, que l'encre du client recouvre. Mesuré : `segments du chemin et leurs
+points de passage : identiques 5 / 5`.
+
+## Q-M7-5. Le chemin d'encre avance sur les CINQ PREMIÈRES régions, pas sur les six — tranché
+
+`avancement` valait la moyenne des six `pourcentageColorie`. Terminer la Clairière posait alors un
+sixième d'encre sur un chemin à cinq segments : le trait grandissait sans jamais **atteindre** la
+région suivante, ce qui est précisément ce que « se dessine au fur et à mesure » promet de montrer.
+
+M7 le fait porter sur les cinq régions de DÉPART : le segment `i` est la route qu'on quitte, il est
+complet quand la région `i` est rallumée. Terminer la Clairière pose exactement le premier cinquième
+et l'encre touche les Galeries.
+
+**Ce que cela ne fait pas** : `CheminEncre` répartit la fraction sur la longueur totale du tracé,
+et les cinq segments n'ont pas la même longueur. « Le premier cinquième » n'est donc pas exactement
+« jusqu'au marqueur des Galeries ». Corriger cela demanderait de découper le tracé en cinq `<path>`,
+c'est-à-dire d'écrire `client/src/monde/CheminEncre.tsx`, **que le contrat v4 n'attribue à aucun
+lot**. Écart signalé, non pris.
+
+## Q-M7-6. Un contrôle hors de `tests/` — motif
+
+Le contrat v4 § 5, point 6, interdit à tout lot d'écrire dans `tests/`. Le contrat de sortie de M7
+demande pourtant sept grandeurs mesurées, et « un fait mécanique n'est jamais affirmé, il est
+mesuré ». M7 a donc écrit `scripts/verifier-carte-monde.mjs`, qui n'appartient à personne d'autre :
+il imprime les sept lignes et rend un code de sortie non nul dès qu'une seule est fausse. Il
+réutilise la géométrie de `scripts/verifier-regions-fermees.mjs` au lieu de la réimplanter.
+
+**À demander à l'orchestrateur** : le porter en `tests/unitaires/carte-monde-v3.test.ts` quand la
+campagne super-QA aura rendu la main sur `tests/`. Trois cas y manqueraient encore, et ils ne sont
+pas mécanisables ici : la comparaison v2/v3 des `id` faite par `ids-regions-stables.test.ts`, la
+reprise de `decor-reconnaissable.test.ts` sur la v3, et la capture de référence de
+`tests/visuel/carte.spec.ts` — cette dernière ne se régénère **pas** de l'initiative d'un agent
+(règle dure de CLAUDE.md, et D39 la laisse rouge exprès tant que M5, M6 et M8 refont le décor).
+
+## Q-M7-7. Une seule règle réécrite au lieu d'être importée — et c'est dit
+
+`scripts/verifier-carte-monde.mjs` réimplante `estCheminFerme`, dont la source est
+`partage/src/contenu/validation.ts:385`. Motif : un script Node ne sait pas importer un `.ts`, et
+c'est exactement pour cette raison que `scripts/verifier-regions-fermees.mjs` la reçoit en argument
+plutôt que de la contenir. Les deux corps sont identiques ligne pour ligne à ce jour ; si la règle
+change dans `partage`, ce script ne le saura pas. C'est la seule duplication du lot, et elle est
+sous les yeux plutôt que cachée.
+
+## Q-M7-8. Ce que M7 n'a PAS mesuré — à traiter comme non su
+
+- **Le rendu sur la Galaxy Tab S10 FE.** Tout a été regardé sur un rendu de bureau à 1200 unités de
+  large. Les cartouches de nom sont dimensionnés sur une chasse **mesurée sous Verdana** (« La Cité
+  des Histoires » : 226 unités de glyphes) ; Andika est plus large, et la chasse retenue a été
+  portée à 12,5 unités par signe pour l'absorber. **Ce n'est pas une mesure sous Andika.**
+- **Le rendu des trois états dans l'application montée.** Les trois rendus ont été composés hors
+  application et vérifiés à la géométrie (0 cartouche hors parchemin, 0 chevauchement, 0 texte
+  débordant, mesuré par `getBBox`), pas dans le client : le banc visuel du dépôt est rouge par
+  décision (D39) et la fenêtre de rendu était tenue par une campagne parallèle.
+- **Que six territoires dessinés suffisent à ce que l'enfant reconnaisse une région sans lire son
+  nom.** C'est la promesse du contrat ; seul l'essai avec l'enfant la juge (R18).
+- **Le coût de rendu.** La v3 pèse 102 éléments dessinés contre 19 en v2, et ajoute six `clipPath`.
+  Aucun budget de performance n'a été mesuré sur la tablette.
+
+---
+
+# Lot M4 — la voix du nouveau contenu (2026-08-02)
+
+## Q-M4-1. Cinq textes que l'enfant déchiffre pour jouer n'étaient audibles nulle part
+
+**Tranché seul par M4, et implanté.** L'audit par OCCURRENCE — chercher `"audio":` dans les
+exercices — rend 52. L'audit par OBJET — énumérer les appels de `ZoneDeLecture`, « le SEUL
+composant qui affiche du texte à déchiffrer » (§ 5.1), et demander de chacun d'où vient son texte —
+en trouve deux formes de plus, que rien ne recensait. Mesuré, sorties citées :
+
+```
+client/src/moteurs/histoire/MoteurHistoire.tsx:116
+    <ZoneDeLecture texte={contenu.recit} motsCles={[]} />          ← NON RECENSÉ
+client/src/moteurs/tri/MoteurTri.tsx:155
+    <ZoneDeLecture texte={receptacle.critere} motsCles={[]} />     ← NON RECENSÉ
+```
+
+**Le récit de `histoire`.** Ce n'est pas une convention inventée ici :
+`partage/src/moteurs/histoire/types.ts:44` déclare `readonly audioRecit: CheminAsset | null` et
+`schema-contenu.ts:32` le rend **obligatoire**. La conception voulait le récit audible. Mesuré,
+`grep -rn audioRecit` rend six lignes et **zéro dans `client/`** : le champ est exigé, rempli à
+`null` partout, et lu par personne. La Cité des Histoires en portera huit et plus, de huit lignes
+chacun, devant un enfant qui déchiffre encore (D14).
+
+**Le critère des réceptacles de `tri`.** Le type le dit lui-même,
+`partage/src/moteurs/tri/types.ts:20`, cité : « Le critère écrit sur le réceptacle. **C'est LUI que
+l'enfant déchiffre.** » Et `ReceptacleTri` ne porte **aucun** champ `audio` — donc aucune recherche
+sur `"audio":` ne pouvait le voir. C'est le mode de défaillance de D48 pour la troisième fois, après
+`trace`, `histoire` et `libre`.
+
+Les cinq objets mesurés sur l'état de départ, textes cités :
+
+```
+clairiere-paniers-couleurs-01/panier-chaud  « les couleurs chaudes »
+clairiere-paniers-couleurs-01/panier-froid  « les couleurs froides »
+galeries-grottes-bd-01/grotte-un            « les mots avec la lettre b »
+galeries-grottes-bd-01/grotte-deux          « les mots avec la lettre d »
+galeries-echo-conte-histoire-01/recit       « Gobi entre dans la grotte… » (6 phrases, 11,5 s)
+```
+
+Un enfant qui ne sait pas encore lire « les mots avec la lettre b » ne peut pas jouer au tri, et R15
+ne fait aucune exception. **Les cinq clips sont rendus, contrôlés à 1,00, et au manifeste.** La clé
+suit la convention du dépôt, `<idExercice>/<identifiant affiché>` — celle que `EcranNoeud.tsx:474`
+construit déjà.
+
+**Ce que M4 n'a pas pu faire, et qui reste à l'orchestrateur.** Produire le clip ne le fait pas
+JOUER : `MoteurHistoire.tsx` et `MoteurTri.tsx` n'appellent pas `services.voix.dire`. Ces deux
+fichiers **n'appartiennent à aucun lot** du plan (§ 4) et M4 n'écrit pas chez un autre (§ 5,
+point 6). Le clip est rendu d'avance pour que la correction cliente coûte une ligne et non une
+nouvelle passe de contrôle qualité.
+
+**Comptage.** Le plan chiffre M4 en « consignes et questions » ; récits et critères sont un livrable
+**de plus**, jamais un gonflement de ce chiffre. `npm run voix:recenser` imprime désormais les deux
+comptes et leur écart.
+
+## Q-M4-2. La ligne que M4 s'est donnée : la consigne se dit, la réponse ne se dit pas
+
+Trois textes s'affichent à l'enfant et **restent muets volontairement**. La règle, opposable et
+consignée pour qu'on puisse la contredire : **on rend audible ce qui est la CONSIGNE — le contexte,
+le critère du bac qui dit où ranger — et on ne rend pas audible ce qui est la RÉPONSE.**
+
+1. **Les mots flashés par `eclair`.** Mesuré : **18 mots flashés, 0 présent dans `motsCles`**, donc
+   0 clip. Exemples cités : `clairiere-luciole-couleurs-01` flashe « rouge », « bleu », « vert »
+   pendant que `motsCles` porte `[touche, luciole, couleur]`. Le mot flashé **est** ce qu'il faut
+   reconnaître ; un bouton qui le prononce supprime l'exercice.
+2. **Les libellés d'options de `histoire`** (`MoteurHistoire.tsx:149`) — « le cristal bleu », « le
+   cristal rouge », « oui », « non ». Sur un QCM `comp.litteral`, lire les trois options *est*
+   l'exercice.
+3. **Le mot à trous de `grave`** (`MoteurGrave.tsx:120`) — dérivé de `consigne.mot` et de l'état
+   courant. C'est un affichage calculé, pas un texte de contenu.
+
+Si le père veut l'inverse — tout audible, y compris la réponse, parce que l'aide ne coûte jamais un
+échec — c'est **une ligne** dans `textesDeLectureDe`. La décision est pédagogique, pas technique.
+
+## Q-M4-3. Le seul texte d'aide non nul du dépôt est celui de `trace`, et il n'est pas audible
+
+**Signalé, non implanté — la clé naturelle entre en collision, et c'est ce qui a arrêté M4.**
+
+L'audit de l'aide de Gobi se referme bien sur vingt-quatre appels : `construireAide(niveau, cible,
+null)` — le texte est nul, les deux paliers sont `relire-consigne`, qui rejoue le clip de la
+consigne (couverte à 100 %), et `montre-cible`, qui est visuel. **Aucune aide n'est écrite-seulement,
+sauf une.** Mesuré, comptage des vingt-cinq appels :
+
+```
+20 construireAide(niveau, maj.restantes[0] ?? null, null)
+ 2 construireAide(niveau, cibleDeDemonstration(majConsigne), null)
+ 2 construireAide(niveau, majConsigne)
+ 1 construireAide(niveau, trait?.id ?? null, trait?.libelle ?? null)   ← partage/src/moteurs/trace/moteur.ts:176
+```
+
+`MoteurTrace.tsx:86` l'affiche : `const libelle = etat.aide?.libelle ?? libelleAttendu`. Et
+`AideProposee.texte` est documenté mot pour mot : « Texte à faire dire par la voix. **Jamais affiché
+seul (R15)** ». Les huit traits livrés portent deux libellés distincts — « la grande barre », « le
+rond » — et c'est le moteur qui répond au besoin nommé de l'enfant (D23), celui-là même qui avait
+déjà coûté au dépôt un bouton « Écouter » absent.
+
+**Pourquoi M4 s'est arrêté.** La clé naturelle `<idExercice>/<idTrait>` **entre en collision** : dans
+`galeries-miroir-bd-01`, la lettre `b` et la lettre `d` portent toutes deux « le rond », et rien ne
+garantit que leurs `id` de trait diffèrent. Le garde-fou de clé en double le verrait et marquerait le
+fichier illisible — c'est-à-dire qu'il casserait la couverture au lieu de l'améliorer. Une clé
+mutualisée par texte (`aide/<libellé>`, sur le modèle de `mot/<mot>`) marcherait, mais **c'est une
+convention que ce dépôt n'a pas décidée**, et aucun composant client ne la construirait.
+Deux textes distincts aujourd'hui ne valent pas d'inventer une convention.
+
+À trancher avec Q-M4-4 : c'est la même correction cliente, sur le même trajet.
+
+## Q-M4-4. Le tableau des réglages de lecture porte des boutons « Écouter » qui ne répondent pas
+
+**Signalé, non corrigé — le fichier n'appartient à aucun lot.** Mesuré, sorties citées :
+
+```
+client/src/ecrans/EcranReglagesLecture.tsx:177
+    void services.voix.dire({ texte, locuteur: 'narrateur' });     ← aucune `cle`
+client/src/services/voix-fichier.ts:104-107
+    const cle = demande.cle ?? null;
+    if (cle === null || cle === '') { return; }                    ← silence immédiat
+```
+
+L'écran affiche au moins trois boutons `data-ecouter` (lignes 204, 231, et 280 dans une boucle sur
+les réglages). Chacun appelle `dire` **sans clé**, et `dire` rend la main sans jouer quoi que ce
+soit. C'est exactement l'inverse de D42 : « un clip absent est un bouton **masqué**, jamais un
+bouton qui ne répond pas ».
+
+M4 n'a produit aucun clip pour ces textes : sans clé côté client, un clip au manifeste serait du
+poids mort — `dire` sort **avant** de consulter le manifeste. La correction est cliente d'abord,
+voix ensuite. À confier avec `MoteurHistoire.tsx` et `MoteurTri.tsx` (Q-M4-1).
+
+## Q-M4-5. Un exercice à moitié écrit par un lot voisin tuait le recensement
+
+**Corrigé par M4 dans son propre fichier.** `scripts/recenser-textes.mjs` portait une lecture JSON
+tolérante — sauter, nommer, compter — et l'avait posée sur `campement.json` et `ouverture.json`, les
+deux fichiers qu'un autre lot écrivait le jour du défaut. **La boucle des exercices, elle, appelait
+`lireJson(chemin)` sans son second argument** : le `catch` faisait `undefined.push(…)`. Or
+`contenu/exercices/` est précisément là où M1 et M2 écrivent 58 fichiers neufs pendant que M4
+tourne. Mesuré sur un faux dépôt portant un seul exercice tronqué, sorties citées :
+
+```
+avant : CRASH :: TypeError :: Cannot read properties of undefined (reading 'push')
+après : OK 0 illisibles [{"chemin":"…/moitie-ecrit.json","motif":"Unterminated string in JSON…"}]
+```
+
+Conséquence de test : `couverture-audio.test.ts` portait déjà le cas « aucun fichier source n'était
+illisible au moment de la mesure », et ce cas **ne pouvait structurellement pas couvrir
+`contenu/exercices/`** — le recenseur mourait avant de remplir le tableau. Il le couvre maintenant.
+
+`npm run voix` **sort en code 2** quand un fichier est illisible, au lieu d'afficher « 100 % » sur un
+dénominateur tronqué. Le plan le demande mot pour mot pour ce lot : « il relance, il n'ajuste pas
+son chiffre ».
+
+## Q-M4-6. Un tirage Piper mou se retire, il ne se contourne pas — et le seuil n'a pas bougé
+
+**Tranché seul par M4, et implanté.** Le premier rendu du contenu de M1 a fait tomber la couverture
+à **112 / 114 = 98,2 %** : deux consignes refusées par le contrôle qualité, donc deux boutons
+« écouter » masqués par D42, donc **deux consignes qui n'existent plus qu'à l'écrit** — R15 violée.
+
+L'hypothèse évidente était fausse, et c'est pourquoi il fallait mesurer. Les deux textes finissent
+par une lettre isolée — « un i », « un a » — et l'ASR est documenté comme sortant de son domaine sur
+les lettres seules. Transcription réelle des deux clips, sorties citées :
+
+```
+0.824  attendu « suis les mots ou tu lis un i »  →  entendu « suis les mots du lien i »
+0.816  attendu « les mots ou tu lis un a »       →  entendu « les mots ou tully s y en a »
+```
+
+**Les deux lettres sont entendues justes.** Ce qui casse, c'est « où tu lis » — une suite de mots
+outils courts que ce tirage-là a rendue molle. Le texte de M1 est bon ; l'échantillon ne l'était pas.
+
+**Le remède.** Piper n'est pas déterministe : le dépôt a déjà mesuré 613 ms contre 404 ms sur le même
+mot `pull`, 34 % d'écart. Deux synthèses du même texte ne sont pas le même clip. `rendre-voix.mjs`
+reprend donc jusqu'à **trois tirages** un clip refusé par la transcription inverse, et s'arrête au
+premier qui passe.
+
+**Un piège évité, et il valait la peine d'être écrit.** Une première version gardait le *meilleur*
+score des tirages « pour ne pas perdre un clip déjà proche du seuil ». C'était un mensonge
+silencieux : le fichier servi est celui du **dernier** tirage, et le manifeste aurait annoncé le
+score d'un enregistrement effacé. Le score publié est désormais toujours celui du fichier qui est
+sur le disque. Un clip peut se retirer ; un score ne se choisit pas parmi les tirages.
+
+**Pourquoi ce n'est pas un assouplissement, et c'est la seule question qui compte.** Le seuil ne
+bouge pas (0,85). L'instrument ne bouge pas. Le texte ne bouge pas. Ce qui change à chaque reprise,
+c'est **le clip lui-même** — un autre échantillon, réécouté par la même machine contre la même barre.
+L'enfant entend exactement le clip qui a passé. Rejouer un tirage serait fautif si le seuil jugeait
+le TEXTE ; il juge un enregistrement, et il y en a plusieurs possibles. Un clip qui échoue **trois
+fois** n'entre pas au manifeste : trois tirages mous de suite ne sont plus de la malchance.
+
+Le nombre de tirages est écrit au verrou **clip par clip** (`tirages`), et le compte global
+(`clipsRepris`) est imprimé à chaque lancement : une reprise ne peut pas être invisible.
+
+**Résultat mesuré, sur les deux refus.** L'un est récupéré, l'autre non, et c'est ce contraste qui
+valide le procédé :
+
+```
+clairiere-lianes-voyelles-01/c2       0,824 → 1,000 au 2e tirage   ← retenu
+clairiere-paniers-voyelles-01/panier-du-a  0,816 · 0,844 · 0,844   ← REFUSÉ après 3 tirages
+```
+
+Un tirage mou se rattrape ; un texte que la synthèse ne sait pas dire, non. **Et c'est le second
+qu'il faut lire.** Transcription du dernier tirage, sortie citée :
+
+```
+attendu : « les mots ou tu lis un a »
+entendu : « les mots que tullisien a »
+```
+
+Whisper fond « tu lis un » en un seul bloc. Le variant en `i` du même exercice passe à 1,00 : ce
+n'est donc ni l'instrument, ni la lettre isolée — c'est **cette suite de mots outils** que Piper rend
+molle à `echelleLongueur = 1,15`. **La correction appartient à M1, et elle tient en une
+reformulation** : « les mots avec un a » au lieu de « les mots où tu lis un a ». Une relative est de
+toute façon lourde pour un enfant qui déchiffre encore (D14). M4 ne réécrit pas le fichier d'un autre
+lot (§ 5, un seul écrivain par fichier).
+
+En attendant, D42 fait ce qu'il doit : le bouton est **masqué**, pas muet. Le critère du bac reste
+lisible à l'écran ; il n'est simplement pas encore écoutable.
+
+## Q-M4-7. Le contrôle qualité mémorise ses scores, et ce n'est pas un assouplissement
+
+**Tranché seul par M4.** La transcription inverse coûte **3,8 s par clip de phrase** sur CPU/int8. À
+53 consignes c'était trois minutes ; à 304 — la cible du plan — c'est vingt minutes **par
+lancement**, et le plan demande justement à M4 de relancer à chaque dépôt d'un lot voisin. Une étape
+de contrôle qu'on n'ose plus relancer est une étape qu'on finit par sauter — le dépôt a déjà payé ce
+mode de panne sur le GPU (D6).
+
+Un score n'est relu au verrou que si **les quatre** conditions tiennent : le clip n'a pas été
+re-synthétisé pendant ce lancement · le nom du fichier est identique — or il **porte l'empreinte du
+texte**, donc un texte modifié sort de la mémoire par construction · l'empreinte concorde · la durée
+mesurée par `ffprobe` est identique à la milliseconde. `--requalifier` réécoute tout.
+
+**Vérifié, pas affirmé.** Deux lancements sur le même contenu à horodatage figé, l'un mémorisé
+(`clipsQcMemorises: 78`), l'autre requalifié (`clipsQcMemorises: 0`, 81 clips réécoutés par
+faster-whisper) :
+
+```
+A memoise    0c2ba2b4a25c76e713ef88a31afe4179495602f2429bb944289bfb3aa7535a51
+B requalifie 0c2ba2b4a25c76e713ef88a31afe4179495602f2429bb944289bfb3aa7535a51
+```
+
+Le manifeste est **identique octet pour octet**. La mémoïsation est neutre, et le contrat de sortie
+« manifeste reproductible octet à octet à horodatage figé » est tenu par la même mesure. Le compte
+des scores relus est écrit au verrou (`clipsQcMemorises`) et imprimé : personne ne peut lire
+« 100 % contrôlé » sans voir combien l'ont été à cet instant.
+
+## Q-M4-8. Les quatre compagnons n'ont aucun texte, et M4 ne leur en invente pas
+
+Le plan dit « un compagnon par région ». `contenu/monde/compagnons.json` porte `"replique": null`
+pour **les quatre** — mesuré. M4 ne possède pas ce fichier (§ 4 ne l'attribue à personne) et écrire
+des répliques serait décider d'une voix de personnage : D7 est formel.
+
+Les sept locuteurs restent **prouvés fonctionnels** par leurs sept clips témoins, ce qui est
+exactement ce à quoi ces clips servent. Dès qu'un texte de compagnon existera, `npm run voix` le
+prendra sans qu'une ligne change.
+
+## Q-M4-9. La cible « ≥ 300 clips `mot/` » ne dépend pas de M4, et M4 n'inventera pas de mots
+
+Les clips `mot/` sont dérivés du champ `motsCles` des consignes : un mot cible n'existe que si M1 ou
+M2 l'a déclaré. Atteindre 300 clips demande **150 mots distincts** (rendu normal + rendu syllabé).
+
+Mesure d'alerte sur les exercices neufs de M1 : `clairiere/collier-syllabes-01.json` porte
+`4 consignes · 3 motsCles distincts : assemble, syllabes, mot`. Ce sont des mots de **consigne**,
+pas des mots **cibles** — et « assemble » syllabé n'aide personne à lire « collier ».
+
+**M4 ne comblera pas l'écart en fabriquant des mots.** Le socle phonologique de M3 porte ≥ 430 mots
+et serait la source évidente — mais ses fichiers sont `brouillon-non-jouable`, et CLAUDE.md est
+formel : aucun contenu n'atteint l'enfant sans relecture parent, et **un clip au manifeste est du
+contenu qui atteint l'enfant**. La cible est donc mesurée et rendue telle quelle, cause nommée —
+« corriger la cible plutôt que la forcer » (§ 8 du plan).
+
+**Recommandation opposable pour M1 et M2** : `motsCles` doit porter les mots que l'enfant
+**déchiffre** — « collier », « lune », « banane » — et non les verbes de la consigne. C'est ce champ
+qui alimente `souffle-syllabe`, l'un des cinq paliers d'`aideGobi`.
+
+## Q-M4-10. Les clips orphelins s'accumulent sur le disque, et aucun lot ne doit les effacer
+
+Mesuré : **194 fichiers `.opus` sur disque pour 179 clips au manifeste**, soit 15 orphelins, 1,8 Mo
+en tout. Chaque réécriture d'un exercice par M1 ou M2 change le texte, donc l'empreinte, donc le nom
+du fichier — et l'ancien reste. Ce n'est **pas** un défaut de correction : le manifeste est la seule
+source de vérité sur l'existence d'un clip (D42), et un fichier qu'il ne déclare pas n'est jamais
+servi.
+
+M4 n'en supprime aucun : ils n'ont pas tous été créés par cette session, et la règle de suppression
+de CLAUDE.md est absolue. À l'échelle visée — 640 clips — l'ordre de grandeur reste quelques mégaoctets.
+Si un nettoyage devient souhaitable, il se fait **nommément**, depuis la liste que
+`production/voix.lock.json` permet de calculer, et jamais par joker.
+
+## Q-M4-11. Où en est la voix quand M4 rend la main — chiffres mesurés, pas rapportés
+
+M4 passe **après** M1 et M2 (§ 5, point 4). **M1 a livré ses 26 nœuds et 26 exercices ; M2 n'avait
+déposé aucun de ses 50 exercices quand M4 a rendu la main** — `contenu/exercices/` ne contient que
+`clairiere/` et `galeries/`. Les chiffres ci-dessous portent donc sur ce qui existe, et l'objectif du
+plan reste hors d'atteinte tant que les quatre régions vides le sont.
+
+| grandeur | avant M4 | après M4 | cible du plan |
+|---|---|---|---|
+| exercices lus | 18 | **26** | 76 (M2 manquant) |
+| clés à couvrir | 69 | **136** | ≥ 304 |
+| dont récits et critères, invisibles avant M4 | **0** | **10** | — |
+| clips au manifeste | 174 | **284** | ≥ 640 |
+| clips `mot/` | 98 | **142** | ≥ 300 |
+| couverture des consignes | 100 % (69/69) | **99,3 % (135/136)** | 100 % |
+| clips refusés, nommés | 0 | **1** | — |
+| `qcScore` minimum au manifeste | 0,8889 | **0,8649** | ≥ 0,85 |
+
+**La couverture BAISSE, et c'est le chiffre le plus honnête de ce lot.** Elle passe de 100 % à
+99,3 % parce que M4 a **élargi le dénominateur** : les dix récits et critères qu'il a recensés
+n'étaient auparavant ni couverts, ni comptés. Avant M4, « les mots avec la lettre b » était muet
+**et invisible** ; après M4, neuf de ces dix textes sont audibles et le dixième est nommé,
+mesuré, et à une reformulation de l'être. Un 100 % qui ne regarde pas n'est pas un 100 %.
+
+**Relancer coûte désormais une minute et non vingt** (mémoïsation du contrôle qualité, Q-M4-7). Dès
+que M2 dépose : `npm run voix`. Le lot ne demande aucune décision pour cela.
+
+**Deux suites restent rouges, sur le même unique objet** —
+`tests/unitaires/couverture-audio.test.ts` et `consignes-audibles.test.ts`, tous deux sur
+`clairiere-paniers-voyelles-01/panier-du-a`. 31 cas sur 33 passent. C'est D39 appliqué : la chaîne
+dit la vérité plutôt que d'être verte à bon compte.
+
+---
+
+## M5 — Gobi, vraiment beau, et enfin à l'écran
+
+Lot du contrat du monde v4 § M5. **Tranché seul, consigné ici.** Les chiffres sont des sorties de
+commande, jamais des affirmations : chaque ligne se rejoue par `node scripts/gobi-*.mjs --verifier`.
+
+### Ce que le lot a corrigé, et l'ordre dans lequel il l'a fait
+
+**La première écriture a été `Gobi.tsx`, comme le plan l'impose, et c'était le bon ordre.** Le
+défaut central n'était pas un défaut d'asset : la canonique validée par D36 est bonne, ses 10 stades
+et ses 5 états sont produits en PNG depuis le 2026-08-02, et **l'écran montrait un rond framboise
+sans cœur de Pierre**. Refaire des assets sans brancher les précédents aurait ajouté une deuxième
+couche invisible à la première.
+
+### Q-M5-1 — `personnage-cristal.api.json` impose « black and white line art », Gobi est en couleur
+
+Le plan prescrit ce workflow pour les 25 graphèmes. Sa clause de style **figée** dit `no colour, no
+shading, no grey`, et D29/D36 posent Gobi **en couleur**. L'écart était assez sérieux pour que le lot
+N3 ait forké un second workflow (`gobi-declinaison.api.json`) plutôt que d'amender celui-ci.
+
+**Tranché par la mesure, pas par le raisonnement** — un essai unique avant toute écriture, graine
+4201, `production/personnages/gobi/essais/essai-cristal-bw.png`, 21 s : **le corps, les teintes et le
+cœur de Pierre sont intacts, et le cristal demandé apparaît.** Flux Fill reconstruit depuis le
+contexte de l'image, pas depuis la seule clause de texte. **Le plan est appliqué tel qu'il est écrit ;
+l'écart pressenti n'existe pas.** Cette mesure est consignée en tête de `scripts/decliner-gobi.mjs`
+pour qu'aucune session ne la refasse.
+
+### Q-M5-2 — les 25 cristaux sont dessinés en vecteur, pas tracés depuis le PNG
+
+Le plan dit « PNG 1024² **puis** SVG ». **Les deux existent, mais le second ne dérive pas du premier
+par vectorisation**, et c'est un arbitrage :
+
+- **`potrace` est absent de `outils/bin/`** — mesuré, et le contrat v4 § M6 l'a déjà retiré du chemin
+  pour les 53 décors, sur ce même fait ;
+- **le guide § 5.1 MESURE l'extraction de trait depuis une image en couleur : 0/12 à la porte
+  technique, 11/12 fuites.** « Le trait obtenu n'est pas le trait du dessin, c'est la carte de ses
+  contrastes » ;
+- le cristal est monté **à 24-64 px** dans la bulle d'aide : ce qui s'y lit est une silhouette.
+
+Le PNG reste le **témoin de production** et il est journalisé au verrou avec l'empreinte de sa source.
+Le SVG est le livrable, et il est **mesurable** : silhouettes déclarées en polygones, rastérisées à
+160², **300 paires comparées**, plafond de recouvrement opposable. `scripts/gobi-formes.mjs` **refuse
+d'écrire** si une paire franchit 0,90.
+
+### Q-M5-3 — trois scripts que la table de propriété du § 4.3 ne nommait pas
+
+Le § 4.3 attribue `scripts/decliner-gobi.mjs` à M5 et rien d'autre côté outillage. Le lot en a créé
+trois de plus : `scripts/gobi-dessin.mjs`, `scripts/gobi-formes.mjs`, `scripts/gobi-assets.mjs`, plus
+`production/personnages/gobi/masque-crete.png` (couvert, lui, par `production/personnages/gobi/**`).
+**Aucun n'est réclamable par un autre lot** — ils sont préfixés `gobi-` et ne touchent que des
+fichiers de M5 — donc la règle « un seul écrivain par fichier » tient. **Signalé plutôt que tu.**
+
+### Q-M5-4 — le corps et le visage n'ont PAS été redessinés, et c'est délibéré
+
+Le plan demande « 15 SVG dérivés de la canonique » là où l'inventaire trouvait « une transposition à
+la main ». Rastérisés et regardés côte à côte avec la canonique, **deux écarts seulement** expliquent
+l'essentiel de la pauvreté : les bras étaient deux traits ronds, les cristaux de petits pentagones à
+une facette. Ce sont les deux que le lot refait. `gobi-corps` — fourrure dentelée, ventre, cœur de
+Pierre — et `gobi-visage` sont fidèles et déjà mesurés conformes. **On corrige ce qu'on a vu être
+faux, pas tout ce qu'on pourrait rouvrir** : réécrire le corps, c'était risquer de faire glisser le
+personnage pour rien, et casser l'égalité octet à octet sur les 15.
+
+### Q-M5-5 — LE TEST QUE LE LOT DEMANDE À L'ORCHESTRATEUR
+
+Le § 5 point 6 interdit à tout lot d'écrire dans `tests/`. Le contrat de sortie de M5 exige pourtant
+« le dessin monté à l'écran est celui du fichier du stade — **test DOM contre SVG** ». Le lot fournit
+la mesure sous forme exécutable, `node scripts/gobi-dessin.mjs --verifier`, qui sort en 1 si
+`client/src/composants/gobi-dessin.gen.ts` a divergé des SVG. **Il manque le test DOM**, et voici son
+assertion exacte, à ajouter par qui possède `tests/` :
+
+> monter `<Gobi stade="crete" animation="repos" …/>`, lire `[id="gobi-dessin"].innerHTML`, et le
+> comparer à la concaténation `gobi-corps` + `gobi-parure` de `contenu/assets/gobi/stades/stade-5.svg`
+> + `gobi-bras` + `gobi-visage` de `contenu/assets/gobi/animation/repos.svg`. Vérifier en outre que
+> `[id="coeur-de-pierre"]` est présent dans le DOM monté — c'est la ligne « cœur de Pierre présent à
+> l'écran » du contrat, et c'était le défaut.
+
+### Q-M5-6 — fait mécanique, à connaître : un `.mjs` en CRLF casse la suite de tests
+
+Une édition intermédiaire a laissé `scripts/decliner-gobi.mjs` en fins de ligne CRLF. `node --check`
+le déclare **valide**, il s'exécute correctement en ligne de commande, et **vitest échoue à
+l'importer** : `SyntaxError: Invalid or unexpected token`, sur la ligne d'import de
+`tests/unitaires/gobi-assets.test.ts`. Vingt tests verts deviennent une suite morte, et le message
+ne nomme pas la cause. Converti en LF, tout repasse. **Les scripts `.mjs` du dépôt sont en LF ; une
+édition par un outil Windows peut les convertir sans que rien ne le dise.**
+
+### Ce que le lot n'a PAS obtenu
+
+- **Un PNG sur 25 reste faible** : `d.png` rend une masse blanche hérissée plutôt qu'une colonne à
+  boule. Deux passes ont été faites (budget : 5), la seconde avec une instruction corrigée et la
+  **même graine** — un seul facteur par itération. Les 24 autres sont nets. **Cela n'atteint pas
+  l'écran** : le livrable est le SVG, dont la silhouette est mesurée.
+- **Les cinq états d'animation ne sont pas animés**, ils sont cinq poses. C'est ce que l'addendum
+  § A.2 décrit et ce que `data-animation-gobi` porte ; le mouvement appartient au CSS, donc à M8,
+  qui possède `global.css`.
+- **`test:visuel` reste rouge par décision (D39)** et le lot n'a pas lancé `--maj`.
+
+---
+
+## M6 — les décors des six régions (contrat du monde v4 § 2)
+
+**Livré** : 53 SVG + 53 `.habillage.json`, **507 régions coloriables**. Chiffres recalculés sur le
+disque par `node scripts/decors/auditer.mjs`, jamais repris d'un document.
+
+### Q-M6-1 — LES BOUCHONS SONT RÉÉCRITS SUR PLACE, ET ARCHIVÉS HORS DE `contenu/`
+
+Deux règles se croisaient et il fallait trancher. Le plan v4 § 4.4 donne à M6 tout
+`contenu/habillages/<region>/**` et attend « 39 bouchons → 0 » — ce qui suppose que le
+`.habillage.json` continue de servir le même chemin. CLAUDE.md interdit d'écraser un fichier
+qu'on n'a pas écrit soi-même.
+
+**Tranché : réécriture sur place, avec copie préalable octet pour octet dans
+`production/archives/habillages-bouchons/`** (78 fichiers : 39 SVG + 39 JSON). Trois raisons, dans
+l'ordre où elles pèsent :
+
+1. Le précédent du dépôt — `ecole.svg` → `ecole-v2.svg` + entrée au registre — coûterait ici **36
+   entrées d'archive** dans `contenu/registre-svg.json`, un fichier qu'**aucun lot du plan ne
+   possède**. Écrire 36 entrées dans le fichier d'un autre pour éviter d'écraser le mien, c'est
+   échanger un risque contre un plus grand.
+2. **Il n'y a rien à préserver** : le v4 § 1.2 le mesure, « les 39 sont le même fichier à
+   l'identifiant près ». Garder 36 copies d'une grille de six rectangles n'est pas de la prudence.
+3. **Rien n'est perdu** : les originaux sont sur disque hors de `contenu/` — donc sans créer
+   d'orphelin pour le contrôle P3.2 — et le dépôt est un dépôt git au commit `6107861` : le père
+   revient en arrière d'un `git checkout` sur un chemin.
+
+**Aucun fichier n'a été supprimé.**
+
+### Q-M6-2 — AUCUN IDENTIFIANT DE RÉGION N'EST MORT, ET C'EST VÉRIFIÉ PAR CONSTRUCTION
+
+« Un identifiant peut naître, jamais mourir » : une consigne qui nomme une région disparue est un
+état sans issue. Les 6 régions de chacun des 36 bouchons, les 3 de `ecole-place` et la région de
+tracé de chacun des deux supports `trace` sont **reprises à la lettre, avec leur libellé**.
+`scripts/dessiner-decors.mjs` relit l'ancien `.habillage.json` avant d'écrire et **refuse d'écrire
+le lot entier** si un identifiant déclaré n'est plus dessiné. Les régions ajoutées — 478 livrées
+contre 231 déclarées avant — sont neuves — 507 livrées contre 231 déclarées avant.
+
+**Deux géométries sont conservées au pixel**, et c'est délibéré : les 3 zones de dépôt de
+`clairiere.ecole-place` — le moteur `place` dessine ses cibles par-dessus, mais le pointillé du
+bouchon disait juste que « ce qui est tapable est ce qui est visible » — et les rectangles
+`ardoise` / `paroi` des deux habillages `trace`, parce que « la prise du geste ne dépend pas du
+décor ».
+
+### Q-M6-3 — LES DÉCORS SONT DESSINÉS À LA MAIN, MAIS ÉMIS PAR UN GÉNÉRATEUR
+
+Le v4 § 2 tranche « les décors se dessinent à la main, en SVG ». Le lot le respecte au sens qui
+compte — **la géométrie est décidée sommet par sommet par un auteur**, dans
+`scripts/decors/formes.mjs` pour les silhouettes et `scripts/decors/decors.mjs` pour les 53 scènes
+— mais il ne recopie pas 478 chaînes `d` au clavier. `scripts/dessiner-decors.mjs` mesure ce qu'il
+vient d'écrire et **n'inscrit au `.habillage.json` que des surfaces et des centroïdes recalculés**.
+
+C'est ce qui rend le contrat vérifiable plutôt qu'affirmé : le générateur refuse d'écrire — rien
+n'est produit — si une région n'est pas polygonale, pas fermée, si deux régions d'un même décor
+partagent leur silhouette ou leur surface à l'unité près, si un décor tombe sous 6 régions, si un
+centroïde sort de sa région ou passe à moins de 5 unités de son bord, ou si un identifiant
+disparaît. Les sept contrôles tournent sur les 53 décors **avant** la première écriture.
+
+Le centroïde déclaré n'est pas le centroïde d'aire : c'est le point intérieur le plus éloigné du
+bord (`pointRepresentatif`), parce que le centroïde d'aire d'une forme percée tombe dans le trou.
+Marge minimale mesurée sur les 507 régions : **5,5 unités** (`clairiere.collier#fil`).
+
+### Q-M6-4 — CE QUE LA MÉTROLOGIE NE VOIT PAS : IL A FALLU REGARDER
+
+Les régions étaient vertes sur les sept contrôles **et plusieurs décors étaient illisibles**.
+Rendus en planche-contact et regardés :
+
+- les trois lucioles de `clairiere.lucioles` se lisaient **« astérisque »** ;
+- le feu de `clairiere.veillee` se lisait **« scie »** ;
+- les deux coquillages de `marais.coquillages` se lisaient **« couronne »** ;
+- les feuilles de `foret.feuilles` et `foret.tapis` se lisaient **« étoile »** ;
+- l'arbre de `foret.buee` était **derrière le cadre de la fenêtre**, donc invisible ;
+- la bougie et la lanterne de `cite.theatre-ombres` étaient **sous le rideau** ;
+- les houppiers de `foret.veillee-automne` flottaient **25 unités au-dessus de leur tronc** ;
+- le renard et l'écureuil de `foret.bestiaire` étaient **à moitié enfouis** dans le sous-bois ;
+- les lianes de `clairiere.lianes` étaient des **zigzags anguleux**, pas des lianes.
+
+Aucun chiffre ne le disait. Cinq silhouettes ont été redessinées — feuille, luciole (nouvelle,
+distincte de la libellule), coquillage, grenouille, flammes —, la rondeur par défaut des masses
+lobées est passée de 0,72 à 0,78 parce que les houppiers se lisaient « étoile » (le seuil du test
+est 0,85, on reste dessous), et huit scènes ont été recomposées.
+
+**Le rastériseur est dans le dépôt** — `scripts/decors/planche.mjs` — et les six planches sont dans
+`production/planches/m6/`. Il est **sans aucune dépendance** : mesuré, les navigateurs de Playwright
+ne sont pas installés sur cette machine (le dossier `ms-playwright` de `%LOCALAPPDATA%` n'existe
+pas), et D9 interdit d'installer hors du dépôt sans accord.
+
+### Q-M6-5 — LE FAIT MESURÉ QUI DÉPASSE LE LOT : DOUZE MOTEURS SUR QUATORZE N'AFFICHENT PAS LE DÉCOR
+
+Mesuré, sortie citée :
+
+```
+$ grep -rn "scene.fichier" client/src --include=*.tsx --include=*.ts
+client/src/ecrans/EcranCampement.tsx:262
+client/src/habillages/chargeur.ts:158
+client/src/moteurs/colorie/MoteurColorie.tsx:52
+client/src/moteurs/place/MoteurPlace.tsx:64
+```
+
+**Seuls `colorie` et `place` chargent le SVG de l'habillage.** Les douze autres moteurs — `attrape`,
+`tri`, `assemble`, `chemin`, `eclair`, `paires`, `phrase`, `histoire`, `chrono`, `grave`, `libre`,
+`trace` — ne portent que `data-habillage={habillage.id}` et dessinent leur propre scène.
+
+C'est **exactement le défaut que le v4 § 1.2 relève pour Gobi** : la chaîne d'asset réussit et son
+résultat n'est pas branché. 45 des 53 décors de ce lot ne sont donc, à cette heure, **vus par
+personne**. Le lot les livre quand même : ils sont la condition nécessaire, ils sont déjà déclarés,
+mesurés et opposables, et brancher un moteur sur `chargerSvgHabillage` ne demande aucune donnée
+nouvelle. **Mais aucun chiffre de ce lot ne doit se lire « l'enfant voit 53 décors ».**
+
+Ce n'est pas un travail de M6 : `client/src/moteurs/**` n'appartient à aucun lot du plan v4. **À
+arbitrer par le père**, et c'est probablement le plus gros écart entre ce que le dépôt contient et
+ce que l'écran montre.
+
+### Q-M6-6 — fichiers créés hors de la liste du plan, signalés plutôt que tus
+
+Le § 7 annonce « M6 : 53 SVG + 53 `.habillage.json` = 106 ». Le lot en écrit **106**, plus cinq
+fichiers d'outillage et six planches qui ne sont pas du contenu : `scripts/dessiner-decors.mjs`,
+`scripts/decors/{formes,decors,auditer,planche}.mjs`, et `production/planches/m6/*.png`. Précédent :
+M5 possède `scripts/decliner-gobi.mjs` au même titre. Aucun n'est possédé par un autre lot.
+
+### Ce que le lot n'a PAS fait
+
+- **Aucun test écrit** : le v4 § 5 point 6 l'interdit à tout lot du plan. La mesure est fournie sous
+  forme exécutable — `node scripts/decors/auditer.mjs` et `node scripts/dessiner-decors.mjs
+  --verifier`, qui sortent en 1 si le contrat est faux. Le test à ajouter par qui possède `tests/`
+  est écrit en Q-M6-7.
+- **Les cinq tableaux d'ouverture** et **les trois habillages du campement** ne sont pas touchés :
+  les premiers sont repoussés au § 6 du plan, les seconds appartiennent à M8.
+- **`ecole-v2.svg` et `grottes-v2.svg` ne sont pas réécrits** : ils sont présentables (v4 § 1.2) et
+  `decor-reconnaissable.test.ts` les mesure. Le script d'audit les lit mais ne les impute jamais à
+  M6 — leurs quatre arbres identiques sont justes pour une cour d'école et le seraient moins dans
+  un décor où l'enfant doit désigner « le deuxième ».
+- **`test:visuel` n'a pas été régénéré** : `--maj` est interdit de sa propre initiative (D39).
+
+### Q-M6-7 — LE TEST QUE LE LOT DEMANDE À L'ORCHESTRATEUR
+
+> Pour chacun des 53 habillages de M6, relire son SVG et son `.habillage.json`, et vérifier :
+> (1) chaque région déclarée est un **enfant direct** de `#calque-zones` — la règle que
+> `SceneSvg.tsx` applique en silence et qu'aucun contrôle du dépôt ne mesure aujourd'hui ;
+> (2) `polygonesDuChemin` ne rend jamais `null` ; (3) dans un même décor, aucune paire de régions
+> ne partage sa silhouette ni sa surface arrondie à l'unité ; (4) le centroïde déclaré tombe dans
+> sa région et à au moins 5 unités du bord. Le cas de non-vacuité est obligatoire :
+> `expect(decorsControles).toBe(53)` — « 0 anomalie » ne doit jamais pouvoir vouloir dire
+> « 0 fichier lu ».### Q-M6-8 — LA FRONTIÈRE M2 ↔ M6 QUE LE PLAN N'AVAIT PAS GELÉE : LES `id` DE RÉGION
+
+Le v4 § 2 gèle les **14 identifiants d'habillage** pour que M2 puisse écrire avant que M6 livre.
+Il ne gèle **aucun identifiant de région à l'intérieur** de ces habillages. M2 en avait pourtant
+besoin : ses quatre exercices `colorie` neufs nomment des régions, et il les a inventées.
+
+Mesuré une fois les deux lots posés — `tests/unitaires/ids-regions-stables.test.ts`, **29 régions
+orphelines**, quatre exercices injouables :
+
+```
+cite.fresque-murale#{ciel, porte, arbre, mur, pot, soleil, feuille, fleur}
+foret.tapis#{ciel, feuille-basse, feuille-haute, arbre, rat, chat, nid}
+marais.brume#{ciel, route, roue, poule, souris, mouche, caillou}
+volcan.forge#{feu, oiseau, rideau, chapeau, drapeau, tableau, seau}
+```
+
+**M2 avait raison et M6 avait tort**, et il faut le dire dans ce sens-là. Ces noms ne sont pas
+décoratifs : `seau`, `chapeau`, `drapeau`, `oiseau`, `tableau`, `rideau`, `feu` sont les mots du
+graphème `eau` que le Volcan travaille ; `route`, `roue`, `poule`, `souris`, `mouche`, `caillou`
+sont ceux du digramme `ou` du Marais ; `rat`, `chat`, `nid` sont des finales muettes de la Forêt.
+**Dans un exercice de coloriage, le nom de la région EST le mot à lire.** Mes noms de scène —
+`mur-de-la-forge`, `enclume`, `billot` — étaient justes pour une scène et faux pour la pédagogie.
+
+**Résolution, additive et sans perte** : les 29 régions ont été **ajoutées** aux quatre décors,
+avec leur objet dessiné (neuf silhouettes nouvelles : arbre, oiseau, poule, souris, chat, nid,
+mouche, chapeau, drapeau). Aucune région existante n'a été renommée ni supprimée — les quatre
+décors passent de 9-10 à 16-17 régions. `ids-regions-stables.test.ts` repasse au vert, et le total
+livré monte de 478 à **507 régions**.
+
+**La leçon pour le plan suivant** : geler l'identifiant d'un habillage sans geler les identifiants
+de ses régions ne suffit pas dès que le moteur est `colorie`, `libre` ou `place` — ce sont les
+trois qui nomment des régions dans leur contenu. Le prochain contrat gèle **les deux niveaux**, ou
+il nomme explicitement le lot qui tranche en cas de désaccord.
+
+
+
+
+---
+
+## M2 — contenu des quatre régions vides (contrat du monde v4 § 2)
+
+Six arbitrages tranchés seuls, dans l'ordre où ils se sont présentés. Chacun porte la mesure qui
+l'a commandé, et non l'intuition qui aurait suffi.
+
+### Q-M2-1. Le corpus n'est pas recopié, il est RÉÉCRIT — et c'est la seule façon de l'exploiter
+
+Mesuré sur les fiches elles-mêmes : « Les dauphins vivent dans les océans », « Le pollen aide les
+fleurs à produire des fruits », « Sébastien n'arrive pas à faire une addition posée ». Le lexique
+CE1 opposable du dépôt en portait 430 mots au début de ce lot, 546 à la fin ; aucune de ces phrases
+n'en est faite. Le corpus **suppose le déchiffrage acquis** — le plan l'écrit lui-même — et
+l'enfant déchiffre encore (D14).
+
+Les quatorze exercices de la Cité reprennent donc de leur fiche **le sujet, la structure de
+questionnement, l'ordre des étapes et la valeur de vérité**, et réécrivent le texte dans le
+lexique. Le `$commentaire` de chaque fichier **cite la ligne de la fiche qui porte le corrigé** :
+c'est là, et nulle part ailleurs, que la traçabilité se vérifie. Exemple, `bibliotheque-histoire-01` :
+la fiche NIVEAU 2 n° 3 dit « on met la pâte dans un four chaud pour la cuire », le PDF ne porte
+aucun corrigé (`reponseAttendue: null`), et c'est de cette ligne que descend la réponse « dans le
+four ».
+
+**Les prénoms du corpus (Léo, Tom, Léa, Mina, Emma, Sébastien, Raoul) sont remplacés par Gobi et
+ses compagnons.** Deux raisons, aucune cosmétique : un prénom n'est pas au lexique et serait refusé
+par `scripts/valider-brouillons.mjs` ; et le corpus devient ainsi le monde du jeu au lieu de rester
+une pile de photocopies.
+
+**À trancher par le père** : est-ce que « exploiter une fiche » veut bien dire cela ? Si la réponse
+est « non, je veux le texte d'origine », alors la Cité n'est pas jouable avant que l'enfant lise
+couramment, et elle doit être repoussée en bloc — pas réécrite à moitié.
+
+### Q-M2-2. On ne peut PAS nommer un graphème dans une consigne, et cela a façonné trois régions
+
+Fait mécanique, mesuré : `scripts/valider-brouillons.mjs` confronte au lexique CE1 **tout mot de
+plus d'une lettre**. « on », « an », « ou », « oi », « ch », « qu », « eau », « ill » en font
+partie. Une consigne « Attrape les mots où tu entends an » est refusée mot pour mot.
+
+D'où le **mot-repère**, employé partout dans le Marais, la Forêt et le Volcan : « le son de pont »,
+« le son de noir », « le son de chat », « le son de coq », « le son de fille », « le son de
+montagne ». C'est de toute façon la bonne façon de parler d'un son à un enfant de sept ans, et
+c'est exactement la forme que M3 donne à ses mnémoniques.
+
+Deux tournures ont été trouvées sous la même contrainte et méritent d'être connues, parce qu'elles
+sont réemployables :
+
+- **la lettre muette** : « où tu ENTENDS la dernière lettre » contre « où tu N'ENTENDS PAS la
+  dernière lettre ». `muette`, `silencieuse`, `finale` ne sont pas au lexique ; `entends` est un
+  verbe de consigne qui y figure, et il dit exactement la bonne chose ;
+- **le pluriel** : « qui ont un s » contre « qui n'ont pas de s ».
+
+**Aucun mot n'a été ajouté au lexique par M2** : `scripts/generer-phonologie.mjs` appartient à M3.
+
+### Q-M2-3. `comp.vrai-faux` n'est déclaré par AUCUN exercice, et aucun exercice ne peut le sauver
+
+Le plan lui accorde au plus 4 nœuds de la Cité. R12 exige **trois moteurs mécaniquement distincts**
+par compétence citée. Des huit moteurs que les dix habillages de la Cité rendent atteignables —
+`histoire`, `paires`, `chrono`, `phrase`, `chemin`, `tri`, `assemble`, `colorie` — **deux seulement
+portent un champ de texte** (`histoire.recit`, `chrono.consignes[].recit`), et un seul juge des
+affirmations. Placer une affirmation dans `tri` ou dans `chemin`, c'est demander à l'enfant de la
+juger **sans texte**, donc sur un savoir extérieur — ce que le plan écarte explicitement dans la
+même page (« toute affirmation dont la vérité dépend d'un savoir extérieur au texte est écartée »).
+
+Le code est donc porté par zéro exercice, et la Cité ne le déclare pas dans `regions.json`.
+**Conséquence assumée et mesurée** : `tests/unitaires/competences-trois-moteurs.test.ts` échoue
+avec « référentiel : 30 code(s), 29 cité(s) par un exercice ». C'est le bon message : il nomme le
+code et pointe le référentiel, là où la décision se prend. L'alternative — déclarer le code sur les
+trois `histoire` — aurait fait rougir R12 dans `moteurs-couverture.test.ts` en suggérant le mauvais
+remède : « écrivez plus d'exercices », alors qu'aucun nombre d'exercices ne crée un second moteur
+capable de juger une affirmation.
+
+**Deux issues, et elles n'appartiennent pas à M2** :
+
+1. donner à la Cité un habillage de plus pour un moteur porteur de texte — travail de M6, et
+   décision de conception ;
+2. retirer `comp.vrai-faux` du référentiel jusqu'à ce qu'un moteur puisse le porter — c'est
+   `contenu/referentiel/competences.json`, que M3 possède, et un objet protégé (annexe P § 6.4).
+
+### Q-M2-4. `gn` et `ph` : le verrou n'était pas l'écriture des exercices, c'était le lexique
+
+Mesuré au début du lot, sur les 430 mots de `LEXIQUE_CE1` :
+
+```
+/gn/ → 1  : peigne
+/ph/ → 2  : photo, éléphant
+```
+
+Un mot et deux mots. On ne construit ni un tri à deux réceptacles, ni un chemin, ni une série de
+paires là-dessus. Les deux codes avaient donc été écartés, et le Volcan ne travaillait que trois
+graphèmes sur cinq.
+
+Remesuré après la livraison de M3, sur 546 mots :
+
+```
+/gn/ → 13 : agneau araignée baignoire campagne champignon cygne guignol ligne montagne oignon
+            peigne poignée signe
+/ph/ → 10 : alphabet dauphin nénuphar phare pharmacie phoque photo phrase téléphone éléphant
+```
+
+Les deux graphèmes ont été rouverts dans le même lot, chacun sur trois moteurs mécaniquement
+distincts. **Le même contenu était impossible à 430 mots et évident à 546** : c'est la preuve
+mesurée que le verrou du contenu n'était pas l'écriture des exercices.
+
+**Leçon pour le plan suivant** : un lot qui dépend d'un lexique produit en parallèle doit
+**remesurer avant sa dernière écriture**, pas seulement avant la première.
+
+### Q-M2-5. Le pointeur de scène passe à la v3, et le registre des SVG a dû suivre
+
+Le contrat § 2 confie à M2, et à lui seul, `contenu/monde/regions.json` → `scene.fichier`
+(« M7 ne l'écrit pas »). M7 a livré `carte-monde-v3.svg`, `client/src/ecrans/EcranCarte.tsx` la
+sert déjà, et le champ pointait encore la v2. Mesuré avant correction :
+
+```
+$ npm run test:contenu
+  ✗ contenu/habillages/carte/carte-monde-v3.svg : aucun habillage, aucun document de
+    contenu/monde/ et aucune entrée de contenu/registre-svg.json ne déclare ce SVG
+```
+
+**La carte réellement affichée n'était contrôlée par personne.** Le pointeur passe donc à la v3.
+
+**Ce qui suit est une écriture hors du tableau de propriété, et elle est signalée comme telle** :
+faire passer le pointeur laissait aussitôt `carte-monde-v2.svg` orpheline, et cassait l'entrée
+d'archive de la v1, qui la nommait comme successeur. `contenu/registre-svg.json` n'est confié à
+aucun lot du plan. Deux modifications y ont été faites, toutes deux mécaniques :
+
+- une entrée d'archive pour `carte-monde-v2.svg`, au profit de la v3 ;
+- l'entrée de `carte-monde.svg` (v1) repointée sur la v3, parce que le contrôle P3.2 exige un
+  successeur **déclaré vivant** (`estDeclareVivant`) et refuse une chaîne d'archives.
+
+Aucun octet n'a été effacé, aucun fichier renommé. Les trois cartes portent les mêmes six
+identifiants de région, dans le même ordre, avec les mêmes six centres et le même
+`viewBox 0 0 1200 800`.
+
+### Q-M2-6. Ce que M2 n'a PAS fait — les 75 fiches ne sont pas passées à `valide`
+
+Le tableau § 4.1 du plan confie à M2 « `contenu/brouillons/niveau-{2..6}/fiche-*.json` — 75 fiches
+passées à `valide`, corrigé consigné ». **C'est mécaniquement impossible contre le schéma gelé**,
+et la mesure est immédiate :
+
+```
+$ grep -A2 '"statut"' contenu/schemas/brouillon.schema.json
+  "description": "Un seul statut existe, et c'est voulu : aucun brouillon n'est jouable.
+                  Le passage a contenu/exercices/ est un geste humain.",
+  "const": "brouillon-non-jouable"
+```
+
+`statut` est un `const`, et le document est `additionalProperties: false`. Un brouillon passé à
+`valide` est refusé par `test:contenu`. Le schéma vit dans `contenu/schemas/`, qu'aucun lot du plan
+ne possède.
+
+**Ce qui a été fait à la place, et qui porte la même information** : le corrigé des quatorze fiches
+réellement exploitées est consigné **dans le `$commentaire` de l'exercice qui en descend**, avec la
+citation de la ligne source qui le fonde. C'est vérifiable par un relecteur, versionné (là où
+`contenu/brouillons/` est ignoré par git — mesuré), et attaché au fichier que l'enfant joue.
+
+**Les 61 autres fiches restent non exploitées.** Le plan estimait « ≥ 16 fiches exploitées » et le
+compte réel est de **14 pour M2** : la borne haute n'est pas le nombre de fiches mais **le nombre
+de nœuds de la Cité**, quatorze, un nœud portant un exercice et un exercice une fiche
+(`tests/unitaires/fiches-cablees.test.ts` fait déjà ce raisonnement pour le niveau 1). Exploiter
+les 61 restantes demande **des nœuds en plus**, donc une région plus grande que ce que le plan lui
+accorde. À arbitrer.
+
+**Le champ `reponseAttendue` des fiches, lui, existe et reste vide** (`type: ["boolean","null"]` au
+niveau 2, `["string","null"]` au niveau 6). Y écrire les 120 valeurs de vérité du niveau 2 est un
+travail utile, mécanique, et qui ne demande aucun changement de schéma. Il n'a pas été fait faute
+de budget dans ce lot, et il est nommé ici pour ne pas être oublié.
+
+### Q-M2-7. Quatre suites rougissent parce que le contenu a quadruplé, et aucune n'est un défaut
+
+Ces quatre-là échouent **par construction** depuis que les six régions sont pleines. Elles vivent
+dans `tests/`, qu'aucun lot du plan ne possède ; elles sont listées ici pour que l'orchestrateur
+tranche, et non corrigées en douce.
+
+| suite | ce qu'elle mesure | pourquoi elle rougit |
+|---|---|---|
+| `carte.test.ts` — « le voile se lève sur le Marais » | `regionsOuvertes` après un Éclat | attendait `['galeries']` ; le Marais a maintenant 12 nœuds, il devient donc proposable et la fenêtre en rend deux. **Le test encodait l'absence de contenu.** |
+| `fiches-cablees.test.ts` — « un nœud, un exercice » | `NOEUDS.length === EXERCICES.length` | `EXERCICES` ne lit que `clairiere` et `galeries` (26) quand `NOEUDS` lit les six régions (76). La relation 1↔1 tient : 76 nœuds, 76 exercices, mesuré. |
+| `moteurs-atteignables.test.ts` — contrôle négatif | retire le seul nœud citant `galeries-echos-paires-01` et attend `moteur-sans-noeud` | `paires` a maintenant cinq exercices : retirer un nœud ne le rend plus inatteignable. **Le contrôle négatif supposait un exercice unique par moteur.** |
+| `fuzz-contenu.test.ts` — pointeurs hostiles | 89 568 cas sur l'enveloppe + 89 568 sur le bloc de jeu | **0 plantage** ; le cas dépasse simplement les 5 s de `testTimeout` parce qu'il croise les pointeurs de 76 exercices au lieu de 18. |
+
+Un cinquième, `propriete-tentative-coherente.test.ts`, exige que le hasard fasse avancer au moins
+9 moteurs sur 14 et n'en atteint plus que 8 : `tri` tombe à 0 progrès sur 1 000 tirages. C'est un
+effet plausible de contenus plus grands — dix éléments et deux à trois réceptacles font chuter la
+probabilité d'un coup juste au hasard. **Rétrécir les exercices pour plaire au fuzzer serait le
+mauvais sens de la correction** ; c'est le pilotage du fuzzer qui doit viser, pas le contenu qui
+doit maigrir.
+
+---
+
+# Lot d'intégration — le contenu, les assets et la chaîne (2026-08-02)
+
+Ce lot ne produit ni contenu ni asset : il branche ce que M1 à M8 ont livré, et il rend la chaîne
+verte. Les décisions ci-dessous sont prises seule à seule, et consignées ici parce que trois
+d'entre elles contredisent un document gelé ou un lot précédent.
+
+## Q-I-1. `comp.vrai-faux` sort du référentiel — la deuxième issue de Q-M2-3, prise
+
+**Décidé, appliqué, réversible en une ligne.**
+
+`tests/unitaires/competences-trois-moteurs.test.ts` dénonçait un code mort : « référentiel :
+30 code(s), 29 cité(s) par un exercice ». Q-M2-3 avait déjà fait l'analyse complète et laissait
+deux issues, dont aucune n'appartenait à M2. La première — donner à la Cité un habillage de plus
+pour un moteur porteur de texte — est une décision de conception. La seconde — retirer le code
+jusqu'à ce qu'un moteur puisse le porter — est celle qui n'invente aucune loi. C'est celle-là.
+
+**Ce qui a été mesuré avant de trancher**, en montant les quatorze moteurs sur les 76 exercices
+livrés et en lisant le `modeReponse` que chacun calcule :
+
+```
+histoire:vrai-faux    12 étapes
+tri:vrai-faux         39 étapes
+eclair:vrai-faux      10 étapes
+```
+
+Trois moteurs produisent donc bien un jugement binaire — R12 semblait tenable. **Elle ne l'est
+pas, et c'est le libellé qui le dit** : « Juger une affirmation portant sur un texte ». Des trois,
+`histoire` seul porte un champ de texte (`histoire.recit`). Dans `tri`, l'enfant range des mots
+dans deux paniers ; dans `eclair`, il choisit entre deux options flashées. Leur coller
+`comp.vrai-faux` aurait fait passer R12 en écrivant une contre-vérité dans le fichier de contenu —
+exactement ce que ce dépôt refuse partout ailleurs.
+
+**Ce que le retrait contredit, et il faut le dire net** : le contrat du monde v4 § 2 gèle **30**
+codes, et son § 1.1 confie les 120 affirmations du niveau 2 à `histoire` pour 3 nœuds de la Cité.
+Le contrat n'a jamais réconcilié cette ligne avec R12 (v2 § 15, « au moins 3 mini-jeux
+mécaniquement distincts »), et c'est cette contradiction-là qu'on solde, pas le code.
+
+**Comment le défaire.** `scripts/generer-phonologie.mjs` porte désormais trois listes au lieu
+d'une : `CODES_DU_CONTRAT` (les 30, intacts), `CODES_RETIRES` (`['comp.vrai-faux']`, avec son
+motif), et `CODES_ATTENDUS` = la différence. Le script imprime les trois comptes à chaque
+exécution — « 29 code(s) sur 29 attendus (30 au contrat, 1 retiré) ». Vider `CODES_RETIRES` et
+remettre l'entrée dans `contenu/referentiel/competences.json` rétablit l'état d'avant.
+
+**Rien n'est perdu.** Les 120 affirmations du niveau 2 restent ingérées dans
+`contenu/brouillons/niveau-2/`, comptées et intactes. Ce qui manque est un second moteur porteur
+de texte capable de juger — un travail de conception, à commander.
+
+## Q-I-2. Un exercice faisait inscrire au journal un nombre qu'il n'avait pas
+
+**Corrigé dans le contenu, pas dans le test.**
+
+`galeries-echos-paires-01` portait quatre consignes d'**une** paire chacune.
+`partage/src/moteurs/paires/moteur.ts:203` rend `nbElements = etape.aApparier.length`, et
+`journaliserEtapes` borne par `Math.max(2, n)` : chaque étape faisait donc inscrire `2` au journal
+là où le contenu en comptait `1`. Ce n'est pas un plantage — c'est pire, un `p_devinette` juste en
+apparence sur un item qui ne mesure rien (D13). `tests/api/tentatives-nbelements.test.ts` le
+nommait, et cet exercice était **le seul des 76** sous le plancher.
+
+Les quatre paires minimales sont conservées (boule/poule, bas/pas, bain/pain, bol/pot), les huit
+cartes restent toutes visibles, l'axe haut-bas reste pur (D23). Seule la découpe change : deux
+consignes de deux paires. L'argument d'origine — « trouver l'écho de `bain` parmi `pas`, `poule` et
+`pot` est un vrai choix entre trois `p` » — reste vrai mot pour mot.
+
+## Q-I-3. Le fuzzer de propriétés perdait sa puissance parce que les DÉCORS avaient grandi
+
+**C'est la correction dont la première hypothèse était la plus séduisante, et la plus fausse.**
+
+`tests/unitaires/propriete-tentative-coherente.test.ts` exige que le hasard fasse avancer au moins
+9 moteurs sur 14. Il n'en atteignait plus que 8. Q-M2-7 en donnait la cause supposée : « un effet
+plausible de contenus plus grands — dix éléments et deux à trois réceptacles font chuter la
+probabilité d'un coup juste au hasard ». **La mesure dit autre chose.**
+
+Onze des quatorze cas de ce fichier ne lisent AUCUN exercice : ils montent les fixtures de
+`tests/fixtures/moteurs/`, que les lots de contenu n'ont pas touchées. Le contenu piloté n'a donc
+pas grandi. Ce qui a grandi, c'est l'HABILLAGE — `poolDe` compose son vivier de cibles en unissant
+les chaînes du contenu et **les régions du décor**, puis tire uniformément :
+
+```
+clairiere/guirlande            6 → 10 régions   (phrase)
+cite-des-histoires/pellicule   6 →  9           (chrono)
+campement/page-blanche         6 → 14           (libre)
+clairiere/ecole-place          3 →  9           (place)
+galeries/tracer-cristal        1 →  6           (trace)
+```
+
+M6 a remplacé 39 bouchons par de vrais décors ; la part des cibles utiles a donc baissé de 17 % sur
+`phrase`, sans qu'une ligne de moteur ni de fixture ne change. Les deux moteurs d'ordonnancement,
+qui ont besoin de plusieurs bons tirages **d'affilée**, sont passés sous la barre.
+
+**Un instrument dont la puissance dépend de la taille du décor n'est pas un instrument.** Abaisser
+le plancher à 8 aurait rendu le fichier vert en le rendant faux. `arbCible` tire maintenant à poids
+FIXES sur trois sources séparées — contenu 4, décor 1, cible inexistante 1 — et le tableau du
+contrat de sortie imprime les deux parts, `cibles= 24 (contenu 14 · décor 10)`, pour que la
+prochaine dérive se voie. Résultat remesuré : **11 moteurs avancent, 10 terminent, 12 comptent une
+erreur**, contre 10 / 10 / 11 à la mesure de référence. Les planchers n'ont pas bougé.
+
+## Q-I-4. Neuf suites encodaient l'ABSENCE de contenu, et il fallait retourner les assertions
+
+Q-M2-7 en listait quatre ; il y en avait neuf. Aucune n'est un défaut de code, et **aucune n'a été
+assouplie** : chaque attendu écrit en dur a été remplacé par une mesure sur disque, ce qui les rend
+insensibles à la prochaine campagne de contenu.
+
+| suite | ce qui était écrit en dur | ce qui le remplace |
+|---|---|---|
+| `carte.test.ts` | `regionsOuvertes` rend `['galeries']` | `['galeries', 'marais-jumeau']`, plus une assertion que le Marais porte bien des nœuds |
+| `clairiere-sortie-complete.test.ts` | `4 <= nœuds de la Clairière <= 6` | bornes lues dans `parametres-pedagogie.json`, plafond rendu à la SORTIE, boucle sur les six régions |
+| `fiches-cablees.test.ts` | `['clairiere', 'galeries']` | les régions déclarées par `regions.json` |
+| `phonologie-couverture.test.ts` | socle sur deux régions | les régions du monde moins la Cité, qui n'a pas de socle et ne doit pas en avoir |
+| `moteurs-atteignables.test.ts` | coupe le nœud de `galeries-echos-paires-01` | coupe TOUS les nœuds du moteur le plus fourni, et exige plus d'un exercice coupé |
+| `parent-etat-profil.test.ts` | `18`, `6`, `12` | comptés sur `contenu/noeuds/*.json` |
+| `profils-vecus.test.ts` | `18`, `10`, `1/6`, `2/12`, « aucun nœud dans ces quatre régions » | comptés ; et l'assertion des régions vides est **retournée** : aucune des six ne doit être vide |
+| `migration-catalogue.test.ts` | `9` nœuds joués, retrait à `{6, 8}` | déduits, avec une assertion que le catalogue rétrécit vraiment |
+| `parent-galerie.test.ts` | `['clairiere','galeries','marais','foret','volcan','cite']` | les codes de `regions.json` |
+
+Trois d'entre elles méritent d'être lues avant d'être crues.
+
+**`parent-galerie.test.ts` acceptait n'importe quoi.** Quatre des six entrées de sa liste écrite à
+la main — `marais`, `foret`, `volcan`, `cite` — n'ont **jamais** été des codes de région ; les
+vrais sont `marais-jumeau`, `foret-muette`, `volcan`, `cite-des-histoires`. Le cas passait parce
+qu'aucun exercice n'était rattaché à ces régions. Il exige maintenant que les six apparaissent.
+
+**`clairiere-sortie-complete.test.ts` gagne un contrôle qu'il n'avait pas.** `composerSortie`
+déduplique le vivier PAR HABILLAGE quand `habillageUniqueParSortie` est vrai : ce n'est donc pas le
+nombre de nœuds qui borne une sortie, c'est le nombre d'habillages DISTINCTS. Une région de douze
+nœuds sur cinq décors ne servirait jamais plus de cinq nœuds, et rien ne l'aurait dit. Mesuré :
+Clairière 9, Galeries 12, Marais 8, Forêt 8, Volcan 8, Cité 10 — toutes au-dessus de six.
+
+**`profils-vecus.test.ts` — le témoin « AURAIT ÉTÉ ROUGE sous l'ancien critère » avait perdu ses
+dents, et c'est le contenu qui les lui avait ôtées.** Le critère de l'Éclat ne bloquait l'enfant
+que parce que les quatre régions suivantes étaient vides. Elles ne le sont plus : sur le contenu du
+jour, l'ancien critère rend 2 sorties comme le nouveau. Suivre ce chiffre aurait désarmé le témoin
+en silence — il serait resté vert le jour où quelqu'un rétablirait le critère de l'Éclat. Le cas
+remonte donc la même base sur le catalogue D'ALORS (deux régions pleines, quatre vides), et
+l'écart 0 contre 2 redevient mesurable.
+
+## Q-I-5. Le second défaut de H3 s'est fermé tout seul, et il faut le dire ainsi
+
+`profils-vecus.test.ts` portait en tête : « `tout-fini` — **TOUJOURS ROUGE** ». L'enfant qui
+terminait les 18 nœuds alors livrés se retrouvait sans aucun exercice jouable, les deux régions
+suivantes ne déclarant aucun nœud.
+
+Le cas passe. **Ce n'est pas le code qui a changé, c'est le vide qui a été comblé** : le Marais
+porte maintenant douze nœuds. La fragilité reste donc entière le jour où une région serait ouverte
+avant d'avoir son contenu — et c'est exactement ce que refuse par construction le cas retourné de
+Q-I-4, « AUCUNE des six régions n'est vide ». L'en-tête du fichier a été réécrit pour dire cette
+histoire au lieu de la version périmée.
+
+## Q-I-6. Trois décors sont dessinés, déclarés, contrôlés — et l'enfant ne peut pas les atteindre
+
+**Non corrigé. C'est une décision de conception, elle revient au père.**
+
+`scripts/auditer-assets-affiches.mjs` (nouveau, hors `tests/`, motif au Q-I-7) remonte pour chaque
+SVG la chaîne complète jusqu'à l'écran — décor, habillage, exercice, nœud, liste `noeuds` d'une
+région. Ce n'est pas la question que pose `test:contenu`, qui vérifie qu'un document DÉCLARE
+chaque SVG : un habillage peut déclarer parfaitement son décor sans qu'aucun exercice ne le cite.
+
+```
+SVG livrés sous contenu/          : 115
+SVG atteignables à l’écran        : 103
+archivés (remplacés, jamais ôtés) :   9
+hors de portée, motif nommé       :   3
+jamais atteignables, sans motif   :   0
+habillages déclarés / ouvrables par un nœud de la carte : 58 / 55
+```
+
+Les trois sont `campement/chaudron.svg`, `campement/page-blanche.svg`,
+`campement/vitrail-libre.svg` — les surfaces de coloriage libre. `client/src/monde/Chaudron.tsx`
+expose `surOuvrir`, `EcranCampement` le relaie sous `surOuvrirChaudron`, et `client/src/routeur.tsx`
+ne le passe pas : le chaudron répond « Le chaudron mijote encore », jamais une erreur (R14), et
+`tests/composants/EcranCampement.test.tsx` garde ce comportement.
+
+**Ce qui bloquait n'est plus vrai.** Le commentaire dit « absent tant qu'aucun nœud `libre` n'est
+livré » ; `galeries-12` porte désormais `galeries-paroi-libre-01`. Mais câbler le chaudron sur ce
+nœud journaliserait une tentative, rendrait trois étoiles et ferait monter la recoloration des
+Galeries — ce qui contredit « il n'y a rien à réussir » (v2 § 5.4). **Les deux issues sont donc :**
+
+1. un nœud `libre` hébergé par le campement, avec sa région propre — travail de contenu et de
+   schéma ;
+2. une route de coloriage libre SANS journalisation, qui monte `MoteurLibre` sur l'un des trois
+   habillages sans passer par une tentative — travail de code, et changement de la promesse
+   « tout ce que l'enfant fait est journalisé ».
+
+Le script porte une table d'exceptions NOMMÉES, chacune avec son motif : un quatrième décor hors de
+portée le ferait sortir en 1, et une exception devenue inutile — le décor étant devenu atteignable
+— le ferait sortir en 1 aussi. La table ne peut donc pas pourrir en silence.
+
+## Q-I-7. Un contrôle de plus vit hors de `tests/`, et c'est assumé
+
+`scripts/auditer-assets-affiches.mjs` n'est pas une suite : il lit `client/src`, `contenu/` et
+`scripts/` ensemble, et il rend un compte plutôt qu'un verdict binaire. Le mettre dans `tests/`
+l'aurait fait tourner à chaque `pre-commit` pour lire 115 SVG et l'intégralité des sources du
+client. Il n'est PAS branché dans `npm run verifier` : l'ajouter à la chaîne change la définition
+de « vert », et cette décision revient au père. En attendant, il se lance à la main et son code de
+sortie est utilisable tel quel.
+
+## Q-I-8. Ce que ce lot n'a PAS vérifié — à traiter comme non su
+
+- **Je n'ai écouté aucun clip.** La seule oreille de la chaîne reste `faster-whisper/large-v3`,
+  comme au lot M4. Un clip à `qcScore` 0,87 est transcrit correctement ; personne ne dit s'il est
+  agréable à entendre pour un enfant de sept ans.
+- **`test:visuel` reste rouge, et rien n'a été figé** (D39) : les références attendent le père.
+- **Je n'ai pas relu les 76 exercices ligne à ligne.** Le lexique, les schémas, les invariants
+  mécaniques et R16 sont mesurés par `valider-brouillons.mjs` et `test-contenu.mjs` ; la JUSTESSE
+  pédagogique de chaque consigne reste à la validation parentale (annexe P § 6.4), et aucun de ces
+  76 fichiers n'a encore été validé.
+- **Les avertissements d'eslint sont à 17 et n'ont pas été touchés** — 15 constantes de schéma
+  déclarées et non lues, 2 annotations `import()`. Aucun n'est une erreur ; les corriger touche des
+  fichiers que ce lot n'a pas de raison d'ouvrir.
+- **Les cinq tableaux de la séquence d'ouverture sont encore des bouchons**, et ce sont les cinq
+  premiers écrans que l'enfant verra. Mesuré : `contenu/habillages/ouverture/{pierre, grisaille,
+  habitants, appel, noms}.svg` pèsent 2 033 à 2 673 octets et portent toujours en toutes lettres
+  « PLACEHOLDER — decor bouchon ecrit a la main (D2) », là où les 53 décors de M6 pèsent entre 8 et
+  30 Ko. Ils sont bien AFFICHÉS — la chaîne jusqu'à l'écran existe, `contenu/monde/ouverture.json`
+  les cite —, mais le lot M6 ne les avait pas dans son périmètre (les six
+  régions), et aucun autre lot ne les a repris. **C'est le seul endroit du jeu où D35 est servi par
+  un dessin de dépannage.** À commander comme un lot d'assets à part entière, avec la même DA que
+  M6 et M7.

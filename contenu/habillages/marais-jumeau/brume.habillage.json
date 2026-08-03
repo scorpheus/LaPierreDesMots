@@ -1,0 +1,196 @@
+{
+  "id": "marais.brume",
+  "moteurs": [
+    "colorie"
+  ],
+  "libelle": "La berge que la brume quitte",
+  "region": "marais-jumeau",
+  "scene": {
+    "fichier": "habillages/marais-jumeau/brume.svg",
+    "viewBox": "0 0 960 600",
+    "calques": [
+      {
+        "id": "calque-fond",
+        "role": "fond",
+        "regions": []
+      },
+      {
+        "id": "calque-zones",
+        "role": "coloriable",
+        "regions": [
+          {
+            "id": "ciel-pale",
+            "libelle": "le ciel pâle",
+            "centroide": [
+              360,
+              40
+            ],
+            "surface": 69120
+          },
+          {
+            "id": "ciel",
+            "libelle": "le ciel",
+            "centroide": [
+              360,
+              132.1
+            ],
+            "surface": 122880
+          },
+          {
+            "id": "brume-haute",
+            "libelle": "la brume du haut",
+            "centroide": [
+              862.9,
+              231
+            ],
+            "surface": 79993
+          },
+          {
+            "id": "brume-basse",
+            "libelle": "la brume du bas",
+            "centroide": [
+              480,
+              360
+            ],
+            "surface": 56587.7
+          },
+          {
+            "id": "eau-du-fond",
+            "libelle": "l’eau du fond",
+            "centroide": [
+              120,
+              511.6
+            ],
+            "surface": 163200
+          },
+          {
+            "id": "berge",
+            "libelle": "la berge",
+            "centroide": [
+              474.2,
+              407.7
+            ],
+            "surface": 39934
+          },
+          {
+            "id": "saule-de-la-berge",
+            "libelle": "le saule de la berge",
+            "centroide": [
+              220,
+              288
+            ],
+            "surface": 25511.3
+          },
+          {
+            "id": "tronc-du-saule",
+            "libelle": "le tronc du saule",
+            "centroide": [
+              234,
+              411
+            ],
+            "surface": 2467.6
+          },
+          {
+            "id": "poule",
+            "libelle": "la poule",
+            "centroide": [
+              407.1,
+              353.4
+            ],
+            "surface": 6774.6
+          },
+          {
+            "id": "souris",
+            "libelle": "la souris",
+            "centroide": [
+              586.3,
+              371.5
+            ],
+            "surface": 5644
+          },
+          {
+            "id": "mouche",
+            "libelle": "la mouche",
+            "centroide": [
+              746,
+              277.1
+            ],
+            "surface": 3097.6
+          },
+          {
+            "id": "barque-echouee",
+            "libelle": "la barque échouée",
+            "centroide": [
+              650.5,
+              452.5
+            ],
+            "surface": 8543.8
+          },
+          {
+            "id": "nenuphar-perdu",
+            "libelle": "le nénuphar perdu",
+            "centroide": [
+              851.5,
+              481.8
+            ],
+            "surface": 7612.6
+          },
+          {
+            "id": "route",
+            "libelle": "la route",
+            "centroide": [
+              509.8,
+              524.4
+            ],
+            "surface": 55764.2
+          },
+          {
+            "id": "roue",
+            "libelle": "la roue",
+            "centroide": [
+              141.4,
+              554.6
+            ],
+            "surface": 5015.9
+          },
+          {
+            "id": "caillou",
+            "libelle": "le caillou",
+            "centroide": [
+              852.9,
+              551.2
+            ],
+            "surface": 3509.7
+          }
+        ]
+      },
+      {
+        "id": "calque-trait",
+        "role": "trait",
+        "regions": []
+      }
+    ]
+  },
+  "palette": {
+    "jetons": {},
+    "nuancier": [
+      "bleu",
+      "vert",
+      "gris",
+      "violet",
+      "brun",
+      "blanc"
+    ]
+  },
+  "timings": {
+    "appuiMs": 60,
+    "relachementMs": 120,
+    "refusMs": 180,
+    "recolorationMs": 800,
+    "interEtoilesMs": 180
+  },
+  "sons": {
+    "ambiance": null,
+    "effets": {}
+  }
+}

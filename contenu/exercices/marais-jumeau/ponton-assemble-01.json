@@ -1,0 +1,156 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Les sept blocs utiles sont deux à deux distincts : `partage/src/moteurs/assemble/validation.ts:53` refuse en `bloc-deja-pose` un bloc réemployé, motif qui ne compte pas d'erreur et ne libère rien — l'exercice deviendrait interminable. Les deux intrus `pon` et `tan` sont les JUMEAUX des syllabes justes, jamais des syllabes au hasard. ÉCART CONNU ET SIGNALÉ À L’ORCHESTRATEUR : `scripts/valider-brouillons.mjs` audite `blocs.libelle` comme du VOCABULAIRE, alors qu'une syllabe n'est pas un mot — il refuse déjà les huit blocs de `galeries/stalagmites-assemble-01.json`. Le script sait pourtant faire la différence : sa branche phonologie lit `natureDesFormes`. La branche exercice n’a pas d’équivalent, et aucun lot du plan ne possède ce fichier. Consigné en question ouverte.",
+  "id": "marais-jumeau-ponton-assemble-01",
+  "version": 1,
+  "titre": "Les planches du ponton",
+  "competences": [
+    "gph.nasale.on",
+    "gph.nasale.in"
+  ],
+  "difficulte": 4,
+  "jeu": {
+    "moteur": "assemble",
+    "habillage": "marais.ponton",
+    "noeud": "marais-jumeau-06",
+    "etoiles": {
+      "sansAide": true,
+      "sansErreur": true
+    },
+    "aideGobi": [
+      "relire-consigne",
+      "souffle-syllabe",
+      "surligne-graphene"
+    ],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Range les syllabes pour écrire : lapin.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "lapin",
+          "solution": [
+            "bloc-la",
+            "bloc-pin"
+          ],
+          "motsCles": [
+            "range",
+            "syllabe",
+            "lapin"
+          ]
+        },
+        {
+          "id": "c2",
+          "texte": "Range les syllabes pour écrire : matin.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "matin",
+          "solution": [
+            "bloc-ma",
+            "bloc-tin"
+          ],
+          "motsCles": [
+            "range",
+            "syllabe",
+            "matin"
+          ]
+        },
+        {
+          "id": "c3",
+          "texte": "Range les syllabes pour écrire : jardin.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "jardin",
+          "solution": [
+            "bloc-jar",
+            "bloc-din"
+          ],
+          "motsCles": [
+            "range",
+            "syllabe",
+            "jardin"
+          ]
+        },
+        {
+          "id": "c4",
+          "texte": "Range les syllabes pour écrire : citron.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "citron",
+          "solution": [
+            "bloc-ci",
+            "bloc-tron"
+          ],
+          "motsCles": [
+            "range",
+            "syllabe",
+            "citron"
+          ]
+        }
+      ],
+      "blocs": [
+        {
+          "id": "bloc-la",
+          "libelle": "la",
+          "intrus": false,
+          "confusionAvec": null
+        },
+        {
+          "id": "bloc-pin",
+          "libelle": "pin",
+          "intrus": false,
+          "confusionAvec": "pon"
+        },
+        {
+          "id": "bloc-ma",
+          "libelle": "ma",
+          "intrus": false,
+          "confusionAvec": null
+        },
+        {
+          "id": "bloc-tin",
+          "libelle": "tin",
+          "intrus": false,
+          "confusionAvec": "tan"
+        },
+        {
+          "id": "bloc-jar",
+          "libelle": "jar",
+          "intrus": false,
+          "confusionAvec": null
+        },
+        {
+          "id": "bloc-din",
+          "libelle": "din",
+          "intrus": false,
+          "confusionAvec": "don"
+        },
+        {
+          "id": "bloc-ci",
+          "libelle": "ci",
+          "intrus": false,
+          "confusionAvec": null
+        },
+        {
+          "id": "bloc-tron",
+          "libelle": "tron",
+          "intrus": false,
+          "confusionAvec": "tran"
+        },
+        {
+          "id": "bloc-pon",
+          "libelle": "pon",
+          "intrus": true,
+          "confusionAvec": "pin"
+        },
+        {
+          "id": "bloc-tan",
+          "libelle": "tan",
+          "intrus": true,
+          "confusionAvec": "tin"
+        }
+      ],
+      "competence": "gph.nasale.in"
+    }
+  }
+}

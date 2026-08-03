@@ -1,0 +1,314 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. `ville` est L'EXCEPTION du graphème, et elle est ici EXPRÈS, dans le wagon de droite : mêmes lettres que `fille`, autre son. Un graphème enseigné sans son exception se défait au premier mot rencontré dans un livre. Le wagon du milieu ouvre `gn`, qui n’avait qu’UN mot au lexique CE1 au début de ce lot et en compte treize depuis M3. Sept consignes, quatorze éléments disjoints.",
+  "id": "volcan-wagons-tri-02",
+  "version": 1,
+  "titre": "Les wagons de la fille et de la ville",
+  "competences": [
+    "gph.rare.ill",
+    "gph.rare.gn",
+    "comp.consigne.multiple"
+  ],
+  "difficulte": 4,
+  "jeu": {
+    "moteur": "tri",
+    "habillage": "volcan.wagons",
+    "noeud": "volcan-10",
+    "etoiles": {
+      "sansAide": true,
+      "sansErreur": true
+    },
+    "aideGobi": [
+      "relire-consigne",
+      "souffle-syllabe",
+      "surligne-graphene",
+      "montre-cible"
+    ],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Range les mots où tu entends le son de fille.",
+          "forme": "imperative",
+          "audio": null,
+          "aRanger": [
+            "mot-bille",
+            "mot-quille"
+          ],
+          "motsCles": [
+            "range",
+            "mot",
+            "son",
+            "fille"
+          ]
+        },
+        {
+          "id": "c2",
+          "texte": "Range aussi les mots où tu entends le son de fille.",
+          "forme": "imperative",
+          "audio": null,
+          "aRanger": [
+            "mot-famille",
+            "mot-feuille"
+          ],
+          "motsCles": [
+            "range",
+            "mot",
+            "son",
+            "fille"
+          ]
+        },
+        {
+          "id": "c3",
+          "texte": "Range les mots où tu n'entends pas le son de fille.",
+          "forme": "imperative",
+          "audio": null,
+          "aRanger": [
+            "mot-balle",
+            "mot-salle"
+          ],
+          "motsCles": [
+            "range",
+            "mot",
+            "son",
+            "fille"
+          ]
+        },
+        {
+          "id": "c4",
+          "texte": "Range aussi les mots où tu n'entends pas le son de fille.",
+          "forme": "imperative",
+          "audio": null,
+          "aRanger": [
+            "mot-colle",
+            "mot-pile"
+          ],
+          "motsCles": [
+            "range",
+            "mot",
+            "son",
+            "fille"
+          ]
+        },
+        {
+          "id": "c5",
+          "texte": "Range les mots où tu entends le son de montagne.",
+          "forme": "imperative",
+          "audio": null,
+          "aRanger": [
+            "mot-ligne",
+            "mot-signe"
+          ],
+          "motsCles": [
+            "range",
+            "mot",
+            "son",
+            "montagne"
+          ]
+        },
+        {
+          "id": "c6",
+          "texte": "Range aussi les mots où tu entends le son de montagne.",
+          "forme": "imperative",
+          "audio": null,
+          "aRanger": [
+            "mot-agneau",
+            "mot-champignon"
+          ],
+          "motsCles": [
+            "range",
+            "mot",
+            "son",
+            "montagne"
+          ]
+        },
+        {
+          "id": "c7",
+          "texte": "Range les derniers mots.",
+          "forme": "imperative",
+          "audio": null,
+          "aRanger": [
+            "mot-grenouille",
+            "mot-ville"
+          ],
+          "motsCles": [
+            "range",
+            "dernier",
+            "mot"
+          ]
+        }
+      ],
+      "receptacles": [
+        {
+          "id": "wagon-gauche",
+          "libelle": "le premier wagon",
+          "critere": "le son de fille",
+          "zone": [
+            [
+              40,
+              300
+            ],
+            [
+              300,
+              300
+            ],
+            [
+              300,
+              560
+            ],
+            [
+              40,
+              560
+            ]
+          ]
+        },
+        {
+          "id": "wagon-milieu",
+          "libelle": "le deuxième wagon",
+          "critere": "le son de montagne",
+          "zone": [
+            [
+              350,
+              300
+            ],
+            [
+              610,
+              300
+            ],
+            [
+              610,
+              560
+            ],
+            [
+              350,
+              560
+            ]
+          ]
+        },
+        {
+          "id": "wagon-droite",
+          "libelle": "le troisième wagon",
+          "critere": "pas le son de fille",
+          "zone": [
+            [
+              660,
+              300
+            ],
+            [
+              920,
+              300
+            ],
+            [
+              920,
+              560
+            ],
+            [
+              660,
+              560
+            ]
+          ]
+        }
+      ],
+      "elements": [
+        {
+          "id": "mot-bille",
+          "libelle": "bille",
+          "asset": null,
+          "receptacleAttendu": "wagon-gauche",
+          "confusionAvec": "ville"
+        },
+        {
+          "id": "mot-quille",
+          "libelle": "quille",
+          "asset": null,
+          "receptacleAttendu": "wagon-gauche",
+          "confusionAvec": "pile"
+        },
+        {
+          "id": "mot-famille",
+          "libelle": "famille",
+          "asset": null,
+          "receptacleAttendu": "wagon-gauche",
+          "confusionAvec": null
+        },
+        {
+          "id": "mot-feuille",
+          "libelle": "feuille",
+          "asset": null,
+          "receptacleAttendu": "wagon-gauche",
+          "confusionAvec": null
+        },
+        {
+          "id": "mot-grenouille",
+          "libelle": "grenouille",
+          "asset": null,
+          "receptacleAttendu": "wagon-gauche",
+          "confusionAvec": null
+        },
+        {
+          "id": "mot-balle",
+          "libelle": "balle",
+          "asset": null,
+          "receptacleAttendu": "wagon-droite",
+          "confusionAvec": "bille"
+        },
+        {
+          "id": "mot-salle",
+          "libelle": "salle",
+          "asset": null,
+          "receptacleAttendu": "wagon-droite",
+          "confusionAvec": null
+        },
+        {
+          "id": "mot-colle",
+          "libelle": "colle",
+          "asset": null,
+          "receptacleAttendu": "wagon-droite",
+          "confusionAvec": null
+        },
+        {
+          "id": "mot-pile",
+          "libelle": "pile",
+          "asset": null,
+          "receptacleAttendu": "wagon-droite",
+          "confusionAvec": "quille"
+        },
+        {
+          "id": "mot-ville",
+          "libelle": "ville",
+          "asset": null,
+          "receptacleAttendu": "wagon-droite",
+          "confusionAvec": "bille"
+        },
+        {
+          "id": "mot-ligne",
+          "libelle": "ligne",
+          "asset": null,
+          "receptacleAttendu": "wagon-milieu",
+          "confusionAvec": "line"
+        },
+        {
+          "id": "mot-signe",
+          "libelle": "signe",
+          "asset": null,
+          "receptacleAttendu": "wagon-milieu",
+          "confusionAvec": "cygne"
+        },
+        {
+          "id": "mot-agneau",
+          "libelle": "agneau",
+          "asset": null,
+          "receptacleAttendu": "wagon-milieu",
+          "confusionAvec": "anneau"
+        },
+        {
+          "id": "mot-champignon",
+          "libelle": "champignon",
+          "asset": null,
+          "receptacleAttendu": "wagon-milieu",
+          "confusionAvec": null
+        }
+      ],
+      "competence": "gph.rare.ill"
+    }
+  }
+}

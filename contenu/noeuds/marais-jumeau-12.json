@@ -1,0 +1,10 @@
+{
+  "id": "marais-jumeau-12",
+  "region": "marais-jumeau",
+  "ordre": 12,
+  "exercice": "marais-jumeau-nenuphars-chemin-02",
+  "prerequis": [
+    "marais-jumeau-11"
+  ],
+  "temps": "maitrise"
+}

@@ -1,0 +1,10 @@
+{
+  "id": "marais-jumeau-03",
+  "region": "marais-jumeau",
+  "ordre": 3,
+  "exercice": "marais-jumeau-grenouilles-tri-01",
+  "prerequis": [
+    "marais-jumeau-02"
+  ],
+  "temps": "retournement"
+}

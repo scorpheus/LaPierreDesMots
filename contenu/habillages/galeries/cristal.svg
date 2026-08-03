@@ -1,16 +1,37 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" width="960" height="600" role="img" aria-label="Le cristal qui s’allume">
+  <title>Le cristal qui s’allume</title>
+  <desc>Deux cristaux facettés de deux hauteurs sur un socle taillé, une stalactite fine, la goutte qui en tombe, une veine lumineuse dans la paroi, l’ombre longue au sol.</desc>
+  <!--
+    DÉCOR — lot M6, contrat du monde v4 § 2. Trait noir sur blanc, la COULEUR VIENT DU CODE
+    (annexe P § 2) : les régions sortent d'ici en grisaille #8E97A8, qui est leur état
+    par défaut et non un choix graphique. Géométrie 100 % polygonale (M, L, Z — aucun arc) :
+    surface et centroïde sont donc calculables exactement et opposables aux valeurs déclarées
+    par le .habillage.json, que scripts/verifier-regions-fermees.mjs --strict recalcule.
+
+    Chaque région est un ENFANT DIRECT de #calque-zones : SceneSvg.tsx sélectionne
+    "#calque-zones > [id]", et un tracé niché dans un sous-groupe échapperait au tap sans
+    qu'aucun message ne le dise.
+
+    ÉCRIT PAR scripts/dessiner-decors.mjs — ne pas retoucher à la main : la scène est décrite
+    dans scripts/decors/decors.mjs, et l'émetteur refuse d'écrire si la mesure est mauvaise.
+  -->
   <g id="calque-fond">
-    <rect id="fond" x="0" y="0" width="960" height="600" fill="#eceaf2"/>
+    <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
   </g>
-  <g id="calque-zones">
-    <rect id="cristal-clair" x="90" y="110" width="200" height="160" rx="12"/>
-    <rect id="cristal-sombre" x="380" y="110" width="200" height="160" rx="12"/>
-    <rect id="socle" x="670" y="110" width="200" height="160" rx="12"/>
-    <rect id="paroi-humide" x="90" y="340" width="200" height="160" rx="12"/>
-    <rect id="gouttes" x="380" y="340" width="200" height="160" rx="12"/>
-    <rect id="ombre-longue" x="670" y="340" width="200" height="160" rx="12"/>
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round">
+    <path id="paroi-humide" class="zone" data-region-svg="paroi-humide" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L960,0 L960,358 L933.3,366 L906.7,371.9 L880,374 L853.3,371.9 L826.7,366 L800,358 L773.3,350 L746.7,344.1 L720,342 L693.3,344.1 L666.7,350 L640,358 L613.3,366 L586.7,371.9 L560,374 L533.3,371.9 L506.7,366 L480,358 L453.3,350 L426.7,344.1 L400,342 L373.3,344.1 L346.7,350 L320,358 L293.3,366 L266.7,371.9 L240,374 L213.3,371.9 L186.7,366 L160,358 L133.3,350 L106.7,344.1 L80,342 L53.3,344.1 L26.7,350 L0,358 Z"/>
+    <path id="sol-de-la-galerie" class="zone" data-region-svg="sol-de-la-galerie" fill="#8E97A8" fill-rule="evenodd" d="M0,538 L26.7,544.1 L53.3,545.9 L80,542 L106.7,535.3 L133.3,530.5 L160,531.1 L186.7,536.6 L213.3,543.1 L240,546 L266.7,543.1 L293.3,536.6 L320,531.1 L346.7,530.5 L373.3,535.3 L400,542 L426.7,545.9 L453.3,544.1 L480,538 L506.7,531.9 L533.3,530.1 L560,534 L586.7,540.7 L613.3,545.5 L640,544.9 L666.7,539.4 L693.3,532.9 L720,530 L746.7,532.9 L773.3,539.4 L800,544.9 L826.7,545.5 L853.3,540.7 L880,534 L906.7,530.1 L933.3,531.9 L960,538 L960,600 L0,600 Z"/>
+    <path id="ombre-longue" class="zone" data-region-svg="ombre-longue" fill="#8E97A8" fill-rule="evenodd" d="M240,520 L900,500 L930,558 L210,566 Z"/>
+    <path id="socle" class="zone" data-region-svg="socle" fill="#8E97A8" fill-rule="evenodd" d="M299,470 L561,470 L601,556 L259,556 Z"/>
+    <path id="cristal-clair" class="zone" data-region-svg="cristal-clair" fill="#8E97A8" fill-rule="evenodd" d="M360,150 L436,240.2 L419.3,426.9 L360,472 L300.7,426.9 L284,240.2 Z"/>
+    <path id="cristal-sombre" class="zone" data-region-svg="cristal-sombre" fill="#8E97A8" fill-rule="evenodd" d="M544,230 L600,302.6 L587.7,438.1 L544,472 L500.3,438.1 L488,302.6 Z"/>
+    <path id="gouttes" class="zone" data-region-svg="gouttes" fill="#8E97A8" fill-rule="evenodd" d="M762,150 L775,193.5 L781.5,198.9 L786,206.1 L787.9,214.3 L787.1,222.7 L783.6,230.4 L777.8,236.6 L770.4,240.6 L762,242 L753.6,240.6 L746.2,236.6 L740.4,230.4 L736.9,222.7 L736.1,214.3 L738,206.1 L742.5,198.9 L749,193.5 Z"/>
+    <path id="stalactite-fine" class="zone" data-region-svg="stalactite-fine" fill="#8E97A8" fill-rule="evenodd" d="M160,58 L169,166.4 L173.5,170.1 L176.6,175.1 L178,180.8 L177.4,186.7 L175,192 L171,196.3 L165.8,199 L160,200 L154.2,199 L149,196.3 L145,192 L142.6,186.7 L142,180.8 L143.4,175.1 L146.5,170.1 L151,166.4 Z"/>
+    <path id="veine-lumineuse" class="zone" data-region-svg="veine-lumineuse" fill="#8E97A8" fill-rule="evenodd" d="M35.9,125.7 L173.4,222.4 L113.1,341.2 L216.8,456.7 L227.2,447.3 L126.9,338.8 L186.6,217.6 L44.1,114.3 Z"/>
+    <path id="galet" class="zone" data-region-svg="galet" fill="#8E97A8" fill-rule="evenodd" d="M882.7,558.6 L875.1,561.8 L865.9,563 L857.1,562.9 L849.3,563 L841.6,563.7 L832.9,564.7 L823.5,564.5 L815.1,562 L809.6,557.5 L807.6,551.9 L807.8,546.6 L807.7,542 L806.4,537.4 L804.8,532.2 L805.2,526.5 L809.3,521.4 L816.9,518.2 L826.1,517 L834.9,517.1 L842.7,517 L850.4,516.3 L859.1,515.3 L868.5,515.5 L876.9,518 L882.4,522.5 L884.4,528.1 L884.2,533.4 L884.3,538 L885.6,542.6 L887.2,547.8 L886.8,553.5 Z"/>
   </g>
-  <g id="calque-trait">
-    <path id="cadre" d="M20 20 H940 V580 H20 Z" fill="none" stroke="#2b2b2b" stroke-width="4"/>
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path class="trait" d="M360,210 L360,460"/>
+    <path class="trait" d="M544,274 L544,466"/>
   </g>
 </svg>

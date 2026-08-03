@@ -1,9 +1,9 @@
 {
-  "$commentaire": "PLACEHOLDER — À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Lot A4 : le moteur `chemin` n'avait aucun exercice. Quatre contraintes MESURÉES : (1) `voisines` doit être SYMÉTRIQUE — le schéma ne sait pas l'exprimer et un plateau asymétrique ferait un cul-de-sac invisible (en-tête de `partage/src/moteurs/chemin/schema-contenu.ts`). Les huit pierres forment deux rangées de quatre, reliées deux à deux, et chaque relation est écrite dans les deux sens. (2) `modeReponseChemin` DÉRIVE le mode du branchement réel : le plus grand nombre de voisines vaut 3 ici, donc `qcm-3`, donc p_devinette 0,33 (D13). Un couloir à deux voisines aurait donné `vrai-faux` à 0,50, le format que D13 nomme comme le moins informatif — c'est pour cela que le plateau a des embranchements. (3) `acquis` n'est jamais remis à zéro entre deux consignes : les deux parcours sont donc DISJOINTS, et les deux cases de départ (`pierre-bol`, `pierre-dos`) n'entrent dans aucun parcours. (4) Une case hors de portée est ignorée sans bruit et sans erreur (`case-non-adjacente`, `REFUS_CHEMIN_COMPTE_ERREUR` à `false`) : le geste n'est jamais puni, seule la LECTURE l'est (R16). Les huit mots sont dans le lexique CE1 de `scripts/generer-phonologie.mjs` et opposent b à d sur l'axe gauche-droite de D23.",
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Lot M1 — réécriture du PLACEHOLDER du lot A4. LE PLATEAU PASSE DE HUIT PIERRES À TREIZE, ET DE DEUX CONSIGNES À QUATRE : c'est le seul changement de fond, le reste reprend mot pour mot les quatre contraintes que A4 avait mesurées et qui n'ont pas bougé. (1) `voisines` doit être SYMÉTRIQUE — le schéma ne sait pas l'exprimer et un plateau asymétrique ferait un cul-de-sac invisible (en-tête de `partage/src/moteurs/chemin/schema-contenu.ts`). Chaque relation est écrite dans les deux sens ; le plateau est une grille de quatre colonnes sur trois rangs, plus la pierre de départ. (2) `modeReponseChemin` DÉRIVE le mode du branchement réel : le plus grand nombre de voisines vaut 4 ici (`pierre-dos` et `pierre-robe` en ont quatre), donc `qcm-4`, donc p_devinette 0,25 — meilleur que les 0,33 de la version à huit pierres, et bien meilleur que le 0,50 d'un couloir, format que D13 nomme le moins informatif. (3) `acquis` n'est jamais remis à zéro entre deux consignes : les QUATRE parcours sont deux à deux disjoints, et `pierre-depart` n'appartient à aucun d'eux — `chemin/moteur.ts` remet `position` à `departs[indexEtape]` sans jamais l'inscrire dans `acquis`, une seule pierre de départ suffit donc pour les quatre consignes. (4) Une case hors de portée est ignorée sans bruit et sans erreur (`case-non-adjacente` à `false`) : le geste n'est jamais puni, seule la LECTURE l'est. AXE GAUCHE-DROITE UNIQUEMENT — b ↔ d (D23, conséquence 1) : aucun des douze mots ne porte de `p` ni de `q`, et aucun ne porte à la fois un `b` et un `d`. Les douze mots sont au lexique CE1 et tous à syllabe fermée, d'où `syl.cvc` en seconde compétence.",
   "id": "galeries-passage-chemin-01",
-  "version": 1,
+  "version": 2,
   "titre": "Le passage aux pierres plates",
-  "competences": ["gph.miroir.gauche-droite"],
+  "competences": ["gph.miroir.gauche-droite", "syl.cvc"],
   "difficulte": 3,
   "jeu": {
     "moteur": "chemin",
@@ -18,8 +18,8 @@
           "texte": "Marche sur les mots où tu lis un b.",
           "forme": "imperative",
           "audio": null,
-          "depart": "pierre-bol",
-          "parcours": ["pierre-bille", "pierre-banc", "pierre-boule"],
+          "depart": "pierre-depart",
+          "parcours": ["pierre-bol", "pierre-bus", "pierre-bec"],
           "motsCles": ["marche", "mots", "lis"]
         },
         {
@@ -27,67 +27,120 @@
           "texte": "Marche sur les mots où tu lis un d.",
           "forme": "imperative",
           "audio": null,
-          "depart": "pierre-dos",
-          "parcours": ["pierre-dent", "pierre-dame", "pierre-dalle"],
+          "depart": "pierre-depart",
+          "parcours": ["pierre-dos", "pierre-dur", "pierre-dix"],
           "motsCles": ["marche", "mots", "lis"]
+        },
+        {
+          "id": "c3",
+          "texte": "Marche sur les autres mots où tu lis un b.",
+          "forme": "imperative",
+          "audio": null,
+          "depart": "pierre-depart",
+          "parcours": ["pierre-robe", "pierre-barbe", "pierre-botte"],
+          "motsCles": ["marche", "autres", "lis"]
+        },
+        {
+          "id": "c4",
+          "texte": "Marche sur les derniers mots où tu lis un d.",
+          "forme": "imperative",
+          "audio": null,
+          "depart": "pierre-depart",
+          "parcours": ["pierre-dame", "pierre-radis", "pierre-ronde"],
+          "motsCles": ["marche", "derniers", "lis"]
         }
       ],
       "cases": [
         {
+          "id": "pierre-depart",
+          "libelle": "la marche",
+          "position": [480, 60],
+          "voisines": ["pierre-bol", "pierre-dos", "pierre-robe", "pierre-dame"],
+          "confusionAvec": null
+        },
+        {
           "id": "pierre-bol",
           "libelle": "bol",
-          "position": [120, 180],
-          "voisines": ["pierre-bille", "pierre-dos"],
+          "position": [150, 200],
+          "voisines": ["pierre-depart", "pierre-bus", "pierre-dos"],
           "confusionAvec": "dos"
-        },
-        {
-          "id": "pierre-bille",
-          "libelle": "bille",
-          "position": [340, 180],
-          "voisines": ["pierre-bol", "pierre-banc", "pierre-dent"],
-          "confusionAvec": "dent"
-        },
-        {
-          "id": "pierre-banc",
-          "libelle": "banc",
-          "position": [560, 180],
-          "voisines": ["pierre-bille", "pierre-boule", "pierre-dame"],
-          "confusionAvec": "dame"
-        },
-        {
-          "id": "pierre-boule",
-          "libelle": "boule",
-          "position": [780, 180],
-          "voisines": ["pierre-banc", "pierre-dalle"],
-          "confusionAvec": "dalle"
         },
         {
           "id": "pierre-dos",
           "libelle": "dos",
-          "position": [120, 420],
-          "voisines": ["pierre-dent", "pierre-bol"],
+          "position": [370, 200],
+          "voisines": ["pierre-depart", "pierre-dur", "pierre-bol", "pierre-robe"],
           "confusionAvec": "bol"
         },
         {
-          "id": "pierre-dent",
-          "libelle": "dent",
-          "position": [340, 420],
-          "voisines": ["pierre-dos", "pierre-dame", "pierre-bille"],
-          "confusionAvec": "bille"
+          "id": "pierre-robe",
+          "libelle": "robe",
+          "position": [590, 200],
+          "voisines": ["pierre-depart", "pierre-barbe", "pierre-dos", "pierre-dame"],
+          "confusionAvec": "ronde"
         },
         {
           "id": "pierre-dame",
           "libelle": "dame",
-          "position": [560, 420],
-          "voisines": ["pierre-dent", "pierre-dalle", "pierre-banc"],
-          "confusionAvec": "banc"
+          "position": [810, 200],
+          "voisines": ["pierre-depart", "pierre-radis", "pierre-robe"],
+          "confusionAvec": "barbe"
         },
         {
-          "id": "pierre-dalle",
-          "libelle": "dalle",
-          "position": [780, 420],
-          "voisines": ["pierre-dame", "pierre-boule"],
-          "confusionAvec": "boule"
+          "id": "pierre-bus",
+          "libelle": "bus",
+          "position": [150, 360],
+          "voisines": ["pierre-bol", "pierre-bec", "pierre-dur"],
+          "confusionAvec": "dur"
+        },
+        {
+          "id": "pierre-dur",
+          "libelle": "dur",
+          "position": [370, 360],
+          "voisines": ["pierre-dos", "pierre-dix", "pierre-bus", "pierre-barbe"],
+          "confusionAvec": "bus"
+        },
+        {
+          "id": "pierre-barbe",
+          "libelle": "barbe",
+          "position": [590, 360],
+          "voisines": ["pierre-robe", "pierre-botte", "pierre-dur", "pierre-radis"],
+          "confusionAvec": "dame"
+        },
+        {
+          "id": "pierre-radis",
+          "libelle": "radis",
+          "position": [810, 360],
+          "voisines": ["pierre-dame", "pierre-ronde", "pierre-barbe"],
+          "confusionAvec": "robe"
+        },
+        {
+          "id": "pierre-bec",
+          "libelle": "bec",
+          "position": [150, 510],
+          "voisines": ["pierre-bus", "pierre-dix"],
+          "confusionAvec": "dix"
+        },
+        {
+          "id": "pierre-dix",
+          "libelle": "dix",
+          "position": [370, 510],
+          "voisines": ["pierre-dur", "pierre-bec", "pierre-botte"],
+          "confusionAvec": "bec"
+        },
+        {
+          "id": "pierre-botte",
+          "libelle": "botte",
+          "position": [590, 510],
+          "voisines": ["pierre-barbe", "pierre-dix", "pierre-ronde"],
+          "confusionAvec": "ronde"
+        },
+        {
+          "id": "pierre-ronde",
+          "libelle": "ronde",
+          "position": [810, 510],
+          "voisines": ["pierre-radis", "pierre-botte"],
+          "confusionAvec": "botte"
         }
       ],
       "competence": "gph.miroir.gauche-droite"

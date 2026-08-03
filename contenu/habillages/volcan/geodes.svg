@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" width="960" height="600" role="img" aria-label="Les géodes à ouvrir">
+  <title>Les géodes à ouvrir</title>
+  <desc>Quatre géodes de quatre tailles, chacune creuse en son milieu — c’est ce vide qui les désigne comme géodes. Le marteau du mineur, la lampe, un éclat détaché.</desc>
+  <!--
+    DÉCOR — lot M6, contrat du monde v4 § 2. Trait noir sur blanc, la COULEUR VIENT DU CODE
+    (annexe P § 2) : les régions sortent d'ici en grisaille #8E97A8, qui est leur état
+    par défaut et non un choix graphique. Géométrie 100 % polygonale (M, L, Z — aucun arc) :
+    surface et centroïde sont donc calculables exactement et opposables aux valeurs déclarées
+    par le .habillage.json, que scripts/verifier-regions-fermees.mjs --strict recalcule.
+
+    Chaque région est un ENFANT DIRECT de #calque-zones : SceneSvg.tsx sélectionne
+    "#calque-zones > [id]", et un tracé niché dans un sous-groupe échapperait au tap sans
+    qu'aucun message ne le dise.
+
+    ÉCRIT PAR scripts/dessiner-decors.mjs — ne pas retoucher à la main : la scène est décrite
+    dans scripts/decors/decors.mjs, et l'émetteur refuse d'écrire si la mesure est mauvaise.
+  -->
+  <g id="calque-fond">
+    <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
+  </g>
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round">
+    <path id="paroi-de-la-mine" class="zone" data-region-svg="paroi-de-la-mine" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L960,0 L960,158 L933.3,163 L906.7,166.7 L880,168 L853.3,166.7 L826.7,163 L800,158 L773.3,153 L746.7,149.3 L720,148 L693.3,149.3 L666.7,153 L640,158 L613.3,163 L586.7,166.7 L560,168 L533.3,166.7 L506.7,163 L480,158 L453.3,153 L426.7,149.3 L400,148 L373.3,149.3 L346.7,153 L320,158 L293.3,163 L266.7,166.7 L240,168 L213.3,166.7 L186.7,163 L160,158 L133.3,153 L106.7,149.3 L80,148 L53.3,149.3 L26.7,153 L0,158 Z"/>
+    <path id="sol-de-cendre" class="zone" data-region-svg="sol-de-cendre" fill="#8E97A8" fill-rule="evenodd" d="M0,480 L26.7,486.9 L53.3,488.9 L80,484.5 L106.7,476.9 L133.3,471.5 L160,472.2 L186.7,478.4 L213.3,485.8 L240,489 L266.7,485.8 L293.3,478.4 L320,472.2 L346.7,471.5 L373.3,476.9 L400,484.5 L426.7,488.9 L453.3,486.9 L480,480 L506.7,473.1 L533.3,471.1 L560,475.5 L586.7,483.1 L613.3,488.5 L640,487.8 L666.7,481.6 L693.3,474.2 L720,471 L746.7,474.2 L773.3,481.6 L800,487.8 L826.7,488.5 L853.3,483.1 L880,475.5 L906.7,471.1 L933.3,473.1 L960,480 L960,600 L0,600 Z"/>
+    <path id="geode-un" class="zone" data-region-svg="geode-un" fill="#8E97A8" fill-rule="evenodd" d="M209,218 L265.6,237.2 L301.9,283.3 L297.9,348.6 L253.4,394.6 L188.8,406.2 L132.2,375.4 L112,317.8 L136.3,256.4 Z M209,264.1 L253.4,298.6 L241.3,356.2 L180.7,363.9 L156.5,306.3 Z"/>
+    <path id="geode-deux" class="zone" data-region-svg="geode-deux" fill="#8E97A8" fill-rule="evenodd" d="M444,248 L492.2,264.2 L523.1,303.1 L519.7,358.2 L481.8,397 L426.8,406.8 L378.6,380.8 L361.4,332.2 L382.1,280.4 Z M444,286.9 L481.8,316 L471.5,364.6 L419.9,371.1 L399.3,322.5 Z"/>
+    <path id="geode-trois" class="zone" data-region-svg="geode-trois" fill="#8E97A8" fill-rule="evenodd" d="M696,228 L749.8,246.2 L784.3,289.9 L780.5,351.8 L738.2,395.4 L676.8,406.4 L623,377.2 L603.8,322.6 L626.9,264.4 Z M696,271.7 L738.2,304.4 L726.7,359 L669.1,366.3 L646.1,311.7 Z"/>
+    <path id="geode-quatre" class="zone" data-region-svg="geode-quatre" fill="#8E97A8" fill-rule="evenodd" d="M878,268 L915,280.6 L938.7,310.8 L936.1,353.7 L907,383.9 L864.8,391.5 L827.8,371.3 L814.6,333.5 L830.5,293.2 Z M878,298.2 L907,320.9 L899.1,358.7 L859.5,363.8 L843.7,326 Z"/>
+    <path id="marteau-du-mineur" class="zone" data-region-svg="marteau-du-mineur" fill="#8E97A8" fill-rule="evenodd" d="M129.2,475.3 L198.6,475.3 L218.8,487.5 L218.8,511.9 L198.6,524.1 L183,524.1 L180.7,590 L162.8,590 L165,524.1 L129.2,524.1 Z"/>
+    <path id="lampe-de-geode" class="zone" data-region-svg="lampe-de-geode" fill="#8E97A8" fill-rule="evenodd" d="M733.1,468 L758.9,468 L751.5,481.4 L771.8,490.4 L779.1,506.1 L773.6,553.1 L782.8,564.3 L782.8,575.5 L709.2,575.5 L709.2,564.3 L718.4,553.1 L712.9,506.1 L720.2,490.4 L740.5,481.4 Z"/>
+    <path id="eclat-de-geode" class="zone" data-region-svg="eclat-de-geode" fill="#8E97A8" fill-rule="evenodd" d="M450,468 L482,493.8 L475,547.1 L450,560 L425,547.1 L418,493.8 Z"/>
+  </g>
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path class="trait" d="M0,482 L960,474"/>
+  </g>
+</svg>

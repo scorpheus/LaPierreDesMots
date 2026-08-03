@@ -19,58 +19,139 @@
         "role": "coloriable",
         "regions": [
           {
-            "id": "eclat-un",
-            "libelle": "le premier éclat",
+            "id": "cadre-plomb",
+            "libelle": "le cadre de plomb",
             "centroide": [
-              190.0,
-              190.0
+              398.5,
+              301
             ],
-            "surface": 32000.0
-          },
-          {
-            "id": "eclat-deux",
-            "libelle": "le deuxième éclat",
-            "centroide": [
-              480.0,
-              190.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "eclat-trois",
-            "libelle": "le troisième éclat",
-            "centroide": [
-              770.0,
-              190.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "eclat-quatre",
-            "libelle": "le quatrième éclat",
-            "centroide": [
-              190.0,
-              420.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "sertissure",
-            "libelle": "la sertissure",
-            "centroide": [
-              480.0,
-              420.0
-            ],
-            "surface": 32000.0
+            "surface": 294448
           },
           {
             "id": "fond-clair",
             "libelle": "le fond clair",
             "centroide": [
-              770.0,
-              420.0
+              409.5,
+              301
             ],
-            "surface": 32000.0
+            "surface": 214668
+          },
+          {
+            "id": "sertissure",
+            "libelle": "la sertissure",
+            "centroide": [
+              480,
+              300
+            ],
+            "surface": 26368
+          },
+          {
+            "id": "rosace-centre",
+            "libelle": "la rosace du centre",
+            "centroide": [
+              482.14,
+              298.25
+            ],
+            "surface": 4750.1
+          },
+          {
+            "id": "eclat-un",
+            "libelle": "le premier éclat",
+            "centroide": [
+              319.06,
+              178.68
+            ],
+            "surface": 7700.67
+          },
+          {
+            "id": "eclat-deux",
+            "libelle": "le deuxième éclat",
+            "centroide": [
+              646.56,
+              178.53
+            ],
+            "surface": 5863.24
+          },
+          {
+            "id": "eclat-trois",
+            "libelle": "le troisième éclat",
+            "centroide": [
+              318.4,
+              424.08
+            ],
+            "surface": 7127.16
+          },
+          {
+            "id": "eclat-quatre",
+            "libelle": "le quatrième éclat",
+            "centroide": [
+              646.82,
+              421.75
+            ],
+            "surface": 5702.23
+          },
+          {
+            "id": "eclat-cinq",
+            "libelle": "le cinquième éclat",
+            "centroide": [
+              250.15,
+              302.29
+            ],
+            "surface": 7432.43
+          },
+          {
+            "id": "eclat-six",
+            "libelle": "le sixième éclat",
+            "centroide": [
+              708.95,
+              300.13
+            ],
+            "surface": 4487.63
+          },
+          {
+            "id": "eclat-sept",
+            "libelle": "le septième éclat",
+            "centroide": [
+              478.63,
+              128.59
+            ],
+            "surface": 4612.71
+          },
+          {
+            "id": "eclat-huit",
+            "libelle": "le huitième éclat",
+            "centroide": [
+              479.29,
+              473.96
+            ],
+            "surface": 4544.55
+          },
+          {
+            "id": "eclat-neuf",
+            "libelle": "le neuvième éclat",
+            "centroide": [
+              391.15,
+              247.32
+            ],
+            "surface": 2338.26
+          },
+          {
+            "id": "eclat-dix",
+            "libelle": "le dixième éclat",
+            "centroide": [
+              571.95,
+              355.06
+            ],
+            "surface": 2388.49
+          },
+          {
+            "id": "appui-pierre",
+            "libelle": "l’appui de pierre",
+            "centroide": [
+              124.75,
+              564
+            ],
+            "surface": 36744
           }
         ]
       },

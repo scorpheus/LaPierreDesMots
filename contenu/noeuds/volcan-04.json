@@ -1,0 +1,10 @@
+{
+  "id": "volcan-04",
+  "region": "volcan",
+  "ordre": 4,
+  "exercice": "volcan-geodes-paires-01",
+  "prerequis": [
+    "volcan-03"
+  ],
+  "temps": "maitrise"
+}

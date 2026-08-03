@@ -1,0 +1,75 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Lot M1, nœud clairiere-09. C'est le TROISIÈME moteur de `mot.outil.frequent` (avec `phrase` et `colorie`) : c'est lui qui rend R12 tenable sur ce code. LE RÉCIT EST ÉCRIT SOUS CONTRAINTE DE LEXIQUE, PAS SOUS CONTRAINTE DE STYLE : chacun de ses mots est passé au crible de `estAuLexique` (scripts/generer-phonologie.mjs, 430 mots) — c'est pourquoi on lit « Le feu est rouge et chaud » et non « le feu crépite ». Un verbe plus juste que l'enfant ne peut pas déchiffrer n'est pas plus juste, il est illisible (D14). DEUX CONTRAINTES MESURÉES DANS LE MOTEUR. (1) `partage/src/moteurs/histoire/validation.ts` inscrit la BONNE réponse dans `acquis` et n'en sort jamais : les cinq réponses sont cinq options distinctes, et les jeux d'options des cinq questions sont DEUX À DEUX DISJOINTS — sans cela, un leurre pourrait être une bonne réponse déjà consommée, donc un bouton inerte sous le doigt. (2) `option-hors-question` ne compte pas d'erreur. LA ZONE DE LECTURE NE S'ANIME PAS : le récit tient en huit lignes courtes, fond parchemin et Andika, aucune animation — c'est la règle du dépôt, et c'est ici qu'elle porte le plus.",
+  "id": "clairiere-veillee-histoire-01",
+  "version": 1,
+  "titre": "La veillée dans la cabane",
+  "competences": ["mot.outil.frequent", "comp.consigne.simple"],
+  "difficulte": 3,
+  "jeu": {
+    "moteur": "histoire",
+    "habillage": "clairiere.veillee",
+    "noeud": "clairiere-09",
+    "etoiles": { "sansAide": true, "sansErreur": true },
+    "aideGobi": ["relire-consigne", "souffle-syllabe", "montre-cible"],
+    "contenu": {
+      "titre": "La veillée dans la cabane",
+      "recit": "Le soir, la nuit est noire. Gobi est dans la cabane. Il a froid. Le feu est rouge et chaud. Gobi écoute une histoire. Un lapin est sur le tapis. Il joue avec une pomme. La lune est ronde et belle.",
+      "audioRecit": null,
+      "questions": [
+        {
+          "id": "c1",
+          "texte": "Où est Gobi ?",
+          "audio": null,
+          "options": ["opt-cabane", "opt-lac"],
+          "reponse": "opt-cabane",
+          "motsCles": ["où", "gobi"]
+        },
+        {
+          "id": "c2",
+          "texte": "Le feu est rouge ou bleu ?",
+          "audio": null,
+          "options": ["opt-rouge", "opt-bleu"],
+          "reponse": "opt-rouge",
+          "motsCles": ["feu", "rouge", "bleu"]
+        },
+        {
+          "id": "c3",
+          "texte": "Qui joue avec la pomme ?",
+          "audio": null,
+          "options": ["opt-lapin", "opt-chat"],
+          "reponse": "opt-lapin",
+          "motsCles": ["joue", "pomme"]
+        },
+        {
+          "id": "c4",
+          "texte": "La lune est ronde ou petite ?",
+          "audio": null,
+          "options": ["opt-ronde", "opt-petite"],
+          "reponse": "opt-ronde",
+          "motsCles": ["lune", "ronde"]
+        },
+        {
+          "id": "c5",
+          "texte": "Gobi a chaud ou froid ?",
+          "audio": null,
+          "options": ["opt-froid", "opt-chaud"],
+          "reponse": "opt-froid",
+          "motsCles": ["gobi", "chaud", "froid"]
+        }
+      ],
+      "options": [
+        { "id": "opt-cabane", "libelle": "dans la cabane", "confusionAvec": null },
+        { "id": "opt-lac", "libelle": "dans le lac", "confusionAvec": null },
+        { "id": "opt-rouge", "libelle": "rouge", "confusionAvec": "roue" },
+        { "id": "opt-bleu", "libelle": "bleu", "confusionAvec": "blé" },
+        { "id": "opt-lapin", "libelle": "le lapin", "confusionAvec": null },
+        { "id": "opt-chat", "libelle": "le chat", "confusionAvec": null },
+        { "id": "opt-ronde", "libelle": "ronde", "confusionAvec": null },
+        { "id": "opt-petite", "libelle": "petite", "confusionAvec": null },
+        { "id": "opt-froid", "libelle": "froid", "confusionAvec": null },
+        { "id": "opt-chaud", "libelle": "chaud", "confusionAvec": null }
+      ],
+      "competence": "mot.outil.frequent"
+    }
+  }
+}

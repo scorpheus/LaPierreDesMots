@@ -1,16 +1,36 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" width="960" height="600" role="img" aria-label="La bibliothèque">
+  <title>La bibliothèque</title>
+  <desc>Deux étagères en anneau, l’une plus haute que l’autre, une échelle à barreaux, un pupitre incliné, une fenêtre à carreaux, un livre ouvert sur le parquet.</desc>
+  <!--
+    DÉCOR — lot M6, contrat du monde v4 § 2. Trait noir sur blanc, la COULEUR VIENT DU CODE
+    (annexe P § 2) : les régions sortent d'ici en grisaille #8E97A8, qui est leur état
+    par défaut et non un choix graphique. Géométrie 100 % polygonale (M, L, Z — aucun arc) :
+    surface et centroïde sont donc calculables exactement et opposables aux valeurs déclarées
+    par le .habillage.json, que scripts/verifier-regions-fermees.mjs --strict recalcule.
+
+    Chaque région est un ENFANT DIRECT de #calque-zones : SceneSvg.tsx sélectionne
+    "#calque-zones > [id]", et un tracé niché dans un sous-groupe échapperait au tap sans
+    qu'aucun message ne le dise.
+
+    ÉCRIT PAR scripts/dessiner-decors.mjs — ne pas retoucher à la main : la scène est décrite
+    dans scripts/decors/decors.mjs, et l'émetteur refuse d'écrire si la mesure est mauvaise.
+  -->
   <g id="calque-fond">
-    <rect id="fond" x="0" y="0" width="960" height="600" fill="#f7f0e4"/>
+    <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
   </g>
-  <g id="calque-zones">
-    <rect id="etagere-haute" x="90" y="110" width="200" height="160" rx="12"/>
-    <rect id="etagere-basse" x="380" y="110" width="200" height="160" rx="12"/>
-    <rect id="pupitre" x="670" y="110" width="200" height="160" rx="12"/>
-    <rect id="echelle" x="90" y="340" width="200" height="160" rx="12"/>
-    <rect id="vitre" x="380" y="340" width="200" height="160" rx="12"/>
-    <rect id="parquet" x="670" y="340" width="200" height="160" rx="12"/>
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round">
+    <path id="mur-du-fond" class="zone" data-region-svg="mur-du-fond" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L960,0 L960,118 L933.3,122 L906.7,124.9 L880,126 L853.3,124.9 L826.7,122 L800,118 L773.3,114 L746.7,111.1 L720,110 L693.3,111.1 L666.7,114 L640,118 L613.3,122 L586.7,124.9 L560,126 L533.3,124.9 L506.7,122 L480,118 L453.3,114 L426.7,111.1 L400,110 L373.3,111.1 L346.7,114 L320,118 L293.3,122 L266.7,124.9 L240,126 L213.3,124.9 L186.7,122 L160,118 L133.3,114 L106.7,111.1 L80,110 L53.3,111.1 L26.7,114 L0,118 Z"/>
+    <path id="parquet" class="zone" data-region-svg="parquet" fill="#8E97A8" fill-rule="evenodd" d="M0,490 L26.7,496.1 L53.3,496.1 L80,490 L106.7,483.9 L133.3,483.9 L160,490 L186.7,496.1 L213.3,496.1 L240,490 L266.7,483.9 L293.3,483.9 L320,490 L346.7,496.1 L373.3,496.1 L400,490 L426.7,483.9 L453.3,483.9 L480,490 L506.7,496.1 L533.3,496.1 L560,490 L586.7,483.9 L613.3,483.9 L640,490 L666.7,496.1 L693.3,496.1 L720,490 L746.7,483.9 L773.3,483.9 L800,490 L826.7,496.1 L853.3,496.1 L880,490 L906.7,483.9 L933.3,483.9 L960,490 L960,600 L0,600 Z"/>
+    <path id="etagere-haute" class="zone" data-region-svg="etagere-haute" fill="#8E97A8" fill-rule="evenodd" d="M80,150 L640,150 L640,302 L80,302 Z M110,180 L610,180 L610,272 L110,272 Z"/>
+    <path id="etagere-basse" class="zone" data-region-svg="etagere-basse" fill="#8E97A8" fill-rule="evenodd" d="M80,320 L640,320 L640,462 L80,462 Z M110,348 L610,348 L610,434 L110,434 Z"/>
+    <path id="pupitre" class="zone" data-region-svg="pupitre" fill="#8E97A8" fill-rule="evenodd" d="M678,383.1 L920,337.7 L920,360.4 L813.5,389.6 L823.2,490 L774.8,490 L784.5,389.6 L678,405.8 Z"/>
+    <path id="echelle" class="zone" data-region-svg="echelle" fill="#8E97A8" fill-rule="evenodd" d="M640,118 L660.2,118 L660.2,172.7 L711.8,172.7 L711.8,118 L732,118 L732,460 L711.8,460 L711.8,405.3 L660.2,405.3 L660.2,460 L640,460 L640,343.7 L660.2,343.7 L660.2,309.5 L640,309.5 L640,268.5 L660.2,268.5 L660.2,234.3 L640,234.3 Z"/>
+    <path id="vitre" class="zone" data-region-svg="vitre" fill="#8E97A8" fill-rule="evenodd" d="M760,118 L932,118 L932,300 L760,300 Z M790,148 L902,148 L902,270 L790,270 Z"/>
+    <path id="livre-ouvert" class="zone" data-region-svg="livre-ouvert" fill="#8E97A8" fill-rule="evenodd" d="M338.9,485.9 L415.4,474.7 L422.6,474.7 L499.1,485.9 L499.1,566.6 L422.6,557.6 L415.4,557.6 L338.9,566.6 Z"/>
+    <path id="lampe-de-lecture" class="zone" data-region-svg="lampe-de-lecture" fill="#8E97A8" fill-rule="evenodd" d="M85.5,358 L108.5,358 L101.9,371.4 L120,380.4 L126.5,396.1 L121.6,443.1 L129.8,454.3 L129.8,465.5 L64.2,465.5 L64.2,454.3 L72.4,443.1 L67.5,396.1 L74,380.4 L92.1,371.4 Z"/>
   </g>
-  <g id="calque-trait">
-    <path id="cadre" d="M20 20 H940 V580 H20 Z" fill="none" stroke="#2b2b2b" stroke-width="4"/>
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path class="trait" d="M110,226 L610,226"/>
+    <path class="trait" d="M110,390 L610,390"/>
   </g>
 </svg>

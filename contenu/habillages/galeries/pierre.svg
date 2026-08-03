@@ -1,16 +1,36 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" width="960" height="600" role="img" aria-label="La pierre à graver">
+  <title>La pierre à graver</title>
+  <desc>La dalle inclinée qu’on grave, le sillon déjà creusé, le burin posé, l’éclat détaché, la torche au mur et un copeau de pierre au sol.</desc>
+  <!--
+    DÉCOR — lot M6, contrat du monde v4 § 2. Trait noir sur blanc, la COULEUR VIENT DU CODE
+    (annexe P § 2) : les régions sortent d'ici en grisaille #8E97A8, qui est leur état
+    par défaut et non un choix graphique. Géométrie 100 % polygonale (M, L, Z — aucun arc) :
+    surface et centroïde sont donc calculables exactement et opposables aux valeurs déclarées
+    par le .habillage.json, que scripts/verifier-regions-fermees.mjs --strict recalcule.
+
+    Chaque région est un ENFANT DIRECT de #calque-zones : SceneSvg.tsx sélectionne
+    "#calque-zones > [id]", et un tracé niché dans un sous-groupe échapperait au tap sans
+    qu'aucun message ne le dise.
+
+    ÉCRIT PAR scripts/dessiner-decors.mjs — ne pas retoucher à la main : la scène est décrite
+    dans scripts/decors/decors.mjs, et l'émetteur refuse d'écrire si la mesure est mauvaise.
+  -->
   <g id="calque-fond">
-    <rect id="fond" x="0" y="0" width="960" height="600" fill="#eceaf2"/>
+    <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
   </g>
-  <g id="calque-zones">
-    <rect id="dalle" x="90" y="110" width="200" height="160" rx="12"/>
-    <rect id="sillon" x="380" y="110" width="200" height="160" rx="12"/>
-    <rect id="burin" x="670" y="110" width="200" height="160" rx="12"/>
-    <rect id="eclat" x="90" y="340" width="200" height="160" rx="12"/>
-    <rect id="paroi-seche" x="380" y="340" width="200" height="160" rx="12"/>
-    <rect id="torche" x="670" y="340" width="200" height="160" rx="12"/>
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round">
+    <path id="paroi-seche" class="zone" data-region-svg="paroi-seche" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L960,0 L960,178 L933.3,183 L906.7,186.7 L880,188 L853.3,186.7 L826.7,183 L800,178 L773.3,173 L746.7,169.3 L720,168 L693.3,169.3 L666.7,173 L640,178 L613.3,183 L586.7,186.7 L560,188 L533.3,186.7 L506.7,183 L480,178 L453.3,173 L426.7,169.3 L400,168 L373.3,169.3 L346.7,173 L320,178 L293.3,183 L266.7,186.7 L240,188 L213.3,186.7 L186.7,183 L160,178 L133.3,173 L106.7,169.3 L80,168 L53.3,169.3 L26.7,173 L0,178 Z"/>
+    <path id="sol-de-la-salle" class="zone" data-region-svg="sol-de-la-salle" fill="#8E97A8" fill-rule="evenodd" d="M0,520 L26.7,526.1 L53.3,527.9 L80,524 L106.7,517.3 L133.3,512.5 L160,513.1 L186.7,518.6 L213.3,525.1 L240,528 L266.7,525.1 L293.3,518.6 L320,513.1 L346.7,512.5 L373.3,517.3 L400,524 L426.7,527.9 L453.3,526.1 L480,520 L506.7,513.9 L533.3,512.1 L560,516 L586.7,522.7 L613.3,527.5 L640,526.9 L666.7,521.4 L693.3,514.9 L720,512 L746.7,514.9 L773.3,521.4 L800,526.9 L826.7,527.5 L853.3,522.7 L880,516 L906.7,512.1 L933.3,513.9 L960,520 L960,600 L0,600 Z"/>
+    <path id="dalle" class="zone" data-region-svg="dalle" fill="#8E97A8" fill-rule="evenodd" d="M180,240 L760,224 L792,470 L150,486 Z"/>
+    <path id="sillon" class="zone" data-region-svg="sillon" fill="#8E97A8" fill-rule="evenodd" d="M261.5,330.9 L418.9,308.9 L559.1,361 L702.3,330.8 L697.7,309.2 L560.9,339 L421.1,287.1 L258.5,309.1 Z"/>
+    <path id="burin" class="zone" data-region-svg="burin" fill="#8E97A8" fill-rule="evenodd" d="M799.1,148 L818.9,148 L820.2,267 L815.2,290.1 L812.7,340 L805.3,340 L802.8,290.1 L797.8,267 Z"/>
+    <path id="eclat" class="zone" data-region-svg="eclat" fill="#8E97A8" fill-rule="evenodd" d="M120,428 L155,456.6 L147.3,515.7 L120,530 L92.7,515.7 L85,456.6 Z"/>
+    <path id="torche" class="zone" data-region-svg="torche" fill="#8E97A8" fill-rule="evenodd" d="M97,118 L111.8,145.5 L106.8,169.6 L116.7,166.2 L106.8,193.7 L110.1,290 L83.9,290 L87.2,193.7 L77.3,166.2 L87.2,169.6 L82.2,145.5 Z"/>
+    <path id="copeau-de-pierre" class="zone" data-region-svg="copeau-de-pierre" fill="#8E97A8" fill-rule="evenodd" d="M820,500 L900,486 L914,528 L830,542 Z"/>
+    <path id="goutte-sur-la-dalle" class="zone" data-region-svg="goutte-sur-la-dalle" fill="#8E97A8" fill-rule="evenodd" d="M872,300 L882,344.7 L887,348.8 L890.5,354.3 L892,360.7 L891.3,367.2 L888.6,373.1 L884.2,377.9 L878.4,380.9 L872,382 L865.6,380.9 L859.8,377.9 L855.4,373.1 L852.7,367.2 L852,360.7 L853.5,354.3 L857,348.8 L862,344.7 Z"/>
   </g>
-  <g id="calque-trait">
-    <path id="cadre" d="M20 20 H940 V580 H20 Z" fill="none" stroke="#2b2b2b" stroke-width="4"/>
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path class="trait" d="M200,260 L740,246"/>
+    <path class="trait" d="M200,452 L764,438"/>
   </g>
 </svg>

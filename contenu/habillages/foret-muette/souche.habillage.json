@@ -1,0 +1,133 @@
+{
+  "id": "foret.souche",
+  "moteurs": [
+    "tri"
+  ],
+  "libelle": "Les deux souches creuses",
+  "region": "foret-muette",
+  "scene": {
+    "fichier": "habillages/foret-muette/souche.svg",
+    "viewBox": "0 0 960 600",
+    "calques": [
+      {
+        "id": "calque-fond",
+        "role": "fond",
+        "regions": []
+      },
+      {
+        "id": "calque-zones",
+        "role": "coloriable",
+        "regions": [
+          {
+            "id": "canopee-sombre",
+            "libelle": "la canopée sombre",
+            "centroide": [
+              240,
+              85
+            ],
+            "surface": 151680
+          },
+          {
+            "id": "sol-de-feuilles",
+            "libelle": "le sol de feuilles",
+            "centroide": [
+              720,
+              520
+            ],
+            "surface": 144000
+          },
+          {
+            "id": "souche-gauche",
+            "libelle": "la souche de gauche",
+            "centroide": [
+              179.2,
+              439.5
+            ],
+            "surface": 36883.9
+          },
+          {
+            "id": "souche-droite",
+            "libelle": "la souche de droite",
+            "centroide": [
+              601.1,
+              447
+            ],
+            "surface": 27728.9
+          },
+          {
+            "id": "gland-un",
+            "libelle": "le premier gland",
+            "centroide": [
+              454,
+              207.1
+            ],
+            "surface": 4083.9
+          },
+          {
+            "id": "gland-deux",
+            "libelle": "le deuxième gland",
+            "centroide": [
+              589,
+              181.9
+            ],
+            "surface": 2712.8
+          },
+          {
+            "id": "gland-trois",
+            "libelle": "le troisième gland",
+            "centroide": [
+              743,
+              221.6
+            ],
+            "surface": 5644.2
+          },
+          {
+            "id": "champignon-entre-deux",
+            "libelle": "le champignon entre les deux",
+            "centroide": [
+              476,
+              456.2
+            ],
+            "surface": 5924
+          },
+          {
+            "id": "feuille-au-sol",
+            "libelle": "la feuille au sol",
+            "centroide": [
+              879,
+              519
+            ],
+            "surface": 6761.6
+          }
+        ]
+      },
+      {
+        "id": "calque-trait",
+        "role": "trait",
+        "regions": []
+      }
+    ]
+  },
+  "palette": {
+    "jetons": {},
+    "nuancier": [
+      "vert",
+      "brun",
+      "gris",
+      "noir",
+      "blanc",
+      "jaune"
+    ]
+  },
+  "timings": {
+    "appuiMs": 60,
+    "relachementMs": 120,
+    "refusMs": 180,
+    "recolorationMs": 800,
+    "interEtoilesMs": 180
+  },
+  "sons": {
+    "ambiance": null,
+    "effets": {}
+  }
+}

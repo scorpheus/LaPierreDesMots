@@ -1,16 +1,30 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" width="960" height="600" role="img" aria-label="Le vitrail à inventer">
+  <title>Le vitrail à inventer</title>
+  <desc>Décor de COLORIAGE : trait noir sur blanc, régions fermées par construction, couleur appliquée par le code depuis les jetons de palette (annexe P § 2). Chaque région est un enfant DIRECT de #calque-zones — SceneSvg sélectionne « #calque-zones &gt; [id] » et un tracé niché dans un sous-groupe échapperait au tap sans qu’aucun message ne le dise. Les centroïdes et surfaces du .habillage.json sont recalculés par le générateur, jamais écrits à la main.</desc>
   <g id="calque-fond">
-    <rect id="fond" x="0" y="0" width="960" height="600" fill="#f4f1e6"/>
+    <path id="mur-vitrail" d="M0,0 L960,0 L960,600 L0,600 Z" fill="#FFF6E3"/>
   </g>
-  <g id="calque-zones">
-    <rect id="eclat-un" x="90" y="110" width="200" height="160" rx="12"/>
-    <rect id="eclat-deux" x="380" y="110" width="200" height="160" rx="12"/>
-    <rect id="eclat-trois" x="670" y="110" width="200" height="160" rx="12"/>
-    <rect id="eclat-quatre" x="90" y="340" width="200" height="160" rx="12"/>
-    <rect id="sertissure" x="380" y="340" width="200" height="160" rx="12"/>
-    <rect id="fond-clair" x="670" y="340" width="200" height="160" rx="12"/>
+  <g id="calque-zones" stroke="#1B2440" stroke-width="4" stroke-linejoin="round">
+    <path id="cadre-plomb" d="M190,62 L770,62 L806,300 L770,540 L190,540 L154,300 Z" fill="#8E97A8"/>
+    <path id="fond-clair" d="M228,100 L732,100 L762,300 L732,502 L228,502 L198,300 Z" fill="#8E97A8"/>
+    <path id="sertissure" d="M480,176 L516,244 L592,232 L552,300 L592,368 L516,356 L480,424 L444,356 L368,368 L408,300 L368,232 L444,244 Z" fill="#8E97A8"/>
+    <path id="rosace-centre" d="M529,309.93 L497.68,326.67 L469.27,352.92 L455,316.58 L429.04,289.67 L461.21,271.66 L489.54,252.96 L510.01,280.11 Z" fill="#8E97A8"/>
+    <path id="eclat-un" d="M376.79,203.7 L321.67,223.65 L268.13,214.18 L277.32,161.64 L307.37,108.53 L354.29,149.06 Z" fill="#8E97A8"/>
+    <path id="eclat-deux" d="M667.59,224.34 L621.11,213.21 L586.08,174.94 L626.76,144.13 L673.43,132.72 L687.94,180.32 Z" fill="#8E97A8"/>
+    <path id="eclat-trois" d="M291.03,476.56 L274.19,425.96 L277.76,368.21 L334.31,381.99 L371.75,416.72 L344.97,462.75 Z" fill="#8E97A8"/>
+    <path id="eclat-quatre" d="M593.37,445.93 L612.76,400.37 L648.26,370.17 L683.78,403.2 L688.4,452.74 L640.72,461.87 Z" fill="#8E97A8"/>
+    <path id="eclat-cinq" d="M284.05,333 L235.08,359.65 L203.52,312.23 L211.59,258.39 L264.01,257.67 L314.05,284.34 Z" fill="#8E97A8"/>
+    <path id="eclat-six" d="M706.89,337.98 L667.51,321.83 L679.06,282.15 L709.46,250.02 L739.69,282.92 L748.85,325.2 Z" fill="#8E97A8"/>
+    <path id="eclat-sept" d="M529.68,145.37 L487.54,163.15 L446.25,161.26 L443.7,118.77 L468.91,81.24 L506.41,105.53 Z" fill="#8E97A8"/>
+    <path id="eclat-huit" d="M444.61,502.42 L445.67,459.17 L468.75,419.23 L503.6,448.39 L523.87,483.84 L488.65,509.05 Z" fill="#8E97A8"/>
+    <path id="eclat-neuf" d="M399.09,278.76 L371.78,264.55 L353.21,236.5 L383.58,222.87 L412.42,223.17 L417.11,253 Z" fill="#8E97A8"/>
+    <path id="eclat-dix" d="M535.05,362.61 L553.38,336.69 L578.91,323.26 L597.19,347.3 L596.32,381.41 L562.76,378.97 Z" fill="#8E97A8"/>
+    <path id="appui-pierre" d="M112,540 L848,540 L872,566 L860,588 L100,588 L88,566 Z" fill="#8E97A8"/>
   </g>
-  <g id="calque-trait">
-    <path id="cadre" d="M20 20 H940 V580 H20 Z" fill="none" stroke="#2b2b2b" stroke-width="4"/>
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M228,100 L732,100"/>
+    <path d="M228,502 L732,502"/>
+    <path d="M190,62 L154,300 L190,540"/>
+    <path d="M770,62 L806,300 L770,540"/>
   </g>
 </svg>

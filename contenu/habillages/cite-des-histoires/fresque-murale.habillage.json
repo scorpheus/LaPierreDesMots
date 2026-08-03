@@ -1,0 +1,205 @@
+{
+  "id": "cite.fresque-murale",
+  "moteurs": [
+    "colorie"
+  ],
+  "libelle": "La fresque du mur de la Cité",
+  "region": "cite-des-histoires",
+  "scene": {
+    "fichier": "habillages/cite-des-histoires/fresque-murale.svg",
+    "viewBox": "0 0 960 600",
+    "calques": [
+      {
+        "id": "calque-fond",
+        "role": "fond",
+        "regions": []
+      },
+      {
+        "id": "calque-zones",
+        "role": "coloriable",
+        "regions": [
+          {
+            "id": "mur-de-pierre",
+            "libelle": "le mur de pierre",
+            "centroide": [
+              240,
+              33
+            ],
+            "surface": 57600
+          },
+          {
+            "id": "pave-de-la-rue",
+            "libelle": "le pavé de la rue",
+            "centroide": [
+              120,
+              547
+            ],
+            "surface": 96000
+          },
+          {
+            "id": "cadre-de-la-fresque",
+            "libelle": "le cadre de la fresque",
+            "centroide": [
+              86.3,
+              95
+            ],
+            "surface": 92800
+          },
+          {
+            "id": "ciel",
+            "libelle": "le ciel",
+            "centroide": [
+              480,
+              156
+            ],
+            "surface": 69920
+          },
+          {
+            "id": "soleil",
+            "libelle": "le soleil",
+            "centroide": [
+              790,
+              152
+            ],
+            "surface": 3430.6
+          },
+          {
+            "id": "arbre",
+            "libelle": "l’arbre",
+            "centroide": [
+              168,
+              220.7
+            ],
+            "surface": 13159.9
+          },
+          {
+            "id": "feuille",
+            "libelle": "la feuille",
+            "centroide": [
+              335,
+              177.4
+            ],
+            "surface": 3726.9
+          },
+          {
+            "id": "scene-du-haut",
+            "libelle": "la scène du haut",
+            "centroide": [
+              311,
+              269
+            ],
+            "surface": 9028
+          },
+          {
+            "id": "scene-du-bas",
+            "libelle": "la scène du bas",
+            "centroide": [
+              311,
+              369
+            ],
+            "surface": 8052
+          },
+          {
+            "id": "scene-de-droite",
+            "libelle": "la scène de droite",
+            "centroide": [
+              451,
+              286
+            ],
+            "surface": 17936
+          },
+          {
+            "id": "mur",
+            "libelle": "le mur",
+            "centroide": [
+              641,
+              360
+            ],
+            "surface": 33880
+          },
+          {
+            "id": "porte",
+            "libelle": "la porte",
+            "centroide": [
+              600,
+              373.3
+            ],
+            "surface": 6969
+          },
+          {
+            "id": "fleur",
+            "libelle": "la fleur",
+            "centroide": [
+              430,
+              400
+            ],
+            "surface": 3048.8
+          },
+          {
+            "id": "echafaudage",
+            "libelle": "l’échafaudage",
+            "centroide": [
+              913.1,
+              123.8
+            ],
+            "surface": 36480
+          },
+          {
+            "id": "pot-de-couleur",
+            "libelle": "le pot de couleur",
+            "centroide": [
+              300,
+              545
+            ],
+            "surface": 5476
+          },
+          {
+            "id": "pot",
+            "libelle": "le pot",
+            "centroide": [
+              432,
+              545.1
+            ],
+            "surface": 3596
+          },
+          {
+            "id": "pinceau",
+            "libelle": "le pinceau",
+            "centroide": [
+              651,
+              495
+            ],
+            "surface": 3004.8
+          }
+        ]
+      },
+      {
+        "id": "calque-trait",
+        "role": "trait",
+        "regions": []
+      }
+    ]
+  },
+  "palette": {
+    "jetons": {},
+    "nuancier": [
+      "orange",
+      "jaune",
+      "rose",
+      "violet",
+      "blanc",
+      "brun"
+    ]
+  },
+  "timings": {
+    "appuiMs": 60,
+    "relachementMs": 120,
+    "refusMs": 180,
+    "recolorationMs": 800,
+    "interEtoilesMs": 180
+  },
+  "sons": {
+    "ambiance": null,
+    "effets": {}
+  }
+}

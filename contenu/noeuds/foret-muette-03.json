@@ -1,0 +1,10 @@
+{
+  "id": "foret-muette-03",
+  "region": "foret-muette",
+  "ordre": 3,
+  "exercice": "foret-muette-souche-tri-01",
+  "prerequis": [
+    "foret-muette-02"
+  ],
+  "temps": "retournement"
+}

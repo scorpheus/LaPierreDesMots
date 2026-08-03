@@ -19,58 +19,85 @@
         "role": "coloriable",
         "regions": [
           {
-            "id": "renard",
-            "libelle": "le renard",
+            "id": "canopee-du-bestiaire",
+            "libelle": "la canopée du bestiaire",
             "centroide": [
-              190.0,
-              190.0
+              240,
+              81
             ],
-            "surface": 32000.0
-          },
-          {
-            "id": "hibou",
-            "libelle": "le hibou",
-            "centroide": [
-              480.0,
-              190.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "ecureuil",
-            "libelle": "l’écureuil",
-            "centroide": [
-              770.0,
-              190.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "terrier",
-            "libelle": "le terrier",
-            "centroide": [
-              190.0,
-              420.0
-            ],
-            "surface": 32000.0
+            "surface": 142080
           },
           {
             "id": "sous-bois",
             "libelle": "le sous-bois",
             "centroide": [
-              480.0,
-              420.0
+              180,
+              509.1
             ],
-            "surface": 32000.0
+            "surface": 163200
           },
           {
             "id": "lichen",
             "libelle": "le lichen",
             "centroide": [
-              770.0,
-              420.0
+              117.8,
+              236.4
             ],
-            "surface": 32000.0
+            "surface": 8220.2
+          },
+          {
+            "id": "terrier",
+            "libelle": "le terrier",
+            "centroide": [
+              755.1,
+              348.9
+            ],
+            "surface": 18712.1
+          },
+          {
+            "id": "renard",
+            "libelle": "le renard",
+            "centroide": [
+              341,
+              357.7
+            ],
+            "surface": 14082
+          },
+          {
+            "id": "hibou",
+            "libelle": "le hibou",
+            "centroide": [
+              497,
+              296.1
+            ],
+            "surface": 14625.7
+          },
+          {
+            "id": "ecureuil",
+            "libelle": "l’écureuil",
+            "centroide": [
+              631.4,
+              356.1
+            ],
+            "surface": 11601.3
+          },
+          {
+            "id": "champignon-du-sous-bois",
+            "libelle": "le champignon du sous-bois",
+            "centroide": [
+              112,
+              476.2
+            ],
+            "surface": 5924
+          },
+          {
+            "id": "gland-tombe",
+            "libelle": "le gland tombé",
+            "centroide": [
+              384,
+              497.1
+            ],
+            "surface": 4083.9
           }
         ]
       },

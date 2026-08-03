@@ -1,57 +1,112 @@
 {
-  "$commentaire": "PLACEHOLDER — À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Lot A4 : le moteur `histoire` n'avait aucun exercice. C'est LE fichier où `modeReponse` se déclare ÉTAPE PAR ÉTAPE, et c'est mesurable : `modeReponseHistoire(contenu, index)` déduit le mode du nombre d'options de CHAQUE question — 2 options donnent `vrai-faux` (p_devinette 0,50), 3 donnent `qcm-3` (0,33). Cet exercice rend donc, dans l'ordre, `vrai-faux`, `qcm-3`, `qcm-3`. Un seul vrai/faux, et il est le premier : c'est la question d'entrée, celle dont la réussite doit être quasi certaine ; les deux suivantes portent l'information, conformément à D13 qui nomme le vrai/faux comme le format le moins informatif. Le vrai/faux n'a pas de moteur à lui (contrat features v2 § 8, n° 6) : il se retire d'une ligne de contenu, et c'est exactement pour cela qu'il n'y en a qu'un. DEUX contraintes mesurées : (1) `acquis` n'est jamais remis à zéro — la bonne réponse de chaque question est donc une option DISTINCTE (`q1-oui`, `q2-bleu`, `q3-rouge`), sans quoi la seconde serait refusée en `question-deja-repondue` et l'exercice deviendrait interminable ; (2) le récit reste consultable pendant les questions (`recitVisible`, action `basculerRecit`) et relire est GRATUIT (R15) — le texte n'est jamais retiré à un enfant qui déchiffre encore (D14). Récit de 6 phrases courtes, vocabulaire du lexique CE1 de `scripts/generer-phonologie.mjs`.",
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Lot M1 — réécriture du PLACEHOLDER du lot A4. LE RÉCIT A CHANGÉ POUR DEUX RAISONS MESURÉES. (1) `scripts/valider-brouillons.mjs` REFUSAIT ce fichier : « récit : voit est hors du lexique CE1 », deux fois. Le mot est parti, la chaîne cesse de rougir sur un fichier livré — c'était l'un des treize refus mesurés à l'ouverture du lot. (2) Le récit oppose désormais quatre couples sourde/sonore que l'enfant doit LIRE pour répondre : pot/bol (p/b), four/verre (f/v), sac (s), et il n'y a plus de couleur qui suffise à trancher. C'est ce qui fait de cet exercice le second moteur de `gph.confusion.sourde-sonore`, avec `chrono`. `lex.couleur` reste déclarée, et sans complaisance : deux questions sur huit exigent bien de lire un nom de couleur. LE DOSAGE DES OPTIONS EST DÉLIBÉRÉ ET RESTE CELUI DE A4, ÉTENDU : `modeReponseHistoire(contenu, index)` déduit le mode du nombre d'options de CHAQUE question — 2 options donnent `vrai-faux` (p_devinette 0,50), 3 donnent `qcm-3` (0,33). Une seule question est en vrai/faux, et c'est la PREMIÈRE : celle dont la réussite doit être quasi certaine. Les sept suivantes sont à trois options, conformément à D13 qui nomme le vrai/faux comme le format le moins informatif. DEUX CONTRAINTES MESURÉES. (1) `acquis` n'est jamais remis à zéro : les huit bonnes réponses sont huit options distinctes, et les huit jeux d'options sont deux à deux disjoints — un leurre ne peut donc jamais être une bonne réponse déjà consommée, c'est-à-dire un bouton mort sous le doigt. (2) Le récit reste consultable pendant les questions (`recitVisible`, action `basculerRecit`) et relire est GRATUIT (R15) — le texte n'est jamais retiré à un enfant qui déchiffre encore (D14).",
   "id": "galeries-echo-conte-histoire-01",
-  "version": 1,
-  "titre": "Le cristal bleu",
-  "competences": ["lex.couleur", "comp.consigne.simple"],
+  "version": 2,
+  "titre": "Le conte de l’écho",
+  "competences": ["gph.confusion.sourde-sonore", "comp.consigne.simple", "lex.couleur"],
   "difficulte": 3,
   "jeu": {
     "moteur": "histoire",
     "habillage": "galeries.echo-conte",
     "noeud": "galeries-10",
     "etoiles": { "sansAide": true, "sansErreur": true },
-    "aideGobi": ["relire-consigne", "souffle-syllabe", "montre-couleur"],
+    "aideGobi": ["relire-consigne", "souffle-syllabe", "surligne-graphene", "montre-couleur"],
     "contenu": {
-      "titre": "Le cristal bleu",
-      "recit": "Gobi entre dans la grotte. Il a une lampe. Il voit un cristal bleu. Il voit aussi un cristal rouge. Le cristal bleu est petit. Le cristal rouge est gros.",
+      "titre": "Le conte de l’écho",
+      "recit": "Gobi marche dans la grotte. Il trouve un pot et un bol. Le pot est brun. Le bol est bleu. Puis il trouve un four et un verre. Le four est chaud. Le verre est froid. Alors Gobi range le pot, le bol, le four et le verre dans son sac.",
       "audioRecit": null,
       "questions": [
         {
           "id": "c1",
-          "texte": "Gobi a une lampe.",
+          "texte": "Gobi trouve un pot.",
           "audio": null,
           "options": ["q1-oui", "q1-non"],
           "reponse": "q1-oui",
-          "motsCles": ["Gobi", "lampe"]
+          "motsCles": ["gobi", "trouve", "pot"]
         },
         {
           "id": "c2",
-          "texte": "Trouve le petit cristal.",
+          "texte": "Le pot est brun ou bleu ?",
           "audio": null,
-          "options": ["q2-bleu", "q2-rouge", "q2-vert"],
-          "reponse": "q2-bleu",
-          "motsCles": ["trouve", "cristal", "petit"]
+          "options": ["q2-brun", "q2-bleu", "q2-vert"],
+          "reponse": "q2-brun",
+          "motsCles": ["pot", "brun", "bleu"]
         },
         {
           "id": "c3",
-          "texte": "Trouve le gros cristal.",
+          "texte": "Le bol est brun ou bleu ?",
           "audio": null,
-          "options": ["q3-rouge", "q3-bleu", "q3-noir"],
-          "reponse": "q3-rouge",
-          "motsCles": ["trouve", "cristal", "gros"]
+          "options": ["q3-bleu", "q3-brun", "q3-noir"],
+          "reponse": "q3-bleu",
+          "motsCles": ["bol", "brun", "bleu"]
+        },
+        {
+          "id": "c4",
+          "texte": "Le four est chaud ou froid ?",
+          "audio": null,
+          "options": ["q4-chaud", "q4-froid", "q4-doux"],
+          "reponse": "q4-chaud",
+          "motsCles": ["four", "chaud", "froid"]
+        },
+        {
+          "id": "c5",
+          "texte": "Le verre est chaud ou froid ?",
+          "audio": null,
+          "options": ["q5-froid", "q5-chaud", "q5-doux"],
+          "reponse": "q5-froid",
+          "motsCles": ["verre", "chaud", "froid"]
+        },
+        {
+          "id": "c6",
+          "texte": "Où marche Gobi ?",
+          "audio": null,
+          "options": ["q6-grotte", "q6-ville", "q6-cour"],
+          "reponse": "q6-grotte",
+          "motsCles": ["où", "marche", "gobi"]
+        },
+        {
+          "id": "c7",
+          "texte": "Où range Gobi le pot ?",
+          "audio": null,
+          "options": ["q7-sac", "q7-poche", "q7-cahier"],
+          "reponse": "q7-sac",
+          "motsCles": ["où", "range", "pot"]
+        },
+        {
+          "id": "c8",
+          "texte": "Gobi trouve un bol ou une balle ?",
+          "audio": null,
+          "options": ["q8-bol", "q8-balle", "q8-bille"],
+          "reponse": "q8-bol",
+          "motsCles": ["trouve", "bol", "balle"]
         }
       ],
       "options": [
         { "id": "q1-oui", "libelle": "oui", "confusionAvec": null },
         { "id": "q1-non", "libelle": "non", "confusionAvec": "oui" },
-        { "id": "q2-bleu", "libelle": "le cristal bleu", "confusionAvec": null },
-        { "id": "q2-rouge", "libelle": "le cristal rouge", "confusionAvec": "le cristal bleu" },
-        { "id": "q2-vert", "libelle": "le cristal vert", "confusionAvec": "le cristal bleu" },
-        { "id": "q3-rouge", "libelle": "le cristal rouge", "confusionAvec": null },
-        { "id": "q3-bleu", "libelle": "le cristal bleu", "confusionAvec": "le cristal rouge" },
-        { "id": "q3-noir", "libelle": "le cristal noir", "confusionAvec": "le cristal rouge" }
+        { "id": "q2-brun", "libelle": "brun", "confusionAvec": null },
+        { "id": "q2-bleu", "libelle": "bleu", "confusionAvec": "brun" },
+        { "id": "q2-vert", "libelle": "vert", "confusionAvec": "brun" },
+        { "id": "q3-bleu", "libelle": "bleu", "confusionAvec": null },
+        { "id": "q3-brun", "libelle": "brun", "confusionAvec": "bleu" },
+        { "id": "q3-noir", "libelle": "noir", "confusionAvec": "bleu" },
+        { "id": "q4-chaud", "libelle": "chaud", "confusionAvec": null },
+        { "id": "q4-froid", "libelle": "froid", "confusionAvec": "chaud" },
+        { "id": "q4-doux", "libelle": "doux", "confusionAvec": "chaud" },
+        { "id": "q5-froid", "libelle": "froid", "confusionAvec": null },
+        { "id": "q5-chaud", "libelle": "chaud", "confusionAvec": "froid" },
+        { "id": "q5-doux", "libelle": "doux", "confusionAvec": "froid" },
+        { "id": "q6-grotte", "libelle": "dans la grotte", "confusionAvec": null },
+        { "id": "q6-ville", "libelle": "dans la ville", "confusionAvec": "dans la grotte" },
+        { "id": "q6-cour", "libelle": "dans la cour", "confusionAvec": "dans la grotte" },
+        { "id": "q7-sac", "libelle": "dans son sac", "confusionAvec": null },
+        { "id": "q7-poche", "libelle": "dans sa poche", "confusionAvec": "dans son sac" },
+        { "id": "q7-cahier", "libelle": "dans son cahier", "confusionAvec": "dans son sac" },
+        { "id": "q8-bol", "libelle": "un bol", "confusionAvec": null },
+        { "id": "q8-balle", "libelle": "une balle", "confusionAvec": "un bol" },
+        { "id": "q8-bille", "libelle": "une bille", "confusionAvec": "un bol" }
       ],
-      "competence": "lex.couleur"
+      "competence": "gph.confusion.sourde-sonore"
     }
   }
 }

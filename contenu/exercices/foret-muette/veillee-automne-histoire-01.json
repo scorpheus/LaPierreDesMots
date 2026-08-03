@@ -1,0 +1,119 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Le récit est écrit POUR ses liaisons : « un hibou », « un arbre », « un ours », « les amis », « les enfants ». Six phrases très courtes — l'enfant déchiffre encore (D14) — et le récit reste consultable pendant les questions (`recitVisible`, action `basculerRecit`), relire étant GRATUIT (R15). L'ordre des questions suit D13 : le vrai/faux d'abord, celui dont la réussite doit être quasi certaine, puis deux questions à trois options qui portent l’information. Les trois bonnes réponses sont des options DISTINCTES, sans quoi la seconde serait refusée en `question-deja-repondue` et l’exercice deviendrait interminable.",
+  "id": "foret-muette-veillee-automne-histoire-01",
+  "version": 1,
+  "titre": "La veillée sous les arbres roux",
+  "competences": [
+    "flu.liaison",
+    "comp.consigne.simple"
+  ],
+  "difficulte": 3,
+  "jeu": {
+    "moteur": "histoire",
+    "habillage": "foret.veillee-automne",
+    "noeud": "foret-muette-07",
+    "etoiles": {
+      "sansAide": true,
+      "sansErreur": true
+    },
+    "aideGobi": [
+      "relire-consigne",
+      "souffle-syllabe",
+      "montre-cible"
+    ],
+    "contenu": {
+      "titre": "La veillée",
+      "recit": "Le soir, Plume est dans la forêt. Un hibou est sur un arbre. Les enfants sont devant le feu. Un ours est très grand. Les amis ont un livre. La nuit est très noire.",
+      "audioRecit": null,
+      "questions": [
+        {
+          "id": "c1",
+          "texte": "Un hibou est sur un arbre.",
+          "audio": null,
+          "options": [
+            "q1-oui",
+            "q1-non"
+          ],
+          "reponse": "q1-oui",
+          "motsCles": [
+            "hibou",
+            "arbre"
+          ]
+        },
+        {
+          "id": "c2",
+          "texte": "Où sont les enfants ?",
+          "audio": null,
+          "options": [
+            "q2-feu",
+            "q2-arbre",
+            "q2-toit"
+          ],
+          "reponse": "q2-feu",
+          "motsCles": [
+            "enfant",
+            "où"
+          ]
+        },
+        {
+          "id": "c3",
+          "texte": "Qui est très grand ?",
+          "audio": null,
+          "options": [
+            "q3-ours",
+            "q3-hibou",
+            "q3-lapin"
+          ],
+          "reponse": "q3-ours",
+          "motsCles": [
+            "grand",
+            "qui"
+          ]
+        }
+      ],
+      "options": [
+        {
+          "id": "q1-oui",
+          "libelle": "oui",
+          "confusionAvec": null
+        },
+        {
+          "id": "q1-non",
+          "libelle": "non",
+          "confusionAvec": "oui"
+        },
+        {
+          "id": "q2-feu",
+          "libelle": "devant le feu",
+          "confusionAvec": null
+        },
+        {
+          "id": "q2-arbre",
+          "libelle": "sur un arbre",
+          "confusionAvec": "devant le feu"
+        },
+        {
+          "id": "q2-toit",
+          "libelle": "sur le toit",
+          "confusionAvec": "devant le feu"
+        },
+        {
+          "id": "q3-ours",
+          "libelle": "l'ours",
+          "confusionAvec": null
+        },
+        {
+          "id": "q3-hibou",
+          "libelle": "le hibou",
+          "confusionAvec": "l'ours"
+        },
+        {
+          "id": "q3-lapin",
+          "libelle": "le lapin",
+          "confusionAvec": "l'ours"
+        }
+      ],
+      "competence": "flu.liaison"
+    }
+  }
+}

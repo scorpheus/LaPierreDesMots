@@ -1,0 +1,80 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Lot M1, nœud galeries-13, temps `retournement`. IL REJOUE `galeries.grottes` DU NŒUD 4 : neuf nœuds d'écart, R13 tenue (la règle porte sur une fenêtre de six). Même décor, autre question — au nœud 4 l'enfant triait b et d, ici il trie f et v. C'EST LE CHOIX DE PAIRE QUI DEMANDE À ÊTRE JUSTIFIÉ. `gph.confusion.sourde-sonore` couvre `p`/`b`, `t`/`d`, `f`/`v`, `s`/`z`, `ch`/`j`. Deux de ces couples — `p`/`b` et `t`/`d` — sont AUSSI des couples de lettres miroir : `b` ↔ `p` sur l'axe haut-bas, `b` ↔ `d` sur l'axe gauche-droite. Les employer ici mêlerait, dans un même compte du tableau de bord, une confusion de SON et une confusion de FORME : l'enfant qui range `bol` avec `pot` peut avoir mal entendu ou mal vu, et la trace ne dirait pas lequel. Ce fichier ne travaille donc que `f`/`v`, et aucun de ses douze mots ne porte de `b`, de `d`, de `p` ni de `q` — vérifié lettre à lettre. C'est la lecture stricte de D23 : les axes ne se traitent jamais en bloc, et cela vaut aussi pour ce qui les recoupe. Trois faits mesurés : `acquis[element]` n'est jamais remis à zéro (quatre lots disjoints de trois), `element-hors-consigne` ne compte pas d'erreur (ranger en avance ne coûte rien), `MoteurTri.tsx` rend les douze tuiles en permanence. c3 et c4 offrent les DEUX grottes sans dire laquelle : c'est là que l'enfant décide seul. Elles ne disent pas « la bonne grotte » pour une raison mécanique et non stylistique — `estAuLexique` accepte « bon » et refuse « bonne », sa règle de flexion retirant un `s`, un `x` puis un `e` final, ce qui donne « bonn ». Le masculin passe (`le bon panier`, en Clairière), le féminin non. Plutôt que d'inscrire un mot au lexique — ce qui revient au parent, jamais à un lot —, la consigne redit le critère : `du f ou du v`.",
+  "id": "galeries-grottes-fv-01",
+  "version": 1,
+  "titre": "Les grottes du f et du v",
+  "competences": ["gph.confusion.sourde-sonore", "comp.consigne.multiple"],
+  "difficulte": 4,
+  "jeu": {
+    "moteur": "tri",
+    "habillage": "galeries.grottes",
+    "noeud": "galeries-13",
+    "etoiles": { "sansAide": true, "sansErreur": true },
+    "aideGobi": ["relire-consigne", "souffle-syllabe", "surligne-graphene", "montre-cible"],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Range dans la grotte de gauche les mots avec la lettre f.",
+          "forme": "imperative",
+          "audio": null,
+          "aRanger": ["mot-four", "mot-fil", "mot-fer"],
+          "motsCles": ["range", "grotte", "gauche", "lettre"]
+        },
+        {
+          "id": "c2",
+          "texte": "Range dans la grotte de droite les mots avec la lettre v.",
+          "forme": "imperative",
+          "audio": null,
+          "aRanger": ["mot-vent", "mot-ville", "mot-ver"],
+          "motsCles": ["range", "grotte", "droite", "lettre"]
+        },
+        {
+          "id": "c3",
+          "texte": "Range ces mots dans la grotte du f ou dans la grotte du v.",
+          "forme": "imperative",
+          "audio": null,
+          "aRanger": ["mot-feu", "mot-veau", "mot-fee"],
+          "motsCles": ["range", "mots", "grotte"]
+        },
+        {
+          "id": "c4",
+          "texte": "Range les derniers mots dans la grotte du f ou dans la grotte du v.",
+          "forme": "imperative",
+          "audio": null,
+          "aRanger": ["mot-fleur", "mot-vase", "mot-velo"],
+          "motsCles": ["range", "derniers", "grotte"]
+        }
+      ],
+      "receptacles": [
+        {
+          "id": "grotte-un",
+          "libelle": "la grotte de gauche",
+          "critere": "les mots avec la lettre f",
+          "zone": [[60, 60], [440, 60], [440, 300], [60, 300]]
+        },
+        {
+          "id": "grotte-deux",
+          "libelle": "la grotte de droite",
+          "critere": "les mots avec la lettre v",
+          "zone": [[520, 60], [900, 60], [900, 300], [520, 300]]
+        }
+      ],
+      "elements": [
+        { "id": "mot-four", "libelle": "four", "asset": null, "receptacleAttendu": "grotte-un", "confusionAvec": "mot-vent" },
+        { "id": "mot-fil", "libelle": "fil", "asset": null, "receptacleAttendu": "grotte-un", "confusionAvec": "mot-ville" },
+        { "id": "mot-fer", "libelle": "fer", "asset": null, "receptacleAttendu": "grotte-un", "confusionAvec": "mot-ver" },
+        { "id": "mot-feu", "libelle": "feu", "asset": null, "receptacleAttendu": "grotte-un", "confusionAvec": "mot-veau" },
+        { "id": "mot-fee", "libelle": "fée", "asset": null, "receptacleAttendu": "grotte-un", "confusionAvec": "mot-velo" },
+        { "id": "mot-fleur", "libelle": "fleur", "asset": null, "receptacleAttendu": "grotte-un", "confusionAvec": "mot-vase" },
+        { "id": "mot-vent", "libelle": "vent", "asset": null, "receptacleAttendu": "grotte-deux", "confusionAvec": "mot-four" },
+        { "id": "mot-ville", "libelle": "ville", "asset": null, "receptacleAttendu": "grotte-deux", "confusionAvec": "mot-fil" },
+        { "id": "mot-ver", "libelle": "ver", "asset": null, "receptacleAttendu": "grotte-deux", "confusionAvec": "mot-fer" },
+        { "id": "mot-veau", "libelle": "veau", "asset": null, "receptacleAttendu": "grotte-deux", "confusionAvec": "mot-feu" },
+        { "id": "mot-vase", "libelle": "vase", "asset": null, "receptacleAttendu": "grotte-deux", "confusionAvec": "mot-fleur" },
+        { "id": "mot-velo", "libelle": "vélo", "asset": null, "receptacleAttendu": "grotte-deux", "confusionAvec": "mot-fee" }
+      ],
+      "competence": "gph.confusion.sourde-sonore"
+    }
+  }
+}

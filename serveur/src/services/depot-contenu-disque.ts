@@ -11,6 +11,7 @@ import { readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
 
 import type {
+  Competence,
   Exercice,
   Habillage,
   Noeud
@@ -140,6 +141,50 @@ class DepotContenuDisque {
   async listerExercices(): Promise<readonly Exercice[]> {
     const index = await this.#obtenirIndex();
     return [...index.exercices.values()];
+  }
+
+  /**
+   * Le référentiel de compétences, lu sur disque.
+   *
+   * ══════════════════════════════════════════════════════════════════════════════════════
+   * LE DÉFAUT QUE CETTE MÉTHODE FERME, mesuré en jouant et non en lisant.
+   *
+   * `listerCompetences` est FACULTATIF au contrat (`partage/src/fournisseurs/depot-contenu.ts`
+   * : « optionnel pour ne rien casser chez qui ne l'expose pas »). Ce dépôt ne l'exposait pas.
+   * `POST /api/profils/:id/sortie` fait alors `competences = []`, et `composerSortie` juge
+   * chaque code par `competenceEligible`, qui commence par :
+   *
+   *     const competence = parRef.get(code);
+   *     if (competence === undefined) return false;
+   *
+   * Référentiel vide ⇒ **aucune compétence n'est éligible ⇒ aucun nœud n'est candidat ⇒ la
+   * route refuse, dans les six régions, pour tout profil, toujours.** Mesuré sur un serveur
+   * réel (`PIERRE_CONTENU=contenu`), profil neuf, les six régions demandées une par une :
+   *
+   *     Impossible de composer une sortie dans « clairiere » : 0 nœud(s) éligible(s) …
+   *     … et la même phrase pour galeries, marais-jumeau, foret-muette, volcan, cité.
+   *
+   * Aucune suite ne le voyait, et il faut dire pourquoi : `tests/api/sortie.test.ts` monte
+   * `DepotContenuMemoire`, qui EXPOSE la méthode et reçoit le référentiel ; les E2E ne passent
+   * pas par cette route ; et aucun écran du client ne l'appelle encore — `composerSortie` est
+   * exporté par `client/src/api/client.ts` et n'a pas de consommateur. Le défaut était donc
+   * dormant, et il se serait réveillé le jour où un écran aurait branché la route : un « Partir
+   * en sortie » qui répond 409 est un état sans issue, le pire défaut possible ici (R14).
+   *
+   * Le fichier est lu à CHAQUE appel, sans index : c'est une centaine de lignes de JSON, lue
+   * une fois par composition de sortie, là où l'index des exercices sert à chaque battement.
+   * Un dossier ou un fichier absent rend `[]` — le même comportement qu'avant, pas une
+   * exception : un serveur qui refuserait de démarrer parce que le référentiel manque serait
+   * plus dur à réparer que celui qui compose des sorties sans prérequis.
+   * ══════════════════════════════════════════════════════════════════════════════════════
+   */
+  async listerCompetences(): Promise<readonly Competence[]> {
+    try {
+      const brut = await lireJson(path.join(this.#racine, 'referentiel', 'competences.json'));
+      return Array.isArray(brut) ? (brut as readonly Competence[]) : [];
+    } catch {
+      return [];
+    }
   }
 
   /** Lit un asset (SVG, image, audio) sous `contenu/`. `null` si absent ou hors du dossier. */

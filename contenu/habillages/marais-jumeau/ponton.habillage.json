@@ -19,58 +19,85 @@
         "role": "coloriable",
         "regions": [
           {
-            "id": "planche-un",
-            "libelle": "la première planche",
+            "id": "ciel-du-ponton",
+            "libelle": "le ciel du ponton",
             "centroide": [
-              190.0,
-              190.0
+              240,
+              78
             ],
-            "surface": 32000.0
-          },
-          {
-            "id": "planche-deux",
-            "libelle": "la deuxième planche",
-            "centroide": [
-              480.0,
-              190.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "planche-trois",
-            "libelle": "la troisième planche",
-            "centroide": [
-              770.0,
-              190.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "pilotis",
-            "libelle": "le pilotis",
-            "centroide": [
-              190.0,
-              420.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "eau-calme",
-            "libelle": "l’eau calme",
-            "centroide": [
-              480.0,
-              420.0
-            ],
-            "surface": 32000.0
+            "surface": 142080
           },
           {
             "id": "brume",
             "libelle": "la brume",
             "centroide": [
-              770.0,
-              420.0
+              480,
+              230
             ],
-            "surface": 32000.0
+            "surface": 70041.3
+          },
+          {
+            "id": "eau-calme",
+            "libelle": "l’eau calme",
+            "centroide": [
+              120,
+              497
+            ],
+            "surface": 192000
+          },
+          {
+            "id": "planche-un",
+            "libelle": "la première planche",
+            "centroide": [
+              373.4,
+              391.3
+            ],
+            "surface": 13916
+          },
+          {
+            "id": "planche-deux",
+            "libelle": "la deuxième planche",
+            "centroide": [
+              557,
+              390.9
+            ],
+            "surface": 14120
+          },
+          {
+            "id": "planche-trois",
+            "libelle": "la troisième planche",
+            "centroide": [
+              900.9,
+              381.4
+            ],
+            "surface": 9224
+          },
+          {
+            "id": "pilotis",
+            "libelle": "le pilotis",
+            "centroide": [
+              204.3,
+              426.6
+            ],
+            "surface": 7600
+          },
+          {
+            "id": "roseau-du-ponton",
+            "libelle": "le roseau du ponton",
+            "centroide": [
+              109,
+              423.8
+            ],
+            "surface": 7253.4
+          },
+          {
+            "id": "barque-amarree",
+            "libelle": "la barque amarrée",
+            "centroide": [
+              808.3,
+              494.5
+            ],
+            "surface": 7697.8
           }
         ]
       },

@@ -1,16 +1,35 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" width="960" height="600" role="img" aria-label="Le train de pierre">
+  <title>Le train de pierre</title>
+  <desc>Une locomotive à cheminée tire deux wagons de deux tailles sur une voie ; un tunnel en anneau attend à droite, la lave coule en bas, la fumée monte.</desc>
+  <!--
+    DÉCOR — lot M6, contrat du monde v4 § 2. Trait noir sur blanc, la COULEUR VIENT DU CODE
+    (annexe P § 2) : les régions sortent d'ici en grisaille #8E97A8, qui est leur état
+    par défaut et non un choix graphique. Géométrie 100 % polygonale (M, L, Z — aucun arc) :
+    surface et centroïde sont donc calculables exactement et opposables aux valeurs déclarées
+    par le .habillage.json, que scripts/verifier-regions-fermees.mjs --strict recalcule.
+
+    Chaque région est un ENFANT DIRECT de #calque-zones : SceneSvg.tsx sélectionne
+    "#calque-zones > [id]", et un tracé niché dans un sous-groupe échapperait au tap sans
+    qu'aucun message ne le dise.
+
+    ÉCRIT PAR scripts/dessiner-decors.mjs — ne pas retoucher à la main : la scène est décrite
+    dans scripts/decors/decors.mjs, et l'émetteur refuse d'écrire si la mesure est mauvaise.
+  -->
   <g id="calque-fond">
-    <rect id="fond" x="0" y="0" width="960" height="600" fill="#f6ece6"/>
+    <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
   </g>
-  <g id="calque-zones">
-    <rect id="locomotive" x="90" y="110" width="200" height="160" rx="12"/>
-    <rect id="wagon-avant" x="380" y="110" width="200" height="160" rx="12"/>
-    <rect id="wagon-arriere" x="670" y="110" width="200" height="160" rx="12"/>
-    <rect id="voie" x="90" y="340" width="200" height="160" rx="12"/>
-    <rect id="lave" x="380" y="340" width="200" height="160" rx="12"/>
-    <rect id="ciel-cendre" x="670" y="340" width="200" height="160" rx="12"/>
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round">
+    <path id="ciel-cendre" class="zone" data-region-svg="ciel-cendre" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L960,0 L960,168 L933.3,173 L906.7,176.7 L880,178 L853.3,176.7 L826.7,173 L800,168 L773.3,163 L746.7,159.3 L720,158 L693.3,159.3 L666.7,163 L640,168 L613.3,173 L586.7,176.7 L560,178 L533.3,176.7 L506.7,173 L480,168 L453.3,163 L426.7,159.3 L400,158 L373.3,159.3 L346.7,163 L320,168 L293.3,173 L266.7,176.7 L240,178 L213.3,176.7 L186.7,173 L160,168 L133.3,163 L106.7,159.3 L80,158 L53.3,159.3 L26.7,163 L0,168 Z"/>
+    <path id="lave" class="zone" data-region-svg="lave" fill="#8E97A8" fill-rule="evenodd" d="M0,470 L26.7,477.7 L53.3,481.8 L80,480.4 L106.7,474.1 L133.3,465.9 L160,459.6 L186.7,458.2 L213.3,462.3 L240,470 L266.7,477.7 L293.3,481.8 L320,480.4 L346.7,474.1 L373.3,465.9 L400,459.6 L426.7,458.2 L453.3,462.3 L480,470 L506.7,477.7 L533.3,481.8 L560,480.4 L586.7,474.1 L613.3,465.9 L640,459.6 L666.7,458.2 L693.3,462.3 L720,470 L746.7,477.7 L773.3,481.8 L800,480.4 L826.7,474.1 L853.3,465.9 L880,459.6 L906.7,458.2 L933.3,462.3 L960,470 L960,600 L0,600 Z"/>
+    <path id="voie" class="zone" data-region-svg="voie" fill="#8E97A8" fill-rule="evenodd" d="M0.3,453 L960.3,431 L959.7,405 L-0.3,427 Z"/>
+    <path id="locomotive" class="zone" data-region-svg="locomotive" fill="#8E97A8" fill-rule="evenodd" d="M104.9,309.9 L144.4,309.9 L144.4,269.8 L183.9,269.8 L183.9,309.9 L262.8,309.9 L279.8,273.5 L353.1,273.5 L370,320.8 L370,390 L104.9,390 Z"/>
+    <path id="wagon-avant" class="zone" data-region-svg="wagon-avant" fill="#8E97A8" fill-rule="evenodd" d="M428.1,316.4 L613.9,316.4 L593.7,390.2 L448.3,390.2 Z"/>
+    <path id="wagon-arriere" class="zone" data-region-svg="wagon-arriere" fill="#8E97A8" fill-rule="evenodd" d="M666.9,324.4 L825.1,324.4 L807.9,393 L684.1,393 Z"/>
+    <path id="tunnel" class="zone" data-region-svg="tunnel" fill="#8E97A8" fill-rule="evenodd" d="M769,442 L769,311 L771.8,286.3 L780,262.8 L793.2,241.8 L810.8,224.2 L831.8,211 L855.3,202.8 L880,200 L904.7,202.8 L928.2,211 L949.2,224.2 L966.8,241.8 L980,262.8 L988.2,286.3 L991,311 L991,442 Z M809,442 L809,341 L810.8,325.2 L816,310.2 L824.5,296.7 L835.7,285.5 L849.2,277 L864.2,271.8 L880,270 L895.8,271.8 L910.8,277 L924.3,285.5 L935.5,296.7 L944,310.2 L949.2,325.2 L951,341 L951,442 Z"/>
+    <path id="fumee-du-train" class="zone" data-region-svg="fumee-du-train" fill="#8E97A8" fill-rule="evenodd" d="M243.8,181.2 L230.6,184.4 L213.9,182.6 L201,180.7 L192.7,183.6 L184.2,191.2 L172,197.9 L158.7,197.9 L149.2,190.5 L144.9,181 L140.3,174.8 L129.5,173.2 L113.1,172.2 L99.4,167.9 L97.1,160 L106,151.7 L117,145.4 L120.4,140 L115,132.6 L109.2,123.1 L112.2,114.8 L125.4,111.6 L142.1,113.4 L155,115.3 L163.3,112.4 L171.8,104.8 L184,98.1 L197.3,98.1 L206.8,105.5 L211.1,115 L215.7,121.2 L226.5,122.8 L242.9,123.8 L256.6,128.1 L258.9,136 L250,144.3 L239,150.6 L235.6,156 L241,163.4 L246.8,172.9 Z"/>
+    <path id="braise-sur-la-voie" class="zone" data-region-svg="braise-sur-la-voie" fill="#8E97A8" fill-rule="evenodd" d="M568.2,524 L558.8,523 L551.2,519.5 L545.1,516.4 L538,515.2 L528.6,514.4 L519.8,512 L516.1,507.3 L518.4,501.9 L522.6,497.5 L524,493.5 L522.4,488.8 L522.2,483.3 L527,478.9 L536.3,477.3 L546,478 L553.8,478.2 L561,476.5 L569.8,474.2 L579.5,473.9 L586.7,477.2 L589.8,482.4 L591.2,487.2 L595,490.6 L601.6,494.1 L607,498.7 L606.4,503.8 L599.6,507.7 L591.2,510.1 L585.2,512.6 L581.4,516.6 L576.3,521.3 Z"/>
   </g>
-  <g id="calque-trait">
-    <path id="cadre" d="M20 20 H940 V580 H20 Z" fill="none" stroke="#2b2b2b" stroke-width="4"/>
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path class="trait" d="M0,452 L960,430"/>
   </g>
 </svg>

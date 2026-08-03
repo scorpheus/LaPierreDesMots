@@ -1,0 +1,175 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. SIX des huit cibles s'écrivent avec `eau` — seau, tableau, drapeau, chapeau, rideau, oiseau : c’est le mot à colorier qui porte le graphème, ce qui garde la consigne à cinq mots et laisse toute la charge de lecture sur la CIBLE. Une version intermédiaire de ce fichier avait dû lâcher `gph.rare.eau` faute de mots sur le décor ; M6 a ajouté les six objets, et le code revient. M6 a AJOUTÉ ces régions à son décor après avoir mesuré que « dans un exercice de coloriage, le nom de la région EST le mot à lire » : les identifiants employés ici sont ceux du `.habillage.json` livré, relus sur disque, jamais devinés. Aucune région existante n'a été renommée ni supprimée. Aucune n'est peinte deux fois : `partage/src/moteurs/colorie/validation.ts:167` refuse en `region-deja-peinte`. AUCUNE CIBLE N'EST GRISE, et ce n'est pas un hasard de palette : le gris est l'état du monde éteint, et `partage/src/ton` refuse « en gris » dans tout texte destiné à l'enfant (C7) — colorier EN gris demanderait à l'enfant d'éteindre ce qu'il vient d'allumer.",
+  "id": "volcan-forge-colorie-01",
+  "version": 1,
+  "titre": "La forge et ses braises",
+  "competences": [
+    "gph.rare.eau",
+    "lex.couleur",
+    "comp.consigne.simple"
+  ],
+  "difficulte": 2,
+  "jeu": {
+    "moteur": "colorie",
+    "habillage": "volcan.forge",
+    "noeud": "volcan-08",
+    "etoiles": {
+      "sansAide": true,
+      "sansErreur": true
+    },
+    "aideGobi": [
+      "relire-consigne",
+      "montre-couleur",
+      "montre-cible"
+    ],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Colorie le seau en bleu.",
+          "forme": "imperative",
+          "audio": null,
+          "cibles": [
+            {
+              "region": "seau",
+              "couleur": "bleu"
+            }
+          ],
+          "motsCles": [
+            "colorie",
+            "seau",
+            "bleu"
+          ]
+        },
+        {
+          "id": "c2",
+          "texte": "Colorie le tableau en noir.",
+          "forme": "imperative",
+          "audio": null,
+          "cibles": [
+            {
+              "region": "tableau",
+              "couleur": "noir"
+            }
+          ],
+          "motsCles": [
+            "colorie",
+            "tableau",
+            "noir"
+          ]
+        },
+        {
+          "id": "c3",
+          "texte": "Colorie le drapeau en rouge.",
+          "forme": "imperative",
+          "audio": null,
+          "cibles": [
+            {
+              "region": "drapeau",
+              "couleur": "rouge"
+            }
+          ],
+          "motsCles": [
+            "colorie",
+            "drapeau",
+            "rouge"
+          ]
+        },
+        {
+          "id": "c4",
+          "texte": "Colorie le chapeau en brun.",
+          "forme": "imperative",
+          "audio": null,
+          "cibles": [
+            {
+              "region": "chapeau",
+              "couleur": "brun"
+            }
+          ],
+          "motsCles": [
+            "colorie",
+            "chapeau",
+            "brun"
+          ]
+        },
+        {
+          "id": "c5",
+          "texte": "Colorie le rideau en violet.",
+          "forme": "imperative",
+          "audio": null,
+          "cibles": [
+            {
+              "region": "rideau",
+              "couleur": "violet"
+            }
+          ],
+          "motsCles": [
+            "colorie",
+            "rideau",
+            "violet"
+          ]
+        },
+        {
+          "id": "c6",
+          "texte": "Colorie l'oiseau en jaune.",
+          "forme": "imperative",
+          "audio": null,
+          "cibles": [
+            {
+              "region": "oiseau",
+              "couleur": "jaune"
+            }
+          ],
+          "motsCles": [
+            "colorie",
+            "oiseau",
+            "jaune"
+          ]
+        },
+        {
+          "id": "c7",
+          "texte": "Colorie le mur en rose.",
+          "forme": "imperative",
+          "audio": null,
+          "cibles": [
+            {
+              "region": "mur-de-la-forge",
+              "couleur": "rose"
+            }
+          ],
+          "motsCles": [
+            "colorie",
+            "mur",
+            "rose"
+          ]
+        },
+        {
+          "id": "c8",
+          "texte": "Le feu est très chaud.",
+          "forme": "affirmative",
+          "audio": null,
+          "cibles": [
+            {
+              "region": "feu",
+              "couleur": "orange"
+            }
+          ],
+          "motsCles": [
+            "feu",
+            "chaud"
+          ]
+        }
+      ],
+      "nuancierAutorise": [
+        "bleu",
+        "noir",
+        "rouge",
+        "brun",
+        "violet",
+        "jaune",
+        "rose",
+        "orange"
+      ]
+    }
+  }
+}

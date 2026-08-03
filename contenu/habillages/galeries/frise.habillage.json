@@ -19,58 +19,85 @@
         "role": "coloriable",
         "regions": [
           {
-            "id": "case-de-frise-un",
-            "libelle": "la première case de la frise",
+            "id": "paroi-du-haut",
+            "libelle": "la paroi du haut",
             "centroide": [
-              190,
-              190
+              180,
+              64
             ],
-            "surface": 32000
+            "surface": 115200
           },
           {
-            "id": "case-de-frise-deux",
-            "libelle": "la deuxième case de la frise",
+            "id": "sol-de-la-frise",
+            "libelle": "le sol de la frise",
             "centroide": [
-              480,
-              190
+              720,
+              556.5
             ],
-            "surface": 32000
-          },
-          {
-            "id": "case-de-frise-trois",
-            "libelle": "la troisième case de la frise",
-            "centroide": [
-              770,
-              190
-            ],
-            "surface": 32000
-          },
-          {
-            "id": "case-de-frise-quatre",
-            "libelle": "la quatrième case de la frise",
-            "centroide": [
-              190,
-              420
-            ],
-            "surface": 32000
+            "surface": 76800
           },
           {
             "id": "bandeau-de-frise",
             "libelle": "le bandeau de la frise",
             "centroide": [
-              480,
-              420
+              760.9,
+              312
             ],
-            "surface": 32000
+            "surface": 206912
+          },
+          {
+            "id": "case-de-frise-un",
+            "libelle": "la première case de la frise",
+            "centroide": [
+              175,
+              316
+            ],
+            "surface": 29240
+          },
+          {
+            "id": "case-de-frise-deux",
+            "libelle": "la deuxième case de la frise",
+            "centroide": [
+              379,
+              316
+            ],
+            "surface": 34944
+          },
+          {
+            "id": "case-de-frise-trois",
+            "libelle": "la troisième case de la frise",
+            "centroide": [
+              580,
+              315
+            ],
+            "surface": 25280
+          },
+          {
+            "id": "case-de-frise-quatre",
+            "libelle": "la quatrième case de la frise",
+            "centroide": [
+              788,
+              311
+            ],
+            "surface": 34888
           },
           {
             "id": "torche-de-frise",
             "libelle": "la torche de la frise",
             "centroide": [
-              770,
-              420
+              912,
+              85.8
             ],
-            "surface": 32000
+            "surface": 2997.9
+          },
+          {
+            "id": "eclat-tombe",
+            "libelle": "l’éclat tombé",
+            "centroide": [
+              140,
+              506.3
+            ],
+            "surface": 4575.8
           }
         ]
       },

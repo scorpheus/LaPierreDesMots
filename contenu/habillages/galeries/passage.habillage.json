@@ -19,58 +19,85 @@
         "role": "coloriable",
         "regions": [
           {
-            "id": "pierre-plate-un",
-            "libelle": "la première pierre plate",
+            "id": "paroi-du-passage",
+            "libelle": "la paroi du passage",
             "centroide": [
-              190,
-              190
+              240,
+              106
             ],
-            "surface": 32000
-          },
-          {
-            "id": "pierre-plate-deux",
-            "libelle": "la deuxième pierre plate",
-            "centroide": [
-              480,
-              190
-            ],
-            "surface": 32000
-          },
-          {
-            "id": "pierre-plate-trois",
-            "libelle": "la troisième pierre plate",
-            "centroide": [
-              770,
-              190
-            ],
-            "surface": 32000
+            "surface": 192000
           },
           {
             "id": "ruisseau",
             "libelle": "le ruisseau",
             "centroide": [
-              190,
-              420
+              480,
+              500
             ],
-            "surface": 32000
+            "surface": 90608.4
           },
           {
-            "id": "paroi-du-passage",
-            "libelle": "la paroi du passage",
+            "id": "rive-gauche",
+            "libelle": "la rive gauche",
             "centroide": [
-              480,
-              420
+              176.3,
+              561.6
             ],
-            "surface": 32000
+            "surface": 15400
+          },
+          {
+            "id": "rive-droite",
+            "libelle": "la rive droite",
+            "centroide": [
+              791.6,
+              560.3
+            ],
+            "surface": 15020
+          },
+          {
+            "id": "pierre-plate-un",
+            "libelle": "la première pierre plate",
+            "centroide": [
+              200,
+              500
+            ],
+            "surface": 5753.6
+          },
+          {
+            "id": "pierre-plate-deux",
+            "libelle": "la deuxième pierre plate",
+            "centroide": [
+              450,
+              470
+            ],
+            "surface": 8361.1
+          },
+          {
+            "id": "pierre-plate-trois",
+            "libelle": "la troisième pierre plate",
+            "centroide": [
+              700,
+              506
+            ],
+            "surface": 4670.5
           },
           {
             "id": "lanterne-du-passage",
             "libelle": "la lanterne du passage",
             "centroide": [
-              770,
-              420
+              876,
+              198.7
             ],
-            "surface": 32000
+            "surface": 10304.3
+          },
+          {
+            "id": "stalactite-du-passage",
+            "libelle": "la stalactite du passage",
+            "centroide": [
+              560,
+              163.2
+            ],
+            "surface": 3111.8
           }
         ]
       },

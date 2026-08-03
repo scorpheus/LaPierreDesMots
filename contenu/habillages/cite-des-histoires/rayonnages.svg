@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" width="960" height="600" role="img" aria-label="Les deux rayonnages">
+  <title>Les deux rayonnages</title>
+  <desc>Deux rayonnages en anneau, à gauche et à droite, servent de réceptacles ; deux livres de deux tailles attendent au milieu. Une échelle, un pupitre, une lampe.</desc>
+  <!--
+    DÉCOR — lot M6, contrat du monde v4 § 2. Trait noir sur blanc, la COULEUR VIENT DU CODE
+    (annexe P § 2) : les régions sortent d'ici en grisaille #8E97A8, qui est leur état
+    par défaut et non un choix graphique. Géométrie 100 % polygonale (M, L, Z — aucun arc) :
+    surface et centroïde sont donc calculables exactement et opposables aux valeurs déclarées
+    par le .habillage.json, que scripts/verifier-regions-fermees.mjs --strict recalcule.
+
+    Chaque région est un ENFANT DIRECT de #calque-zones : SceneSvg.tsx sélectionne
+    "#calque-zones > [id]", et un tracé niché dans un sous-groupe échapperait au tap sans
+    qu'aucun message ne le dise.
+
+    ÉCRIT PAR scripts/dessiner-decors.mjs — ne pas retoucher à la main : la scène est décrite
+    dans scripts/decors/decors.mjs, et l'émetteur refuse d'écrire si la mesure est mauvaise.
+  -->
+  <g id="calque-fond">
+    <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
+  </g>
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round">
+    <path id="mur-de-la-salle" class="zone" data-region-svg="mur-de-la-salle" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L960,0 L960,128 L933.3,132 L906.7,134.9 L880,136 L853.3,134.9 L826.7,132 L800,128 L773.3,124 L746.7,121.1 L720,120 L693.3,121.1 L666.7,124 L640,128 L613.3,132 L586.7,134.9 L560,136 L533.3,134.9 L506.7,132 L480,128 L453.3,124 L426.7,121.1 L400,120 L373.3,121.1 L346.7,124 L320,128 L293.3,132 L266.7,134.9 L240,136 L213.3,134.9 L186.7,132 L160,128 L133.3,124 L106.7,121.1 L80,120 L53.3,121.1 L26.7,124 L0,128 Z"/>
+    <path id="parquet-cire" class="zone" data-region-svg="parquet-cire" fill="#8E97A8" fill-rule="evenodd" d="M0,500 L26.7,506.1 L53.3,506.1 L80,500 L106.7,493.9 L133.3,493.9 L160,500 L186.7,506.1 L213.3,506.1 L240,500 L266.7,493.9 L293.3,493.9 L320,500 L346.7,506.1 L373.3,506.1 L400,500 L426.7,493.9 L453.3,493.9 L480,500 L506.7,506.1 L533.3,506.1 L560,500 L586.7,493.9 L613.3,493.9 L640,500 L666.7,506.1 L693.3,506.1 L720,500 L746.7,493.9 L773.3,493.9 L800,500 L826.7,506.1 L853.3,506.1 L880,500 L906.7,493.9 L933.3,493.9 L960,500 L960,600 L0,600 Z"/>
+    <path id="rayonnage-gauche" class="zone" data-region-svg="rayonnage-gauche" fill="#8E97A8" fill-rule="evenodd" d="M70,160 L410,160 L410,482 L70,482 Z M100,190 L380,190 L380,452 L100,452 Z"/>
+    <path id="rayonnage-droit" class="zone" data-region-svg="rayonnage-droit" fill="#8E97A8" fill-rule="evenodd" d="M550,180 L872,180 L872,482 L550,482 Z M578,208 L844,208 L844,454 L578,454 Z"/>
+    <path id="livre-a-ranger-un" class="zone" data-region-svg="livre-a-ranger-un" fill="#8E97A8" fill-rule="evenodd" d="M444.7,240.7 L491.8,226.5 L496.2,226.5 L543.3,240.7 L543.3,343 L496.2,331.6 L491.8,331.6 L444.7,343 Z"/>
+    <path id="livre-a-ranger-deux" class="zone" data-region-svg="livre-a-ranger-deux" fill="#8E97A8" fill-rule="evenodd" d="M443.8,397.5 L484.1,385.3 L487.9,385.3 L528.2,397.5 L528.2,485.4 L487.9,475.6 L484.1,475.6 L443.8,485.4 Z"/>
+    <path id="echelle-de-la-salle" class="zone" data-region-svg="echelle-de-la-salle" fill="#8E97A8" fill-rule="evenodd" d="M898,178 L910.8,178 L910.8,226.3 L943.2,226.3 L943.2,178 L956,178 L956,480 L943.2,480 L943.2,431.7 L910.8,431.7 L910.8,480 L898,480 L898,377.3 L910.8,377.3 L910.8,347.1 L898,347.1 L898,310.9 L910.8,310.9 L910.8,280.7 L898,280.7 Z"/>
+    <path id="pupitre-du-milieu" class="zone" data-region-svg="pupitre-du-milieu" fill="#8E97A8" fill-rule="evenodd" d="M178,522.7 L400,494.1 L400,508.4 L302.3,526.8 L311.2,590 L266.8,590 L275.7,526.8 L178,537 Z"/>
+    <path id="lampe-du-rayonnage" class="zone" data-region-svg="lampe-du-rayonnage" fill="#8E97A8" fill-rule="evenodd" d="M507.5,118 L530.5,118 L523.9,130.2 L542,138.4 L548.5,152.7 L543.6,195.5 L551.8,205.7 L551.8,215.9 L486.2,215.9 L486.2,205.7 L494.4,195.5 L489.5,152.7 L496,138.4 L514.1,130.2 Z"/>
+  </g>
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path class="trait" d="M100,320 L380,320"/>
+    <path class="trait" d="M578,330 L844,330"/>
+  </g>
+</svg>

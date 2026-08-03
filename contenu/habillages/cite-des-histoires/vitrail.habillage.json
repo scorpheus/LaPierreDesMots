@@ -19,58 +19,85 @@
         "role": "coloriable",
         "regions": [
           {
-            "id": "losange-un",
-            "libelle": "le premier losange",
+            "id": "nef",
+            "libelle": "la nef",
             "centroide": [
-              190.0,
-              190.0
+              283.1,
+              329
             ],
-            "surface": 32000.0
+            "surface": 306364
           },
           {
-            "id": "losange-deux",
-            "libelle": "le deuxième losange",
+            "id": "sol-de-la-nef",
+            "libelle": "le sol de la nef",
             "centroide": [
-              480.0,
-              190.0
+              120,
+              562
             ],
-            "surface": 32000.0
-          },
-          {
-            "id": "losange-trois",
-            "libelle": "le troisième losange",
-            "centroide": [
-              770.0,
-              190.0
-            ],
-            "surface": 32000.0
+            "surface": 67200
           },
           {
             "id": "plomb",
             "libelle": "le plomb",
             "centroide": [
-              190.0,
-              420.0
+              453.8,
+              82.8
             ],
-            "surface": 32000.0
+            "surface": 55772.6
           },
           {
             "id": "rosace",
             "libelle": "la rosace",
             "centroide": [
-              480.0,
-              420.0
+              452,
+              99.5
             ],
-            "surface": 32000.0
+            "surface": 27875.8
           },
           {
-            "id": "nef",
-            "libelle": "la nef",
+            "id": "losange-un",
+            "libelle": "le premier losange",
             "centroide": [
-              770.0,
-              420.0
+              320,
+              330
             ],
-            "surface": 32000.0
+            "surface": 15680
+          },
+          {
+            "id": "losange-deux",
+            "libelle": "le deuxième losange",
+            "centroide": [
+              480,
+              360
+            ],
+            "surface": 22704
+          },
+          {
+            "id": "losange-trois",
+            "libelle": "le troisième losange",
+            "centroide": [
+              640,
+              330
+            ],
+            "surface": 11520
+          },
+          {
+            "id": "cierge",
+            "libelle": "le cierge",
+            "centroide": [
+              149,
+              436.2
+            ],
+            "surface": 2038.4
+          },
+          {
+            "id": "banc-de-la-nef",
+            "libelle": "le banc de la nef",
+            "centroide": [
+              869,
+              455.1
+            ],
+            "surface": 10134
           }
         ]
       },

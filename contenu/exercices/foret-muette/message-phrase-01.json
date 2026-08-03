@@ -1,0 +1,115 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Les deux phrases sont bâties AUTOUR d'une liaison : « un ours », « les oiseaux ». La liaison ne se voit pas — elle apparaît quand la phrase est dite —, donc elle a besoin d’un moteur qui fasse construire la phrase entière avant de la relire à voix haute, et non d’un moteur qui isole un mot. Huit étiquettes utiles plus un intrus : neuf boutons, le plafond mesuré par `guirlande-phrase-01`. Toutes distinctes MOT COMPRIS.",
+  "id": "foret-muette-message-phrase-01",
+  "version": 1,
+  "titre": "Le message gravé sur l'écorce",
+  "competences": [
+    "flu.liaison",
+    "comp.consigne.simple"
+  ],
+  "difficulte": 3,
+  "jeu": {
+    "moteur": "phrase",
+    "habillage": "foret.message",
+    "noeud": "foret-muette-04",
+    "etoiles": {
+      "sansAide": true,
+      "sansErreur": true
+    },
+    "aideGobi": [
+      "relire-consigne",
+      "souffle-syllabe",
+      "montre-cible"
+    ],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Range les mots pour lire : un ours est grand.",
+          "forme": "imperative",
+          "audio": null,
+          "phrase": "Un ours est grand.",
+          "ordre": [
+            "mot-un",
+            "mot-ours",
+            "mot-est",
+            "mot-grand"
+          ],
+          "motsCles": [
+            "range",
+            "mot",
+            "ours",
+            "grand"
+          ]
+        },
+        {
+          "id": "c2",
+          "texte": "Range les mots pour lire : les oiseaux sont noirs.",
+          "forme": "imperative",
+          "audio": null,
+          "phrase": "Les oiseaux sont noirs.",
+          "ordre": [
+            "mot-les",
+            "mot-oiseaux",
+            "mot-sont",
+            "mot-noirs"
+          ],
+          "motsCles": [
+            "range",
+            "mot",
+            "oiseau",
+            "noir"
+          ]
+        }
+      ],
+      "etiquettes": [
+        {
+          "id": "mot-un",
+          "mot": "Un",
+          "intrus": false
+        },
+        {
+          "id": "mot-ours",
+          "mot": "ours",
+          "intrus": false
+        },
+        {
+          "id": "mot-est",
+          "mot": "est",
+          "intrus": false
+        },
+        {
+          "id": "mot-grand",
+          "mot": "grand.",
+          "intrus": false
+        },
+        {
+          "id": "mot-les",
+          "mot": "Les",
+          "intrus": false
+        },
+        {
+          "id": "mot-oiseaux",
+          "mot": "oiseaux",
+          "intrus": false
+        },
+        {
+          "id": "mot-sont",
+          "mot": "sont",
+          "intrus": false
+        },
+        {
+          "id": "mot-noirs",
+          "mot": "noirs.",
+          "intrus": false
+        },
+        {
+          "id": "mot-arbre",
+          "mot": "arbre",
+          "intrus": true
+        }
+      ],
+      "competence": "flu.liaison"
+    }
+  }
+}

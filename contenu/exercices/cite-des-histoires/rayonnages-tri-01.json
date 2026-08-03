@@ -1,0 +1,230 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. ORIGINE : NIVEAU 2, fiche 15, « LE GRAND SPECTACLE DES COULEURS ». CORRIGÉ PRODUIT : la fiche affirme « Le renard porte un costume rouge » — d’où son habit rouge ici, et d’où la fausseté de son affirmation 2 (« Le renard porte un costume bleu »), qui arrivait à `reponseAttendue: null` ; et « Le hibou dit : Bravo à tous », d’où le hibou. C’EST LE NŒUD D’INFÉRENCE DE LA RÉGION, et c'est mécanique : AUCUN des dix mots à ranger ne nomme son animal. « Il a un bec », « Il a une grande queue », « Il est dans le nid » — la réponse ne se lit pas, elle se déduit. Dix éléments, cinq consignes, tous disjoints (`element-deja-range` ne libère rien).",
+  "id": "cite-des-histoires-rayonnages-tri-01",
+  "version": 1,
+  "titre": "Les mots du renard et du hibou",
+  "origine": {
+    "source": "fiches-origine/NIVEAU 2.pdf",
+    "niveau": 2,
+    "fiche": 15
+  },
+  "competences": [
+    "comp.inference",
+    "comp.consigne.multiple"
+  ],
+  "difficulte": 4,
+  "jeu": {
+    "moteur": "tri",
+    "habillage": "cite.rayonnages",
+    "noeud": "cite-des-histoires-08",
+    "etoiles": {
+      "sansAide": true,
+      "sansErreur": true
+    },
+    "aideGobi": [
+      "relire-consigne",
+      "souffle-syllabe",
+      "montre-cible"
+    ],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Range les mots du renard.",
+          "forme": "imperative",
+          "audio": null,
+          "aRanger": [
+            "mot-habit",
+            "mot-brun"
+          ],
+          "motsCles": [
+            "range",
+            "mot",
+            "renard"
+          ]
+        },
+        {
+          "id": "c2",
+          "texte": "Range aussi les mots du renard.",
+          "forme": "imperative",
+          "audio": null,
+          "aRanger": [
+            "mot-foret",
+            "mot-queue"
+          ],
+          "motsCles": [
+            "range",
+            "mot",
+            "renard"
+          ]
+        },
+        {
+          "id": "c3",
+          "texte": "Range les mots du hibou.",
+          "forme": "imperative",
+          "audio": null,
+          "aRanger": [
+            "mot-arbre",
+            "mot-gris"
+          ],
+          "motsCles": [
+            "range",
+            "mot",
+            "hibou"
+          ]
+        },
+        {
+          "id": "c4",
+          "texte": "Range aussi les mots du hibou.",
+          "forme": "imperative",
+          "audio": null,
+          "aRanger": [
+            "mot-nuit",
+            "mot-bec"
+          ],
+          "motsCles": [
+            "range",
+            "mot",
+            "hibou"
+          ]
+        },
+        {
+          "id": "c5",
+          "texte": "Range les derniers mots.",
+          "forme": "imperative",
+          "audio": null,
+          "aRanger": [
+            "mot-cour",
+            "mot-nid"
+          ],
+          "motsCles": [
+            "range",
+            "dernier",
+            "mot"
+          ]
+        }
+      ],
+      "receptacles": [
+        {
+          "id": "rayon-gauche",
+          "libelle": "le livre de gauche",
+          "critere": "les mots du renard",
+          "zone": [
+            [
+              60,
+              300
+            ],
+            [
+              420,
+              300
+            ],
+            [
+              420,
+              560
+            ],
+            [
+              60,
+              560
+            ]
+          ]
+        },
+        {
+          "id": "rayon-droite",
+          "libelle": "le livre de droite",
+          "critere": "les mots du hibou",
+          "zone": [
+            [
+              540,
+              300
+            ],
+            [
+              900,
+              300
+            ],
+            [
+              900,
+              560
+            ],
+            [
+              540,
+              560
+            ]
+          ]
+        }
+      ],
+      "elements": [
+        {
+          "id": "mot-habit",
+          "libelle": "Il porte un habit rouge.",
+          "asset": null,
+          "receptacleAttendu": "rayon-gauche",
+          "confusionAvec": null
+        },
+        {
+          "id": "mot-brun",
+          "libelle": "Il est brun.",
+          "asset": null,
+          "receptacleAttendu": "rayon-gauche",
+          "confusionAvec": null
+        },
+        {
+          "id": "mot-foret",
+          "libelle": "Il marche dans la forêt.",
+          "asset": null,
+          "receptacleAttendu": "rayon-gauche",
+          "confusionAvec": null
+        },
+        {
+          "id": "mot-queue",
+          "libelle": "Il a une grande queue.",
+          "asset": null,
+          "receptacleAttendu": "rayon-gauche",
+          "confusionAvec": null
+        },
+        {
+          "id": "mot-cour",
+          "libelle": "Il joue dans la cour.",
+          "asset": null,
+          "receptacleAttendu": "rayon-gauche",
+          "confusionAvec": null
+        },
+        {
+          "id": "mot-arbre",
+          "libelle": "Il est sur l'arbre.",
+          "asset": null,
+          "receptacleAttendu": "rayon-droite",
+          "confusionAvec": null
+        },
+        {
+          "id": "mot-gris",
+          "libelle": "Il a un habit gris.",
+          "asset": null,
+          "receptacleAttendu": "rayon-droite",
+          "confusionAvec": null
+        },
+        {
+          "id": "mot-nuit",
+          "libelle": "Il est dans la nuit.",
+          "asset": null,
+          "receptacleAttendu": "rayon-droite",
+          "confusionAvec": null
+        },
+        {
+          "id": "mot-bec",
+          "libelle": "Il a un bec.",
+          "asset": null,
+          "receptacleAttendu": "rayon-droite",
+          "confusionAvec": null
+        },
+        {
+          "id": "mot-nid",
+          "libelle": "Il est dans le nid.",
+          "asset": null,
+          "receptacleAttendu": "rayon-droite",
+          "confusionAvec": null
+        }
+      ],
+      "competence": "comp.inference"
+    }
+  }
+}

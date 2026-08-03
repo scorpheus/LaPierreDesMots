@@ -1,0 +1,10 @@
+{
+  "id": "foret-muette-05",
+  "region": "foret-muette",
+  "ordre": 5,
+  "exercice": "foret-muette-pas-japonais-chemin-01",
+  "prerequis": [
+    "foret-muette-04"
+  ],
+  "temps": "presentation"
+}

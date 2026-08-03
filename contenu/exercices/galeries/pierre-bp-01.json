@@ -1,9 +1,9 @@
 {
-  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Lot N8. AXE HAUT-BAS UNIQUEMENT — b ↔ p. C'est l'axe que le père a RAPPORTÉ (D23, fait rapporté : « l'enfant confond b/p »). Le clavier ne porte que deux touches : ajouter d et q y remettrait l'autre axe. POURQUOI IL NE DÉCLARE PAS `gph.miroir.haut-bas`, et c'est un arbitrage consigné dans Docs/questions-en-attente.md : R12 exige 3 moteurs par compétence CITÉE ; Les Galeries n'ouvrent que 4 nœuds neufs et 3 moteurs hors `trace` (eclair, tri, grave) ; on ne peut donc couvrir qu'UN axe à 3 moteurs. L'axe gauche-droite l'est ; l'axe haut-bas est travaillé par ce contenu et par `miroir-bp-01` (moteur `trace`), et sa compétence est DÉRIVÉE à l'exécution par le moteur `trace` (moteurs/trace/moteur.ts) — elle n'est donc pas perdue pour le tableau de bord. La déclarer ici ferait tomber R12 à 1 moteur sur 3 et rendrait la suite rouge : un compte faux ne vaut pas mieux qu'un compte absent.",
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Lot N8, corrigé par le lot M1 — le contenu gravé n'est pas touché, seule la compétence déclarée change. AXE HAUT-BAS UNIQUEMENT — b ↔ p. C'est l'axe que le père a RAPPORTÉ (D23, fait rapporté : « l'enfant confond b/p »). Le clavier ne porte que deux touches : ajouter d et q y remettrait l'autre axe. L'ARBITRAGE DE N8 EST LEVÉ, ET IL FAUT DIRE POURQUOI PLUTÔT QUE L'EFFACER. N8 écrivait : « R12 exige 3 moteurs par compétence CITÉE ; les Galeries n'ouvrent que 4 nœuds neufs et 3 moteurs hors trace ; on ne peut donc couvrir qu'UN axe à 3 moteurs », et déclarait `comp.consigne.simple` pour ne pas rendre la suite rouge. Le raisonnement était juste sur ses prémisses et le résultat était mauvais : mesuré au gel du contrat du monde v4, `gph.miroir.haut-bas` figurait au référentiel et était porté par ZÉRO exercice, donc le BKT, le Leitner et le Top 10 des confusions ne voyaient jamais l'axe que le père avait signalé. Un compte absent ne valait pas mieux qu'un compte faux : il était pire, parce qu'il était silencieux. Les prémisses ont changé — les Galeries comptent 14 nœuds, et `gph.miroir.haut-bas` est porté par trois moteurs mécaniquement distincts : `trace` (`miroir-bp-01`), `grave` (ce fichier) et `paires` (`echos-paires-01`). R12 est tenue, et la déclaration dit enfin ce que l'exercice fait.",
   "id": "galeries-pierre-bp-01",
-  "version": 1,
+  "version": 2,
   "titre": "Graver le b et le p",
-  "competences": ["comp.consigne.simple"],
+  "competences": ["gph.miroir.haut-bas"],
   "difficulte": 4,
   "jeu": {
     "moteur": "grave",

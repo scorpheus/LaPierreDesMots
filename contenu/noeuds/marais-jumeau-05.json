@@ -1,0 +1,10 @@
+{
+  "id": "marais-jumeau-05",
+  "region": "marais-jumeau",
+  "ordre": 5,
+  "exercice": "marais-jumeau-coquillages-paires-01",
+  "prerequis": [
+    "marais-jumeau-04"
+  ],
+  "temps": "presentation"
+}

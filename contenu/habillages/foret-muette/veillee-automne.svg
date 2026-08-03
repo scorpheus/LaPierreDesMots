@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" width="960" height="600" role="img" aria-label="La veillée sous les arbres roux">
+  <title>La veillée sous les arbres roux</title>
+  <desc>Deux arbres roux à tronc et houppier lobé encadrent un feu de veillée ; Plume, le hibou à deux aigrettes, est assise à côté. Une bûche, la lune, la nuit.</desc>
+  <!--
+    DÉCOR — lot M6, contrat du monde v4 § 2. Trait noir sur blanc, la COULEUR VIENT DU CODE
+    (annexe P § 2) : les régions sortent d'ici en grisaille #8E97A8, qui est leur état
+    par défaut et non un choix graphique. Géométrie 100 % polygonale (M, L, Z — aucun arc) :
+    surface et centroïde sont donc calculables exactement et opposables aux valeurs déclarées
+    par le .habillage.json, que scripts/verifier-regions-fermees.mjs --strict recalcule.
+
+    Chaque région est un ENFANT DIRECT de #calque-zones : SceneSvg.tsx sélectionne
+    "#calque-zones > [id]", et un tracé niché dans un sous-groupe échapperait au tap sans
+    qu'aucun message ne le dise.
+
+    ÉCRIT PAR scripts/dessiner-decors.mjs — ne pas retoucher à la main : la scène est décrite
+    dans scripts/decors/decors.mjs, et l'émetteur refuse d'écrire si la mesure est mauvaise.
+  -->
+  <g id="calque-fond">
+    <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
+  </g>
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round">
+    <path id="ciel-de-nuit" class="zone" data-region-svg="ciel-de-nuit" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L960,0 L960,228 L933.3,232.1 L906.7,235.7 L880,238.4 L853.3,239.8 L826.7,239.8 L800,238.4 L773.3,235.7 L746.7,232.1 L720,228 L693.3,223.9 L666.7,220.3 L640,217.6 L613.3,216.2 L586.7,216.2 L560,217.6 L533.3,220.3 L506.7,223.9 L480,228 L453.3,232.1 L426.7,235.7 L400,238.4 L373.3,239.8 L346.7,239.8 L320,238.4 L293.3,235.7 L266.7,232.1 L240,228 L213.3,223.9 L186.7,220.3 L160,217.6 L133.3,216.2 L106.7,216.2 L80,217.6 L53.3,220.3 L26.7,223.9 L0,228 Z"/>
+    <path id="clairiere-rousse" class="zone" data-region-svg="clairiere-rousse" fill="#8E97A8" fill-rule="evenodd" d="M0,470 L26.7,476.4 L53.3,479.8 L80,478.7 L106.7,473.4 L133.3,466.6 L160,461.3 L186.7,460.2 L213.3,463.6 L240,470 L266.7,476.4 L293.3,479.8 L320,478.7 L346.7,473.4 L373.3,466.6 L400,461.3 L426.7,460.2 L453.3,463.6 L480,470 L506.7,476.4 L533.3,479.8 L560,478.7 L586.7,473.4 L613.3,466.6 L640,461.3 L666.7,460.2 L693.3,463.6 L720,470 L746.7,476.4 L773.3,479.8 L800,478.7 L826.7,473.4 L853.3,466.6 L880,461.3 L906.7,460.2 L933.3,463.6 L960,470 L960,600 L0,600 Z"/>
+    <path id="arbre-roux-gauche" class="zone" data-region-svg="arbre-roux-gauche" fill="#8E97A8" fill-rule="evenodd" d="M296.1,206.1 L282.3,216.3 L258.6,220.3 L237.7,221.5 L226.7,226.5 L223,239.3 L217.8,256.4 L205.1,268.9 L186.4,269.7 L168.4,259.2 L155.1,245.5 L144.3,237.9 L129.4,239.7 L107.7,245.7 L84.5,247 L69.7,238.8 L69.1,223.2 L78.2,207 L85.2,195 L80.1,186.4 L63.6,176.9 L47.3,164 L43.9,149.9 L57.7,139.7 L81.4,135.7 L102.3,134.5 L113.3,129.5 L117,116.7 L122.2,99.6 L134.9,87.1 L153.6,86.3 L171.6,96.8 L184.9,110.5 L195.7,118.1 L210.6,116.3 L232.3,110.3 L255.5,109 L270.3,117.2 L270.9,132.8 L261.8,149 L254.8,161 L259.9,169.6 L276.4,179.1 L292.7,192 Z"/>
+    <path id="arbre-roux-droit" class="zone" data-region-svg="arbre-roux-droit" fill="#8E97A8" fill-rule="evenodd" d="M840.8,265.9 L824.8,267.5 L808,263.2 L793.7,256.5 L782.1,251.5 L770.8,250.7 L756.8,253.6 L739.6,256.7 L722,256.2 L708.7,250.2 L703.2,239.6 L705.2,227.4 L710.3,216.4 L712.8,207.8 L709,200.3 L700,191.8 L690.8,181.3 L687.6,169.7 L693.9,159.8 L708.4,153.9 L726.3,152.1 L742.5,152.1 L754.4,150.5 L763.4,144.9 L772.9,136 L785.6,127.2 L801.2,122.7 L816.6,125.1 L828.5,133.6 L835.6,144.9 L840.4,154.8 L847.1,161.3 L858.8,165 L874.8,168.6 L890.5,174.7 L899.9,184 L899.2,194.8 L889.4,204.8 L875.6,212.4 L864,218.5 L858.3,225.1 L857.4,234.4 L857,246.3 L852.1,258 Z"/>
+    <path id="tronc-gauche" class="zone" data-region-svg="tronc-gauche" fill="#8E97A8" fill-rule="evenodd" d="M158,249.2 L148,469.2 L184,470.8 L194,250.8 Z"/>
+    <path id="tronc-droit" class="zone" data-region-svg="tronc-droit" fill="#8E97A8" fill-rule="evenodd" d="M778,252.6 L788,470.6 L816,469.4 L806,251.4 Z"/>
+    <path id="feu-de-veillee" class="zone" data-region-svg="feu-de-veillee" fill="#8E97A8" fill-rule="evenodd" d="M422,470 L425.3,447.6 L431.2,434.6 L434.5,411 L439.4,437 L444.8,452.3 L449.2,470 L452.5,425.2 L458.4,399.2 L461.7,352 L466.6,403.9 L472,434.6 L476.4,470 L479.7,436.4 L485.6,416.9 L488.9,381.5 L493.8,420.4 L499.2,443.5 L503.6,470 L506.9,447.6 L512.8,434.6 L516.1,411 L521,437 L526.4,452.3 L530.8,470 L534.1,425.2 L540,399.2 L543.3,352 L548.2,403.9 L553.6,434.6 L558,470 L558,490 L422,490 Z"/>
+    <path id="plume-assise" class="zone" data-region-svg="plume-assise" fill="#8E97A8" fill-rule="evenodd" d="M624.4,344.2 L642.9,370.1 L685.1,370.1 L703.6,344.2 L714.2,389.6 L722.1,434.9 L701,473.8 L677.2,480.3 L674.6,490 L664,477 L653.4,490 L650.8,480.3 L627,473.8 L605.9,434.9 L613.8,389.6 Z"/>
+    <path id="buche-de-veillee" class="zone" data-region-svg="buche-de-veillee" fill="#8E97A8" fill-rule="evenodd" d="M398,486 L576,470 L586,510 L404,526 Z"/>
+    <path id="lune-rousse" class="zone" data-region-svg="lune-rousse" fill="#8E97A8" fill-rule="evenodd" d="M910,108 L907.7,122.8 L900.8,136.2 L890.2,146.8 L876.8,153.7 L862,156 L847.2,153.7 L833.8,146.8 L823.2,136.2 L816.3,122.8 L814,108 L816.3,93.2 L823.2,79.8 L833.8,69.2 L847.2,62.3 L862,60 L876.8,62.3 L890.2,69.2 L900.8,79.8 L907.7,93.2 Z"/>
+  </g>
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path class="trait" d="M0,472 L960,464"/>
+  </g>
+</svg>

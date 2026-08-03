@@ -1,16 +1,36 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" width="960" height="600" role="img" aria-label="La salle des échos">
+  <title>La salle des échos</title>
+  <desc>Une voûte en anneau qui coiffe la salle, le banc de pierre, le cristal du conte, la lampe accrochée, la flaque étalée au sol et un gradin taillé.</desc>
+  <!--
+    DÉCOR — lot M6, contrat du monde v4 § 2. Trait noir sur blanc, la COULEUR VIENT DU CODE
+    (annexe P § 2) : les régions sortent d'ici en grisaille #8E97A8, qui est leur état
+    par défaut et non un choix graphique. Géométrie 100 % polygonale (M, L, Z — aucun arc) :
+    surface et centroïde sont donc calculables exactement et opposables aux valeurs déclarées
+    par le .habillage.json, que scripts/verifier-regions-fermees.mjs --strict recalcule.
+
+    Chaque région est un ENFANT DIRECT de #calque-zones : SceneSvg.tsx sélectionne
+    "#calque-zones > [id]", et un tracé niché dans un sous-groupe échapperait au tap sans
+    qu'aucun message ne le dise.
+
+    ÉCRIT PAR scripts/dessiner-decors.mjs — ne pas retoucher à la main : la scène est décrite
+    dans scripts/decors/decors.mjs, et l'émetteur refuse d'écrire si la mesure est mauvaise.
+  -->
   <g id="calque-fond">
-    <rect id="fond" x="0" y="0" width="960" height="600" fill="#f4f1e6"/>
+    <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
   </g>
-  <g id="calque-zones">
-    <rect id="voute-des-echos" x="90" y="110" width="200" height="160" rx="12"/>
-    <rect id="banc-de-pierre" x="380" y="110" width="200" height="160" rx="12"/>
-    <rect id="cristal-du-conte" x="670" y="110" width="200" height="160" rx="12"/>
-    <rect id="lampe-du-conte" x="90" y="340" width="200" height="160" rx="12"/>
-    <rect id="flaque-des-echos" x="380" y="340" width="200" height="160" rx="12"/>
-    <rect id="sol-des-echos" x="670" y="340" width="200" height="160" rx="12"/>
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round">
+    <path id="sol-des-echos" class="zone" data-region-svg="sol-des-echos" fill="#8E97A8" fill-rule="evenodd" d="M0,520 L26.7,526.4 L53.3,529.8 L80,528.7 L106.7,523.4 L133.3,516.6 L160,511.3 L186.7,510.2 L213.3,513.6 L240,520 L266.7,526.4 L293.3,529.8 L320,528.7 L346.7,523.4 L373.3,516.6 L400,511.3 L426.7,510.2 L453.3,513.6 L480,520 L506.7,526.4 L533.3,529.8 L560,528.7 L586.7,523.4 L613.3,516.6 L640,511.3 L666.7,510.2 L693.3,513.6 L720,520 L746.7,526.4 L773.3,529.8 L800,528.7 L826.7,523.4 L853.3,516.6 L880,511.3 L906.7,510.2 L933.3,513.6 L960,520 L960,600 L0,600 Z"/>
+    <path id="voute-des-echos" class="zone" data-region-svg="voute-des-echos" fill="#8E97A8" fill-rule="evenodd" d="M30,300 L30,300 L41.3,199.9 L74.6,104.8 L128.2,19.4 L199.4,-51.8 L284.8,-105.4 L379.9,-138.7 L480,-150 L580.1,-138.7 L675.2,-105.4 L760.6,-51.8 L831.8,19.4 L885.4,104.8 L918.7,199.9 L930,300 L930,300 Z M99,300 L99,300 L108.6,215.2 L136.7,134.7 L182.1,62.5 L242.5,2.1 L314.7,-43.3 L395.2,-71.4 L480,-81 L564.8,-71.4 L645.3,-43.3 L717.5,2.1 L777.9,62.5 L823.3,134.7 L851.4,215.2 L861,300 L861,300 Z"/>
+    <path id="banc-de-pierre" class="zone" data-region-svg="banc-de-pierre" fill="#8E97A8" fill-rule="evenodd" d="M180,440 L420,430 L432,486 L172,494 Z"/>
+    <path id="cristal-du-conte" class="zone" data-region-svg="cristal-du-conte" fill="#8E97A8" fill-rule="evenodd" d="M620,300 L686,353.8 L671.5,465.1 L620,492 L568.5,465.1 L554,353.8 Z"/>
+    <path id="lampe-du-conte" class="zone" data-region-svg="lampe-du-conte" fill="#8E97A8" fill-rule="evenodd" d="M800.3,198 L831.7,198 L822.7,216.2 L847.4,228.4 L856.3,249.7 L849.6,313.5 L860.8,328.7 L860.8,343.9 L771.2,343.9 L771.2,328.7 L782.4,313.5 L775.7,249.7 L784.6,228.4 L809.3,216.2 Z"/>
+    <path id="flaque-des-echos" class="zone" data-region-svg="flaque-des-echos" fill="#8E97A8" fill-rule="evenodd" d="M495.8,572.6 L479.2,574.5 L459.9,573.5 L442.5,571.1 L428.6,569.4 L416.2,569.8 L402.2,572.2 L384.8,575 L365.9,576 L349.8,573.9 L340.5,568.9 L338.8,562.6 L340.8,556.8 L340.7,552.3 L334.3,548.8 L321.9,545.1 L308.8,540.5 L301.7,534.9 L305.2,529.5 L318.8,525.5 L337.4,523.4 L354.7,522.2 L366.9,520.6 L374.7,517.2 L382,512 L392.7,506.7 L407.9,503.4 L425.2,503.5 L440.6,507 L451.8,512.2 L460.1,516.8 L469.3,519.6 L483,520.7 L501.2,521.4 L519.9,523.3 L532.9,527.4 L535.6,532.9 L528.3,538.5 L516,543.3 L505.6,547.2 L501.5,550.9 L503.6,555.6 L506.9,561.6 L505.4,567.8 Z"/>
+    <path id="gradin-de-pierre" class="zone" data-region-svg="gradin-de-pierre" fill="#8E97A8" fill-rule="evenodd" d="M600,468 L900,456 L914,520 L590,528 Z"/>
+    <path id="stalactite-du-conte" class="zone" data-region-svg="stalactite-du-conte" fill="#8E97A8" fill-rule="evenodd" d="M300,118 L312,195.2 L318,200.2 L322.2,206.8 L323.9,214.4 L323.2,222.2 L320,229.3 L314.6,235 L307.7,238.7 L300,240 L292.3,238.7 L285.4,235 L280,229.3 L276.8,222.2 L276.1,214.4 L277.8,206.8 L282,200.2 L288,195.2 Z"/>
+    <path id="echo-cristal-petit" class="zone" data-region-svg="echo-cristal-petit" fill="#8E97A8" fill-rule="evenodd" d="M248,340 L288,374.2 L279.2,444.9 L248,462 L216.8,444.9 L208,374.2 Z"/>
   </g>
-  <g id="calque-trait">
-    <path id="cadre" d="M20 20 H940 V580 H20 Z" fill="none" stroke="#2b2b2b" stroke-width="4"/>
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path class="trait" d="M180,466 L426,456"/>
+    <path class="trait" d="M620,340 L620,486"/>
   </g>
 </svg>

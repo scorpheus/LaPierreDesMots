@@ -1,0 +1,160 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Six paires, douze cartes, deux par paire exactement ; trois consignes à paires disjointes. Les six mots couvrent les quatre voisinages du graphème : `ill` seul (bille, fille, famille, quille), `euill` (feuille), `ouill` (grenouille) — la même lettre triple qui chante toujours pareil.",
+  "id": "volcan-geodes-paires-01",
+  "version": 1,
+  "titre": "Les géodes du son de fille",
+  "competences": [
+    "gph.rare.ill"
+  ],
+  "difficulte": 3,
+  "jeu": {
+    "moteur": "paires",
+    "habillage": "volcan.geodes",
+    "noeud": "volcan-04",
+    "etoiles": {
+      "sansAide": true,
+      "sansErreur": true
+    },
+    "aideGobi": [
+      "relire-consigne",
+      "souffle-syllabe",
+      "montre-cible"
+    ],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Trouve le mot et son image.",
+          "forme": "imperative",
+          "audio": null,
+          "aApparier": [
+            "paire-bille",
+            "paire-fille"
+          ],
+          "motsCles": [
+            "trouve",
+            "mot",
+            "image"
+          ]
+        },
+        {
+          "id": "c2",
+          "texte": "Trouve aussi le mot et son image.",
+          "forme": "imperative",
+          "audio": null,
+          "aApparier": [
+            "paire-famille",
+            "paire-quille"
+          ],
+          "motsCles": [
+            "trouve",
+            "mot",
+            "image"
+          ]
+        },
+        {
+          "id": "c3",
+          "texte": "Trouve les derniers mots et les images.",
+          "forme": "imperative",
+          "audio": null,
+          "aApparier": [
+            "paire-feuille",
+            "paire-grenouille"
+          ],
+          "motsCles": [
+            "trouve",
+            "mot",
+            "image"
+          ]
+        }
+      ],
+      "cartes": [
+        {
+          "id": "mot-bille",
+          "libelle": "bille",
+          "face": "mot",
+          "asset": null,
+          "paire": "paire-bille"
+        },
+        {
+          "id": "image-bille",
+          "libelle": "la bille",
+          "face": "image",
+          "asset": null,
+          "paire": "paire-bille"
+        },
+        {
+          "id": "mot-fille",
+          "libelle": "fille",
+          "face": "mot",
+          "asset": null,
+          "paire": "paire-fille"
+        },
+        {
+          "id": "image-fille",
+          "libelle": "la fille",
+          "face": "image",
+          "asset": null,
+          "paire": "paire-fille"
+        },
+        {
+          "id": "mot-famille",
+          "libelle": "famille",
+          "face": "mot",
+          "asset": null,
+          "paire": "paire-famille"
+        },
+        {
+          "id": "image-famille",
+          "libelle": "la famille",
+          "face": "image",
+          "asset": null,
+          "paire": "paire-famille"
+        },
+        {
+          "id": "mot-quille",
+          "libelle": "quille",
+          "face": "mot",
+          "asset": null,
+          "paire": "paire-quille"
+        },
+        {
+          "id": "image-quille",
+          "libelle": "la quille",
+          "face": "image",
+          "asset": null,
+          "paire": "paire-quille"
+        },
+        {
+          "id": "mot-feuille",
+          "libelle": "feuille",
+          "face": "mot",
+          "asset": null,
+          "paire": "paire-feuille"
+        },
+        {
+          "id": "image-feuille",
+          "libelle": "la feuille",
+          "face": "image",
+          "asset": null,
+          "paire": "paire-feuille"
+        },
+        {
+          "id": "mot-grenouille",
+          "libelle": "grenouille",
+          "face": "mot",
+          "asset": null,
+          "paire": "paire-grenouille"
+        },
+        {
+          "id": "image-grenouille",
+          "libelle": "la grenouille",
+          "face": "image",
+          "asset": null,
+          "paire": "paire-grenouille"
+        }
+      ],
+      "competence": "gph.rare.ill"
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "id": "foret-muette-09",
+  "region": "foret-muette",
+  "ordre": 9,
+  "exercice": "foret-muette-feuilles-attrape-02",
+  "prerequis": [
+    "foret-muette-08"
+  ],
+  "temps": "presentation"
+}

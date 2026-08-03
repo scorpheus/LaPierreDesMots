@@ -1,4 +1,4 @@
-// La carte du monde — l'élément signature de la v2 § 9.4. Lot L2-F.
+// La carte du monde — l'élément signature de la v2 § 9.4. Lot L2-F, repris par M7.
 //
 // « Dessinée comme une carte au trésor sur parchemin, avec les régions conquises en couleur, les
 // régions grises encore voilées d'un brouillard mouvant, et le chemin qui se dessine à l'encre au
@@ -12,11 +12,22 @@
 //   2. **Le vide restant se montre.** La part non recoloriée de chaque région est ce que la carte
 //      donne à voir (D25, point 3) : c'est le moteur de retour du jeu.
 //   3. **Le décor s'agite, le texte jamais.** Le brouillard bouge ; les noms de région sont posés
-//      sur parchemin et ne bougent pas (v2 § 9.3).
+//      sur parchemin, dans leur cartouche, et ne bougent pas (v2 § 9.3).
 //   4. **Aucune géométrie n'est écrite deux fois.** Le dessin vient de
-//      `contenu/habillages/carte/carte-monde.svg` (décor bouchon D2) ; cet écran n'y ajoute que
-//      les prises tactiles et les états. Tant que l'asset n'est pas là, la carte annonce qu'elle
-//      se déplie — jamais un écran d'erreur.
+//      `contenu/habillages/carte/carte-monde-v3.svg` ; cet écran n'y ajoute que les prises
+//      tactiles et les trois rendus d'état. Tant que l'asset n'est pas là, la carte annonce
+//      qu'elle se déplie — jamais un écran d'erreur.
+//
+// ── CE QUE M7 A CHANGÉ, ET POURQUOI ─────────────────────────────────────────────────────────
+// L'écran servait `carte-monde-v2.svg` — six aplats — et il n'exploitait presque rien de
+// `EtatAfficheRegion` : les trois états ne se distinguaient que par une épaisseur de trait, 6
+// contre 3. Trois choses ont donc bougé ici, et rien d'autre :
+//   • le décor servi passe à la v3 (voir `SVG_CARTE`) ;
+//   • les trois états reçoivent trois RENDUS déclarés en table (voir `RENDUS`) ;
+//   • le chemin d'encre avance segment par segment au lieu d'une moyenne uniforme.
+// Le contrat DOM ne bouge pas : `data-ecran`, `data-region`, `data-region-etat`, `data-depart`,
+// `data-vers`, les libellés accessibles et la garde « une prise n'existe que si elle répond »
+// sont repris à l'identique — ce sont les prises de six suites de tests.
 import { useCallback, useMemo } from 'react';
 import type { ReactElement } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -31,33 +42,33 @@ import { VoileGrisaille } from '../monde/VoileGrisaille.js';
 /**
  * Le chemin du décor de la carte, relatif à `contenu/`.
  *
- * ── PASSAGE À LA v2, fait à l'intégration de la campagne N ──────────────────────────────────
- * Cette ligne portait `carte-monde.svg`, la carte de la v1 : six hexagones identiques. N7 a
- * livré `carte-monde-v2.svg` et l'a déclarée dans `contenu/monde/regions.json` (`scene.fichier`),
- * mais **ce fichier appartient à N4** (contrat de finition v3 § 6.2) et N7 n'avait pas le droit
- * d'y écrire. Il a donc consigné l'écart dans le `$commentaire` de `regions.json`, en toutes
- * lettres : « Tant que cette ligne n'est pas passée à `carte-monde-v2.svg`, l'enfant voit encore
- * les six hexagones identiques de la v1 ». Personne ne l'a faite. C'est exactement le mode de
- * défaillance que D10 nomme : un morceau qu'aucun fichier n'a pris en charge.
+ * ── PASSAGE À LA v3 — lot M7, contrat du monde v4 § 2 ───────────────────────────────────────
+ * La v2 avait gagné le bon combat : six silhouettes distinctes là où la v1 en dessinait six
+ * identiques. Elle restait pourtant **six aplats** — ni relief, ni arbre, ni grotte, ni eau.
+ * La v3 dessine les six territoires, avec les signes d'ambiance de la v2 § 3.3, sur un
+ * parchemin qui a enfin l'air d'un parchemin (grain, pliures, brûlures d'angle, rose des vents).
  *
- * Le passage est sûr, et c'est MESURÉ, pas supposé :
- *   • même `viewBox` — `0 0 1200 800` dans les deux fichiers, donc la table `ANCRES` ci-dessous
- *     reste juste au pixel près ;
- *   • mêmes six identifiants de région, dans le même ordre, et mêmes six centres de marqueur —
- *     `tests/unitaires/ids-regions-stables.test.ts` (V1/V2, lignes 243-244) compare les deux
- *     fichiers et échoue si l'un dérive de l'autre.
+ * Le passage est sûr, et c'est MESURÉ, pas supposé — `node scripts/verifier-carte-monde.mjs` :
+ *   • même `viewBox` `0 0 1200 800`, donc la table `ANCRES` ci-dessous reste juste au pixel ;
+ *   • mêmes six identifiants de région, dans le même ordre ;
+ *   • mêmes six centres de marqueur, écart mesuré **0 unité** ;
+ *   • mêmes cinq segments de chemin, `id` et `d` repris octet pour octet.
  *
- * La v1 reste sur le disque : rien n'est supprimé, elle redevient simplement la référence de
- * comparaison du test.
+ * Les v1 et v2 restent sur le disque : rien n'est supprimé, et
+ * `tests/unitaires/ids-regions-stables.test.ts` continue de les comparer l'une à l'autre.
  *
  * DETTE ASSUMÉE, consignée dans `Docs/questions-en-attente.md` : ce chemin est ici ET dans
- * `regions.json`. Le lire depuis le monde supprimerait la duplication (convention C5), mais
- * `scene` n'est exposée ni par `partage/src/monde/types.ts` ni par le dépôt serveur — mesuré :
- * `grep -n "scene" partage/src/monde/types.ts serveur/src/depots/monde.ts` ne rend aucune ligne.
- * La plomberie traverse trois fichiers d'autres lots ; le test ci-dessus tient la cohérence en
- * attendant, et c'est lui qui rend cette dette sûre plutôt que silencieuse.
+ * `contenu/monde/regions.json` (`scene.fichier`). Le lire depuis le monde supprimerait la
+ * duplication (convention C5), mais `scene` n'est exposée ni par `partage/src/monde/types.ts`
+ * ni par le dépôt serveur — mesuré : `grep -n "scene" partage/src/monde/types.ts
+ * serveur/src/depots/monde.ts` ne rend aucune ligne. Et surtout **`regions.json` appartient à
+ * M2**, pas à M7 (contrat du monde v4 § 2, tableau des livrables de M7) : M7 n'y écrit pas.
+ * Tant que M2 n'a pas repointé `scene.fichier`, `npm run test:contenu` verra la v3 comme un
+ * SVG que personne ne déclare — **et c'est le bon comportement** : la chaîne dit la vérité
+ * plutôt que d'être verte à bon compte (D39). L'enfant, lui, voit bien la v3 : c'est cette
+ * ligne-ci qui décide de ce qui est servi.
  */
-const SVG_CARTE = 'habillages/carte/carte-monde-v2.svg';
+const SVG_CARTE = 'habillages/carte/carte-monde-v3.svg';
 
 /**
  * Les ancres de chaque région, en unités `viewBox`, **dans l'ordre de la progression**.
@@ -77,6 +88,100 @@ const ANCRES: readonly (readonly [CodeRegion, number, number, string])[] = [
 
 /** Rayon de la prise tactile, en unités `viewBox`. 64 unités ≈ 64 px CSS à l'échelle de rendu. */
 const RAYON_PRISE = 46;
+
+/** Rayon du sceau visible. Plus petit que la prise : le territoire se voit à travers. */
+const RAYON_SCEAU = 34;
+
+/**
+ * LES TROIS RENDUS D'UNE RÉGION — contrat du monde v4 § 2, point 3 de M7.
+ *
+ * « M7 lui donne trois RENDUS, pas trois teintes. » Le modèle porte l'état depuis longtemps
+ * (`EtatAfficheRegion`, `partage/src/monde/carte.ts:344`) ; l'écran, lui, n'en faisait presque
+ * rien — une épaisseur de trait à 6 au lieu de 3, et c'est tout. Un enfant de sept ans ne lit
+ * pas trois pixels d'épaisseur.
+ *
+ * Chaque état se distingue donc par TROIS signaux simultanés, et aucun n'est une nuance de la
+ * même chose :
+ *
+ *   voilee    sceau creux, cerclé de tirets, sans remplissage — « rien à toucher ici, encore ».
+ *             Le brouillard de `VoileGrisaille` couvre la région entière : c'est LUI le signal
+ *             principal, le sceau ne fait que ne pas mentir. Aucun cadenas, aucun rouge (R14).
+ *   ouverte   sceau plein sur parchemin, anneau épais, et une JAUGE annulaire qui montre le
+ *             VIDE restant plutôt que l'acquis (D25, point 3). C'est l'état qui appelle.
+ *   terminee  double anneau et étoile-Éclat dorée. La couleur du territoire est entièrement
+ *             revenue sous le sceau : « quand la couleur revient, elle doit CLAQUER ».
+ *
+ * Les trois sont déclarés en TABLE plutôt qu'en cascade de ternaires : un état ajouté au
+ * modèle ferait alors une erreur de type ici, au lieu de retomber silencieusement sur le rendu
+ * du dernier `else` — c'est-à-dire de dessiner « ouverte » pour un état qu'on n'a pas prévu.
+ */
+interface RenduRegion {
+  /** Opacité du remplissage du sceau. Zéro = on voit le territoire à travers. */
+  readonly fondSceau: number;
+  /** Épaisseur de l'anneau, en unités `viewBox`. */
+  readonly epaisseurAnneau: number;
+  /** Tirets de l'anneau, ou `undefined` pour un trait plein. */
+  readonly tiretsAnneau: string | undefined;
+  /** Un second anneau, dehors : le signe que la région est close pour de bon. */
+  readonly doubleAnneau: boolean;
+  /** L'étoile-Éclat, dorée, au centre du sceau. */
+  readonly etoile: boolean;
+  /** La jauge annulaire du VIDE restant. Inutile sur une région voilée (rien n'est commencé). */
+  readonly jauge: boolean;
+}
+
+const RENDUS: Readonly<Record<'voilee' | 'ouverte' | 'terminee', RenduRegion>> = {
+  voilee: {
+    fondSceau: 0,
+    epaisseurAnneau: 4,
+    tiretsAnneau: '10 9',
+    doubleAnneau: false,
+    etoile: false,
+    jauge: false
+  },
+  ouverte: {
+    fondSceau: 0.72,
+    epaisseurAnneau: 8,
+    tiretsAnneau: undefined,
+    doubleAnneau: false,
+    etoile: false,
+    jauge: true
+  },
+  terminee: {
+    fondSceau: 0.55,
+    epaisseurAnneau: 8,
+    tiretsAnneau: undefined,
+    doubleAnneau: true,
+    etoile: true,
+    jauge: false
+  }
+};
+
+/** L'étoile-Éclat du sceau d'une région terminée, en unités `viewBox`, centrée sur l'origine. */
+const ETOILE_ECLAT =
+  'M0,-22 L6.5,-7 L22,-6 L10,4 L14,20 L0,11 L-14,20 L-10,4 L-22,-6 L-6.5,-7 Z';
+
+/** Corps du nom de région, en unités `viewBox`. */
+const CORPS_NOM = 22;
+
+/** Chasse moyenne mesurée du corps ci-dessus : ≈ 0,52 em pour Andika et Atkinson. */
+const CHASSE_NOM = 12.5;
+
+/** Marge intérieure du cartouche, de part et d'autre du nom. */
+const MARGE_NOM = 30;
+
+/**
+ * Le cartouche du nom, borné au parchemin.
+ *
+ * « La Cité des Histoires » fait vingt et un signes : sans borne, son cartouche sortirait du
+ * papier par la droite et le nom se lirait à moitié. On le recentre plutôt que de le tronquer
+ * — un nom coupé est une consigne écrite qu'on ne peut pas lire, et l'enfant déchiffre encore.
+ */
+function cartouche(x: number, libelle: string): { readonly x: number; readonly largeur: number } {
+  const largeur = libelle.length * CHASSE_NOM + MARGE_NOM;
+  const gauche = Math.min(Math.max(x - largeur / 2, 26), 1174 - largeur);
+  return { x: gauche, largeur };
+}
 
 /** Retire l'enveloppe `<svg>` d'un fichier pour pouvoir l'insérer dans un autre. */
 export function interieurDuSvg(texte: string): string {
@@ -191,11 +296,35 @@ export function EcranCarte({
     [noeudsFaits]
   );
 
-  /** Le chemin d'encre avance comme la recoloration moyenne : une dérivée, jamais un état. */
-  const avancement =
-    regions.length === 0
-      ? 0
-      : regions.reduce((total, region) => total + region.pourcentageColorie, 0) / regions.length;
+  /**
+   * Le chemin d'encre avance SEGMENT PAR SEGMENT — v2 § 9.4, contrat v4 § 2, point 4 de M7.
+   *
+   * « … et le chemin qui se dessine à l'encre au fur et à mesure. »
+   *
+   * L'ancienne formule prenait la moyenne des six recolorations. Elle avançait donc d'un
+   * sixième de sixième à chaque nœud, uniformément, et ne montrait JAMAIS un segment se
+   * fermer : l'enfant voyait un trait grandir sans jamais atteindre la région suivante.
+   *
+   * Le chemin relie six étapes par CINQ segments, et le segment `i` est la route que l'on
+   * quitte : il s'encre à mesure que la région `i` se rallume, et il est complet quand elle
+   * l'est. D'où la moyenne sur les CINQ PREMIÈRES régions — la sixième n'a pas de route qui
+   * en parte. Terminer la Clairière remplit exactement le premier cinquième et pose l'encre
+   * jusqu'aux Galeries : le geste de l'enfant et le dessin disent la même chose.
+   *
+   * C'est une DÉRIVÉE de la progression, jamais un état à part : rien à synchroniser, rien
+   * qui puisse mentir, rien à remettre à zéro — le chemin ne se dépeint pas (R14).
+   */
+  const avancement = useMemo(() => {
+    const depart = ANCRES.slice(0, -1)
+      .map(([code]) => parCode.get(String(code)))
+      .filter((region): region is EtatRegion => region !== undefined);
+    if (depart.length === 0) {
+      return 0;
+    }
+    return (
+      depart.reduce((total, region) => total + region.pourcentageColorie, 0) / (ANCRES.length - 1)
+    );
+  }, [parCode]);
 
   const entrer = useCallback(
     (noeud: IdNoeud): void => {
@@ -287,7 +416,7 @@ export function EcranCarte({
       )}
 
       <Parchemin>
-        {/* Le décor bouchon. Absent, la carte le dit calmement et reste utilisable. */}
+        {/* Le décor. Absent, la carte le dit calmement et reste utilisable — jamais d'erreur. */}
         {requeteDecor.data === undefined ? (
           <text x="600" y="400" textAnchor="middle" fontSize="36" fill="var(--trait)">
             On déplie la carte…
@@ -304,7 +433,18 @@ export function EcranCarte({
           animationsDesactivees={animationsDesactivees}
         />
 
-        {/* Le voile, région par région. Il n'intercepte jamais le tap. */}
+        {/*
+          LE VOILE, RÉGION PAR RÉGION. Il n'intercepte jamais le tap.
+
+          C'est ici que les trois rendus se jouent vraiment, et pas seulement sur le sceau :
+            • `voilee`   — la région n'est pas commencée, le voile est plein, la brume bouge ;
+            • `ouverte`  — le voile s'efface EXACTEMENT à la mesure de ce qui est rallumé, donc
+                           ce qu'on voit est le VIDE restant (D25, point 3) ;
+            • `terminee` — le voile tombe à zéro et la couleur du territoire claque, entière.
+          Le voile épouse la silhouette par un `<use href="#<région>">` : les signes d'ambiance
+          de la v3 sont détourés par cette même silhouette, donc le voile couvre exactement ce
+          que le dessin remplit — aucun ornement ne dépasse du brouillard.
+        */}
         {requeteDecor.data === undefined
           ? null
           : ANCRES.map(([code]) => {
@@ -326,17 +466,84 @@ export function EcranCarte({
           const etat = region === undefined ? 'voilee' : etatAfficheRegion(region);
           const ouverte = jouables.has(String(code));
           const premierNoeud = reprise(region).noeud;
+          const rendu = RENDUS[etat];
+          const colorie = region?.pourcentageColorie ?? 0;
+          const nom = cartouche(x, libelle);
 
           return (
             <g key={String(code)} data-region={String(code)} data-region-etat={etat}>
+              {/*
+                ── LE SCEAU, EN TROIS RENDUS ────────────────────────────────────────────────
+                Tout ce bloc est DÉCORATIF et ne reçoit jamais le doigt : `aria-hidden` et
+                `pointerEvents: none`. La prise tactile est le cercle qui suit, inchangé dans
+                son rôle comme dans sa taille (R16). Séparer les deux est ce qui permet de
+                rendre le sceau plus petit que la cible : le dessin du territoire reste
+                visible sous le marqueur, au lieu d'être masqué par un disque opaque.
+              */}
+              <g aria-hidden="true" style={{ pointerEvents: 'none' }}>
+                {rendu.doubleAnneau ? (
+                  <circle
+                    cx={x}
+                    cy={y}
+                    r={RAYON_SCEAU + 9}
+                    fill="none"
+                    stroke="var(--soleil)"
+                    strokeWidth={5}
+                  />
+                ) : null}
+                <circle
+                  cx={x}
+                  cy={y}
+                  r={RAYON_SCEAU}
+                  fill="var(--parchemin)"
+                  fillOpacity={rendu.fondSceau}
+                  stroke="var(--trait)"
+                  strokeWidth={rendu.epaisseurAnneau}
+                  strokeDasharray={rendu.tiretsAnneau}
+                />
+                {/*
+                  LA JAUGE MONTRE LE VIDE — D25, point 3 : « le VIDE restant est ce que la
+                  carte donne à voir ». L'arc plein compte donc ce qui RESTE à rallumer, et
+                  il disparaît quand la région est finie. `pathLength={1}` rend la fraction
+                  lisible telle quelle, sans jamais appeler `getTotalLength()` — qui n'existe
+                  pas sous happy-dom et ferait dépendre le dessin de la taille de rendu.
+                */}
+                {rendu.jauge ? (
+                  <circle
+                    data-jauge-restant={(1 - colorie).toFixed(2)}
+                    cx={x}
+                    cy={y}
+                    r={RAYON_SCEAU + 6}
+                    pathLength={1}
+                    fill="none"
+                    stroke="var(--grisaille)"
+                    strokeWidth={7}
+                    strokeLinecap="round"
+                    strokeDasharray={`${String(Math.min(1, Math.max(0, 1 - colorie)))} 1`}
+                    transform={`rotate(-90 ${String(x)} ${String(y)})`}
+                  />
+                ) : null}
+                {rendu.etoile ? (
+                  <path
+                    d={ETOILE_ECLAT}
+                    transform={`translate(${String(x)} ${String(y)})`}
+                    fill="var(--soleil)"
+                    stroke="var(--trait)"
+                    strokeWidth={4}
+                    strokeLinejoin="round"
+                  />
+                ) : null}
+              </g>
               <circle
                 cx={x}
                 cy={y}
                 r={RAYON_PRISE}
+                // Une prise INVISIBLE et pourtant tapable : le sceau ci-dessus porte tout le
+                // dessin, celui-ci porte toute la surface. `pointerEvents: all` rend le tap
+                // indépendant du remplissage — sans quoi une opacité nulle coûterait la
+                // cible, et R16 avec elle.
                 fill="var(--parchemin)"
-                fillOpacity={0.85}
-                stroke="var(--trait)"
-                strokeWidth={ouverte ? 6 : 3}
+                fillOpacity={0}
                 // ── UNE PRISE N'EXISTE QUE SI ELLE RÉPOND ────────────────────────────────
                 // Corrigé à l'intégration de la campagne N. Ces pastilles portaient
                 // `role="button"` et `tabIndex={0}` sur les SIX régions, alors que le
@@ -353,7 +560,11 @@ export function EcranCarte({
                 // issue aurait été un message, et un message dirait à l'enfant ce qui lui
                 // manque — exactement ce que la convention C7 et D35 interdisent.
                 {...(ouverte && premierNoeud !== null
-                  ? { role: 'button' as const, tabIndex: 0, style: { cursor: 'pointer' } }
+                  ? {
+                      role: 'button' as const,
+                      tabIndex: 0,
+                      style: { cursor: 'pointer', pointerEvents: 'all' as const }
+                    }
                   : { 'aria-hidden': true as const, style: { pointerEvents: 'none' as const } })}
                 aria-label={`${libelle} — ${etat}`}
                 onClick={() => {
@@ -371,11 +582,31 @@ export function EcranCarte({
                   }
                 }}
               />
+              {/*
+                LE NOM SUR SON CARTOUCHE — « le décor s'agite, le texte JAMAIS » (v2 § 9.3).
+                Le décor de la v3 est chargé : un mot posé nu sur des feuillages ou sur une
+                coulée de lave se déchiffre mal, et cet enfant déchiffre encore. Le cartouche
+                est donc de l'accessibilité, pas de l'ornement — fond parchemin plein, cerné du
+                trait, et strictement immobile pendant que la brume bouge autour.
+                Sa largeur suit le libellé : rien n'est en dur, rien ne déborde.
+              */}
+              <g aria-hidden="true" style={{ pointerEvents: 'none' }}>
+                <rect
+                  x={nom.x}
+                  y={y + 52}
+                  width={nom.largeur}
+                  height={32}
+                  rx={10}
+                  fill="var(--parchemin)"
+                  stroke="var(--trait)"
+                  strokeWidth={4}
+                />
+              </g>
               <text
-                x={x}
-                y={y + 76}
+                x={nom.x + nom.largeur / 2}
+                y={y + 75}
                 textAnchor="middle"
-                fontSize="26"
+                fontSize={CORPS_NOM}
                 fill="var(--trait)"
                 style={{ pointerEvents: 'none' }}
               >

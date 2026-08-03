@@ -1,16 +1,35 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" width="960" height="600" role="img" aria-label="Le théâtre d’ombres">
+  <title>Le théâtre d’ombres</title>
+  <desc>Un drap tendu, la silhouette d’un enfant qui s’y projette, une bougie allumée sur le côté, l’estrade, les deux pans de rideau, le gradin devant.</desc>
+  <!--
+    DÉCOR — lot M6, contrat du monde v4 § 2. Trait noir sur blanc, la COULEUR VIENT DU CODE
+    (annexe P § 2) : les régions sortent d'ici en grisaille #8E97A8, qui est leur état
+    par défaut et non un choix graphique. Géométrie 100 % polygonale (M, L, Z — aucun arc) :
+    surface et centroïde sont donc calculables exactement et opposables aux valeurs déclarées
+    par le .habillage.json, que scripts/verifier-regions-fermees.mjs --strict recalcule.
+
+    Chaque région est un ENFANT DIRECT de #calque-zones : SceneSvg.tsx sélectionne
+    "#calque-zones > [id]", et un tracé niché dans un sous-groupe échapperait au tap sans
+    qu'aucun message ne le dise.
+
+    ÉCRIT PAR scripts/dessiner-decors.mjs — ne pas retoucher à la main : la scène est décrite
+    dans scripts/decors/decors.mjs, et l'émetteur refuse d'écrire si la mesure est mauvaise.
+  -->
   <g id="calque-fond">
-    <rect id="fond" x="0" y="0" width="960" height="600" fill="#f7f0e4"/>
+    <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
   </g>
-  <g id="calque-zones">
-    <rect id="drap" x="90" y="110" width="200" height="160" rx="12"/>
-    <rect id="silhouette" x="380" y="110" width="200" height="160" rx="12"/>
-    <rect id="bougie" x="670" y="110" width="200" height="160" rx="12"/>
-    <rect id="estrade" x="90" y="340" width="200" height="160" rx="12"/>
-    <rect id="rideau" x="380" y="340" width="200" height="160" rx="12"/>
-    <rect id="gradin" x="670" y="340" width="200" height="160" rx="12"/>
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round">
+    <path id="fond-de-salle" class="zone" data-region-svg="fond-de-salle" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L960,0 L960,108 L933.3,112 L906.7,114.9 L880,116 L853.3,114.9 L826.7,112 L800,108 L773.3,104 L746.7,101.1 L720,100 L693.3,101.1 L666.7,104 L640,108 L613.3,112 L586.7,114.9 L560,116 L533.3,114.9 L506.7,112 L480,108 L453.3,104 L426.7,101.1 L400,100 L373.3,101.1 L346.7,104 L320,108 L293.3,112 L266.7,114.9 L240,116 L213.3,114.9 L186.7,112 L160,108 L133.3,104 L106.7,101.1 L80,100 L53.3,101.1 L26.7,104 L0,108 Z"/>
+    <path id="gradin" class="zone" data-region-svg="gradin" fill="#8E97A8" fill-rule="evenodd" d="M60,470 L900,456 L932,560 L28,572 Z"/>
+    <path id="estrade" class="zone" data-region-svg="estrade" fill="#8E97A8" fill-rule="evenodd" d="M180,400 L780,386 L802,470 L158,480 Z"/>
+    <path id="drap" class="zone" data-region-svg="drap" fill="#8E97A8" fill-rule="evenodd" d="M260,118 L700,118 L700,390 L260,390 Z"/>
+    <path id="silhouette" class="zone" data-region-svg="silhouette" fill="#8E97A8" fill-rule="evenodd" d="M474,158 L498.3,179.2 L498.3,208.9 L528.7,221.6 L550,276.7 L531.8,285.2 L510.5,251.3 L507.4,306.4 L498.3,370 L480.1,370 L474,319.1 L467.9,370 L449.7,370 L440.6,306.4 L437.5,251.3 L416.2,285.2 L398,276.7 L419.3,221.6 L449.7,208.9 L449.7,179.2 Z"/>
+    <path id="rideau" class="zone" data-region-svg="rideau" fill="#8E97A8" fill-rule="evenodd" d="M0,60 L200,38 L190,520 L0,542 Z M770,38 L960,60 L960,542 L780,520 Z"/>
+    <path id="bougie" class="zone" data-region-svg="bougie" fill="#8E97A8" fill-rule="evenodd" d="M736,248 L744.6,267.9 L741.8,284.9 L736,293.4 L730.2,284.9 L727.4,267.9 L731.7,296.3 L750.4,296.3 L750.4,381.5 L721.6,381.5 L721.6,296.3 L740.3,296.3 Z"/>
+    <path id="lanterne-de-scene" class="zone" data-region-svg="lanterne-de-scene" fill="#8E97A8" fill-rule="evenodd" d="M249.1,178 L274.9,178 L267.5,192.6 L287.8,202.4 L295.1,219.5 L289.6,270.7 L298.8,282.9 L298.8,295.1 L225.2,295.1 L225.2,282.9 L234.4,270.7 L228.9,219.5 L236.2,202.4 L256.5,192.6 Z"/>
+    <path id="coussin-du-gradin" class="zone" data-region-svg="coussin-du-gradin" fill="#8E97A8" fill-rule="evenodd" d="M564.5,533.6 L556.2,539.1 L544.2,542.4 L531.9,544.3 L521.1,545.9 L510.9,548.5 L499.5,551.5 L486.3,553.3 L472.7,552.2 L461.8,548.1 L455.1,542.1 L451.5,535.9 L448.1,530.5 L443,525.5 L437,519.8 L433.5,513.1 L435.5,506.4 L443.8,500.9 L455.8,497.6 L468.1,495.7 L478.9,494.1 L489.1,491.5 L500.5,488.5 L513.7,486.7 L527.3,487.8 L538.2,491.9 L544.9,497.9 L548.5,504.1 L551.9,509.5 L557,514.5 L563,520.2 L566.5,526.9 Z"/>
   </g>
-  <g id="calque-trait">
-    <path id="cadre" d="M20 20 H940 V580 H20 Z" fill="none" stroke="#2b2b2b" stroke-width="4"/>
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path class="trait" d="M158,480 L802,470"/>
   </g>
 </svg>

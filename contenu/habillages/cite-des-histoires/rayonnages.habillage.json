@@ -1,0 +1,133 @@
+{
+  "id": "cite.rayonnages",
+  "moteurs": [
+    "tri"
+  ],
+  "libelle": "Les deux rayonnages",
+  "region": "cite-des-histoires",
+  "scene": {
+    "fichier": "habillages/cite-des-histoires/rayonnages.svg",
+    "viewBox": "0 0 960 600",
+    "calques": [
+      {
+        "id": "calque-fond",
+        "role": "fond",
+        "regions": []
+      },
+      {
+        "id": "calque-zones",
+        "role": "coloriable",
+        "regions": [
+          {
+            "id": "mur-de-la-salle",
+            "libelle": "le mur de la salle",
+            "centroide": [
+              240,
+              68
+            ],
+            "surface": 122880
+          },
+          {
+            "id": "parquet-cire",
+            "libelle": "le parquet ciré",
+            "centroide": [
+              120,
+              547
+            ],
+            "surface": 96000
+          },
+          {
+            "id": "rayonnage-gauche",
+            "libelle": "le rayonnage de gauche",
+            "centroide": [
+              85.9,
+              180.1
+            ],
+            "surface": 36120
+          },
+          {
+            "id": "rayonnage-droit",
+            "libelle": "le rayonnage de droite",
+            "centroide": [
+              565.1,
+              198.9
+            ],
+            "surface": 31808
+          },
+          {
+            "id": "livre-a-ranger-un",
+            "libelle": "le premier livre à ranger",
+            "centroide": [
+              494,
+              277.5
+            ],
+            "surface": 10231
+          },
+          {
+            "id": "livre-a-ranger-deux",
+            "libelle": "le deuxième livre à ranger",
+            "centroide": [
+              486,
+              429.1
+            ],
+            "surface": 7524.6
+          },
+          {
+            "id": "echelle-de-la-salle",
+            "libelle": "l’échelle de la salle",
+            "centroide": [
+              927.9,
+              258.2
+            ],
+            "surface": 13613
+          },
+          {
+            "id": "pupitre-du-milieu",
+            "libelle": "le pupitre du milieu",
+            "centroide": [
+              289,
+              570.5
+            ],
+            "surface": 5927.8
+          },
+          {
+            "id": "lampe-du-rayonnage",
+            "libelle": "la lampe du rayonnage",
+            "centroide": [
+              519,
+              159.3
+            ],
+            "surface": 4749.7
+          }
+        ]
+      },
+      {
+        "id": "calque-trait",
+        "role": "trait",
+        "regions": []
+      }
+    ]
+  },
+  "palette": {
+    "jetons": {},
+    "nuancier": [
+      "orange",
+      "jaune",
+      "rose",
+      "violet",
+      "blanc",
+      "brun"
+    ]
+  },
+  "timings": {
+    "appuiMs": 60,
+    "relachementMs": 120,
+    "refusMs": 180,
+    "recolorationMs": 800,
+    "interEtoilesMs": 180
+  },
+  "sons": {
+    "ambiance": null,
+    "effets": {}
+  }
+}

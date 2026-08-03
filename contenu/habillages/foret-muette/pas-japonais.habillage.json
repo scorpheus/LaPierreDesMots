@@ -19,58 +19,85 @@
         "role": "coloriable",
         "regions": [
           {
-            "id": "pierre-un",
-            "libelle": "la première pierre",
+            "id": "canopee-basse",
+            "libelle": "la canopée basse",
             "centroide": [
-              190.0,
-              190.0
+              180,
+              68.9
             ],
-            "surface": 32000.0
-          },
-          {
-            "id": "pierre-deux",
-            "libelle": "la deuxième pierre",
-            "centroide": [
-              480.0,
-              190.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "pierre-trois",
-            "libelle": "la troisième pierre",
-            "centroide": [
-              770.0,
-              190.0
-            ],
-            "surface": 32000.0
+            "surface": 122880
           },
           {
             "id": "ruisseau",
             "libelle": "le ruisseau",
             "centroide": [
-              190.0,
-              420.0
+              480,
+              380
             ],
-            "surface": 32000.0
+            "surface": 150969.8
           },
           {
             "id": "fougere",
             "libelle": "la fougère",
             "centroide": [
-              480.0,
-              420.0
+              147,
+              306.6
             ],
-            "surface": 32000.0
+            "surface": 23929.3
           },
           {
             "id": "tronc-couche",
             "libelle": "le tronc couché",
             "centroide": [
-              770.0,
-              420.0
+              145.2,
+              515.7
             ],
-            "surface": 32000.0
+            "surface": 39154
+          },
+          {
+            "id": "pierre-un",
+            "libelle": "la première pierre",
+            "centroide": [
+              240,
+              380
+            ],
+            "surface": 6110.9
+          },
+          {
+            "id": "pierre-deux",
+            "libelle": "la deuxième pierre",
+            "centroide": [
+              480,
+              350
+            ],
+            "surface": 8222.3
+          },
+          {
+            "id": "pierre-trois",
+            "libelle": "la troisième pierre",
+            "centroide": [
+              709.9,
+              396.9
+            ],
+            "surface": 5053.8
+          },
+          {
+            "id": "souche-du-bord",
+            "libelle": "la souche du bord",
+            "centroide": [
+              816.4,
+              269.5
+            ],
+            "surface": 10023.7
+          },
+          {
+            "id": "champignon-humide",
+            "libelle": "le champignon humide",
+            "centroide": [
+              424,
+              219.4
+            ],
+            "surface": 3997
           }
         ]
       },

@@ -1,0 +1,127 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. LES BLOCS SONT DES LETTRES, SAUF `eau` QUI EST UN BLOC À LUI SEUL, et c'est tout le propos : l'enfant voit que trois lettres n'en font qu'une. Les deux intrus sont les graphies CONCURRENTES du même son, `au` et `o` — sans elles, poser `eau` ne demanderait aucune décision. Douze blocs utiles, tous d'identifiants distincts (`bloc-deja-pose` ne libère rien) ; trois lettres reviennent sous deux identifiants, ce qui est nécessaire et suffisant. ÉCART RÉSIDUEL, mesuré : `scripts/valider-brouillons.mjs` audite `blocs.libelle` comme du vocabulaire ; les lettres seules lui échappent (il écarte les mots d’une lettre) mais `eau` et `au` sont refusés — QUATRE refus, contre huit avec un découpage syllabique. Défaut du script, pas du contenu ; consigné en question ouverte.",
+  "id": "volcan-train-assemble-01",
+  "version": 1,
+  "titre": "Les wagons à assembler",
+  "competences": [
+    "gph.rare.eau"
+  ],
+  "difficulte": 4,
+  "jeu": {
+    "moteur": "assemble",
+    "habillage": "volcan.train",
+    "noeud": "volcan-06",
+    "etoiles": {
+      "sansAide": true,
+      "sansErreur": true
+    },
+    "aideGobi": [
+      "relire-consigne",
+      "souffle-syllabe",
+      "surligne-graphene"
+    ],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Range les syllabes pour écrire : bateau.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "bateau",
+          "solution": [
+            "bloc-ba",
+            "bloc-teau"
+          ],
+          "motsCles": [
+            "range",
+            "syllabe",
+            "bateau"
+          ]
+        },
+        {
+          "id": "c2",
+          "texte": "Range les syllabes pour écrire : cadeau.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "cadeau",
+          "solution": [
+            "bloc-ca",
+            "bloc-deau"
+          ],
+          "motsCles": [
+            "range",
+            "syllabe",
+            "cadeau"
+          ]
+        },
+        {
+          "id": "c3",
+          "texte": "Range les syllabes pour écrire : chapeau.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "chapeau",
+          "solution": [
+            "bloc-cha",
+            "bloc-peau"
+          ],
+          "motsCles": [
+            "range",
+            "syllabe",
+            "chapeau"
+          ]
+        }
+      ],
+      "blocs": [
+        {
+          "id": "bloc-ba",
+          "libelle": "ba",
+          "intrus": false,
+          "confusionAvec": "bo"
+        },
+        {
+          "id": "bloc-teau",
+          "libelle": "teau",
+          "intrus": false,
+          "confusionAvec": "to"
+        },
+        {
+          "id": "bloc-ca",
+          "libelle": "ca",
+          "intrus": false,
+          "confusionAvec": "co"
+        },
+        {
+          "id": "bloc-deau",
+          "libelle": "deau",
+          "intrus": false,
+          "confusionAvec": "do"
+        },
+        {
+          "id": "bloc-cha",
+          "libelle": "cha",
+          "intrus": false,
+          "confusionAvec": "ca"
+        },
+        {
+          "id": "bloc-peau",
+          "libelle": "peau",
+          "intrus": false,
+          "confusionAvec": "po"
+        },
+        {
+          "id": "bloc-tau",
+          "libelle": "tau",
+          "intrus": true,
+          "confusionAvec": "teau"
+        },
+        {
+          "id": "bloc-do",
+          "libelle": "do",
+          "intrus": true,
+          "confusionAvec": "deau"
+        }
+      ],
+      "competence": "gph.rare.eau"
+    }
+  }
+}

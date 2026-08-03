@@ -21,7 +21,7 @@ import { ENTETE_JETON_PARENT } from '@partage/parent/types';
 
 import type { CatalogueGalerie } from '@partage/parent/galerie';
 
-import { RACINE_DEPOT, monterApplication } from '../configuration/preparation.js';
+import { RACINE_DEPOT, lireJson, monterApplication } from '../configuration/preparation.js';
 
 import type { ApplicationDeTest } from '../configuration/preparation.js';
 
@@ -143,13 +143,28 @@ describe('GET /api/parent/:profil/galerie', () => {
     // Le nom de fichier ne fait jamais autorité (`depot-contenu-disque.ts`) ; le dossier non
     // plus. Un exercice dont le nœud est de La Clairière est de La Clairière, même si
     // quelqu'un range son JSON ailleurs un jour.
+    // ⚠ LA LISTE ATTENDUE ÉTAIT ÉCRITE À LA MAIN — et quatre de ses six entrées (`marais`,
+    // `foret`, `volcan`, `cite`) n'ont JAMAIS été des codes de région : les vrais sont
+    // `marais-jumeau`, `foret-muette`, `volcan`, `cite-des-histoires`. Le cas passait parce
+    // qu'aucun exercice n'était encore rattaché à ces régions ; il aurait accepté n'importe
+    // quel code inventé. On lit donc les codes sur le référentiel du monde, l'unique document
+    // qui les déclare.
+    const codesDeclares = lireJson<{
+      readonly regions: readonly { readonly region: string }[];
+    }>('contenu/monde/regions.json').regions.map((r) => r.region);
+
     const cablees = catalogue.entrees.filter((e) => e.region !== null);
     expect(cablees.length, 'au moins un exercice doit être rattaché à une région').toBeGreaterThan(0);
     for (const entree of cablees) {
-      expect(['clairiere', 'galeries', 'marais', 'foret', 'volcan', 'cite']).toContain(
+      expect(codesDeclares, `région de ${String(entree.exercice)}`).toContain(
         String(entree.region)
       );
     }
+    // Contrat de sortie : les SIX régions doivent apparaître, sinon le cas resterait vert avec
+    // une seule région câblée et ne dirait rien du rattachement des cinq autres.
+    expect([...new Set(cablees.map((e) => String(e.region)))].sort()).toEqual(
+      [...codesDeclares].sort()
+    );
   });
 
   it('les deux index sont cohérents avec les entrées — jamais une clé orpheline', async () => {

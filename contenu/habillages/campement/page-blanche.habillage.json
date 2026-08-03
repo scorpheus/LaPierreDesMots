@@ -19,58 +19,130 @@
         "role": "coloriable",
         "regions": [
           {
+            "id": "pupitre-bois",
+            "libelle": "le pupitre",
+            "centroide": [
+              641.63,
+              414.88
+            ],
+            "surface": 51292
+          },
+          {
+            "id": "pupitre-pied",
+            "libelle": "le pied du pupitre",
+            "centroide": [
+              483,
+              528.5
+            ],
+            "surface": 25986
+          },
+          {
             "id": "page",
             "libelle": "la page",
             "centroide": [
-              190.0,
-              190.0
+              345.75,
+              241.72
             ],
-            "surface": 32000.0
+            "surface": 124500
+          },
+          {
+            "id": "bordure-page",
+            "libelle": "la bordure de la page",
+            "centroide": [
+              184.06,
+              122.53
+            ],
+            "surface": 18924
           },
           {
             "id": "marge",
             "libelle": "la marge",
             "centroide": [
-              480.0,
-              190.0
+              268,
+              246.67
             ],
-            "surface": 32000.0
+            "surface": 7672
           },
           {
             "id": "coin-corne",
             "libelle": "le coin corné",
             "centroide": [
-              770.0,
-              190.0
+              616.78,
+              334.13
             ],
-            "surface": 32000.0
+            "surface": 1920
+          },
+          {
+            "id": "tache-encre",
+            "libelle": "la tache d’encre",
+            "centroide": [
+              501.94,
+              275.19
+            ],
+            "surface": 4878
           },
           {
             "id": "encrier",
             "libelle": "l’encrier",
             "centroide": [
-              190.0,
-              420.0
+              769.38,
+              371
             ],
-            "surface": 32000.0
+            "surface": 12382
+          },
+          {
+            "id": "col-encrier",
+            "libelle": "le col de l’encrier",
+            "centroide": [
+              734.03,
+              307.25
+            ],
+            "surface": 3416
+          },
+          {
+            "id": "plume-tige",
+            "libelle": "la tige de la plume",
+            "centroide": [
+              771,
+              276.38
+            ],
+            "surface": 6260
           },
           {
             "id": "plume-posee",
-            "libelle": "la plume posée",
+            "libelle": "la plume",
             "centroide": [
-              480.0,
-              420.0
+              886.66,
+              122.5
             ],
-            "surface": 32000.0
+            "surface": 8792
           },
           {
-            "id": "pupitre-bois",
-            "libelle": "le pupitre de bois",
+            "id": "bougie",
+            "libelle": "la bougie",
             "centroide": [
-              770.0,
-              420.0
+              92,
+              318.38
             ],
-            "surface": 32000.0
+            "surface": 12656
+          },
+          {
+            "id": "flamme-bougie",
+            "libelle": "la flamme de la bougie",
+            "centroide": [
+              90.09,
+              248
+            ],
+            "surface": 2828
+          },
+          {
+            "id": "tabouret-atelier",
+            "libelle": "le tabouret",
+            "centroide": [
+              869.09,
+              484.88
+            ],
+            "surface": 9634
           }
         ]
       },

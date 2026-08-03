@@ -1,0 +1,231 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. LE nœud jumeau de la région : deux réceptacles, deux sons voisins, et rien pour les distinguer que la lecture. Les cinq consignes portent sur des éléments DISJOINTS (`element-deja-range` ne libère rien). Les deux réceptacles sont nommés par leur POSITION et non par le son — « la feuille de gauche » — parce que le nom du graphème est illisible pour un enfant qui déchiffre encore, et que le `critere` porte déjà le mot-repère pour l’adulte qui relit.",
+  "id": "marais-jumeau-grenouilles-tri-01",
+  "version": 1,
+  "titre": "Les deux feuilles des grenouilles",
+  "competences": [
+    "gph.nasale.on",
+    "gph.nasale.an",
+    "comp.consigne.multiple"
+  ],
+  "difficulte": 3,
+  "jeu": {
+    "moteur": "tri",
+    "habillage": "marais.grenouilles",
+    "noeud": "marais-jumeau-03",
+    "etoiles": {
+      "sansAide": true,
+      "sansErreur": true
+    },
+    "aideGobi": [
+      "relire-consigne",
+      "souffle-syllabe",
+      "montre-cible"
+    ],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Range les mots où tu entends le son de pont.",
+          "forme": "imperative",
+          "audio": null,
+          "aRanger": [
+            "mot-ballon",
+            "mot-citron"
+          ],
+          "motsCles": [
+            "range",
+            "mot",
+            "son",
+            "pont"
+          ]
+        },
+        {
+          "id": "c2",
+          "texte": "Range aussi les mots où tu entends le son de pont.",
+          "forme": "imperative",
+          "audio": null,
+          "aRanger": [
+            "mot-savon",
+            "mot-maison"
+          ],
+          "motsCles": [
+            "range",
+            "mot",
+            "son",
+            "pont"
+          ]
+        },
+        {
+          "id": "c3",
+          "texte": "Range les mots où tu entends le son de gant.",
+          "forme": "imperative",
+          "audio": null,
+          "aRanger": [
+            "mot-dent",
+            "mot-vent"
+          ],
+          "motsCles": [
+            "range",
+            "mot",
+            "son",
+            "gant"
+          ]
+        },
+        {
+          "id": "c4",
+          "texte": "Range aussi les mots où tu entends le son de gant.",
+          "forme": "imperative",
+          "audio": null,
+          "aRanger": [
+            "mot-grand",
+            "mot-orange"
+          ],
+          "motsCles": [
+            "range",
+            "mot",
+            "son",
+            "gant"
+          ]
+        },
+        {
+          "id": "c5",
+          "texte": "Range les derniers mots.",
+          "forme": "imperative",
+          "audio": null,
+          "aRanger": [
+            "mot-cochon",
+            "mot-viande"
+          ],
+          "motsCles": [
+            "range",
+            "range",
+            "dernier",
+            "mot"
+          ]
+        }
+      ],
+      "receptacles": [
+        {
+          "id": "feuille-gauche",
+          "libelle": "la feuille de gauche",
+          "critere": "le son de pont",
+          "zone": [
+            [
+              60,
+              300
+            ],
+            [
+              420,
+              300
+            ],
+            [
+              420,
+              560
+            ],
+            [
+              60,
+              560
+            ]
+          ]
+        },
+        {
+          "id": "feuille-droite",
+          "libelle": "la feuille de droite",
+          "critere": "le son de gant",
+          "zone": [
+            [
+              540,
+              300
+            ],
+            [
+              900,
+              300
+            ],
+            [
+              900,
+              560
+            ],
+            [
+              540,
+              560
+            ]
+          ]
+        }
+      ],
+      "elements": [
+        {
+          "id": "mot-ballon",
+          "libelle": "ballon",
+          "asset": null,
+          "receptacleAttendu": "feuille-gauche",
+          "confusionAvec": "banc"
+        },
+        {
+          "id": "mot-citron",
+          "libelle": "citron",
+          "asset": null,
+          "receptacleAttendu": "feuille-gauche",
+          "confusionAvec": null
+        },
+        {
+          "id": "mot-savon",
+          "libelle": "savon",
+          "asset": null,
+          "receptacleAttendu": "feuille-gauche",
+          "confusionAvec": null
+        },
+        {
+          "id": "mot-maison",
+          "libelle": "maison",
+          "asset": null,
+          "receptacleAttendu": "feuille-gauche",
+          "confusionAvec": "main"
+        },
+        {
+          "id": "mot-cochon",
+          "libelle": "cochon",
+          "asset": null,
+          "receptacleAttendu": "feuille-gauche",
+          "confusionAvec": null
+        },
+        {
+          "id": "mot-dent",
+          "libelle": "dent",
+          "asset": null,
+          "receptacleAttendu": "feuille-droite",
+          "confusionAvec": "don"
+        },
+        {
+          "id": "mot-vent",
+          "libelle": "vent",
+          "asset": null,
+          "receptacleAttendu": "feuille-droite",
+          "confusionAvec": "vont"
+        },
+        {
+          "id": "mot-grand",
+          "libelle": "grand",
+          "asset": null,
+          "receptacleAttendu": "feuille-droite",
+          "confusionAvec": "gond"
+        },
+        {
+          "id": "mot-orange",
+          "libelle": "orange",
+          "asset": null,
+          "receptacleAttendu": "feuille-droite",
+          "confusionAvec": null
+        },
+        {
+          "id": "mot-viande",
+          "libelle": "viande",
+          "asset": null,
+          "receptacleAttendu": "feuille-droite",
+          "confusionAvec": null
+        }
+      ],
+      "competence": "gph.nasale.an"
+    }
+  }
+}

@@ -1,0 +1,178 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. ORIGINE : NIVEAU 4, fiche 2, « La dispute de la récré ». CORRIGÉ PRODUIT : la fiche donne ses trois options par question sans dire laquelle est juste (motif d’ingestion : « rien ne distingue par position l’option juste des deux autres »). Le texte source tranche : « le ballon tombe dans une flaque d’eau » → le ballon, et non le cartable ; « Julie, une amie, arrive et propose qu’ils trouvent une solution » → c’est un TIERS qui débloque, ici Filou. Les trois options de chaque question de la fiche sont conservées comme distracteurs. La question 3 fait choisir entre trois OMBRES, ce que le théâtre d’ombres de l’habillage montre littéralement : c’est là que `comp.image` se travaille. Bonnes réponses toutes distinctes.",
+  "id": "cite-des-histoires-theatre-ombres-histoire-01",
+  "version": 1,
+  "titre": "Le ballon dans le trou",
+  "origine": {
+    "source": "fiches-origine/NIVEAU 4.pdf",
+    "niveau": 4,
+    "fiche": 2
+  },
+  "competences": [
+    "comp.litteral",
+    "comp.image"
+  ],
+  "difficulte": 3,
+  "jeu": {
+    "moteur": "histoire",
+    "habillage": "cite.theatre-ombres",
+    "noeud": "cite-des-histoires-05",
+    "etoiles": {
+      "sansAide": true,
+      "sansErreur": true
+    },
+    "aideGobi": [
+      "relire-consigne",
+      "souffle-syllabe",
+      "montre-cible"
+    ],
+    "contenu": {
+      "titre": "Le ballon dans le trou",
+      "recit": "Gobi joue avec Plume dans la cour. Ils ont un ballon. Le ballon tombe dans un trou. Gobi montre le trou à Plume. Puis Filou entre dans la cour. Filou trouve le ballon. Gobi joue avec Filou.",
+      "audioRecit": null,
+      "questions": [
+        {
+          "id": "c1",
+          "texte": "Gobi joue dans la cour.",
+          "audio": null,
+          "options": [
+            "q1-oui",
+            "q1-non"
+          ],
+          "reponse": "q1-oui",
+          "motsCles": [
+            "Gobi",
+            "cour"
+          ]
+        },
+        {
+          "id": "c2",
+          "texte": "Où tombe le ballon ?",
+          "audio": null,
+          "options": [
+            "q2-trou",
+            "q2-sac",
+            "q2-panier"
+          ],
+          "reponse": "q2-trou",
+          "motsCles": [
+            "où",
+            "ballon"
+          ]
+        },
+        {
+          "id": "c3",
+          "texte": "Trouve l'ombre qui a le ballon.",
+          "audio": null,
+          "options": [
+            "q3-filou",
+            "q3-plume",
+            "q3-gobi"
+          ],
+          "reponse": "q3-filou",
+          "motsCles": [
+            "ombre",
+            "ballon"
+          ]
+        },
+        {
+          "id": "c4",
+          "texte": "Qui entre dans la cour ?",
+          "audio": null,
+          "options": [
+            "q4-filou",
+            "q4-chat",
+            "q4-renard"
+          ],
+          "reponse": "q4-filou",
+          "motsCles": [
+            "qui",
+            "cour"
+          ]
+        },
+        {
+          "id": "c5",
+          "texte": "Gobi et Plume ont un ballon.",
+          "audio": null,
+          "options": [
+            "q5-oui",
+            "q5-non"
+          ],
+          "reponse": "q5-oui",
+          "motsCles": [
+            "Gobi",
+            "ballon"
+          ]
+        }
+      ],
+      "options": [
+        {
+          "id": "q1-oui",
+          "libelle": "oui",
+          "confusionAvec": null
+        },
+        {
+          "id": "q1-non",
+          "libelle": "non",
+          "confusionAvec": "oui"
+        },
+        {
+          "id": "q2-trou",
+          "libelle": "dans un trou",
+          "confusionAvec": null
+        },
+        {
+          "id": "q2-sac",
+          "libelle": "dans le sac",
+          "confusionAvec": "dans un trou"
+        },
+        {
+          "id": "q2-panier",
+          "libelle": "dans le panier",
+          "confusionAvec": "dans un trou"
+        },
+        {
+          "id": "q3-filou",
+          "libelle": "l'ombre de Filou",
+          "confusionAvec": null
+        },
+        {
+          "id": "q3-plume",
+          "libelle": "l'ombre de Plume",
+          "confusionAvec": "l'ombre de Filou"
+        },
+        {
+          "id": "q3-gobi",
+          "libelle": "l'ombre de Gobi",
+          "confusionAvec": "l'ombre de Filou"
+        },
+        {
+          "id": "q4-filou",
+          "libelle": "Filou",
+          "confusionAvec": null
+        },
+        {
+          "id": "q4-chat",
+          "libelle": "le chat",
+          "confusionAvec": "Filou"
+        },
+        {
+          "id": "q4-renard",
+          "libelle": "le renard",
+          "confusionAvec": "Filou"
+        },
+        {
+          "id": "q5-oui",
+          "libelle": "oui",
+          "confusionAvec": null
+        },
+        {
+          "id": "q5-non",
+          "libelle": "non",
+          "confusionAvec": "oui"
+        }
+      ],
+      "competence": "comp.litteral"
+    }
+  }
+}

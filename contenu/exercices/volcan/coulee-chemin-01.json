@@ -1,0 +1,253 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. La rangée du milieu — balle, salle, colle, pile — porte les MÊMES lettres doubles sans le son de `fille`. C’est le seul contraste qui rende le graphème visible : `ll` ne suffit pas, il faut `ill`. La troisième rangée ouvre `gn`, le graphème que le lexique CE1 ne portait pas encore au début de ce lot — un seul mot, `peigne` — et qui en compte treize depuis la livraison de M3. Voisinage symétrique remesuré, parcours disjoints, départs hors parcours.",
+  "id": "volcan-coulee-chemin-01",
+  "version": 1,
+  "titre": "Les pierres de la coulée",
+  "competences": [
+    "gph.rare.ill",
+    "gph.rare.gn"
+  ],
+  "difficulte": 3,
+  "jeu": {
+    "moteur": "chemin",
+    "habillage": "volcan.coulee",
+    "noeud": "volcan-05",
+    "etoiles": {
+      "sansAide": true,
+      "sansErreur": true
+    },
+    "aideGobi": [
+      "relire-consigne",
+      "souffle-syllabe",
+      "surligne-graphene",
+      "montre-cible"
+    ],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Marche sur les mots où tu entends le son de fille.",
+          "forme": "imperative",
+          "audio": null,
+          "depart": "case-fille",
+          "parcours": [
+            "case-bille",
+            "case-quille",
+            "case-famille"
+          ],
+          "motsCles": [
+            "marche",
+            "mot",
+            "son",
+            "fille"
+          ]
+        },
+        {
+          "id": "c2",
+          "texte": "Marche sur les mots où tu n'entends pas le son de fille.",
+          "forme": "imperative",
+          "audio": null,
+          "depart": "case-balle",
+          "parcours": [
+            "case-salle",
+            "case-colle",
+            "case-pile"
+          ],
+          "motsCles": [
+            "marche",
+            "mot",
+            "son",
+            "fille"
+          ]
+        },
+        {
+          "id": "c3",
+          "texte": "Marche sur les mots où tu entends le son de montagne.",
+          "forme": "imperative",
+          "audio": null,
+          "depart": "case-montagne",
+          "parcours": [
+            "case-ligne",
+            "case-signe",
+            "case-agneau"
+          ],
+          "motsCles": [
+            "marche",
+            "mot",
+            "son",
+            "montagne"
+          ]
+        }
+      ],
+      "cases": [
+        {
+          "id": "case-fille",
+          "libelle": "fille",
+          "position": [
+            120,
+            140
+          ],
+          "voisines": [
+            "case-bille",
+            "case-balle"
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "case-bille",
+          "libelle": "bille",
+          "position": [
+            340,
+            140
+          ],
+          "voisines": [
+            "case-fille",
+            "case-quille",
+            "case-salle"
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "case-quille",
+          "libelle": "quille",
+          "position": [
+            560,
+            140
+          ],
+          "voisines": [
+            "case-bille",
+            "case-famille",
+            "case-colle"
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "case-famille",
+          "libelle": "famille",
+          "position": [
+            780,
+            140
+          ],
+          "voisines": [
+            "case-quille",
+            "case-pile"
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "case-balle",
+          "libelle": "balle",
+          "position": [
+            120,
+            340
+          ],
+          "voisines": [
+            "case-salle",
+            "case-fille",
+            "case-montagne"
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "case-salle",
+          "libelle": "salle",
+          "position": [
+            340,
+            340
+          ],
+          "voisines": [
+            "case-balle",
+            "case-colle",
+            "case-bille",
+            "case-ligne"
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "case-colle",
+          "libelle": "colle",
+          "position": [
+            560,
+            340
+          ],
+          "voisines": [
+            "case-salle",
+            "case-pile",
+            "case-quille",
+            "case-signe"
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "case-pile",
+          "libelle": "pile",
+          "position": [
+            780,
+            340
+          ],
+          "voisines": [
+            "case-colle",
+            "case-famille",
+            "case-agneau"
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "case-montagne",
+          "libelle": "montagne",
+          "position": [
+            120,
+            540
+          ],
+          "voisines": [
+            "case-ligne",
+            "case-balle"
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "case-ligne",
+          "libelle": "ligne",
+          "position": [
+            340,
+            540
+          ],
+          "voisines": [
+            "case-montagne",
+            "case-signe",
+            "case-salle"
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "case-signe",
+          "libelle": "signe",
+          "position": [
+            560,
+            540
+          ],
+          "voisines": [
+            "case-ligne",
+            "case-agneau",
+            "case-colle"
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "case-agneau",
+          "libelle": "agneau",
+          "position": [
+            780,
+            540
+          ],
+          "voisines": [
+            "case-signe",
+            "case-pile"
+          ],
+          "confusionAvec": null
+        }
+      ],
+      "competence": "gph.rare.ill"
+    }
+  }
+}

@@ -1,0 +1,211 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Les deux intrus portent le digramme jumeau `ou` : `loup` et `four`. Quatre consignes, cibles disjointes.",
+  "id": "marais-jumeau-poissons-attrape-02",
+  "version": 1,
+  "titre": "Les poissons du son de noir",
+  "competences": [
+    "gph.digramme.oi"
+  ],
+  "difficulte": 3,
+  "jeu": {
+    "moteur": "attrape",
+    "habillage": "marais.poissons",
+    "noeud": "marais-jumeau-10",
+    "etoiles": {
+      "sansAide": true,
+      "sansErreur": true
+    },
+    "aideGobi": [
+      "relire-consigne",
+      "souffle-syllabe",
+      "montre-cible"
+    ],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Attrape les poissons où tu entends le son de noir.",
+          "forme": "imperative",
+          "audio": null,
+          "aAttraper": [
+            "poisson-roi",
+            "poisson-noix"
+          ],
+          "motsCles": [
+            "attrape",
+            "poisson",
+            "son",
+            "noir"
+          ]
+        },
+        {
+          "id": "c2",
+          "texte": "Attrape aussi les poissons où tu entends le son de noir.",
+          "forme": "imperative",
+          "audio": null,
+          "aAttraper": [
+            "poisson-soir",
+            "poisson-etoile"
+          ],
+          "motsCles": [
+            "attrape",
+            "poisson",
+            "son",
+            "noir"
+          ]
+        },
+        {
+          "id": "c3",
+          "texte": "Attrape le poisson où tu lis poire.",
+          "forme": "imperative",
+          "audio": null,
+          "aAttraper": [
+            "poisson-poire"
+          ],
+          "motsCles": [
+            "attrape",
+            "poisson",
+            "poire"
+          ]
+        },
+        {
+          "id": "c4",
+          "texte": "Attrape le poisson où tu lis toit.",
+          "forme": "imperative",
+          "audio": null,
+          "aAttraper": [
+            "poisson-toit"
+          ],
+          "motsCles": [
+            "attrape",
+            "poisson",
+            "toit"
+          ]
+        }
+      ],
+      "cibles": [
+        {
+          "id": "poisson-roi",
+          "libelle": "roi",
+          "bonne": true,
+          "asset": null,
+          "depart": [
+            120,
+            120
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": "roue"
+        },
+        {
+          "id": "poisson-noix",
+          "libelle": "noix",
+          "bonne": true,
+          "asset": null,
+          "depart": [
+            320,
+            380
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": "nous"
+        },
+        {
+          "id": "poisson-soir",
+          "libelle": "soir",
+          "bonne": true,
+          "asset": null,
+          "depart": [
+            520,
+            120
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": "sous"
+        },
+        {
+          "id": "poisson-etoile",
+          "libelle": "étoile",
+          "bonne": true,
+          "asset": null,
+          "depart": [
+            720,
+            380
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "poisson-poire",
+          "libelle": "poire",
+          "bonne": true,
+          "asset": null,
+          "depart": [
+            120,
+            380
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": "poule"
+        },
+        {
+          "id": "poisson-toit",
+          "libelle": "toit",
+          "bonne": true,
+          "asset": null,
+          "depart": [
+            720,
+            120
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": "tour"
+        },
+        {
+          "id": "poisson-loup",
+          "libelle": "loup",
+          "bonne": false,
+          "asset": null,
+          "depart": [
+            320,
+            120
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": "roi"
+        },
+        {
+          "id": "poisson-four",
+          "libelle": "four",
+          "bonne": false,
+          "asset": null,
+          "depart": [
+            520,
+            380
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": "soir"
+        }
+      ],
+      "competence": "gph.digramme.oi"
+    }
+  }
+}

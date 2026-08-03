@@ -1,0 +1,10 @@
+{
+  "id": "foret-muette-08",
+  "region": "foret-muette",
+  "ordre": 8,
+  "exercice": "foret-muette-tapis-colorie-01",
+  "prerequis": [
+    "foret-muette-07"
+  ],
+  "temps": "maitrise"
+}

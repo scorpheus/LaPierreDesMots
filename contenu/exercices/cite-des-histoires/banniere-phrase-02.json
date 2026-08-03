@@ -1,0 +1,120 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. ORIGINE : NIVEAU 6, fiche 11, « Le jeu des amis à la récré ». CORRIGÉ PRODUIT : la fiche demande « À quoi jouent-ils ? » et « Comment Raoul se sent-il à la fin ? » avec des amorces vides ; le texte source répond « Ils décident de jouer ensemble au ballon » et « Raoul est heureux d’avoir un ami ». Les deux phrases à reconstruire disent cela. Nœud de clôture de la Cité (difficulté 5), et il ferme la région sur une phrase joyeuse : R14 veut qu’une session finisse sur une réussite. Neuf étiquettes, toutes distinctes MOT COMPRIS.",
+  "id": "cite-des-histoires-banniere-phrase-02",
+  "version": 1,
+  "titre": "Le jeu des amis",
+  "origine": {
+    "source": "fiches-origine/NIVEAU 6.pdf",
+    "niveau": 6,
+    "fiche": 11
+  },
+  "competences": [
+    "comp.phrase.completee"
+  ],
+  "difficulte": 5,
+  "jeu": {
+    "moteur": "phrase",
+    "habillage": "cite.banniere",
+    "noeud": "cite-des-histoires-14",
+    "etoiles": {
+      "sansAide": true,
+      "sansErreur": true
+    },
+    "aideGobi": [
+      "relire-consigne",
+      "souffle-syllabe",
+      "montre-cible"
+    ],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Range les mots pour lire : mon ami a un ballon.",
+          "forme": "imperative",
+          "audio": null,
+          "phrase": "Mon ami a un ballon.",
+          "ordre": [
+            "mot-mon",
+            "mot-ami",
+            "mot-a",
+            "mot-un",
+            "mot-ballon"
+          ],
+          "motsCles": [
+            "range",
+            "mot",
+            "ami",
+            "ballon"
+          ]
+        },
+        {
+          "id": "c2",
+          "texte": "Range les mots pour lire : la cour est grande.",
+          "forme": "imperative",
+          "audio": null,
+          "phrase": "La cour est grande.",
+          "ordre": [
+            "mot-la",
+            "mot-cour",
+            "mot-est",
+            "mot-grande"
+          ],
+          "motsCles": [
+            "range",
+            "mot",
+            "cour",
+            "grand"
+          ]
+        }
+      ],
+      "etiquettes": [
+        {
+          "id": "mot-mon",
+          "mot": "Mon",
+          "intrus": false
+        },
+        {
+          "id": "mot-ami",
+          "mot": "ami",
+          "intrus": false
+        },
+        {
+          "id": "mot-a",
+          "mot": "a",
+          "intrus": false
+        },
+        {
+          "id": "mot-un",
+          "mot": "un",
+          "intrus": false
+        },
+        {
+          "id": "mot-ballon",
+          "mot": "ballon.",
+          "intrus": false
+        },
+        {
+          "id": "mot-la",
+          "mot": "La",
+          "intrus": false
+        },
+        {
+          "id": "mot-cour",
+          "mot": "cour",
+          "intrus": false
+        },
+        {
+          "id": "mot-est",
+          "mot": "est",
+          "intrus": false
+        },
+        {
+          "id": "mot-grande",
+          "mot": "grande.",
+          "intrus": false
+        }
+      ],
+      "competence": "comp.phrase.completee"
+    }
+  }
+}

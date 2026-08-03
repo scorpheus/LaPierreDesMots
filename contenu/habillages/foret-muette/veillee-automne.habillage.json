@@ -1,0 +1,142 @@
+{
+  "id": "foret.veillee-automne",
+  "moteurs": [
+    "histoire"
+  ],
+  "libelle": "La veillée sous les arbres roux",
+  "region": "foret-muette",
+  "scene": {
+    "fichier": "habillages/foret-muette/veillee-automne.svg",
+    "viewBox": "0 0 960 600",
+    "calques": [
+      {
+        "id": "calque-fond",
+        "role": "fond",
+        "regions": []
+      },
+      {
+        "id": "calque-zones",
+        "role": "coloriable",
+        "regions": [
+          {
+            "id": "ciel-de-nuit",
+            "libelle": "le ciel de nuit",
+            "centroide": [
+              360,
+              119.9
+            ],
+            "surface": 218880
+          },
+          {
+            "id": "clairiere-rousse",
+            "libelle": "la clairière rousse",
+            "centroide": [
+              660,
+              530.1
+            ],
+            "surface": 124800
+          },
+          {
+            "id": "arbre-roux-gauche",
+            "libelle": "l’arbre roux de gauche",
+            "centroide": [
+              162.1,
+              175.1
+            ],
+            "surface": 27434.4
+          },
+          {
+            "id": "arbre-roux-droit",
+            "libelle": "l’arbre roux de droite",
+            "centroide": [
+              797.1,
+              195.1
+            ],
+            "surface": 19519.3
+          },
+          {
+            "id": "tronc-gauche",
+            "libelle": "le tronc de gauche",
+            "centroide": [
+              171,
+              360
+            ],
+            "surface": 7936
+          },
+          {
+            "id": "tronc-droit",
+            "libelle": "le tronc de droite",
+            "centroide": [
+              797,
+              361
+            ],
+            "surface": 6116
+          },
+          {
+            "id": "feu-de-veillee",
+            "libelle": "le feu de veillée",
+            "centroide": [
+              490,
+              474.9
+            ],
+            "surface": 8454.7
+          },
+          {
+            "id": "plume-assise",
+            "libelle": "Plume assise",
+            "centroide": [
+              662.2,
+              423.9
+            ],
+            "surface": 11529.5
+          },
+          {
+            "id": "buche-de-veillee",
+            "libelle": "la bûche de veillée",
+            "centroide": [
+              559.6,
+              491.9
+            ],
+            "surface": 7328
+          },
+          {
+            "id": "lune-rousse",
+            "libelle": "la lune rousse",
+            "centroide": [
+              862,
+              108
+            ],
+            "surface": 7120
+          }
+        ]
+      },
+      {
+        "id": "calque-trait",
+        "role": "trait",
+        "regions": []
+      }
+    ]
+  },
+  "palette": {
+    "jetons": {},
+    "nuancier": [
+      "vert",
+      "brun",
+      "gris",
+      "noir",
+      "blanc",
+      "jaune"
+    ]
+  },
+  "timings": {
+    "appuiMs": 60,
+    "relachementMs": 120,
+    "refusMs": 180,
+    "recolorationMs": 800,
+    "interEtoilesMs": 180
+  },
+  "sons": {
+    "ambiance": null,
+    "effets": {}
+  }
+}

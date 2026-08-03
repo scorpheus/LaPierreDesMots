@@ -1,0 +1,10 @@
+{
+  "id": "clairiere-10",
+  "region": "clairiere",
+  "ordre": 10,
+  "exercice": "clairiere-ecole-03-mots-outils",
+  "prerequis": [
+    "clairiere-09"
+  ],
+  "temps": "retournement"
+}

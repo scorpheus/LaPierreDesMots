@@ -164,10 +164,89 @@ for (const chemin of exercices) {
     if (typeof consigne.recit === 'string') auditerTexte(ou, `récit ${String(consigne.id)}`, consigne.recit);
     if (typeof consigne.mot === 'string') auditerTexte(ou, `mot ${String(consigne.id)}`, consigne.mot);
   }
-  for (const cle of ['cibles', 'options', 'elements', 'blocs', 'etiquettes', 'cartes', 'vignettes', 'reserve', 'receptacles', 'cases']) {
+  // `blocs` est ABSENT de cette liste, et c'est un contrôle DÉPLACÉ, jamais retiré : il est
+  // repris plus bas, en plus strict. Voir le bloc « les syllabes du moteur assemble ».
+  for (const cle of ['cibles', 'options', 'elements', 'etiquettes', 'cartes', 'vignettes', 'reserve', 'receptacles', 'cases']) {
     for (const item of contenu[cle] ?? []) {
       if (typeof item.libelle === 'string') auditerTexte(ou, `${cle}.${String(item.id)}`, item.libelle);
       if (typeof item.mot === 'string') auditerTexte(ou, `${cle}.${String(item.id)}`, item.mot);
+    }
+  }
+
+  // ───────────────────────────────── les syllabes du moteur `assemble` — lot M1
+  //
+  // CE N'EST PAS UNE EXEMPTION, C'EST LA CORRECTION D'UNE ERREUR DE CATÉGORIE.
+  //
+  // Mesuré au gel du lot M1, sortie citée :
+  //
+  //   $ node scripts/valider-brouillons.mjs
+  //   REFUS — 13 problème(s) :
+  //     ✗ …/stalagmites-assemble-01.json : blocs.bloc-do : « do » est hors du lexique CE1
+  //     ✗ … 8 autres, tous des syllabes du même fichier
+  //
+  // Neuf refus sur treize portaient sur des syllabes. Un bloc du moteur `assemble` porte une
+  // SYLLABE — « mi », « pa », « jar » — et une syllabe n'est jamais dans une liste de
+  // vocabulaire. Ce script le dit déjà lui-même, mot pour mot, pour les brouillons de
+  // phonologie : « Sans ce champ déclaré, le contrôle n'aurait que deux issues, toutes deux
+  // fausses : refuser 50 syllabes correctes, ou laisser passer n'importe quelle suite de
+  // lettres ». Il avait `natureDesFormes` pour trancher côté brouillon, et RIEN côté exercice.
+  // Conséquence mécanique : AUCUN exercice `assemble` ne pouvait franchir cette porte, quel
+  // que soit son contenu. C'est pourquoi le seul qui existait la faisait rougir depuis son
+  // écriture, et pourquoi la porte rendait déjà un REFUS sur le dépôt livré.
+  //
+  // La troisième issue est celle-ci, et elle est PLUS STRICTE que le contrôle qu'elle
+  // remplace, pas moins :
+  //   • le `mot` de chaque consigne reste confronté au lexique — il l'est déjà par la boucle
+  //     des consignes, et c'est LUI le mot de vocabulaire ;
+  //   • les syllabes de la solution doivent RECOMPOSER ce mot, à l'accent près. Le contrôle
+  //     d'origine ne le faisait pas : « do » + « mi » + « no » aurait pu écrire « domi » sans
+  //     que rien ne le voie ;
+  //   • deux blocs ne peuvent pas porter le même libellé — un doublon ferait payer à l'enfant
+  //     une erreur qu'il n'a pas commise, `bloc-hors-ordre` comptant une erreur ;
+  //   • un bloc ne porte que des lettres : ni chiffre, ni espace, ni ponctuation. C'est ce qui
+  //     ferme la seconde issue fausse que le commentaire d'origine redoutait — « laisser
+  //     passer n'importe quelle suite de lettres » n'est plus possible, puisque la suite doit
+  //     recomposer un mot du lexique.
+  if (exercice?.jeu?.moteur === 'assemble') {
+    const parId = new Map((contenu.blocs ?? []).map((b) => [String(b.id), b]));
+
+    const vus = new Map();
+    for (const bloc of contenu.blocs ?? []) {
+      objetsAudites += 1;
+      const libelle = String(bloc.libelle ?? '');
+      if (!/^[A-Za-zÀ-ÖØ-öø-ÿ]+$/u.test(libelle)) {
+        signaler(ou, `blocs.${String(bloc.id)} : « ${libelle} » n'est pas une syllabe (lettres seules attendues)`);
+      }
+      const cle = normaliser(libelle);
+      if (vus.has(cle)) {
+        signaler(
+          ou,
+          `blocs.${String(bloc.id)} : le libellé « ${libelle} » est déjà porté par ` +
+            `« ${String(vus.get(cle))} ». Deux tuiles identiques font payer à l'enfant une ` +
+            "erreur qu'il n'a pas commise : `bloc-hors-ordre` compte une erreur.",
+        );
+      }
+      vus.set(cle, bloc.id);
+    }
+
+    for (const consigne of contenu.consignes ?? []) {
+      objetsAudites += 1;
+      const manquants = (consigne.solution ?? []).filter((id) => !parId.has(String(id)));
+      if (manquants.length > 0) {
+        signaler(ou, `consigne ${String(consigne.id)} : bloc(s) inconnu(s) ${manquants.join(', ')}`);
+        continue;
+      }
+      const recompose = (consigne.solution ?? [])
+        .map((id) => String(parId.get(String(id)).libelle))
+        .join('');
+      if (normaliser(recompose) !== normaliser(String(consigne.mot ?? ''))) {
+        signaler(
+          ou,
+          `consigne ${String(consigne.id)} : les syllabes de la solution écrivent ` +
+            `« ${recompose} », pas « ${String(consigne.mot)} ». Un exercice qui n'écrit pas le ` +
+            'mot annoncé est un exercice qu\'aucune réponse ne termine.',
+        );
+      }
     }
   }
   if (typeof contenu.recit === 'string') auditerTexte(ou, 'récit', contenu.recit);

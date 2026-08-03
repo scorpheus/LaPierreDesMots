@@ -1,16 +1,35 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" width="960" height="600" role="img" aria-label="Les cartes de la cité">
+  <title>Les cartes de la cité</title>
+  <desc>Deux cartes rectangulaires de deux tailles posées sur un tapis, une colonne à gauche, une fresque murale en anneau, une lanterne, un coussin, un livre posé.</desc>
+  <!--
+    DÉCOR — lot M6, contrat du monde v4 § 2. Trait noir sur blanc, la COULEUR VIENT DU CODE
+    (annexe P § 2) : les régions sortent d'ici en grisaille #8E97A8, qui est leur état
+    par défaut et non un choix graphique. Géométrie 100 % polygonale (M, L, Z — aucun arc) :
+    surface et centroïde sont donc calculables exactement et opposables aux valeurs déclarées
+    par le .habillage.json, que scripts/verifier-regions-fermees.mjs --strict recalcule.
+
+    Chaque région est un ENFANT DIRECT de #calque-zones : SceneSvg.tsx sélectionne
+    "#calque-zones > [id]", et un tracé niché dans un sous-groupe échapperait au tap sans
+    qu'aucun message ne le dise.
+
+    ÉCRIT PAR scripts/dessiner-decors.mjs — ne pas retoucher à la main : la scène est décrite
+    dans scripts/decors/decors.mjs, et l'émetteur refuse d'écrire si la mesure est mauvaise.
+  -->
   <g id="calque-fond">
-    <rect id="fond" x="0" y="0" width="960" height="600" fill="#f7f0e4"/>
+    <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
   </g>
-  <g id="calque-zones">
-    <rect id="carte-un" x="90" y="110" width="200" height="160" rx="12"/>
-    <rect id="carte-deux" x="380" y="110" width="200" height="160" rx="12"/>
-    <rect id="tapis" x="670" y="110" width="200" height="160" rx="12"/>
-    <rect id="lanterne" x="90" y="340" width="200" height="160" rx="12"/>
-    <rect id="colonne" x="380" y="340" width="200" height="160" rx="12"/>
-    <rect id="fresque-murale" x="670" y="340" width="200" height="160" rx="12"/>
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round">
+    <path id="mur-de-la-salle" class="zone" data-region-svg="mur-de-la-salle" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L960,0 L960,138 L933.3,143 L906.7,146.7 L880,148 L853.3,146.7 L826.7,143 L800,138 L773.3,133 L746.7,129.3 L720,128 L693.3,129.3 L666.7,133 L640,138 L613.3,143 L586.7,146.7 L560,148 L533.3,146.7 L506.7,143 L480,138 L453.3,133 L426.7,129.3 L400,128 L373.3,129.3 L346.7,133 L320,138 L293.3,143 L266.7,146.7 L240,148 L213.3,146.7 L186.7,143 L160,138 L133.3,133 L106.7,129.3 L80,128 L53.3,129.3 L26.7,133 L0,138 Z"/>
+    <path id="tapis" class="zone" data-region-svg="tapis" fill="#8E97A8" fill-rule="evenodd" d="M80,430 L880,412 L922,546 L38,562 Z"/>
+    <path id="colonne" class="zone" data-region-svg="colonne" fill="#8E97A8" fill-rule="evenodd" d="M58,118 L130,118 L130,450 L58,450 Z"/>
+    <path id="fresque-murale" class="zone" data-region-svg="fresque-murale" fill="#8E97A8" fill-rule="evenodd" d="M200,118 L720,118 L720,320 L200,320 Z M240,154 L680,154 L680,284 L240,284 Z"/>
+    <path id="carte-un" class="zone" data-region-svg="carte-un" fill="#8E97A8" fill-rule="evenodd" d="M238,330 L400,330 L400,552 L238,552 Z"/>
+    <path id="carte-deux" class="zone" data-region-svg="carte-deux" fill="#8E97A8" fill-rule="evenodd" d="M458,350 L600,350 L600,552 L458,552 Z"/>
+    <path id="lanterne" class="zone" data-region-svg="lanterne" fill="#8E97A8" fill-rule="evenodd" d="M818.3,148 L849.7,148 L840.7,166.2 L865.4,178.4 L874.3,199.7 L867.6,263.5 L878.8,278.7 L878.8,293.9 L789.2,293.9 L789.2,278.7 L800.4,263.5 L793.7,199.7 L802.6,178.4 L827.3,166.2 Z"/>
+    <path id="coussin" class="zone" data-region-svg="coussin" fill="#8E97A8" fill-rule="evenodd" d="M773.7,502.1 L762.6,508.8 L747.4,512.4 L732.3,514 L718.9,515.5 L706.2,518.2 L691.9,521.3 L675.6,522.8 L659.7,520.5 L647.7,514.4 L641.1,506.1 L638.3,497.8 L635.5,490.4 L630.6,483.4 L624.8,475.5 L622.2,466.6 L626.3,457.9 L637.4,451.2 L652.6,447.6 L667.7,446 L681.1,444.5 L693.8,441.8 L708.1,438.7 L724.4,437.2 L740.3,439.5 L752.3,445.6 L758.9,453.9 L761.7,462.2 L764.5,469.6 L769.4,476.6 L775.2,484.5 L777.8,493.4 Z"/>
+    <path id="livre-pose" class="zone" data-region-svg="livre-pose" fill="#8E97A8" fill-rule="evenodd" d="M67.1,482.7 L131,473.5 L137,473.5 L200.9,482.7 L200.9,549 L137,541.6 L131,541.6 L67.1,549 Z"/>
   </g>
-  <g id="calque-trait">
-    <path id="cadre" d="M20 20 H940 V580 H20 Z" fill="none" stroke="#2b2b2b" stroke-width="4"/>
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path class="trait" d="M38,562 L922,546"/>
   </g>
 </svg>

@@ -1,0 +1,160 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Chaque carte-mot est un GROUPE porteur de liaison — « un ours », « les oiseaux » —, jamais un mot isolé : une liaison n’existe qu'entre deux mots, et l'isoler la ferait disparaître. La carte-image redit le même groupe dans une expression plus longue, ce qui oblige à relire la liaison une seconde fois. Six paires, douze cartes, trois consignes à paires disjointes.",
+  "id": "foret-muette-bestiaire-paires-02",
+  "version": 1,
+  "titre": "Les mots qui se tiennent la main",
+  "competences": [
+    "flu.liaison"
+  ],
+  "difficulte": 4,
+  "jeu": {
+    "moteur": "paires",
+    "habillage": "foret.bestiaire",
+    "noeud": "foret-muette-10",
+    "etoiles": {
+      "sansAide": true,
+      "sansErreur": true
+    },
+    "aideGobi": [
+      "relire-consigne",
+      "souffle-syllabe",
+      "montre-cible"
+    ],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Trouve le mot et son image.",
+          "forme": "imperative",
+          "audio": null,
+          "aApparier": [
+            "paire-ours",
+            "paire-hibou"
+          ],
+          "motsCles": [
+            "trouve",
+            "mot",
+            "image"
+          ]
+        },
+        {
+          "id": "c2",
+          "texte": "Trouve aussi le mot et son image.",
+          "forme": "imperative",
+          "audio": null,
+          "aApparier": [
+            "paire-arbre",
+            "paire-enfant"
+          ],
+          "motsCles": [
+            "trouve",
+            "mot",
+            "image"
+          ]
+        },
+        {
+          "id": "c3",
+          "texte": "Trouve les derniers mots et les images.",
+          "forme": "imperative",
+          "audio": null,
+          "aApparier": [
+            "paire-oiseau",
+            "paire-etoile"
+          ],
+          "motsCles": [
+            "trouve",
+            "mot",
+            "image"
+          ]
+        }
+      ],
+      "cartes": [
+        {
+          "id": "mot-ours",
+          "libelle": "un ours",
+          "face": "mot",
+          "asset": null,
+          "paire": "paire-ours"
+        },
+        {
+          "id": "image-ours",
+          "libelle": "l'ours brun",
+          "face": "image",
+          "asset": null,
+          "paire": "paire-ours"
+        },
+        {
+          "id": "mot-hibou",
+          "libelle": "un hibou",
+          "face": "mot",
+          "asset": null,
+          "paire": "paire-hibou"
+        },
+        {
+          "id": "image-hibou",
+          "libelle": "le hibou gris",
+          "face": "image",
+          "asset": null,
+          "paire": "paire-hibou"
+        },
+        {
+          "id": "mot-arbre",
+          "libelle": "un arbre",
+          "face": "mot",
+          "asset": null,
+          "paire": "paire-arbre"
+        },
+        {
+          "id": "image-arbre",
+          "libelle": "l'arbre vert",
+          "face": "image",
+          "asset": null,
+          "paire": "paire-arbre"
+        },
+        {
+          "id": "mot-enfant",
+          "libelle": "les enfants",
+          "face": "mot",
+          "asset": null,
+          "paire": "paire-enfant"
+        },
+        {
+          "id": "image-enfant",
+          "libelle": "les enfants de l'école",
+          "face": "image",
+          "asset": null,
+          "paire": "paire-enfant"
+        },
+        {
+          "id": "mot-oiseau",
+          "libelle": "les oiseaux",
+          "face": "mot",
+          "asset": null,
+          "paire": "paire-oiseau"
+        },
+        {
+          "id": "image-oiseau",
+          "libelle": "les oiseaux du matin",
+          "face": "image",
+          "asset": null,
+          "paire": "paire-oiseau"
+        },
+        {
+          "id": "mot-etoile",
+          "libelle": "les étoiles",
+          "face": "mot",
+          "asset": null,
+          "paire": "paire-etoile"
+        },
+        {
+          "id": "image-etoile",
+          "libelle": "les étoiles de la nuit",
+          "face": "image",
+          "asset": null,
+          "paire": "paire-etoile"
+        }
+      ],
+      "competence": "flu.liaison"
+    }
+  }
+}

@@ -1,0 +1,130 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. `ville` FERME la série, et c'est le nœud le plus fin de la région : la graphie est la même que celle de `fille`, le son ne l’est pas, et l’enfant doit écrire `ill` malgré son oreille. Le clavier ne porte que les quatre graphies concurrentes. Positions remesurées contre les mots.",
+  "id": "volcan-sable-grave-02",
+  "version": 1,
+  "titre": "Graver les trois lettres de fille",
+  "competences": [
+    "gph.rare.ill"
+  ],
+  "difficulte": 4,
+  "jeu": {
+    "moteur": "grave",
+    "habillage": "volcan.sable",
+    "noeud": "volcan-11",
+    "etoiles": {
+      "sansAide": true,
+      "sansErreur": true
+    },
+    "aideGobi": [
+      "relire-consigne",
+      "souffle-syllabe",
+      "surligne-graphene"
+    ],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Grave les lettres pour écrire ce mot.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "bille",
+          "trous": [
+            {
+              "id": "trou-un",
+              "position": 1,
+              "attendu": "ill"
+            }
+          ],
+          "motsCles": [
+            "grave",
+            "lettre",
+            "mot"
+          ]
+        },
+        {
+          "id": "c2",
+          "texte": "Grave les lettres pour écrire ce mot.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "fille",
+          "trous": [
+            {
+              "id": "trou-deux",
+              "position": 1,
+              "attendu": "ill"
+            }
+          ],
+          "motsCles": [
+            "grave",
+            "lettre",
+            "mot"
+          ]
+        },
+        {
+          "id": "c3",
+          "texte": "Grave les lettres pour écrire ce mot.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "quille",
+          "trous": [
+            {
+              "id": "trou-trois",
+              "position": 2,
+              "attendu": "ill"
+            }
+          ],
+          "motsCles": [
+            "grave",
+            "lettre",
+            "mot"
+          ]
+        },
+        {
+          "id": "c4",
+          "texte": "Grave les lettres pour écrire ce mot.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "famille",
+          "trous": [
+            {
+              "id": "trou-quatre",
+              "position": 3,
+              "attendu": "ill"
+            }
+          ],
+          "motsCles": [
+            "grave",
+            "lettre",
+            "mot"
+          ]
+        },
+        {
+          "id": "c5",
+          "texte": "Grave les lettres pour écrire ce mot.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "ville",
+          "trous": [
+            {
+              "id": "trou-cinq",
+              "position": 1,
+              "attendu": "ill"
+            }
+          ],
+          "motsCles": [
+            "grave",
+            "lettre",
+            "mot"
+          ]
+        }
+      ],
+      "clavier": [
+        "ill",
+        "il",
+        "ll",
+        "l"
+      ],
+      "competence": "gph.rare.ill"
+    }
+  }
+}

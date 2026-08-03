@@ -1,7 +1,7 @@
 {
-  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Lot N8. AXE GAUCHE-DROITE UNIQUEMENT — b ↔ d. D23, conséquence 1 : « distinguer les AXES de confusion, jamais traiter b/d/p/q en bloc ». Aucun mot en p ni en q n'entre ici, et le fichier de l'axe haut-bas (`cristal-bp-01.json`) ne porte aucun mot en d. Les paires viennent de `contenu/brouillons/phonologie/galeries/miroir-gauche-droite.json`, produit par `scripts/generer-phonologie.mjs`, qui remesure que chaque mot de la colonne A porte b et jamais d, et l'inverse. `expositionMs` à 1800 : l'enfant déchiffre encore (D14), le mot éclair n'a d'intérêt que s'il a le temps d'être LU. Paramètre de données, recalibrable (D13).",
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Lot N8, CORRIGÉ PAR LE LOT M1 — le défaut n'était pas visible à la relecture d'un seul champ, il fallait dérouler l'exercice. La version N8 offrait deux options par consigne et les alternait : c1 proposait `bol` et `dos` et attendait `bol` ; c2 proposait `dos` et `bol` et attendait `dos`. Or `partage/src/moteurs/eclair/validation.ts` inscrit la bonne réponse dans `acquis` et n'en sort jamais : à c2, `bol` était déjà gagné, donc REFUSÉ en `option-deja-choisie`, donc inerte sous le doigt. Trois consignes sur six — c2, c4, c6 — n'offraient ainsi qu'UN SEUL bouton vivant, le bon. Et `modeReponseEclair` déclarait pourtant `vrai-faux`, p_devinette 0,50, sur des étapes où l'enfant ne pouvait pas se tromper : le BKT recevait une probabilité de devinette fausse sur la moitié de l'exercice. C'est exactement « un détecteur qui déclare un poids qu'il n'applique jamais » (CLAUDE.md), et rien ne le disait — aucun refus n'est compté comme erreur, l'exercice était vert. LA CORRECTION : dix options, trois par consigne, et une option n'est JAMAIS offerte après avoir été gagnée. Le mode passe de `vrai-faux` (0,50) à `qcm-3` (0,33) sur les six étapes, ce qui est aussi ce que D13 recommande. AXE GAUCHE-DROITE UNIQUEMENT — b ↔ d. D23, conséquence 1 : « distinguer les AXES de confusion, jamais traiter b/d/p/q en bloc ». Aucun mot en p ni en q n'entre ici, et aucun des dix ne porte à la fois un b et un d. Les paires viennent de `contenu/brouillons/phonologie/galeries/miroir-gauche-droite.json`, qui remesure que chaque mot de la colonne A porte b et jamais d, et l'inverse. `expositionMs` à 1800 : l'enfant déchiffre encore (D14), le mot éclair n'a d'intérêt que s'il a le temps d'être LU. Paramètre de données, recalibrable (D13).",
   "id": "galeries-cristal-bd-01",
-  "version": 1,
+  "version": 2,
   "titre": "Les cristaux b et d",
   "competences": ["gph.miroir.gauche-droite"],
   "difficulte": 3,
@@ -20,7 +20,7 @@
           "forme": "imperative",
           "audio": null,
           "expositionMs": 1800,
-          "options": ["mot-bol", "mot-dos"],
+          "options": ["mot-bol", "mot-dos", "mot-bille"],
           "reponse": "mot-bol",
           "motsCles": ["touche", "mot", "lu"]
         },
@@ -31,7 +31,7 @@
           "forme": "imperative",
           "audio": null,
           "expositionMs": 1800,
-          "options": ["mot-dos", "mot-bol"],
+          "options": ["mot-dos", "mot-dame", "mot-dent"],
           "reponse": "mot-dos",
           "motsCles": ["touche", "mot", "lu"]
         },
@@ -42,7 +42,7 @@
           "forme": "imperative",
           "audio": null,
           "expositionMs": 1800,
-          "options": ["mot-banane", "mot-dame"],
+          "options": ["mot-banane", "mot-dame", "mot-bille"],
           "reponse": "mot-banane",
           "motsCles": ["touche", "mot", "lu"]
         },
@@ -53,7 +53,7 @@
           "forme": "imperative",
           "audio": null,
           "expositionMs": 1800,
-          "options": ["mot-dame", "mot-banane"],
+          "options": ["mot-dame", "mot-balle", "mot-dent"],
           "reponse": "mot-dame",
           "motsCles": ["touche", "mot", "lu"]
         },
@@ -64,7 +64,7 @@
           "forme": "imperative",
           "audio": null,
           "expositionMs": 1800,
-          "options": ["mot-balle", "mot-dalle"],
+          "options": ["mot-balle", "mot-dalle", "mot-bec"],
           "reponse": "mot-balle",
           "motsCles": ["touche", "mot", "lu"]
         },
@@ -75,7 +75,7 @@
           "forme": "imperative",
           "audio": null,
           "expositionMs": 1800,
-          "options": ["mot-dalle", "mot-balle"],
+          "options": ["mot-dalle", "mot-bec", "mot-dur"],
           "reponse": "mot-dalle",
           "motsCles": ["touche", "mot", "lu"]
         }
@@ -86,7 +86,11 @@
         { "id": "mot-banane", "libelle": "banane", "bonne": true, "confusionAvec": "dame" },
         { "id": "mot-dame", "libelle": "dame", "bonne": true, "confusionAvec": "banane" },
         { "id": "mot-balle", "libelle": "balle", "bonne": true, "confusionAvec": "dalle" },
-        { "id": "mot-dalle", "libelle": "dalle", "bonne": true, "confusionAvec": "balle" }
+        { "id": "mot-dalle", "libelle": "dalle", "bonne": true, "confusionAvec": "balle" },
+        { "id": "mot-bille", "libelle": "bille", "bonne": false, "confusionAvec": null },
+        { "id": "mot-dent", "libelle": "dent", "bonne": false, "confusionAvec": null },
+        { "id": "mot-bec", "libelle": "bec", "bonne": false, "confusionAvec": null },
+        { "id": "mot-dur", "libelle": "dur", "bonne": false, "confusionAvec": null }
       ],
       "competence": "gph.miroir.gauche-droite"
     }

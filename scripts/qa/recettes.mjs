@@ -83,26 +83,24 @@ export const MUTATIONS = [
     fichier: 'client/src/ecrans/EcranNoeud.tsx',
     ancrage: '          data-vers="carte"',
     remplacement: '          data-vers="carte-disparue"',
-    attendu: 'SURVIT',
-    couvertPar: 'e2e',
+    // ── CLIQUET RESSERRÉ LE 2026-08-02 À L'INTÉGRATION. « Pas avant » est arrivé.
+    //
+    // Le commentaire précédent, gardé ici parce qu'il vaut plus que la ligne qu'il explique,
+    // disait : « le resserrement redeviendra juste le jour où ce test sera commité — pas
+    // avant ». Le test est commité (6107861), donc l'invariant 3 ne l'exclut plus.
+    //
+    // Resserré sur TROIS mesures, pas une — la règle que M2 elle-même avait écrite après
+    // s'être fait desserrer le même jour :
+    //   1. banc complet ......................... 🎉 DETECTEE
+    //   2. `--seulement=M2,M25` (second banc) ... 🎉 DETECTEE
+    //   3. attribution différentielle ........... ANCIENNE=SURVIT · NOUVELLE=DETECTEE
+    //      par `tests/composants/exploration-modele.test.tsx` — l'explorateur du lot Q2,
+    //      qui énumère les transitions au lieu de compter les éléments interactifs (D48).
+    //
+    // C'est le défaut n° 1 du père, et il est désormais gardé AU COMPOSANT, sans build.
+    attendu: 'DETECTEE',
     assertionE2E:
-      'tests/e2e/parcours-audit-tout-le-site.spec.ts — « noeud/<id> » a au moins une sortie',
-    pourquoi:
-      'Aucun test de composant SUIVI PAR GIT ne monte `EcranNoeud`. La sortie est vérifiée par ' +
-      'une recette E2E par nœud livré, qui exige un build. Le lot QA-2 ferme ce trou au ' +
-      'composant.\n' +
-      '\n' +
-      '  CLIQUET RESSERRÉ PUIS DESSERRÉ LE MÊME JOUR — et c’est la ligne la plus utile de ce\n' +
-      '  fichier. Un banc a rendu `🎉 AMÉLIORATION` sur M2 ; j’ai passé `attendu` à `DETECTEE`,\n' +
-      '  et le banc suivant l’a vu SURVIVRE. La détection venait de\n' +
-      '  `tests/composants/exploration-modele.test.tsx`, qu’une campagne parallèle était en\n' +
-      '  train d’écrire : le fichier n’est PAS suivi par git, donc l’invariant 3 l’exclut — et\n' +
-      '  il ne l’excluait pas encore au moment du premier banc, où il n’existait pas.\n' +
-      '\n' +
-      '  **On ne resserre pas un cliquet sur une mesure qu’on n’a pas reproduite.** La règle,\n' +
-      '  écrite ici pour la prochaine fois : une AMÉLIORATION se confirme par un second banc,\n' +
-      '  `npm run qa:mutations -- --seulement=<id>`, AVANT de toucher à `attendu`. Le\n' +
-      '  resserrement redeviendra juste le jour où ce test sera commité — pas avant.'
+      'tests/e2e/parcours-audit-tout-le-site.spec.ts — « noeud/<id> » a au moins une sortie'
   },
   {
     id: 'M3',
@@ -394,11 +392,13 @@ export const MUTATIONS = [
     fichier: 'client/src/ecrans/EcranProfils.tsx',
     ancrage: '      onClick={() => surChoix(profil)}',
     remplacement: '      onClick={undefined}',
-    attendu: 'SURVIT',
-    couvertPar: 'e2e',
+    // CLIQUET RESSERRÉ le 2026-08-02, aux mêmes trois mesures que M2 : banc complet, second
+    // banc `--seulement=M2,M25`, puis attribution différentielle ANCIENNE=SURVIT /
+    // NOUVELLE=DETECTEE par `tests/composants/exploration-modele.test.tsx`. L'écran d'accueil
+    // — la porte du jeu — n'exige plus un build pour être gardé.
+    attendu: 'DETECTEE',
     assertionE2E:
-      'tests/e2e/qa-outils.ts — toutes les recettes commencent par `choisirLeProfil(page)`',
-    pourquoi: 'Écran non couvert au composant. L’intégralité des parcours E2E tomberait. Lot QA-2.'
+      'tests/e2e/qa-outils.ts — toutes les recettes commencent par `choisirLeProfil(page)`'
   },
   {
     id: 'M26',

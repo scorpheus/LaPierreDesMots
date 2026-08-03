@@ -23,6 +23,7 @@
 //   npm run voix -- --tout            → refait tout, même ce qui existe
 //   npm run voix -- --sans-qc         → rend sans transcription inverse (qcScore = null → 0)
 //   npm run voix -- --locuteurs       → ne rend QUE les sept clips témoins de locuteur
+//   npm run voix -- --requalifier     → réécoute TOUT, sans relire un score au verrou
 //
 // AUCUN `Math.random`, AUCUN `Date.now` : la seule horodatation est celle de `genereLe`, lue
 // une fois, et la règle ESLint ne porte que sur `partage/` et `client/`. On la respecte quand
@@ -376,8 +377,65 @@ export function remesurer(destination, texte) {
 
 // ────────────────────────────────────────────────────────────────────── rendu du lot
 
+/**
+ * Les scores de contrôle qualité DÉJÀ MESURÉS, relus au verrou.
+ *
+ * ═══════════════════════════════════════════════════════════════════════════════════════════
+ * POURQUOI, ET POURQUOI CE N'EST PAS UN ASSOUPLISSEMENT.
+ *
+ * MESURÉ : la transcription inverse coûte 3,8 s par clip de phrase sur CPU/int8 (le chiffre
+ * est dans `qc-voix.mjs`, mesure citée). À 53 consignes c'était trois minutes. À 304 consignes
+ * — la cible du plan pour ce lot — c'est vingt minutes par lancement, et le plan demande
+ * justement à M4 de RELANCER chaque fois qu'un lot voisin dépose : « il relance, il n'ajuste
+ * pas son chiffre ». Une étape de contrôle qu'on n'ose plus relancer est une étape qu'on finit
+ * par sauter, et c'est le mode de panne que ce dépôt a déjà payé sur le GPU.
+ *
+ * Ce qui est réutilisé n'est PAS une dispense : c'est la mesure réelle faite sur CE fichier-là.
+ * Quatre conditions, toutes nécessaires, et la première suffirait presque :
+ *
+ *   1. le clip n'a pas été re-synthétisé pendant ce lancement — un fichier neuf est toujours
+ *      réécouté, sans exception ;
+ *   2. le NOM du fichier est identique — or le nom porte l'empreinte du texte (`fichierDuClip`),
+ *      donc un texte modifié donne un autre fichier et sort de la mémoire par construction ;
+ *   3. l'empreinte du texte concorde, vérifiée en plus du nom ;
+ *   4. la durée mesurée par `ffprobe` est identique à la milliseconde — un fichier réencodé,
+ *      tronqué ou remplacé change de durée.
+ *
+ * `--requalifier` réécoute tout, et `--tout` re-rend tout donc réécoute tout. Le compte des
+ * scores mémorisés est écrit au verrou (`clipsQcMemorises`) : personne ne peut lire « 100 %
+ * contrôlé » sans voir combien l'ont été à cet instant.
+ * ═══════════════════════════════════════════════════════════════════════════════════════════
+ */
+export function scoresDejaMesures(cheminVerrou = VERROU) {
+  const connus = new Map();
+  if (!existsSync(cheminVerrou)) return connus;
+  let verrou;
+  try {
+    verrou = JSON.parse(readFileSync(cheminVerrou, 'utf8'));
+  } catch {
+    // Un verrou illisible n'est pas une panne : c'est zéro mémoire, donc tout est réécouté.
+    return connus;
+  }
+  for (const clip of verrou.clips ?? []) {
+    // Seuls les scores issus de l'ASR se mémorisent. `remesure-duree` est recalculé de toute
+    // façon — il ne coûte rien — et `aucun` (mode `--sans-qc`) ne doit jamais se propager.
+    if (clip.qcInstrument !== 'transcription-inverse') continue;
+    if (typeof clip.qcScore !== 'number') continue;
+    connus.set(`${clip.cle}|${clip.rendu}`, {
+      fichier: clip.fichier,
+      empreinteTexte: clip.empreinteTexte,
+      dureeMs: clip.dureeMs,
+      qcScore: clip.qcScore,
+    });
+  }
+  return connus;
+}
+
 export async function rendreTout(options = {}) {
-  const { tout = false, sansQc = false, horodatage = null, seulementLocuteurs = false } = options;
+  const {
+    tout = false, sansQc = false, horodatage = null, seulementLocuteurs = false,
+    requalifier = false,
+  } = options;
 
   const absents = manquants();
   if (absents.length > 0) {
@@ -415,6 +473,8 @@ export async function rendreTout(options = {}) {
   const refuses = [];
   let rendus = 0;
   let reutilises = 0;
+  /** Les clips que ce lancement n'a PAS re-synthétisés — seuls eux peuvent mémoriser un score. */
+  const nonResynthetises = new Set();
 
   for (const objet of aRendre) {
     const voix = VOIX[objet.locuteur];
@@ -441,6 +501,7 @@ export async function rendreTout(options = {}) {
       }
     } else {
       reutilises += 1;
+      nonResynthetises.add(`${objet.cle}|${objet.rendu}`);
     }
 
     const mesure = remesurer(destination, objet.texte);
@@ -494,18 +555,51 @@ export async function rendreTout(options = {}) {
   const estCourt = (clip) => clip.texte.trim().split(/\s+/u).length < MOTS_MINIMUM_POUR_ASR;
 
   let moteurQc = 'aucun';
+  let memorises = 0;
   if (!sansQc) {
     const { transcrireLot } = await import('./qc-voix.mjs');
-    const aTranscrire = clips.filter((clip) => !estCourt(clip));
+
+    // La mémoire du verrou — voir `scoresDejaMesures` pour les quatre conditions.
+    const connus = requalifier || tout ? new Map() : scoresDejaMesures();
+    const memoire = new Map();
+    const aTranscrire = [];
+    for (const clip of clips) {
+      if (estCourt(clip)) continue;
+      const identifiant = `${clip.cle}|${clip.rendu}`;
+      const connu = connus.get(identifiant);
+      if (
+        nonResynthetises.has(identifiant) &&
+        connu !== undefined &&
+        connu.fichier === clip.fichier &&
+        connu.empreinteTexte === clip.empreinteTexte &&
+        connu.dureeMs === clip.dureeMs
+      ) {
+        memoire.set(identifiant, connu.qcScore);
+        continue;
+      }
+      aTranscrire.push(clip);
+    }
+    memorises = memoire.size;
+
     const resultatQc = transcrireLot(aTranscrire, RACINE);
-    moteurQc = resultatQc.moteur;
+    // `transcrireLot` rend `aucun` quand il n'a rien à faire. Dire « aucun » alors que tous
+    // les scores viennent d'une transcription inverse antérieure serait faux dans l'autre
+    // sens : on nomme l'instrument ET la part mémorisée.
+    moteurQc =
+      aTranscrire.length === 0 && memorises > 0
+        ? `faster-whisper (${String(memorises)} scores relus au verrou, 0 réécouté)`
+        : resultatQc.moteur;
 
     for (const clip of clips) {
+      const identifiant = `${clip.cle}|${clip.rendu}`;
       if (estCourt(clip)) {
         clip.qcScore = 1;
         clip.qcInstrument = 'remesure-duree';
+      } else if (memoire.has(identifiant)) {
+        clip.qcScore = memoire.get(identifiant);
+        clip.qcInstrument = 'transcription-inverse';
       } else {
-        clip.qcScore = resultatQc.scores.get(`${clip.cle}|${clip.rendu}`) ?? 0;
+        clip.qcScore = resultatQc.scores.get(identifiant) ?? 0;
         clip.qcInstrument = 'transcription-inverse';
       }
     }
@@ -517,13 +611,98 @@ export async function rendreTout(options = {}) {
     }
   }
 
+  // ══════════════════════════════════════════════════════════════════════════════════════
+  // LES REPRISES — ON RETIRE UN TIRAGE RATÉ, ON NE CONTOURNE PAS LE SEUIL.
+  //
+  // **Piper n'est pas déterministe** : son prédicteur de durée VITS est stochastique, et le
+  // dépôt l'a déjà mesuré — 613 ms contre 404 ms sur le MÊME mot `pull`, 34 % d'écart. Deux
+  // synthèses du même texte ne sont donc pas le même clip, et un tirage peut être mou là où le
+  // suivant est net.
+  //
+  // MESURÉ le 2026-08-02 sur les deux premiers refus du contenu de M1, sorties citées — et le
+  // constat n'est pas celui qu'on attendait :
+  //
+  //   0.824  attendu « suis les mots ou tu lis un i »  →  entendu « suis les mots du lien i »
+  //   0.816  attendu « les mots ou tu lis un a »       →  entendu « les mots ou tully s y en a »
+  //
+  // Ce n'est PAS la lettre isolée qui échoue — `i` et `a` sont entendus justes tous les deux.
+  // C'est « où tu lis », une suite de mots outils courts, que le tirage a rendue molle. Le
+  // texte est bon, la voix de ce tirage-là ne l'est pas.
+  //
+  // ── POURQUOI CE N'EST PAS UN ASSOUPLISSEMENT, ET C'EST LA SEULE QUESTION QUI COMPTE ──────
+  // Le seuil ne bouge pas. L'instrument ne bouge pas. Le texte ne bouge pas. Ce qui change à
+  // chaque reprise, c'est **le clip lui-même** — un autre échantillon, réécouté par la même
+  // machine contre la même barre. On s'arrête au PREMIER tirage qui passe, et c'est celui-là que
+  // l'enfant entend : le score publié est toujours celui du fichier qui est sur le disque.
+  // Rejouer un tirage aléatoire serait fautif si le seuil jugeait le TEXTE ; il juge un
+  // enregistrement, et il y en a plusieurs possibles.
+  //
+  // Le nombre de tirages est BORNÉ et DÉCLARÉ par clip au verrou (`tirages`). Un clip qui échoue
+  // trois fois n'entre pas au manifeste — D42 masque son bouton, il est nommé, compté, et c'est
+  // le bon comportement : trois tirages mous de suite ne sont plus de la malchance.
+  // ══════════════════════════════════════════════════════════════════════════════════════
+  const TIRAGES_MAXIMUM = 3;
+  for (const clip of clips) clip.tirages = 1;
+
+  if (!sansQc) {
+    const { transcrireLot } = await import('./qc-voix.mjs');
+    for (let tirage = 2; tirage <= TIRAGES_MAXIMUM; tirage += 1) {
+      // Seuls les clips jugés par l'ASR sont repris : ceux contrôlés par leur remesure de durée
+      // portent déjà 1, et un `--sans-qc` ne doit jamais déclencher de reprise.
+      const aReprendre = clips.filter(
+        (clip) => clip.qcInstrument === 'transcription-inverse' && clip.qcScore < SEUIL_QC,
+      );
+      if (aReprendre.length === 0) break;
+
+      const repris = [];
+      for (const clip of aReprendre) {
+        const objet = aRendre.find((o) => o.cle === clip.cle && o.rendu === clip.rendu);
+        if (objet === undefined) continue;
+        const destination = join(RACINE, 'contenu', clip.fichier);
+        try {
+          rmSync(destination, { force: true });
+          rendreClip(objet, VOIX[objet.locuteur], syllabes, destination);
+          rendus += 1;
+        } catch {
+          // Une synthèse qui lève pendant une reprise laisse le score du tirage précédent :
+          // on ne dégrade pas ce qu'on avait, et le clip reste refusé s'il l'était.
+          continue;
+        }
+        const mesure = remesurer(destination, objet.texte);
+        if (!mesure.ok) continue;
+        clip.dureeMs = mesure.dureeMs;
+        clip.octets = mesure.octets;
+        clip.tirages = tirage;
+        repris.push(clip);
+      }
+      if (repris.length === 0) break;
+
+      const resultatReprise = transcrireLot(repris, RACINE);
+      for (const clip of repris) {
+        // ── LE SCORE EST CELUI DU FICHIER QUI EST SUR LE DISQUE, TOUJOURS ──────────────────
+        //
+        // Une première version gardait le MEILLEUR score des tirages « pour ne pas perdre un
+        // clip déjà proche du seuil ». C'était un mensonge silencieux : le fichier servi est
+        // celui du DERNIER tirage, et le manifeste aurait annoncé le score d'un enregistrement
+        // effacé. Un clip peut se retirer ; un score ne se choisit pas parmi les tirages.
+        //
+        // La boucle s'arrête dès qu'un tirage passe, donc le dernier tirage EST le tirage
+        // retenu. Si aucun ne passe, le score publié est celui du fichier réellement écrit —
+        // et le clip est refusé de toute façon.
+        clip.qcScore = resultatReprise.scores.get(`${clip.cle}|${clip.rendu}`) ?? 0;
+      }
+    }
+  }
+
   const retenus = clips.filter((clip) => clip.qcScore >= SEUIL_QC);
   for (const clip of clips) {
     if (clip.qcScore < SEUIL_QC) {
       refuses.push({
         cle: clip.cle,
         rendu: clip.rendu,
-        motif: `qcScore ${clip.qcScore.toFixed(3)} < ${String(SEUIL_QC)}`,
+        motif:
+          `qcScore ${clip.qcScore.toFixed(3)} < ${String(SEUIL_QC)} ` +
+          `après ${String(clip.tirages)} tirage(s)`,
       });
     }
   }
@@ -549,8 +728,10 @@ export async function rendreTout(options = {}) {
     // fichier — y ajouter un champ ferait diverger le manifeste de son propre type et de son
     // schéma (`additionalProperties: false`). L'information n'est pas perdue : elle est au
     // verrou, clip par clip, et résumée dans le `$commentaire` ci-dessus.
+    // `qcInstrument` et `tirages` sont RETIRÉS ici : `ClipVoix` est gelé au § 5.4 et le schéma
+    // du manifeste est `additionalProperties: false`. Les deux sont au verrou, clip par clip.
     clips: retenus
-      .map(({ qcInstrument: _instrument, ...clip }) => clip)
+      .map(({ qcInstrument: _instrument, tirages: _tirages, ...clip }) => clip)
       .sort((a, b) => (a.cle + a.rendu).localeCompare(b.cle + b.rendu)),
   };
 
@@ -583,7 +764,18 @@ export async function rendreTout(options = {}) {
           clipsReutilises: reutilises,
           clipsAuManifeste: retenus.length,
           clipsRefuses: refuses.length,
+          // La part des scores RELUS au verrou plutôt que réécoutée à cet instant. Écrite,
+          // jamais tue : « 100 % contrôlé » ne veut pas dire « 100 % contrôlé aujourd'hui ».
+          clipsQcMemorises: memorises,
+          /** Clips qu'un tirage Piper mou a obligé à re-synthétiser. Voir `tirages` ci-dessous. */
+          clipsRepris: clips.filter((clip) => clip.tirages > 1).length,
+          // Les fichiers de contenu qu'un AUTRE lot était en train d'écrire pendant ce rendu.
+          // Ils sont au verrou parce qu'ils changent le sens du taux de couverture : chacun
+          // retire ses consignes du DÉNOMINATEUR. Une couverture de « 100 % » calculée sur un
+          // dénominateur tronqué est le mensonge exact que ce lot doit éviter.
+          fichiersIllisibles: recensement.illisibles.length,
         },
+        illisibles: recensement.illisibles,
         refuses,
         clips: retenus.map((clip) => ({
           cle: clip.cle,
@@ -596,6 +788,10 @@ export async function rendreTout(options = {}) {
           // L'instrument, NOMMÉ clip par clip. C'est ce champ qui rend le `qcScore` du
           // manifeste lisible sans qu'il faille relire ce script.
           qcInstrument: clip.qcInstrument,
+          // Combien de tirages Piper il a fallu. `1` = passé du premier coup. Au-delà, le clip
+          // servi est un AUTRE échantillon du même texte, jugé par le même seuil : c'est ce
+          // champ qui rend la reprise auditable au lieu d'être invisible.
+          tirages: clip.tirages,
         })),
       },
       null,
@@ -604,7 +800,16 @@ export async function rendreTout(options = {}) {
     'utf8',
   );
 
-  return { manifeste, refuses, rendus, reutilises, recensement };
+  return {
+    manifeste,
+    refuses,
+    rendus,
+    reutilises,
+    recensement,
+    memorises,
+    moteurQc,
+    repris: clips.filter((clip) => clip.tirages > 1).length,
+  };
 }
 
 // ─────────────────────────────────────────────────────────────────────── ligne de commande
@@ -614,12 +819,14 @@ if (process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.a
   const horodatageArgument = argv.find((a) => a.startsWith('--horodatage='));
 
   try {
-    const { manifeste, refuses, rendus, reutilises, recensement } = await rendreTout({
-      tout: argv.includes('--tout'),
-      sansQc: argv.includes('--sans-qc'),
-      seulementLocuteurs: argv.includes('--locuteurs'),
-      horodatage: horodatageArgument?.slice('--horodatage='.length) ?? null,
-    });
+    const { manifeste, refuses, rendus, reutilises, recensement, memorises, moteurQc, repris } =
+      await rendreTout({
+        tout: argv.includes('--tout'),
+        sansQc: argv.includes('--sans-qc'),
+        seulementLocuteurs: argv.includes('--locuteurs'),
+        requalifier: argv.includes('--requalifier'),
+        horodatage: horodatageArgument?.slice('--horodatage='.length) ?? null,
+      });
 
     const cles = clesACouvrir(recensement);
     const couverts = cles.filter((cle) =>
@@ -633,6 +840,9 @@ if (process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.a
     process.stdout.write(`  clips réutilisés         : ${String(reutilises)}\n`);
     process.stdout.write(`  clips au manifeste       : ${String(manifeste.clips.length)}\n`);
     process.stdout.write(`  clips REFUSÉS            : ${String(refuses.length)}\n`);
+    process.stdout.write(`  scores QC relus au verrou: ${String(memorises)}\n`);
+    process.stdout.write(`  clips repris (tirage mou) : ${String(repris)}\n`);
+    process.stdout.write(`  instrument de contrôle   : ${String(moteurQc)}\n`);
     for (const refus of refuses.slice(0, 20)) {
       process.stdout.write(`      · ${refus.cle} [${refus.rendu}] — ${refus.motif}\n`);
     }
@@ -640,6 +850,31 @@ if (process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.a
       `  COUVERTURE des consignes : ${String(couverts.length)} / ${String(cles.length)} = ` +
         `${(cles.length === 0 ? 0 : (couverts.length / cles.length) * 100).toFixed(1)} %\n`,
     );
+
+    // ════════════════════════════════════════════════════════════════════════════════════
+    // UN DÉNOMINATEUR TRONQUÉ N'EST PAS UNE COUVERTURE — sortie 2, et on RELANCE.
+    //
+    // Le plan gelé le dit pour ce lot précisément : « M4 dépend de tout le texte de M1 et M2 […]
+    // Si son contrat de sortie mesure un écart non nul, c'est que M1 ou M2 a déposé après lui :
+    // il relance, il n'ajuste pas son chiffre. » Un fichier d'exercice saisi à mi-écriture est
+    // sauté par le recenseur : ses consignes quittent le dénominateur, et la ligne ci-dessus
+    // affiche « 100 % » alors qu'il manque des clips. C'est le seul moyen qu'a ce script de
+    // rendre un faux vert, et il ne l'a pas.
+    //
+    // Sortie 2, distincte du 1 des vraies pannes : ce n'est pas une erreur du lot, c'est une
+    // course d'écriture avec un lot voisin. Le geste est « relancer », pas « diagnostiquer ».
+    // ════════════════════════════════════════════════════════════════════════════════════
+    if (recensement.illisibles.length > 0) {
+      process.stdout.write(
+        `\n  ATTENTION — ${String(recensement.illisibles.length)} fichier(s) de contenu ` +
+          'illisible(s) : leurs consignes sont SORTIES du dénominateur ci-dessus.\n',
+      );
+      for (const illisible of recensement.illisibles) {
+        process.stdout.write(`      · ${illisible.chemin} — ${illisible.motif}\n`);
+      }
+      process.stdout.write('  → un autre lot écrivait pendant ce rendu. RELANCER `npm run voix`.\n');
+      process.exit(2);
+    }
     process.exit(0);
   } catch (cause) {
     process.stderr.write(`\n${cause instanceof Error ? cause.message : String(cause)}\n`);

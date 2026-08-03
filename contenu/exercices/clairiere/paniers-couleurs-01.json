@@ -1,7 +1,7 @@
 {
-  "$commentaire": "PLACEHOLDER — À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Écrit à l'intégration de la campagne v2 pour combler un manque du contrat gelé : son § 10.4 fait de R12 (« chaque compétence travaillée par ≥ 3 moteurs distincts, sur le contenu réel ») le chiffre de sortie du lot L2-E, mais son § 3.5 ne confie à AUCUN lot les `contenu/exercices/**` des onze moteurs. Sans cet exercice et son jumeau `luciole-couleurs-01.json`, `lex.couleur` reste travaillée par un seul moteur et R12 est mécaniquement intenable. Le vocabulaire est CE1 par construction : les six mots sont ceux du nuancier déjà employés par `ecole-01.json`, contenu de référence du socle v1. Aucun mot nouveau n'a été introduit.",
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Lot M1 — réécriture du PLACEHOLDER de l'intégration v2. LE CRITÈRE DE TRI A CHANGÉ, ET C'EST LE FOND DE LA RÉÉCRITURE : « couleurs chaudes / couleurs froides » est une abstraction d'adulte, que l'enfant ne peut pas LIRE — il devait la deviner ou l'apprendre par cœur, et l'exercice mesurait alors autre chose que `lex.couleur`. Le critère est maintenant celui du code même du référentiel : « Reconnaître le nom écrit d'une couleur ». Un mot est un nom de couleur, ou il ne l'est pas ; la réponse est dans le mot, pas dans une convention. Les cinq mots non-couleurs sont pris dans le décor du panier lui-même (pomme, poire, table, nappe sont quatre des six régions de `clairiere.paniers`) : l'enfant qui hésite peut regarder le dessin. Trois contraintes mesurées. (1) `partage/src/moteurs/tri/validation.ts` : `acquis[element]` n'est jamais remis à zéro — les douze éléments sont donc répartis en quatre lots disjoints, un par consigne. (2) `element-hors-consigne` ne compte PAS d'erreur : un enfant qui range en avance un mot de la consigne suivante ne paie rien, ce qui autorise les quatre consignes sans piège. (3) `client/src/moteurs/tri/MoteurTri.tsx` rend `contenu.elements` EN ENTIER, pas seulement les éléments de la consigne courante : douze tuiles à l'écran est le plafond retenu pour un enfant de 7 ans, aligné sur les neuf boutons de `guirlande-phrase-01`. c3 et c4 ne nomment plus le panier : c'est le retournement, l'enfant décide seul.",
   "id": "clairiere-paniers-couleurs-01",
-  "version": 1,
+  "version": 2,
   "titre": "Les paniers de couleurs",
   "competences": ["lex.couleur", "comp.consigne.multiple"],
   "difficulte": 1,
@@ -15,26 +15,42 @@
       "consignes": [
         {
           "id": "c1",
-          "texte": "Range les mots chauds dans le panier de gauche.",
+          "texte": "Range les mots de couleur dans le panier de gauche.",
           "forme": "imperative",
           "audio": null,
-          "aRanger": ["mot-rouge", "mot-jaune", "mot-orange"],
-          "motsCles": ["range", "mots", "panier", "gauche"]
+          "aRanger": ["mot-rouge", "mot-bleu", "mot-jaune"],
+          "motsCles": ["range", "couleur", "panier", "gauche"]
         },
         {
           "id": "c2",
-          "texte": "Range les mots froids dans le panier de droite.",
+          "texte": "Range les autres mots dans le panier de droite.",
           "forme": "imperative",
           "audio": null,
-          "aRanger": ["mot-bleu", "mot-vert", "mot-violet"],
-          "motsCles": ["range", "mots", "panier", "droite"]
+          "aRanger": ["mot-pomme", "mot-poire", "mot-banane"],
+          "motsCles": ["range", "autres", "panier", "droite"]
+        },
+        {
+          "id": "c3",
+          "texte": "Range ces mots dans le bon panier.",
+          "forme": "imperative",
+          "audio": null,
+          "aRanger": ["mot-vert", "mot-rose", "mot-table"],
+          "motsCles": ["range", "mots", "bon", "panier"]
+        },
+        {
+          "id": "c4",
+          "texte": "Range les derniers mots dans le bon panier.",
+          "forme": "imperative",
+          "audio": null,
+          "aRanger": ["mot-violet", "mot-orange", "mot-nappe"],
+          "motsCles": ["range", "derniers", "bon", "panier"]
         }
       ],
       "receptacles": [
         {
-          "id": "panier-chaud",
+          "id": "panier-des-couleurs",
           "libelle": "le panier de gauche",
-          "critere": "les couleurs chaudes",
+          "critere": "les mots de couleur",
           "zone": [
             [60, 300],
             [420, 300],
@@ -43,9 +59,9 @@
           ]
         },
         {
-          "id": "panier-froid",
+          "id": "panier-des-autres",
           "libelle": "le panier de droite",
-          "critere": "les couleurs froides",
+          "critere": "les autres mots",
           "zone": [
             [540, 300],
             [900, 300],
@@ -55,48 +71,18 @@
         }
       ],
       "elements": [
-        {
-          "id": "mot-rouge",
-          "libelle": "rouge",
-          "asset": null,
-          "receptacleAttendu": "panier-chaud",
-          "confusionAvec": "rose"
-        },
-        {
-          "id": "mot-jaune",
-          "libelle": "jaune",
-          "asset": null,
-          "receptacleAttendu": "panier-chaud",
-          "confusionAvec": "jeune"
-        },
-        {
-          "id": "mot-orange",
-          "libelle": "orange",
-          "asset": null,
-          "receptacleAttendu": "panier-chaud",
-          "confusionAvec": "orage"
-        },
-        {
-          "id": "mot-bleu",
-          "libelle": "bleu",
-          "asset": null,
-          "receptacleAttendu": "panier-froid",
-          "confusionAvec": "blé"
-        },
-        {
-          "id": "mot-vert",
-          "libelle": "vert",
-          "asset": null,
-          "receptacleAttendu": "panier-froid",
-          "confusionAvec": "ver"
-        },
-        {
-          "id": "mot-violet",
-          "libelle": "violet",
-          "asset": null,
-          "receptacleAttendu": "panier-froid",
-          "confusionAvec": null
-        }
+        { "id": "mot-rouge", "libelle": "rouge", "asset": null, "receptacleAttendu": "panier-des-couleurs", "confusionAvec": "roue" },
+        { "id": "mot-bleu", "libelle": "bleu", "asset": null, "receptacleAttendu": "panier-des-couleurs", "confusionAvec": "blé" },
+        { "id": "mot-jaune", "libelle": "jaune", "asset": null, "receptacleAttendu": "panier-des-couleurs", "confusionAvec": "jeune" },
+        { "id": "mot-vert", "libelle": "vert", "asset": null, "receptacleAttendu": "panier-des-couleurs", "confusionAvec": "ver" },
+        { "id": "mot-rose", "libelle": "rose", "asset": null, "receptacleAttendu": "panier-des-couleurs", "confusionAvec": "ronde" },
+        { "id": "mot-violet", "libelle": "violet", "asset": null, "receptacleAttendu": "panier-des-couleurs", "confusionAvec": null },
+        { "id": "mot-orange", "libelle": "orange", "asset": null, "receptacleAttendu": "panier-des-couleurs", "confusionAvec": "orage" },
+        { "id": "mot-pomme", "libelle": "pomme", "asset": null, "receptacleAttendu": "panier-des-autres", "confusionAvec": "poire" },
+        { "id": "mot-poire", "libelle": "poire", "asset": null, "receptacleAttendu": "panier-des-autres", "confusionAvec": "pomme" },
+        { "id": "mot-banane", "libelle": "banane", "asset": null, "receptacleAttendu": "panier-des-autres", "confusionAvec": null },
+        { "id": "mot-table", "libelle": "table", "asset": null, "receptacleAttendu": "panier-des-autres", "confusionAvec": "tache" },
+        { "id": "mot-nappe", "libelle": "nappe", "asset": null, "receptacleAttendu": "panier-des-autres", "confusionAvec": null }
       ],
       "competence": "lex.couleur"
     }

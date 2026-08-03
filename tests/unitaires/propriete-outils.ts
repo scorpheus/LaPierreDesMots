@@ -126,19 +126,50 @@ export interface CasMoteurPropriete {
   readonly arbitraireActionsPropres: (pool: PoolCibles) => fc.Arbitrary<Record<string, unknown>>;
 }
 
-/** Les cibles disponibles pour un moteur : identifiants du contenu, couleurs de l'habillage. */
+/**
+ * Les cibles disponibles pour un moteur : identifiants du contenu, couleurs de l'habillage.
+ *
+ * ── POURQUOI LES DEUX SOURCES SONT SÉPARÉES ─────────────────────────────────────────────
+ * `identifiants` a longtemps été la seule liste : l'union des chaînes du contenu et des
+ * régions du décor, tirée UNIFORMÉMENT. La proportion de cibles utiles dépendait donc de la
+ * taille du décor — et les décors ont grandi, mesuré : `clairiere/guirlande` est passée de 6 à
+ * 10 régions, `cite-des-histoires/pellicule` de 6 à 9, `campement/page-blanche` de 6 à 14.
+ *
+ * Conséquence : la chance de toucher une cible utile a baissé de 17 % sur `phrase` sans que
+ * rien ne change dans le moteur ni dans la fixture, et deux moteurs d'ordonnancement — pour
+ * qui il faut plusieurs bons tirages D'AFFILÉE — sont tombés de « le hasard les fait avancer »
+ * à zéro. **Un instrument dont la puissance dépend de la taille du décor n'est pas un
+ * instrument.**
+ *
+ * Les deux sources sont donc tirées à poids FIXES (voir `arbCible`). Les régions du décor
+ * restent au vivier — ce sont les cibles plausibles mais fausses, celles qui font visiter les
+ * branches de refus — simplement elles ne noient plus les autres en grandissant.
+ */
 export interface PoolCibles {
+  /** L'union des deux sources. Ce qu'un moteur peut recevoir comme cible existante. */
   readonly identifiants: readonly string[];
+  /** Les chaînes du contenu réel : les cibles qui font AVANCER. */
+  readonly duContenu: readonly string[];
+  /** Les régions du décor que le contenu ne nomme pas : plausibles, et fausses. */
+  readonly duDecor: readonly string[];
   readonly couleurs: readonly string[];
 }
 
 /** Le socle commun imposé aux quatorze par le contrat des features v2 § 4.8. */
 const SOCLE_COMMUN = ['ecouterConsigne', 'demanderAide', 'battementHorloge'] as const;
 
-/** Un identifiant tiré du contenu, ou un identifiant qui n'existe nulle part. */
+/**
+ * Une cible : tirée du contenu, tirée du décor, ou n'existant nulle part.
+ *
+ * Les trois poids sont FIXES et ne dépendent d'aucune taille. C'est le correctif décrit sur
+ * `PoolCibles` : avec un tirage uniforme sur l'union, agrandir un décor diminuait la part des
+ * cibles utiles, donc la puissance du fuzzer, sans qu'aucun test ne le dise.
+ */
 function arbCible(pool: PoolCibles): fc.Arbitrary<string> {
+  const decor = pool.duDecor.length > 0 ? pool.duDecor : ['region-hors-decor'];
   return fc.oneof(
-    { weight: 4, arbitrary: fc.constantFrom(...pool.identifiants) },
+    { weight: 4, arbitrary: fc.constantFrom(...pool.duContenu) },
+    { weight: 1, arbitrary: fc.constantFrom(...decor) },
     { weight: 1, arbitrary: fc.constantFrom('cible-qui-nexiste-pas', '', 'é', '../..') },
   );
 }
@@ -354,8 +385,13 @@ export function poolDe(cas: CasMoteurPropriete): PoolCibles {
   const regions = habillage.scene.calques.flatMap((calque) =>
     calque.regions.map((region) => String(region.id)),
   );
+  const duContenu = [...new Set(chainesDe(cas.contenu))];
+  const dansLeContenu = new Set(duContenu);
+  const duDecor = [...new Set(regions)].filter((region) => !dansLeContenu.has(region));
   const pool: PoolCibles = {
-    identifiants: [...new Set([...chainesDe(cas.contenu), ...regions])],
+    identifiants: [...new Set([...duContenu, ...regions])],
+    duContenu,
+    duDecor,
     couleurs: [...habillage.palette.nuancier].map(String),
   };
   POOLS.set(cas.code, pool);

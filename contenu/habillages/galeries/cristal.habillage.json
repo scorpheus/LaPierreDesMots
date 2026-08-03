@@ -19,58 +19,94 @@
         "role": "coloriable",
         "regions": [
           {
-            "id": "cristal-clair",
-            "libelle": "le cristal clair",
-            "centroide": [
-              190.0,
-              190.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "cristal-sombre",
-            "libelle": "le cristal sombre",
-            "centroide": [
-              480.0,
-              190.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "socle",
-            "libelle": "le socle",
-            "centroide": [
-              770.0,
-              190.0
-            ],
-            "surface": 32000.0
-          },
-          {
             "id": "paroi-humide",
             "libelle": "la paroi humide",
             "centroide": [
-              190.0,
-              420.0
+              240,
+              187
             ],
-            "surface": 32000.0
+            "surface": 343680
           },
           {
-            "id": "gouttes",
-            "libelle": "les gouttes",
+            "id": "sol-de-la-galerie",
+            "libelle": "le sol de la galerie",
             "centroide": [
-              480.0,
-              420.0
+              720,
+              565
             ],
-            "surface": 32000.0
+            "surface": 59520
           },
           {
             "id": "ombre-longue",
             "libelle": "l’ombre longue",
             "centroide": [
-              770.0,
-              420.0
+              862.5,
+              529.9
             ],
-            "surface": 32000.0
+            "surface": 35880
+          },
+          {
+            "id": "socle",
+            "libelle": "le socle",
+            "centroide": [
+              328.5,
+              513
+            ],
+            "surface": 25972
+          },
+          {
+            "id": "cristal-clair",
+            "libelle": "le cristal clair",
+            "centroide": [
+              360,
+              265.7
+            ],
+            "surface": 34790.1
+          },
+          {
+            "id": "cristal-sombre",
+            "libelle": "le cristal sombre",
+            "centroide": [
+              544,
+              320.8
+            ],
+            "surface": 19056.4
+          },
+          {
+            "id": "gouttes",
+            "libelle": "les gouttes",
+            "centroide": [
+              762,
+              216.1
+            ],
+            "surface": 2591.8
+          },
+          {
+            "id": "stalactite-fine",
+            "libelle": "la stalactite fine",
+            "centroide": [
+              160,
+              182.3
+            ],
+            "surface": 1950.1
+          },
+          {
+            "id": "veine-lumineuse",
+            "libelle": "la veine lumineuse",
+            "centroide": [
+              182.4,
+              408.6
+            ],
+            "surface": 5565
+          },
+          {
+            "id": "galet",
+            "libelle": "le galet",
+            "centroide": [
+              831.8,
+              540.8
+            ],
+            "surface": 3510.8
           }
         ]
       },

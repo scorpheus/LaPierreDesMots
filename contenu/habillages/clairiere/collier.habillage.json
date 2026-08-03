@@ -19,58 +19,94 @@
         "role": "coloriable",
         "regions": [
           {
-            "id": "perle-un",
-            "libelle": "la première perle",
+            "id": "ciel-du-matin",
+            "libelle": "le ciel du matin",
             "centroide": [
-              190.0,
-              190.0
+              240,
+              83
             ],
-            "surface": 32000.0
-          },
-          {
-            "id": "perle-deux",
-            "libelle": "la deuxième perle",
-            "centroide": [
-              480.0,
-              190.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "perle-trois",
-            "libelle": "la troisième perle",
-            "centroide": [
-              770.0,
-              190.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "fil",
-            "libelle": "le fil",
-            "centroide": [
-              190.0,
-              420.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "coffret",
-            "libelle": "le coffret",
-            "centroide": [
-              480.0,
-              420.0
-            ],
-            "surface": 32000.0
+            "surface": 145920
           },
           {
             "id": "mousse",
             "libelle": "la mousse",
             "centroide": [
-              770.0,
-              420.0
+              134.7,
+              545.4
             ],
-            "surface": 32000.0
+            "surface": 10317.3
+          },
+          {
+            "id": "herbe-du-bord",
+            "libelle": "l’herbe du bord",
+            "centroide": [
+              708.1,
+              563.6
+            ],
+            "surface": 18488.5
+          },
+          {
+            "id": "coffret",
+            "libelle": "le coffret",
+            "centroide": [
+              373.5,
+              502
+            ],
+            "surface": 42864
+          },
+          {
+            "id": "fil",
+            "libelle": "le fil",
+            "centroide": [
+              233.4,
+              261.8
+            ],
+            "surface": 7439.6
+          },
+          {
+            "id": "perle-un",
+            "libelle": "la première perle",
+            "centroide": [
+              300,
+              302
+            ],
+            "surface": 4211.2
+          },
+          {
+            "id": "perle-deux",
+            "libelle": "la deuxième perle",
+            "centroide": [
+              480,
+              364
+            ],
+            "surface": 6821.4
+          },
+          {
+            "id": "perle-trois",
+            "libelle": "la troisième perle",
+            "centroide": [
+              660,
+              302
+            ],
+            "surface": 2227.8
+          },
+          {
+            "id": "feuille-posee",
+            "libelle": "la feuille posée",
+            "centroide": [
+              787,
+              501
+            ],
+            "surface": 6496
+          },
+          {
+            "id": "caillou",
+            "libelle": "le caillou",
+            "centroide": [
+              836.5,
+              545.2
+            ],
+            "surface": 3808.7
           }
         ]
       },

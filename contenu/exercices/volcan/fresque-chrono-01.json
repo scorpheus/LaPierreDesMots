@@ -1,0 +1,177 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Trois récits, dix vignettes, aucune réemployée d'un récit à l'autre : `acquis` n'est jamais remis à zéro et une vignette reprise serait refusée en `vignette-deja-numerotee`. Quatre vignettes au premier récit et trois au second — chaque vignette est une PHRASE à lire, et quatre phrases sont déjà un texte pour un enfant qui déchiffre encore (D14), même raison que `frise-chrono-01`. Les deux premiers récits sont bâtis sur les mots en `ch` et en `qu` ; le troisième sur ceux en `gn`, que le lexique CE1 ne portait pas encore au début de ce lot.",
+  "id": "volcan-fresque-chrono-01",
+  "version": 1,
+  "titre": "La fresque du cochon et de la fille",
+  "competences": [
+    "gph.rare.ch-qu",
+    "gph.rare.gn",
+    "comp.consigne.simple"
+  ],
+  "difficulte": 4,
+  "jeu": {
+    "moteur": "chrono",
+    "habillage": "volcan.fresque",
+    "noeud": "volcan-07",
+    "etoiles": {
+      "sansAide": true,
+      "sansErreur": true
+    },
+    "aideGobi": [
+      "relire-consigne",
+      "souffle-syllabe",
+      "montre-cible"
+    ],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Range les images dans l'ordre de l'histoire.",
+          "forme": "imperative",
+          "audio": null,
+          "recit": "Le cochon entre dans la cour. Il marche vers la ruche. Une mouche est sur son nez. Le cochon danse.",
+          "ordre": [
+            "vignette-cour",
+            "vignette-ruche",
+            "vignette-mouche",
+            "vignette-danse"
+          ],
+          "motsCles": [
+            "range",
+            "image",
+            "ordre",
+            "histoire"
+          ]
+        },
+        {
+          "id": "c2",
+          "texte": "Range aussi les images dans l'ordre de l'histoire.",
+          "forme": "imperative",
+          "audio": null,
+          "recit": "La fille a une quille. Elle range la quille dans le sac. Puis elle joue avec le chat.",
+          "ordre": [
+            "vignette-quille",
+            "vignette-sac",
+            "vignette-joue"
+          ],
+          "motsCles": [
+            "range",
+            "image",
+            "ordre",
+            "histoire"
+          ]
+        },
+        {
+          "id": "c3",
+          "texte": "Range les dernières images dans l'ordre.",
+          "forme": "imperative",
+          "audio": null,
+          "recit": "La montagne est très grande. Gobi marche sur la ligne. Puis Gobi trouve un champignon.",
+          "ordre": [
+            "vignette-montagne",
+            "vignette-ligne",
+            "vignette-champignon"
+          ],
+          "motsCles": [
+            "range",
+            "image",
+            "ordre"
+          ]
+        }
+      ],
+      "vignettes": [
+        {
+          "id": "vignette-cour",
+          "libelle": "Le cochon entre dans la cour.",
+          "asset": null,
+          "taille": [
+            220,
+            160
+          ]
+        },
+        {
+          "id": "vignette-ruche",
+          "libelle": "Il marche vers la ruche.",
+          "asset": null,
+          "taille": [
+            220,
+            160
+          ]
+        },
+        {
+          "id": "vignette-mouche",
+          "libelle": "Une mouche est sur son nez.",
+          "asset": null,
+          "taille": [
+            220,
+            160
+          ]
+        },
+        {
+          "id": "vignette-danse",
+          "libelle": "Le cochon danse.",
+          "asset": null,
+          "taille": [
+            220,
+            160
+          ]
+        },
+        {
+          "id": "vignette-quille",
+          "libelle": "La fille a une quille.",
+          "asset": null,
+          "taille": [
+            220,
+            160
+          ]
+        },
+        {
+          "id": "vignette-sac",
+          "libelle": "Elle range la quille dans le sac.",
+          "asset": null,
+          "taille": [
+            220,
+            160
+          ]
+        },
+        {
+          "id": "vignette-joue",
+          "libelle": "Puis elle joue avec le chat.",
+          "asset": null,
+          "taille": [
+            220,
+            160
+          ]
+        },
+        {
+          "id": "vignette-montagne",
+          "libelle": "La montagne est très grande.",
+          "asset": null,
+          "taille": [
+            220,
+            160
+          ]
+        },
+        {
+          "id": "vignette-ligne",
+          "libelle": "Gobi marche sur la ligne.",
+          "asset": null,
+          "taille": [
+            220,
+            160
+          ]
+        },
+        {
+          "id": "vignette-champignon",
+          "libelle": "Puis Gobi trouve un champignon.",
+          "asset": null,
+          "taille": [
+            220,
+            160
+          ]
+        }
+      ],
+      "competence": "gph.rare.ch-qu"
+    }
+  }
+}

@@ -1,9 +1,9 @@
 {
-  "$commentaire": "PLACEHOLDER — À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Lot A4 : le moteur `assemble` était déclaré, testé, monté dans le registre, et AUCUN exercice ne le citait — donc inatteignable par l'enfant (mesuré par `tests/e2e/parcours-audit-moteurs.spec.ts`, 8 moteurs joués sur 14). Trois contraintes MESURÉES dans le code, pas supposées : (1) `partage/src/moteurs/assemble/moteur.ts` ne remet jamais `acquis` à zéro entre deux consignes — un bloc réutilisé d'un mot à l'autre serait refusé en `bloc-deja-pose`, motif qui ne compte PAS d'erreur et ne libère rien : l'exercice deviendrait interminable, un état sans issue. Les sept blocs utiles sont donc deux à deux distincts. (2) Le découpage syllabique n'est pas inventé : il est celui que rend `decouperSyllabes` de `partage/src/lecture/syllabation.ts` sur les trois mots — do·mi·no, ba·teau, bal·lon. (3) Le référentiel de compétences est un objet protégé (annexe P § 6.4) et ne porte aucun code de syllabation (point ouvert O10) : l'exercice déclare donc `gph.miroir.gauche-droite`, qui est ce qu'il travaille réellement — les deux intrus `bo` et `da` ne se distinguent des blocs justes `do` et `ba` que par l'axe b/d de D23. Les trois mots sont dans le lexique CE1 de `scripts/generer-phonologie.mjs`. `modeReponse` de chaque étape : `ordre` (1/n!, calculé au BKT depuis le nombre de blocs, D13).",
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Lot M1 — réécriture du PLACEHOLDER du lot A4. LA COMPÉTENCE CHANGE, ET C'EST LE FOND DE LA RÉÉCRITURE. A4 écrivait : « le référentiel ne porte aucun code de syllabation (point ouvert O10) : l'exercice déclare donc `gph.miroir.gauche-droite`, qui est ce qu'il travaille réellement — les deux intrus `bo` et `da` ne se distinguent des blocs justes que par l'axe b/d ». Le raisonnement était bon et le résultat gênant : un exercice de découpage syllabique déclarait un code de lettres miroir, et le tableau de bord attribuait à l'axe b/d des réussites qui mesuraient la syllabation. Le référentiel porte désormais `syl.cvc` ; l'exercice dit ce qu'il fait, et il ne mélange plus deux enseignements dans un même compte. Cinq mots à syllabe FERMÉE (jar·din, bar·be, tor·tue, lun·di, mar·che), là où la Clairière a travaillé la syllabe ouverte : c'est exactement le passage de la Clairière aux Galeries que décrit la v2 § 3.3. TROIS CONTRAINTES MESURÉES. (1) `acquis` n'est jamais remis à zéro : les dix blocs utiles sont deux à deux distincts et chacun n'appartient qu'à un mot. (2) Deux blocs de même libellé feraient payer une erreur non commise (`bloc-hors-ordre` compte une erreur) : les onze libellés sont deux à deux distincts. (3) `MoteurAssemble.tsx` rend `contenu.blocs` en entier — onze tuiles de deux à trois lettres, contre neuf en Clairière : la charge visuelle monte avec la région, elle n'explose pas. LE POINT QUI BLOQUE LA CHAÎNE, SIGNALÉ PLUTÔT QUE CONTOURNÉ : `scripts/valider-brouillons.mjs` audite `blocs[].libelle` contre le lexique CE1, or une syllabe n'est jamais un mot de vocabulaire. Le script le dit lui-même pour les brouillons via `natureDesFormes` (« mi, pa, fé sont des syllabes justes ») mais l'audit côté exercice n'a pas l'équivalent : AUCUN exercice `assemble` ne peut passer la porte aujourd'hui, et c'est pourquoi ce fichier-ci la faisait rougir depuis son écriture. Voir Docs/questions-en-attente.md, section M1.",
   "id": "galeries-stalagmites-assemble-01",
-  "version": 1,
+  "version": 2,
   "titre": "Les stalagmites à empiler",
-  "competences": ["gph.miroir.gauche-droite"],
+  "competences": ["syl.cvc"],
   "difficulte": 3,
   "jeu": {
     "moteur": "assemble",
@@ -15,44 +15,64 @@
       "consignes": [
         {
           "id": "c1",
-          "texte": "Range les syllabes pour écrire : domino.",
+          "texte": "Range les syllabes pour écrire le mot.",
           "forme": "imperative",
           "audio": null,
-          "mot": "domino",
-          "solution": ["bloc-do", "bloc-mi", "bloc-no"],
-          "motsCles": ["range", "syllabe", "domino"]
+          "mot": "jardin",
+          "solution": ["bloc-jar", "bloc-din"],
+          "motsCles": ["range", "syllabes", "mot"]
         },
         {
           "id": "c2",
-          "texte": "Range les syllabes pour écrire : bateau.",
+          "texte": "Range les syllabes pour écrire le mot.",
           "forme": "imperative",
           "audio": null,
-          "mot": "bateau",
-          "solution": ["bloc-ba", "bloc-teau"],
-          "motsCles": ["range", "syllabe", "bateau"]
+          "mot": "barbe",
+          "solution": ["bloc-bar", "bloc-be"],
+          "motsCles": ["range", "syllabes", "mot"]
         },
         {
           "id": "c3",
-          "texte": "Range les syllabes pour écrire : ballon.",
+          "texte": "Range les syllabes pour écrire le mot.",
           "forme": "imperative",
           "audio": null,
-          "mot": "ballon",
-          "solution": ["bloc-bal", "bloc-lon"],
-          "motsCles": ["range", "syllabe", "ballon"]
+          "mot": "tortue",
+          "solution": ["bloc-tor", "bloc-tue"],
+          "motsCles": ["range", "syllabes", "mot"]
+        },
+        {
+          "id": "c4",
+          "texte": "Range les syllabes pour écrire le mot.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "lundi",
+          "solution": ["bloc-lun", "bloc-di"],
+          "motsCles": ["range", "syllabes", "mot"]
+        },
+        {
+          "id": "c5",
+          "texte": "Range les syllabes pour écrire le mot.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "marche",
+          "solution": ["bloc-mar", "bloc-che"],
+          "motsCles": ["range", "syllabes", "mot"]
         }
       ],
       "blocs": [
-        { "id": "bloc-do", "libelle": "do", "intrus": false, "confusionAvec": "bo" },
-        { "id": "bloc-mi", "libelle": "mi", "intrus": false, "confusionAvec": null },
-        { "id": "bloc-no", "libelle": "no", "intrus": false, "confusionAvec": null },
-        { "id": "bloc-ba", "libelle": "ba", "intrus": false, "confusionAvec": "da" },
-        { "id": "bloc-teau", "libelle": "teau", "intrus": false, "confusionAvec": null },
-        { "id": "bloc-bal", "libelle": "bal", "intrus": false, "confusionAvec": "dal" },
-        { "id": "bloc-lon", "libelle": "lon", "intrus": false, "confusionAvec": null },
-        { "id": "bloc-bo", "libelle": "bo", "intrus": true, "confusionAvec": "do" },
-        { "id": "bloc-da", "libelle": "da", "intrus": true, "confusionAvec": "ba" }
+        { "id": "bloc-jar", "libelle": "jar", "intrus": false, "confusionAvec": null },
+        { "id": "bloc-din", "libelle": "din", "intrus": false, "confusionAvec": null },
+        { "id": "bloc-bar", "libelle": "bar", "intrus": false, "confusionAvec": null },
+        { "id": "bloc-be", "libelle": "be", "intrus": false, "confusionAvec": null },
+        { "id": "bloc-tor", "libelle": "tor", "intrus": false, "confusionAvec": null },
+        { "id": "bloc-tue", "libelle": "tue", "intrus": false, "confusionAvec": null },
+        { "id": "bloc-lun", "libelle": "lun", "intrus": false, "confusionAvec": null },
+        { "id": "bloc-di", "libelle": "di", "intrus": false, "confusionAvec": null },
+        { "id": "bloc-mar", "libelle": "mar", "intrus": false, "confusionAvec": null },
+        { "id": "bloc-che", "libelle": "che", "intrus": false, "confusionAvec": null },
+        { "id": "bloc-sar", "libelle": "sar", "intrus": true, "confusionAvec": null }
       ],
-      "competence": "gph.miroir.gauche-droite"
+      "competence": "syl.cvc"
     }
   }
 }

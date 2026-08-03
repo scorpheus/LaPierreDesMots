@@ -1,0 +1,133 @@
+{
+  "id": "foret.feuilles",
+  "moteurs": [
+    "attrape"
+  ],
+  "libelle": "Les feuilles qui tombent",
+  "region": "foret-muette",
+  "scene": {
+    "fichier": "habillages/foret-muette/feuilles.svg",
+    "viewBox": "0 0 960 600",
+    "calques": [
+      {
+        "id": "calque-fond",
+        "role": "fond",
+        "regions": []
+      },
+      {
+        "id": "calque-zones",
+        "role": "coloriable",
+        "regions": [
+          {
+            "id": "ciel-d-automne",
+            "libelle": "le ciel d’automne",
+            "centroide": [
+              240,
+              74.5
+            ],
+            "surface": 132480
+          },
+          {
+            "id": "tapis-du-sol",
+            "libelle": "le tapis du sol",
+            "centroide": [
+              180,
+              539.1
+            ],
+            "surface": 105600
+          },
+          {
+            "id": "branche-haute",
+            "libelle": "la branche du haut",
+            "centroide": [
+              43.7,
+              145.4
+            ],
+            "surface": 26933
+          },
+          {
+            "id": "feuille-un",
+            "libelle": "la première feuille",
+            "centroide": [
+              199,
+              274
+            ],
+            "surface": 7424.5
+          },
+          {
+            "id": "feuille-deux",
+            "libelle": "la deuxième feuille",
+            "centroide": [
+              389,
+              346
+            ],
+            "surface": 5099.2
+          },
+          {
+            "id": "feuille-trois",
+            "libelle": "la troisième feuille",
+            "centroide": [
+              609,
+              302
+            ],
+            "surface": 9875.2
+          },
+          {
+            "id": "feuille-quatre",
+            "libelle": "la quatrième feuille",
+            "centroide": [
+              786,
+              358
+            ],
+            "surface": 3822.7
+          },
+          {
+            "id": "gland-qui-tombe",
+            "libelle": "le gland qui tombe",
+            "centroide": [
+              452,
+              204.8
+            ],
+            "surface": 3558.8
+          },
+          {
+            "id": "souche-au-sol",
+            "libelle": "la souche au sol",
+            "centroide": [
+              177.1,
+              527
+            ],
+            "surface": 11558.6
+          }
+        ]
+      },
+      {
+        "id": "calque-trait",
+        "role": "trait",
+        "regions": []
+      }
+    ]
+  },
+  "palette": {
+    "jetons": {},
+    "nuancier": [
+      "vert",
+      "brun",
+      "gris",
+      "noir",
+      "blanc",
+      "jaune"
+    ]
+  },
+  "timings": {
+    "appuiMs": 60,
+    "relachementMs": 120,
+    "refusMs": 180,
+    "recolorationMs": 800,
+    "interEtoilesMs": 180
+  },
+  "sons": {
+    "ambiance": null,
+    "effets": {}
+  }
+}

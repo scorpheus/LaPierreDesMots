@@ -1,0 +1,181 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. ORIGINE : NIVEAU 3, fiche 3, « Comment pousse une graine ? ». CORRIGÉ PRODUIT : la fiche demande « De quoi une graine a-t-elle besoin pour pousser ? » sans donner la réponse ; le texte source dit « Une graine a besoin de terre, d’eau, d’air et de soleil ». La fresque porte ces éléments — la fleur, la feuille, le soleil, le pot — et l’enfant les DÉSIGNE en les coloriant : choisir l’image qui correspond à une phrase écrite est exactement `comp.image`, avec le geste en plus. `graine`, `racine`, `tige` et `terre` ne sont pas au lexique CE1 ; `fleur`, `feuille`, `soleil`, `pot`, `mur`, `arbre`, `porte` et `ciel` y sont, et ce sont eux que les huit consignes font lire. M6 a AJOUTÉ ces régions à son décor après avoir mesuré que « dans un exercice de coloriage, le nom de la région EST le mot à lire » : les identifiants employés ici sont ceux du `.habillage.json` livré, relus sur disque, jamais devinés. Aucune région existante n'a été renommée ni supprimée. Aucune n'est peinte deux fois : `partage/src/moteurs/colorie/validation.ts:167` refuse en `region-deja-peinte`. AUCUNE CIBLE N'EST GRISE, et ce n'est pas un hasard de palette : le gris est l'état du monde éteint, et `partage/src/ton` refuse « en gris » dans tout texte destiné à l'enfant (C7) — colorier EN gris demanderait à l'enfant d'éteindre ce qu'il vient d'allumer.",
+  "id": "cite-des-histoires-fresque-murale-colorie-01",
+  "version": 1,
+  "titre": "La fresque de la graine",
+  "origine": {
+    "source": "fiches-origine/NIVEAU 3.pdf",
+    "niveau": 3,
+    "fiche": 3
+  },
+  "competences": [
+    "comp.image",
+    "lex.couleur",
+    "comp.consigne.simple"
+  ],
+  "difficulte": 2,
+  "jeu": {
+    "moteur": "colorie",
+    "habillage": "cite.fresque-murale",
+    "noeud": "cite-des-histoires-10",
+    "etoiles": {
+      "sansAide": true,
+      "sansErreur": true
+    },
+    "aideGobi": [
+      "relire-consigne",
+      "montre-couleur",
+      "montre-cible"
+    ],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Colorie la fleur en rouge.",
+          "forme": "imperative",
+          "audio": null,
+          "cibles": [
+            {
+              "region": "fleur",
+              "couleur": "rouge"
+            }
+          ],
+          "motsCles": [
+            "colorie",
+            "fleur",
+            "rouge"
+          ]
+        },
+        {
+          "id": "c2",
+          "texte": "Colorie la feuille en vert.",
+          "forme": "imperative",
+          "audio": null,
+          "cibles": [
+            {
+              "region": "feuille",
+              "couleur": "vert"
+            }
+          ],
+          "motsCles": [
+            "colorie",
+            "feuille",
+            "vert"
+          ]
+        },
+        {
+          "id": "c3",
+          "texte": "Colorie le soleil en jaune.",
+          "forme": "imperative",
+          "audio": null,
+          "cibles": [
+            {
+              "region": "soleil",
+              "couleur": "jaune"
+            }
+          ],
+          "motsCles": [
+            "colorie",
+            "soleil",
+            "jaune"
+          ]
+        },
+        {
+          "id": "c4",
+          "texte": "Colorie le pot en brun.",
+          "forme": "imperative",
+          "audio": null,
+          "cibles": [
+            {
+              "region": "pot",
+              "couleur": "brun"
+            }
+          ],
+          "motsCles": [
+            "colorie",
+            "pot",
+            "brun"
+          ]
+        },
+        {
+          "id": "c5",
+          "texte": "Colorie le mur en rose.",
+          "forme": "imperative",
+          "audio": null,
+          "cibles": [
+            {
+              "region": "mur",
+              "couleur": "rose"
+            }
+          ],
+          "motsCles": [
+            "colorie",
+            "mur",
+            "rose"
+          ]
+        },
+        {
+          "id": "c6",
+          "texte": "Colorie l'arbre en orange.",
+          "forme": "imperative",
+          "audio": null,
+          "cibles": [
+            {
+              "region": "arbre",
+              "couleur": "orange"
+            }
+          ],
+          "motsCles": [
+            "colorie",
+            "arbre",
+            "orange"
+          ]
+        },
+        {
+          "id": "c7",
+          "texte": "Colorie la porte en violet.",
+          "forme": "imperative",
+          "audio": null,
+          "cibles": [
+            {
+              "region": "porte",
+              "couleur": "violet"
+            }
+          ],
+          "motsCles": [
+            "colorie",
+            "porte",
+            "violet"
+          ]
+        },
+        {
+          "id": "c8",
+          "texte": "Le ciel du matin est bleu.",
+          "forme": "affirmative",
+          "audio": null,
+          "cibles": [
+            {
+              "region": "ciel",
+              "couleur": "bleu"
+            }
+          ],
+          "motsCles": [
+            "ciel",
+            "matin",
+            "bleu"
+          ]
+        }
+      ],
+      "nuancierAutorise": [
+        "rouge",
+        "vert",
+        "jaune",
+        "brun",
+        "rose",
+        "orange",
+        "violet",
+        "bleu"
+      ]
+    }
+  }
+}

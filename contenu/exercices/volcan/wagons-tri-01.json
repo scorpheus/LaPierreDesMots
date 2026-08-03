@@ -1,0 +1,314 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Les deux mots-repères sont choisis pour être entendables : `chat` porte le son de `ch`, `coq` porte celui de `qu`. Nommer les graphèmes eux-mêmes est impossible — « ch » et « qu » sont des mots de plus d'une lettre et le lexique CE1 ne les porte pas, `scripts/valider-brouillons.mjs` les refuserait. TROIS wagons et non deux — le maximum que le schéma du moteur accorde —, parce que `ph` fait un TROISIÈME son, ni celui de chat ni celui de coq : le proposer en choix binaire aurait obligé à le ranger du mauvais côté. Sept consignes, quatorze éléments, tous disjoints (`element-deja-range` ne libère rien).",
+  "id": "volcan-wagons-tri-01",
+  "version": 1,
+  "titre": "Les wagons du chat et du coq",
+  "competences": [
+    "gph.rare.ch-qu",
+    "gph.rare.ph",
+    "comp.consigne.multiple"
+  ],
+  "difficulte": 3,
+  "jeu": {
+    "moteur": "tri",
+    "habillage": "volcan.wagons",
+    "noeud": "volcan-02",
+    "etoiles": {
+      "sansAide": true,
+      "sansErreur": true
+    },
+    "aideGobi": [
+      "relire-consigne",
+      "souffle-syllabe",
+      "surligne-graphene",
+      "montre-cible"
+    ],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Range les mots où tu entends le son de chat.",
+          "forme": "imperative",
+          "audio": null,
+          "aRanger": [
+            "mot-cheval",
+            "mot-cochon"
+          ],
+          "motsCles": [
+            "range",
+            "mot",
+            "son",
+            "chat"
+          ]
+        },
+        {
+          "id": "c2",
+          "texte": "Range aussi les mots où tu entends le son de chat.",
+          "forme": "imperative",
+          "audio": null,
+          "aRanger": [
+            "mot-bouche",
+            "mot-mouche"
+          ],
+          "motsCles": [
+            "range",
+            "mot",
+            "son",
+            "chat"
+          ]
+        },
+        {
+          "id": "c3",
+          "texte": "Range les mots où tu entends le son de coq.",
+          "forme": "imperative",
+          "audio": null,
+          "aRanger": [
+            "mot-quille",
+            "mot-queue"
+          ],
+          "motsCles": [
+            "range",
+            "mot",
+            "son",
+            "coq"
+          ]
+        },
+        {
+          "id": "c4",
+          "texte": "Range aussi les mots où tu entends le son de coq.",
+          "forme": "imperative",
+          "audio": null,
+          "aRanger": [
+            "mot-musique",
+            "mot-quatre"
+          ],
+          "motsCles": [
+            "range",
+            "mot",
+            "son",
+            "coq"
+          ]
+        },
+        {
+          "id": "c5",
+          "texte": "Range les mots où tu entends le son de photo.",
+          "forme": "imperative",
+          "audio": null,
+          "aRanger": [
+            "mot-phare",
+            "mot-dauphin"
+          ],
+          "motsCles": [
+            "range",
+            "mot",
+            "son",
+            "photo"
+          ]
+        },
+        {
+          "id": "c6",
+          "texte": "Range aussi les mots où tu entends le son de photo.",
+          "forme": "imperative",
+          "audio": null,
+          "aRanger": [
+            "mot-phoque",
+            "mot-telephone"
+          ],
+          "motsCles": [
+            "range",
+            "mot",
+            "son",
+            "photo"
+          ]
+        },
+        {
+          "id": "c7",
+          "texte": "Range les derniers mots.",
+          "forme": "imperative",
+          "audio": null,
+          "aRanger": [
+            "mot-vache",
+            "mot-elephant"
+          ],
+          "motsCles": [
+            "range",
+            "dernier",
+            "mot"
+          ]
+        }
+      ],
+      "receptacles": [
+        {
+          "id": "wagon-gauche",
+          "libelle": "le premier wagon",
+          "critere": "le son de chat",
+          "zone": [
+            [
+              40,
+              300
+            ],
+            [
+              300,
+              300
+            ],
+            [
+              300,
+              560
+            ],
+            [
+              40,
+              560
+            ]
+          ]
+        },
+        {
+          "id": "wagon-milieu",
+          "libelle": "le deuxième wagon",
+          "critere": "le son de photo",
+          "zone": [
+            [
+              350,
+              300
+            ],
+            [
+              610,
+              300
+            ],
+            [
+              610,
+              560
+            ],
+            [
+              350,
+              560
+            ]
+          ]
+        },
+        {
+          "id": "wagon-droite",
+          "libelle": "le troisième wagon",
+          "critere": "le son de coq",
+          "zone": [
+            [
+              660,
+              300
+            ],
+            [
+              920,
+              300
+            ],
+            [
+              920,
+              560
+            ],
+            [
+              660,
+              560
+            ]
+          ]
+        }
+      ],
+      "elements": [
+        {
+          "id": "mot-cheval",
+          "libelle": "cheval",
+          "asset": null,
+          "receptacleAttendu": "wagon-gauche",
+          "confusionAvec": null
+        },
+        {
+          "id": "mot-cochon",
+          "libelle": "cochon",
+          "asset": null,
+          "receptacleAttendu": "wagon-gauche",
+          "confusionAvec": null
+        },
+        {
+          "id": "mot-bouche",
+          "libelle": "bouche",
+          "asset": null,
+          "receptacleAttendu": "wagon-gauche",
+          "confusionAvec": "boule"
+        },
+        {
+          "id": "mot-mouche",
+          "libelle": "mouche",
+          "asset": null,
+          "receptacleAttendu": "wagon-gauche",
+          "confusionAvec": null
+        },
+        {
+          "id": "mot-vache",
+          "libelle": "vache",
+          "asset": null,
+          "receptacleAttendu": "wagon-gauche",
+          "confusionAvec": null
+        },
+        {
+          "id": "mot-quille",
+          "libelle": "quille",
+          "asset": null,
+          "receptacleAttendu": "wagon-droite",
+          "confusionAvec": "fille"
+        },
+        {
+          "id": "mot-queue",
+          "libelle": "queue",
+          "asset": null,
+          "receptacleAttendu": "wagon-droite",
+          "confusionAvec": null
+        },
+        {
+          "id": "mot-musique",
+          "libelle": "musique",
+          "asset": null,
+          "receptacleAttendu": "wagon-droite",
+          "confusionAvec": null
+        },
+        {
+          "id": "mot-quatre",
+          "libelle": "quatre",
+          "asset": null,
+          "receptacleAttendu": "wagon-droite",
+          "confusionAvec": null
+        },
+        {
+          "id": "mot-phare",
+          "libelle": "phare",
+          "asset": null,
+          "receptacleAttendu": "wagon-milieu",
+          "confusionAvec": "fer"
+        },
+        {
+          "id": "mot-dauphin",
+          "libelle": "dauphin",
+          "asset": null,
+          "receptacleAttendu": "wagon-milieu",
+          "confusionAvec": null
+        },
+        {
+          "id": "mot-phoque",
+          "libelle": "phoque",
+          "asset": null,
+          "receptacleAttendu": "wagon-milieu",
+          "confusionAvec": "coq"
+        },
+        {
+          "id": "mot-telephone",
+          "libelle": "téléphone",
+          "asset": null,
+          "receptacleAttendu": "wagon-milieu",
+          "confusionAvec": null
+        },
+        {
+          "id": "mot-elephant",
+          "libelle": "éléphant",
+          "asset": null,
+          "receptacleAttendu": "wagon-milieu",
+          "confusionAvec": null
+        }
+      ],
+      "competence": "gph.rare.ch-qu"
+    }
+  }
+}

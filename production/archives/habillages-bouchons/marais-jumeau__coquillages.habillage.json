@@ -1,0 +1,106 @@
+{
+  "id": "marais.coquillages",
+  "moteurs": [
+    "paires"
+  ],
+  "libelle": "Les coquillages jumeaux",
+  "region": "marais-jumeau",
+  "scene": {
+    "fichier": "habillages/marais-jumeau/coquillages.svg",
+    "viewBox": "0 0 960 600",
+    "calques": [
+      {
+        "id": "calque-fond",
+        "role": "fond",
+        "regions": []
+      },
+      {
+        "id": "calque-zones",
+        "role": "coloriable",
+        "regions": [
+          {
+            "id": "coquille-un",
+            "libelle": "le premier coquillage",
+            "centroide": [
+              190.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "coquille-deux",
+            "libelle": "le deuxième coquillage",
+            "centroide": [
+              480.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "sable-mouille",
+            "libelle": "le sable mouillé",
+            "centroide": [
+              770.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "algue",
+            "libelle": "l’algue",
+            "centroide": [
+              190.0,
+              420.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "galet",
+            "libelle": "le galet",
+            "centroide": [
+              480.0,
+              420.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "ecume",
+            "libelle": "l’écume",
+            "centroide": [
+              770.0,
+              420.0
+            ],
+            "surface": 32000.0
+          }
+        ]
+      },
+      {
+        "id": "calque-trait",
+        "role": "trait",
+        "regions": []
+      }
+    ]
+  },
+  "palette": {
+    "jetons": {},
+    "nuancier": [
+      "bleu",
+      "vert",
+      "gris",
+      "violet",
+      "brun",
+      "blanc"
+    ]
+  },
+  "timings": {
+    "appuiMs": 60,
+    "relachementMs": 120,
+    "refusMs": 200,
+    "recolorationMs": 850,
+    "interEtoilesMs": 190
+  },
+  "sons": {
+    "ambiance": null,
+    "effets": {}
+  }
+}

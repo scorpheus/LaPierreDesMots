@@ -1,0 +1,96 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Lot M1, nœud clairiere-11, temps `maitrise`. IL REJOUE `clairiere.luciole` DU NŒUD 2 : neuf nœuds d'écart, R13 tenue (la règle porte sur une fenêtre de six). L'EXERCICE A CHANGÉ DE QUESTION, PAS DE DÉCOR — au nœud 2 l'enfant lisait un mot de couleur et touchait la luciole correspondante ; ici il lit un mot court et touche LE SON qu'il y voit. Même mécanique, autre compétence : c'est ce que l'axe moteur × habillage × contenu promet. QUATRE FAITS MESURÉS. (1) `expositionMs` descend de 1800 à 1600 ms — la progression est dans les données, jamais dans le code, et cette valeur se recalibre sur l'enfant (D13). (2) Les six réponses sont six options distinctes, contrainte de `acquis` : un même son ne peut donc pas être la réponse de deux consignes, d'où six mots à voyelle dominante différente (a, i, o, u, é, è) pris au brouillon `clairiere/voyelles.json`. (3) Aucune consigne n'offre en leurre une option déjà gagnée : `le son ou` et `le son on` ne sont la réponse de personne et complètent les triplets de la fin. (4) Les libellés d'option écrivent la lettre seule (« le son a ») : `motsDuTexte` de `scripts/valider-brouillons.mjs` écarte les tokens d'une lettre, si bien que le graphème travaillé n'est jamais confronté au lexique — ce qui est juste, une voyelle n'étant pas un mot.",
+  "id": "clairiere-luciole-voyelles-01",
+  "version": 1,
+  "titre": "Les lucioles des voyelles",
+  "competences": ["gph.voyelle.orale", "syl.cv"],
+  "difficulte": 3,
+  "jeu": {
+    "moteur": "eclair",
+    "habillage": "clairiere.luciole",
+    "noeud": "clairiere-11",
+    "etoiles": { "sansAide": true, "sansErreur": true },
+    "aideGobi": ["relire-consigne", "souffle-syllabe", "surligne-graphene"],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "mot": "papa",
+          "texte": "Touche le son que tu lis dans le mot.",
+          "forme": "imperative",
+          "audio": null,
+          "expositionMs": 1600,
+          "options": ["son-a", "son-i", "son-o"],
+          "reponse": "son-a",
+          "motsCles": ["touche", "son", "mot"]
+        },
+        {
+          "id": "c2",
+          "mot": "riz",
+          "texte": "Touche le son que tu lis dans le mot.",
+          "forme": "imperative",
+          "audio": null,
+          "expositionMs": 1600,
+          "options": ["son-i", "son-o", "son-u"],
+          "reponse": "son-i",
+          "motsCles": ["touche", "son", "mot"]
+        },
+        {
+          "id": "c3",
+          "mot": "dos",
+          "texte": "Touche le son que tu lis dans le mot.",
+          "forme": "imperative",
+          "audio": null,
+          "expositionMs": 1600,
+          "options": ["son-o", "son-u", "son-e-aigu"],
+          "reponse": "son-o",
+          "motsCles": ["touche", "son", "mot"]
+        },
+        {
+          "id": "c4",
+          "mot": "mur",
+          "texte": "Touche le son que tu lis dans le mot.",
+          "forme": "imperative",
+          "audio": null,
+          "expositionMs": 1600,
+          "options": ["son-u", "son-e-aigu", "son-e-grave"],
+          "reponse": "son-u",
+          "motsCles": ["touche", "son", "mot"]
+        },
+        {
+          "id": "c5",
+          "mot": "bébé",
+          "texte": "Touche le son que tu lis dans le mot.",
+          "forme": "imperative",
+          "audio": null,
+          "expositionMs": 1600,
+          "options": ["son-e-aigu", "son-e-grave", "son-ou"],
+          "reponse": "son-e-aigu",
+          "motsCles": ["touche", "son", "mot"]
+        },
+        {
+          "id": "c6",
+          "mot": "mère",
+          "texte": "Touche le son que tu lis dans le mot.",
+          "forme": "imperative",
+          "audio": null,
+          "expositionMs": 1600,
+          "options": ["son-e-grave", "son-ou", "son-on"],
+          "reponse": "son-e-grave",
+          "motsCles": ["touche", "son", "mot"]
+        }
+      ],
+      "options": [
+        { "id": "son-a", "libelle": "le son a", "bonne": true, "confusionAvec": "o" },
+        { "id": "son-i", "libelle": "le son i", "bonne": true, "confusionAvec": "u" },
+        { "id": "son-o", "libelle": "le son o", "bonne": true, "confusionAvec": "a" },
+        { "id": "son-u", "libelle": "le son u", "bonne": true, "confusionAvec": "i" },
+        { "id": "son-e-aigu", "libelle": "le son é", "bonne": true, "confusionAvec": "è" },
+        { "id": "son-e-grave", "libelle": "le son è", "bonne": true, "confusionAvec": "é" },
+        { "id": "son-ou", "libelle": "le son ou", "bonne": false, "confusionAvec": null },
+        { "id": "son-on", "libelle": "le son on", "bonne": false, "confusionAvec": null }
+      ],
+      "competence": "gph.voyelle.orale"
+    }
+  }
+}

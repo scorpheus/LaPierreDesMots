@@ -1,0 +1,10 @@
+{
+  "id": "galeries-14",
+  "region": "galeries",
+  "ordre": 14,
+  "exercice": "galeries-cristal-fv-01",
+  "prerequis": [
+    "galeries-13"
+  ],
+  "temps": "maitrise"
+}

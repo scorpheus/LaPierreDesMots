@@ -20,58 +20,85 @@
         "role": "coloriable",
         "regions": [
           {
-            "id": "veine",
-            "libelle": "la veine",
+            "id": "paroi-de-la-mine",
+            "libelle": "la paroi de la mine",
             "centroide": [
-              190.0,
-              190.0
+              180,
+              88.5
             ],
-            "surface": 32000.0
+            "surface": 161280
           },
           {
-            "id": "quartz",
-            "libelle": "le quartz",
+            "id": "sol-de-la-mine",
+            "libelle": "le sol de la mine",
             "centroide": [
-              480.0,
-              190.0
+              720,
+              561
             ],
-            "surface": 32000.0
-          },
-          {
-            "id": "marteau",
-            "libelle": "le marteau",
-            "centroide": [
-              770.0,
-              190.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "copeau",
-            "libelle": "le copeau",
-            "centroide": [
-              190.0,
-              420.0
-            ],
-            "surface": 32000.0
+            "surface": 67200
           },
           {
             "id": "filon",
             "libelle": "le filon",
             "centroide": [
-              480.0,
-              420.0
+              753.8,
+              317.7
             ],
-            "surface": 32000.0
+            "surface": 178314
+          },
+          {
+            "id": "veine",
+            "libelle": "la veine",
+            "centroide": [
+              810.8,
+              332.2
+            ],
+            "surface": 19544.2
+          },
+          {
+            "id": "quartz",
+            "libelle": "le quartz",
+            "centroide": [
+              300,
+              206.3
+            ],
+            "surface": 12896.2
+          },
+          {
+            "id": "marteau",
+            "libelle": "le marteau",
+            "centroide": [
+              761,
+              163.7
+            ],
+            "surface": 8152.7
+          },
+          {
+            "id": "copeau",
+            "libelle": "le copeau",
+            "centroide": [
+              216.9,
+              484.1
+            ],
+            "surface": 4216
           },
           {
             "id": "lampe",
             "libelle": "la lampe",
             "centroide": [
-              770.0,
-              420.0
+              102,
+              515.6
             ],
-            "surface": 32000.0
+            "surface": 6374
+          },
+          {
+            "id": "eclat-de-quartz",
+            "libelle": "l’éclat de quartz",
+            "centroide": [
+              560,
+              493.9
+            ],
+            "surface": 3495.6
           }
         ]
       },

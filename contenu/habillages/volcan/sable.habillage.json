@@ -19,58 +19,85 @@
         "role": "coloriable",
         "regions": [
           {
-            "id": "plage-noire",
-            "libelle": "la plage noire",
+            "id": "ciel-de-cendre",
+            "libelle": "le ciel de cendre",
             "centroide": [
-              190.0,
-              190.0
+              240,
+              73.5
             ],
-            "surface": 32000.0
-          },
-          {
-            "id": "trace-doigt",
-            "libelle": "la trace du doigt",
-            "centroide": [
-              480.0,
-              190.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "galet-chaud",
-            "libelle": "le galet chaud",
-            "centroide": [
-              770.0,
-              190.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "vapeur",
-            "libelle": "la vapeur",
-            "centroide": [
-              190.0,
-              420.0
-            ],
-            "surface": 32000.0
+            "surface": 132480
           },
           {
             "id": "mer-sombre",
             "libelle": "la mer sombre",
             "centroide": [
-              480.0,
-              420.0
+              720,
+              285
             ],
-            "surface": 32000.0
+            "surface": 96000
+          },
+          {
+            "id": "plage-noire",
+            "libelle": "la plage noire",
+            "centroide": [
+              600,
+              466.6
+            ],
+            "surface": 249600
           },
           {
             "id": "falaise",
             "libelle": "la falaise",
             "centroide": [
-              770.0,
-              420.0
+              127.8,
+              205
             ],
-            "surface": 32000.0
+            "surface": 54084
+          },
+          {
+            "id": "trace-doigt",
+            "libelle": "la trace du doigt",
+            "centroide": [
+              702.7,
+              414.8
+            ],
+            "surface": 10276.6
+          },
+          {
+            "id": "galet-chaud",
+            "libelle": "le galet chaud",
+            "centroide": [
+              808.4,
+              469
+            ],
+            "surface": 6181.2
+          },
+          {
+            "id": "vapeur",
+            "libelle": "la vapeur",
+            "centroide": [
+              611,
+              213.8
+            ],
+            "surface": 9251
+          },
+          {
+            "id": "rocher-de-la-plage",
+            "libelle": "le rocher de la plage",
+            "centroide": [
+              153.5,
+              474.4
+            ],
+            "surface": 10801.2
+          },
+          {
+            "id": "coquille-noire",
+            "libelle": "la coquille noire",
+            "centroide": [
+              432.3,
+              563
+            ],
+            "surface": 6281.8
           }
         ]
       },

@@ -1,0 +1,107 @@
+{
+  "$commentaire": "SECOND HABILLAGE DU MOTEUR `grave` DANS LES GALERIES — ajouté à l'intégration de la campagne N. Motif mesuré, pas supposé : `pierre-bd-01` et `pierre-bp-01` déclaraient TOUS LES DEUX `galeries.pierre`, et `tests/e2e/parcours-variete.spec.ts` relevait « galeries.pierre, galeries.pierre » — 12 nœuds joués, 11 habillages distincts. R13 exige qu'une sortie ne rejoue jamais deux fois le même habillage. Il n'existait qu'un seul habillage `grave` pour la région, donc le second nœud n'avait pas d'autre choix. Ce fichier et `veine.svg` sont l'unique correction : AUCUNE ligne de code n'a été touchée pour l'ajouter, ce qui est précisément la promesse de l'axe moteur × habillage × contenu de la v2 § 7 — si ajouter un habillage demandait du code, la variété ne tiendrait pas.",
+  "id": "galeries.veine",
+  "moteurs": [
+    "grave"
+  ],
+  "libelle": "La veine de quartz",
+  "region": "galeries",
+  "scene": {
+    "fichier": "habillages/galeries/veine.svg",
+    "viewBox": "0 0 960 600",
+    "calques": [
+      {
+        "id": "calque-fond",
+        "role": "fond",
+        "regions": []
+      },
+      {
+        "id": "calque-zones",
+        "role": "coloriable",
+        "regions": [
+          {
+            "id": "veine",
+            "libelle": "la veine",
+            "centroide": [
+              190.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "quartz",
+            "libelle": "le quartz",
+            "centroide": [
+              480.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "marteau",
+            "libelle": "le marteau",
+            "centroide": [
+              770.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "copeau",
+            "libelle": "le copeau",
+            "centroide": [
+              190.0,
+              420.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "filon",
+            "libelle": "le filon",
+            "centroide": [
+              480.0,
+              420.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "lampe",
+            "libelle": "la lampe",
+            "centroide": [
+              770.0,
+              420.0
+            ],
+            "surface": 32000.0
+          }
+        ]
+      },
+      {
+        "id": "calque-trait",
+        "role": "trait",
+        "regions": []
+      }
+    ]
+  },
+  "palette": {
+    "jetons": {},
+    "nuancier": [
+      "violet",
+      "bleu",
+      "gris",
+      "blanc",
+      "brun",
+      "noir"
+    ]
+  },
+  "timings": {
+    "appuiMs": 60,
+    "relachementMs": 120,
+    "refusMs": 180,
+    "recolorationMs": 800,
+    "interEtoilesMs": 180
+  },
+  "sons": {
+    "ambiance": null,
+    "effets": {}
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "id": "cite-des-histoires-04",
+  "region": "cite-des-histoires",
+  "ordre": 4,
+  "exercice": "cite-des-histoires-banniere-phrase-01",
+  "prerequis": [
+    "cite-des-histoires-03"
+  ],
+  "temps": "maitrise"
+}

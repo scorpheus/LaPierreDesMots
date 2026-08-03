@@ -1,0 +1,133 @@
+{
+  "id": "volcan.geodes",
+  "moteurs": [
+    "paires"
+  ],
+  "libelle": "Les géodes à ouvrir",
+  "region": "volcan",
+  "scene": {
+    "fichier": "habillages/volcan/geodes.svg",
+    "viewBox": "0 0 960 600",
+    "calques": [
+      {
+        "id": "calque-fond",
+        "role": "fond",
+        "regions": []
+      },
+      {
+        "id": "calque-zones",
+        "role": "coloriable",
+        "regions": [
+          {
+            "id": "paroi-de-la-mine",
+            "libelle": "la paroi de la mine",
+            "centroide": [
+              240,
+              84
+            ],
+            "surface": 151680
+          },
+          {
+            "id": "sol-de-cendre",
+            "libelle": "le sol de cendre",
+            "centroide": [
+              720,
+              535.5
+            ],
+            "surface": 115200
+          },
+          {
+            "id": "geode-un",
+            "libelle": "la première géode",
+            "centroide": [
+              251.5,
+              262.1
+            ],
+            "surface": 19811.2
+          },
+          {
+            "id": "geode-deux",
+            "libelle": "la deuxième géode",
+            "centroide": [
+              480.1,
+              285.2
+            ],
+            "surface": 14234.2
+          },
+          {
+            "id": "geode-trois",
+            "libelle": "la troisième géode",
+            "centroide": [
+              736.4,
+              269.8
+            ],
+            "surface": 17850.1
+          },
+          {
+            "id": "geode-quatre",
+            "libelle": "la quatrième géode",
+            "centroide": [
+              905.7,
+              296.9
+            ],
+            "surface": 8495
+          },
+          {
+            "id": "marteau-du-mineur",
+            "libelle": "le marteau du mineur",
+            "centroide": [
+              174,
+              500.4
+            ],
+            "surface": 5308.9
+          },
+          {
+            "id": "lampe-de-geode",
+            "libelle": "la lampe de la géode",
+            "centroide": [
+              746,
+              515
+            ],
+            "surface": 5851.5
+          },
+          {
+            "id": "eclat-de-geode",
+            "libelle": "l’éclat de géode",
+            "centroide": [
+              450,
+              506.8
+            ],
+            "surface": 4186.2
+          }
+        ]
+      },
+      {
+        "id": "calque-trait",
+        "role": "trait",
+        "regions": []
+      }
+    ]
+  },
+  "palette": {
+    "jetons": {},
+    "nuancier": [
+      "rouge",
+      "orange",
+      "jaune",
+      "noir",
+      "gris",
+      "brun"
+    ]
+  },
+  "timings": {
+    "appuiMs": 60,
+    "relachementMs": 120,
+    "refusMs": 180,
+    "recolorationMs": 800,
+    "interEtoilesMs": 180
+  },
+  "sons": {
+    "ambiance": null,
+    "effets": {}
+  }
+}

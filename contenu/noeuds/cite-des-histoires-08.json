@@ -1,0 +1,10 @@
+{
+  "id": "cite-des-histoires-08",
+  "region": "cite-des-histoires",
+  "ordre": 8,
+  "exercice": "cite-des-histoires-rayonnages-tri-01",
+  "prerequis": [
+    "cite-des-histoires-07"
+  ],
+  "temps": "maitrise"
+}

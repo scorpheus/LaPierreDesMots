@@ -19,58 +19,85 @@
         "role": "coloriable",
         "regions": [
           {
-            "id": "carte-un",
-            "libelle": "la première carte",
+            "id": "mur-de-la-salle",
+            "libelle": "le mur de la salle",
             "centroide": [
-              190.0,
-              190.0
+              240,
+              74
             ],
-            "surface": 32000.0
-          },
-          {
-            "id": "carte-deux",
-            "libelle": "la deuxième carte",
-            "centroide": [
-              480.0,
-              190.0
-            ],
-            "surface": 32000.0
+            "surface": 132480
           },
           {
             "id": "tapis",
             "libelle": "le tapis",
             "centroide": [
-              770.0,
-              190.0
+              742.4,
+              482.3
             ],
-            "surface": 32000.0
-          },
-          {
-            "id": "lanterne",
-            "libelle": "la lanterne",
-            "centroide": [
-              190.0,
-              420.0
-            ],
-            "surface": 32000.0
+            "surface": 111986
           },
           {
             "id": "colonne",
             "libelle": "la colonne",
             "centroide": [
-              480.0,
-              420.0
+              94,
+              284
             ],
-            "surface": 32000.0
+            "surface": 23904
           },
           {
             "id": "fresque-murale",
             "libelle": "la fresque murale",
             "centroide": [
-              770.0,
-              420.0
+              224.4,
+              140.1
             ],
-            "surface": 32000.0
+            "surface": 47840
+          },
+          {
+            "id": "carte-un",
+            "libelle": "la première carte",
+            "centroide": [
+              319,
+              441
+            ],
+            "surface": 35964
+          },
+          {
+            "id": "carte-deux",
+            "libelle": "la deuxième carte",
+            "centroide": [
+              529,
+              451
+            ],
+            "surface": 28684
+          },
+          {
+            "id": "lanterne",
+            "libelle": "la lanterne",
+            "centroide": [
+              834,
+              207.3
+            ],
+            "surface": 9668.1
+          },
+          {
+            "id": "coussin",
+            "libelle": "le coussin",
+            "centroide": [
+              700,
+              480
+            ],
+            "surface": 9857.5
+          },
+          {
+            "id": "livre-pose",
+            "libelle": "le livre posé",
+            "centroide": [
+              131.9,
+              507.7
+            ],
+            "surface": 8996.8
           }
         ]
       },

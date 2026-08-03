@@ -449,6 +449,10 @@ describe('CONTRAT DE SORTIE — ce que les séquences engendrées ont réellemen
         ...bilan,
         actions: actionsDeclarees(cas.code).length,
         cibles: poolDe(cas).identifiants.length,
+        // Les DEUX sources et leur part : c'est ce qui rend visible qu'un décor plus riche ne
+        // dilue plus les cibles utiles. Compter l'union seule masquait exactement ce défaut.
+        duContenu: poolDe(cas).duContenu.length,
+        duDecor: poolDe(cas).duDecor.length,
       };
     });
 
@@ -475,7 +479,9 @@ describe('CONTRAT DE SORTIE — ce que les séquences engendrées ont réellemen
         ...lignes.map(
           (l) =>
             `[Q3-P1]   ${l.code.padEnd(9)} actions=${String(l.actions).padStart(2)} ` +
-            `cibles=${String(l.cibles).padStart(3)} progrès=${String(l.progres).padStart(4)}/${String(l.cas)} ` +
+            `cibles=${String(l.cibles).padStart(3)} ` +
+            `(contenu ${String(l.duContenu).padStart(3)} · décor ${String(l.duDecor).padStart(3)}) ` +
+            `progrès=${String(l.progres).padStart(4)}/${String(l.cas)} ` +
             `terminé=${String(l.termine).padStart(4)} avecErreur=${String(l.avecErreur).padStart(4)} ` +
             `étoiles=${JSON.stringify([...l.etoiles].sort((a, b) => a[0] - b[0]))}`,
         ),
@@ -487,7 +493,20 @@ describe('CONTRAT DE SORTIE — ce que les séquences engendrées ont réellemen
     expect(casTotal, 'moins de mille cas par moteur').toBeGreaterThanOrEqual(NB_CAS * 14);
     // Planchers MESURÉS le 2026-08-02 : 10 moteurs avancent, 10 terminent, 11 comptent une
     // erreur. Les seuils sont posés un cran en dessous — assez bas pour que le contenu puisse
-    // bouger sans faire rougir, assez haut pour qu'un pilotage devenu creux se voie aussitôt.
+    // bouger sans faire rougir, assez haut qu'un pilotage devenu creux se voie aussitôt.
+    //
+    // REMESURÉ au lot d'intégration, après le correctif de `arbCible` : **11 avancent, 10
+    // terminent, 12 comptent une erreur.** Les seuils n'ont pas bougé, et c'est délibéré :
+    // les relever à la mesure du jour ferait rougir la prochaine campagne de contenu pour un
+    // écart de un, exactement le piège que la note ci-dessus décrit.
+    //
+    // Entre les deux mesures il y a eu une chute à 8 / 8 / 11, et sa cause n'était NI le code
+    // NI le contenu : les décors ayant grandi (6 → 9-14 régions), le tirage uniforme sur
+    // l'union « contenu + décor » diluait les cibles utiles. Deux moteurs d'ordonnancement,
+    // qui ont besoin de plusieurs bons tirages d'affilée, sont passés sous la barre. Abaisser
+    // le plancher aurait rendu le fichier vert en le rendant faux. Le correctif est dans
+    // `propriete-outils.ts` — poids fixes par source — et la ligne `cibles=` du tableau
+    // ci-dessous imprime désormais les deux parts, pour que la prochaine dérive se voie.
     expect(
       avecProgres.length,
       'le hasard ne fait plus avancer les moteurs : les invariants deviennent vides',

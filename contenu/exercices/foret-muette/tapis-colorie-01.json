@@ -1,0 +1,161 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. TROIS cibles portent une lettre finale muette — nid, chat, rat — et quatre mots de plus la portent dans les consignes : haut, bas, vert, violet. C’est le mot à colorier qui travaille la loi, jamais la consigne, ce qui garde la consigne à six mots. M6 a AJOUTÉ ces régions à son décor après avoir mesuré que « dans un exercice de coloriage, le nom de la région EST le mot à lire » : les identifiants employés ici sont ceux du `.habillage.json` livré, relus sur disque, jamais devinés. Aucune région existante n'a été renommée ni supprimée. Aucune n'est peinte deux fois : `partage/src/moteurs/colorie/validation.ts:167` refuse en `region-deja-peinte`. AUCUNE CIBLE N'EST GRISE, et ce n'est pas un hasard de palette : le gris est l'état du monde éteint, et `partage/src/ton` refuse « en gris » dans tout texte destiné à l'enfant (C7) — colorier EN gris demanderait à l'enfant d'éteindre ce qu'il vient d'allumer.",
+  "id": "foret-muette-tapis-colorie-01",
+  "version": 1,
+  "titre": "Le tapis de feuilles",
+  "competences": [
+    "gph.finale.muette",
+    "lex.couleur",
+    "comp.consigne.simple"
+  ],
+  "difficulte": 2,
+  "jeu": {
+    "moteur": "colorie",
+    "habillage": "foret.tapis",
+    "noeud": "foret-muette-08",
+    "etoiles": {
+      "sansAide": true,
+      "sansErreur": true
+    },
+    "aideGobi": [
+      "relire-consigne",
+      "montre-couleur",
+      "montre-cible"
+    ],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Colorie le nid en brun.",
+          "forme": "imperative",
+          "audio": null,
+          "cibles": [
+            {
+              "region": "nid",
+              "couleur": "brun"
+            }
+          ],
+          "motsCles": [
+            "colorie",
+            "nid",
+            "brun"
+          ]
+        },
+        {
+          "id": "c2",
+          "texte": "Colorie le chat en noir.",
+          "forme": "imperative",
+          "audio": null,
+          "cibles": [
+            {
+              "region": "chat",
+              "couleur": "noir"
+            }
+          ],
+          "motsCles": [
+            "colorie",
+            "chat",
+            "noir"
+          ]
+        },
+        {
+          "id": "c3",
+          "texte": "Colorie le rat en violet.",
+          "forme": "imperative",
+          "audio": null,
+          "cibles": [
+            {
+              "region": "rat",
+              "couleur": "violet"
+            }
+          ],
+          "motsCles": [
+            "colorie",
+            "rat",
+            "violet"
+          ]
+        },
+        {
+          "id": "c4",
+          "texte": "Colorie l'arbre en vert.",
+          "forme": "imperative",
+          "audio": null,
+          "cibles": [
+            {
+              "region": "arbre",
+              "couleur": "vert"
+            }
+          ],
+          "motsCles": [
+            "colorie",
+            "arbre",
+            "vert"
+          ]
+        },
+        {
+          "id": "c5",
+          "texte": "Colorie la feuille du haut en rouge.",
+          "forme": "imperative",
+          "audio": null,
+          "cibles": [
+            {
+              "region": "feuille-haute",
+              "couleur": "rouge"
+            }
+          ],
+          "motsCles": [
+            "colorie",
+            "feuille",
+            "haut",
+            "rouge"
+          ]
+        },
+        {
+          "id": "c6",
+          "texte": "Colorie la feuille du bas en jaune.",
+          "forme": "imperative",
+          "audio": null,
+          "cibles": [
+            {
+              "region": "feuille-basse",
+              "couleur": "jaune"
+            }
+          ],
+          "motsCles": [
+            "colorie",
+            "feuille",
+            "bas",
+            "jaune"
+          ]
+        },
+        {
+          "id": "c7",
+          "texte": "Le ciel du soir est orange.",
+          "forme": "affirmative",
+          "audio": null,
+          "cibles": [
+            {
+              "region": "ciel",
+              "couleur": "orange"
+            }
+          ],
+          "motsCles": [
+            "ciel",
+            "soir",
+            "orange"
+          ]
+        }
+      ],
+      "nuancierAutorise": [
+        "brun",
+        "noir",
+        "violet",
+        "vert",
+        "rouge",
+        "jaune",
+        "orange",
+        "rose"
+      ]
+    }
+  }
+}

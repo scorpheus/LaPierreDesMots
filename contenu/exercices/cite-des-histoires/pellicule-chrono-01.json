@@ -1,0 +1,170 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. ORIGINE : NIVEAU 5, fiche 10, « Construire un château de sable ». CORRIGÉ PRODUIT : le PDF imprime ses cinq étapes DANS LE DÉSORDRE — c’est le motif d’ingestion, mot pour mot : « les cinq étapes y sont imprimées dans le désordre, et c’est l’enfant qui les numérote ». Le texte source, lui, donne l’ordre : « Préparez les seaux… D’abord, choisissez un endroit plat… Ensuite, il faut remplir des seaux d’eau… Construisez d’abord les fondations… Ajoutez les décorations ». L’ordre des vignettes en descend directement. TROIS consignes de TROIS vignettes plutôt qu’une de cinq : chaque vignette est une PHRASE à lire, et cinq phrases d’un coup sont un texte pour un enfant qui déchiffre encore (D14), même arbitrage que `frise-chrono-01`. Aucune vignette n’est réemployée : `vignette-deja-numerotee` ne libère rien.",
+  "id": "cite-des-histoires-pellicule-chrono-01",
+  "version": 1,
+  "titre": "Le château de sable",
+  "origine": {
+    "source": "fiches-origine/NIVEAU 5.pdf",
+    "niveau": 5,
+    "fiche": 10
+  },
+  "competences": [
+    "comp.chronologie"
+  ],
+  "difficulte": 3,
+  "jeu": {
+    "moteur": "chrono",
+    "habillage": "cite.pellicule",
+    "noeud": "cite-des-histoires-03",
+    "etoiles": {
+      "sansAide": true,
+      "sansErreur": true
+    },
+    "aideGobi": [
+      "relire-consigne",
+      "souffle-syllabe",
+      "montre-cible"
+    ],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Range les images dans l'ordre de l'histoire.",
+          "forme": "imperative",
+          "audio": null,
+          "recit": "Gobi est sur la plage. Il a un seau. Le sable est dans le seau.",
+          "ordre": [
+            "vignette-plage",
+            "vignette-seau",
+            "vignette-sable"
+          ],
+          "motsCles": [
+            "range",
+            "image",
+            "ordre",
+            "histoire"
+          ]
+        },
+        {
+          "id": "c2",
+          "texte": "Range aussi les images dans l'ordre de l'histoire.",
+          "forme": "imperative",
+          "audio": null,
+          "recit": "Le château est petit. Puis le château est très grand. Gobi montre le château.",
+          "ordre": [
+            "vignette-petit",
+            "vignette-grand",
+            "vignette-montre"
+          ],
+          "motsCles": [
+            "range",
+            "image",
+            "ordre",
+            "histoire"
+          ]
+        },
+        {
+          "id": "c3",
+          "texte": "Range les dernières images dans l'ordre.",
+          "forme": "imperative",
+          "audio": null,
+          "recit": "Plume entre sur la plage. Elle range un caillou sur le château. Puis Plume danse.",
+          "ordre": [
+            "vignette-plume",
+            "vignette-caillou",
+            "vignette-danse"
+          ],
+          "motsCles": [
+            "range",
+            "image",
+            "ordre"
+          ]
+        }
+      ],
+      "vignettes": [
+        {
+          "id": "vignette-plage",
+          "libelle": "Gobi est sur la plage.",
+          "asset": null,
+          "taille": [
+            220,
+            160
+          ]
+        },
+        {
+          "id": "vignette-seau",
+          "libelle": "Il a un seau.",
+          "asset": null,
+          "taille": [
+            220,
+            160
+          ]
+        },
+        {
+          "id": "vignette-sable",
+          "libelle": "Le sable est dans le seau.",
+          "asset": null,
+          "taille": [
+            220,
+            160
+          ]
+        },
+        {
+          "id": "vignette-petit",
+          "libelle": "Le château est petit.",
+          "asset": null,
+          "taille": [
+            220,
+            160
+          ]
+        },
+        {
+          "id": "vignette-grand",
+          "libelle": "Puis le château est très grand.",
+          "asset": null,
+          "taille": [
+            220,
+            160
+          ]
+        },
+        {
+          "id": "vignette-montre",
+          "libelle": "Gobi montre le château.",
+          "asset": null,
+          "taille": [
+            220,
+            160
+          ]
+        },
+        {
+          "id": "vignette-plume",
+          "libelle": "Plume entre sur la plage.",
+          "asset": null,
+          "taille": [
+            220,
+            160
+          ]
+        },
+        {
+          "id": "vignette-caillou",
+          "libelle": "Elle range un caillou sur le château.",
+          "asset": null,
+          "taille": [
+            220,
+            160
+          ]
+        },
+        {
+          "id": "vignette-danse",
+          "libelle": "Puis Plume danse.",
+          "asset": null,
+          "taille": [
+            220,
+            160
+          ]
+        }
+      ],
+      "competence": "comp.chronologie"
+    }
+  }
+}

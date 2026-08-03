@@ -1,0 +1,127 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. ORIGINE : NIVEAU 6, fiche 2, « Les feux rouges et les voitures ». CORRIGÉ PRODUIT : la fiche demande « Que doivent faire les voitures quand le feu est rouge ? » et laisse l’amorce vide ; le texte source répond « Quand le feu est rouge, les voitures doivent s’arrêter et attendre leur tour ». Les deux phrases à reconstruire disent exactement cela, dans les mots du lexique CE1 — `s’arrêter`, `circulation`, `piéton`, `sécurité` n’y sont pas. ÉCART ASSUMÉ, et il est nommé : le moteur `grave` que le plan associe au niveau 6 n’a AUCUN habillage à la Cité (les dix déclarés couvrent phrase, histoire, paires, chrono, chemin, tri, assemble, colorie). La phrase à compléter passe donc par `phrase` et par `assemble`, qui font le même travail. Neuf étiquettes — le plafond mesuré par `guirlande-phrase-01` —, toutes distinctes MOT COMPRIS (`etiquette-deja-placee` ne libère rien).",
+  "id": "cite-des-histoires-banniere-phrase-01",
+  "version": 1,
+  "titre": "Le feu rouge de la ville",
+  "origine": {
+    "source": "fiches-origine/NIVEAU 6.pdf",
+    "niveau": 6,
+    "fiche": 2
+  },
+  "competences": [
+    "comp.phrase.completee",
+    "comp.litteral"
+  ],
+  "difficulte": 3,
+  "jeu": {
+    "moteur": "phrase",
+    "habillage": "cite.banniere",
+    "noeud": "cite-des-histoires-04",
+    "etoiles": {
+      "sansAide": true,
+      "sansErreur": true
+    },
+    "aideGobi": [
+      "relire-consigne",
+      "souffle-syllabe",
+      "montre-cible"
+    ],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Range les mots pour lire : le feu est rouge.",
+          "forme": "imperative",
+          "audio": null,
+          "phrase": "Le feu est rouge.",
+          "ordre": [
+            "mot-le",
+            "mot-feu",
+            "mot-est",
+            "mot-rouge"
+          ],
+          "motsCles": [
+            "range",
+            "mot",
+            "feu",
+            "rouge"
+          ]
+        },
+        {
+          "id": "c2",
+          "texte": "Range les mots pour lire : les voitures sont sur la route.",
+          "forme": "imperative",
+          "audio": null,
+          "phrase": "Les voitures sont sur la route.",
+          "ordre": [
+            "mot-les",
+            "mot-voitures",
+            "mot-sont",
+            "mot-sur",
+            "mot-la",
+            "mot-route"
+          ],
+          "motsCles": [
+            "range",
+            "mot",
+            "voiture",
+            "route"
+          ]
+        }
+      ],
+      "etiquettes": [
+        {
+          "id": "mot-le",
+          "mot": "Le",
+          "intrus": false
+        },
+        {
+          "id": "mot-feu",
+          "mot": "feu",
+          "intrus": false
+        },
+        {
+          "id": "mot-est",
+          "mot": "est",
+          "intrus": false
+        },
+        {
+          "id": "mot-rouge",
+          "mot": "rouge.",
+          "intrus": false
+        },
+        {
+          "id": "mot-les",
+          "mot": "Les",
+          "intrus": false
+        },
+        {
+          "id": "mot-voitures",
+          "mot": "voitures",
+          "intrus": false
+        },
+        {
+          "id": "mot-sont",
+          "mot": "sont",
+          "intrus": false
+        },
+        {
+          "id": "mot-sur",
+          "mot": "sur",
+          "intrus": false
+        },
+        {
+          "id": "mot-la",
+          "mot": "la",
+          "intrus": false
+        },
+        {
+          "id": "mot-route",
+          "mot": "route.",
+          "intrus": false
+        }
+      ],
+      "competence": "comp.phrase.completee"
+    }
+  }
+}

@@ -19,58 +19,85 @@
         "role": "coloriable",
         "regions": [
           {
-            "id": "wagon-un",
-            "libelle": "le premier wagon",
+            "id": "paroi",
+            "libelle": "la paroi",
             "centroide": [
-              190.0,
-              190.0
+              240,
+              99
             ],
-            "surface": 32000.0
-          },
-          {
-            "id": "wagon-deux",
-            "libelle": "le deuxième wagon",
-            "centroide": [
-              480.0,
-              190.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "wagon-trois",
-            "libelle": "le troisième wagon",
-            "centroide": [
-              770.0,
-              190.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "rail",
-            "libelle": "le rail",
-            "centroide": [
-              190.0,
-              420.0
-            ],
-            "surface": 32000.0
+            "surface": 180480
           },
           {
             "id": "braise",
             "libelle": "la braise",
             "centroide": [
-              480.0,
-              420.0
+              504.2,
+              551.3
             ],
-            "surface": 32000.0
+            "surface": 11822.7
           },
           {
-            "id": "paroi",
-            "libelle": "la paroi",
+            "id": "rail",
+            "libelle": "le rail",
             "centroide": [
-              770.0,
-              420.0
+              480,
+              461
             ],
-            "surface": 32000.0
+            "surface": 23047.2
+          },
+          {
+            "id": "wagon-un",
+            "libelle": "le premier wagon",
+            "centroide": [
+              146.8,
+              362.5
+            ],
+            "surface": 16705.3
+          },
+          {
+            "id": "wagon-deux",
+            "libelle": "le deuxième wagon",
+            "centroide": [
+              435.5,
+              373.3
+            ],
+            "surface": 12221.3
+          },
+          {
+            "id": "wagon-trois",
+            "libelle": "le troisième wagon",
+            "centroide": [
+              703.1,
+              367.9
+            ],
+            "surface": 14378
+          },
+          {
+            "id": "lampe-de-la-mine",
+            "libelle": "la lampe de la mine",
+            "centroide": [
+              914,
+              160
+            ],
+            "surface": 4579.3
+          },
+          {
+            "id": "tas-de-charbon",
+            "libelle": "le tas de charbon",
+            "centroide": [
+              175.6,
+              496.2
+            ],
+            "surface": 7316.6
+          },
+          {
+            "id": "etai",
+            "libelle": "l’étai",
+            "centroide": [
+              52.3,
+              214.4
+            ],
+            "surface": 19380
           }
         ]
       },

@@ -16,6 +16,26 @@ import { JaugePalier } from './JaugePalier.js';
 const TRACE_ETOILE =
   'M12 2.6l2.9 5.9 6.5.95-4.7 4.6 1.1 6.45L12 17.45 6.2 20.5l1.1-6.45L2.6 9.45l6.5-.95z';
 
+/**
+ * Épaisseur du cerne, en unités du `viewBox` de 24.
+ *
+ * ── POURQUOI 2,6 ET PAS 1,6 (lot M8) ────────────────────────────────────────────────────
+ * « Contours épais, 3 à 5 px, non négociable, c'est ce qui tient le style » (v2 § 9.1). Le
+ * `viewBox` fait 24 unités pour une étoile rendue à `taille` pixels : l'épaisseur À L'ÉCRAN
+ * vaut donc `trait × taille / 24`. Mesuré aux trois tailles réellement employées :
+ *
+ *     taille  1,6 unité → px   2,6 unités → px
+ *     64      4,3              6,9        (écran de récompense)
+ *     40      2,7              4,3        (carte, coffre)
+ *     24      1,6              2,6        (bandeau du nœud)
+ *
+ * À 1,6 le cerne tombait sous 3 px dès que l'étoile descendait sous 45 px, c'est-à-dire
+ * partout sauf sur l'écran de récompense — l'étoile y redevenait une icône d'interface. À 2,6
+ * elle tient la fourchette sur les deux tailles courantes ; la plus petite reste en dessous,
+ * et c'est un choix : y forcer 3 px boucherait le creux entre les branches.
+ */
+const TRAIT_ETOILE = 2.6;
+
 export interface ProprietesEtoiles {
   /** Nombre d'étoiles acquises, de 0 à 3. */
   readonly acquises: number;
@@ -78,9 +98,22 @@ export function Etoiles({
               // Jamais de rouge, jamais de barré, jamais de croix.
               fill={acquise ? 'var(--soleil)' : 'transparent'}
               stroke={acquise ? 'var(--trait)' : 'var(--grisaille)'}
-              strokeWidth={1.6}
+              strokeWidth={TRAIT_ETOILE}
               strokeLinejoin="round"
+              strokeLinecap="round"
             />
+            {/* Le reflet — un seul, en haut à gauche, comme sur un aplat de BD. Il n'existe
+                que sur l'étoile GAGNÉE : c'est le contraste gris/couleur qui porte tout le
+                jeu, et une étoile en creux qui brillerait le supprimerait. Purement décoratif,
+                donc hors du calcul de contraste : le cerne, lui, ne bouge pas. */}
+            {acquise ? (
+              <path
+                d="M10.4 7.6l1.4-2.9 1.3 2.7-1.4 1.4z"
+                fill="var(--parchemin)"
+                stroke="none"
+                opacity={0.9}
+              />
+            ) : null}
           </svg>
         );
       })}

@@ -1,16 +1,37 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" width="960" height="600" role="img" aria-label="La fresque du volcan">
+  <title>La fresque du volcan</title>
+  <desc>Une bordure en anneau encadre trois panneaux de trois tailles à lire dans l’ordre ; une torche les éclaire, une lueur monte du sol, un éclat de roche traîne.</desc>
+  <!--
+    DÉCOR — lot M6, contrat du monde v4 § 2. Trait noir sur blanc, la COULEUR VIENT DU CODE
+    (annexe P § 2) : les régions sortent d'ici en grisaille #8E97A8, qui est leur état
+    par défaut et non un choix graphique. Géométrie 100 % polygonale (M, L, Z — aucun arc) :
+    surface et centroïde sont donc calculables exactement et opposables aux valeurs déclarées
+    par le .habillage.json, que scripts/verifier-regions-fermees.mjs --strict recalcule.
+
+    Chaque région est un ENFANT DIRECT de #calque-zones : SceneSvg.tsx sélectionne
+    "#calque-zones > [id]", et un tracé niché dans un sous-groupe échapperait au tap sans
+    qu'aucun message ne le dise.
+
+    ÉCRIT PAR scripts/dessiner-decors.mjs — ne pas retoucher à la main : la scène est décrite
+    dans scripts/decors/decors.mjs, et l'émetteur refuse d'écrire si la mesure est mauvaise.
+  -->
   <g id="calque-fond">
-    <rect id="fond" x="0" y="0" width="960" height="600" fill="#f6ece6"/>
+    <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
   </g>
-  <g id="calque-zones">
-    <rect id="panneau-un" x="90" y="110" width="200" height="160" rx="12"/>
-    <rect id="panneau-deux" x="380" y="110" width="200" height="160" rx="12"/>
-    <rect id="panneau-trois" x="670" y="110" width="200" height="160" rx="12"/>
-    <rect id="bordure" x="90" y="340" width="200" height="160" rx="12"/>
-    <rect id="roche-noire" x="380" y="340" width="200" height="160" rx="12"/>
-    <rect id="lueur" x="670" y="340" width="200" height="160" rx="12"/>
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round">
+    <path id="roche-noire" class="zone" data-region-svg="roche-noire" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L960,0 L960,148 L933.3,153 L906.7,156.7 L880,158 L853.3,156.7 L826.7,153 L800,148 L773.3,143 L746.7,139.3 L720,138 L693.3,139.3 L666.7,143 L640,148 L613.3,153 L586.7,156.7 L560,158 L533.3,156.7 L506.7,153 L480,148 L453.3,143 L426.7,139.3 L400,138 L373.3,139.3 L346.7,143 L320,148 L293.3,153 L266.7,156.7 L240,158 L213.3,156.7 L186.7,153 L160,148 L133.3,143 L106.7,139.3 L80,138 L53.3,139.3 L26.7,143 L0,148 Z"/>
+    <path id="lueur" class="zone" data-region-svg="lueur" fill="#8E97A8" fill-rule="evenodd" d="M697.6,554.3 L681.9,562.2 L652.8,567.5 L620.9,570.7 L595.5,573.4 L579.3,578.1 L567.5,585.4 L552.4,594.1 L529.1,601.2 L499,603.8 L467.9,601.1 L442.1,594.4 L422.7,587 L405.2,581.7 L383.1,579.3 L353,578.6 L318.6,576.8 L289.1,572.2 L274.3,564.4 L277.7,555.2 L294.2,546.5 L312.8,539.3 L323.3,533.1 L322.3,526.2 L315.1,517.6 L312,507.8 L321.7,498.9 L346.2,493.4 L379.8,492.3 L413.9,494.5 L442.7,497.1 L466.3,497.3 L489.8,494.3 L517.9,489.6 L551,486.3 L583.5,487.1 L607.6,492.8 L619.2,501.9 L621,511.6 L621.6,519.6 L630.1,525.6 L649.6,531 L674.6,537.3 L694.1,545.4 Z"/>
+    <path id="bordure" class="zone" data-region-svg="bordure" fill="#8E97A8" fill-rule="evenodd" d="M70,180 L900,180 L900,500 L70,500 Z M110,220 L860,220 L860,460 L110,460 Z"/>
+    <path id="panneau-un" class="zone" data-region-svg="panneau-un" fill="#8E97A8" fill-rule="evenodd" d="M130,240 L352,240 L352,442 L130,442 Z"/>
+    <path id="panneau-deux" class="zone" data-region-svg="panneau-deux" fill="#8E97A8" fill-rule="evenodd" d="M370,230 L612,230 L612,452 L370,452 Z"/>
+    <path id="panneau-trois" class="zone" data-region-svg="panneau-trois" fill="#8E97A8" fill-rule="evenodd" d="M632,250 L834,250 L834,432 L632,432 Z"/>
+    <path id="socle-de-la-fresque" class="zone" data-region-svg="socle-de-la-fresque" fill="#8E97A8" fill-rule="evenodd" d="M60,500 L900,486 L914,540 L52,554 Z"/>
+    <path id="torche-de-la-fresque" class="zone" data-region-svg="torche-de-la-fresque" fill="#8E97A8" fill-rule="evenodd" d="M48,300 L59.5,322.7 L55.7,342.6 L63.4,339.8 L55.7,362.5 L58.2,442 L37.8,442 L40.3,362.5 L32.6,339.8 L40.3,342.6 L36.5,322.7 Z"/>
+    <path id="eclat-de-roche" class="zone" data-region-svg="eclat-de-roche" fill="#8E97A8" fill-rule="evenodd" d="M902,300 L932,325.8 L925.4,379.1 L902,392 L878.6,379.1 L872,325.8 Z"/>
   </g>
-  <g id="calque-trait">
-    <path id="cadre" d="M20 20 H940 V580 H20 Z" fill="none" stroke="#2b2b2b" stroke-width="4"/>
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path class="trait" d="M130,300 L340,300"/>
+    <path class="trait" d="M380,290 L600,290"/>
+    <path class="trait" d="M640,310 L820,310"/>
   </g>
 </svg>

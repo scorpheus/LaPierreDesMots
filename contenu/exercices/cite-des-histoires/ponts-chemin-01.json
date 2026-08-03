@@ -1,0 +1,255 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. ORIGINE : NIVEAU 2, fiche 5, « LE LAPIN QUI VOULAIT FAIRE DU VÉLO ». CORRIGÉ PRODUIT : la fiche livre huit affirmations à `reponseAttendue: null` ; le texte source les tranche une à une — « Lili essaie de monter sur le vélo, mais elle tombe plusieurs fois » (affirmation 3 : VRAI), « Le renard lui tient le guidon » (affirmation 5 : VRAI), « Lili réussit enfin à rouler toute seule » (affirmation 6, « Lili n’arrive jamais » : FAUX). Les douze ponts reprennent ces étapes VRAIES, dans leur ordre, et l’enfant les remet en marchant : c’est le seul moteur sans champ de texte qui puisse porter une chronologie, parce que le parcours EST la chronologie. Voisinage symétrique remesuré ; les trois parcours sont disjoints et aucun départ n’entre dans un parcours.",
+  "id": "cite-des-histoires-ponts-chemin-01",
+  "version": 1,
+  "titre": "Les ponts de livres",
+  "origine": {
+    "source": "fiches-origine/NIVEAU 2.pdf",
+    "niveau": 2,
+    "fiche": 5
+  },
+  "competences": [
+    "comp.chronologie"
+  ],
+  "difficulte": 4,
+  "jeu": {
+    "moteur": "chemin",
+    "habillage": "cite.ponts",
+    "noeud": "cite-des-histoires-07",
+    "etoiles": {
+      "sansAide": true,
+      "sansErreur": true
+    },
+    "aideGobi": [
+      "relire-consigne",
+      "souffle-syllabe",
+      "montre-cible"
+    ],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Marche sur les images dans l'ordre de l'histoire.",
+          "forme": "imperative",
+          "audio": null,
+          "depart": "pont-un",
+          "parcours": [
+            "pont-deux",
+            "pont-trois",
+            "pont-quatre"
+          ],
+          "motsCles": [
+            "marche",
+            "image",
+            "ordre",
+            "histoire"
+          ]
+        },
+        {
+          "id": "c2",
+          "texte": "Marche aussi sur les images dans l'ordre de l'histoire.",
+          "forme": "imperative",
+          "audio": null,
+          "depart": "pont-cinq",
+          "parcours": [
+            "pont-six",
+            "pont-sept",
+            "pont-huit"
+          ],
+          "motsCles": [
+            "marche",
+            "image",
+            "ordre",
+            "histoire"
+          ]
+        },
+        {
+          "id": "c3",
+          "texte": "Marche sur les dernières images dans l'ordre.",
+          "forme": "imperative",
+          "audio": null,
+          "depart": "pont-neuf",
+          "parcours": [
+            "pont-dix",
+            "pont-onze",
+            "pont-douze"
+          ],
+          "motsCles": [
+            "marche",
+            "image",
+            "ordre"
+          ]
+        }
+      ],
+      "cases": [
+        {
+          "id": "pont-un",
+          "libelle": "Le lapin est dans le jardin.",
+          "position": [
+            120,
+            140
+          ],
+          "voisines": [
+            "pont-deux",
+            "pont-cinq"
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "pont-deux",
+          "libelle": "Il a un vélo.",
+          "position": [
+            340,
+            140
+          ],
+          "voisines": [
+            "pont-un",
+            "pont-trois",
+            "pont-six"
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "pont-trois",
+          "libelle": "Le lapin tombe.",
+          "position": [
+            560,
+            140
+          ],
+          "voisines": [
+            "pont-deux",
+            "pont-quatre",
+            "pont-sept"
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "pont-quatre",
+          "libelle": "Puis le renard porte le vélo.",
+          "position": [
+            780,
+            140
+          ],
+          "voisines": [
+            "pont-trois",
+            "pont-huit"
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "pont-cinq",
+          "libelle": "Le lapin est sur le vélo.",
+          "position": [
+            120,
+            340
+          ],
+          "voisines": [
+            "pont-six",
+            "pont-un",
+            "pont-neuf"
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "pont-six",
+          "libelle": "Le vélo marche.",
+          "position": [
+            340,
+            340
+          ],
+          "voisines": [
+            "pont-cinq",
+            "pont-sept",
+            "pont-deux",
+            "pont-dix"
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "pont-sept",
+          "libelle": "Le lapin danse.",
+          "position": [
+            560,
+            340
+          ],
+          "voisines": [
+            "pont-six",
+            "pont-huit",
+            "pont-trois",
+            "pont-onze"
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "pont-huit",
+          "libelle": "Puis les amis sont dans le jardin.",
+          "position": [
+            780,
+            340
+          ],
+          "voisines": [
+            "pont-sept",
+            "pont-quatre",
+            "pont-douze"
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "pont-neuf",
+          "libelle": "Le matin, le lapin est dans le jardin.",
+          "position": [
+            120,
+            540
+          ],
+          "voisines": [
+            "pont-dix",
+            "pont-cinq"
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "pont-dix",
+          "libelle": "Puis le soleil est chaud.",
+          "position": [
+            340,
+            540
+          ],
+          "voisines": [
+            "pont-neuf",
+            "pont-onze",
+            "pont-six"
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "pont-onze",
+          "libelle": "Le lapin joue avec le renard.",
+          "position": [
+            560,
+            540
+          ],
+          "voisines": [
+            "pont-dix",
+            "pont-douze",
+            "pont-sept"
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "pont-douze",
+          "libelle": "Le soir, le lapin est dans son lit.",
+          "position": [
+            780,
+            540
+          ],
+          "voisines": [
+            "pont-onze",
+            "pont-huit"
+          ],
+          "confusionAvec": null
+        }
+      ],
+      "competence": "comp.chronologie"
+    }
+  }
+}

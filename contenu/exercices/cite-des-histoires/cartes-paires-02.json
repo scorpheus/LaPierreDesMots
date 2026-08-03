@@ -1,0 +1,208 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. ORIGINE : NIVEAU 6, fiche 10, « Ma salade de couleurs ». CORRIGÉ PRODUIT : la fiche pose « Quels légumes rouges utilise Emma ? » avec une amorce vide ; le texte source répond « tomates rouges, carottes orange et concombres verts ». Les trois couples tomate-rouge, carotte-orange, salade-verte en descendent ; citron, olive et raisin viennent du même texte (« un peu de sel, d’huile et de jus de citron »), leurs couleurs sont celles du nuancier du jeu. CHAQUE CARTE-MOT EST UNE PHRASE INACHEVÉE et chaque carte-image sa fin : apparier, ici, c’est compléter — c’est la troisième façon dont la Cité travaille `comp.phrase.completee`, après `phrase` et `assemble`, et R12 est tenue sans que le mot « grave » ait jamais eu d’habillage ici. Huit paires, seize cartes, deux par paire, quatre consignes à paires disjointes.",
+  "id": "cite-des-histoires-cartes-paires-02",
+  "version": 1,
+  "titre": "La salade de couleurs",
+  "origine": {
+    "source": "fiches-origine/NIVEAU 6.pdf",
+    "niveau": 6,
+    "fiche": 10
+  },
+  "competences": [
+    "comp.phrase.completee"
+  ],
+  "difficulte": 4,
+  "jeu": {
+    "moteur": "paires",
+    "habillage": "cite.cartes",
+    "noeud": "cite-des-histoires-12",
+    "etoiles": {
+      "sansAide": true,
+      "sansErreur": true
+    },
+    "aideGobi": [
+      "relire-consigne",
+      "souffle-syllabe",
+      "montre-couleur"
+    ],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Trouve le mot et son image.",
+          "forme": "imperative",
+          "audio": null,
+          "aApparier": [
+            "paire-tomate",
+            "paire-carotte"
+          ],
+          "motsCles": [
+            "trouve",
+            "mot",
+            "image"
+          ]
+        },
+        {
+          "id": "c2",
+          "texte": "Trouve aussi le mot et son image.",
+          "forme": "imperative",
+          "audio": null,
+          "aApparier": [
+            "paire-salade",
+            "paire-citron"
+          ],
+          "motsCles": [
+            "trouve",
+            "mot",
+            "image"
+          ]
+        },
+        {
+          "id": "c3",
+          "texte": "Trouve les mots et les images.",
+          "forme": "imperative",
+          "audio": null,
+          "aApparier": [
+            "paire-olive",
+            "paire-raisin"
+          ],
+          "motsCles": [
+            "trouve",
+            "mot",
+            "image"
+          ]
+        },
+        {
+          "id": "c4",
+          "texte": "Trouve les derniers mots et les images.",
+          "forme": "imperative",
+          "audio": null,
+          "aApparier": [
+            "paire-pomme",
+            "paire-prune"
+          ],
+          "motsCles": [
+            "trouve",
+            "mot",
+            "image"
+          ]
+        }
+      ],
+      "cartes": [
+        {
+          "id": "mot-tomate",
+          "libelle": "La tomate est",
+          "face": "mot",
+          "asset": null,
+          "paire": "paire-tomate"
+        },
+        {
+          "id": "image-tomate",
+          "libelle": "rouge",
+          "face": "image",
+          "asset": null,
+          "paire": "paire-tomate"
+        },
+        {
+          "id": "mot-carotte",
+          "libelle": "La carotte est",
+          "face": "mot",
+          "asset": null,
+          "paire": "paire-carotte"
+        },
+        {
+          "id": "image-carotte",
+          "libelle": "orange",
+          "face": "image",
+          "asset": null,
+          "paire": "paire-carotte"
+        },
+        {
+          "id": "mot-salade",
+          "libelle": "La salade est",
+          "face": "mot",
+          "asset": null,
+          "paire": "paire-salade"
+        },
+        {
+          "id": "image-salade",
+          "libelle": "verte",
+          "face": "image",
+          "asset": null,
+          "paire": "paire-salade"
+        },
+        {
+          "id": "mot-citron",
+          "libelle": "Le citron est",
+          "face": "mot",
+          "asset": null,
+          "paire": "paire-citron"
+        },
+        {
+          "id": "image-citron",
+          "libelle": "jaune",
+          "face": "image",
+          "asset": null,
+          "paire": "paire-citron"
+        },
+        {
+          "id": "mot-olive",
+          "libelle": "L'olive est",
+          "face": "mot",
+          "asset": null,
+          "paire": "paire-olive"
+        },
+        {
+          "id": "image-olive",
+          "libelle": "noire",
+          "face": "image",
+          "asset": null,
+          "paire": "paire-olive"
+        },
+        {
+          "id": "mot-raisin",
+          "libelle": "Le raisin est",
+          "face": "mot",
+          "asset": null,
+          "paire": "paire-raisin"
+        },
+        {
+          "id": "image-raisin",
+          "libelle": "violet",
+          "face": "image",
+          "asset": null,
+          "paire": "paire-raisin"
+        },
+        {
+          "id": "mot-pomme",
+          "libelle": "La pomme est dans",
+          "face": "mot",
+          "asset": null,
+          "paire": "paire-pomme"
+        },
+        {
+          "id": "image-pomme",
+          "libelle": "le panier",
+          "face": "image",
+          "asset": null,
+          "paire": "paire-pomme"
+        },
+        {
+          "id": "mot-prune",
+          "libelle": "La prune est dans",
+          "face": "mot",
+          "asset": null,
+          "paire": "paire-prune"
+        },
+        {
+          "id": "image-prune",
+          "libelle": "le bol",
+          "face": "image",
+          "asset": null,
+          "paire": "paire-prune"
+        }
+      ],
+      "competence": "comp.phrase.completee"
+    }
+  }
+}

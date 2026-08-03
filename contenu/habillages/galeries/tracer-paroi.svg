@@ -1,49 +1,33 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600" role="img" aria-label="Graver la lettre sur la paroi de sable">
+  <title>Graver la lettre sur la paroi de sable</title>
+  <desc>Trois strates de sable de trois longueurs, un tas au pied, le sol, et au centre la paroi de sable, inchangée, sur laquelle on grave au doigt.</desc>
   <!--
-    Décor BOUCHON (D2, § 8 n° 10) : trait noir sur blanc, régions fermées par construction.
+    DÉCOR — lot M6, contrat du monde v4 § 2. Trait noir sur blanc, la COULEUR VIENT DU CODE
+    (annexe P § 2) : les régions sortent d'ici en grisaille #8E97A8, qui est leur état
+    par défaut et non un choix graphique. Géométrie 100 % polygonale (M, L, Z — aucun arc) :
+    surface et centroïde sont donc calculables exactement et opposables aux valeurs déclarées
+    par le .habillage.json, que scripts/verifier-regions-fermees.mjs --strict recalcule.
 
-    SECOND habillage du moteur `trace`, écrit à l'intégration de la campagne v2. Motif : R13
-    — « une sortie complète ne rejoue jamais deux fois le même habillage » (v2 § 15). Les deux
-    nœuds `trace` livrés, `galeries-01` et `galeries-02`, pointaient tous deux sur
-    `galeries.tracer-cristal`, seul habillage `trace` du § 3.3. Mesuré, sortie citée :
+    Chaque région est un ENFANT DIRECT de #calque-zones : SceneSvg.tsx sélectionne
+    "#calque-zones > [id]", et un tracé niché dans un sous-groupe échapperait au tap sans
+    qu'aucun message ne le dise.
 
-      Error: habillages joués dans l'ordre : clairiere.ecole, galeries.tracer-cristal,
-             galeries.tracer-cristal
-      Expected: 3   Received: 2
-
-    Ajouter un habillage ne coûte AUCUNE ligne de code (v2 § 7) : ce fichier et son JSON
-    suffisent, `registre-rendu.ts` n'est pas touché. C'est la promesse de variété vérifiée
-    en acte.
-
-    Même scène que l'ardoise de cristal, autre matière : la PAROI DE SABLE, sur laquelle on
-    grave au doigt. Une seule région coloriable, la paroi, au même endroit et de surface
-    équivalente — la prise du geste ne dépend pas du décor.
-
-    LE DÉCOR NE S'AGITE PAS ICI : « le décor s'agite, le texte jamais » (CLAUDE.md). Une
-    lettre à tracer est du déchiffrage ; le fond reste calme.
+    ÉCRIT PAR scripts/dessiner-decors.mjs — ne pas retoucher à la main : la scène est décrite
+    dans scripts/decors/decors.mjs, et l'émetteur refuse d'écrire si la mesure est mauvaise.
   -->
   <g id="calque-fond">
-    <path d="M 0 0 L 800 0 L 800 600 L 0 600 Z" fill="#FFFFFF" stroke="none"/>
+    <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L800,0 L800,600 L0,600 Z"/>
   </g>
-
-  <g id="calque-decor">
-    <!-- Strates de sable, à gauche. -->
-    <path d="M 40 180 L 200 172 L 200 196 L 40 204 Z" fill="none" stroke="#1B2440" stroke-width="3"/>
-    <path d="M 40 250 L 200 242 L 200 266 L 40 274 Z" fill="none" stroke="#1B2440" stroke-width="3"/>
-    <!-- Strates de sable, à droite. -->
-    <path d="M 600 200 L 760 192 L 760 216 L 600 224 Z" fill="none" stroke="#1B2440" stroke-width="3"/>
-    <path d="M 600 300 L 760 292 L 760 316 L 600 324 Z" fill="none" stroke="#1B2440" stroke-width="3"/>
-    <!-- Un tas de sable au pied de la paroi. -->
-    <path d="M 320 520 L 400 470 L 480 520 Z" fill="none" stroke="#1B2440" stroke-width="3"/>
-    <!-- Le sol de la galerie. -->
-    <path d="M 0 520 L 800 520 L 800 524 L 0 524 Z" fill="none" stroke="#1B2440" stroke-width="2"/>
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round">
+    <path id="strate-haute" class="zone" data-region-svg="strate-haute" fill="#8E97A8" fill-rule="evenodd" d="M30,170 L212,158 L214,206 L32,218 Z"/>
+    <path id="strate-basse" class="zone" data-region-svg="strate-basse" fill="#8E97A8" fill-rule="evenodd" d="M30,250 L210,240 L216,288 L34,298 Z"/>
+    <path id="strate-droite" class="zone" data-region-svg="strate-droite" fill="#8E97A8" fill-rule="evenodd" d="M600,190 L772,178 L776,230 L604,242 Z"/>
+    <path id="tas-de-sable" class="zone" data-region-svg="tas-de-sable" fill="#8E97A8" fill-rule="evenodd" d="M318,522 L400,468 L482,522 Z"/>
+    <path id="sol-de-sable" class="zone" data-region-svg="sol-de-sable" fill="#8E97A8" fill-rule="evenodd" d="M0,522 L22.2,527.4 L44.4,528.9 L66.7,525.5 L88.9,519.6 L111.1,515.4 L133.3,515.9 L155.6,520.8 L177.8,526.5 L200,529 L222.2,526.5 L244.4,520.8 L266.7,515.9 L288.9,515.4 L311.1,519.6 L333.3,525.5 L355.6,528.9 L377.8,527.4 L400,522 L422.2,516.6 L444.4,515.1 L466.7,518.5 L488.9,524.4 L511.1,528.6 L533.3,528.1 L555.6,523.2 L577.8,517.5 L600,515 L622.2,517.5 L644.4,523.2 L666.7,528.1 L688.9,528.6 L711.1,524.4 L733.3,518.5 L755.6,515.1 L777.8,516.6 L800,522 L800,600 L0,600 Z"/>
+    <path id="paroi" class="zone" data-region-svg="paroi" fill="none" fill-rule="evenodd" d="M235,90 L565,90 L565,490 L235,490 Z"/>
   </g>
-
-  <g id="calque-zones">
-    <path id="paroi" d="M 235 90 L 565 90 L 565 490 L 235 490 Z" fill="none" stroke="#1B2440" stroke-width="4"/>
-  </g>
-
-  <g id="calque-trait">
-    <path d="M 2 2 L 798 2 L 798 598 L 2 598 Z" fill="none" stroke="#1B2440" stroke-width="2"/>
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path class="trait" d="M235,140 L565,140"/>
+    <path class="trait" d="M0,522 L800,522"/>
   </g>
 </svg>

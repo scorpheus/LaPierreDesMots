@@ -1,0 +1,42 @@
+{
+  "id": "galeries.tracer-cristal",
+  "moteurs": ["trace"],
+  "libelle": "Graver la lettre sur l’ardoise de cristal",
+  "region": "galeries",
+  "scene": {
+    "fichier": "habillages/galeries/tracer-cristal.svg",
+    "viewBox": "0 0 800 600",
+    "calques": [
+      { "id": "calque-fond", "role": "fond", "regions": [] },
+      { "id": "calque-decor", "role": "decor", "regions": [] },
+      {
+        "id": "calque-zones",
+        "role": "coloriable",
+        "regions": [
+          {
+            "id": "ardoise",
+            "libelle": "l’ardoise de cristal",
+            "centroide": [400.0, 290.0],
+            "surface": 120000.0
+          }
+        ]
+      },
+      { "id": "calque-trait", "role": "trait", "regions": [] }
+    ]
+  },
+  "palette": {
+    "jetons": {},
+    "nuancier": ["bleu", "violet", "blanc", "gris"]
+  },
+  "timings": {
+    "appuiMs": 40,
+    "relachementMs": 100,
+    "refusMs": 180,
+    "recolorationMs": 700,
+    "interEtoilesMs": 180
+  },
+  "sons": {
+    "ambiance": null,
+    "effets": {}
+  }
+}

@@ -1,0 +1,133 @@
+{
+  "id": "marais.grenouilles",
+  "moteurs": [
+    "tri"
+  ],
+  "libelle": "Les grenouilles à ranger",
+  "region": "marais-jumeau",
+  "scene": {
+    "fichier": "habillages/marais-jumeau/grenouilles.svg",
+    "viewBox": "0 0 960 600",
+    "calques": [
+      {
+        "id": "calque-fond",
+        "role": "fond",
+        "regions": []
+      },
+      {
+        "id": "calque-zones",
+        "role": "coloriable",
+        "regions": [
+          {
+            "id": "rive-de-vase",
+            "libelle": "la rive de vase",
+            "centroide": [
+              240,
+              114
+            ],
+            "surface": 209280
+          },
+          {
+            "id": "eau-du-marais",
+            "libelle": "l’eau du marais",
+            "centroide": [
+              180,
+              424.1
+            ],
+            "surface": 326400
+          },
+          {
+            "id": "roseaux-du-fond",
+            "libelle": "les roseaux du fond",
+            "centroide": [
+              280,
+              223
+            ],
+            "surface": 24249.4
+          },
+          {
+            "id": "nenuphar-gauche",
+            "libelle": "le nénuphar de gauche",
+            "centroide": [
+              188.3,
+              451.8
+            ],
+            "surface": 41262.2
+          },
+          {
+            "id": "nenuphar-droit",
+            "libelle": "le nénuphar de droite",
+            "centroide": [
+              632,
+              460.9
+            ],
+            "surface": 33688.3
+          },
+          {
+            "id": "grenouille-un",
+            "libelle": "la première grenouille",
+            "centroide": [
+              237.1,
+              240.8
+            ],
+            "surface": 6240.1
+          },
+          {
+            "id": "grenouille-deux",
+            "libelle": "la deuxième grenouille",
+            "centroide": [
+              488.8,
+              220.6
+            ],
+            "surface": 8399.6
+          },
+          {
+            "id": "grenouille-trois",
+            "libelle": "la troisième grenouille",
+            "centroide": [
+              710.4,
+              241.7
+            ],
+            "surface": 4211
+          },
+          {
+            "id": "libellule-temoin",
+            "libelle": "la libellule témoin",
+            "centroide": [
+              888,
+              138.5
+            ],
+            "surface": 3178.2
+          }
+        ]
+      },
+      {
+        "id": "calque-trait",
+        "role": "trait",
+        "regions": []
+      }
+    ]
+  },
+  "palette": {
+    "jetons": {},
+    "nuancier": [
+      "bleu",
+      "vert",
+      "gris",
+      "violet",
+      "brun",
+      "blanc"
+    ]
+  },
+  "timings": {
+    "appuiMs": 60,
+    "relachementMs": 120,
+    "refusMs": 180,
+    "recolorationMs": 800,
+    "interEtoilesMs": 180
+  },
+  "sons": {
+    "ambiance": null,
+    "effets": {}
+  }
+}

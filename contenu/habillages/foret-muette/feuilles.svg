@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" width="960" height="600" role="img" aria-label="Les feuilles qui tombent">
+  <title>Les feuilles qui tombent</title>
+  <desc>Une branche traverse le haut ; quatre feuilles dentelées de quatre tailles descendent, un gland tombe avec elles, une souche creuse attend en bas.</desc>
+  <!--
+    DÉCOR — lot M6, contrat du monde v4 § 2. Trait noir sur blanc, la COULEUR VIENT DU CODE
+    (annexe P § 2) : les régions sortent d'ici en grisaille #8E97A8, qui est leur état
+    par défaut et non un choix graphique. Géométrie 100 % polygonale (M, L, Z — aucun arc) :
+    surface et centroïde sont donc calculables exactement et opposables aux valeurs déclarées
+    par le .habillage.json, que scripts/verifier-regions-fermees.mjs --strict recalcule.
+
+    Chaque région est un ENFANT DIRECT de #calque-zones : SceneSvg.tsx sélectionne
+    "#calque-zones > [id]", et un tracé niché dans un sous-groupe échapperait au tap sans
+    qu'aucun message ne le dise.
+
+    ÉCRIT PAR scripts/dessiner-decors.mjs — ne pas retoucher à la main : la scène est décrite
+    dans scripts/decors/decors.mjs, et l'émetteur refuse d'écrire si la mesure est mauvaise.
+  -->
+  <g id="calque-fond">
+    <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
+  </g>
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round">
+    <path id="ciel-d-automne" class="zone" data-region-svg="ciel-d-automne" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L960,0 L960,138 L933.3,143.5 L906.7,147.5 L880,149 L853.3,147.5 L826.7,143.5 L800,138 L773.3,132.5 L746.7,128.5 L720,127 L693.3,128.5 L666.7,132.5 L640,138 L613.3,143.5 L586.7,147.5 L560,149 L533.3,147.5 L506.7,143.5 L480,138 L453.3,132.5 L426.7,128.5 L400,127 L373.3,128.5 L346.7,132.5 L320,138 L293.3,143.5 L266.7,147.5 L240,149 L213.3,147.5 L186.7,143.5 L160,138 L133.3,132.5 L106.7,128.5 L80,127 L53.3,128.5 L26.7,132.5 L0,138 Z"/>
+    <path id="tapis-du-sol" class="zone" data-region-svg="tapis-du-sol" fill="#8E97A8" fill-rule="evenodd" d="M0,490 L26.7,497.7 L53.3,501.8 L80,500.4 L106.7,494.1 L133.3,485.9 L160,479.6 L186.7,478.2 L213.3,482.3 L240,490 L266.7,497.7 L293.3,501.8 L320,500.4 L346.7,494.1 L373.3,485.9 L400,479.6 L426.7,478.2 L453.3,482.3 L480,490 L506.7,497.7 L533.3,501.8 L560,500.4 L586.7,494.1 L613.3,485.9 L640,479.6 L666.7,478.2 L693.3,482.3 L720,490 L746.7,497.7 L773.3,501.8 L800,500.4 L826.7,494.1 L853.3,485.9 L880,479.6 L906.7,478.2 L933.3,482.3 L960,490 L960,600 L0,600 Z"/>
+    <path id="branche-haute" class="zone" data-region-svg="branche-haute" fill="#8E97A8" fill-rule="evenodd" d="M1.5,163.9 L300.1,132 L640.2,160 L961.7,121.9 L958.3,94.1 L639.8,132 L299.9,104 L-1.5,136.1 Z"/>
+    <path id="feuille-un" class="zone" data-region-svg="feuille-un" fill="#8E97A8" fill-rule="evenodd" d="M199,218 L211.2,224.7 L223.4,235.9 L233.2,240.4 L240.5,251.6 L247.8,258.3 L245.4,269.5 L250.2,280.7 L242.9,289.7 L240.5,303.1 L228.3,309.8 L216.1,318.8 L203.9,323.3 L203.9,330 L194.1,330 L194.1,323.3 L181.9,318.8 L169.7,309.8 L157.5,303.1 L155.1,289.7 L147.8,280.7 L152.6,269.5 L150.2,258.3 L157.5,251.6 L164.8,240.4 L174.6,235.9 L186.8,224.7 Z"/>
+    <path id="feuille-deux" class="zone" data-region-svg="feuille-deux" fill="#8E97A8" fill-rule="evenodd" d="M389,300 L399.2,305.5 L409.4,314.7 L417.6,318.4 L423.7,327.6 L429.8,333.1 L427.8,342.3 L431.8,351.5 L425.7,358.9 L423.7,369.9 L413.5,375.4 L403.3,382.8 L393.1,386.5 L393.1,392 L384.9,392 L384.9,386.5 L374.7,382.8 L364.5,375.4 L354.3,369.9 L352.3,358.9 L346.2,351.5 L350.2,342.3 L348.2,333.1 L354.3,327.6 L360.4,318.4 L368.6,314.7 L378.8,305.5 Z"/>
+    <path id="feuille-trois" class="zone" data-region-svg="feuille-trois" fill="#8E97A8" fill-rule="evenodd" d="M609,238 L623.2,245.7 L637.4,258.5 L648.8,263.6 L657.3,276.4 L665.8,284.1 L663,296.9 L668.6,309.7 L660.1,319.9 L657.3,335.3 L643.1,343 L628.9,353.2 L614.7,358.3 L614.7,366 L603.3,366 L603.3,358.3 L589.1,353.2 L574.9,343 L560.7,335.3 L557.9,319.9 L549.4,309.7 L555,296.9 L552.2,284.1 L560.7,276.4 L569.2,263.6 L580.6,258.5 L594.8,245.7 Z"/>
+    <path id="feuille-quatre" class="zone" data-region-svg="feuille-quatre" fill="#8E97A8" fill-rule="evenodd" d="M786,318 L794.8,322.8 L803.6,330.8 L810.6,334 L815.9,342 L821.2,346.8 L819.4,354.8 L823,362.8 L817.7,369.2 L815.9,378.8 L807.1,383.6 L798.3,390 L789.5,393.2 L789.5,398 L782.5,398 L782.5,393.2 L773.7,390 L764.9,383.6 L756.1,378.8 L754.3,369.2 L749,362.8 L752.6,354.8 L750.8,346.8 L756.1,342 L761.4,334 L768.4,330.8 L777.2,322.8 Z"/>
+    <path id="gland-qui-tombe" class="zone" data-region-svg="gland-qui-tombe" fill="#8E97A8" fill-rule="evenodd" d="M452,178 L468.3,183.6 L479.2,196.8 L479.2,210 L473.8,217.5 L472.4,243.8 L460.2,268.2 L443.8,268.2 L431.6,243.8 L430.2,217.5 L424.8,210 L424.8,196.8 L435.7,183.6 Z"/>
+    <path id="souche-au-sol" class="zone" data-region-svg="souche-au-sol" fill="#8E97A8" fill-rule="evenodd" d="M72.2,459.7 L104.6,446.5 L137,454.4 L172.6,443.8 L201.8,459.7 L208.3,541.5 L182.4,554.7 L137,546.8 L91.6,554.7 L65.7,541.5 Z M104.6,472.9 L169.4,472.9 L169.4,501.9 L104.6,501.9 Z"/>
+  </g>
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path class="trait" d="M0,492 L960,484"/>
+  </g>
+</svg>

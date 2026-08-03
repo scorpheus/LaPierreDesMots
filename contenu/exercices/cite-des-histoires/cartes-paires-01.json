@@ -1,0 +1,209 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. ORIGINE : NIVEAU 3, fiche 1, « Le cartable oublié ». C’est le niveau dont la matière est « une question, trois images » — le moteur `paires` en est la transposition exacte : une phrase, son image. CORRIGÉ PRODUIT : la fiche pose « Qu’est-ce que Léo oublie ? » et « Qui aide Léo dans la classe ? » sans donner de réponse (motif d’ingestion : « les trois images-réponses ne sont pas toutes des blocs image du PDF »). Le texte source dit « Son cartable n’est pas là ! » et « la maîtresse lui sourit — Tu peux partager les affaires de Camille » : le cartable et la maîtresse sont donc les deux appariements justes, et ils sont ici. Huit paires, seize cartes, DEUX cartes par paire exactement ; quatre consignes à paires disjointes (`acquis` indexé par `IdPaire`, jamais remis à zéro).",
+  "id": "cite-des-histoires-cartes-paires-01",
+  "version": 1,
+  "titre": "Le cartable oublié",
+  "origine": {
+    "source": "fiches-origine/NIVEAU 3.pdf",
+    "niveau": 3,
+    "fiche": 1
+  },
+  "competences": [
+    "comp.image",
+    "comp.litteral"
+  ],
+  "difficulte": 2,
+  "jeu": {
+    "moteur": "paires",
+    "habillage": "cite.cartes",
+    "noeud": "cite-des-histoires-02",
+    "etoiles": {
+      "sansAide": true,
+      "sansErreur": true
+    },
+    "aideGobi": [
+      "relire-consigne",
+      "souffle-syllabe",
+      "montre-cible"
+    ],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Trouve le mot et son image.",
+          "forme": "imperative",
+          "audio": null,
+          "aApparier": [
+            "paire-cartable",
+            "paire-ecole"
+          ],
+          "motsCles": [
+            "trouve",
+            "mot",
+            "image"
+          ]
+        },
+        {
+          "id": "c2",
+          "texte": "Trouve aussi le mot et son image.",
+          "forme": "imperative",
+          "audio": null,
+          "aApparier": [
+            "paire-maitresse",
+            "paire-cahier"
+          ],
+          "motsCles": [
+            "trouve",
+            "mot",
+            "image"
+          ]
+        },
+        {
+          "id": "c3",
+          "texte": "Trouve les mots et les images.",
+          "forme": "imperative",
+          "audio": null,
+          "aApparier": [
+            "paire-ami",
+            "paire-matin"
+          ],
+          "motsCles": [
+            "trouve",
+            "mot",
+            "image"
+          ]
+        },
+        {
+          "id": "c4",
+          "texte": "Trouve les derniers mots et les images.",
+          "forme": "imperative",
+          "audio": null,
+          "aApparier": [
+            "paire-cour",
+            "paire-livre"
+          ],
+          "motsCles": [
+            "trouve",
+            "mot",
+            "image"
+          ]
+        }
+      ],
+      "cartes": [
+        {
+          "id": "mot-cartable",
+          "libelle": "Il a un cartable.",
+          "face": "mot",
+          "asset": null,
+          "paire": "paire-cartable"
+        },
+        {
+          "id": "image-cartable",
+          "libelle": "le cartable",
+          "face": "image",
+          "asset": null,
+          "paire": "paire-cartable"
+        },
+        {
+          "id": "mot-ecole",
+          "libelle": "Il entre dans l'école.",
+          "face": "mot",
+          "asset": null,
+          "paire": "paire-ecole"
+        },
+        {
+          "id": "image-ecole",
+          "libelle": "l'école",
+          "face": "image",
+          "asset": null,
+          "paire": "paire-ecole"
+        },
+        {
+          "id": "mot-maitresse",
+          "libelle": "La maîtresse est dans la salle.",
+          "face": "mot",
+          "asset": null,
+          "paire": "paire-maitresse"
+        },
+        {
+          "id": "image-maitresse",
+          "libelle": "la maîtresse",
+          "face": "image",
+          "asset": null,
+          "paire": "paire-maitresse"
+        },
+        {
+          "id": "mot-cahier",
+          "libelle": "Il range le cahier.",
+          "face": "mot",
+          "asset": null,
+          "paire": "paire-cahier"
+        },
+        {
+          "id": "image-cahier",
+          "libelle": "le cahier",
+          "face": "image",
+          "asset": null,
+          "paire": "paire-cahier"
+        },
+        {
+          "id": "mot-ami",
+          "libelle": "Un ami montre son livre.",
+          "face": "mot",
+          "asset": null,
+          "paire": "paire-ami"
+        },
+        {
+          "id": "image-ami",
+          "libelle": "l'ami et son livre",
+          "face": "image",
+          "asset": null,
+          "paire": "paire-ami"
+        },
+        {
+          "id": "mot-matin",
+          "libelle": "Le matin est très gris.",
+          "face": "mot",
+          "asset": null,
+          "paire": "paire-matin"
+        },
+        {
+          "id": "image-matin",
+          "libelle": "le matin gris",
+          "face": "image",
+          "asset": null,
+          "paire": "paire-matin"
+        },
+        {
+          "id": "mot-cour",
+          "libelle": "Les enfants sont dans la cour.",
+          "face": "mot",
+          "asset": null,
+          "paire": "paire-cour"
+        },
+        {
+          "id": "image-cour",
+          "libelle": "la cour",
+          "face": "image",
+          "asset": null,
+          "paire": "paire-cour"
+        },
+        {
+          "id": "mot-livre",
+          "libelle": "Le livre est sur la table.",
+          "face": "mot",
+          "asset": null,
+          "paire": "paire-livre"
+        },
+        {
+          "id": "image-livre",
+          "libelle": "le livre et la table",
+          "face": "image",
+          "asset": null,
+          "paire": "paire-livre"
+        }
+      ],
+      "competence": "comp.image"
+    }
+  }
+}

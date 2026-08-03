@@ -861,6 +861,39 @@ n'était visible seul.
 correct posé 20 px à côté était refusé. D33 autorise explicitement à assouplir la précision — jamais
 le sens.
 
+### D50. Économie de l'analyse d'images — mesurer plutôt que regarder
+
+**Signalé par l'utilisateur** : lire des images consomme beaucoup trop de jetons. C'est exact — une
+image en pleine résolution coûte l'équivalent de plusieurs pages de texte, et cette session en a
+lu une vingtaine.
+
+**Règle : une image ne se regarde que si le jugement demandé est esthétique.** Tout le reste se
+mesure par commande, pour une fraction du coût.
+
+| Ce qu'on veut savoir | ❌ Coûteux | ✅ Économe |
+|---|---|---|
+| Le fond est-il blanc ? Y a-t-il de la couleur ? | lire l'image | saturation HSV moyenne, part de pixels neutres |
+| Le trait est-il assez épais ? | lire l'image | largeur des traits mesurée, `stroke-width` du SVG |
+| Les régions sont-elles fermées ? | lire l'image | remplissage par diffusion, comptage de sous-chemins |
+| Un asset a-t-il changé ? | lire les deux | empreinte SHA-256, ou différence de pixels |
+| Le personnage est-il cohérent ? | lire les 25 variantes | lire **2 ou 3** en vignette, mesurer le reste |
+| L'écran s'affiche-t-il correctement ? | capture pleine page | arbre d'accessibilité, `get_page_text` |
+
+**Trois règles pratiques :**
+
+1. **Réduire avant de lire.** Une vignette de 512 px suffit pour juger une silhouette ou une
+   expression ; la pleine résolution ne sert qu'à inspecter un détail précis.
+2. **Échantillonner, ne pas balayer.** Sur une série de N variantes, en regarder 2 ou 3 et mesurer
+   les autres. C'est ainsi qu'a été trouvée l'erreur des « 20 personnages » (D31) : par la mesure de
+   saturation, pas par la contemplation.
+3. **Le jugement esthétique appartient au parent.** Il tranche en trois secondes ce qu'un agent
+   décrit en trois paragraphes — mieux, et gratuitement. **Lui envoyer une planche de vignettes
+   coûte moins cher que de faire décrire chaque image par un agent**, et donne un meilleur verdict.
+
+**Conséquence pour les campagnes** : une phase de « jugement du regard » se limite à un **échantillon
+représentatif** — jamais tous les assets — et s'appuie d'abord sur les mesures. Ce qui doit être
+jugé beau part chez le parent, en planche contact.
+
 ---
 
 ## Points encore ouverts

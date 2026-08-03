@@ -1,0 +1,10 @@
+{
+  "id": "clairiere-09",
+  "region": "clairiere",
+  "ordre": 9,
+  "exercice": "clairiere-veillee-histoire-01",
+  "prerequis": [
+    "clairiere-08"
+  ],
+  "temps": "developpement"
+}

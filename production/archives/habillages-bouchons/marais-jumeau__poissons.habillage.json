@@ -1,0 +1,106 @@
+{
+  "id": "marais.poissons",
+  "moteurs": [
+    "attrape"
+  ],
+  "libelle": "Les poissons du marais",
+  "region": "marais-jumeau",
+  "scene": {
+    "fichier": "habillages/marais-jumeau/poissons.svg",
+    "viewBox": "0 0 960 600",
+    "calques": [
+      {
+        "id": "calque-fond",
+        "role": "fond",
+        "regions": []
+      },
+      {
+        "id": "calque-zones",
+        "role": "coloriable",
+        "regions": [
+          {
+            "id": "poisson-rouge",
+            "libelle": "le poisson rouge",
+            "centroide": [
+              190.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "poisson-plat",
+            "libelle": "le poisson plat",
+            "centroide": [
+              480.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "roseau",
+            "libelle": "le roseau",
+            "centroide": [
+              770.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "vase",
+            "libelle": "la vase",
+            "centroide": [
+              190.0,
+              420.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "nenuphar",
+            "libelle": "le nénuphar",
+            "centroide": [
+              480.0,
+              420.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "reflet",
+            "libelle": "le reflet sur l’eau",
+            "centroide": [
+              770.0,
+              420.0
+            ],
+            "surface": 32000.0
+          }
+        ]
+      },
+      {
+        "id": "calque-trait",
+        "role": "trait",
+        "regions": []
+      }
+    ]
+  },
+  "palette": {
+    "jetons": {},
+    "nuancier": [
+      "bleu",
+      "vert",
+      "gris",
+      "violet",
+      "brun",
+      "blanc"
+    ]
+  },
+  "timings": {
+    "appuiMs": 50,
+    "relachementMs": 100,
+    "refusMs": 160,
+    "recolorationMs": 700,
+    "interEtoilesMs": 160
+  },
+  "sons": {
+    "ambiance": null,
+    "effets": {}
+  }
+}

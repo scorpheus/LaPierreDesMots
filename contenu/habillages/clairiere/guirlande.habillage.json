@@ -19,58 +19,94 @@
         "role": "coloriable",
         "regions": [
           {
-            "id": "fanion-un",
-            "libelle": "le premier fanion",
+            "id": "ciel-de-fete",
+            "libelle": "le ciel de fête",
             "centroide": [
-              190.0,
-              190.0
+              360,
+              77.9
             ],
-            "surface": 32000.0
-          },
-          {
-            "id": "fanion-deux",
-            "libelle": "le deuxième fanion",
-            "centroide": [
-              480.0,
-              190.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "fanion-trois",
-            "libelle": "le troisième fanion",
-            "centroide": [
-              770.0,
-              190.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "corde-tendue",
-            "libelle": "la corde tendue",
-            "centroide": [
-              190.0,
-              420.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "piquet",
-            "libelle": "le piquet",
-            "centroide": [
-              480.0,
-              420.0
-            ],
-            "surface": 32000.0
+            "surface": 134400
           },
           {
             "id": "pelouse",
             "libelle": "la pelouse",
             "centroide": [
-              770.0,
-              420.0
+              240,
+              544
             ],
-            "surface": 32000.0
+            "surface": 96000
+          },
+          {
+            "id": "corde-tendue",
+            "libelle": "la corde tendue",
+            "centroide": [
+              850.1,
+              172.1
+            ],
+            "surface": 13084
+          },
+          {
+            "id": "fanion-un",
+            "libelle": "le premier fanion",
+            "centroide": [
+              256,
+              253.1
+            ],
+            "surface": 7392
+          },
+          {
+            "id": "fanion-deux",
+            "libelle": "le deuxième fanion",
+            "centroide": [
+              483,
+              298.8
+            ],
+            "surface": 9576
+          },
+          {
+            "id": "fanion-trois",
+            "libelle": "le troisième fanion",
+            "centroide": [
+              700,
+              266.6
+            ],
+            "surface": 5568
+          },
+          {
+            "id": "piquet",
+            "libelle": "le piquet",
+            "centroide": [
+              892,
+              329
+            ],
+            "surface": 10136
+          },
+          {
+            "id": "lampion",
+            "libelle": "le lampion",
+            "centroide": [
+              124,
+              225.6
+            ],
+            "surface": 6374
+          },
+          {
+            "id": "fleur",
+            "libelle": "la fleur",
+            "centroide": [
+              152,
+              540
+            ],
+            "surface": 2757.1
+          },
+          {
+            "id": "caillou-du-pre",
+            "libelle": "le caillou du pré",
+            "centroide": [
+              766.9,
+              551.4
+            ],
+            "surface": 2916.1
           }
         ]
       },

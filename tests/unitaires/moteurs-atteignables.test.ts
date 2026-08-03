@@ -175,22 +175,49 @@ describe('le garde refuse l’état d’avant ce lot — 8 moteurs sur 14', () =
   it('un exercice écrit mais qu’aucun nœud ne cite laisse son moteur INATTEIGNABLE', () => {
     // Le deuxième maillon. Un moteur peut avoir son exercice et rester injouable : c'est le
     // défaut que `clairiere-sortie-complete.test.ts` traque, vu depuis les moteurs.
+    //
+    // ⚠ CE CAS COUPAIT UN SEUL NŒUD, NOMMÉ EN DUR — celui de `galeries-echos-paires-01`, alors
+    // le seul exercice `paires` du dépôt. Les lots de contenu en ont livré cinq autres : ôter
+    // ce nœud-là ne rendait plus rien inatteignable, et le contrôle négatif ne déclenchait
+    // plus. Un contrôle négatif qui ne se déclenche plus est un test qui rassure sans rien
+    // prouver — le pire des deux mondes, puisqu'il reste vert le jour où le garde casse.
+    //
+    // On coupe donc TOUS les nœuds du moteur choisi, et le moteur est celui du dépôt qui porte
+    // le plus d'exercices : plus il en porte, plus la coupure est parlante.
+    const parMoteurDuDepot = new Map<string, string[]>();
+    for (const exercice of EXERCICES) {
+      const moteur = moteurDe(exercice);
+      const vus = parMoteurDuDepot.get(moteur) ?? [];
+      vus.push(String((exercice.donnees as { id?: unknown }).id ?? ''));
+      parMoteurDuDepot.set(moteur, vus);
+    }
+    const [moteurCoupe, exercicesCoupes] = [...parMoteurDuDepot.entries()].sort(
+      (a, b) => b[1].length - a[1].length || (a[0] < b[0] ? -1 : 1),
+    )[0] as [string, string[]];
+
     const rapport = croiser({
       moteursDeclares: MOTEURS_DECLARES,
       exercices: EXERCICES,
       noeuds: NOEUDS.filter(
         (noeud) =>
-          String((noeud.donnees as { exercice?: unknown }).exercice ?? '') !==
-          'galeries-echos-paires-01',
+          !exercicesCoupes.includes(
+            String((noeud.donnees as { exercice?: unknown }).exercice ?? ''),
+          ),
       ),
       noeudsCites: NOEUDS_CITES,
     });
 
-    expect(declenchees(rapport)).toEqual([regles['MOTEUR_SANS_NOEUD']]);
-    const paires = rapport.parMoteur.find((bilan) => bilan.moteur === 'paires');
-    expect(paires?.exercices).toBe(1);
-    expect(paires?.noeuds).toBe(0);
-    expect(paires?.atteignable).toBe(false);
+    expect(declenchees(rapport), `moteur coupé : ${moteurCoupe}`).toEqual([
+      regles['MOTEUR_SANS_NOEUD'],
+    ]);
+    const bilan = rapport.parMoteur.find((entree) => entree.moteur === moteurCoupe);
+    expect(bilan?.exercices, `${moteurCoupe} : exercices restés écrits`).toBe(
+      exercicesCoupes.length,
+    );
+    expect(bilan?.exercices, 'la coupure ne porte que sur un exercice : trop peu pour prouver')
+      .toBeGreaterThan(1);
+    expect(bilan?.noeuds).toBe(0);
+    expect(bilan?.atteignable).toBe(false);
   });
 
   it('un nœud livré que sa région ne cite pas laisse son moteur HORS CARTE', () => {

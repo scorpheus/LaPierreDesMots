@@ -19,58 +19,85 @@
         "role": "coloriable",
         "regions": [
           {
+            "id": "sol-des-echos",
+            "libelle": "le sol des échos",
+            "centroide": [
+              660,
+              555.1
+            ],
+            "surface": 76800
+          },
+          {
             "id": "voute-des-echos",
             "libelle": "la voûte des échos",
             "centroide": [
-              190,
-              190
+              142.5,
+              60.9
             ],
-            "surface": 32000
+            "surface": 89293.4
           },
           {
             "id": "banc-de-pierre",
             "libelle": "le banc de pierre",
             "centroide": [
-              480,
-              190
+              395.4,
+              459
             ],
-            "surface": 32000
+            "surface": 13768
           },
           {
             "id": "cristal-du-conte",
             "libelle": "le cristal du conte",
             "centroide": [
-              770,
-              190
+              620,
+              381
             ],
-            "surface": 32000
+            "surface": 18013.9
           },
           {
             "id": "lampe-du-conte",
             "libelle": "la lampe du conte",
             "centroide": [
-              190,
-              420
+              816,
+              257.3
             ],
-            "surface": 32000
+            "surface": 9668.1
           },
           {
             "id": "flaque-des-echos",
             "libelle": "la flaque des échos",
             "centroide": [
-              480,
-              420
+              407.7,
+              537.4
             ],
-            "surface": 32000
+            "surface": 10900.3
           },
           {
-            "id": "sol-des-echos",
-            "libelle": "le sol des échos",
+            "id": "gradin-de-pierre",
+            "libelle": "le gradin de pierre",
             "centroide": [
-              770,
-              420
+              853.3,
+              489.8
             ],
-            "surface": 32000
+            "surface": 19364
+          },
+          {
+            "id": "stalactite-du-conte",
+            "libelle": "la stalactite du conte",
+            "centroide": [
+              300,
+              215.2
+            ],
+            "surface": 2655.9
+          },
+          {
+            "id": "echo-cristal-petit",
+            "libelle": "le petit cristal de l’écho",
+            "centroide": [
+              248,
+              389.6
+            ],
+            "surface": 6935.4
           }
         ]
       },

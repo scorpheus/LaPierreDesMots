@@ -115,6 +115,29 @@
   --rayon-carte: 24px;
   --epaisseur-trait: 4px;
 
+  /* ── L'HABILLAGE BD, lot M8 — v2 § 9.1 ────────────────────────────────────────────────
+     « Bande dessinée jeunesse franco-belge : contours épais, couleur franche, aplats saturés
+     cernés d'un trait sombre. » Le trait tient le style à lui seul ; l'ombre d'une case de BD
+     est un APLAT décalé, jamais un flou. Ces deux variables existent pour qu'aucun composant
+     ne redécide de son épaisseur ni de son décalage : trois valeurs d'ombre différentes sur
+     trois écrans, c'est trois styles.
+
+     `--ombre-bd` : le relief au repos. `--ombre-bd-appui` : le même objet enfoncé, l'ombre
+     réduite et l'objet descendu de la différence — la somme reste constante, donc rien ne
+     saute à l'écran. Aucune couleur d'alerte n'y entre : l'erreur est un mouvement, pas une
+     teinte (v2 § 9.2). */
+  --ombre-bd: 0 5px 0 0 var(--trait);
+  --ombre-bd-appui: 0 2px 0 0 var(--trait);
+
+  /* La région d'un décor de coloriage qui n'a pas encore reçu sa couleur.
+     `SceneSvg.tsx:50` la lit sous la forme `var(--region-vide, #D9DEE7)` et la commentait
+     « surchargeable par L-D dans global.css » — sans qu'aucune feuille ne la déclare. Un repli
+     qui n'est jamais surchargé est une valeur en dur écrite dans un composant de rendu, c'est-
+     à-dire l'endroit où personne ne va la chercher. Elle est ici, à côté des sept jetons, et
+     elle vaut exactement ce que le repli valait : ce lot rend la valeur VISIBLE, il ne la
+     change pas — la changer déplacerait un contraste que l'audit a11y a déjà mesuré. */
+  --region-vide: #D9DEE7;
+
   color-scheme: light;
 }
 
@@ -274,11 +297,21 @@ body {
   font-family: var(--font-interface);
   cursor: pointer;
   touch-action: manipulation;
-  transition: transform 120ms cubic-bezier(0.16, 1, 0.3, 1);
+  /* Le relief de BD. L'ombre est un aplat décalé du trait, sans flou : c'est ce qui donne au
+     bouton l'épaisseur d'une case dessinée plutôt que celle d'un rectangle d'interface. */
+  box-shadow: var(--ombre-bd);
+  transition:
+    transform 120ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 120ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* L'appui : le bouton s'enfonce de 3 px et son ombre maigrit d'autant. Le bas de l'objet ne
+   bouge donc pas — un bouton qui descend sans que son ombre suive « glisse » au lieu de
+   s'enfoncer. Le `scale` d'origine est conservé : c'est lui que la v2 § 8 demande, et le
+   retour sous 100 ms en dépend. */
 .cible:active {
-  transform: scale(0.96);
+  transform: scale(0.96) translateY(3px);
+  box-shadow: var(--ombre-bd-appui);
 }
 
 .cible:focus-visible {
@@ -302,6 +335,37 @@ body {
 .cible-secondaire {
   background-color: var(--framboise);
   color: var(--trait);
+}
+
+/* ------------------------------------------------------------------ le panneau de BD (M8)
+   La case : parchemin, cerné du trait, ombre en aplat. C'est le conteneur de tout ce qui
+   n'est pas une cible — sections du campement, du coffre, de la récompense. Il est déclaré
+   ICI et une seule fois : la même bordure recopiée dans huit composants finit par exister en
+   huit épaisseurs. Il ne porte AUCUNE animation, ce qui le rend utilisable autour d'une zone
+   de lecture sans enfreindre « le décor s'agite, le texte jamais ». */
+.panneau {
+  background-color: var(--parchemin);
+  border: var(--epaisseur-trait) solid var(--trait);
+  border-radius: var(--rayon-carte);
+  box-shadow: var(--ombre-bd);
+  padding: 1rem 1.25rem;
+}
+
+/* Le bandeau de titre d'un panneau : un aplat franc, cerné, qui ne se lit jamais comme du
+   texte à déchiffrer. Le contraste encre-sur-soleil vaut 9,4:1 — bien au-delà des 4,5 exigés,
+   et c'est le même couple que `.cible-appel` emploie déjà. */
+.panneau-titre {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.75rem;
+  padding: 0.25rem 0.9rem;
+  border: var(--epaisseur-trait) solid var(--trait);
+  border-radius: 999px;
+  background-color: var(--soleil);
+  color: var(--trait);
+  font-family: var(--font-titre);
+  font-weight: 600;
 }
 
 /* ------------------------------------------------------------------ mouvements

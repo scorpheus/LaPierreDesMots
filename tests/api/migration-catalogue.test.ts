@@ -231,21 +231,40 @@ describe('un nœud retiré du référentiel — l’erreur d’exploitation sym�
    * suppose pas, on le joue.
    */
   it('ne perd aucune étoile et ne bloque pas l’enfant', async () => {
+    // ⚠ LES TROIS NOMBRES DE CE CAS ÉTAIENT ÉCRITS EN DUR — `9` nœuds joués, un catalogue
+    // rétréci à `{ clairiere: 6, galeries: 8 }`. Ils tenaient tant que la Clairière portait
+    // six nœuds. Ils se DÉDUISENT maintenant du contenu livré : ce qui doit rester vrai n'est
+    // pas leur valeur, c'est que le catalogue RÉTRÉCISSE vraiment sous un état déjà écrit.
+    const dansLaClairiere = noeudsDeLaRegion('clairiere').length;
+    const galeriesJouees = 3;
+    const joues = dansLaClairiere + galeriesJouees;
+    const retrait = {
+      clairiere: Math.max(2, Math.floor(dansLaClairiere / 2)),
+      galeries: Math.max(2, noeudsDeLaRegion('galeries').length - 4)
+    };
+
     const grand = await monterAtelier();
     const profil = await creerProfil(grand, 'Ezékiel');
     for (const noeud of noeudsDeLaRegion('clairiere')) {
       await jouerNoeud(grand, profil, noeud);
       grand.horloge.avancer({ minutes: 4 });
     }
-    for (const noeud of noeudsDeLaRegion('galeries').slice(0, 3)) {
+    for (const noeud of noeudsDeLaRegion('galeries').slice(0, galeriesJouees)) {
       await jouerNoeud(grand, profil, noeud);
       grand.horloge.avancer({ minutes: 4 });
     }
     await lireMondeHttp(grand, profil);
 
-    const retreci = await changerDeCatalogue(grand, { clairiere: 6, galeries: 8 });
+    // Le rétrécissement doit être RÉEL, sinon le cas ne joue plus la migration qu'il prétend
+    // jouer : on l'exige avant de remonter, pas après.
+    expect(retrait.clairiere, 'la Clairière ne rétrécit pas').toBeLessThan(dansLaClairiere);
+    expect(retrait.galeries, 'les Galeries ne rétrécissent pas').toBeLessThan(
+      noeudsDeLaRegion('galeries').length
+    );
+
+    const retreci = await changerDeCatalogue(grand, retrait);
     try {
-      expect(await lireProgressionHttp(retreci, profil)).toHaveLength(9);
+      expect(await lireProgressionHttp(retreci, profil)).toHaveLength(joues);
       const monde = await lireMondeHttp(retreci, profil);
       const clairiere = monde.carte.regions.find((region) => region.region === 'clairiere');
       expect(clairiere?.pourcentageColorie).toBe(1);

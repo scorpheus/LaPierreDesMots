@@ -12,12 +12,13 @@
  *     est une chaîne, pas un tableau) ;
  *   · un exercice porte exactement UNE fiche d'origine (`origine.fiche` est un entier) ;
  *   · `tests/unitaires/clairiere-sortie-complete.test.ts` — test de constat que la campagne
- *     conserve — exige `4 ≤ nœuds de la Clairière ≤ 6` et interdit tout exercice qu'aucun
- *     nœud ne cite ;
- *   · donc au plus 6 fiches câblables en Clairière, et le contrat n'ouvre que 6 nœuds aux
- *     Galeries, qui ne travaillent pas le niveau 1.
+ *     conserve — interdit tout exercice qu'aucun nœud ne cite ;
+ *   · donc au plus autant de fiches câblables en Clairière qu'elle porte de nœuds. Le plafond
+ *     n'est pas écrit ici : il se RECOMPTE plus bas, sur `contenu/noeuds/*.json`. Il valait 6
+ *     quand ce fichier a été écrit ; les lots de contenu l'ont porté à 12, et le raisonnement
+ *     tient à l'identique parce qu'il ne dépend que du compte, jamais de sa valeur.
  *
- * Câbler 15 fiches demanderait 15 nœuds dans une région qui en admet 6. Ce fichier mesure
+ * Câbler 15 fiches demanderait 15 nœuds dans une région qui en porte moins. Ce fichier mesure
  * donc **le taux réel, l'écart, et surtout la SINCÉRITÉ de chaque origine déclarée** — un
  * exercice qui affiche « fiche 1 » sans en avoir repris une seule ligne est pire qu'un
  * exercice sans origine : il fait croire à une traçabilité qui n'existe pas.
@@ -51,7 +52,20 @@ function fichiersDe(dossierRelatif: string): readonly string[] {
   return readdirSync(join(RACINE_DEPOT, dossierRelatif)).filter((f) => f.endsWith('.json'));
 }
 
-const EXERCICES: readonly Exercice[] = (['clairiere', 'galeries'] as const).flatMap((region) =>
+/**
+ * Les régions déclarées par le monde, jamais une liste écrite ici.
+ *
+ * ⚠ CE FICHIER LISAIT `['clairiere', 'galeries']`. Les deux seules régions qui existaient
+ * quand il a été écrit. Quatre régions ont été ouvertes depuis : la relation « un nœud, un
+ * exercice » se mesurait donc sur 76 nœuds contre 26 exercices, et l'assertion d'égalité
+ * échouait sur un écart qui n'existait pas. La population est maintenant lue sur disque, ce
+ * qui la rend insensible à l'ouverture d'une septième région.
+ */
+const REGIONS: readonly string[] = lireJson<{
+  readonly regions: readonly { readonly region: string }[];
+}>('contenu/monde/regions.json').regions.map((r) => r.region);
+
+const EXERCICES: readonly Exercice[] = REGIONS.flatMap((region) =>
   fichiersDe(`contenu/exercices/${region}`).map((f) =>
     lireJson<Exercice>(`contenu/exercices/${region}/${f}`),
   ),

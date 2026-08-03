@@ -1,0 +1,106 @@
+{
+  "id": "galeries.cristal",
+  "moteurs": [
+    "eclair"
+  ],
+  "libelle": "Le cristal qui s’allume",
+  "region": "galeries",
+  "scene": {
+    "fichier": "habillages/galeries/cristal.svg",
+    "viewBox": "0 0 960 600",
+    "calques": [
+      {
+        "id": "calque-fond",
+        "role": "fond",
+        "regions": []
+      },
+      {
+        "id": "calque-zones",
+        "role": "coloriable",
+        "regions": [
+          {
+            "id": "cristal-clair",
+            "libelle": "le cristal clair",
+            "centroide": [
+              190.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "cristal-sombre",
+            "libelle": "le cristal sombre",
+            "centroide": [
+              480.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "socle",
+            "libelle": "le socle",
+            "centroide": [
+              770.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "paroi-humide",
+            "libelle": "la paroi humide",
+            "centroide": [
+              190.0,
+              420.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "gouttes",
+            "libelle": "les gouttes",
+            "centroide": [
+              480.0,
+              420.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "ombre-longue",
+            "libelle": "l’ombre longue",
+            "centroide": [
+              770.0,
+              420.0
+            ],
+            "surface": 32000.0
+          }
+        ]
+      },
+      {
+        "id": "calque-trait",
+        "role": "trait",
+        "regions": []
+      }
+    ]
+  },
+  "palette": {
+    "jetons": {},
+    "nuancier": [
+      "violet",
+      "bleu",
+      "gris",
+      "blanc",
+      "brun",
+      "noir"
+    ]
+  },
+  "timings": {
+    "appuiMs": 40,
+    "relachementMs": 90,
+    "refusMs": 150,
+    "recolorationMs": 600,
+    "interEtoilesMs": 150
+  },
+  "sons": {
+    "ambiance": null,
+    "effets": {}
+  }
+}

@@ -1,0 +1,252 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Les deux intrus sont les SINGULIERS de deux mots qui tombent au pluriel : `chat` et `fleur`. Sans eux il n’y aurait rien à lire, on attraperait tout. Cinq consignes, cibles disjointes.",
+  "id": "foret-muette-feuilles-attrape-02",
+  "version": 1,
+  "titre": "Les feuilles qui ont un s",
+  "competences": [
+    "enc.pluriel.s"
+  ],
+  "difficulte": 3,
+  "jeu": {
+    "moteur": "attrape",
+    "habillage": "foret.feuilles",
+    "noeud": "foret-muette-09",
+    "etoiles": {
+      "sansAide": true,
+      "sansErreur": true
+    },
+    "aideGobi": [
+      "relire-consigne",
+      "souffle-syllabe",
+      "montre-cible"
+    ],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Attrape les mots qui ont un s.",
+          "forme": "imperative",
+          "audio": null,
+          "aAttraper": [
+            "feuille-chats",
+            "feuille-fleurs"
+          ],
+          "motsCles": [
+            "attrape",
+            "mot",
+            "ont"
+          ]
+        },
+        {
+          "id": "c2",
+          "texte": "Attrape aussi les mots qui ont un s.",
+          "forme": "imperative",
+          "audio": null,
+          "aAttraper": [
+            "feuille-livres",
+            "feuille-jours"
+          ],
+          "motsCles": [
+            "attrape",
+            "mot",
+            "ont"
+          ]
+        },
+        {
+          "id": "c3",
+          "texte": "Attrape les mots amis et feuilles.",
+          "forme": "imperative",
+          "audio": null,
+          "aAttraper": [
+            "feuille-amis",
+            "feuille-feuilles"
+          ],
+          "motsCles": [
+            "attrape",
+            "ami",
+            "feuille"
+          ]
+        },
+        {
+          "id": "c4",
+          "texte": "Attrape le mot mots.",
+          "forme": "imperative",
+          "audio": null,
+          "aAttraper": [
+            "feuille-mots"
+          ],
+          "motsCles": [
+            "attrape",
+            "mot"
+          ]
+        },
+        {
+          "id": "c5",
+          "texte": "Attrape le mot arbres.",
+          "forme": "imperative",
+          "audio": null,
+          "aAttraper": [
+            "feuille-arbres"
+          ],
+          "motsCles": [
+            "attrape",
+            "arbre"
+          ]
+        }
+      ],
+      "cibles": [
+        {
+          "id": "feuille-chats",
+          "libelle": "chats",
+          "bonne": true,
+          "asset": null,
+          "depart": [
+            120,
+            120
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": "chat"
+        },
+        {
+          "id": "feuille-fleurs",
+          "libelle": "fleurs",
+          "bonne": true,
+          "asset": null,
+          "depart": [
+            320,
+            380
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": "fleur"
+        },
+        {
+          "id": "feuille-livres",
+          "libelle": "livres",
+          "bonne": true,
+          "asset": null,
+          "depart": [
+            520,
+            120
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "feuille-jours",
+          "libelle": "jours",
+          "bonne": true,
+          "asset": null,
+          "depart": [
+            720,
+            380
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "feuille-amis",
+          "libelle": "amis",
+          "bonne": true,
+          "asset": null,
+          "depart": [
+            120,
+            380
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "feuille-feuilles",
+          "libelle": "feuilles",
+          "bonne": true,
+          "asset": null,
+          "depart": [
+            720,
+            120
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "feuille-mots",
+          "libelle": "mots",
+          "bonne": true,
+          "asset": null,
+          "depart": [
+            320,
+            120
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "feuille-arbres",
+          "libelle": "arbres",
+          "bonne": true,
+          "asset": null,
+          "depart": [
+            520,
+            380
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "feuille-chat",
+          "libelle": "chat",
+          "bonne": false,
+          "asset": null,
+          "depart": [
+            920,
+            120
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": "chats"
+        },
+        {
+          "id": "feuille-fleur",
+          "libelle": "fleur",
+          "bonne": false,
+          "asset": null,
+          "depart": [
+            920,
+            380
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": "fleurs"
+        }
+      ],
+      "competence": "enc.pluriel.s"
+    }
+  }
+}

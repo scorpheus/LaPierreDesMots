@@ -19,58 +19,85 @@
         "role": "coloriable",
         "regions": [
           {
-            "id": "socle-gauche",
-            "libelle": "le socle de gauche",
+            "id": "voute-basse",
+            "libelle": "la voûte basse",
             "centroide": [
-              190,
-              190
+              240,
+              75
             ],
-            "surface": 32000
-          },
-          {
-            "id": "socle-milieu",
-            "libelle": "le socle du milieu",
-            "centroide": [
-              480,
-              190
-            ],
-            "surface": 32000
-          },
-          {
-            "id": "socle-droit",
-            "libelle": "le socle de droite",
-            "centroide": [
-              770,
-              190
-            ],
-            "surface": 32000
-          },
-          {
-            "id": "stalagmite-un",
-            "libelle": "la première stalagmite",
-            "centroide": [
-              190,
-              420
-            ],
-            "surface": 32000
-          },
-          {
-            "id": "stalagmite-deux",
-            "libelle": "la deuxième stalagmite",
-            "centroide": [
-              480,
-              420
-            ],
-            "surface": 32000
+            "surface": 132480
           },
           {
             "id": "sol-de-la-grotte",
             "libelle": "le sol de la grotte",
             "centroide": [
-              770,
-              420
+              420,
+              555.6
             ],
-            "surface": 32000
+            "surface": 76800
+          },
+          {
+            "id": "socle-gauche",
+            "libelle": "le socle de gauche",
+            "centroide": [
+              159,
+              480
+            ],
+            "surface": 13680
+          },
+          {
+            "id": "socle-milieu",
+            "libelle": "le socle du milieu",
+            "centroide": [
+              444.4,
+              476
+            ],
+            "surface": 13892
+          },
+          {
+            "id": "socle-droit",
+            "libelle": "le socle de droite",
+            "centroide": [
+              686.5,
+              485
+            ],
+            "surface": 13440
+          },
+          {
+            "id": "stalagmite-un",
+            "libelle": "la première stalagmite",
+            "centroide": [
+              200,
+              294.3
+            ],
+            "surface": 14518.2
+          },
+          {
+            "id": "stalagmite-deux",
+            "libelle": "la deuxième stalagmite",
+            "centroide": [
+              470,
+              310.6
+            ],
+            "surface": 9315.1
+          },
+          {
+            "id": "stalactite-pendante",
+            "libelle": "la stalactite pendante",
+            "centroide": [
+              340,
+              181.5
+            ],
+            "surface": 3750.6
+          },
+          {
+            "id": "flaque-du-sol",
+            "libelle": "la flaque du sol",
+            "centroide": [
+              608.5,
+              542.4
+            ],
+            "surface": 6459.2
           }
         ]
       },

@@ -1,9 +1,10 @@
 {
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D’ÊTRE JOUÉ. Lot M1 — CORRECTION DE COMPÉTENCE, le contenu du tracé n'est pas touché. Ce fichier travaille l'axe GAUCHE-DROITE et lui seul : ses deux `ModeleLettre` portent `axeRisque: \"gauche-droite\"` et sa `paire` déclare `{a: b, b: d, axe: gauche-droite}`. Il déclarait pourtant `comp.consigne.simple`, c'est-à-dire rien de ce qu'il enseigne. Conséquence mesurée avant correction : ni le BKT ni le Leitner ne voyaient jamais qu'un exercice de tracé travaille une lettre miroir, et le « Top 10 des confusions » du tableau de bord — que D23 conséquence 3 désigne comme « une pièce centrale, pas un ornement » — ignorait le seul moteur qui fait ÉCRIRE la lettre plutôt que la reconnaître. Le motif d'origine était l'arbitrage R12 consigné dans `pierre-bp-01.json` : le référentiel ne portait alors que cinq codes et les Galeries ne pouvaient couvrir qu'un axe à trois moteurs. Le motif est levé — `gph.miroir.gauche-droite` est désormais porté par cinq moteurs (trace, eclair, tri, grave, chemin).",
   "id": "galeries-miroir-bd-01",
-  "version": 1,
+  "version": 2,
   "titre": "Le b et le d — le rond change de cote",
   "competences": [
-    "comp.consigne.simple"
+    "gph.miroir.gauche-droite"
   ],
   "difficulte": 2,
   "jeu": {

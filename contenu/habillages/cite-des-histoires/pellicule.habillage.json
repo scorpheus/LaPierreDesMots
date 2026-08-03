@@ -19,58 +19,85 @@
         "role": "coloriable",
         "regions": [
           {
-            "id": "image-un",
-            "libelle": "la première image",
+            "id": "mur-blanc",
+            "libelle": "le mur blanc",
             "centroide": [
-              190.0,
-              190.0
+              240,
+              93
             ],
-            "surface": 32000.0
-          },
-          {
-            "id": "image-deux",
-            "libelle": "la deuxième image",
-            "centroide": [
-              480.0,
-              190.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "image-trois",
-            "libelle": "la troisième image",
-            "centroide": [
-              770.0,
-              190.0
-            ],
-            "surface": 32000.0
+            "surface": 170880
           },
           {
             "id": "bande",
             "libelle": "la bande",
             "centroide": [
-              190.0,
-              420.0
+              480,
+              335
             ],
-            "surface": 32000.0
+            "surface": 251544
           },
           {
             "id": "perforation",
             "libelle": "la perforation",
             "centroide": [
-              480.0,
-              420.0
+              310.7,
+              227.1
             ],
-            "surface": 32000.0
+            "surface": 5040
           },
           {
-            "id": "mur-blanc",
-            "libelle": "le mur blanc",
+            "id": "image-un",
+            "libelle": "la première image",
             "centroide": [
-              770.0,
-              420.0
+              221,
+              346
             ],
-            "surface": 32000.0
+            "surface": 38184
+          },
+          {
+            "id": "image-deux",
+            "libelle": "la deuxième image",
+            "centroide": [
+              489,
+              345
+            ],
+            "surface": 44044
+          },
+          {
+            "id": "image-trois",
+            "libelle": "la troisième image",
+            "centroide": [
+              751,
+              345
+            ],
+            "surface": 32724
+          },
+          {
+            "id": "table-de-montage",
+            "libelle": "la table de montage",
+            "centroide": [
+              900,
+              542
+            ],
+            "surface": 103680
+          },
+          {
+            "id": "loupe",
+            "libelle": "la loupe",
+            "centroide": [
+              127,
+              570.6
+            ],
+            "surface": 4814.1
+          },
+          {
+            "id": "bobine",
+            "libelle": "la bobine",
+            "centroide": [
+              812.3,
+              517.3
+            ],
+            "surface": 8479.4
           }
         ]
       },

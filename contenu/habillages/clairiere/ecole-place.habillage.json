@@ -1,44 +1,125 @@
 {
   "id": "clairiere.ecole-place",
-  "moteurs": ["place"],
+  "moteurs": [
+    "place"
+  ],
   "libelle": "La cour de l’école — à toi de placer",
   "region": "clairiere",
   "scene": {
     "fichier": "habillages/clairiere/ecole-place.svg",
     "viewBox": "0 0 922 615",
     "calques": [
-      { "id": "calque-fond", "role": "fond", "regions": [] },
-      { "id": "calque-decor", "role": "decor", "regions": [] },
+      {
+        "id": "calque-fond",
+        "role": "fond",
+        "regions": []
+      },
       {
         "id": "calque-zones",
         "role": "coloriable",
         "regions": [
           {
+            "id": "herbe-cour",
+            "libelle": "l’herbe de la cour",
+            "centroide": [
+              691.5,
+              502
+            ],
+            "surface": 200074
+          },
+          {
+            "id": "mur-ecole",
+            "libelle": "le mur de l’école",
+            "centroide": [
+              270,
+              329
+            ],
+            "surface": 22720
+          },
+          {
+            "id": "porte-ecole",
+            "libelle": "la porte de l’école",
+            "centroide": [
+              270,
+              354.9
+            ],
+            "surface": 4408.9
+          },
+          {
+            "id": "arbre-feuilles",
+            "libelle": "les feuilles de l’arbre",
+            "centroide": [
+              640,
+              250
+            ],
+            "surface": 18773
+          },
+          {
+            "id": "arbre-tronc",
+            "libelle": "le tronc de l’arbre",
+            "centroide": [
+              640,
+              372
+            ],
+            "surface": 3024
+          },
+          {
+            "id": "banc-assise",
+            "libelle": "l’assise du banc",
+            "centroide": [
+              95,
+              479
+            ],
+            "surface": 2964
+          },
+          {
             "id": "ciel",
             "libelle": "le ciel",
-            "centroide": [680.0, 100.0],
-            "surface": 19200.0
+            "centroide": [
+              680,
+              100
+            ],
+            "surface": 19200
           },
           {
             "id": "toit-ecole",
             "libelle": "le toit de l’école",
-            "centroide": [270.0, 229.0],
-            "surface": 8120.0
+            "centroide": [
+              270,
+              229
+            ],
+            "surface": 8120
           },
           {
             "id": "a-cote-du-banc",
             "libelle": "à côté du banc",
-            "centroide": [235.0, 495.0],
-            "surface": 16900.0
+            "centroide": [
+              235,
+              495
+            ],
+            "surface": 16900
           }
         ]
       },
-      { "id": "calque-trait", "role": "trait", "regions": [] }
+      {
+        "id": "calque-trait",
+        "role": "trait",
+        "regions": []
+      }
     ]
   },
   "palette": {
     "jetons": {},
-    "nuancier": ["rouge", "orange", "jaune", "vert", "bleu", "violet", "rose", "brun"]
+    "nuancier": [
+      "rouge",
+      "orange",
+      "jaune",
+      "vert",
+      "bleu",
+      "violet",
+      "rose",
+      "brun"
+    ]
   },
   "timings": {
     "appuiMs": 60,

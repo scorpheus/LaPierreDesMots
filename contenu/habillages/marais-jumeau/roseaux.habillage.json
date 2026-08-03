@@ -1,0 +1,142 @@
+{
+  "id": "marais.roseaux",
+  "moteurs": [
+    "phrase"
+  ],
+  "libelle": "Les roseaux porteurs de mots",
+  "region": "marais-jumeau",
+  "scene": {
+    "fichier": "habillages/marais-jumeau/roseaux.svg",
+    "viewBox": "0 0 960 600",
+    "calques": [
+      {
+        "id": "calque-fond",
+        "role": "fond",
+        "regions": []
+      },
+      {
+        "id": "calque-zones",
+        "role": "coloriable",
+        "regions": [
+          {
+            "id": "ciel-du-soir",
+            "libelle": "le ciel du soir",
+            "centroide": [
+              360,
+              78.9
+            ],
+            "surface": 142080
+          },
+          {
+            "id": "rive-molle",
+            "libelle": "la rive molle",
+            "centroide": [
+              840,
+              447.7
+            ],
+            "surface": 70080
+          },
+          {
+            "id": "eau-basse",
+            "libelle": "l’eau basse",
+            "centroide": [
+              720,
+              545.5
+            ],
+            "surface": 96000
+          },
+          {
+            "id": "roseau-un",
+            "libelle": "le premier roseau",
+            "centroide": [
+              178.9,
+              455
+            ],
+            "surface": 6579.6
+          },
+          {
+            "id": "roseau-deux",
+            "libelle": "le deuxième roseau",
+            "centroide": [
+              405.1,
+              415.4
+            ],
+            "surface": 8180.6
+          },
+          {
+            "id": "roseau-trois",
+            "libelle": "le troisième roseau",
+            "centroide": [
+              617.7,
+              445.3
+            ],
+            "surface": 5133.8
+          },
+          {
+            "id": "etiquette-un",
+            "libelle": "la première étiquette",
+            "centroide": [
+              209,
+              214
+            ],
+            "surface": 13104
+          },
+          {
+            "id": "etiquette-deux",
+            "libelle": "la deuxième étiquette",
+            "centroide": [
+              439,
+              187
+            ],
+            "surface": 15756
+          },
+          {
+            "id": "etiquette-trois",
+            "libelle": "la troisième étiquette",
+            "centroide": [
+              639,
+              226
+            ],
+            "surface": 10368
+          },
+          {
+            "id": "libellule-du-soir",
+            "libelle": "la libellule du soir",
+            "centroide": [
+              856,
+              242.5
+            ],
+            "surface": 4621.8
+          }
+        ]
+      },
+      {
+        "id": "calque-trait",
+        "role": "trait",
+        "regions": []
+      }
+    ]
+  },
+  "palette": {
+    "jetons": {},
+    "nuancier": [
+      "bleu",
+      "vert",
+      "gris",
+      "violet",
+      "brun",
+      "blanc"
+    ]
+  },
+  "timings": {
+    "appuiMs": 60,
+    "relachementMs": 120,
+    "refusMs": 180,
+    "recolorationMs": 800,
+    "interEtoilesMs": 180
+  },
+  "sons": {
+    "ambiance": null,
+    "effets": {}
+  }
+}

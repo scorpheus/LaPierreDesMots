@@ -1,0 +1,262 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Nœud d'entrée de La Forêt Muette (M2). Ici on ne demande pas encore d'entendre le silence : on demande de VOIR la lettre — « où la dernière lettre est un t ». C'est le geste que l'enfant sait déjà faire, et l'audio de Gobi (R15) fait le reste : il dit le mot, la lettre ne s'entend pas, et l'écart est l'exercice. Les deux intrus finissent par un `e` prononcé nulle part non plus, mais qui n’est aucune des quatre lettres nommées. Cibles disjointes d’une consigne à l’autre (`cible-deja-attrapee`).",
+  "id": "foret-muette-feuilles-attrape-01",
+  "version": 1,
+  "titre": "Les feuilles à dernière lettre",
+  "competences": [
+    "gph.finale.muette"
+  ],
+  "difficulte": 2,
+  "jeu": {
+    "moteur": "attrape",
+    "habillage": "foret.feuilles",
+    "noeud": "foret-muette-01",
+    "etoiles": {
+      "sansAide": true,
+      "sansErreur": true
+    },
+    "aideGobi": [
+      "relire-consigne",
+      "souffle-syllabe",
+      "surligne-graphene",
+      "montre-cible"
+    ],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Attrape les mots où la dernière lettre est un t.",
+          "forme": "imperative",
+          "audio": null,
+          "aAttraper": [
+            "feuille-chat",
+            "feuille-lit",
+            "feuille-rat"
+          ],
+          "motsCles": [
+            "attrape",
+            "mot",
+            "dernier",
+            "lettre"
+          ]
+        },
+        {
+          "id": "c2",
+          "texte": "Attrape les mots où la dernière lettre est un d.",
+          "forme": "imperative",
+          "audio": null,
+          "aAttraper": [
+            "feuille-grand",
+            "feuille-pied"
+          ],
+          "motsCles": [
+            "attrape",
+            "mot",
+            "dernier",
+            "lettre"
+          ]
+        },
+        {
+          "id": "c3",
+          "texte": "Attrape les mots où la dernière lettre est un s.",
+          "forme": "imperative",
+          "audio": null,
+          "aAttraper": [
+            "feuille-tapis",
+            "feuille-souris"
+          ],
+          "motsCles": [
+            "attrape",
+            "mot",
+            "dernier",
+            "lettre"
+          ]
+        },
+        {
+          "id": "c4",
+          "texte": "Attrape les mots où la dernière lettre est un x.",
+          "forme": "imperative",
+          "audio": null,
+          "aAttraper": [
+            "feuille-noix",
+            "feuille-doux"
+          ],
+          "motsCles": [
+            "attrape",
+            "mot",
+            "dernier",
+            "lettre"
+          ]
+        }
+      ],
+      "cibles": [
+        {
+          "id": "feuille-chat",
+          "libelle": "chat",
+          "bonne": true,
+          "asset": null,
+          "depart": [
+            120,
+            120
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": "chatte"
+        },
+        {
+          "id": "feuille-lit",
+          "libelle": "lit",
+          "bonne": true,
+          "asset": null,
+          "depart": [
+            320,
+            380
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "feuille-rat",
+          "libelle": "rat",
+          "bonne": true,
+          "asset": null,
+          "depart": [
+            520,
+            120
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "feuille-grand",
+          "libelle": "grand",
+          "bonne": true,
+          "asset": null,
+          "depart": [
+            720,
+            380
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": "grande"
+        },
+        {
+          "id": "feuille-pied",
+          "libelle": "pied",
+          "bonne": true,
+          "asset": null,
+          "depart": [
+            120,
+            380
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "feuille-tapis",
+          "libelle": "tapis",
+          "bonne": true,
+          "asset": null,
+          "depart": [
+            720,
+            120
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "feuille-souris",
+          "libelle": "souris",
+          "bonne": true,
+          "asset": null,
+          "depart": [
+            320,
+            120
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "feuille-noix",
+          "libelle": "noix",
+          "bonne": true,
+          "asset": null,
+          "depart": [
+            520,
+            380
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "feuille-doux",
+          "libelle": "doux",
+          "bonne": true,
+          "asset": null,
+          "depart": [
+            920,
+            120
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": "douce"
+        },
+        {
+          "id": "feuille-robe",
+          "libelle": "robe",
+          "bonne": false,
+          "asset": null,
+          "depart": [
+            920,
+            380
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "feuille-lune",
+          "libelle": "lune",
+          "bonne": false,
+          "asset": null,
+          "depart": [
+            120,
+            620
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": null
+        }
+      ],
+      "competence": "gph.finale.muette"
+    }
+  }
+}

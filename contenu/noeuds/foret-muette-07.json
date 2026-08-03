@@ -1,0 +1,10 @@
+{
+  "id": "foret-muette-07",
+  "region": "foret-muette",
+  "ordre": 7,
+  "exercice": "foret-muette-veillee-automne-histoire-01",
+  "prerequis": [
+    "foret-muette-06"
+  ],
+  "temps": "retournement"
+}

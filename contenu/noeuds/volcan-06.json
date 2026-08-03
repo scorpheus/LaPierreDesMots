@@ -1,0 +1,10 @@
+{
+  "id": "volcan-06",
+  "region": "volcan",
+  "ordre": 6,
+  "exercice": "volcan-train-assemble-01",
+  "prerequis": [
+    "volcan-05"
+  ],
+  "temps": "developpement"
+}

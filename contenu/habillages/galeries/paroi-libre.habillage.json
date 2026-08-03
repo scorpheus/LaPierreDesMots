@@ -19,58 +19,85 @@
         "role": "coloriable",
         "regions": [
           {
+            "id": "ombre-du-fond",
+            "libelle": "l’ombre du fond",
+            "centroide": [
+              360,
+              120.9
+            ],
+            "surface": 218880
+          },
+          {
+            "id": "sol-de-la-paroi",
+            "libelle": "le sol de la paroi",
+            "centroide": [
+              180,
+              565.6
+            ],
+            "surface": 57600
+          },
+          {
             "id": "grande-paroi",
             "libelle": "la grande paroi",
             "centroide": [
-              190,
-              190
+              291,
+              325
             ],
-            "surface": 32000
+            "surface": 150094
           },
           {
             "id": "petite-paroi",
             "libelle": "la petite paroi",
             "centroide": [
-              480,
-              190
+              751,
+              345
             ],
-            "surface": 32000
+            "surface": 69054
           },
           {
             "id": "veine-de-cristal",
             "libelle": "la veine de cristal",
             "centroide": [
-              770,
-              190
+              96.9,
+              293.8
             ],
-            "surface": 32000
+            "surface": 7738.4
           },
           {
             "id": "goutte-de-pluie",
             "libelle": "la goutte de pluie",
             "centroide": [
-              190,
-              420
+              700,
+              226.1
             ],
-            "surface": 32000
+            "surface": 2415.9
           },
           {
             "id": "pierre-ronde",
             "libelle": "la pierre ronde",
             "centroide": [
-              480,
-              420
+              289.6,
+              529.5
             ],
-            "surface": 32000
+            "surface": 9942.9
           },
           {
-            "id": "ombre-du-fond",
-            "libelle": "l’ombre du fond",
+            "id": "niche-vide",
+            "libelle": "la niche vide",
             "centroide": [
-              770,
-              420
+              762,
+              354
             ],
-            "surface": 32000
+            "surface": 23995.1
+          },
+          {
+            "id": "cristal-oublie",
+            "libelle": "le cristal oublié",
+            "centroide": [
+              866,
+              351.6
+            ],
+            "surface": 7504
           }
         ]
       },

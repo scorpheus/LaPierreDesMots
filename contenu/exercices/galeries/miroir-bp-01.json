@@ -1,9 +1,10 @@
 {
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D’ÊTRE JOUÉ. Lot M1 — CORRECTION DE COMPÉTENCE OBLIGATOIRE ET PRIORITAIRE, le contenu du tracé n'est pas touché. C'est le défaut nommé par l'inventaire du contrat du monde v4 § 1.1 : `gph.miroir.haut-bas` était déclaré au référentiel et porté par ZÉRO exercice, alors que ce fichier et `pierre-bp-01.json` travaillent exactement cet axe — mesuré dans leur contenu, ils portent bien b et p. Ils déclaraient `comp.consigne.simple`. Conséquence : le BKT, le Leitner et le « Top 10 des confusions » étaient AVEUGLES sur la moitié du problème que l'enfant a aujourd'hui — et c'est l'axe que le père a rapporté (D23, fait rapporté : « l'enfant confond b/p »). Ce fichier porte `axeRisque: \"haut-bas\"` sur ses deux lettres et `paire: {a: b, b: p, axe: haut-bas}` : la déclaration dit désormais ce que le contenu fait. `gph.miroir.haut-bas` est porté par trois moteurs mécaniquement distincts — `trace` (ici), `grave` (`pierre-bp-01`) et `paires` (`echos-paires-01`) —, donc R12 est tenue et l'arbitrage inverse consigné au lot N8 est levé.",
   "id": "galeries-miroir-bp-01",
-  "version": 1,
+  "version": 2,
   "titre": "Le b et le p — le rond change de hauteur",
   "competences": [
-    "comp.consigne.simple"
+    "gph.miroir.haut-bas"
   ],
   "difficulte": 2,
   "jeu": {

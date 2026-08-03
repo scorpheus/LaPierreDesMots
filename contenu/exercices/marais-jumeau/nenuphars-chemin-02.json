@@ -1,0 +1,253 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Nœud de maîtrise de la région : les trois rangées alternent la nasale de `main` et celle de `pont`, les deux plus proches à l'oreille. Voisinage symétrique remesuré, parcours disjoints, départs hors parcours.",
+  "id": "marais-jumeau-nenuphars-chemin-02",
+  "version": 1,
+  "titre": "Les nénuphars du son de main",
+  "competences": [
+    "gph.nasale.in",
+    "gph.nasale.on"
+  ],
+  "difficulte": 4,
+  "jeu": {
+    "moteur": "chemin",
+    "habillage": "marais.nenuphars",
+    "noeud": "marais-jumeau-12",
+    "etoiles": {
+      "sansAide": true,
+      "sansErreur": true
+    },
+    "aideGobi": [
+      "relire-consigne",
+      "souffle-syllabe",
+      "surligne-graphene",
+      "montre-cible"
+    ],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Marche sur les mots où tu entends le son de main.",
+          "forme": "imperative",
+          "audio": null,
+          "depart": "case-lapin",
+          "parcours": [
+            "case-matin",
+            "case-jardin",
+            "case-sapin"
+          ],
+          "motsCles": [
+            "marche",
+            "mot",
+            "son",
+            "main"
+          ]
+        },
+        {
+          "id": "c2",
+          "texte": "Marche sur les mots où tu entends le son de pont.",
+          "forme": "imperative",
+          "audio": null,
+          "depart": "case-ballon",
+          "parcours": [
+            "case-citron",
+            "case-savon",
+            "case-bonbon"
+          ],
+          "motsCles": [
+            "marche",
+            "mot",
+            "son",
+            "pont"
+          ]
+        },
+        {
+          "id": "c3",
+          "texte": "Marche aussi sur les mots où tu entends le son de main.",
+          "forme": "imperative",
+          "audio": null,
+          "depart": "case-pain",
+          "parcours": [
+            "case-copain",
+            "case-raisin",
+            "case-dinde"
+          ],
+          "motsCles": [
+            "marche",
+            "mot",
+            "son",
+            "main"
+          ]
+        }
+      ],
+      "cases": [
+        {
+          "id": "case-lapin",
+          "libelle": "lapin",
+          "position": [
+            120,
+            140
+          ],
+          "voisines": [
+            "case-matin",
+            "case-ballon"
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "case-matin",
+          "libelle": "matin",
+          "position": [
+            340,
+            140
+          ],
+          "voisines": [
+            "case-lapin",
+            "case-jardin",
+            "case-citron"
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "case-jardin",
+          "libelle": "jardin",
+          "position": [
+            560,
+            140
+          ],
+          "voisines": [
+            "case-matin",
+            "case-sapin",
+            "case-savon"
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "case-sapin",
+          "libelle": "sapin",
+          "position": [
+            780,
+            140
+          ],
+          "voisines": [
+            "case-jardin",
+            "case-bonbon"
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "case-ballon",
+          "libelle": "ballon",
+          "position": [
+            120,
+            340
+          ],
+          "voisines": [
+            "case-citron",
+            "case-lapin",
+            "case-pain"
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "case-citron",
+          "libelle": "citron",
+          "position": [
+            340,
+            340
+          ],
+          "voisines": [
+            "case-ballon",
+            "case-savon",
+            "case-matin",
+            "case-copain"
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "case-savon",
+          "libelle": "savon",
+          "position": [
+            560,
+            340
+          ],
+          "voisines": [
+            "case-citron",
+            "case-bonbon",
+            "case-jardin",
+            "case-raisin"
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "case-bonbon",
+          "libelle": "bonbon",
+          "position": [
+            780,
+            340
+          ],
+          "voisines": [
+            "case-savon",
+            "case-sapin",
+            "case-dinde"
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "case-pain",
+          "libelle": "pain",
+          "position": [
+            120,
+            540
+          ],
+          "voisines": [
+            "case-copain",
+            "case-ballon"
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "case-copain",
+          "libelle": "copain",
+          "position": [
+            340,
+            540
+          ],
+          "voisines": [
+            "case-pain",
+            "case-raisin",
+            "case-citron"
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "case-raisin",
+          "libelle": "raisin",
+          "position": [
+            560,
+            540
+          ],
+          "voisines": [
+            "case-copain",
+            "case-dinde",
+            "case-savon"
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "case-dinde",
+          "libelle": "dinde",
+          "position": [
+            780,
+            540
+          ],
+          "voisines": [
+            "case-raisin",
+            "case-bonbon"
+          ],
+          "confusionAvec": null
+        }
+      ],
+      "competence": "gph.nasale.in"
+    }
+  }
+}

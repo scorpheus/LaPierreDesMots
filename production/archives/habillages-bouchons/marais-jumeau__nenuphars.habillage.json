@@ -1,0 +1,106 @@
+{
+  "id": "marais.nenuphars",
+  "moteurs": [
+    "chemin"
+  ],
+  "libelle": "Les nénuphars",
+  "region": "marais-jumeau",
+  "scene": {
+    "fichier": "habillages/marais-jumeau/nenuphars.svg",
+    "viewBox": "0 0 960 600",
+    "calques": [
+      {
+        "id": "calque-fond",
+        "role": "fond",
+        "regions": []
+      },
+      {
+        "id": "calque-zones",
+        "role": "coloriable",
+        "regions": [
+          {
+            "id": "nenuphar-un",
+            "libelle": "le premier nénuphar",
+            "centroide": [
+              190.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "nenuphar-deux",
+            "libelle": "le deuxième nénuphar",
+            "centroide": [
+              480.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "nenuphar-trois",
+            "libelle": "le troisième nénuphar",
+            "centroide": [
+              770.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "eau-sombre",
+            "libelle": "l’eau sombre",
+            "centroide": [
+              190.0,
+              420.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "rive",
+            "libelle": "la rive",
+            "centroide": [
+              480.0,
+              420.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "libellule",
+            "libelle": "la libellule",
+            "centroide": [
+              770.0,
+              420.0
+            ],
+            "surface": 32000.0
+          }
+        ]
+      },
+      {
+        "id": "calque-trait",
+        "role": "trait",
+        "regions": []
+      }
+    ]
+  },
+  "palette": {
+    "jetons": {},
+    "nuancier": [
+      "bleu",
+      "vert",
+      "gris",
+      "violet",
+      "brun",
+      "blanc"
+    ]
+  },
+  "timings": {
+    "appuiMs": 60,
+    "relachementMs": 110,
+    "refusMs": 170,
+    "recolorationMs": 750,
+    "interEtoilesMs": 170
+  },
+  "sons": {
+    "ambiance": null,
+    "effets": {}
+  }
+}

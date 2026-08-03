@@ -1,0 +1,10 @@
+{
+  "id": "foret-muette-04",
+  "region": "foret-muette",
+  "ordre": 4,
+  "exercice": "foret-muette-message-phrase-01",
+  "prerequis": [
+    "foret-muette-03"
+  ],
+  "temps": "maitrise"
+}

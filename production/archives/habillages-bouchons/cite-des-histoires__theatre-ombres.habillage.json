@@ -1,0 +1,106 @@
+{
+  "id": "cite.theatre-ombres",
+  "moteurs": [
+    "histoire"
+  ],
+  "libelle": "Le théâtre d’ombres",
+  "region": "cite-des-histoires",
+  "scene": {
+    "fichier": "habillages/cite-des-histoires/theatre-ombres.svg",
+    "viewBox": "0 0 960 600",
+    "calques": [
+      {
+        "id": "calque-fond",
+        "role": "fond",
+        "regions": []
+      },
+      {
+        "id": "calque-zones",
+        "role": "coloriable",
+        "regions": [
+          {
+            "id": "drap",
+            "libelle": "le drap",
+            "centroide": [
+              190.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "silhouette",
+            "libelle": "la silhouette",
+            "centroide": [
+              480.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "bougie",
+            "libelle": "la bougie",
+            "centroide": [
+              770.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "estrade",
+            "libelle": "l’estrade",
+            "centroide": [
+              190.0,
+              420.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "rideau",
+            "libelle": "le rideau",
+            "centroide": [
+              480.0,
+              420.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "gradin",
+            "libelle": "le gradin",
+            "centroide": [
+              770.0,
+              420.0
+            ],
+            "surface": 32000.0
+          }
+        ]
+      },
+      {
+        "id": "calque-trait",
+        "role": "trait",
+        "regions": []
+      }
+    ]
+  },
+  "palette": {
+    "jetons": {},
+    "nuancier": [
+      "orange",
+      "jaune",
+      "rose",
+      "violet",
+      "blanc",
+      "brun"
+    ]
+  },
+  "timings": {
+    "appuiMs": 80,
+    "relachementMs": 150,
+    "refusMs": 200,
+    "recolorationMs": 950,
+    "interEtoilesMs": 200
+  },
+  "sons": {
+    "ambiance": null,
+    "effets": {}
+  }
+}

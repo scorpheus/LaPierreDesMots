@@ -19,58 +19,85 @@
         "role": "coloriable",
         "regions": [
           {
-            "id": "etoile-vive",
-            "libelle": "l’étoile vive",
+            "id": "ciel-rouge",
+            "libelle": "le ciel rouge",
             "centroide": [
-              190.0,
-              190.0
+              360,
+              166.9
             ],
-            "surface": 32000.0
+            "surface": 305280
           },
           {
-            "id": "etoile-lente",
-            "libelle": "l’étoile lente",
+            "id": "pente-de-cendre",
+            "libelle": "la pente de cendre",
             "centroide": [
-              480.0,
-              190.0
+              180,
+              510.1
             ],
-            "surface": 32000.0
+            "surface": 163200
           },
           {
             "id": "cratere",
             "libelle": "le cratère",
             "centroide": [
-              770.0,
-              190.0
+              465.9,
+              340
             ],
-            "surface": 32000.0
+            "surface": 55568
           },
           {
             "id": "coulee",
             "libelle": "la coulée",
             "centroide": [
-              190.0,
-              420.0
+              406.2,
+              367.9
             ],
-            "surface": 32000.0
+            "surface": 15745
           },
           {
             "id": "fumee",
             "libelle": "la fumée",
             "centroide": [
-              480.0,
-              420.0
+              480,
+              138
             ],
-            "surface": 32000.0
+            "surface": 19531
           },
           {
-            "id": "ciel-rouge",
-            "libelle": "le ciel rouge",
+            "id": "etoile-vive",
+            "libelle": "l’étoile vive",
             "centroide": [
-              770.0,
-              420.0
+              178,
+              148
             ],
-            "surface": 32000.0
+            "surface": 3362.3
+          },
+          {
+            "id": "etoile-lente",
+            "libelle": "l’étoile lente",
+            "centroide": [
+              800,
+              198
+            ],
+            "surface": 1585.6
+          },
+          {
+            "id": "braise-au-sol",
+            "libelle": "la braise au sol",
+            "centroide": [
+              134.9,
+              537.9
+            ],
+            "surface": 4159.9
+          },
+          {
+            "id": "eclat-de-lave",
+            "libelle": "l’éclat de lave",
+            "centroide": [
+              862,
+              469.4
+            ],
+            "surface": 4780.5
           }
         ]
       },

@@ -1,0 +1,10 @@
+{
+  "id": "cite-des-histoires-14",
+  "region": "cite-des-histoires",
+  "ordre": 14,
+  "exercice": "cite-des-histoires-banniere-phrase-02",
+  "prerequis": [
+    "cite-des-histoires-13"
+  ],
+  "temps": "developpement"
+}

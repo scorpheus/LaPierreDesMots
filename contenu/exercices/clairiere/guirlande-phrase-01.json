@@ -1,9 +1,9 @@
 {
-  "$commentaire": "PLACEHOLDER — À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Écrit pour le lot C4 : la Clairière ne portait qu'un seul nœud alors que la v2 § 5.2 (ligne 143) décrit « 4 à 6 nœuds enchaînés → nœud final un peu plus corsé ». C'est CE nœud final. Trois contraintes mesurées, pas supposées : (1) `partage/src/moteurs/phrase/moteur.ts` ne remet jamais `acquis` à zéro entre deux consignes — une étiquette réutilisée d'une phrase à l'autre serait refusée en `etiquette-deja-placee`, motif qui ne compte PAS d'erreur et ne libère rien : l'exercice deviendrait interminable, un état sans issue. Les huit étiquettes utiles sont donc deux à deux distinctes, MOT COMPRIS — deux boutons portant « est » feraient payer une erreur que l'enfant n'a pas commise. (2) `client/src/moteurs/phrase/MoteurPhrase.tsx` rend TOUTES les étiquettes en permanence : à 9 boutons on est déjà au plafond de ce qu'un enfant de 7 ans balaie du regard, d'où deux consignes et non quatre. (3) Le référentiel de compétences est un objet protégé (annexe P § 6.4) : il ne porte que `comp.consigne.simple`, `comp.consigne.multiple` et `lex.couleur`. Aucun code de syllabation n'a été inventé pour ce fichier, bien que le domaine de la région en appelle un (point ouvert O10). L'intrus `bleu` est un mot de couleur et non un mot neutre : c'est lui qui oblige à LIRE la phrase modèle au lieu de prendre la seule couleur restante. Le modèle écrit dans la consigne est un choix assumé pour un enfant qui déchiffre encore (D14) — question posée dans `Docs/questions-en-attente.md`.",
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Lot M1 — réécriture du PLACEHOLDER du lot C4. La marque tombe pour le motif exact qui l'avait fait poser : le fichier disait « aucun code de syllabation n'a été inventé, bien que le domaine de la région en appelle un (point ouvert O10) » ; le référentiel porte désormais `mot.outil.frequent`, et c'est lui que cet exercice travaille. TROIS CONTRAINTES MESURÉES, reprises telles quelles de la version précédente parce qu'elles n'ont pas bougé. (1) `partage/src/moteurs/phrase/moteur.ts` ne remet jamais `acquis` à zéro entre deux consignes — une étiquette réutilisée d'une phrase à l'autre serait refusée en `etiquette-deja-placee`, motif qui ne compte PAS d'erreur et ne libère rien : l'exercice deviendrait interminable, un état sans issue. Les huit étiquettes utiles sont donc deux à deux distinctes, MOT COMPRIS — deux boutons portant « est » feraient payer une erreur que l'enfant n'a pas commise. (2) `client/src/moteurs/phrase/MoteurPhrase.tsx` rend TOUTES les étiquettes en permanence : à 9 boutons on est au plafond de ce qu'un enfant de 7 ans balaie du regard. C'EST CE PLAFOND, ET LUI SEUL, QUI TIENT CET EXERCICE À DEUX CONSIGNES au lieu des quatre visées par le lot : trois phrases de quatre mots feraient treize boutons. Le plancher de quatre consignes est donc tenu partout ailleurs et signalé ici comme exception mécanique, jamais contournée en réduisant les phrases à deux mots — une phrase de deux mots ne demande aucune lecture d'ordre. (3) L'INTRUS A CHANGÉ : il était `bleu`, un mot de couleur ; il est maintenant `une`, un mot outil. Le leurre porte ainsi sur ce que l'exercice enseigne — l'enfant doit choisir `Le` plutôt que `une` en lisant l'accord, et non écarter la seule couleur qui reste.",
   "id": "clairiere-guirlande-phrase-01",
-  "version": 1,
+  "version": 2,
   "titre": "La guirlande de mots",
-  "competences": ["comp.consigne.simple", "lex.couleur"],
+  "competences": ["lex.couleur", "mot.outil.frequent"],
   "difficulte": 2,
   "jeu": {
     "moteur": "phrase",
@@ -15,35 +15,35 @@
       "consignes": [
         {
           "id": "c1",
-          "texte": "Range les fanions dans l’ordre pour lire : le ballon est rouge.",
+          "texte": "Range les fanions pour lire : le chat est noir.",
           "forme": "imperative",
           "audio": null,
-          "phrase": "Le ballon est rouge.",
-          "ordre": ["mot-le", "mot-ballon", "mot-est", "mot-rouge"],
-          "motsCles": ["ballon", "rouge"]
+          "phrase": "Le chat est noir.",
+          "ordre": ["mot-le", "mot-chat", "mot-est", "mot-noir"],
+          "motsCles": ["chat", "noir"]
         },
         {
           "id": "c2",
-          "texte": "Range les fanions dans l’ordre pour lire : les feuilles sont vertes.",
+          "texte": "Range les fanions pour lire : les fleurs sont roses.",
           "forme": "imperative",
           "audio": null,
-          "phrase": "Les feuilles sont vertes.",
-          "ordre": ["mot-les", "mot-feuilles", "mot-sont", "mot-vertes"],
-          "motsCles": ["feuilles", "vertes"]
+          "phrase": "Les fleurs sont roses.",
+          "ordre": ["mot-les", "mot-fleurs", "mot-sont", "mot-roses"],
+          "motsCles": ["fleurs", "roses"]
         }
       ],
       "etiquettes": [
         { "id": "mot-le", "mot": "Le", "intrus": false },
-        { "id": "mot-ballon", "mot": "ballon", "intrus": false },
+        { "id": "mot-chat", "mot": "chat", "intrus": false },
         { "id": "mot-est", "mot": "est", "intrus": false },
-        { "id": "mot-rouge", "mot": "rouge.", "intrus": false },
+        { "id": "mot-noir", "mot": "noir.", "intrus": false },
         { "id": "mot-les", "mot": "Les", "intrus": false },
-        { "id": "mot-feuilles", "mot": "feuilles", "intrus": false },
+        { "id": "mot-fleurs", "mot": "fleurs", "intrus": false },
         { "id": "mot-sont", "mot": "sont", "intrus": false },
-        { "id": "mot-vertes", "mot": "vertes.", "intrus": false },
-        { "id": "mot-bleu", "mot": "bleu", "intrus": true }
+        { "id": "mot-roses", "mot": "roses.", "intrus": false },
+        { "id": "mot-une", "mot": "une", "intrus": true }
       ],
-      "competence": "lex.couleur"
+      "competence": "mot.outil.frequent"
     }
   }
 }

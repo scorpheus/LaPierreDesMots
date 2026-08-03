@@ -1,32 +1,94 @@
 {
   "id": "galeries.tracer-paroi",
-  "moteurs": ["trace"],
+  "moteurs": [
+    "trace"
+  ],
   "libelle": "Graver la lettre sur la paroi de sable",
   "region": "galeries",
   "scene": {
     "fichier": "habillages/galeries/tracer-paroi.svg",
     "viewBox": "0 0 800 600",
     "calques": [
-      { "id": "calque-fond", "role": "fond", "regions": [] },
-      { "id": "calque-decor", "role": "decor", "regions": [] },
+      {
+        "id": "calque-fond",
+        "role": "fond",
+        "regions": []
+      },
       {
         "id": "calque-zones",
         "role": "coloriable",
         "regions": [
           {
+            "id": "strate-haute",
+            "libelle": "la strate du haut",
+            "centroide": [
+              122,
+              188
+            ],
+            "surface": 8760
+          },
+          {
+            "id": "strate-basse",
+            "libelle": "la strate du bas",
+            "centroide": [
+              155,
+              267.2
+            ],
+            "surface": 8738
+          },
+          {
+            "id": "strate-droite",
+            "libelle": "la strate de droite",
+            "centroide": [
+              688,
+              210
+            ],
+            "surface": 8992
+          },
+          {
+            "id": "tas-de-sable",
+            "libelle": "le tas de sable",
+            "centroide": [
+              400,
+              497.5
+            ],
+            "surface": 4428
+          },
+          {
+            "id": "sol-de-sable",
+            "libelle": "le sol de sable",
+            "centroide": [
+              600,
+              557.5
+            ],
+            "surface": 62400
+          },
+          {
             "id": "paroi",
             "libelle": "la paroi de sable",
-            "centroide": [400.0, 290.0],
-            "surface": 132000.0
+            "centroide": [
+              400,
+              290
+            ],
+            "surface": 132000
           }
         ]
       },
-      { "id": "calque-trait", "role": "trait", "regions": [] }
+      {
+        "id": "calque-trait",
+        "role": "trait",
+        "regions": []
+      }
     ]
   },
   "palette": {
     "jetons": {},
-    "nuancier": ["brun", "jaune", "blanc", "gris"]
+    "nuancier": [
+      "brun",
+      "jaune",
+      "blanc",
+      "gris"
+    ]
   },
   "timings": {
     "appuiMs": 40,

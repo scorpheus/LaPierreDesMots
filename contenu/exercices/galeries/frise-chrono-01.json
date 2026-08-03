@@ -1,16 +1,16 @@
 {
-  "$commentaire": "PLACEHOLDER — À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Lot A4 : le moteur `chrono` n'avait aucun exercice. Trois choix MESURÉS : (1) quatre vignettes et non cinq — le corpus dit « Numérote de 1 à 5 » (niveau 5) et le schéma borne `ordre` à 5, mais l'enfant DÉCHIFFRE ENCORE (D14) : chaque vignette est une phrase à lire, quatre phrases sont déjà un texte. (2) `acquis` n'est jamais remis à zéro entre deux consignes : une seule consigne, donc aucune vignette réutilisée, donc aucun `vignette-deja-numerotee`. (3) La compétence déclarée est `comp.consigne.simple` et non un code de chronologie : le référentiel est un objet protégé (annexe P § 6.4) et n'en porte aucun — le point ouvert O10 reste ouvert, et inventer un code ici l'aurait masqué. `comp.consigne.multiple` a été ÉCARTÉE bien qu'elle décrive mieux l'exercice : elle a `comp.consigne.simple` en prérequis, et `competenceEligible` (partage/src/pedagogie/selecteur.ts) écarte des sorties tout nœud dont un prérequis est sous 60 % — sur un profil neuf, ce nœud aurait été inatteignable, c'est-à-dire exactement le défaut que ce lot répare. `modeReponse` de l'étape : `ordre` (1/n!, calculé au BKT, D13). Le vocabulaire est celui du lexique CE1 de `scripts/generer-phonologie.mjs`.",
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Lot M1 — réécriture du PLACEHOLDER du lot A4. DEUX CHOSES CHANGENT, ET UNE SEULE EST UN AJOUT DE VOLUME. (1) La compétence : A4 déclarait `comp.consigne.simple` faute de mieux, en écrivant que « le référentiel est un objet protégé et n'en porte aucun » de chronologie — le point O10 était ouvert. Il l'est toujours pour la chronologie, mais le référentiel porte désormais `gph.confusion.sourde-sonore`, et c'est ce que ce contenu-ci travaille : chaque récit oppose une sourde à sa sonore (p/b, t/d, f/v, s/z), et l'enfant ne peut ordonner les vignettes qu'en LISANT laquelle porte quelle consonne. `comp.consigne.simple` est conservée en seconde compétence : elle décrit la consigne, l'autre décrit le contenu. `comp.consigne.multiple` reste ÉCARTÉE pour le motif exact de A4, qui n'a pas bougé — elle a `comp.consigne.simple` en prérequis, et `competenceEligible` (partage/src/pedagogie/selecteur.ts) écarte des sorties tout nœud dont un prérequis est sous 60 % : sur un profil neuf, ce nœud serait inatteignable. (2) Le volume : une consigne devient quatre. Contrainte mesurée qui les borne à quatre et non cinq — `acquis[vignette]` n'est jamais remis à zéro et le schéma plafonne `vignettes` à 10 : quatre lots disjoints de 3, 3, 2 et 2 vignettes saturent exactement ce plafond. Le choix de A4 de ne pas dépasser quatre vignettes par récit est conservé et pour la même raison : chaque vignette est une phrase à lire, et l'enfant déchiffre encore (D14).",
   "id": "galeries-frise-chrono-01",
-  "version": 1,
+  "version": 2,
   "titre": "La frise gravée",
-  "competences": ["comp.consigne.simple"],
+  "competences": ["gph.confusion.sourde-sonore", "comp.consigne.simple"],
   "difficulte": 3,
   "jeu": {
     "moteur": "chrono",
     "habillage": "galeries.frise",
     "noeud": "galeries-09",
     "etoiles": { "sansAide": true, "sansErreur": true },
-    "aideGobi": ["relire-consigne", "souffle-syllabe", "montre-cible"],
+    "aideGobi": ["relire-consigne", "souffle-syllabe", "surligne-graphene", "montre-cible"],
     "contenu": {
       "consignes": [
         {
@@ -18,43 +18,51 @@
           "texte": "Range les images dans l’ordre de l’histoire.",
           "forme": "imperative",
           "audio": null,
-          "recit": "Gobi entre dans la grotte. Il a une lampe. Il voit un cristal bleu. Gobi montre le cristal.",
-          "ordre": [
-            "vignette-entre",
-            "vignette-lampe",
-            "vignette-cristal",
-            "vignette-montre"
-          ],
+          "recit": "Gobi trouve un pot. Puis il trouve un bol. Alors il range le pot et le bol dans le panier.",
+          "ordre": ["vignette-pot", "vignette-bol", "vignette-panier"],
+          "motsCles": ["range", "images", "ordre", "histoire"]
+        },
+        {
+          "id": "c2",
+          "texte": "Range les images dans l’ordre de l’histoire.",
+          "forme": "imperative",
+          "audio": null,
+          "recit": "Gobi montre le tas. Puis il montre le dos du chien. Alors il montre la dame.",
+          "ordre": ["vignette-tas", "vignette-dos", "vignette-dame"],
+          "motsCles": ["range", "images", "ordre", "histoire"]
+        },
+        {
+          "id": "c3",
+          "texte": "Range les images dans l’ordre de l’histoire.",
+          "forme": "imperative",
+          "audio": null,
+          "recit": "Gobi trouve un four. Puis il trouve un verre.",
+          "ordre": ["vignette-four", "vignette-verre"],
+          "motsCles": ["range", "images", "ordre", "histoire"]
+        },
+        {
+          "id": "c4",
+          "texte": "Range les images dans l’ordre de l’histoire.",
+          "forme": "imperative",
+          "audio": null,
+          "recit": "Gobi range le sac. Puis il montre le zèbre.",
+          "ordre": ["vignette-sac", "vignette-zebre"],
           "motsCles": ["range", "images", "ordre", "histoire"]
         }
       ],
       "vignettes": [
-        {
-          "id": "vignette-entre",
-          "libelle": "Gobi entre dans la grotte.",
-          "asset": null,
-          "taille": [220, 160]
-        },
-        {
-          "id": "vignette-lampe",
-          "libelle": "Il a une lampe.",
-          "asset": null,
-          "taille": [220, 160]
-        },
-        {
-          "id": "vignette-cristal",
-          "libelle": "Il voit un cristal bleu.",
-          "asset": null,
-          "taille": [220, 160]
-        },
-        {
-          "id": "vignette-montre",
-          "libelle": "Gobi montre le cristal.",
-          "asset": null,
-          "taille": [220, 160]
-        }
+        { "id": "vignette-pot", "libelle": "Gobi trouve un pot.", "asset": null, "taille": [220, 160] },
+        { "id": "vignette-bol", "libelle": "Il trouve un bol.", "asset": null, "taille": [220, 160] },
+        { "id": "vignette-panier", "libelle": "Il range le pot et le bol.", "asset": null, "taille": [220, 160] },
+        { "id": "vignette-tas", "libelle": "Gobi montre le tas.", "asset": null, "taille": [220, 160] },
+        { "id": "vignette-dos", "libelle": "Il montre le dos du chien.", "asset": null, "taille": [220, 160] },
+        { "id": "vignette-dame", "libelle": "Il montre la dame.", "asset": null, "taille": [220, 160] },
+        { "id": "vignette-four", "libelle": "Gobi trouve un four.", "asset": null, "taille": [220, 160] },
+        { "id": "vignette-verre", "libelle": "Il trouve un verre.", "asset": null, "taille": [220, 160] },
+        { "id": "vignette-sac", "libelle": "Gobi range le sac.", "asset": null, "taille": [220, 160] },
+        { "id": "vignette-zebre", "libelle": "Il montre le zèbre.", "asset": null, "taille": [220, 160] }
       ],
-      "competence": "comp.consigne.simple"
+      "competence": "gph.confusion.sourde-sonore"
     }
   }
 }

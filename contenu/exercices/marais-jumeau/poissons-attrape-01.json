@@ -1,0 +1,211 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Deux intrus, et ce ne sont pas des mots au hasard : `bonbon` et `lapin` portent les deux autres nasales de la région. Sans intrus il n'y a rien à lire, on attrape tout (`lucioles-attrape-01`, même motif). Les quatre consignes portent sur des cibles DISJOINTES : `acquis` n’est jamais remis à zéro et une cible réemployée serait refusée en `cible-deja-attrapee`. `banane`, `cabane`, `canard` et `ananas` sont ÉCARTÉS bien qu'ils s'écrivent avec `an` : on n'y entend pas le son, et l'exercice travaille l'oreille.",
+  "id": "marais-jumeau-poissons-attrape-01",
+  "version": 1,
+  "titre": "Les poissons du son de gant",
+  "competences": [
+    "gph.nasale.an"
+  ],
+  "difficulte": 2,
+  "jeu": {
+    "moteur": "attrape",
+    "habillage": "marais.poissons",
+    "noeud": "marais-jumeau-02",
+    "etoiles": {
+      "sansAide": true,
+      "sansErreur": true
+    },
+    "aideGobi": [
+      "relire-consigne",
+      "souffle-syllabe",
+      "montre-cible"
+    ],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Attrape les poissons où tu entends le son de gant.",
+          "forme": "imperative",
+          "audio": null,
+          "aAttraper": [
+            "poisson-dent",
+            "poisson-vent"
+          ],
+          "motsCles": [
+            "attrape",
+            "poisson",
+            "son",
+            "gant"
+          ]
+        },
+        {
+          "id": "c2",
+          "texte": "Attrape aussi les poissons où tu entends le son de gant.",
+          "forme": "imperative",
+          "audio": null,
+          "aAttraper": [
+            "poisson-grand",
+            "poisson-enfant"
+          ],
+          "motsCles": [
+            "attrape",
+            "poisson",
+            "son",
+            "gant"
+          ]
+        },
+        {
+          "id": "c3",
+          "texte": "Attrape le poisson où tu lis orange.",
+          "forme": "imperative",
+          "audio": null,
+          "aAttraper": [
+            "poisson-orange"
+          ],
+          "motsCles": [
+            "attrape",
+            "poisson",
+            "orange"
+          ]
+        },
+        {
+          "id": "c4",
+          "texte": "Attrape le poisson où tu lis viande.",
+          "forme": "imperative",
+          "audio": null,
+          "aAttraper": [
+            "poisson-viande"
+          ],
+          "motsCles": [
+            "attrape",
+            "poisson",
+            "viande"
+          ]
+        }
+      ],
+      "cibles": [
+        {
+          "id": "poisson-dent",
+          "libelle": "dent",
+          "bonne": true,
+          "asset": null,
+          "depart": [
+            120,
+            120
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": "don"
+        },
+        {
+          "id": "poisson-vent",
+          "libelle": "vent",
+          "bonne": true,
+          "asset": null,
+          "depart": [
+            320,
+            380
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": "vont"
+        },
+        {
+          "id": "poisson-grand",
+          "libelle": "grand",
+          "bonne": true,
+          "asset": null,
+          "depart": [
+            520,
+            120
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": "gond"
+        },
+        {
+          "id": "poisson-enfant",
+          "libelle": "enfant",
+          "bonne": true,
+          "asset": null,
+          "depart": [
+            720,
+            380
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "poisson-orange",
+          "libelle": "orange",
+          "bonne": true,
+          "asset": null,
+          "depart": [
+            120,
+            380
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "poisson-viande",
+          "libelle": "viande",
+          "bonne": true,
+          "asset": null,
+          "depart": [
+            720,
+            120
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": null
+        },
+        {
+          "id": "poisson-bonbon",
+          "libelle": "bonbon",
+          "bonne": false,
+          "asset": null,
+          "depart": [
+            320,
+            120
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": "banc"
+        },
+        {
+          "id": "poisson-lapin",
+          "libelle": "lapin",
+          "bonne": false,
+          "asset": null,
+          "depart": [
+            520,
+            380
+          ],
+          "taille": [
+            150,
+            150
+          ],
+          "confusionAvec": "lampe"
+        }
+      ],
+      "competence": "gph.nasale.an"
+    }
+  }
+}

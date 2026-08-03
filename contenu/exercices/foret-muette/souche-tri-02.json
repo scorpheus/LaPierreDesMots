@@ -1,0 +1,228 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Les dix éléments sont CINQ mots dans leurs deux formes : rien d’autre ne varie, donc rien d’autre ne peut servir d’indice. Cinq consignes, éléments disjoints. ── LOT D'INTÉGRATION : les deux « critere » ont été reformulés, et c'est le CONTRÔLE QUALITÉ DE LA VOIX qui l'a exigé, pas la pédagogie. « le mot a un s » a été refusé trois tirages de suite par la transcription inverse (faster-whisper large-v3) : qcScore 0,727 < 0,85, entendu « le mot 1s » — sur quatre mots, l'ASR contracte « a un » en « 1 » et le texte est trop court pour que le reste rattrape. Un clip sous le seuil N'ENTRE PAS au manifeste, donc D42 masque le bouton « écouter », donc la consigne devient muette : R15 tombe. La formulation retenue est celle que le dépôt emploie DÉJÀ et qui passe — « les mots avec la lettre b » de galeries-grottes-bd-01 —, et le critère de droite suit la même forme que la consigne c3 du même exercice (« Range les mots qui n'ont pas de s »). Le sens est inchangé : à gauche les pluriels chats, fleurs, arbres, livres, jours ; à droite leurs singuliers. Le mot « sans » a été écarté : il n'est pas au lexique CE1 des 546 entrées.",
+  "id": "foret-muette-souche-tri-02",
+  "version": 1,
+  "titre": "Un seul mot, ou plusieurs",
+  "competences": [
+    "enc.pluriel.s",
+    "comp.consigne.multiple"
+  ],
+  "difficulte": 4,
+  "jeu": {
+    "moteur": "tri",
+    "habillage": "foret.souche",
+    "noeud": "foret-muette-11",
+    "etoiles": {
+      "sansAide": true,
+      "sansErreur": true
+    },
+    "aideGobi": [
+      "relire-consigne",
+      "souffle-syllabe",
+      "surligne-graphene",
+      "montre-cible"
+    ],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Range les mots qui ont un s.",
+          "forme": "imperative",
+          "audio": null,
+          "aRanger": [
+            "mot-chats",
+            "mot-fleurs"
+          ],
+          "motsCles": [
+            "range",
+            "mot",
+            "ont"
+          ]
+        },
+        {
+          "id": "c2",
+          "texte": "Range aussi les mots qui ont un s.",
+          "forme": "imperative",
+          "audio": null,
+          "aRanger": [
+            "mot-arbres",
+            "mot-livres"
+          ],
+          "motsCles": [
+            "range",
+            "mot",
+            "ont"
+          ]
+        },
+        {
+          "id": "c3",
+          "texte": "Range les mots qui n'ont pas de s.",
+          "forme": "imperative",
+          "audio": null,
+          "aRanger": [
+            "mot-chat",
+            "mot-fleur"
+          ],
+          "motsCles": [
+            "range",
+            "mot",
+            "ont",
+            "pas"
+          ]
+        },
+        {
+          "id": "c4",
+          "texte": "Range aussi les mots qui n'ont pas de s.",
+          "forme": "imperative",
+          "audio": null,
+          "aRanger": [
+            "mot-arbre",
+            "mot-livre"
+          ],
+          "motsCles": [
+            "range",
+            "mot",
+            "ont",
+            "pas"
+          ]
+        },
+        {
+          "id": "c5",
+          "texte": "Range les derniers mots.",
+          "forme": "imperative",
+          "audio": null,
+          "aRanger": [
+            "mot-jours",
+            "mot-jour"
+          ],
+          "motsCles": [
+            "range",
+            "dernier",
+            "mot"
+          ]
+        }
+      ],
+      "receptacles": [
+        {
+          "id": "souche-gauche",
+          "libelle": "le trou de gauche",
+          "critere": "les mots avec la lettre s",
+          "zone": [
+            [
+              60,
+              300
+            ],
+            [
+              420,
+              300
+            ],
+            [
+              420,
+              560
+            ],
+            [
+              60,
+              560
+            ]
+          ]
+        },
+        {
+          "id": "souche-droite",
+          "libelle": "le trou de droite",
+          "critere": "les mots qui n'ont pas de s",
+          "zone": [
+            [
+              540,
+              300
+            ],
+            [
+              900,
+              300
+            ],
+            [
+              900,
+              560
+            ],
+            [
+              540,
+              560
+            ]
+          ]
+        }
+      ],
+      "elements": [
+        {
+          "id": "mot-chats",
+          "libelle": "chats",
+          "asset": null,
+          "receptacleAttendu": "souche-gauche",
+          "confusionAvec": "chat"
+        },
+        {
+          "id": "mot-fleurs",
+          "libelle": "fleurs",
+          "asset": null,
+          "receptacleAttendu": "souche-gauche",
+          "confusionAvec": "fleur"
+        },
+        {
+          "id": "mot-arbres",
+          "libelle": "arbres",
+          "asset": null,
+          "receptacleAttendu": "souche-gauche",
+          "confusionAvec": "arbre"
+        },
+        {
+          "id": "mot-livres",
+          "libelle": "livres",
+          "asset": null,
+          "receptacleAttendu": "souche-gauche",
+          "confusionAvec": "livre"
+        },
+        {
+          "id": "mot-jours",
+          "libelle": "jours",
+          "asset": null,
+          "receptacleAttendu": "souche-gauche",
+          "confusionAvec": "jour"
+        },
+        {
+          "id": "mot-chat",
+          "libelle": "chat",
+          "asset": null,
+          "receptacleAttendu": "souche-droite",
+          "confusionAvec": "chats"
+        },
+        {
+          "id": "mot-fleur",
+          "libelle": "fleur",
+          "asset": null,
+          "receptacleAttendu": "souche-droite",
+          "confusionAvec": "fleurs"
+        },
+        {
+          "id": "mot-arbre",
+          "libelle": "arbre",
+          "asset": null,
+          "receptacleAttendu": "souche-droite",
+          "confusionAvec": "arbres"
+        },
+        {
+          "id": "mot-livre",
+          "libelle": "livre",
+          "asset": null,
+          "receptacleAttendu": "souche-droite",
+          "confusionAvec": "livres"
+        },
+        {
+          "id": "mot-jour",
+          "libelle": "jour",
+          "asset": null,
+          "receptacleAttendu": "souche-droite",
+          "confusionAvec": "jours"
+        }
+      ],
+      "competence": "enc.pluriel.s"
+    }
+  }
+}

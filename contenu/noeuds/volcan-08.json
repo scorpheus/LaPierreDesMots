@@ -1,0 +1,10 @@
+{
+  "id": "volcan-08",
+  "region": "volcan",
+  "ordre": 8,
+  "exercice": "volcan-forge-colorie-01",
+  "prerequis": [
+    "volcan-07"
+  ],
+  "temps": "maitrise"
+}

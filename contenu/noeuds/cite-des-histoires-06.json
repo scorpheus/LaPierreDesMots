@@ -1,0 +1,10 @@
+{
+  "id": "cite-des-histoires-06",
+  "region": "cite-des-histoires",
+  "ordre": 6,
+  "exercice": "cite-des-histoires-vitrail-chrono-01",
+  "prerequis": [
+    "cite-des-histoires-05"
+  ],
+  "temps": "developpement"
+}

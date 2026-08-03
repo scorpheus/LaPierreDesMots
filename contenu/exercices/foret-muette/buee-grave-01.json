@@ -1,0 +1,149 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Le nœud le plus dur de la région : l'enfant doit ÉCRIRE une lettre qu'il n'entend pas, ce qui n'est possible que si la loi est acquise. Le clavier ne porte que les quatre lettres finales muettes du contenu — t, d, s, x — et rien d’autre : y ajouter des consonnes prononcées transformerait un exercice d'orthographe en tri au hasard. Chaque position de trou est REMESURÉE par le générateur contre le mot lui-même.",
+  "id": "foret-muette-buee-grave-01",
+  "version": 1,
+  "titre": "La lettre qui ne se dit pas",
+  "competences": [
+    "gph.finale.muette"
+  ],
+  "difficulte": 4,
+  "jeu": {
+    "moteur": "grave",
+    "habillage": "foret.buee",
+    "noeud": "foret-muette-06",
+    "etoiles": {
+      "sansAide": true,
+      "sansErreur": true
+    },
+    "aideGobi": [
+      "relire-consigne",
+      "souffle-syllabe",
+      "surligne-graphene"
+    ],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Grave la lettre pour écrire ce mot.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "chat",
+          "trous": [
+            {
+              "id": "trou-un",
+              "position": 3,
+              "attendu": "t"
+            }
+          ],
+          "motsCles": [
+            "grave",
+            "lettre",
+            "mot"
+          ]
+        },
+        {
+          "id": "c2",
+          "texte": "Grave la lettre pour écrire ce mot.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "grand",
+          "trous": [
+            {
+              "id": "trou-deux",
+              "position": 4,
+              "attendu": "d"
+            }
+          ],
+          "motsCles": [
+            "grave",
+            "lettre",
+            "mot"
+          ]
+        },
+        {
+          "id": "c3",
+          "texte": "Grave la lettre pour écrire ce mot.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "tapis",
+          "trous": [
+            {
+              "id": "trou-trois",
+              "position": 4,
+              "attendu": "s"
+            }
+          ],
+          "motsCles": [
+            "grave",
+            "lettre",
+            "mot"
+          ]
+        },
+        {
+          "id": "c4",
+          "texte": "Grave la lettre pour écrire ce mot.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "noix",
+          "trous": [
+            {
+              "id": "trou-quatre",
+              "position": 3,
+              "attendu": "x"
+            }
+          ],
+          "motsCles": [
+            "grave",
+            "lettre",
+            "mot"
+          ]
+        },
+        {
+          "id": "c5",
+          "texte": "Grave la lettre pour écrire ce mot.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "toit",
+          "trous": [
+            {
+              "id": "trou-cinq",
+              "position": 3,
+              "attendu": "t"
+            }
+          ],
+          "motsCles": [
+            "grave",
+            "lettre",
+            "mot"
+          ]
+        },
+        {
+          "id": "c6",
+          "texte": "Grave la lettre pour écrire ce mot.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "pied",
+          "trous": [
+            {
+              "id": "trou-six",
+              "position": 3,
+              "attendu": "d"
+            }
+          ],
+          "motsCles": [
+            "grave",
+            "lettre",
+            "mot"
+          ]
+        }
+      ],
+      "clavier": [
+        "t",
+        "d",
+        "s",
+        "x"
+      ],
+      "competence": "gph.finale.muette"
+    }
+  }
+}

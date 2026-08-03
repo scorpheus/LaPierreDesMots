@@ -1,8 +1,8 @@
 {
-  "$commentaire": "Les six régions de la v2 § 3.3, DANS L'ORDRE DE LA PROGRESSION PHONOLOGIQUE — cet ordre est la progression, il ne se réarrange pas. Deux régions restent ouvertes en parallèle dès la troisième. `competences` ne cite que des codes présents dans `contenu/referentiel/competences.json` : le référentiel est un objet protégé (annexe P § 6.4), aucun lot n'y ajoute de code sans validation, et `tests/unitaires/carte.test.ts` échoue si une région en invente un. Les régions dont le référentiel ne porte pas encore les compétences déclarent une liste vide plutôt qu'un code mort. `noeuds` ne cite que des nœuds réellement livrés : c'est lui qui fait le pourcentage de recoloration, et un nœud fantôme rendrait la région à jamais incomplète. ── LOT N7, POINT DE SYNCHRONISATION DU § 6.2 : « N8 veut y ajouter ses nœuds. Il ne le fait pas : N7 lit la liste des nœuds livrés et l inscrit. » Mesuré à l écriture : `ls contenu/noeuds/*.json` rend DOUZE fichiers (clairiere-01 à -06, galeries-01 à -06) alors que ce document n en citait que SEPT. Les cinq autres étaient écrits, validés, et INVISIBLES sur la carte : ni atteignables, ni comptés dans la recoloration. Même défaut que le § 1.5 du contrat sur les quatre nœuds de La Clairière, reparu après la livraison de N8. `tests/unitaires/ids-regions-stables.test.ts` croise désormais les deux populations et échoue dans les DEUX sens. ── LA SCÈNE POINTE SUR LA v2. ÉCART À SIGNALER À N4 : `client/src/ecrans/EcranCarte.tsx` ne lit PAS ce champ, il porte le chemin en dur ligne 32 (`SVG_CARTE = habillages/carte/carte-monde.svg`) ; mesuré, `scene` n a aucun consommateur dans partage/, client/ ni serveur/. Tant que cette ligne n est pas passée à `carte-monde-v2.svg`, l enfant voit encore les six hexagones identiques de la v1, et la v1 apparaît en « contenu mort » au contrôle P3.2 alors qu elle est le seul fichier réellement servi. Les deux fichiers portent les MÊMES six identifiants dans le MÊME ordre et les MÊMES six centres de marqueur (comparés fichier à fichier par le test) : le passage est un changement d une ligne, sans risque. `EcranCarte.tsx` appartient à N4 (§ 6.2), N7 ne l écrit pas. ── NOM DE FICHIER : le contrat § 4.7 écrit `carte-monde.v2.svg`, que le motif `cheminAsset` de `contenu/schemas/monde.schema.json` REFUSE (il n admet qu un seul point, celui de l extension). Le tiret est la seule forme que les deux documents gelés acceptent — voir Q-R7 de questions-en-attente.md.",
+  "$commentaire": "Les six régions de la v2 § 3.3, DANS L'ORDRE DE LA PROGRESSION PHONOLOGIQUE — cet ordre EST la progression, il ne se réarrange pas. ── ÉCRIT PAR M2, SEUL ÉCRIVAIN DE CE FICHIER (contrat du monde v4 § 5, frontière n° 1). Les 76 identifiants de nœud sont ceux que le § 2 du plan a gelés : `<region>-01` à `-12`, `-14` pour Les Galeries et La Cité. M1 livre les 26 premiers (Clairière, Galeries), M2 les 50 autres ; aucun des deux ne les demande à l’autre à l'exécution. C'est la correction du défaut N7/N8, où cinq nœuds écrits et validés étaient INVISIBLES sur la carte, ni atteignables ni comptés dans la recoloration : `tests/unitaires/ids-regions-stables.test.ts` croise désormais les deux populations et échoue dans les DEUX sens. ── LES COMPÉTENCES. Le référentiel est un objet protégé (annexe P § 6.4) : `tests/unitaires/carte.test.ts` échoue si une région cite un code qu’il ne porte pas. Les 30 codes sont gelés au § 2 du plan et M3 est seul écrivain de `contenu/referentiel/competences.json` ; TANT QUE M3 N’A PAS LIVRÉ SES 25 CODES, CE DOCUMENT CITE DES CODES ABSENTS ET LA SUITE ROUGIT — c’est le comportement voulu (D39) : la chaîne dit la vérité plutôt que d’être verte à bon compte. Les quatre régions de M2 ne déclarent que les codes RÉELLEMENT travaillés par leurs exercices, recalculés à l’écriture et jamais recopiés. Trois codes du § 2 ne sont déclarés par aucune région, et chacun a sa raison mesurée, écrite en tête du fichier de région correspondant : `gph.rare.gn` (1 mot au lexique CE1 : peigne), `gph.rare.ph` (2 mots : photo, éléphant) et `comp.vrai-faux` (un seul des huit moteurs de la Cité porte un champ de texte, R12 en exige trois). Voir Docs/questions-en-attente.md, section M2. ── LA SCÈNE pointe sur `carte-monde-v2.svg`, que `client/src/ecrans/EcranCarte.tsx:60` sert bien : le passage a été fait. M7 produit la v3 ; ce champ le suivra quand elle sera livrée, et M7 n’écrit pas ce fichier.",
   "ouvertesEnParallele": 2,
   "scene": {
-    "fichier": "habillages/carte/carte-monde-v2.svg",
+    "fichier": "habillages/carte/carte-monde-v3.svg",
     "viewBox": "0 0 1200 800"
   },
   "regions": [
@@ -13,9 +13,13 @@
       "domaine": "Voyelles, syllabes simples (CV), premiers mots outils",
       "ambiance": "Une prairie où les lucioles se rallument à mesure que tu lis, autour de l’arbre-maison",
       "competences": [
-        "comp.consigne.simple",
         "comp.consigne.multiple",
-        "lex.couleur"
+        "comp.consigne.simple",
+        "flu.mot.court",
+        "gph.voyelle.orale",
+        "lex.couleur",
+        "mot.outil.frequent",
+        "syl.cv"
       ],
       "noeuds": [
         "clairiere-01",
@@ -23,7 +27,13 @@
         "clairiere-03",
         "clairiere-04",
         "clairiere-05",
-        "clairiere-06"
+        "clairiere-06",
+        "clairiere-07",
+        "clairiere-08",
+        "clairiere-09",
+        "clairiere-10",
+        "clairiere-11",
+        "clairiere-12"
       ]
     },
     {
@@ -32,7 +42,14 @@
       "libelle": "Les Galeries",
       "domaine": "Syllabes CVC, confusions b/d/p/q, sons proches",
       "ambiance": "Des grottes de cristal qui te renvoient en écho les sons que tu poses",
-      "competences": [],
+      "competences": [
+        "comp.consigne.multiple",
+        "comp.consigne.simple",
+        "gph.confusion.sourde-sonore",
+        "gph.miroir.gauche-droite",
+        "gph.miroir.haut-bas",
+        "syl.cvc"
+      ],
       "noeuds": [
         "galeries-01",
         "galeries-02",
@@ -45,7 +62,9 @@
         "galeries-09",
         "galeries-10",
         "galeries-11",
-        "galeries-12"
+        "galeries-12",
+        "galeries-13",
+        "galeries-14"
       ]
     },
     {
@@ -54,8 +73,30 @@
       "libelle": "Le Marais Jumeau",
       "domaine": "Nasales on/an/in/ou, digrammes",
       "ambiance": "Un marais de nénuphars où les grenouilles répondent dès qu’on distingue deux sons jumeaux",
-      "competences": [],
-      "noeuds": []
+      "competences": [
+        "comp.consigne.multiple",
+        "comp.consigne.simple",
+        "gph.digramme.oi",
+        "gph.digramme.ou",
+        "gph.nasale.an",
+        "gph.nasale.in",
+        "gph.nasale.on",
+        "lex.couleur"
+      ],
+      "noeuds": [
+        "marais-jumeau-01",
+        "marais-jumeau-02",
+        "marais-jumeau-03",
+        "marais-jumeau-04",
+        "marais-jumeau-05",
+        "marais-jumeau-06",
+        "marais-jumeau-07",
+        "marais-jumeau-08",
+        "marais-jumeau-09",
+        "marais-jumeau-10",
+        "marais-jumeau-11",
+        "marais-jumeau-12"
+      ]
     },
     {
       "region": "foret-muette",
@@ -63,8 +104,28 @@
       "libelle": "La Forêt Muette",
       "domaine": "Lettres finales muettes, pluriels, liaisons",
       "ambiance": "Une forêt d’automne dont les feuilles rendent leurs lettres quand on les lit à voix haute",
-      "competences": [],
-      "noeuds": []
+      "competences": [
+        "comp.consigne.multiple",
+        "comp.consigne.simple",
+        "enc.pluriel.s",
+        "flu.liaison",
+        "gph.finale.muette",
+        "lex.couleur"
+      ],
+      "noeuds": [
+        "foret-muette-01",
+        "foret-muette-02",
+        "foret-muette-03",
+        "foret-muette-04",
+        "foret-muette-05",
+        "foret-muette-06",
+        "foret-muette-07",
+        "foret-muette-08",
+        "foret-muette-09",
+        "foret-muette-10",
+        "foret-muette-11",
+        "foret-muette-12"
+      ]
     },
     {
       "region": "volcan",
@@ -72,8 +133,30 @@
       "libelle": "Le Volcan",
       "domaine": "Graphèmes rares : eau, ill, gn, ph, ch/qu",
       "ambiance": "Des forges de lave où l’on reforge les graphèmes les plus rares, un par un",
-      "competences": [],
-      "noeuds": []
+      "competences": [
+        "comp.consigne.multiple",
+        "comp.consigne.simple",
+        "gph.rare.ch-qu",
+        "gph.rare.eau",
+        "gph.rare.gn",
+        "gph.rare.ill",
+        "gph.rare.ph",
+        "lex.couleur"
+      ],
+      "noeuds": [
+        "volcan-01",
+        "volcan-02",
+        "volcan-03",
+        "volcan-04",
+        "volcan-05",
+        "volcan-06",
+        "volcan-07",
+        "volcan-08",
+        "volcan-09",
+        "volcan-10",
+        "volcan-11",
+        "volcan-12"
+      ]
     },
     {
       "region": "cite-des-histoires",
@@ -81,8 +164,32 @@
       "libelle": "La Cité des Histoires",
       "domaine": "Compréhension : textes, inférences, chronologie",
       "ambiance": "Une ville-bibliothèque dont les ponts de livres se rebâtissent sous les pas de qui lit",
-      "competences": [],
-      "noeuds": []
+      "competences": [
+        "comp.chronologie",
+        "comp.consigne.multiple",
+        "comp.consigne.simple",
+        "comp.image",
+        "comp.inference",
+        "comp.litteral",
+        "comp.phrase.completee",
+        "lex.couleur"
+      ],
+      "noeuds": [
+        "cite-des-histoires-01",
+        "cite-des-histoires-02",
+        "cite-des-histoires-03",
+        "cite-des-histoires-04",
+        "cite-des-histoires-05",
+        "cite-des-histoires-06",
+        "cite-des-histoires-07",
+        "cite-des-histoires-08",
+        "cite-des-histoires-09",
+        "cite-des-histoires-10",
+        "cite-des-histoires-11",
+        "cite-des-histoires-12",
+        "cite-des-histoires-13",
+        "cite-des-histoires-14"
+      ]
     }
   ]
 }

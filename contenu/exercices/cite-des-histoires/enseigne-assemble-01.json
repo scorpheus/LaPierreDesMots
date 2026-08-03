@@ -1,0 +1,143 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. ORIGINE : NIVEAU 6, fiche 4, « Fabriquer un moulin avec du papier ». CORRIGÉ PRODUIT : la fiche demande « Que fait le papier quand on souffle dessus ? » et « Où peut-on fabriquer ce moulin ? » en laissant l’amorce vide ; le texte source répond « Quand on souffle dessus, le papier tourne comme un moulin » et « à la maison ou à l’école ». Les trois mots à écrire — vent, papier, école — en descendent. LES BLOCS SONT DES LETTRES ET NON DES SYLLABES, et c’est un choix mesuré : `scripts/valider-brouillons.mjs` audite `blocs.libelle` comme du vocabulaire et refuse toute syllabe (il refuse déjà les huit de `galeries/stalagmites-assemble-01`) ; une lettre seule est ignorée par `motsDuTexte`, qui écarte les mots d’une lettre. Le contenu de la Cité passe donc le lexique sans une seule exception. La consigne est une DEVINETTE : le mot à écrire n’est jamais nommé, il se déduit — c’est là que `comp.inference` se travaille. Quinze blocs utiles, tous d’identifiants distincts (`bloc-deja-pose` ne libère rien).",
+  "id": "cite-des-histoires-enseigne-assemble-01",
+  "version": 1,
+  "titre": "L'enseigne à écrire",
+  "origine": {
+    "source": "fiches-origine/NIVEAU 6.pdf",
+    "niveau": 6,
+    "fiche": 4
+  },
+  "competences": [
+    "comp.phrase.completee",
+    "comp.inference"
+  ],
+  "difficulte": 4,
+  "jeu": {
+    "moteur": "assemble",
+    "habillage": "cite.enseigne",
+    "noeud": "cite-des-histoires-09",
+    "etoiles": {
+      "sansAide": true,
+      "sansErreur": true
+    },
+    "aideGobi": [
+      "relire-consigne",
+      "souffle-syllabe",
+      "surligne-graphene"
+    ],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Ce mot a du vent et de la farine. Range les syllabes.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "moulin",
+          "solution": [
+            "bloc-mou",
+            "bloc-lin"
+          ],
+          "motsCles": [
+            "vent",
+            "farine",
+            "range",
+            "syllabe"
+          ]
+        },
+        {
+          "id": "c2",
+          "texte": "Le cahier a des pages de ce mot. Range les syllabes.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "papier",
+          "solution": [
+            "bloc-pa",
+            "bloc-pier"
+          ],
+          "motsCles": [
+            "cahier",
+            "page",
+            "range",
+            "syllabe"
+          ]
+        },
+        {
+          "id": "c3",
+          "texte": "La maîtresse et les enfants sont dans ce mot. Range les syllabes.",
+          "forme": "imperative",
+          "audio": null,
+          "mot": "école",
+          "solution": [
+            "bloc-e-accent",
+            "bloc-co",
+            "bloc-le"
+          ],
+          "motsCles": [
+            "maîtresse",
+            "enfant",
+            "range",
+            "syllabe"
+          ]
+        }
+      ],
+      "blocs": [
+        {
+          "id": "bloc-mou",
+          "libelle": "mou",
+          "intrus": false,
+          "confusionAvec": "nou"
+        },
+        {
+          "id": "bloc-lin",
+          "libelle": "lin",
+          "intrus": false,
+          "confusionAvec": "lon"
+        },
+        {
+          "id": "bloc-pa",
+          "libelle": "pa",
+          "intrus": false,
+          "confusionAvec": "ba"
+        },
+        {
+          "id": "bloc-pier",
+          "libelle": "pier",
+          "intrus": false,
+          "confusionAvec": "bier"
+        },
+        {
+          "id": "bloc-e-accent",
+          "libelle": "é",
+          "intrus": false,
+          "confusionAvec": null
+        },
+        {
+          "id": "bloc-co",
+          "libelle": "co",
+          "intrus": false,
+          "confusionAvec": "con"
+        },
+        {
+          "id": "bloc-le",
+          "libelle": "le",
+          "intrus": false,
+          "confusionAvec": null
+        },
+        {
+          "id": "bloc-lon",
+          "libelle": "lon",
+          "intrus": true,
+          "confusionAvec": "lin"
+        },
+        {
+          "id": "bloc-ba",
+          "libelle": "ba",
+          "intrus": true,
+          "confusionAvec": "pa"
+        }
+      ],
+      "competence": "comp.phrase.completee"
+    }
+  }
+}

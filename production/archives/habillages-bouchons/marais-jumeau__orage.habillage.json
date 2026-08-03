@@ -1,0 +1,106 @@
+{
+  "id": "marais.orage",
+  "moteurs": [
+    "eclair"
+  ],
+  "libelle": "L’orage sur le marais",
+  "region": "marais-jumeau",
+  "scene": {
+    "fichier": "habillages/marais-jumeau/orage.svg",
+    "viewBox": "0 0 960 600",
+    "calques": [
+      {
+        "id": "calque-fond",
+        "role": "fond",
+        "regions": []
+      },
+      {
+        "id": "calque-zones",
+        "role": "coloriable",
+        "regions": [
+          {
+            "id": "eclair-blanc",
+            "libelle": "l’éclair blanc",
+            "centroide": [
+              190.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "nuage-lourd",
+            "libelle": "le nuage lourd",
+            "centroide": [
+              480.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "pluie",
+            "libelle": "la pluie",
+            "centroide": [
+              770.0,
+              190.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "marais-sombre",
+            "libelle": "le marais sombre",
+            "centroide": [
+              190.0,
+              420.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "saule",
+            "libelle": "le saule",
+            "centroide": [
+              480.0,
+              420.0
+            ],
+            "surface": 32000.0
+          },
+          {
+            "id": "barque",
+            "libelle": "la barque",
+            "centroide": [
+              770.0,
+              420.0
+            ],
+            "surface": 32000.0
+          }
+        ]
+      },
+      {
+        "id": "calque-trait",
+        "role": "trait",
+        "regions": []
+      }
+    ]
+  },
+  "palette": {
+    "jetons": {},
+    "nuancier": [
+      "bleu",
+      "vert",
+      "gris",
+      "violet",
+      "brun",
+      "blanc"
+    ]
+  },
+  "timings": {
+    "appuiMs": 40,
+    "relachementMs": 90,
+    "refusMs": 150,
+    "recolorationMs": 600,
+    "interEtoilesMs": 150
+  },
+  "sons": {
+    "ambiance": null,
+    "effets": {}
+  }
+}

@@ -1,0 +1,170 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. ORIGINE : NIVEAU 5, fiche 4, « Le voyage de l’eau du nuage au robinet ». CORRIGÉ PRODUIT : les cinq étapes du PDF sont imprimées dans le désordre ; le texte source donne l’ordre — « L’eau commence son voyage dans les nuages. Quand il pleut, l’eau tombe… Elle coule ensuite vers les lacs… Dans les usines, l’eau est filtrée… Des tuyaux transportent cette eau jusqu’aux maisons ». RÉÉCRITURE ET SA LIMITE, dite plutôt que masquée : le mot `eau` n’est PAS au lexique CE1, ni `usine de filtrage`, ni `robinet`, ni `tuyau`. Le cycle est donc raconté avec les mots qui y sont — nuage, pluie, rivière, lac, soleil —, ce qui garde le voyage et perd le robinet. Neuf vignettes, aucune réemployée.",
+  "id": "cite-des-histoires-vitrail-chrono-01",
+  "version": 1,
+  "titre": "Le voyage de la pluie",
+  "origine": {
+    "source": "fiches-origine/NIVEAU 5.pdf",
+    "niveau": 5,
+    "fiche": 4
+  },
+  "competences": [
+    "comp.chronologie"
+  ],
+  "difficulte": 3,
+  "jeu": {
+    "moteur": "chrono",
+    "habillage": "cite.vitrail",
+    "noeud": "cite-des-histoires-06",
+    "etoiles": {
+      "sansAide": true,
+      "sansErreur": true
+    },
+    "aideGobi": [
+      "relire-consigne",
+      "souffle-syllabe",
+      "montre-cible"
+    ],
+    "contenu": {
+      "consignes": [
+        {
+          "id": "c1",
+          "texte": "Range les images dans l'ordre de l'histoire.",
+          "forme": "imperative",
+          "audio": null,
+          "recit": "Le nuage est très gris. Puis la pluie tombe sur la forêt. La pluie entre dans la rivière.",
+          "ordre": [
+            "vignette-nuage",
+            "vignette-pluie",
+            "vignette-riviere"
+          ],
+          "motsCles": [
+            "range",
+            "image",
+            "ordre",
+            "histoire"
+          ]
+        },
+        {
+          "id": "c2",
+          "texte": "Range aussi les images dans l'ordre de l'histoire.",
+          "forme": "imperative",
+          "audio": null,
+          "recit": "La rivière entre dans le lac. Le lac est très grand. Puis le soleil est chaud.",
+          "ordre": [
+            "vignette-lac",
+            "vignette-grand",
+            "vignette-soleil"
+          ],
+          "motsCles": [
+            "range",
+            "image",
+            "ordre",
+            "histoire"
+          ]
+        },
+        {
+          "id": "c3",
+          "texte": "Range les dernières images dans l'ordre.",
+          "forme": "imperative",
+          "audio": null,
+          "recit": "Le nuage est petit. Puis le nuage est gros. La pluie tombe sur le jardin.",
+          "ordre": [
+            "vignette-petit",
+            "vignette-gros",
+            "vignette-jardin"
+          ],
+          "motsCles": [
+            "range",
+            "image",
+            "ordre"
+          ]
+        }
+      ],
+      "vignettes": [
+        {
+          "id": "vignette-nuage",
+          "libelle": "Le nuage est très gris.",
+          "asset": null,
+          "taille": [
+            220,
+            160
+          ]
+        },
+        {
+          "id": "vignette-pluie",
+          "libelle": "Puis la pluie tombe sur la forêt.",
+          "asset": null,
+          "taille": [
+            220,
+            160
+          ]
+        },
+        {
+          "id": "vignette-riviere",
+          "libelle": "La pluie entre dans la rivière.",
+          "asset": null,
+          "taille": [
+            220,
+            160
+          ]
+        },
+        {
+          "id": "vignette-lac",
+          "libelle": "La rivière entre dans le lac.",
+          "asset": null,
+          "taille": [
+            220,
+            160
+          ]
+        },
+        {
+          "id": "vignette-grand",
+          "libelle": "Le lac est très grand.",
+          "asset": null,
+          "taille": [
+            220,
+            160
+          ]
+        },
+        {
+          "id": "vignette-soleil",
+          "libelle": "Puis le soleil est chaud.",
+          "asset": null,
+          "taille": [
+            220,
+            160
+          ]
+        },
+        {
+          "id": "vignette-petit",
+          "libelle": "Le nuage est petit.",
+          "asset": null,
+          "taille": [
+            220,
+            160
+          ]
+        },
+        {
+          "id": "vignette-gros",
+          "libelle": "Puis le nuage est gros.",
+          "asset": null,
+          "taille": [
+            220,
+            160
+          ]
+        },
+        {
+          "id": "vignette-jardin",
+          "libelle": "La pluie tombe sur le jardin.",
+          "asset": null,
+          "taille": [
+            220,
+            160
+          ]
+        }
+      ],
+      "competence": "comp.chronologie"
+    }
+  }
+}

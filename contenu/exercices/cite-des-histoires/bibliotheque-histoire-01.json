@@ -1,0 +1,207 @@
+{
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Nœud d'entrée de la Cité (M2). ORIGINE : NIVEAU 2, fiche 3, « COMMENT FABRIQUE-T-ON LE PAIN ? ». CORRIGÉ PRODUIT ET SA CITATION : la fiche affirme « Le pain est fabriqué avec de la farine, de l’eau, du sel et de la levure » et « on met la pâte dans un four chaud pour la cuire » — c’est de là que viennent les réponses « du sel », « dans le four » et « chaud ». La fiche livrait ces affirmations avec `reponseAttendue: null` : le PDF ne porte pas son corrigé, et le déduire était le travail de M2. RÉÉCRITURE : farine, sel, four, sac, chaud, bon sont les seuls mots du sujet que porte le lexique CE1 — `blé`, `levure`, `pâte`, `baguette` n'y sont pas, et `eau` non plus, ce qui a coûté la ligne sur l'eau. La première question est un vrai/faux, celle dont la réussite doit être quasi certaine (D13) ; les cinq autres portent l’information. Les six bonnes réponses sont des options DISTINCTES : `partage/src/moteurs/histoire/validation.ts:63` refuse une option déjà choisie en `question-deja-repondue`, et une réponse réemployée rendrait l’exercice interminable.",
+  "id": "cite-des-histoires-bibliotheque-histoire-01",
+  "version": 1,
+  "titre": "Le pain du four",
+  "origine": {
+    "source": "fiches-origine/NIVEAU 2.pdf",
+    "niveau": 2,
+    "fiche": 3
+  },
+  "competences": [
+    "comp.litteral"
+  ],
+  "difficulte": 2,
+  "jeu": {
+    "moteur": "histoire",
+    "habillage": "cite.bibliotheque",
+    "noeud": "cite-des-histoires-01",
+    "etoiles": {
+      "sansAide": true,
+      "sansErreur": true
+    },
+    "aideGobi": [
+      "relire-consigne",
+      "souffle-syllabe",
+      "montre-cible"
+    ],
+    "contenu": {
+      "titre": "Le pain du four",
+      "recit": "Le pain est chaud. Il a de la farine et du sel. La farine est dans un grand sac. Le four est très chaud. Le pain est dans le four. Puis le pain est très bon.",
+      "audioRecit": null,
+      "questions": [
+        {
+          "id": "c1",
+          "texte": "La farine est dans un grand sac.",
+          "audio": null,
+          "options": [
+            "q1-oui",
+            "q1-non"
+          ],
+          "reponse": "q1-oui",
+          "motsCles": [
+            "farine",
+            "sac"
+          ]
+        },
+        {
+          "id": "c2",
+          "texte": "Où est le pain ?",
+          "audio": null,
+          "options": [
+            "q2-four",
+            "q2-sac",
+            "q2-bol"
+          ],
+          "reponse": "q2-four",
+          "motsCles": [
+            "où",
+            "pain"
+          ]
+        },
+        {
+          "id": "c3",
+          "texte": "Où est la farine ?",
+          "audio": null,
+          "options": [
+            "q3-sac",
+            "q3-four",
+            "q3-lit"
+          ],
+          "reponse": "q3-sac",
+          "motsCles": [
+            "où",
+            "farine"
+          ]
+        },
+        {
+          "id": "c4",
+          "texte": "Le four est chaud ou froid ?",
+          "audio": null,
+          "options": [
+            "q4-chaud",
+            "q4-froid",
+            "q4-gris"
+          ],
+          "reponse": "q4-chaud",
+          "motsCles": [
+            "four",
+            "chaud"
+          ]
+        },
+        {
+          "id": "c5",
+          "texte": "Le pain a du sel ou du sucre ?",
+          "audio": null,
+          "options": [
+            "q5-sel",
+            "q5-sucre",
+            "q5-riz"
+          ],
+          "reponse": "q5-sel",
+          "motsCles": [
+            "pain",
+            "sel"
+          ]
+        },
+        {
+          "id": "c6",
+          "texte": "Le pain est bon.",
+          "audio": null,
+          "options": [
+            "q6-oui",
+            "q6-non"
+          ],
+          "reponse": "q6-oui",
+          "motsCles": [
+            "pain",
+            "bon"
+          ]
+        }
+      ],
+      "options": [
+        {
+          "id": "q1-oui",
+          "libelle": "oui",
+          "confusionAvec": null
+        },
+        {
+          "id": "q1-non",
+          "libelle": "non",
+          "confusionAvec": "oui"
+        },
+        {
+          "id": "q2-four",
+          "libelle": "dans le four",
+          "confusionAvec": null
+        },
+        {
+          "id": "q2-sac",
+          "libelle": "dans le sac",
+          "confusionAvec": "dans le four"
+        },
+        {
+          "id": "q2-bol",
+          "libelle": "dans le bol",
+          "confusionAvec": "dans le four"
+        },
+        {
+          "id": "q3-sac",
+          "libelle": "dans un grand sac",
+          "confusionAvec": null
+        },
+        {
+          "id": "q3-four",
+          "libelle": "dans le four",
+          "confusionAvec": "dans un grand sac"
+        },
+        {
+          "id": "q3-lit",
+          "libelle": "dans le lit",
+          "confusionAvec": "dans un grand sac"
+        },
+        {
+          "id": "q4-chaud",
+          "libelle": "chaud",
+          "confusionAvec": null
+        },
+        {
+          "id": "q4-froid",
+          "libelle": "froid",
+          "confusionAvec": "chaud"
+        },
+        {
+          "id": "q4-gris",
+          "libelle": "gris",
+          "confusionAvec": "chaud"
+        },
+        {
+          "id": "q5-sel",
+          "libelle": "du sel",
+          "confusionAvec": null
+        },
+        {
+          "id": "q5-sucre",
+          "libelle": "du sucre",
+          "confusionAvec": "du sel"
+        },
+        {
+          "id": "q5-riz",
+          "libelle": "du riz",
+          "confusionAvec": "du sel"
+        },
+        {
+          "id": "q6-oui",
+          "libelle": "oui",
+          "confusionAvec": null
+        },
+        {
+          "id": "q6-non",
+          "libelle": "non",
+          "confusionAvec": "oui"
+        }
+      ],
+      "competence": "comp.litteral"
+    }
+  }
+}

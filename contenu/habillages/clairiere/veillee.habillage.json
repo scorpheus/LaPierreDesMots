@@ -19,58 +19,85 @@
         "role": "coloriable",
         "regions": [
           {
-            "id": "feu",
-            "libelle": "le feu",
-            "centroide": [
-              190.0,
-              190.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "buche",
-            "libelle": "la bûche",
-            "centroide": [
-              480.0,
-              190.0
-            ],
-            "surface": 32000.0
-          },
-          {
-            "id": "couverture",
-            "libelle": "la couverture",
-            "centroide": [
-              770.0,
-              190.0
-            ],
-            "surface": 32000.0
-          },
-          {
             "id": "ciel-etoile",
             "libelle": "le ciel étoilé",
             "centroide": [
-              190.0,
-              420.0
+              360,
+              156.9
             ],
-            "surface": 32000.0
+            "surface": 288000
+          },
+          {
+            "id": "sol-de-la-clairiere",
+            "libelle": "le sol de la clairière",
+            "centroide": [
+              180,
+              543.1
+            ],
+            "surface": 97920
           },
           {
             "id": "tente",
             "libelle": "la tente",
             "centroide": [
-              480.0,
-              420.0
+              208,
+              334.5
             ],
-            "surface": 32000.0
+            "surface": 24480
+          },
+          {
+            "id": "feu",
+            "libelle": "le feu",
+            "centroide": [
+              490,
+              475.6
+            ],
+            "surface": 9213.3
+          },
+          {
+            "id": "buche",
+            "libelle": "la bûche",
+            "centroide": [
+              551,
+              491.9
+            ],
+            "surface": 7120
+          },
+          {
+            "id": "couverture",
+            "libelle": "la couverture",
+            "centroide": [
+              850.4,
+              490
+            ],
+            "surface": 19272
           },
           {
             "id": "marmite",
             "libelle": "la marmite",
             "centroide": [
-              770.0,
-              420.0
+              776,
+              399.3
             ],
-            "surface": 32000.0
+            "surface": 10175.2
+          },
+          {
+            "id": "lune-pleine",
+            "libelle": "la lune pleine",
+            "centroide": [
+              862,
+              110
+            ],
+            "surface": 8368.5
+          },
+          {
+            "id": "etoile-filante",
+            "libelle": "l’étoile filante",
+            "centroide": [
+              200,
+              118
+            ],
+            "surface": 1396
           }
         ]
       },

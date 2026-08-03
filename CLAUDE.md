@@ -71,6 +71,30 @@ et sera nécessaire à la vectorisation (annexe P § 3.2).
 **Projet solo.** Un seul développeur, un seul écrivain par fichier, pas de coordination d'équipe à
 prévoir. Les sous-agents sont autorisés et bienvenus pour paralléliser.
 
+### Les fichiers de travail vont dans `bac-a-sable/`, jamais dans le dossier temporaire du système
+
+**Règle posée par l'utilisateur.** Pages HTML d'essai, scripts d'inspection, captures
+intermédiaires, scripts de campagne, sorties brutes : tout s'écrit dans
+[bac-a-sable/](bac-a-sable/LISEZ-MOI.md), qui appartient au projet et **ne demande donc aucune
+autorisation**. Il est ignoré par git, à l'exception de son `LISEZ-MOI.md`.
+
+Bénéfice au-delà du confort : ce qui est écrit là **reste visible**. Un script d'inspection posé
+dans le dossier temporaire du système disparaît de la mémoire collective ; ici, la session suivante
+le retrouve — et évite de le réécrire.
+
+Ce qui n'y va **pas** : le code applicatif (`partage/`, `serveur/`, `client/`), les tests
+(`tests/`), les décisions et mesures qui font foi (`Docs/`), les assets de production (`contenu/`,
+`production/`).
+
+### Économie des images (décision D50)
+
+**Une image ne se regarde que si le jugement demandé est esthétique** ; tout le reste se mesure.
+Fond blanc, épaisseur de trait, régions fermées, changement d'asset, cohérence d'un personnage :
+saturation HSV, `stroke-width`, remplissage par diffusion, empreinte SHA-256. Quand il faut
+regarder : une vignette de 512 px, et un échantillon de 2 ou 3 variantes — jamais la série
+entière. **Le jugement esthétique appartient au parent** : une planche de vignettes chez lui coûte
+moins qu'une description par agent, et vaut mieux.
+
 ### Le dépôt est auto-contenu — règle dure (décision D9)
 
 **On clone, on lance, ça marche.** Rien ne s'installe hors du dossier du projet, jamais :

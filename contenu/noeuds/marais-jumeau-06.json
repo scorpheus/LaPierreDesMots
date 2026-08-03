@@ -1,0 +1,10 @@
+{
+  "id": "marais-jumeau-06",
+  "region": "marais-jumeau",
+  "ordre": 6,
+  "exercice": "marais-jumeau-ponton-assemble-01",
+  "prerequis": [
+    "marais-jumeau-05"
+  ],
+  "temps": "developpement"
+}

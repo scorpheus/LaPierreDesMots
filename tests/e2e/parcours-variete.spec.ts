@@ -42,6 +42,21 @@ const INSTANT = '2026-09-01T08:00:00Z';
 const NOEUDS_MINIMUM = 2;
 
 /**
+ * La longueur MAXIMALE d'une sortie, lue dans `contenu/referentiel/parametres-pedagogie.json`
+ * — jamais un littéral : c'est la valeur que `composerSortie` tire réellement (convention C2).
+ * C'est aussi le nombre de décors distincts qu'une région doit porter pour qu'une sortie de
+ * longueur maximale n'en répète aucun.
+ */
+const NOEUDS_MAX_PAR_SORTIE = (
+  JSON.parse(
+    readFileSync(
+      fileURLToPath(new URL('contenu/referentiel/parametres-pedagogie.json', RACINE)),
+      'utf8',
+    ),
+  ) as { selecteur: { nbNoeudsMax: number } }
+).selecteur.nbNoeudsMax;
+
+/**
  * `window.__test`, vu depuis les tests — surface du contrat v1 § 7.1, redéclarée ici parce
  * que `client/src/types-globaux.d.ts` n'est pas dans le périmètre de compilation de
  * Playwright. Toute divergence avec le contrat serait un défaut de ce fichier.
@@ -141,18 +156,41 @@ function consigneAvecAudio(noeud: string): boolean {
 }
 
 test.describe('variété d’une sortie', () => {
-  test('R13 — une sortie ne rejoue jamais deux fois le même habillage', async ({ page }) => {
+  /**
+   * ── CE CAS A ÉTÉ RECADRÉ, ET IL FAUT DIRE EXACTEMENT SUR QUOI ────────────────────────────
+   *
+   * Il montait TOUS les nœuds du dépôt et exigeait que les habillages soient tous distincts :
+   * `new Set(vus).size === vus.length`. C'était juste tant que le dépôt tenait dans une sortie
+   * — 18 nœuds pour 18 décors. Les lots de contenu ont livré 76 nœuds pour 55 décors, et la
+   * marche complète en répète forcément : **R13 parle d'une SORTIE — 4 à 6 nœuds —, jamais du
+   * catalogue.** Exiger 76 décors distincts, c'était exiger un décor par nœud, ce qu'aucune
+   * règle ne demande et ce que le sélecteur n'a jamais promis.
+   *
+   * R13 n'est pas abandonnée, elle est prouvée LÀ OÙ ELLE VIT :
+   * `tests/unitaires/sortie-variete.test.ts` compose 60 sorties RÉELLES par région avec le
+   * vrai `composerSortie` et exige 0 habillage répété. C'est plus fort qu'une marche linéaire,
+   * puisque c'est le plan que l'enfant reçoit vraiment.
+   *
+   * Ce que cette recette garde, et qu'aucune suite hors ligne ne peut donner :
+   *   1. **chaque nœud livré MONTE dans l'application réelle** et affiche son décor — c'est la
+   *      seule preuve que le câblage contenu → moteur → habillage tient à l'écran ;
+   *   2. **chaque région porte assez de décors DISTINCTS pour une sortie de longueur maximale**,
+   *      la condition de données sans laquelle R13 serait tenue par appauvrissement — une
+   *      région de douze nœuds sur cinq décors ne servirait jamais plus de cinq nœuds.
+   */
+  test('chaque nœud monte avec son décor, et chaque région en porte assez pour une sortie entière', async ({
+    page,
+  }) => {
     await preparer(page);
 
     const noeuds = noeudsDuDepot();
     expect(
       noeuds.length,
-      'Une sortie de moins de deux nœuds ne peut pas prouver R13. Cause mesurée : le § 3.5 ' +
-        'du contrat gelé ne confie les `contenu/exercices/**` des onze moteurs de F5 à aucun ' +
-        'lot, donc aucun nœud ne les joue.',
+      'Une sortie de moins de deux nœuds ne peut pas prouver quoi que ce soit.',
     ).toBeGreaterThanOrEqual(NOEUDS_MINIMUM);
 
     const vus: string[] = [];
+    const parRegion = new Map<string, Set<string>>();
     for (const noeud of noeuds) {
       await page.evaluate(async (identifiant) => {
         const fenetre = window as unknown as FenetreTest;
@@ -164,9 +202,35 @@ test.describe('variété d’une sortie', () => {
       const habillage = await racine.getAttribute('data-habillage');
       expect(habillage, `le nœud ${noeud} ne déclare aucun habillage`).not.toBeNull();
       vus.push(habillage ?? '');
+
+      const region = String(lireJsonDuDepot(`contenu/noeuds/${noeud}.json`)['region']);
+      const decors = parRegion.get(region) ?? new Set<string>();
+      decors.add(habillage ?? '');
+      parRegion.set(region, decors);
     }
 
-    expect(new Set(vus).size, `habillages joués dans l’ordre : ${vus.join(', ')}`).toBe(vus.length);
+    // Chaque nœud livré a bien été monté, et chacun a rendu un décor non vide.
+    expect(vus.length, 'des nœuds livrés que l’application n’a pas montés').toBe(noeuds.length);
+    expect(
+      vus.filter((habillage) => habillage === ''),
+      'un nœud a monté sans décor',
+    ).toEqual([]);
+
+    // La condition de données de R13, région par région, avec le compte imprimé.
+    const pauvres: string[] = [];
+    for (const [region, decors] of parRegion) {
+      if (decors.size < NOEUDS_MAX_PAR_SORTIE) {
+        pauvres.push(`${region} : ${String(decors.size)} décor(s) — ${[...decors].sort().join(', ')}`);
+      }
+    }
+    expect(
+      pauvres,
+      `décors distincts par région : ${[...parRegion.entries()]
+        .map(([region, decors]) => `${region}=${String(decors.size)}`)
+        .sort()
+        .join(' · ')}`,
+    ).toEqual([]);
+    expect(parRegion.size, 'aucune région parcourue').toBeGreaterThan(0);
   });
 
   test('aucun nœud de la sortie n’affiche d’écran d’échec', async ({ page }) => {

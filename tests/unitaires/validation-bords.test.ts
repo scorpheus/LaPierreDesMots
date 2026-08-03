@@ -86,6 +86,37 @@ describe('validerBlocJeu — les trois refus', () => {
     expect(rapport.valide).toBe(false);
     expect(rapport.problemes.some((p) => p.chemin.startsWith('/jeu/contenu'))).toBe(true);
   });
+
+  /**
+   * ── LE REPLI QUI N'AVAIT PAS DE TEST ────────────────────────────────────────────────────
+   *
+   * Le commit « Quatre défauts de production trouvés par les fuzzers » a ajouté cinq gardes à
+   * `validation.ts` pour transformer des exceptions en refus lisibles — c'est la mutation
+   * n° 15 de `Docs/audit-qa.md`, « le repli lève au lieu de replier ». Trois de ces gardes
+   * étaient atteintes par les cas ci-dessus. **Deux ne l'étaient par aucun test du dépôt**, et
+   * l'annexe T § 7 l'a dit à sa façon, en chiffres, sur la chaîne complète :
+   *
+   *   ERROR: Coverage for lines (94.89%) — "partage/src/contenu/validation.ts" (95%)
+   *   ERROR: Coverage for branches (93.57%) — idem
+   *
+   * Du code défensif que rien ne déclenche n'est pas gardé : le jour où quelqu'un le
+   * simplifie, aucune suite ne bouge. Les deux cas suivants les déclenchent, et exigent les
+   * DEUX moitiés de la promesse — pas d'exception, ET un refus qui nomme sa règle.
+   *
+   * Le fuzz de `fuzz-contenu.test.ts` ne pouvait pas les atteindre par construction : il
+   * empoisonne un POINTEUR d'un exercice, donc il passe toujours un objet.
+   */
+  it('un exercice qui n’est pas un objet est REFUSÉ, jamais une exception', () => {
+    for (const hostile of [null, undefined, 'un texte', 42, [1, 2, 3], true]) {
+      const rapport = validerBlocJeu(hostile as unknown as Exercice, habillageEcole);
+      expect(rapport.valide, `accepté : ${JSON.stringify(hostile)}`).toBe(false);
+      expect(codesDe(rapport), `règle pour ${JSON.stringify(hostile)}`).toContain(
+        'enveloppe-illisible',
+      );
+      // Un refus sans adresse est illisible pour qui doit le corriger.
+      expect(rapport.problemes.every((p) => typeof p.chemin === 'string')).toBe(true);
+    }
+  });
 });
 
 describe('validerSceneSvg — les formes primitives sont fermées d’office', () => {
@@ -137,6 +168,30 @@ describe('validerSceneSvg — les formes primitives sont fermées d’office', (
     );
     expect(rapport.valide).toBe(false);
     expect(rapport.problemes.some((p) => p.message.includes('region-absente-du-svg'))).toBe(true);
+  });
+
+  /**
+   * La seconde garde du même commit, et le même défaut : livrée sans test qui la déclenche.
+   *
+   * `scripts/test-contenu.mjs:497` passe ici un SVG relu du disque, et `readFileSync` peut
+   * rendre autre chose qu'un texte. Le repli existe pour que la chaîne dise « ce SVG n'est pas
+   * un texte » plutôt que de tomber sur une trace de pile. Un repli qu'aucun test ne parcourt
+   * disparaîtrait à la première simplification sans qu'une suite bouge.
+   */
+  it('un SVG qui n’est pas un texte est REFUSÉ, jamais une exception', () => {
+    for (const hostile of [null, undefined, 42, {}, [], true]) {
+      const rapport = validerSceneSvg(
+        hostile as unknown as string,
+        habillageAvecRegions(['lune']),
+      );
+      expect(rapport.valide, `accepté : ${JSON.stringify(hostile)}`).toBe(false);
+      expect(codesDe(rapport), `règle pour ${JSON.stringify(hostile)}`).toContain('svg-illisible');
+    }
+    // Discrimination : le même habillage avec un VRAI texte ne doit pas rendre `svg-illisible`,
+    // sinon la garde refuserait tout et les cas ci-dessus ne prouveraient rien.
+    expect(codesDe(validerSceneSvg(SVG_PRIMITIVES, habillageAvecRegions(['lune'])))).not.toContain(
+      'svg-illisible',
+    );
   });
 
   it('SIGNALE un tracé coloriable resté ouvert — la fuite de l’annexe P § 3.2', () => {

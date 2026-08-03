@@ -252,14 +252,31 @@ describe('LE CHIFFRE DU LOT — 100 % du vocabulaire est au lexique CE1 déclar�
 describe('les brouillons projetés portent bien ce que le socle déclare', () => {
   const projetes = brouillons();
 
-  it('sept unités phonologiques, réparties sur les deux régions ouvertes', () => {
+  it('le socle couvre les CINQ régions phonologiques, trois unités au moins chacune', () => {
+    // ⚠ CE CAS EXIGEAIT `['clairiere', 'galeries']` — les deux seules régions ouvertes quand il
+    // a été écrit. Le socle phonologique porte désormais les cinq premières régions : la
+    // progression (nasales au Marais, finales muettes en Forêt, graphèmes rares au Volcan) n'a
+    // de sens que si chacune reçoit son matériau. La sixième — La Cité — est de la
+    // COMPRÉHENSION, pas de la phonologie : elle n'a pas de socle et ne doit pas en avoir un.
+    //
+    // La liste attendue n'est pas recopiée à la main : elle se déduit de `regions.json`, dont
+    // on retire la Cité. Ouvrir une septième région phonologique fera donc rougir ce cas tant
+    // qu'elle n'aura pas son socle, ce qui est précisément l'alerte qu'on veut.
+    const REGIONS_SANS_SOCLE = new Set(['cite-des-histoires']);
+    const attendues = lireJson<{ readonly regions: readonly { readonly region: string }[] }>(
+      'contenu/monde/regions.json',
+    )
+      .regions.map((r) => r.region)
+      .filter((region) => !REGIONS_SANS_SOCLE.has(region))
+      .sort();
+
     expect(projetes.length).toBeGreaterThanOrEqual(7);
     const parRegion = new Map<string, number>();
     for (const { donnees } of projetes) {
       const region = String(donnees['region']);
       parRegion.set(region, (parRegion.get(region) ?? 0) + 1);
     }
-    expect([...parRegion.keys()].sort()).toEqual(['clairiere', 'galeries']);
+    expect([...parRegion.keys()].sort()).toEqual(attendues);
     for (const [region, compte] of parRegion) {
       expect(compte, `${region} n’a qu’une unité`).toBeGreaterThanOrEqual(3);
     }

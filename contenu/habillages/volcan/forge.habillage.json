@@ -1,0 +1,196 @@
+{
+  "id": "volcan.forge",
+  "moteurs": [
+    "colorie"
+  ],
+  "libelle": "La forge et son enclume",
+  "region": "volcan",
+  "scene": {
+    "fichier": "habillages/volcan/forge.svg",
+    "viewBox": "0 0 960 600",
+    "calques": [
+      {
+        "id": "calque-fond",
+        "role": "fond",
+        "regions": []
+      },
+      {
+        "id": "calque-zones",
+        "role": "coloriable",
+        "regions": [
+          {
+            "id": "mur-de-la-forge",
+            "libelle": "le mur de la forge",
+            "centroide": [
+              240,
+              79.5
+            ],
+            "surface": 144000
+          },
+          {
+            "id": "sol-de-la-forge",
+            "libelle": "le sol de la forge",
+            "centroide": [
+              720,
+              535
+            ],
+            "surface": 117120
+          },
+          {
+            "id": "rideau",
+            "libelle": "le rideau",
+            "centroide": [
+              60,
+              116.8
+            ],
+            "surface": 49240
+          },
+          {
+            "id": "tableau",
+            "libelle": "le tableau",
+            "centroide": [
+              260,
+              185
+            ],
+            "surface": 26000
+          },
+          {
+            "id": "drapeau",
+            "libelle": "le drapeau",
+            "centroide": [
+              473.1,
+              165.3
+            ],
+            "surface": 7859.9
+          },
+          {
+            "id": "oiseau",
+            "libelle": "l’oiseau",
+            "centroide": [
+              638.2,
+              147.7
+            ],
+            "surface": 5985.5
+          },
+          {
+            "id": "chapeau",
+            "libelle": "le chapeau",
+            "centroide": [
+              856,
+              173.7
+            ],
+            "surface": 6227.7
+          },
+          {
+            "id": "enclume",
+            "libelle": "l’enclume",
+            "centroide": [
+              261,
+              360.1
+            ],
+            "surface": 16836.4
+          },
+          {
+            "id": "billot",
+            "libelle": "le billot",
+            "centroide": [
+              209.8,
+              495
+            ],
+            "surface": 16598
+          },
+          {
+            "id": "marteau-de-forge",
+            "libelle": "le marteau de forge",
+            "centroide": [
+              456,
+              311
+            ],
+            "surface": 7049.5
+          },
+          {
+            "id": "etincelle",
+            "libelle": "l’étincelle",
+            "centroide": [
+              520,
+              300
+            ],
+            "surface": 2269.7
+          },
+          {
+            "id": "foyer",
+            "libelle": "le foyer",
+            "centroide": [
+              690.6,
+              263
+            ],
+            "surface": 36261.7
+          },
+          {
+            "id": "braises-du-foyer",
+            "libelle": "les braises du foyer",
+            "centroide": [
+              691.1,
+              436.5
+            ],
+            "surface": 4579.2
+          },
+          {
+            "id": "feu",
+            "libelle": "le feu",
+            "centroide": [
+              680,
+              462.9
+            ],
+            "surface": 8121.4
+          },
+          {
+            "id": "seau",
+            "libelle": "le seau",
+            "centroide": [
+              900,
+              438
+            ],
+            "surface": 4624
+          },
+          {
+            "id": "seau-d-eau",
+            "libelle": "le seau d’eau",
+            "centroide": [
+              500,
+              513
+            ],
+            "surface": 7396
+          }
+        ]
+      },
+      {
+        "id": "calque-trait",
+        "role": "trait",
+        "regions": []
+      }
+    ]
+  },
+  "palette": {
+    "jetons": {},
+    "nuancier": [
+      "rouge",
+      "orange",
+      "jaune",
+      "noir",
+      "gris",
+      "brun"
+    ]
+  },
+  "timings": {
+    "appuiMs": 60,
+    "relachementMs": 120,
+    "refusMs": 180,
+    "recolorationMs": 800,
+    "interEtoilesMs": 180
+  },
+  "sons": {
+    "ambiance": null,
+    "effets": {}
+  }
+}
