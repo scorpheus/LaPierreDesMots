@@ -38,6 +38,46 @@ const STYLE_CIBLE = {
   cursor: 'pointer',
 } as const;
 
+/**
+ * ══════════════════════════════════════════════════════════════════════════════════════════════
+ * R16 — « ON N'ARRIVE PAS À DÉPLACER »
+ *
+ * Le père, sur tablette : « Range dans la grotte de gauche les mots avec la lettre B. En fait
+ * sur la tablette, ça marche pas, on n'arrive pas à déplacer, on n'arrive pas à bien les mettre. »
+ *
+ * MESURÉ AVANT DE CONCLURE. `grep` sur ce fichier — `onPointer`, `onTouch`, `onDrag`,
+ * `draggable`, `dnd-kit` — ne rendait **aucune ligne**. Ce moteur n'a jamais été un glisser :
+ * c'est un TAP-PUIS-TAP, on touche le mot, puis on touche la grotte.
+ *
+ * Ce n'était donc pas un défaut tactile. C'était un défaut d'AFFORDANCE, et il était double :
+ *
+ *   1. l'état `data-saisi` existait déjà dans le DOM — et **rien ne le montrait**. L'enfant
+ *      tapait un mot, l'écran ne bougeait pas, donc il concluait que le tap n'avait pas marché
+ *      et essayait de glisser ;
+ *   2. rien ne disait le geste attendu, alors que le mot « range » de la consigne en promet un
+ *      autre.
+ *
+ * C'est exactement le défaut du campement au premier jour : « je n'ai pas compris à quoi
+ * servent les formes » — des prises réelles, sans aucun signe qu'on peut les toucher. Le dessin
+ * n'était pas en cause là non plus.
+ * ══════════════════════════════════════════════════════════════════════════════════════════════
+ */
+const STYLE_EN_MAIN = {
+  outline: '4px solid var(--soleil, #FFC93C)',
+  outlineOffset: '3px',
+  transform: 'translateY(-4px)',
+  fontWeight: 700,
+} as const;
+
+/** Un élément déjà rangé ne s'efface pas — un acquis ne se reprend jamais (R14) — il se calme. */
+const STYLE_RANGE = { opacity: 0.55 } as const;
+
+/** Une grotte qui ATTEND quelque chose se signale. Sans main, elle reste au repos. */
+const STYLE_RECEPTACLE_PRET = {
+  outline: '4px dashed var(--soleil, #FFC93C)',
+  outlineOffset: '3px',
+} as const;
+
 export function MoteurTri(
   proprietes: ProprietesMoteur<ContenuTri, EtatTri, ActionTri>,
 ): ReactElement {
@@ -116,6 +156,24 @@ export function MoteurTri(
         motsCles={consigne === null ? [] : consigne.motsCles}
       />
 
+      {/* LE GESTE, DIT EN CLAIR ET AU PRÉSENT. Deux phrases, jamais plus : elle change selon
+          qu'on a quelque chose en main, donc elle décrit toujours LE PROCHAIN geste et non la
+          règle générale. Un enfant qui déchiffre ne lit pas un mode d'emploi ; il lit ce qu'il
+          doit faire maintenant.
+
+          Elle est `aria-live` : un lecteur d'écran annonce le changement, qui est précisément
+          l'information que l'affordance visuelle porte pour les autres. */}
+      <p
+        data-consigne-geste={etat.elementSaisi === null ? 'choisir' : 'deposer'}
+        role="status"
+        aria-live="polite"
+        style={{ margin: 0, fontSize: '1.125rem', opacity: 0.9 }}
+      >
+        {etat.elementSaisi === null
+          ? 'Touche un mot pour le prendre.'
+          : 'Maintenant, touche l’endroit où il va.'}
+      </p>
+
       <div data-plateau="reserve" style={{ display: 'flex', flexWrap: 'wrap' }}>
         {contenu.elements.map((element) => (
           <button
@@ -124,7 +182,11 @@ export function MoteurTri(
             data-element={element.id}
             data-saisi={etat.elementSaisi === element.id ? 'oui' : 'non'}
             data-range={etat.acquis[element.id] ?? 'non'}
-            style={STYLE_CIBLE}
+            style={{
+              ...STYLE_CIBLE,
+              ...(etat.elementSaisi === element.id ? STYLE_EN_MAIN : {}),
+              ...(etat.acquis[element.id] === undefined ? {} : STYLE_RANGE),
+            }}
             onClick={(evenement) => {
               jouer({ type: 'saisir', element: element.id }, evenement);
             }}
@@ -140,7 +202,12 @@ export function MoteurTri(
             key={receptacle.id}
             type="button"
             data-receptacle={receptacle.id}
-            style={{ ...STYLE_CIBLE, minWidth: CIBLE_PX * 3 }}
+            data-attend={etat.elementSaisi === null ? 'non' : 'oui'}
+            style={{
+              ...STYLE_CIBLE,
+              minWidth: CIBLE_PX * 3,
+              ...(etat.elementSaisi === null ? {} : STYLE_RECEPTACLE_PRET),
+            }}
             onClick={(evenement) => {
               // Sans élément en main, le dépôt est simplement ignoré : aucun refus, aucun
               // son, aucun compte. Un doigt qui traîne ne coûte rien.

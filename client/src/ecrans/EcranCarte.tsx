@@ -535,6 +535,10 @@ export function EcranCarte({
           const premierNoeud = reprise(region).noeud;
           const rendu = RENDUS[etat];
           const colorie = region?.pourcentageColorie ?? 0;
+          // R18 — les mêmes deux nombres que le voile : une seule source, sinon la carte et le
+          // halo se contrediraient sous les yeux de l'enfant.
+          const paliers = region?.noeuds.length ?? 0;
+          const franchis = Math.round(colorie * paliers);
           const nom = cartouche(x, libelle);
 
           return (
@@ -601,6 +605,61 @@ export function EcranCarte({
                   />
                 ) : null}
               </g>
+              {/*
+                ══════════════════════════════════════════════════════════════════════════════
+                R18 — L'AVANCEMENT ET L'OUVERTURE SE LISENT SUR LA CARTE, PAS DANS UN PANNEAU.
+
+                Le père : « je ne vois pas vraiment l'évolution de la révélation de la couleur…
+                et il faut bien montrer le lien entre les deux, vu que les deux sont bien
+                ouverts, on sait pas trop qu'on les a bien ouverts. »
+
+                Le panneau du bas disait déjà « Il reste X % » et « Étape N sur M ». Mais il est
+                EN BAS : sur la carte — l'écran qu'on regarde — rien ne distinguait une région
+                ouverte d'une autre, et le halo de D51 à 1/12 est petit par construction (une
+                douzième part de territoire, c'est le prix des douze paliers qu'il a choisis).
+
+                Deux signaux, et aucun n'est une nuance de l'autre :
+                  • un CHIFFRE sous le sceau — « 2/12 » — lisible sans compter les zones ;
+                  • un anneau d'ouverture commun aux régions ouvertes, qui les relie à l'œil.
+
+                Le chiffre vient des nœuds réellement livrés (`region.noeuds.length`) et de
+                `pourcentageColorie`, jamais d'un compteur tenu à part.
+                ══════════════════════════════════════════════════════════════════════════════
+              */}
+              {!ouverte || paliers === 0 ? null : (
+                <g aria-hidden="true" style={{ pointerEvents: 'none' }}>
+                  <circle
+                    cx={x}
+                    cy={y}
+                    r={RAYON_SCEAU + 16}
+                    fill="none"
+                    stroke="var(--soleil)"
+                    strokeWidth={3}
+                    strokeOpacity={0.75}
+                    strokeDasharray="10 7"
+                  />
+                  <rect
+                    x={x - 34}
+                    y={y - RAYON_SCEAU - 42}
+                    width={68}
+                    height={30}
+                    rx={9}
+                    fill="var(--parchemin)"
+                    stroke="var(--trait)"
+                    strokeWidth={3}
+                  />
+                  <text
+                    x={x}
+                    y={y - RAYON_SCEAU - 21}
+                    textAnchor="middle"
+                    fontSize={20}
+                    fill="var(--trait)"
+                    data-avancement-region={`${String(franchis)}/${String(paliers)}`}
+                  >
+                    {franchis}/{paliers}
+                  </text>
+                </g>
+              )}
               <circle
                 cx={x}
                 cy={y}
