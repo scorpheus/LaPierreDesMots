@@ -73,6 +73,15 @@
             "surface": 10630.2
           },
           {
+            "id": "luciole",
+            "libelle": "la luciole",
+            "centroide": [
+              300,
+              252
+            ],
+            "surface": 7152.1
+          },
+          {
             "id": "lune-fine",
             "libelle": "la lune fine",
             "centroide": [

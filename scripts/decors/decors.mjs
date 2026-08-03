@@ -179,6 +179,28 @@ const CLAIRIERE = [
       z('tige', 'la tige', F.ruban([[300, 540], [290, 440], [312, 350], [300, 300]], 14)),
       z('feuille-large', 'la feuille large', F.poser('feuilleDentee', 332, 268, 182, 152)),
       z('halo', 'le halo', F.etoile(300, 250, 86, 40, 10)),
+      // ── R7 bis : LA LUCIOLE N'ÉTAIT PAS DESSINÉE ────────────────────────────────────────────
+      //
+      // Trouvé en jouant, le 2026-08-03 : « j'ai touché la luciole, mais je ne vois aucune
+      // luciole sur l'écran ». Il avait raison, et c'était mesurable en une commande — les
+      // identifiants du SVG produit :
+      //
+      //     calque-fond · calque-trait · calque-zones · etoile-du-soir · feuille-large
+      //     halo · herbe-courte · lune-fine · nuit · rocher-plat · souche-basse · tige
+      //
+      // Le halo était là, l'insecte non. La scène s'appelle « La luciole qui clignote », son
+      // `<desc>` parle du « halo rayonnant de la luciole posée dessus », `MoteurEclair` la fait
+      // clignoter — et rien ne la dessinait. Un oubli de description, invisible à toute
+      // vérification : le SVG était valide, ses régions fermées, ses surfaces justes.
+      //
+      // La forme existait déjà et servait TROIS fois dans `clairiere.lucioles` ; seule cette
+      // scène-ci, celle du singulier, ne l'appelait pas.
+      //
+      // Placement : centrée sur le halo (300, 250), donc au sommet de la tige qui culmine à
+      // (300, 300) — son abdomen chevauche la pointe, elle est POSÉE dessus et ne flotte pas.
+      // Taille 120 × 128, entre la « haute » (132 × 138) et la « basse » (96 × 102) de l'autre
+      // scène : c'est le sujet du tableau, elle doit primer sur les trois de la ronde.
+      z('luciole', 'la luciole', F.poser('luciole', 240, 186, 120, 128)),
       z('lune-fine', 'la lune fine', F.croissant(842, 122, 58, 26)),
       z('etoile-du-soir', 'l’étoile du soir', F.etoile(140, 110, 30, 13, 5)),
       z('souche-basse', 'la souche basse', F.poser('souche', 56, 466, 142, 112)),

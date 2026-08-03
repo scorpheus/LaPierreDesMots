@@ -97,20 +97,64 @@ test.describe('le décor v2 arrive entier jusqu’à l’enfant', () => {
 
     // 3. LA PROPRIÉTÉ QUI EST TOUT L'OBJET DU LOT, mesurée sur le rendu réel et non sur le
     //    fichier : la maîtresse occupe à l'écran au moins 1,35 fois la hauteur d'une élève.
-    const hauteurDe = async (prefixe: string, suffixe: string): Promise<number> => {
+    // ⚠ CE QUE CETTE FONCTION NE MESURAIT PAS — corrigé le 2026-08-03, sur retour de jeu du père
+    // (« la maitresse a la tete dans le sol »).
+    //
+    // Elle prenait un `prefixe` et composait `[data-region-svg^="${prefixe}"]`. Les deux seuls
+    // appels passaient `''`. Or **`[attr^=""]` ne désigne JAMAIS rien** : la spécification CSS
+    // rend le sélecteur invalide-vide, pas universel. `boites` sortait donc vide, et
+    // `Math.max(...[]) - Math.min(...[])` vaut `-Infinity`, d'où `-Infinity / -Infinity = NaN`
+    // et `NaN >= 1.35` faux.
+    //
+    // Le cas échouait donc **toujours**, et surtout : il n'avait **jamais mesuré la propriété
+    // qu'il porte**. C'est le troisième chiffre creux de la semaine, même famille que les seuils
+    // de couverture qui n'appariaient aucun fichier — une assertion sur zéro élément.
+    //
+    // Le paramètre `prefixe` disparaît plutôt que d'être corrigé : un paramètre dont les deux
+    // appels passent la valeur qui casse tout n'a pas de raison d'exister.
+    const hauteurDe = async (suffixe: string): Promise<number> => {
       const boites = await page
-        .locator(`[data-region-svg^="${prefixe}"][data-region-svg$="${suffixe}"]`)
+        .locator(`[data-region-svg$="${suffixe}"]`)
         .evaluateAll((noeuds) =>
           noeuds.map((n) => {
             const b = (n as SVGGraphicsElement).getBoundingClientRect();
             return [b.top, b.bottom] as const;
           })
         );
+      // Sans ce garde, une faute de frappe dans le suffixe rendrait `NaN` et le cas échouerait
+      // pour une raison fausse — exactement ce qu'on vient de corriger.
+      expect(boites.length, `aucune région ne finit par « ${suffixe} »`).toBeGreaterThan(0);
       return Math.max(...boites.map(([, b]) => b)) - Math.min(...boites.map(([t]) => t));
     };
-    const maitresse = await hauteurDe('', 'maitresse');
-    const eleve = await hauteurDe('', 'fille-1');
-    expect(maitresse / eleve).toBeGreaterThanOrEqual(1.35);
+    const maitresse = await hauteurDe('maitresse');
+    const eleve = await hauteurDe('fille-1');
+    expect(
+      maitresse / eleve,
+      `maîtresse ${maitresse.toFixed(0)} px · élève ${eleve.toFixed(0)} px`
+    ).toBeGreaterThanOrEqual(1.35);
+
+    // ── ET ELLE EST DEBOUT SUR LE SOL, PAS DEDANS (R7) ────────────────────────────────────────
+    // Le défaut trouvé en jouant : sa tête allait de y=368 à y=444 pour un sol qui commence à
+    // y=400 — le haut du crâne dans le mur de l'école, le bas dans l'herbe. Aucune assertion ne
+    // regardait la POSITION, seulement la taille ; le décor pouvait donc être absurde et vert.
+    const hautDe = async (region: string): Promise<number> =>
+      (await page.locator(`[data-region-svg="${region}"]`).boundingBox())?.y ?? Number.NaN;
+    const basDe = async (region: string): Promise<number> => {
+      const boite = await page.locator(`[data-region-svg="${region}"]`).boundingBox();
+      return boite === null ? Number.NaN : boite.y + boite.height;
+    };
+
+    const horizon = await hautDe('herbe');
+    const crane = await hautDe('cheveux-maitresse');
+    const pieds = await basDe('jupe-maitresse');
+    const solBas = await basDe('herbe');
+
+    expect(crane, 'le sommet du crâne passe au-dessus de l’horizon').toBeGreaterThan(horizon);
+    expect(pieds, 'les pieds dépassent du sol').toBeLessThanOrEqual(solBas);
+    expect(
+      pieds,
+      'la maîtresse ne tient pas debout sur son propre sol'
+    ).toBeGreaterThan(crane);
 
     // 4. L'objet de classe est servi, et il est tapable.
     await expect(page.locator('[data-region-svg="tableau"]')).toBeVisible();

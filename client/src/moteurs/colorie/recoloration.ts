@@ -134,6 +134,35 @@ function semerParticules(
       retirer();
       continue;
     }
+
+    // ── R5 : UN NETTOYAGE DÉCORATIF NE DÉPEND JAMAIS D'UNE SEULE PROMESSE D'ANIMATION ─────────
+    //
+    // Signalé en jouant, le 2026-08-03 : « les particules ne s'effacent pas de l'écran du tout ».
+    // **Je n'ai pas reproduit le défaut** — ma repro mesurait un panneau navigateur non affiché,
+    // où `document.timeline.currentTime` reste à 0 et où AUCUNE animation n'avance ; mes contrôles
+    // négatifs (un `div` ordinaire, un cercle sans fioriture) ne finissaient pas non plus. Ce
+    // n'est donc pas une correction de cause, c'est la suppression d'un mode de défaillance.
+    //
+    // Ce qui est certain sans mesure : le retrait des 14 cercles reposait **uniquement** sur
+    // `vol.finished`. Et comme les images-clés portent `fill: 'none'`, un cercle dont la promesse
+    // ne se règle jamais revient à son style de base — `opacity: 1`, aucune translation — c'est-
+    // à-dire **plus visible que pendant l'animation**. Le défaut, s'il survient, ne laisse pas
+    // des traces pâles : il laisse quatorze pastilles pleines au point du tap.
+    //
+    // Or `finished` ne se règle pas si la frise de l'animation n'avance pas : onglet en
+    // arrière-plan, document caché, page mise en cache par le navigateur. C'est précisément ce
+    // que mon environnement de mesure faisait — donc un état réel, pas une hypothèse.
+    //
+    // Le filet est une minuterie, indépendante de toute frise d'animation. `retirer` est
+    // idempotent (il teste `parentNode`), les deux chemins peuvent donc courir ensemble sans
+    // dommage. Marge de 4× la durée : assez pour ne jamais couper une gerbe qui se joue
+    // normalement, assez court pour qu'un résidu ne survive pas à l'exercice.
+    const filet = globalThis.setTimeout(retirer, Math.max(1, options.dureeMs * 0.6) * 4 + 200);
+    const retirerEtAnnuler = (): void => {
+      globalThis.clearTimeout(filet);
+      retirer();
+    };
+
     const vol = particule.animate(
       [
         { transform: 'translate(0px, 0px)', opacity: 0.9 },
@@ -144,6 +173,6 @@ function semerParticules(
       ],
       { duration: Math.max(1, options.dureeMs * 0.6), easing: COURBE_RECOLORATION, fill: 'none' }
     );
-    vol.finished.then(retirer, retirer);
+    vol.finished.then(retirerEtAnnuler, retirerEtAnnuler);
   }
 }

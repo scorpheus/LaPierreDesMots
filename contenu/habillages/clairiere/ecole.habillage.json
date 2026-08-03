@@ -167,27 +167,27 @@
             "libelle": "les cheveux de la maîtresse",
             "centroide": [
               175,
-              406
+              445.5
             ],
-            "surface": 4462.1
+            "surface": 2875.4
           },
           {
             "id": "pull-maitresse",
             "libelle": "le pull de la maîtresse",
             "centroide": [
               175,
-              486.2
+              510.9
             ],
-            "surface": 7560
+            "surface": 4824
           },
           {
             "id": "jupe-maitresse",
             "libelle": "la jupe de la maîtresse",
             "centroide": [
-              166.3,
-              570
+              175,
+              578.3
             ],
-            "surface": 6768
+            "surface": 4275
           },
           {
             "id": "tableau",
