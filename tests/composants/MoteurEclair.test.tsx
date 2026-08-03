@@ -15,8 +15,8 @@
  */
 import { useCallback, useState } from 'react';
 import type { ReactElement } from 'react';
-import { cleanup, fireEvent, render } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { act, cleanup, fireEvent, render } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import Ajv2020 from 'ajv/dist/2020.js';
 
 import { moteurEclair } from '@partage/moteurs/eclair/moteur';
@@ -187,6 +187,67 @@ describe('moteur eclair', () => {
   it('réécouter est gratuit : aucune erreur, aucun palier d’aide', () => {
     const { container } = render(<Harnais />);
     taper(container, ['[data-action="ecouter"]', '[data-action="ecouter"]']);
+    const h = harnais(container);
+    expect(h.getAttribute('data-erreurs')).toBe('0');
+    expect(h.getAttribute('data-aide-resume')).toBe('aucune');
+  });
+
+  /**
+   * ════════════════════════════════════════════════════════════════════════════════════════
+   * « QUAND JE CLIQUE SUR REVOIR, ÇA NE FAIT RIEN » — trouvé en JOUANT, le 2026-08-03.
+   *
+   * Le mot s'affiche 1,4 à 1,8 s puis disparaît ; « Revoir » doit le remontrer, gratuitement
+   * et sans limite (R15). Il ne le remontrait jamais :
+   *
+   *     eclairVisible = etat.finExpositionMs === null
+   *
+   * `finExposition` fixe cette date UNE SEULE FOIS — volontairement, c'est l'origine de la
+   * latence de reconnaissance (D18) — et `revoirEclair` n'incrémentait qu'un compteur. Une
+   * fois le mot disparu, il l'était pour toujours.
+   *
+   * `grep -rln revoirEclair tests/` ne rendait AUCUN fichier de recette : ce bouton n'était
+   * exercé par rien. Les trois cas voisins tapent « ecouter » et « aide » et vérifient les
+   * compteurs ; aucun ne vérifiait qu'un contrôle FAIT ce qu'il annonce.
+   *
+   * Ce cas mesure donc l'effet VISIBLE — le plateau réaffiche-t-il le mot ? — et non l'état
+   * interne, qui était juste depuis le début.
+   * ════════════════════════════════════════════════════════════════════════════════════════
+   */
+  it('LE DÉFAUT — « Revoir » réaffiche vraiment le mot, il ne compte pas seulement les revues', () => {
+    vi.useFakeTimers();
+    try {
+      const { container } = render(<Harnais />);
+      const visible = (): string | null =>
+        container.querySelector('[data-plateau="eclair"]')?.getAttribute('data-visible') ?? null;
+
+      expect(visible(), 'le mot doit être là à l’arrivée sur l’exercice').toBe('oui');
+
+      // Bien au-delà de l'exposition la plus longue du contenu livré (1 800 ms).
+      act(() => {
+        vi.advanceTimersByTime(5000);
+      });
+      expect(visible(), 'le mot doit disparaître : c’est tout l’objet de l’éclair').toBe('non');
+
+      taper(container, ['[data-action="revoir"]']);
+      expect(
+        visible(),
+        'AVANT CORRECTION le plateau restait « non » pour toujours : le bouton ne faisait rien'
+      ).toBe('oui');
+
+      // Et il redisparaît : « Revoir » remontre l'éclair, il ne le fige pas à l'écran — sans
+      // quoi l'exercice cesserait d'être un exercice de lecture rapide.
+      act(() => {
+        vi.advanceTimersByTime(5000);
+      });
+      expect(visible(), 'le mot revu doit repartir comme le premier').toBe('non');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('revoir ne coûte rien : aucune erreur, aucun palier d’aide, comme réécouter (R15)', () => {
+    const { container } = render(<Harnais />);
+    taper(container, ['[data-action="revoir"]', '[data-action="revoir"]']);
     const h = harnais(container);
     expect(h.getAttribute('data-erreurs')).toBe('0');
     expect(h.getAttribute('data-aide-resume')).toBe('aucune');

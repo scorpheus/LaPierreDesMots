@@ -17,7 +17,7 @@
  * casserait (contrat § 4.1).
  */
 
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
 import type { ActionEclair, ContenuEclair, EtatEclair } from '@pierre/partage';
 import { ZoneDeLecture } from '../../lecture/ZoneDeLecture.js';
@@ -99,21 +99,57 @@ export function MoteurEclair(
   const etape = etat.etapes[etat.indexEtape];
   const consigne = contenu.consignes[etat.indexEtape] ?? null;
 
-  // L'éclair : le mot s'affiche `expositionMs`, puis disparaît. Le `setTimeout` vit ICI, dans
-  // le rendu, jamais dans la logique (§ 4.8, règle 3). L'action `finExposition` fixe l'origine
-  // de la latence de reconnaissance, qui est l'indicateur principal de D18.
+  // ══════════════════════════════════════════════════════════════════════════════════════════
+  // « QUAND JE CLIQUE SUR REVOIR, ÇA NE FAIT RIEN » — trouvé en jouant, le 2026-08-03.
+  //
+  // Il avait raison, et la cause était structurelle, pas accidentelle :
+  //
+  //     eclairVisible = etat.finExpositionMs === null
+  //
+  // `finExposition` fixe `finExpositionMs` **une seule fois et ne le remet jamais à zéro** —
+  // et c'est VOULU : cette date est l'origine de la latence de reconnaissance (D18), la mesure
+  // principale de ce moteur, et la revoir ne doit pas effacer la première, qui est la vraie.
+  // Mais `revoirEclair` n'incrémentait qu'un compteur d'écoutes. Dès que le mot avait disparu
+  // une fois, `eclairVisible` était faux POUR TOUJOURS.
+  //
+  // Le bouton s'appelle « Revoir », le réducteur commente « GRATUIT et sans limite, comme
+  // réécouter la consigne (R15) », et rien ne réapparaissait jamais. L'intention se lisait dans
+  // le code ; le rendu disait l'inverse — même famille que le `<use>` du voile de Grisaille.
+  //
+  // Et AUCUN test ne l'exerçait : `grep -rln revoirEclair tests/` ne rendait aucun fichier de
+  // recette. Le contrôle était impossible à voir sans jouer.
+  //
+  // ── LA CORRECTION, ET POURQUOI ELLE NE TOUCHE PAS L'ÉTAT PARTAGÉ ───────────────────────────
+  // La VISIBILITÉ de l'éclair devient un état de rendu ; `finExpositionMs` reste la MESURE.
+  // Les deux étaient confondus dans un seul champ, et c'est cette confusion qui rendait
+  // « revoir » impossible sans fausser D18. Le journal, le rejeu et la latence sont inchangés :
+  // le réducteur ignore toujours les `finExposition` suivants.
+  //
+  // `nbEcoutes` sert de déclencheur : chaque « Revoir » l'incrémente, donc l'effet rejoue et le
+  // mot réapparaît pour la même durée. `emettre` passe par une référence plutôt que par les
+  // dépendances — une identité de fonction qui changerait à chaque rendu relancerait l'effet
+  // sans fin, et le mot ne disparaîtrait plus jamais. C'est le défaut symétrique de celui qu'on
+  // corrige, et il serait tout aussi silencieux.
+  // ══════════════════════════════════════════════════════════════════════════════════════════
   const dureeMs = consigne === null ? 0 : consigne.expositionMs;
+  const nbRevues = etape === undefined ? 0 : etape.nbEcoutes;
+  const [eclairVisible, fixerEclairVisible] = useState(true);
+
+  const refEmettre = useRef(emettre);
+  refEmettre.current = emettre;
+
   useEffect(() => {
-    if (consigne === null || etat.finExpositionMs !== null) return undefined;
+    if (consigne === null) return undefined;
+    fixerEclairVisible(true);
+    // Le `setTimeout` vit ICI, dans le rendu, jamais dans la logique (§ 4.8, règle 3).
     const identifiant = setTimeout(() => {
-      emettre({ type: 'finExposition' } as ActionEclair);
+      fixerEclairVisible(false);
+      refEmettre.current({ type: 'finExposition' } as ActionEclair);
     }, dureeMs);
     return () => {
       clearTimeout(identifiant);
     };
-  }, [consigne, dureeMs, etat.finExpositionMs, emettre]);
-
-  const eclairVisible = etat.finExpositionMs === null;
+  }, [consigne, dureeMs, nbRevues]);
 
   return (
     <div
