@@ -21,7 +21,10 @@
  */
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { expect, test } from '@playwright/test';
+// LE HARNAIS D’ISOLATION (lot P1) : un serveur neuf par cas — base `:memory:` vierge, `Alea`
+// rembobiné, port réservé par le noyau. C’est lui qui remplace le `webServer` unique de
+// `playwright.config.ts`, et c’est lui qui rend `fullyParallel` légitime.
+import { expect, test } from '../harnais-serveur.js';
 
 import type { Page } from '@playwright/test';
 

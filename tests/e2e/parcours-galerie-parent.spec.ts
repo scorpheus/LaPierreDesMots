@@ -29,6 +29,7 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { expect, test } from './invariants.js';
+import { attendreQueLaPorteAitDecide } from './qa-outils.js';
 
 import type { Page } from '@playwright/test';
 
@@ -66,6 +67,11 @@ async function preparer(page: Page): Promise<void> {
 
 /** Tape les quatre chiffres et valide. Le pavé est le même en définition et en ouverture. */
 async function taperCode(page: Page, code: string): Promise<void> {
+  // La porte ne sait pas encore quel pavé elle est tant que `GET /api/parent/etat` n’a pas
+  // répondu : elle rend celui d’OUVERTURE puis bascule. Taper pendant la bascule fait perdre les
+  // chiffres et laisse « Poser ce code » désactivé pour toujours (mesuré deux fois, lot P1 —
+  // voir l’encadré de `attendreQueLaPorteAitDecide` dans `qa-outils.ts`).
+  await attendreQueLaPorteAitDecide(page);
   for (const chiffre of code) {
     await page.locator(`[data-touche="${chiffre}"]`).click();
   }

@@ -106,46 +106,89 @@ function sha256(octets) {
 }
 
 /**
- * L'empreinte de l'arbre de travail.
+ * L'empreinte de l'arbre de travail : le CONTENU de chaque fichier surveillé, pas son écart à
+ * la tête.
  *
- * @returns {{tete: string, ecarts: {chemin: string, sha: string}[], empreinte: string,
- *            propre: boolean}}
- *   `tete` — le commit de tête (`inconnu` hors dépôt git) ;
- *   `ecarts` — les fichiers surveillés qui diffèrent de `tete`, avec l'empreinte de leur
- *     contenu EXACT (un fichier modifié deux fois donne deux empreintes différentes, là où
- *     `git status` rendrait la même ligne) ;
- *   `empreinte` — le SHA-256 de l'ensemble ;
- *   `propre` — vrai si aucun fichier surveillé ne s'écarte de `tete`.
+ * ── POURQUOI LE CONTENU, ET NON `git status` — MESURÉ ─────────────────────────────────────
+ * La première version hachait « la tête + les fichiers qui s'en écartent ». Elle criait donc
+ * dès qu'un COMMIT tombait, alors qu'un commit ne change **rien** sur le disque : mesuré le
+ * 2026-08-03, au tour 9 de `tours-apres.ndjson`, la campagne voisine a commité et l'empreinte
+ * a bougé sur huit fichiers dont le contenu était identique. Un garde qui crie pour un
+ * changement qui n'en est pas un finit débranché — c'est la seule façon dont un garde meurt.
+ *
+ * Le coût de l'exactitude a été mesuré avant d'être payé : **900 fichiers, 6,8 Mo, 62 ms**
+ * (24 ms d'énumération, 38 ms de lecture et de hachage). Aucune raison d'approximer.
+ *
+ * L'énumération passe par `git ls-files -c -o --exclude-standard` : les fichiers suivis PLUS
+ * les nouveaux non ignorés. `outils/`, `node_modules/`, les `dist/` et `donnees/` sont donc
+ * hors champ sans qu'on ait à les nommer — `.gitignore` fait foi.
+ *
+ * @returns {{tete: string, fichiers: {chemin: string, sha: string}[], nbFichiers: number,
+ *            ecarts: {chemin: string, sha: string}[], empreinte: string, propre: boolean}}
  */
 export function empreinteArbre() {
   const tete = git(['rev-parse', 'HEAD']).sortie.trim() || 'inconnu';
-  const { code, sortie } = git(['status', '--porcelain', '-uall']);
-  const ecarts = [];
+  const { code, sortie } = git([
+    'ls-files',
+    '-c',
+    '-o',
+    '--exclude-standard',
+    '--',
+    ...PREFIXES_SURVEILLES,
+    ...FICHIERS_SURVEILLES
+  ]);
 
+  const fichiers = [];
   if (code === 0) {
-    for (const ligne of sortie.split(/\r?\n/)) {
-      if (ligne.trim().length === 0) continue;
-      // Format porcelain v1 : deux colonnes d'état, une espace, le chemin. Un renommage porte
-      // « ancien -> nouveau » ; on garde la destination, c'est elle qui est sur le disque.
-      const brut = ligne.slice(3).trim();
-      const chemin = (brut.includes(' -> ') ? brut.split(' -> ')[1] : brut)
-        .replace(/^"|"$/g, '')
-        .replace(/\\/g, '/');
+    for (const brut of sortie.split(/\r?\n/)) {
+      if (brut.trim().length === 0) continue;
+      const chemin = brut.replace(/^"|"$/g, '').replace(/\\/g, '/');
       if (!surveille(chemin)) continue;
       const absolu = join(RACINE, chemin);
-      // Un fichier supprimé n'a pas de contenu : son absence EST l'écart, et elle compte.
+      // Un fichier suivi mais absent du disque a été supprimé : son absence EST l'état, et
+      // elle doit compter — sinon une suppression passerait pour « rien n'a bougé ».
       if (!existsSync(absolu)) {
-        ecarts.push({ chemin, sha: 'absent' });
+        fichiers.push({ chemin, sha: 'absent' });
         continue;
       }
       if (statSync(absolu).isDirectory()) continue;
-      ecarts.push({ chemin, sha: sha256(readFileSync(absolu)) });
+      fichiers.push({ chemin, sha: sha256(readFileSync(absolu)) });
     }
   }
+  fichiers.sort((a, b) => (a.chemin < b.chemin ? -1 : a.chemin > b.chemin ? 1 : 0));
 
-  ecarts.sort((a, b) => (a.chemin < b.chemin ? -1 : a.chemin > b.chemin ? 1 : 0));
-  const matiere = [tete, ...ecarts.map((e) => `${e.chemin}:${e.sha}`)].join('\n');
-  return { tete, ecarts, empreinte: sha256(matiere), propre: ecarts.length === 0 };
+  // Les écarts à la tête ne servent plus à l'empreinte : ils restent au rapport, parce que
+  // « l'arbre porte 8 modifications non commitées » est une information utile au lecteur.
+  const ecarts = ecartsALaTete(fichiers);
+
+  return {
+    tete,
+    fichiers,
+    nbFichiers: fichiers.length,
+    ecarts,
+    empreinte: sha256(fichiers.map((f) => `${f.chemin}:${f.sha}`).join('\n')),
+    propre: ecarts.length === 0
+  };
+}
+
+/** Les fichiers surveillés qui diffèrent de la tête — pour le rapport, jamais pour l'empreinte. */
+function ecartsALaTete(fichiers) {
+  const { code, sortie } = git(['status', '--porcelain', '-uall']);
+  if (code !== 0) return [];
+  const parChemin = new Map(fichiers.map((f) => [f.chemin, f.sha]));
+  const ecarts = [];
+  for (const ligne of sortie.split(/\r?\n/)) {
+    if (ligne.trim().length === 0) continue;
+    // Format porcelain v1 : deux colonnes d'état, une espace, le chemin. Un renommage porte
+    // « ancien -> nouveau » ; on garde la destination, c'est elle qui est sur le disque.
+    const brut = ligne.slice(3).trim();
+    const chemin = (brut.includes(' -> ') ? brut.split(' -> ')[1] : brut)
+      .replace(/^"|"$/g, '')
+      .replace(/\\/g, '/');
+    if (!surveille(chemin)) continue;
+    ecarts.push({ chemin, sha: parChemin.get(chemin) ?? 'absent' });
+  }
+  return ecarts;
 }
 
 /** Une empreinte lisible en une ligne : les douze premiers caractères suffisent à comparer. */
@@ -154,18 +197,25 @@ export function empreinteCourte(empreinte) {
 }
 
 /**
- * Ce qui a bougé entre deux empreintes — nommé, jamais résumé par « ça a changé ».
+ * Ce qui a bougé entre deux empreintes — NOMMÉ, jamais résumé par « ça a changé ».
+ *
+ * Le déplacement de la tête n'y figure PAS : un commit qui ne touche pas au disque n'a rien
+ * changé pour la suite de tests, et le signaler ferait crier le garde à tort (voir
+ * `empreinteArbre`). Seul le contenu compte.
+ *
  * @returns {string[]} les chemins dont le contenu diffère entre les deux relevés.
  */
 export function fichiersQuiOntBouge(avant, apres) {
-  const table = (releve) => new Map(releve.ecarts.map((e) => [e.chemin, e.sha]));
+  const table = (releve) => new Map((releve.fichiers ?? []).map((f) => [f.chemin, f.sha]));
   const a = table(avant);
   const b = table(apres);
   const bouges = new Set();
-  for (const [chemin, sha] of a) if (b.get(chemin) !== sha) bouges.add(chemin);
+  for (const [chemin, sha] of a) if (b.get(chemin) !== sha) bouges.add(`${chemin} (retiré ou modifié)`);
   for (const [chemin, sha] of b) if (a.get(chemin) !== sha) bouges.add(chemin);
-  if (avant.tete !== apres.tete) bouges.add(`(HEAD ${avant.tete.slice(0, 8)} → ${apres.tete.slice(0, 8)})`);
-  return [...bouges].sort();
+  // Un chemin qui a seulement changé de contenu apparaît deux fois sous deux libellés ; on
+  // garde le nom nu, qui est le plus lisible.
+  const nus = new Set([...bouges].map((n) => n.replace(' (retiré ou modifié)', '')));
+  return [...nus].sort();
 }
 
 // ─────────────────────────────────────────────────────────────────── exécution directe
@@ -177,6 +227,7 @@ if (estAppeleDirectement) {
   const releve = empreinteArbre();
   console.log(`empreinte ${releve.empreinte}`);
   console.log(`tête      ${releve.tete}`);
+  console.log(`fichiers  ${String(releve.nbFichiers)} surveillés`);
   console.log(
     `arbre     ${releve.propre ? 'PROPRE' : `${String(releve.ecarts.length)} fichier(s) surveillé(s) s’écartent de la tête`}`
   );

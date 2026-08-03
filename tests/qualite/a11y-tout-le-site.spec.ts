@@ -32,7 +32,10 @@
  * `serious` et `critical` sont bloquantes ; les mineures sont imprimées, pas opposées.
  */
 import AxeBuilder from '@axe-core/playwright';
-import { expect, test } from '@playwright/test';
+// LE HARNAIS D’ISOLATION (lot P1) : un serveur neuf par cas — base `:memory:` vierge, `Alea`
+// rembobiné, port réservé par le noyau. C’est lui qui remplace le `webServer` unique de
+// `playwright.config.ts`, et c’est lui qui rend `fullyParallel` légitime.
+import { expect, test } from '../harnais-serveur.js';
 
 import { ecransDeclares, recettesDEcrans } from '../e2e/qa-outils.js';
 

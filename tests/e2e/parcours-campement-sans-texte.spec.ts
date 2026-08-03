@@ -150,6 +150,34 @@ test.describe('R18 — le campement se comprend sans lire', () => {
     expect(new Set(marques).size).toBe(marques.length);
   });
 
+  /**
+   * ── LE RELEVÉ SE PREND D'UN SEUL COUP. Corrigé par le lot P3, et c'est une MESURE. ────────
+   *
+   * Ce cas lisait ses quatre nombres en quatre allers-retours vers le navigateur : trois
+   * `getAttribute` puis un `count()`. Quatre lectures, donc potentiellement quatre rendus
+   * différents — et l'assertion `obtenues + vides === total` ne comparait alors plus les
+   * chiffres d'une étagère, mais ceux de deux étagères successives.
+   *
+   * Ce n'est pas une crainte théorique. Journal de `npm run verifier`, sortie citée :
+   *
+   *     [N6] étagère au campement : total=0 obtenues=0 vides=25 rendues=25
+   *
+   * `Etagere.tsx:110` pose `const vides = etagere.nbTotal - etagere.nbObtenues`. Le triplet
+   * `total=0, obtenues=0, vides=25` est donc **arithmétiquement impossible dans un rendu** :
+   * 0 − 0 ne vaut pas 25. Aucun rendu du composant n'a jamais produit ces trois valeurs
+   * ensemble ; les lectures ont enjambé le re-rendu qui suit l'arrivée de
+   * `monde/gobi-stades.json` (`useCatalogueFormes`, requête distincte du reste de l'écran).
+   * Le parallélisme n'a rien créé : il a ralenti ce téléchargement, donc élargi une fenêtre
+   * qui existait déjà.
+   *
+   * Deux changements, et AUCUNE assertion n'est retirée ni assouplie :
+   *   • on attend un ÉTAT — l'étagère a annoncé un total — jamais une durée (annexe T § 6) ;
+   *   • le relevé est ATOMIQUE, une seule évaluation dans la page. Les quatre assertions
+   *     d'origine portent donc enfin sur le composant, et non sur l'ordonnanceur.
+   * Une assertion est AJOUTÉE (le total annoncé n'est jamais nul), et elle garde justement le
+   * défaut que `useCatalogueFormes` documente : deux formes de données sous une même clé de
+   * cache rendaient une étagère à ZÉRO case.
+   */
   test('l’étagère montre ses cases VIDES — c’est ce qui donne envie de revenir (D44)', async ({
     page
   }) => {
@@ -159,10 +187,30 @@ test.describe('R18 — le campement se comprend sans lire', () => {
     const etagere = page.locator('[data-ecran="campement"] [data-etagere="oui"]');
     await expect(etagere).toBeVisible();
 
-    const total = Number(await etagere.getAttribute('data-cases-total'));
-    const obtenues = Number(await etagere.getAttribute('data-cases-obtenues'));
-    const vides = Number(await etagere.getAttribute('data-cases-vides'));
-    const rendues = await page.locator('[data-ecran="campement"] [data-case-etagere]').count();
+    /** Les quatre nombres, pris sur LE MÊME rendu. */
+    const relever = async (): Promise<{
+      total: number;
+      obtenues: number;
+      vides: number;
+      rendues: number;
+    }> =>
+      etagere.evaluate((section) => ({
+        total: Number(section.getAttribute('data-cases-total')),
+        obtenues: Number(section.getAttribute('data-cases-obtenues')),
+        vides: Number(section.getAttribute('data-cases-vides')),
+        rendues: section.querySelectorAll('[data-case-etagere]').length
+      }));
+
+    await expect
+      .poll(async () => (await relever()).total, {
+        message:
+          'l’étagère n’a jamais annoncé de total : `monde/gobi-stades.json` n’a pas répondu, ou ' +
+          'il ne déclare aucune forme. C’est exactement le défaut consigné dans `Etagere.tsx` — ' +
+          'deux formes de données sous une même clé de cache — et il rend une étagère à ZÉRO case.'
+      })
+      .toBeGreaterThan(0);
+
+    const { total, obtenues, vides, rendues } = await relever();
 
     console.log(
       `[N6] étagère au campement : total=${String(total)} obtenues=${String(obtenues)} ` +
@@ -182,7 +230,11 @@ test.describe('R18 — le campement se comprend sans lire', () => {
     await allerAuCampement(page);
 
     const cases = page.locator('[data-ecran="campement"] [data-case-etagere]');
-    expect(await cases.count()).toBeGreaterThan(0);
+    // Même fenêtre que le cas précédent, même remède : `count()` ne réessaie pas, et
+    // l'étagère se peuple à l'arrivée de son catalogue. `not.toHaveCount(0)` réessaie et dit
+    // rigoureusement la même chose — la stabilité change, l'exigence non.
+    await expect(cases, 'l’étagère doit porter des cases : sans elles, rien n’est audité ici')
+      .not.toHaveCount(0);
     expect(await page.locator('[data-verrou]').count()).toBe(0);
     expect(await page.locator('[data-etat="echec"]').count()).toBe(0);
 

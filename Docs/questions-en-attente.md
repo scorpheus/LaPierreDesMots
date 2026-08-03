@@ -7521,3 +7521,782 @@ et mon banc d'intégration **3 sur 3** — deux mesures ciblées, restaurations 
 Les 1 975 tests passent sur une machine calme, code 0, plusieurs fois de suite. Aucun des trois
 cas ne rougit pour une raison de produit fausse : ils disent tous la vérité sur un système qui
 n'a pas de marge. Et les 372 recettes E2E — dont le casse-cou et le singe — sont vertes.
+
+## Q-INT-10. La suite N'EST PAS intermittente — c'est la MESURE qui n'était pas attribuable
+
+Lot **P0** de la campagne « parallélisme Playwright », 2026-08-03. Ce point **corrige Q-INT-9**,
+qui l'a précédé de deux heures et dont la conclusion — « la cause est produit, pas outillage » —
+ne résiste pas à la mesure. Rien de ce que Q-INT-9 a observé n'est faux ; c'est son attribution
+qui l'est, et elle allait faire réparer un innocent.
+
+### 1. L'intermittence a été reproduite : 3 rouges sur 10
+
+Dix exécutions de `vitest run --project unitaires --project composants --project api` sur
+l'arbre courant, chronomètre et sorties dans `bac-a-sable/p0-intermittence/tours-avant.ndjson` :
+
+| tours | code | échecs | durée |
+|---|---|---|---|
+| 1 à 7 | **0** | 0 | moyenne 34,7 s (min 32,2 · max 44,1) |
+| 8, 9, 10 | **1** | **20 à chaque fois** | — |
+
+Le résultat qui tranche est là : **les trois rouges sont identiques à la ligne près**, sur trois
+exécutions consécutives. Une suite non déterministe ne se répète pas trois fois exactement. Et
+aucun des vingt cas ne passe par `composerSortie` :
+
+```
+AssertionError: expected 3 to be 1                     tests/api/parcours-humains.test.ts:193
+AssertionError: expected 4 to be 2                     tests/api/pedagogie.test.ts:195
+AssertionError: journal fin vide: expected 6 to be 2   tests/api/tentatives-nbelements.test.ts:410
+```
+
+Des comptes qui **augmentent** : le journal reçoit trois lignes là où le test en attend une.
+
+### 2. La cause, nommée et horodatée — et ce n'est pas le produit
+
+Une campagne voisine appliquait l'arbitrage **Q-INT-4** — « une réussite nourrit toutes les
+compétences de l'exercice » — pendant que la mesure tournait. Horodatages relevés sur le disque
+au moment même, sortie citée :
+
+```
+serveur/src/depots/etapes.ts       modifié à 11:27:26
+serveur/src/depots/tentatives.ts   modifié à 11:28:06
+tours 1 à 7  (verts)               lancés de 11:24:57 à 11:28:48
+tours 8 à 10 (rouges)              lancés après 11:28:48
+```
+
+Les trois rouges tombent **exactement** après les deux écritures, et pour trois lignes de journal
+au lieu d'une — ce que Q-INT-4 produit par construction. Ce n'était pas de l'aléa : **c'était un
+autre code.** Le travail a depuis été commité (`d33989e`) et la suite est revenue au vert
+d'elle-même, sans qu'une ligne soit changée pour elle.
+
+**Un `git status` pris avant et après une campagne de dix minutes ne dit rien de ce qui s'est
+passé pendant.** C'est tout le défaut, et il touche autant Q-INT-9 que le banc de mutation :
+l'orchestrateur et ses agents partageaient la prémisse « arbre propre », donc personne ne la
+testait.
+
+### 3. La prémisse de Q-INT-9 est fausse, et c'est mesurable en deux secondes
+
+Q-INT-9 écrit que `expect(repondent.length).toBeGreaterThanOrEqual(2)` est « posée exactement sur
+son propre plancher, avec zéro marge » et qu'« il suffit que la composition d'une seule région
+bascule ». La phrase suppose qu'une région **puisse** basculer. Elle ne l'a jamais mesuré.
+
+`bac-a-sable/p0-intermittence/sonde-composer-sortie.mjs` refait hors de Vitest ce que fait la
+route pour un profil neuf. Sortie citée :
+
+```
+── A. déterminisme, graine 20260801, 200 passes
+   empreintes distinctes .......... 1  (1 = déterministe)
+   régions qui répondent .......... 2 / 6
+── B. sensibilité : 500 graines distinctes, profil neuf
+   2 région(s) répondent : 500 graine(s) sur 500
+      clairiere            répond sur 500 / 500 graines
+      galeries             répond sur 500 / 500 graines
+plancher observé sur 500 graines : 2 région(s)
+```
+
+**Le plancher n'est jamais franchi**, sur 500 graines. L'assertion n'a aucune marge et n'en a pas
+besoin : la valeur ne varie pas. `composerSortie` est déterministe — 200 passes, une seule
+empreinte. La falaise de S3 est réelle et reste à trancher (S3-Q2), mais **elle n'a jamais fait
+rougir la suite**, et la séquence recommandée par Q-INT-9 — « trancher S3-Q2 d'abord, la QA
+ensuite » — bloquait la mesure de la QA derrière une décision de contenu sans rapport.
+
+### 4. Ce qui a été écrit, et ce que ça garantit
+
+**`scripts/qa/empreinte-arbre.mjs`** (nouveau). Une empreinte SHA-256 du **contenu** des 900
+fichiers dont le verdict de la suite dépend — `partage/src`, `serveur/src`, `serveur/migrations`,
+`client/src`, `contenu`, `tests`, `scripts`, plus les six fichiers de configuration de la racine ;
+`tests/rapports/` exclu, puisque les étages y écrivent en tournant. Coût mesuré : **62 ms** en
+lecture nue, **~150 ms** par relevé complet. Deux empreintes égales ⇒ la suite a jugé le même
+code ; différentes ⇒ aucun verdict n'est comparable.
+
+*Choix tranché seul* : l'empreinte porte sur le **contenu**, jamais sur l'écart à la tête. La
+première version hachait « tête + écarts » et criait donc à chaque commit — mesuré au tour 9 de
+`tours-apres.ndjson` : huit fichiers déclarés « bougés » avec un contenu identique. Un garde qui
+crie à tort finit débranché.
+
+**`scripts/qa/banc-de-mutation.mjs`** — invariant 6 : *un rouge qui n'est pas attribuable n'est
+pas une détection.* Le banc comptait tout code de sortie non nul comme `DETECTEE`, donc un rouge
+spontané **gonflait le score de la QA** (Q-INT-9 l'avait vu sur M11b, et le banc lui-même sur M2).
+Deux gardes, et il faut les deux :
+
+- **l'empreinte** est relevée avant la mutation et après la restauration ; si elle a bougé,
+  quelqu'un d'autre a écrit pendant l'essai → verdict `INDECIS` ;
+- **la confirmation par restauration** : un rouge causé par la mutation *disparaît* quand la
+  mutation disparaît. Les fichiers de test qui ont rougi sont rejoués sur le code restauré ;
+  s'ils rougissent encore, le rouge vient d'ailleurs → `INDECIS`.
+
+Un essai `INDECIS` sort du dénominateur — ni détection, ni survie — et fait sortir le banc en 1.
+
+*Choix tranché seul* : le brief proposait « exiger une base verte immédiatement avant chaque
+injection », soit +33 s × 31 essais ≈ +17 min. La confirmation ne rejoue que les **fichiers
+nommés** par le rapport machine de Vitest. Coût mesuré sur l'essai M4 : **1,7 s** (34,8 s avec
+confirmation contre 33,1 s sans), au lieu de 33 s pour une suite entière. C'est ce qui rend le
+garde tenable, donc réellement branché.
+
+Preuve que le banc marche encore, sortie citée (`--seulement=M4,N1`) :
+
+```
+Arbre au départ : c9a25dc89869 · tête d33989eb · 2 fichier(s) s’écartent de la tête
+BASE  avant … VERTE   1975 tests
+M4    partage/src/monde/carte.ts    … ✅ DETECTEE       34.8 s
+      ↻ confirmée : « vitest » redevient VERT une fois le fichier restauré (7 fichiers)
+N1    partage/src/monde/carte.ts    … ➖ SURVIT         33.1 s
+BASE  après … VERTE   1975 tests
+essais INDÉCIS (hors compte)      0
+✅ VERT — aucune régression de la QA, la mesure est opposable.
+```
+
+Et la preuve que le garde d'empreinte MORD, pas seulement qu'il existe —
+`bac-a-sable/p0-intermittence/sonde-empreinte.mjs`, six faits vérifiés dont le dernier garde la
+régression corrigée :
+
+```
+✔ 1. deux relevés sans rien toucher rendent la même empreinte — c9a25dc89869
+✔ 2. un fichier neuf sous un dossier surveillé change l’empreinte — c9a25dc89869 → 2acfaba827ff
+✔ 3. le fichier qui a bougé est NOMMÉ — tests/.p0-sonde-empreinte.temoin
+✔ 4. le retrait du témoin rétablit exactement l’empreinte initiale — c9a25dc89869
+✔ 5. le témoin n’est plus sur le disque
+✔ 6. un déplacement de la tête, à contenu identique, ne fait bouger AUCUN fichier
+```
+
+### 5. Le chiffre du lot
+
+Dix nouvelles exécutions, chacune encadrée par un relevé d'empreinte
+(`bac-a-sable/p0-intermittence/tours-apres.ndjson`) :
+
+```
+══ apres : 4 rouge(s) sur 10 exécutions ══
+   attribuables à un changement d’arbre : 4
+   INATTRIBUABLES (vraie intermittence)  : 0
+```
+
+Et le fait qui compte le plus : **les tours 5 à 9 ont tourné sur l'empreinte `bd9ad0a8204d`,
+rigoureusement identique, et ont rendu cinq codes 0 sur cinq.**
+
+> **rouges inattribuables : 3/10 avant (aucun outil ne pouvait le dire) → 0/10 après.**
+
+### 6. Ce qui reste ouvert
+
+1. **`Timeout calling "onTaskUpdate"`** — Q-INT-9 l'a vu une fois (« code 1, 136 fichiers verts,
+   aucun cas en échec »). Ce mode-là n'a **pas** été reproduit ici et reste non expliqué : c'est
+   une panne de transport de Vitest, pas une assertion. `vitest.config.ts` ne déclare ni
+   `testTimeout` (défaut 5 s) ni `poolOptions` ; le cas le plus lent hors dérogation mesure
+   1 440 ms (`propriete-sortie-jouee`, S3), soit 3,5× de marge sur une machine calme. **Le fichier
+   appartient au lot P2** : à lui de trancher, avec ce chiffre en main. Le garde du banc couvre
+   déjà le cas — un rouge sans coupable nommé fait rejouer l'étage entier avant d'être compté.
+2. **`scripts/verifier.mjs` n'enregistre pas l'empreinte de l'arbre** dans `tests/rapports/*.json`.
+   Deux rapports ne sont donc pas comparables entre eux. Une ligne suffirait, et le fichier
+   appartient au lot P2.
+3. **Le cliquet du banc** (M18, M20, M23, M24, M26) reste desserré. Q-INT-9 avait raison de ne
+   pas le resserrer sur une mesure bruyante ; il peut désormais l'être sur une mesure dont
+   l'empreinte est enregistrée et les détections confirmées — mais sur un dépôt calme, et la
+   procédure de Q-INT-9 point 2 reste la bonne.
+4. **Le parallélisme Playwright (lot P1) hérite du même principe.** Un test E2E instable en
+   parallèle devra être prouvé instable *sur une empreinte figée* avant qu'on touche à son
+   isolation : sans ça, on réparera encore un innocent.
+
+### 7. Un incident d'orchestration, et il vaut une règle
+
+Le commit `d33989e` de la campagne voisine a emporté **mes deux fichiers en cours d'écriture**
+(`scripts/qa/empreinte-arbre.mjs`, `scripts/qa/banc-de-mutation.mjs`) dans un `git add` large.
+Rien n'est perdu — l'arbre de travail portait déjà la version suivante — mais la tête contient un
+état intermédiaire de fichiers que cette campagne ne possédait pas.
+
+C'est la même faute que celle que ce lot corrige, vue de l'autre côté : **un écrivain qui ne sait
+pas ce qu'il possède**. Un commit de campagne nomme ses fichiers, il ne ramasse pas l'arbre.
+
+### 8. Ce que ça ne remet PAS en cause
+
+Les 1 975 tests passent, plusieurs fois de suite, sur un arbre figé. Aucun test n'a été assoupli,
+désactivé ni allongé : les deux fichiers touchés sont de l'outillage de mesure. La falaise du
+sélecteur (S3-Q2) est réelle et reste à trancher — mais pour ce qu'elle est, un problème de
+contenu, et non parce qu'elle ferait rougir la QA.
+
+## Q-INT-11. Les seuils de couverture par zone n'avaient JAMAIS rien vérifié — et l'échec qu'on leur imputait venait d'ailleurs
+
+Lot P2 de la campagne « playwright-parallele ». Le brief de ce lot affirmait un diagnostic ;
+les deux moitiés en étaient fausses, et c'est la mesure qui l'a dit.
+
+### 1. La prémisse du brief, réfutée
+
+Le brief posait : « l'étape `test` se déclare en échec avec 0 test en échec. C'est un **seuil de
+couverture par zone** qui n'est pas atteint — mais le rapport ne dit pas lequel. »
+
+Commande exécutée sur le journal de l'échec en question, sortie citée :
+
+```
+$ grep -c -i "threshold" tests/rapports/artefacts/journaux/test.log
+0
+```
+
+**Zéro occurrence** dans 429 342 octets. Aucun seuil n'était en cause. La vraie cause était déjà
+écrite dans ce dépôt — **Q-INT-7** l'avait nommée et horodatée : une erreur non capturée,
+`Error: [vitest-worker]: Timeout calling "onTaskUpdate"`, sous saturation du fil principal.
+
+Ce qui a fait croire à la couverture, c'est **le rapport lui-même**. `verifier.mjs` accolait à
+tout échec de l'étape `test` la note « couverture globale … Seuils PAR ZONE : annexe T § 7 »,
+**sans condition** — que la couverture y soit pour quelque chose ou non. La note ressemblait à un
+diagnostic sans en être un, et c'est elle qui envoyait chercher au mauvais endroit.
+
+> Une note affichée systématiquement n'est pas une observation, c'est un décor. Elle coûte
+> d'autant plus cher qu'elle a l'air d'informer.
+
+### 2. Le défaut que personne ne cherchait : les seuils étaient inertes
+
+En vérifiant *quelle* zone était fautive, il est apparu qu'**aucune ne pouvait l'être**.
+
+Vitest résout ses seuils par glob ainsi (`node_modules/vitest/dist/chunks/coverage.DfSpMS-b.js`,
+lignes 4111-4113, lues et non supposées) :
+
+```js
+const matcher = pm(glob);
+const matchingFiles = files.filter((file) => matcher(relative(this.ctx.config.root, file)));
+```
+
+Sur Windows, `relative()` rend des **contre-obliques** ; les globs s'écrivent avec des
+**obliques**. Sortie de la sonde (`bac-a-sable/p2-couverture/sonde-globs.mjs`) :
+
+```
+relative() rend : "client\\src\\moteurs\\registre-rendu.ts"
+
+partage/src/pedagogie/*.ts               tel quel :   0  · séparateurs normalisés :   6
+partage/src/contenu/validation.ts        tel quel :   0  · séparateurs normalisés :   1
+partage/src/moteurs/colorie/validation.ts tel quel :  0  · séparateurs normalisés :   1
+partage/src/moteurs/**/*.ts              tel quel :   0  · séparateurs normalisés :  51
+serveur/src/routes/**/*.ts               tel quel :   0  · séparateurs normalisés :  12
+```
+
+**0 fichier sur 5 zones.** La carte de couverture de chaque zone restait vide. Et le résumé d'une
+carte vide (`bac-a-sable/p2-couverture/sonde-vide.mjs`) :
+
+```
+lines total=0 covered=0 pct=Unknown
+Verdict Vitest « pct < seuil » avec un seuil de 90 : false
+```
+
+`pct` vaut la **chaîne** `"Unknown"`, et `"Unknown" < 90` est `false`. **Le seuil était donc
+déclaré satisfait sans avoir rien mesuré.** Les seuils de l'annexe T § 7 étaient décoratifs sur la
+machine où le jeu se développe, depuis leur introduction.
+
+C'est le même mode de défaillance que le détecteur qui déclarait un poids qu'il n'appliquait
+jamais : **un chiffre creux qui rassure**. Aucun outil ne le voyait, parce que rien n'échouait.
+
+### 3. Ce que valent réellement les zones
+
+Une fois les séparateurs normalisés, agrégation des compteurs déjà mesurés par le fournisseur v8
+(`coverage-summary.json` — jamais recalculée) :
+
+| Zone | Fichiers | Critère le plus juste | Mesuré | Seuil | Marge |
+|---|---:|---|---:|---:|---:|
+| `partage/src/pedagogie/*.ts` | 6 | branches | 98,48 % | 90 % | **+8,48 pt** |
+| `partage/src/contenu/validation.ts` | 1 | branches | 95,61 % | 95 % | **+0,61 pt** |
+| `partage/src/moteurs/colorie/validation.ts` | 1 | branches | 97,62 % | 95 % | **+2,62 pt** |
+| `partage/src/moteurs/**/*.ts` | 51 | branches | 85,12 % | 80 % | **+5,12 pt** |
+| `serveur/src/routes/**/*.ts` | 12 | branches | 95,42 % | 80 % | **+15,42 pt** |
+
+**20 critères évalués, 0 sous son seuil.** Aucun test ne manquait : le brief demandait d'« écrire
+les tests qui manquent dans la zone sous son seuil », il n'y en avait aucune. **Aucun seuil n'a
+été abaissé** — il n'y avait aucune raison de le faire, et la table est désormais gardée par un
+test qui échoue si un chiffre descend.
+
+**Point de vigilance** : `contenu/validation.ts` tient ses branches à **+0,61 pt**. C'est le juge
+du contenu ; il passera sous 95 % au premier `if` non couvert. C'est précisément ce que le tableau
+par zone, désormais affiché même au vert, rend visible **avant** la bascule.
+
+### 4. Ce qui a été livré
+
+- `scripts/couverture-zones.mjs` — **neuf**. Source unique des seuils (importée par
+  `vitest.config.ts`, plus de table en double), normalisation des séparateurs, agrégation par
+  zone, et description qui **nomme** la zone, le critère, la mesure, le seuil et l'écart.
+- `scripts/sortie-outils.mjs` — **neuf**. `sansAnsi` et `erreursNonCapturees`, extraits de
+  `verifier.mjs` pour être testables (`verifier.mjs` lance la chaîne au chargement).
+- `scripts/verifier.mjs` — le statut est **calculé**, plus décoré ; la cause tient en une ligne.
+- `scripts/rapport.mjs` — statut `couverture` distinct d'`echec`, bandeau qui nomme la zone,
+  tableau par zone permanent.
+- `vitest.config.ts` — seuils importés ; `silent: 'passed-only'`.
+- `tests/unitaires/couverture-zones.test.ts` (13 cas) et `tests/unitaires/sortie-outils.test.ts`
+  (8 cas) — **neufs**.
+
+Le rapport dit maintenant ceci, au lieu de « 0 échec(s) sur 1975 » :
+
+```
+- **test** — aucun test en échec — **seuil de couverture non atteint** dans 2 cas :
+  `partage/src/pedagogie/*.ts` : branches 87,4 % < 90 % exigé (écart 2,6 pt · 437/500) — annexe T § 7
+```
+
+### 5. Choix tranchés seul
+
+1. **Un matcher de glob maison plutôt que `picomatch`.** `picomatch` n'est qu'une dépendance
+   **transitive** de Vitest — rien dans `package.json` ne la garantit, et D9 interdit les
+   dépendances invisibles. Le sous-ensemble (`**`, `*`, littéral) est converti en expression
+   régulière et **croisé fichier par fichier avec `picomatch`** sur les 165 fichiers réels et
+   7 cas limites : `DIVERGENCES TOTALES : 0`.
+
+2. **Une zone dont le glob ne matche AUCUN fichier est un DÉFAUT, jamais une réussite.** C'est
+   l'invariant qui rend le matcher maison sûr : s'il divergeait un jour, la zone tomberait à zéro
+   fichier et le rapport le crierait, au lieu de passer en silence comme Vitest le faisait.
+
+3. **Une absence de mesure n'est pas une réussite.** Si l'étape tourne sans produire de résumé de
+   couverture, le statut est `couverture`, pas `reussite`.
+
+4. **Les seuils de `vitest.config.ts` sont conservés**, bien qu'inertes sur Windows : ils sont
+   justes sur POSIX, et l'évaluation qui fait foi est celle de `verifier.mjs`, qui vaut sur les
+   deux plateformes.
+
+5. **`silent: 'passed-only'` appliqué.** Q-INT-7 nommait la piste sans l'appliquer « parce qu'elle
+   touche la configuration de test » — ce lot possède ce fichier. Volume mesuré sur une exécution
+   complète, avant → après :
+
+   | | avant | après |
+   |---|---:|---:|
+   | lignes de sortie | 7 085 | **261** |
+   | octets | 415 721 | **35 420** |
+   | lignes « not configured to support act(...) » | 3 133 | **0** |
+   | blocs `stderr` | 1 167 | **0** |
+
+   dont **1 134 sur 1 167 (97 %)** venaient du seul `tests/composants/exploration-modele.test.tsx`.
+   Chaque bloc est un aller-retour RPC vers le fil principal — le mécanisme même que Q-INT-7
+   désigne.
+
+   **Aucun test n'est assoupli** : ni assertion, ni délai, ni `skip`. Et surtout, la propriété qui
+   conditionnait ce choix a été **vérifiée par un témoin jetable** (créé puis supprimé) : un test
+   qui échoue imprime toujours ses journaux, un test qui passe ne les imprime plus.
+
+   ```
+   stdout | … > un test qui ÉCHOUE : son journal DOIT apparaître
+   TEMOIN_TEST_QUI_ECHOUE                    ← présent
+   TEMOIN_TEST_QUI_PASSE                     ← absent
+   ```
+
+### 6. Ce qui reste à trancher, et que je n'ai PAS fait
+
+**L'erreur non capturée elle-même n'est pas corrigée.** Elle ne s'est reproduite dans aucune des
+quatre exécutions de ce lot (codes 0, 0, 0, 0). Réparer un défaut qu'on ne sait pas reproduire,
+c'est risquer de réparer un innocent — la leçon de P0. Ce lot fait deux choses et s'arrête là :
+il **retire 97 % du trafic RPC** qui la provoque, et il fait en sorte que, si elle revient, **le
+rapport la nomme** au lieu d'accuser la couverture.
+
+Reste ouvert pour le père : faut-il aussi traiter la cause dans
+`tests/composants/exploration-modele.test.tsx` — 1 134 avertissements `act(...)` sont le signe
+d'un rendu React non enveloppé, ce qui est un vrai défaut de test, pas seulement du bruit.
+**Ce fichier n'appartient pas à ce lot** et n'a pas été touché.
+
+### 7. Chronométrages réels
+
+| mesure | valeur |
+|---|---|
+| suite complète (`unitaires` + `composants` + `api`, `--coverage`) | 68 s · 44 s · 52 s · 66 s |
+| évaluation des 5 zones depuis `coverage-summary.json` | < 30 ms |
+| les 21 tests neufs | 15 ms de tests, 6,45 s avec transformation |
+| banc de mutation, 7 mutations sur 2 modules | 4 min |
+
+**La durée de la suite n'est pas attribuable** : ces quatre mesures ont été prises pendant que le
+lot P1 faisait tourner ses campagnes E2E en parallèle. L'écart de 24 s entre la plus rapide et la
+plus lente mesure la charge de la machine, pas l'effet de ce lot. Le volume de sortie, lui, est
+déterministe et attribuable — c'est le chiffre que ce lot revendique.
+
+### 8. Contrat de sortie
+
+| | avant | après |
+|---|---:|---:|
+| zones sous leur seuil | **0** (et non « 1 », comme le brief le supposait) | **0** |
+| zones dont le seuil ne mesurait RIEN | **5 / 5** | **0 / 5** |
+| seuils abaissés | — | **0** |
+| l'étape `test` sort-elle en 0 ? | non (erreur non capturée) | **oui** — 4 exécutions sur 4 |
+| mutations survivantes sur les modules neufs | — | **0 / 7** |
+
+`npm run verifier` **n'a pas été lancé en entier** : le lot P1 réécrivait `playwright.config.ts`,
+`tests/e2e/`, `tests/qualite/` et `tests/visuel/` pendant tout ce lot. Une mesure prise pendant
+qu'une campagne voisine écrit n'est pas attribuable — c'est exactement le constat de Q-INT-10. Ont
+été exécutés : `tsc -b` (code 0), `eslint` sur les fichiers possédés (0 problème), et la suite
+`test` quatre fois (code 0).
+
+---
+
+## § P1 — isolation par cas et parallélisme Playwright (2026-08-03)
+
+Lot P1. **`npm run verifier` : 618 s → 174 s**, mesuré de bout en bout, répartition par étape
+citée plus bas. Tout est écrit ici, rien n'est affirmé sans commande.
+
+### 1. Le réglage avait une bonne raison, et c'est elle qu'il fallait attaquer
+
+`playwright.config.ts` portait `workers: 1` et `fullyParallel: false` sur une machine à
+32 cœurs. Ce n'était pas une négligence : **les 372 cas partageaient UN serveur et UNE base
+`:memory:`**. Un cas qui crée un profil pendant qu'un autre les compte, c'est un rouge
+aléatoire, et un test instable est pire qu'un test lent.
+
+La réponse de ce lot n'est pas de paralléliser quand même. C'est de **supprimer le partage** :
+`tests/harnais-serveur.ts` donne à chaque cas un processus serveur neuf — base `:memory:`
+vierge, `Alea` rembobiné sur `ATELIER_GRAINE`, port réservé par le noyau (`listen(0)`, donc
+jamais deviné, jamais en conflit avec le serveur du père sur 8080 ni avec une campagne
+voisine). Deux cas ne peuvent plus se voir : **le verdict ne dépend plus de l'ordonnancement.**
+C'est plus isolé qu'avant, jamais moins.
+
+### 2. Le contrôle qui sépare le coût de l'isolation du gain du parallélisme
+
+Même arbre, même bundle (`client/dist-test` empreint à `0a2f365acfe098fc` **avant et après**),
+isolation par cas ACTIVE, `PIERRE_TRAVAILLEURS=1` :
+
+| | mur | verdict |
+|---|---:|---|
+| en série, un serveur neuf par cas (ce lot) | **393 s** | 372 verts |
+| mesure archivée du réglage précédent | 390 s | 372 verts |
+
+**L'isolation coûte +3 s sur 390, soit +0,8 %.** Le vivier préchauffe le serveur suivant
+pendant que le cas courant joue, si bien que les 327 ms d'un démarrage (médiane de 8 lancements
+à froid) ne sont presque jamais sur le chemin critique. **Tout le gain vient du parallélisme, et
+rien n'a été acheté en dégradant l'isolation.**
+
+### 3. Le nombre de travailleurs est MESURÉ, pas déduit du nombre de cœurs
+
+Chaque ligne est une exécution entière des 372 cas (`bac-a-sable/p1-parallelisme/`) :
+
+| travailleurs | mur d'horloge | travail cumulé | inflation | verdicts |
+|---:|---|---:|---:|---|
+| 1 | 393 s | 384 s | 1,00 x | vert |
+| 6 | 92 s / 92 s | 490 s | 1,28 x | vert / vert |
+| **10** | **84 s / 84 s / 85 s** | 679 s | 1,77 x | vert / vert / vert |
+| 16 (« 50 % des cœurs ») | 84 → 90 s | 1062 s | 2,77 x | 5 verts, 2 rouges |
+| 24 | 153 s / 162 s | — | — | rouge / rouge |
+| 32 | 98 s | — | — | vert |
+
+Deux faits commandent le choix, et le second est le moins intuitif :
+
+1. **Le mur cesse de descendre à 10.** Il est borné par le CHEMIN CRITIQUE — le cas le plus long
+   de la campagne, « CONTRAT DE SORTIE QA », 20,0 s en série. Aucun nombre de travailleurs ne
+   raccourcit un cas.
+2. **L'inflation, elle, continue de monter.** Or le garde-fou `timeout: 90_000` a été calibré en
+   série, où le pire cas laissait 4,5 x de marge. À 16 elle tombe à 1,6 x. À 24, le mur DOUBLE :
+   on paie de la contention pure.
+
+Retenu : **10**, plafond absolu et non proportionnel (`Math.min(10, cœurs / 2)`).
+`PIERRE_TRAVAILLEURS` force la valeur — `1` reproduit un défaut en série.
+
+### 4. Ce que l'isolation a mis au jour : quatre dépendances d'ordre, toutes réparées
+
+Aucune assertion n'a été retirée, assouplie ni allongée. **Trois assertions ont été AJOUTÉES.**
+
+**(a) `parcours-parent.spec.ts:153` — un contrat de sortie qui vérifiait un voisin.**
+La ligne disait « Premier passage : le code du foyer est posé » et attendait 200 de
+`POST /api/parent/ouvrir`. C'est le contrat d'AVANT : `serveur/src/routes/parent.ts:40` énonce
+celui d'aujourd'hui — « `ouvrir` sans code defini repond 404 et NE POSE RIEN ». Sur un serveur
+neuf, mesuré : `Expected: 200 / Received: 404`. Le cas passait au vert **uniquement parce qu'un
+autre fichier**, `parcours-parent-sans-profil.spec.ts:103`, avait appelé `/api/parent/definir`
+avant lui sur le serveur commun. Le contrat de sortie du verrou ne vérifiait donc pas ce qu'il
+annonçait. Corrigé : la mise en place lui appartient, et le 404 du foyer vierge est désormais
+ASSERTÉ au lieu d'être subi.
+
+**(b) `parcours-parent.spec.ts` « l'écran du verrou » — une précondition empruntée.**
+Son commentaire l'assumait : « Le verrou est FERMÉ quand ce cas s'ouvre : le bloc précédent
+vient de le fermer ». Il ne fermait rien lui-même. Corrigé : il ferme le verrou par l'API et
+PROUVE la fermeture (423) avant d'ouvrir l'écran. Les cinq assertions d'origine sont intactes.
+
+**(c) La porte parent perdait les chiffres tapés — deux rouges, et ce n'est PAS une lenteur.**
+`EcranCodeParent` le déclare en tête de fichier : « TANT QUE L'ÉTAT N'EST PAS CONNU, on rend le
+pavé d'ouverture […] Si la réponse dit "aucun code", l'écran bascule ». `[data-parent="code"]`
+devient donc visible **avant** que `GET /api/parent/etat` ait répondu, puis l'écran est remplacé
+par `EcranDefinirCode` — un autre composant, avec son propre `useState('')`. Les chiffres déjà
+tapés partent avec l'ancien composant, et « Poser ce code » reste désactivé pour toujours :
+
+```
+locator resolved to <button disabled … data-valider="code-parent" data-definir="code-parent">
+  181 x waiting for element to be visible, enabled and stable — element is not enabled
+```
+
+L'un des deux relevés a tenu **270 s** (cas `test.slow()`) sans que le bouton bouge : c'est un
+ÉTAT BLOQUÉ, pas un délai trop court. **Allonger le garde-fou n'aurait rien réparé** et aurait
+seulement rendu l'échec plus lent à venir. Corrigé par `attendreQueLaPorteAitDecide()`
+(`qa-outils.ts`), appelée par les six recettes qui tapent un code : elle demande au SERVEUR ce
+que la porte est, puis attend que l'écran le dise. Attente d'ÉTAT, jamais de durée.
+
+> **À TRANCHER — c'est du produit, pas du test.** Le défaut d'ergonomie reste entier :
+> **un parent qui tape ses quatre chiffres dans les premiers instants les perd sans un mot.**
+> L'écran a choisi le pavé d'ouverture par défaut pour éviter un scintillement, et c'est un
+> arbitrage défendable ; mais rien ne reporte la saisie d'un pavé à l'autre. Le corriger
+> appartient au lot qui possède `client/src/ecrans/EcranCodeParent.tsx` — P1 n'y a pas touché.
+
+**(d) La séquence d'ouverture était auditée avant d'être arrivée.**
+`data-ecran="ouverture"` devient visible avant le chargement de `contenu/monde/ouverture.json` ;
+tant qu'il n'est pas là, `tableaux` est vide, `dernier` vaut vrai, et « Passer l'histoire » n'est
+pas rendu — l'écran n'offre plus qu'UNE prise. L'audit des sorties l'accusait alors d'être une
+impasse : `ouverture : 1 éléments interactifs, aucun ne mène ailleurs`. L'écran publie déjà
+l'état à attendre (`data-tableau-courant="aucun"`) ; la recette l'attend maintenant.
+
+**Bénéfice collatéral : un contournement documenté devient inutile.** `qa-outils.ts` expliquait
+que les fichiers de la QA sont préfixés `parcours-audit-` pour passer AVANT
+`parcours-parent.spec.ts`, parce que celui-ci laissait la porte verrouillée quinze minutes pour
+tout le reste de la campagne — « un défaut d'ISOLATION de la suite, pas du produit, et le pire
+des défauts de test : celui qui accuse un innocent ». Un serveur par cas supprime la cause. Le
+diagnostic a été laissé en place : il ne coûte rien et restera vrai.
+
+### 5. La clôture de campagne devient un projet, et le journal se réunit
+
+`parcours-zz-invariants.spec.ts` § 5 agrège le journal des invariants de TOUTE la campagne. Deux
+choses le tenaient, et le parallélisme casse les deux :
+
+* **L'ordre.** Il reposait sur le tri par chemin (« `parcours-zz-` le garantit sans toucher à
+  `playwright.config.ts`, qui appartient à un autre lot » — ce lot-ci est celui-là). Devenu
+  explicite : projet `bilan`, `dependencies: ['parcours', 'robustesse']`, `fullyParallel: false`.
+  Le fichier n'a pas changé de dossier et reste recensé par `recettesSurDisque()`.
+* **Le journal.** `CAMPAGNE_COURANTE = process.ppid` était déjà la bonne granularité et n'a pas
+  changé. Mais dix processus écrivaient dans le MÊME fichier par `appendFileSync`, sans garantie
+  d'atomicité au-delà d'un tampon, et un bilan fait plusieurs kilo-octets : deux lignes
+  entrelacées auraient rendu le journal inanalysable. Un fichier par travailleur
+  (`TEST_WORKER_INDEX`), et une relecture qui les réunit tous. Vérifié : la clôture publie
+  **371 cas audités** et **12 écrans habités = 12 écrans à sortie prouvée** — aucune fausse
+  impasse, la couverture est bien celle de la campagne entière.
+
+### 6. Ce que ce lot n'a PAS attribué à lui-même
+
+* **`test:visuel` reste rouge, 7 échecs, et c'est l'état déclaré du dépôt** (D39 : les
+  références attendent le nouveau graphisme et un adulte qui a vu l'image). Une mesure
+  intermédiaire a affiché 8 : elle a été prise sur un `client/dist-test` périmé, et le compte
+  est revenu à 7 dès que `construire:test` a rebâti le bundle. Vérifié en outre à
+  `PIERRE_TRAVAILLEURS=1` : **les mêmes 8 échouaient en série** — ni le parallélisme ni
+  l'isolation n'y sont pour quelque chose.
+* **Trois de ces échecs sont une péremption de contenu, antérieure à P1.**
+  `tests/visuel/carte.spec.ts` déclare « Termine l'**unique** nœud livré de la Clairière » ;
+  `ls contenu/noeuds/clairiere-*.json` en rend **12**. Terminer un nœud ne termine plus la
+  région, donc `data-region-etat` ne vaut plus `terminee`. À reprendre par le lot qui possède
+  ce fichier.
+* **Les mesures de durée de ce lot sont contaminées, et c'est réciproque.** Le lot P2 l'a écrit
+  ici même (« ces quatre mesures ont été prises pendant que le lot P1 faisait tourner ses
+  campagnes E2E en parallèle »). Dans l'autre sens, les tours de P1 dont le mur s'écarte de la
+  normale — 150 s, 163 s, 285 s contre 84 s — sont exactement ceux qui ont rendu un rouge.
+  `empreinteArbre()` (lot P0) était relevée avant ET après chaque tour : l'arbre est resté
+  stable sur tous les tours cités. **CLAUDE.md le dit déjà : ne pas mêler deux campagnes de
+  tests lourds, la machine sature et fausse ses propres mesures de durée.**
+
+### 7. Stabilité — la mesure, pas la promesse
+
+Huit campagnes complètes consécutives à 10 travailleurs, APRÈS les quatre corrections du § 4,
+sur une empreinte d’arbre relevée avant ET après chaque tour (`empreinteArbre()`, lot P0) :
+
+```
+tour 1  mur 84,9 s  372 verts / 0 rouges      tour 5  mur 92,0 s  372 verts / 0 rouges
+tour 2  mur 87,4 s  372 verts / 0 rouges      tour 6  mur 90,3 s  372 verts / 0 rouges
+tour 3  mur 85,5 s  372 verts / 0 rouges      tour 7  mur 85,3 s  372 verts / 0 rouges
+tour 4  mur 87,4 s  372 verts / 0 rouges      tour 8  mur 87,3 s  372 verts / 0 rouges
+```
+
+**8 tours sur 8 verts, une seule empreinte d’arbre sur les huit** — les verdicts sont donc
+comparables entre eux. À rapprocher de l’état intermédiaire, avant corrections : 4 rouges sur
+12 campagnes, tous sur les trois défauts nommés au § 4 (c, d).
+
+Le taux de rouges avant/après ne se lit pas comme une amélioration de la vitesse : **les quatre
+défauts existaient déjà et le réglage en série les cachait**, soit en fournissant l’état qu’un
+voisin avait laissé (a, b), soit en laissant assez de temps machine pour que la course ne se
+joue jamais (c, d). Le parallélisme ne les a pas créés ; il a cessé de les couvrir.
+
+### 8. Répartition finale, `npm run verifier`
+
+| étape | avant | après |
+|---|---:|---:|
+| `test:e2e` | 390 s | **84 s** · 372 cas · 0 échec |
+| `test:qualite` | 100 s | **22 s** · 106 cas · 0 échec |
+| `test` (Vitest) | 78 s | 43 s · 2005 cas · 0 échec *(gain du lot P2, pas de P1)* |
+| `test:visuel` | 39 s | **14 s** · 15 cas · 7 échecs *(D39, état déclaré)* |
+| lint, tsc, contenu, rejeu, constructions | 10 s | 10 s |
+| **total, mur d'horloge** | **618 s** | **174 s** |
+
+**Part Playwright : 529 s → 120 s, soit 4,4 x.** Code de sortie 1, dû au seul `test:visuel`,
+exactement comme avant le lot.
+
+---
+
+## § P3 — la preuve : le gain tient, et il n'a rien coûté à la fiabilité (2026-08-03)
+
+Lot P3, intégration et preuve. Ce lot n'a pas conçu le parallélisme : il l'a **éprouvé**, et il
+rapporte ce qu'il a trouvé — y compris un rouge que les lots précédents n'avaient pas vu, et un
+chiffre creux dans le rapport de la chaîne elle-même.
+
+### 1. Le chiffre du lot
+
+> **`npm run verifier` : 618 s → 174,6 s, facteur 3,5 ×.**
+> Et le contrôle qui l'attribue : **5 campagnes E2E consécutives, 5 codes 0** ·
+> **10 suites unitaires consécutives, 10 codes 0**.
+
+Trois chaînes complètes chronométrées de bout en bout : **178,5 s** (celle qui a trouvé le rouge
+du § 3), **178,8 s**, **174,6 s** (après correctifs). Le détail ci-dessous est celui de la
+deuxième — `bac-a-sable/p3-preuve/verifier-2.log` :
+
+```
+→ lint … ✅  4.0 s          → test:e2e … ✅  87.8 s      → test:qualite … ✅  22.6 s
+→ typescript … ✅  0.3 s    → test:visuel … ❌  14.2 s   → test:rejeu … ✅  0.3 s
+→ test … ✅  43.2 s         → construire … ✅  3.2 s
+→ test:contenu … ✅  0.5 s  → construire:test … ✅  2.7 s
+❌ ROUGE — 1 étape(s) en échec sur 11.        Durée totale : 178.8 s
+```
+
+| étape | avant | après | facteur |
+|---|---:|---:|---:|
+| `test:e2e` | 390 s | **87,8 s** · 372 cas · 0 échec | 4,4 × |
+| `test` (Vitest) | 78 s | **43,2 s** · 2 005 cas · 0 échec | 1,8 × |
+| `test:qualite` | 100 s | **22,6 s** · 106 cas · 0 échec | 4,4 × |
+| `test:visuel` | 39 s | **14,2 s** · 15 cas · 8 échecs *(D39)* | 2,7 × |
+| lint, tsc, contenu, rejeu, constructions | 10 s | **11,0 s** | — |
+| **total** | **618 s** | **178,8 s** | **3,5 ×** |
+
+Un écart avec la mesure intermédiaire du lot P1 (174 s), et il est honnête à dire : P1 mesurait
+un arbre où `test:e2e` finissait à 84 s ; les 87,8 s d'ici incluent le correctif du § 3 et la
+variation d'exécution (5 tours chronométrés : 90, 90, 89, 90, 87 s). Le facteur ne bouge pas de
+façon significative.
+
+**Le gain du `test` unitaire (78 → 43 s) n'appartient pas au parallélisme** — Vitest était déjà
+parallèle. Il vient de `silent: 'passed-only'` (lot P2), qui supprime la saturation RPC nommée
+en Q-INT-7. Le dire évite de créditer un lot du travail d'un autre.
+
+### 2. La stabilité, éprouvée par répétition — c'est la moitié qui compte
+
+Un gain de vitesse payé en rouges aléatoires serait une perte. Sorties citées :
+
+```
+suite E2E complète       tour 1 code=0 mur=90 s   372 passed
+                         tour 2 code=0 mur=90 s   372 passed
+                         tour 3 code=0 mur=89 s   372 passed
+                         tour 4 code=0 mur=90 s   372 passed
+                         tour 5 code=0 mur=87 s   372 passed
+
+suite unitaire           10 tours, 10 codes 0, 138 fichiers / 2 005 tests à CHAQUE tour
+                         (mur : 35, 32, 32, 32, 32, 32, 32, 32, 33, 32 s)
+```
+
+À comparer à l'état d'avant la campagne, cité par le lot P0 : **3 rouges sur 7** exécutions de la
+suite unitaire. **0 sur 10 aujourd'hui.**
+
+**Aucun serveur ne fuit.** Après ces 15 campagnes : `serveur/dist/index.js` encore vivants = **0**,
+navigateurs lancés par Playwright encore vivants = **0**, port 8080 en écoute = **0**. La Pierre du
+père n'a jamais été touchée — c'est le harnais qui a supprimé ce risque, pas la prudence de
+l'opérateur.
+
+### 3. LE ROUGE — et pourquoi le remède est la LECTURE du test, pas le produit
+
+Le premier `npm run verifier` du lot a rendu **1 échec sur 372** :
+
+```
+parcours-campement-sans-texte.spec.ts:153 › l'étagère montre ses cases VIDES (D44)
+    expect(rendues).toBe(total)     Expected: 0    Received: 25
+    [N6] étagère au campement : total=0 obtenues=0 vides=25 rendues=25
+```
+
+**Ce relevé est arithmétiquement impossible dans un rendu unique.** `Etagere.tsx:110` pose
+`const vides = etagere.nbTotal - etagere.nbObtenues` : `total=0` et `obtenues=0` imposent
+`vides=0`, et le relevé dit `vides=25`. Aucun rendu du composant n'a jamais produit ces trois
+valeurs ensemble — **les lectures ont enjambé un re-rendu**. Le cas lisait ses quatre nombres en
+quatre allers-retours vers le navigateur, et l'étagère se peuple à l'arrivée de
+`monde/gobi-stades.json` (`useCatalogueFormes`, requête distincte du reste de l'écran).
+
+**Ce n'est donc pas un défaut d'isolation** — l'isolation est parfaite : serveur propre, base
+vierge, aucun voisin. C'est un défaut de **mesure**, interne au cas, que le parallélisme a rendu
+probable en ralentissant un téléchargement.
+
+**L'arbitrage, et il est discutable, donc il est écrit.** J'ai corrigé le TEST, pas le produit.
+Trois raisons :
+
+1. L'étagère vide pendant le chargement est un comportement **décidé et documenté**
+   (`Etagere.tsx:178` : « tant que le catalogue n'est pas là, l'étagère est simplement vide de
+   cases »). Le changer serait une décision de conception, pas une correction.
+2. La retirer de l'écran tant qu'elle charge aurait un **coût de QA mesurable** : l'audit a11y de
+   tout le site n'attend que `data-ecran="campement"`, et c'est lui qui a trouvé le contraste
+   3,88 pour 4,5 exigé **sur les 25 cases vides**. Une étagère absente au moment du scan, c'est ce
+   contrôle qui cesse silencieusement de couvrir.
+3. Quatre lectures séparées comparées entre elles ne mesurent pas un composant, elles mesurent un
+   ordonnanceur. C'est la lecture qui était fausse.
+
+**Aucune assertion n'est retirée ni assouplie — une est AJOUTÉE.** Le relevé est désormais atomique
+(une seule évaluation dans la page), et il est précédé d'une attente d'ÉTAT — jamais d'une durée
+(annexe T § 6). Le second cas du même fichier portait la même fenêtre
+(`expect(await cases.count()).toBeGreaterThan(0)`, sans réessai) : il attend maintenant l'état avec
+`not.toHaveCount(0)`, exigence identique, stabilité différente.
+
+**Contrôle négatif — l'assertion ajoutée n'est pas creuse.** Le catalogue a été dérouté vers un
+fichier inexistant, le client de test reconstruit, le cas relancé :
+
+```
+Error: l'étagère n'a jamais annoncé de total : `monde/gobi-stades.json` n'a pas répondu, ou il ne
+déclare aucune forme. […] il rend une étagère à ZÉRO case.
+  1 failed
+```
+
+Source restaurée, `git diff -- client/src/monde/Etagere.tsx` **vide**. Puis 100 exécutions du
+fichier (`--repeat-each=20`, 10 travailleurs) : **100 passed**.
+
+### 4. Un chiffre creux DANS le rapport de la chaîne — trouvé en vérifiant, pas en cherchant
+
+En recoupant le journal brut avec le rapport de l'étape :
+
+```
+Playwright ................................... 8 failed
+tests/rapports/test-visuel.json .............. echecs: 7, « 1 création(s) »
+références réellement écrites sur disque ..... 0
+```
+
+`scripts/test-visuel.mjs` classait « A snapshot doesn't exist » en **création** sur le seul
+message. C'était juste quand le défaut du script était `--update-snapshots=missing` : Playwright
+écrivait alors l'image puis marquait quand même le cas en échec. **Le lot P1 a changé ce défaut en
+`none`** — plus rien n'est écrit — et le même message veut désormais dire l'inverse : la référence
+manque, la capture n'a été comparée à RIEN, c'est un échec. Le dépouillement n'avait pas suivi : le
+rapport comptait **un échec de moins que l'outil qu'il dépouille** et annonçait une création quand
+rien n'était créé.
+
+Corrigé : le mode commande la lecture du message, une référence absente est comptée comme échec et
+**nommée** comme telle (« référence ABSENTE — la capture n'a été comparée à rien »). Après :
+`8 failed` côté Playwright, `echecs: 8` côté rapport, `0 création(s)`.
+
+*Reste à nettoyer, sans urgence* : les branches `stricte && creations > 0` et
+`creations > 0 || referencesCreees > 0` de ce script sont devenues inatteignables hors `--maj`,
+lui-même traité plus haut. Elles ne mentent pas, elles ne servent plus.
+
+### 5. Ce qui reste rouge, et ce que ça demande — POUR ARBITRAGE
+
+`test:visuel`, **8 rouges sur 15**, seule étape rouge sur onze. D39 en couvre **5** (4 images qui
+diffèrent, 1 référence absente) : elles attendent les yeux du père, puis `--maj`.
+
+**Les 3 autres ne sont pas des images**, et elles sont antérieures à cette campagne :
+
+| recette | grief | cause mesurée |
+|---|---|---|
+| `carte.spec.ts:132` | `data-region-etat` attendu `terminee`, reçu `ouverte` | prémisse périmée |
+| `carte.spec.ts:158` | idem | prémisse périmée |
+| `decor-v2.spec.ts:72` | `maitresse / eleve` = **NaN** | décor v2 non livré |
+
+Preuve pour les deux premières, sans rien affirmer : l'aide du fichier dit encore « termine
+**l'unique nœud livré** de la Clairière » ; `ls contenu/noeuds/ | grep -c clairiere` rend **12**,
+arrivés avec le commit `acb12c6`. Et `etatAfficheRegion` (H1, `partage/src/monde/carte.ts`) exige
+`eclatObtenuLe !== null` **ET** `pourcentageColorie >= 1` : un nœud sur douze donne 1/12, jamais
+`terminee`. **Le code fait ce que H1 demande ; c'est la recette qui décrit un monde à un nœud.**
+Pour la troisième, les deux localisateurs ne trouvent aucun élément —
+`Math.max(...[]) - Math.min(...[])` vaut `-Infinity`, d'où le `NaN`.
+
+**Je ne les ai pas retouchées.** Réécrire l'attente d'une recette visuelle demande de savoir ce
+qu'on veut voir à l'écran : c'est du contenu, et ça revient au père. Trois options, à trancher :
+
+- **(a)** la recette joue les 12 nœuds de la Clairière avant d'attendre `terminee` — fidèle à H1,
+  mais la recette devient longue et fragile au contenu ;
+- **(b)** la recette attend `pourcentageColorie` **croissant** au lieu de `terminee` — elle mesure
+  alors la progression, ce qui est peut-être ce qu'elle voulait dire depuis le début ;
+- **(c)** un raccourci de test (`window.__test`) termine la région d'un coup — le plus rapide, et
+  le plus loin du geste de l'enfant.
+
+### 6. Vérification adverse — ce qui a été cherché et n'a rien donné
+
+| contrôle | commande | résultat |
+|---|---|---|
+| cas de test perdus | `bac-a-sable/p3-preuve/compter-cas.mjs` | 166 fichiers (164 + 2 neufs), **0 disparu**, 1 680 → **1 701** déclarations |
+| `skip` / `only` / `todo` / assertion commentée | `grep -rnE` sur `tests/` | **0** — les 12 `test.slow()` sont tous antérieurs, aucun ajouté |
+| délai allongé pour masquer une instabilité | `git diff -U0 -- tests/` sur `timeout:` / `setTimeout` | **0 ligne** |
+| fichier supprimé | `git log --diff-filter=D --name-only` | **0** |
+| référence visuelle inventée | `git status -- 'tests/**-snapshots'` après **6** campagnes Playwright | **0** — `updateSnapshots: 'none'` tient |
+| réglage déclaré et jamais lu | `Running 372 tests using 10 workers` | le plafond mesuré de P1 est bien celui appliqué |
+| recette hors du harnais | `grep -rlE "test.*from '@playwright/test'" tests/**/*.spec.ts` | **0** — les 493 cas passent tous par l'isolation |
+| seuils de couverture décoratifs | `bac-a-sable/p3-preuve/controle-seuils.mjs` | 5 zones **peuplées** (6, 1, 1, 51, 12 fichiers), seuil poussé à 100 % → manquement **nommé et chiffré**, glob à contre-obliques → **zone vide détectée** |
+| empreinte d'arbre du banc réellement appelée | `grep -n empreinteArbre scripts/qa/banc-de-mutation.mjs` | lignes **382** et **423**, encadrant chaque essai |
+
+### 7. Le défaut de brief, signalé DEUX fois et jamais corrigé — pour la prochaine campagne
+
+Les lots P0 et P2 ont tous deux rapporté que `bac-a-sable/campagne-playwright-parallele.js:173`
+compose le brief à partir de `lot[0]` et `lot[1]` et **ne lit jamais `lot[2]`**, qui porte la
+mission détaillée et le contrat chiffré. Les deux agents ont dû aller relire le script pour
+retrouver leur propre mission. Le signalement est resté sans effet parce qu'il vivait dans un
+rapport d'agent : il est consigné ici pour qu'il survive au changement de conversation. Un
+orchestrateur qui écrit un brief en trois champs et n'en lit que deux paie l'agent deux fois.

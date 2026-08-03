@@ -443,7 +443,12 @@ function essayer(recette) {
   // `M11b` est passée `DETECTEE` puis `SURVIT` entre deux exécutions du même banc, et `M2`
   // avant elle (Q-INT-9).
   //
-  // La confirmation ne coûte que les fichiers qui ont rougi, pas la suite entière.
+  // La confirmation ne coûte que les fichiers qui ont rougi, pas la suite entière. Quand
+  // AUCUN fichier n'a pu être nommé — Vitest sorti en 1 sans rapport exploitable, le cas
+  // « code 1 avec 0 test en échec » vu par Q-INT-9 —, `rejouer([])` relance l'étage ENTIER.
+  // C'est le cas le plus cher, et c'est aussi celui où la confirmation compte le plus : un
+  // rouge sans coupable nommé est précisément celui qu'on ne doit pas prendre pour argent
+  // comptant.
   let confirmation = null;
   if (verdict === 'DETECTEE' && etageFautif !== null) {
     const rejeu = etageFautif.rejouer(fichiersFautifs);

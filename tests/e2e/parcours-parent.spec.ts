@@ -33,6 +33,7 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { expect, test } from './invariants.js';
+import { attendreQueLaPorteAitDecide } from './qa-outils.js';
 
 import type { Page } from '@playwright/test';
 
@@ -76,6 +77,11 @@ async function preparer(page: Page): Promise<void> {
 
 /** Tape un code sur le pavé de `EcranCodeParent` et valide. */
 async function taperCode(page: Page, code: string): Promise<void> {
+  // La porte ne sait pas encore quel pavé elle est tant que `GET /api/parent/etat` n’a pas
+  // répondu : elle rend celui d’OUVERTURE puis bascule. Taper pendant la bascule fait perdre les
+  // chiffres et laisse « Poser ce code » désactivé pour toujours (mesuré deux fois, lot P1 —
+  // voir l’encadré de `attendreQueLaPorteAitDecide` dans `qa-outils.ts`).
+  await attendreQueLaPorteAitDecide(page);
   for (const chiffre of code) {
     await page.locator(`[data-touche="${chiffre}"]`).click();
   }
@@ -148,7 +154,40 @@ test.describe('le verrou, sur le serveur réel', () => {
   test('CONTRAT DE SORTIE : le verrou se ferme au 5ᵉ code faux, et le bon code n’y échappe pas', async ({
     request
   }) => {
-    // Premier passage : le code du foyer est posé.
+    // ── LA MISE EN PLACE ÉTAIT EMPRUNTÉE À UN AUTRE FICHIER. Corrigé par le lot P1.
+    //
+    // Cette ligne disait « Premier passage : le code du foyer est posé » et attendait 200 de
+    // `POST /api/parent/ouvrir`. C'était le contrat d'AVANT : `serveur/src/routes/parent.ts:30`
+    // le cite comme révolu, et sa ligne 40 énonce celui d'aujourd'hui —
+    //
+    //     « `ouvrir` sans code defini repond 404 `introuvable` et NE POSE RIEN ;
+    //       `definir` pose le code, une fois. »
+    //
+    // Sur un serveur neuf, l'assertion rendait donc `404`, mesuré, sortie citée :
+    //
+    //     Expected: 200
+    //     Received: 404        tests/e2e/parcours-parent.spec.ts:153
+    //
+    // Elle passait au vert uniquement parce que TOUTE la campagne partageait un serveur, et
+    // qu'un AUTRE fichier — `parcours-parent-sans-profil.spec.ts:103` — avait appelé
+    // `/api/parent/definir` avant. Le cas ne vérifiait donc pas ce qu'il annonçait : il
+    // constatait qu'un voisin était passé. C'est le test trompeur type, et il était dans le
+    // contrat de sortie du verrou.
+    //
+    // La mise en place est désormais À LUI, et une assertion est AJOUTÉE plutôt que retirée :
+    // le 404 du serveur vierge est vérifié au lieu d'être subi.
+    const avantToutCode = await request.post('/api/parent/ouvrir', { data: { code: CODE } });
+    expect(
+      avantToutCode.status(),
+      'sur un foyer sans code, `ouvrir` répond 404 et ne pose rien (routes/parent.ts § 40)'
+    ).toBe(404);
+
+    const definition = await request.post('/api/parent/definir', { data: { code: CODE } });
+    expect(definition.status(), 'le code du foyer se pose par `definir`, et une seule fois').toBe(
+      200
+    );
+
+    // Le code posé ouvre : c'est l'état de départ que le reste du cas suppose.
     const pose = await request.post('/api/parent/ouvrir', { data: { code: CODE } });
     expect(pose.status()).toBe(200);
 
@@ -180,8 +219,22 @@ test.describe('le verrou, sur le serveur réel', () => {
 
 test.describe('l’écran du verrou', () => {
   /**
-   * Le verrou est FERMÉ quand ce cas s'ouvre : le bloc précédent vient de le fermer, sur le
-   * serveur réel, en comptant ses cinq échecs par requête.
+   * ── LA PRÉCONDITION ÉTAIT CELLE DU CAS D'AVANT. Rendue explicite par le lot P1. ───────────
+   *
+   * Ce commentaire disait : « Le verrou est FERMÉ quand ce cas s'ouvre : le bloc précédent
+   * vient de le fermer, sur le serveur réel ». C'était vrai — et c'était le problème. Le cas
+   * ne fermait rien lui-même ; il héritait de l'état laissé par un autre cas dans une base
+   * `:memory:` partagée par les 372 recettes. Sur un serveur neuf, mesuré, sortie citée :
+   *
+   *     Locator: locator('[data-verrou="actif"]')
+   *     Expected: visible / Error: element(s) not found     parcours-parent.spec.ts:223
+   *
+   * Le verrou est donc désormais fermé ICI, par l'API, et la fermeture est PROUVÉE (423) avant
+   * qu'on ouvre l'écran. La séquence que l'écran traverse est rigoureusement la même qu'avant ;
+   * seule sa cause a cessé d'être un voisin.
+   *
+   * Aucune assertion n'est retirée ni assouplie : les cinq d'origine sont intactes, et la
+   * preuve du 423 s'ajoute.
    *
    * Ce cas mesure donc ce qui lui revient, et rien d'autre : **ce que l'écran fait d'un 423**.
    * Le compte de cinq appartient au serveur et y est mesuré (§ 10.4, contrat de sortie de
@@ -206,6 +259,22 @@ test.describe('l’écran du verrou', () => {
     page
   }) => {
     await preparer(page);
+
+    // ── ON FERME LE VERROU SOI-MÊME, SUR LE SERVEUR DE CE CAS, ET ON LE PROUVE.
+    // Le code du foyer se pose par `definir` (routes/parent.ts § 40), puis cinq codes faux le
+    // verrouillent (v2 § 11). Rien n'est simulé : c'est le vrai verrou du vrai serveur.
+    const pose = await page.request.post('/api/parent/definir', { data: { code: CODE } });
+    expect(pose.status(), 'le code du foyer doit se poser avant qu’on puisse le rater').toBe(200);
+    for (let essai = 1; essai <= ECHECS_AVANT_VERROU; essai += 1) {
+      await page.request.post('/api/parent/ouvrir', { data: { code: CODE_FAUX } });
+    }
+    const verrouille = await page.request.post('/api/parent/ouvrir', { data: { code: CODE } });
+    expect(
+      verrouille.status(),
+      'précondition du cas : le verrou doit être FERMÉ avant qu’on ouvre l’écran. Sans cette ' +
+        'preuve, l’assertion `data-verrou="actif"` plus bas serait vraie ou fausse selon ce ' +
+        'qu’un autre cas aurait laissé derrière lui.'
+    ).toBe(423);
 
     const acces = page.locator('[data-acces-parent]');
     await expect(

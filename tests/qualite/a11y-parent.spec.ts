@@ -21,7 +21,11 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import AxeBuilder from '@axe-core/playwright';
-import { expect, test } from '@playwright/test';
+// LE HARNAIS D’ISOLATION (lot P1) : un serveur neuf par cas — base `:memory:` vierge, `Alea`
+// rembobiné, port réservé par le noyau. C’est lui qui remplace le `webServer` unique de
+// `playwright.config.ts`, et c’est lui qui rend `fullyParallel` légitime.
+import { expect, test } from '../harnais-serveur.js';
+import { attendreQueLaPorteAitDecide } from '../e2e/qa-outils.js';
 
 import type { Page } from '@playwright/test';
 
@@ -69,6 +73,11 @@ async function ouvrirLaPorte(page: Page): Promise<void> {
 }
 
 async function entrer(page: Page): Promise<void> {
+  // La porte ne sait pas encore quel pavé elle est tant que `GET /api/parent/etat` n’a pas
+  // répondu : elle rend celui d’OUVERTURE puis bascule. Taper pendant la bascule fait perdre les
+  // chiffres et laisse « Poser ce code » désactivé pour toujours (mesuré deux fois, lot P1 —
+  // voir l’encadré de `attendreQueLaPorteAitDecide` dans `qa-outils.ts`).
+  await attendreQueLaPorteAitDecide(page);
   for (const chiffre of CODE) {
     await page.locator(`[data-touche="${chiffre}"]`).click();
   }

@@ -31,7 +31,7 @@
     "demarrer": "node scripts/demarrer.mjs",
     "test": "vitest run --project unitaires --project composants --project api",
     "test:contenu": "node scripts/test-contenu.mjs",
-    "test:e2e": "node scripts/playwright.mjs test --project=parcours --project=robustesse",
+    "test:e2e": "node scripts/playwright.mjs test --project=parcours --project=robustesse --project=bilan",
     "test:visuel": "node scripts/test-visuel.mjs",
     "test:qualite": "node scripts/playwright.mjs test --project=qualite && node scripts/verifier-bundle.mjs",
     "test:rejeu": "node scripts/test-rejeu.mjs",

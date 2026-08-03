@@ -646,11 +646,71 @@ export async function ouvrirLaZoneParent(page: Page): Promise<void> {
   }
 
   await page.locator('[data-acces-parent]').click();
-  await expect(page.locator('[data-parent="code"]')).toBeVisible();
+  await attendreQueLaPorteAitDecide(page);
   for (const chiffre of CODE_PARENT) {
     await page.locator(`[data-touche="${chiffre}"]`).click();
   }
   await page.locator('[data-valider="code-parent"]').click();
+}
+
+/**
+ * ATTEND QUE LA PORTE PARENT AIT DÉCIDÉ QUEL PAVÉ ELLE EST — avant qu'on y tape le moindre
+ * chiffre. Posé par le lot P1, sur un défaut mesuré deux fois.
+ *
+ * ── LE DÉFAUT, ET IL N'EST PAS UNE LENTEUR ────────────────────────────────────────────────
+ *
+ * `EcranCodeParent` le déclare lui-même, en tête de fichier :
+ *
+ *     « TANT QUE L'ÉTAT N'EST PAS CONNU, on rend le pavé d'ouverture plutôt qu'un écran
+ *       d'attente […] Si la réponse dit "aucun code", l'écran bascule »
+ *
+ * `[data-parent="code"]` devient donc visible AVANT que `GET /api/parent/etat` ait répondu, et
+ * l'écran se remplace ensuite par `EcranDefinirCode` — un autre composant, avec son propre
+ * `useState('')`. **Les chiffres déjà tapés partent avec l'ancien composant.** Le bouton
+ * « Poser ce code » reste alors désactivé pour toujours (`saisie.length !== LONGUEUR_CODE`),
+ * et la recette attend un bouton qui ne s'activera jamais.
+ *
+ * Mesuré, deux fois, sortie citée (`bac-a-sable/p1-parallelisme/traque.ndjson`) :
+ *
+ *     locator resolved to <button disabled … data-valider="code-parent" data-definir="code-parent">
+ *       181 × waiting for element to be visible, enabled and stable — element is not enabled
+ *
+ * et l'un des deux relevés a tenu **270 s** (un cas `test.slow()`) sans que le bouton bouge :
+ * ce n'est donc pas un délai trop court, c'est un ÉTAT BLOQUÉ. Allonger le garde-fou n'aurait
+ * rien réparé et aurait seulement rendu l'échec plus lent à venir.
+ *
+ * Pourquoi c'est apparu maintenant : avec l'ancien serveur unique, un code du foyer était posé
+ * par la première recette parent de la campagne, et toutes les suivantes trouvaient donc le
+ * pavé d'OUVERTURE, sans bascule. Un serveur neuf par cas remet chaque recette devant une
+ * porte vierge — c'est-à-dire devant le chemin que le père prend le tout premier jour.
+ *
+ * ── CE QUE CETTE FONCTION FAIT, ET CE QU'ELLE NE FAIT PAS ─────────────────────────────────
+ *
+ * Elle demande au SERVEUR ce que la porte est, puis attend que l'écran le dise. C'est une
+ * attente d'ÉTAT (annexe T § 6), pas une durée, et elle ajoute une assertion au lieu d'en
+ * retirer une : si l'écran affichait un mode que le serveur contredit, la recette échouerait
+ * ici, en le nommant.
+ *
+ * Elle ne masque rien du produit. Le défaut d'ergonomie reste entier et il est consigné
+ * (`Docs/questions-en-attente.md`, § P1) : **un parent qui tape ses quatre chiffres dans les
+ * premiers instants les perd sans un mot.** Le réparer appartient au lot qui possède
+ * `client/src/ecrans/EcranCodeParent.tsx`.
+ */
+export async function attendreQueLaPorteAitDecide(page: Page): Promise<void> {
+  const reponse = await page.request.get('/api/parent/etat');
+  // Une porte verrouillée (423) est une porte qui A un code : c'est le pavé d'ouverture.
+  let codeDefini = true;
+  if (reponse.ok()) {
+    const lu = (await reponse.json()) as { readonly codeDefini?: unknown };
+    codeDefini = lu.codeDefini === true;
+  }
+  const mode = codeDefini ? 'ouverture' : 'definition';
+  await expect(
+    page.locator(`[data-parent="code"][data-parent-mode="${mode}"]`),
+    `le serveur dit que le foyer ${codeDefini ? 'A' : 'N’A PAS'} de code : la porte doit ` +
+      `afficher le pavé « ${mode} » avant qu’on y tape quoi que ce soit. Taper pendant la ` +
+      'bascule fait perdre les chiffres — voir l’encadré de `attendreQueLaPorteAitDecide`.',
+  ).toBeVisible();
 }
 
 /** Joue un nœud `colorie` jusqu'à l'écran de récompense, par le magasin. */
@@ -725,6 +785,26 @@ export function recettesDEcrans(): readonly EcranQA[] {
       await preparer(page);
       await choisirLeProfil(page);
       await page.locator('[data-vers="ouverture"]').click();
+      // ── ON ATTEND QUE LE RÉCIT SOIT ARRIVÉ, PAS SEULEMENT QUE L'ÉCRAN SOIT MONTÉ.
+      //
+      // `data-ecran="ouverture"` devient visible avant que `contenu/monde/ouverture.json` ne
+      // soit chargé ; tant qu'il ne l'est pas, `tableaux` est vide, `dernier` vaut vrai et
+      // l'écran n'offre plus qu'UNE prise — le bouton « Passer l'histoire » n'est rendu que
+      // sur les tableaux non finaux. L'audit des sorties tombait alors sur un écran qui n'a
+      // pas fini d'arriver, et l'accusait d'être une impasse. Mesuré une fois sur six
+      // campagnes, sortie citée (`bac-a-sable/p1-parallelisme/traque.ndjson`) :
+      //
+      //     ouverture : 1 éléments interactifs, aucun ne mène ailleurs.
+      //
+      // `data-tableau-courant` vaut littéralement `aucun` tant que la séquence n'est pas là
+      // (`EcranOuverture.tsx:138`) : l'écran publie donc déjà l'état qu'il faut attendre. On
+      // attend un ÉTAT, jamais une durée (annexe T § 6), et aucune assertion n'est touchée —
+      // l'audit juge ensuite exactement ce qu'il jugeait, sur un écran complet.
+      await expect(
+        page.locator('[data-ecran="ouverture"]:not([data-tableau-courant="aucun"])'),
+        'la séquence d’ouverture doit avoir chargé son récit avant qu’on audite ses sorties : ' +
+          'un écran qui n’a pas fini d’arriver n’offre pas encore toutes ses prises.',
+      ).toBeVisible();
     },
   },
   {

@@ -27,6 +27,13 @@ import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } fr
 import { join } from 'node:path';
 
 import {
+  decrireManquement,
+  decrireZoneVide,
+  evaluerZones,
+  lireResumeCouverture
+} from './couverture-zones.mjs';
+import { erreursNonCapturees, sansAnsi } from './sortie-outils.mjs';
+import {
   DOSSIER_RAPPORTS,
   RACINE,
   ecrireEtape,
@@ -180,6 +187,7 @@ function lancerNpm(script, argumentsSupplementaires = [], variables = {}) {
 
 // ───────────────────────────────────────────────────── dépouillement des rapports natifs
 
+
 function depouillerVitest(chemin) {
   if (!existsSync(chemin)) return null;
   try {
@@ -190,7 +198,7 @@ function depouillerVitest(chemin) {
         if (cas.status === 'failed') {
           details.push({
             ou: `${fichier.name ?? ''} › ${[...(cas.ancestorTitles ?? []), cas.title].join(' › ')}`,
-            message: (cas.failureMessages ?? []).join(' | ').split('\n')[0] ?? 'échec'
+            message: sansAnsi((cas.failureMessages ?? []).join(' | ').split('\n')[0] ?? 'échec')
           });
         }
       }
@@ -198,12 +206,17 @@ function depouillerVitest(chemin) {
     return {
       total: brut.numTotalTests ?? details.length,
       echecs: brut.numFailedTests ?? details.length,
+      // `success` est distinct de `numFailedTests` : Vitest le met à `false` quand la campagne
+      // a mal fini SANS qu'aucun test n'ait échoué — une erreur non capturée, un worker qui ne
+      // répond plus. C'est exactement le cas qui affichait « échec, 0 échec ».
+      succes: brut.success === true,
       details
     };
   } catch {
     return null;
   }
 }
+
 
 function depouillerPlaywright(chemin) {
   if (!existsSync(chemin)) return null;
@@ -234,17 +247,36 @@ function depouillerPlaywright(chemin) {
   }
 }
 
-function resumeCouverture() {
+/**
+ * Évalue les seuils PAR ZONE de l'annexe T § 7.
+ *
+ * ── Ce que cette fonction remplace, et pourquoi ──────────────────────────────────────────
+ *
+ * L'ancienne version rendait une phrase — « couverture globale : lignes 94,22 %, branches
+ * 85,78 % » — que l'étape `test` accolait à `Seuils PAR ZONE : annexe T § 7` **quel que soit
+ * le motif de son échec**. Le rapport disait donc « couverture » chaque fois que `test`
+ * rougissait, y compris quand la couverture n'y était pour rien. C'est ce qui envoyait
+ * chercher au mauvais endroit : la note ressemblait à un diagnostic sans en être un.
+ *
+ * Mesuré sur le journal de l'échec qui a motivé ce lot :
+ * `grep -c -i "threshold" tests/rapports/artefacts/journaux/test.log` → **0**. Aucun seuil
+ * n'était en cause ; l'étape était tombée sur une erreur non capturée.
+ *
+ * La nouvelle version ne raconte rien : elle CALCULE des verdicts par zone, et le rapport ne
+ * parle de couverture que lorsqu'une zone est réellement fautive.
+ */
+function evaluerCouverture() {
   const chemin = join(DOSSIER_RAPPORTS, 'couverture', 'coverage-summary.json');
-  if (!existsSync(chemin)) return null;
-  try {
-    const brut = JSON.parse(readFileSync(chemin, 'utf8'));
-    const total = brut.total ?? {};
-    const part = (cle) => (total[cle]?.pct === undefined ? '—' : `${total[cle].pct} %`);
-    return `couverture globale : lignes ${part('lines')}, branches ${part('branches')}, fonctions ${part('functions')}`;
-  } catch {
-    return null;
-  }
+  const resume = lireResumeCouverture(chemin);
+  const verdict = evaluerZones(resume, RACINE);
+  const total = resume?.total ?? {};
+  const part = (cle) => (total[cle]?.pct === undefined ? '—' : `${String(total[cle].pct).replace('.', ',')} %`);
+  return {
+    ...verdict,
+    // Gardé pour mémoire, mais présenté pour ce qu'il est : un chiffre d'ambiance. « Une
+    // couverture globale à 80 % ne dit rien d'utile » (annexe T § 7).
+    global: `couverture globale, pour information : lignes ${part('lines')}, branches ${part('branches')}, fonctions ${part('functions')}`
+  };
 }
 
 // ─────────────────────────────────────────────────────────────────────── exécution
@@ -298,14 +330,76 @@ for (const etape of CHAINE) {
           : null;
 
     const details = natif?.details ?? [];
-    if (details.length === 0 && codeSortie !== 0) {
+
+    // ── couverture par zone : mesurée pour la seule étape `test`, et seulement là
+    const couverture = etape.cle === 'test' ? evaluerCouverture() : null;
+    // Une ABSENCE de mesure compte comme une faute, au même titre qu'un seuil manqué.
+    // `test` est lancée avec `--coverage` : si aucun résumé n'en sort, les seuils de
+    // l'annexe T § 7 n'ont rien vérifié — et un vert obtenu sans mesure est précisément le
+    // genre de silence que ce lot existe pour supprimer.
+    const couvertureNonMesuree = couverture !== null && !couverture.mesuree;
+    const fauteDeCouverture =
+      (couverture?.manquements.length ?? 0) + (couverture?.zonesVides.length ?? 0) > 0 ||
+      couvertureNonMesuree;
+
+    // ── erreurs non capturées : le cas « l'étape échoue, aucun test n'échoue »
+    const horsTest =
+      etape.natif === 'vitest' && codeSortie !== 0 ? erreursNonCapturees(sortie) : null;
+
+    if (details.length === 0 && codeSortie !== 0 && !fauteDeCouverture) {
       // Pas de rapport machine exploitable : on garde les dernières lignes utiles du journal.
-      const lignes = sortie
+      // `sansAnsi` — sans quoi le tableau de `RAPPORT.md` se remplit de codes de couleur.
+      const lignes = sansAnsi(sortie)
         .split(/\r?\n/)
         .map((l) => l.trimEnd())
         .filter((l) => l.length > 0)
         .slice(-25);
       for (const ligne of lignes) details.push({ ou: etape.cle, message: ligne });
+    }
+
+    // ── le statut, et surtout la CAUSE en une ligne
+    //
+    // L'ordre de ces branches est l'ordre de ce qu'on veut lire en premier. Un test en échec
+    // prime sur un seuil : il désigne un comportement cassé, le seuil désigne un comportement
+    // non vérifié. Ce ne sont pas les mêmes urgences, et ce ne sont pas les mêmes remèdes.
+    let statut;
+    let cause = null;
+    if (environnement) {
+      statut = 'environnement';
+      cause = 'prérequis d’installation manquant — défaut d’environnement, pas défaut de code.';
+    } else if ((natif?.echecs ?? 0) > 0) {
+      statut = 'echec';
+      cause = `${natif.echecs} test(s) en échec sur ${natif.total} — voir le détail plus bas.`;
+    } else if (couvertureNonMesuree) {
+      statut = 'couverture';
+      cause =
+        'aucun test en échec, mais **aucune couverture n’a été produite** : les seuils par ' +
+        'zone de l’annexe T § 7 n’ont donc rien vérifié. Une absence de mesure n’est pas une ' +
+        'réussite. Vérifier que l’étape tourne bien avec `--coverage`.';
+    } else if (fauteDeCouverture) {
+      statut = 'couverture';
+      const premiers = [
+        ...couverture.manquements.map((m) => decrireManquement(m)),
+        ...couverture.zonesVides.map((z) => decrireZoneVide(z))
+      ];
+      cause =
+        `aucun test en échec — **seuil de couverture non atteint** dans ` +
+        `${premiers.length} cas : ${premiers[0]}` +
+        (premiers.length > 1 ? ` (et ${premiers.length - 1} autre(s), voir plus bas)` : '');
+    } else if (codeSortie !== 0) {
+      statut = 'echec';
+      // Le cas qui affichait « échec, 0 échec » sans jamais dire pourquoi.
+      const nommees = horsTest?.erreurs ?? [];
+      cause =
+        `aucun test en échec et aucun seuil de couverture manqué, mais l’étape est sortie en ` +
+        `${codeSortie}` +
+        (nommees.length > 0
+          ? ` — ${horsTest.annonce || nommees.length} erreur(s) NON CAPTURÉE(S), hors de tout ` +
+            `test : ${nommees.slice(0, 3).join(' · ')}. Une erreur non capturée peut rendre ` +
+            'vert un test qui aurait dû rougir : elle se corrige, elle ne s’ignore pas.'
+          : ' — motif non identifié dans la sortie ; voir le journal de l’étape.');
+    } else {
+      statut = 'reussite';
     }
 
     const notes = [];
@@ -315,16 +409,23 @@ for (const etape of CHAINE) {
           '(contrat § 8.2). Voir `npm install` et `npx playwright install chromium`.'
       );
     }
-    if (etape.cle === 'test') {
-      const couverture = resumeCouverture();
-      if (couverture) notes.push(`${couverture}. Seuils PAR ZONE : annexe T § 7.`);
-      else notes.push('aucun résumé de couverture produit — seuils par zone non mesurés.');
+    if (couverture) {
+      notes.push(
+        couverture.mesuree
+          ? `${couverture.global}. Les seuils qui font foi sont PAR ZONE (annexe T § 7) : ` +
+            `${couverture.zones.length} zone(s) évaluée(s), ${couverture.manquements.length} ` +
+            `manquement(s), ${couverture.zonesVides.length} zone(s) sans aucun fichier.`
+          : 'aucun résumé de couverture produit — les seuils par zone n’ont donc rien mesuré. ' +
+            'Ce n’est pas une réussite : c’est une absence de mesure.'
+      );
     }
     notes.push(`code de sortie ${codeSortie} · journal : ${`tests/rapports/artefacts/journaux/${etape.cle.replace(/[^a-z0-9._-]+/gi, '-')}.log`}`);
 
     ecrireEtape({
       etape: etape.cle,
-      statut: environnement ? 'environnement' : codeSortie === 0 ? 'reussite' : 'echec',
+      statut,
+      cause,
+      couverture,
       dureeMs,
       total: natif?.total ?? (codeSortie === 0 ? 1 : 0),
       echecs: natif?.echecs ?? (codeSortie === 0 ? 0 : 1),
@@ -385,8 +486,13 @@ for (const etape of CHAINE) {
         ? '➖'
         : relu?.statut === 'environnement'
           ? '🔌'
-          : '❌';
+          : relu?.statut === 'couverture'
+            ? '📉'
+            : '❌';
   console.log(`${symbole}  ${(dureeMs / 1000).toFixed(1)} s`);
+  // La cause s'affiche AUSSI au terminal : l'agent qui lance la chaîne la voit passer sans
+  // avoir à ouvrir le rapport, et sait déjà s'il doit corriger du code ou écrire un test.
+  if (relu?.cause) console.log(`    ${relu.cause.replace(/\*\*/g, '')}`);
 }
 
 // ─────────────────────────────────────────────────────────────────────────── rapport

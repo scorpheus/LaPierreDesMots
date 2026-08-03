@@ -18,6 +18,13 @@
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vitest/config';
 
+// Source UNIQUE des seuils de l'annexe T § 7. Ils vivaient ici ; ils vivent désormais dans un
+// module que `scripts/verifier.mjs` partage, parce que Vitest ne sait pas les appliquer sur
+// Windows (voir l'en-tête du module : `relative()` rend des contre-obliques, les globs des
+// obliques, aucun fichier ne matche, et un seuil qui ne matche rien est déclaré satisfait).
+// Deux tables de seuils auraient fini par diverger sans que rien ne le signale.
+import { SEUILS_PAR_ZONE } from './scripts/couverture-zones.mjs';
+
 const racine = (chemin: string): string => fileURLToPath(new URL(chemin, import.meta.url));
 
 /**
@@ -72,43 +79,13 @@ const preparation = racine('./tests/configuration/preparation.ts');
  * vigueur ici.** C'est la zone où « un ajustement du BKT ou du Leitner ne casse rien
  * visiblement, et la progression est devenue absurde » (annexe T § 1) : c'est celle où une
  * ligne non couverte coûte le plus cher.
+ *
+ * **Ces seuils-ci ne mordent que sur POSIX**, et ce n'est pas un choix : Vitest matche ses
+ * globs contre `relative(root, fichier)`, qui rend des contre-obliques sur Windows. On les
+ * garde — ils sont justes là où ils s'appliquent — mais l'évaluation qui fait foi est celle de
+ * `scripts/verifier.mjs`, qui normalise les séparateurs et tourne sur les deux plateformes.
  */
-const seuilsParZone = {
-  // `pedagogie/` ≥ 90 % — annexe T § 7. Le premier risque du projet vit ici.
-  'partage/src/pedagogie/*.ts': {
-    statements: 90,
-    branches: 90,
-    functions: 90,
-    lines: 90
-  },
-  // `validation/` ≥ 95 % — c'est le juge ; un faux négatif décourage l'enfant pour rien.
-  'partage/src/contenu/validation.ts': {
-    statements: 95,
-    branches: 95,
-    functions: 95,
-    lines: 95
-  },
-  'partage/src/moteurs/colorie/validation.ts': {
-    statements: 95,
-    branches: 95,
-    functions: 95,
-    lines: 95
-  },
-  // `moteurs/` ≥ 80 % — le reste est couvert en E2E.
-  'partage/src/moteurs/**/*.ts': {
-    statements: 80,
-    branches: 80,
-    functions: 80,
-    lines: 80
-  },
-  // `serveur/routes/` ≥ 80 %.
-  'serveur/src/routes/**/*.ts': {
-    statements: 80,
-    branches: 80,
-    functions: 80,
-    lines: 80
-  }
-};
+const seuilsParZone = SEUILS_PAR_ZONE;
 
 export default defineConfig({
   resolve: { alias },
@@ -118,6 +95,33 @@ export default defineConfig({
     // Une seule source de hasard et de temps : le fichier de préparation.
     globals: false,
     reporters: ['default'],
+    /**
+     * Les journaux console des tests qui PASSENT ne sont pas rapportés ; ceux des tests qui
+     * ÉCHOUENT le restent intégralement (c'est la définition de `'passed-only'` : « see logs
+     * from failing tests only »).
+     *
+     * ── Pourquoi, mesuré ────────────────────────────────────────────────────────────────
+     *
+     * Q-INT-7 a observé `verifier` rouge avec **zéro test en échec** :
+     * `Error: [vitest-worker]: Timeout calling "onTaskUpdate"` — le fil principal, saturé,
+     * ne répond plus à l'ouvrier dans le délai RPC. Elle nommait la piste sans l'appliquer,
+     * « parce qu'elle touche la configuration de test ».
+     *
+     * Le volume, compté sur le journal d'une exécution complète :
+     *
+     *     lignes de sortie                                        7 085
+     *     dont « not configured to support act(...) »              3 133   (44 %)
+     *     blocs stderr                                            1 167
+     *     dont tests/composants/exploration-modele.test.tsx        1 134   (97 %)
+     *
+     * Chaque bloc est un aller-retour RPC vers le fil principal. Un seul fichier de test en
+     * produisait 97 %.
+     *
+     * **Ce réglage n'assouplit aucun test** : aucune assertion, aucun délai, aucun `skip`.
+     * Il ne retire que le bruit des tests qui passent — et un échec reste aussi diagnosticable
+     * qu'avant, ce qui a été vérifié en faisant échouer un test exprès.
+     */
+    silent: 'passed-only',
     coverage: {
       provider: 'v8',
       // `--coverage` l'active ; sans ce drapeau, `npm run test` reste rapide.

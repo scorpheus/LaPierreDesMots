@@ -26,10 +26,24 @@
  * dérogation n'est offerte au chemin normal : il n'existe aucun moyen d'acquitter une
  * violation sur la page d'une recette, et c'est délibéré.
  *
- * ── CE FICHIER EST NOMMÉ `zz` POUR PASSER EN DERNIER ───────────────────────────────────────
- * Playwright ordonne par chemin. Le § 5 lit le journal que les 18 autres recettes viennent
- * d'écrire ; il doit donc passer après elles. `parcours-zz-` le garantit sans toucher à
- * `playwright.config.ts`, qui appartient à un autre lot.
+ * ── CE FICHIER PASSE EN DERNIER, ET CE N'EST PLUS SON NOM QUI LE GARANTIT ──────────────────
+ *
+ * Le § 5 lit le journal que les 18 autres recettes viennent d'écrire ; il doit donc passer
+ * après elles. Cette garantie tenait au tri par chemin de Playwright — d'où le préfixe
+ * `parcours-zz-` — et la note d'origine disait : « sans toucher à `playwright.config.ts`, qui
+ * appartient à un autre lot ».
+ *
+ * **Le lot P1 est cet autre lot, et le tri par chemin ne garantit plus rien.** Dès que
+ * `fullyParallel` est vrai, seize travailleurs tirent dans la même file : le dernier fichier
+ * de l'ordre alphabétique n'est plus le dernier exécuté, et le § 5 compterait un journal
+ * encore en cours d'écriture.
+ *
+ * L'ordre est donc devenu EXPLICITE, dans `playwright.config.ts` : ce fichier constitue à lui
+ * seul le projet `bilan`, déclaré `dependencies: ['parcours', 'robustesse']`. Il ne démarre
+ * que lorsque les deux autres projets sont terminés, tous travailleurs confondus, et il tourne
+ * en `fullyParallel: false` pour garder l'ordre de déclaration entre ses propres cas.
+ *
+ * Le préfixe `zz` reste : il ne coûte rien et il dit encore la bonne chose au lecteur.
  */
 import { readdirSync } from 'node:fs';
 

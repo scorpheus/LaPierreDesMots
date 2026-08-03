@@ -93,21 +93,36 @@ let total = 0;
 let echecs = 0;
 /** Cas dont le SEUL grief est « la référence n'existait pas » : une création, pas un écart. */
 let creations = 0;
+/** Référence absente alors que RIEN ne pouvait l'écrire : un échec qui n'a rien vérifié. */
+let absences = 0;
 const details = [];
 
+/** Le message Playwright d'une référence introuvable, quel que soit le mode. */
+const referenceIntrouvable = (message) =>
+  /snapshot doesn'?t exist|writing actual|A snapshot is not provided/i.test(String(message));
+
 /**
- * Playwright ne distingue pas, dans son code de sortie, une référence CRÉÉE d'une capture
- * DIVERGENTE : en 1.62, `--update-snapshots=missing` écrit bien l'image manquante, puis
- * marque quand même le cas en échec avec « A snapshot doesn't exist at …, writing actual ».
- * Mesuré au premier lancement de la chaîne : 2 cas « échoués » alors que rien ne divergeait,
- * il n'y avait simplement aucune référence à comparer.
+ * ── UNE RÉFÉRENCE ABSENTE N'EST UNE « CRÉATION » QUE SI QUELQUE CHOSE L'ÉCRIT ──────────────
  *
- * Les deux cas ne veulent pas dire la même chose et ne doivent pas rendre le même verdict :
- * une divergence est un défaut, une création n'a **rien vérifié du tout**. On lit donc le
- * message, et le rapport dit lequel des deux s'est produit.
+ * Cette fonction rendait `true` sur le seul message, sans regarder le mode. Elle avait raison
+ * quand le défaut du script était `--update-snapshots=missing` : Playwright écrivait alors
+ * l'image manquante puis marquait quand même le cas en échec, et le compter comme une
+ * divergence aurait été faux.
+ *
+ * **Le défaut est passé à `none`** (voir l'encadré de `modeSnapshots`, plus haut) : plus rien
+ * n'est écrit. Le même message veut donc dire l'inverse — la référence manque, la capture n'a
+ * été comparée à RIEN, et le cas est un échec. Mesuré, sorties citées côte à côte :
+ *
+ *     Playwright ............................ 8 failed
+ *     tests/rapports/test-visuel.json ....... echecs: 7, « 1 création(s) »
+ *     références réellement écrites sur disque .................... 0
+ *
+ * Un rapport qui annonce une création quand rien n'a été créé, et qui compte un échec de moins
+ * que l'outil qu'il dépouille, est exactement le genre de chiffre creux que la chaîne existe
+ * pour supprimer. Le mode commande désormais la lecture du message.
  */
 const estCreationDeReference = (message) =>
-  /snapshot doesn'?t exist|writing actual|A snapshot is not provided/i.test(String(message));
+  modeSnapshots === 'all' && referenceIntrouvable(message);
 
 if (existsSync(CHEMIN_JSON)) {
   try {
@@ -122,10 +137,14 @@ if (existsSync(CHEMIN_JSON)) {
             if (estCreationDeReference(message)) {
               creations += 1;
             } else {
+              const absente = referenceIntrouvable(message);
+              if (absente) absences += 1;
               echecs += 1;
               details.push({
                 ou: `${cas.file ?? ''} › ${cas.title}`,
-                message: String(message).split('\n')[0]
+                message: absente
+                  ? `référence ABSENTE — la capture n’a été comparée à rien : ${String(message).split('\n')[0]}`
+                  : String(message).split('\n')[0]
               });
             }
           }
@@ -165,9 +184,18 @@ if (navigateurAbsent) {
     'servent enfin de référence.';
 } else if (echecs > 0) {
   statut = 'echec';
+  // Les deux griefs ne se soignent pas pareil : une divergence se REGARDE, une absence se
+  // PRODUIT. Les additionner sous « N captures différentes » enverrait chercher un diff qui
+  // n'existe pas.
+  const divergences = echecs - absences;
   note =
-    `${echecs} capture(s) différente(s) de leur référence. ` +
-    'Regarder les diffs dans `tests/rapports/artefacts/`. Si l’écart est voulu : ' +
+    (divergences > 0 ? `${divergences} capture(s) différente(s) de leur référence` : '') +
+    (divergences > 0 && absences > 0 ? ' · ' : '') +
+    (absences > 0
+      ? `${absences} référence(s) ABSENTE(S) — ces captures-là n’ont RIEN vérifié ` +
+        '(`--update-snapshots=none` : rien n’est écrit sans qu’on le demande)'
+      : '') +
+    '. Regarder les diffs dans `tests/rapports/artefacts/`. Si l’écart est voulu : ' +
     '`npm run test:visuel -- --maj` — jamais de sa propre initiative sur une divergence non expliquée.';
 } else if (total === 0 && resultat.status !== 0) {
   // Playwright a échoué AVANT d'exécuter quoi que ce soit — configuration illisible, client
@@ -217,6 +245,7 @@ ecrireEtape({
 genererRapport({ commande: `npm run test:visuel${majDemandee ? ' -- --maj' : ''}` });
 
 console.log(
-  `test:visuel — ${total} capture(s), ${creations} création(s), ${echecs} échec(s). ${note}`
+  `test:visuel — ${total} capture(s), ${creations} création(s), ${absences} référence(s) absente(s), ` +
+    `${echecs} échec(s). ${note}`
 );
 process.exit(statut === 'echec' || statut === 'environnement' ? 1 : 0);

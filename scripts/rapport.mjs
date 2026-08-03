@@ -18,17 +18,29 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+// Module local, sans dépendance npm : la promesse « il tourne avant `npm install` » tient.
+import { decrireManquement, decrireZoneVide } from './couverture-zones.mjs';
+
 export const RACINE = fileURLToPath(new URL('..', import.meta.url));
 export const DOSSIER_RAPPORTS = join(RACINE, 'tests', 'rapports');
 export const DOSSIER_BRUT = join(DOSSIER_RAPPORTS, 'brut');
 export const DOSSIER_ARTEFACTS = join(DOSSIER_RAPPORTS, 'artefacts');
 export const CHEMIN_RAPPORT_MD = join(DOSSIER_RAPPORTS, 'RAPPORT.md');
 
-/** Les statuts possibles d'une étape, et ce qu'ils veulent dire. */
+/**
+ * Les statuts possibles d'une étape, et ce qu'ils veulent dire.
+ *
+ * `couverture` est distinct d'`echec` **parce qu'on ne les corrige pas de la même façon** :
+ * un test en échec se corrige dans le code qu'il accuse ; un seuil non atteint se corrige en
+ * écrivant les tests qui manquent. Les confondre — c'est ce que faisait le rapport — envoie
+ * chercher au mauvais endroit, et le lecteur y perd le plus de temps qu'il n'en faut pour
+ * lire le rapport en entier.
+ */
 export const STATUTS = {
   reussite: { symbole: '✅', libelle: 'réussite', bloquant: false },
   vide: { symbole: '➖', libelle: 'aucun cas à ce stade', bloquant: false },
   echec: { symbole: '❌', libelle: 'échec', bloquant: true },
+  couverture: { symbole: '📉', libelle: 'seuil de couverture non atteint', bloquant: true },
   environnement: { symbole: '🔌', libelle: 'défaut d’environnement', bloquant: true }
 };
 
@@ -82,6 +94,12 @@ export function ecrireEtape(rapport) {
     total: rapport.total ?? 0,
     echecs: rapport.echecs ?? 0,
     details: rapport.details ?? [],
+    // `cause` : la raison en UNE ligne, celle qu'on lit dans le bandeau rouge. `note` reste le
+    // commentaire long. Les séparer évite le « 0 échec sur 1975 » qui n'expliquait rien.
+    cause: rapport.cause ?? null,
+    // Verdicts de couverture par zone — voir `scripts/couverture-zones.mjs`. Seule l'étape
+    // `test` la renseigne ; `null` partout ailleurs.
+    couverture: rapport.couverture ?? null,
     note: rapport.note ?? null,
     artefacts: rapport.artefacts ?? []
   };
@@ -181,9 +199,29 @@ export function genererRapport(options = {}) {
     );
     lignes.push('');
     for (const etape of bloquantes) {
-      lignes.push(`- **${etape.etape}** — ${etape.echecs} échec(s) sur ${etape.total}`);
+      // `cause` dit POURQUOI en une ligne. Sans elle on retombe sur le comptage, qui a
+      // longtemps affiché « 0 échec(s) sur 1975 » — un énoncé exact et parfaitement inutile.
+      const raison = etape.cause ?? `${etape.echecs} échec(s) sur ${etape.total}`;
+      lignes.push(`- **${etape.etape}** — ${raison}`);
     }
     lignes.push('');
+
+    // La zone fautive au premier écran : c'est la seule information qui dise où aller.
+    const manquements = bloquantes.flatMap((e) => e.couverture?.manquements ?? []);
+    const zonesVides = bloquantes.flatMap((e) => e.couverture?.zonesVides ?? []);
+    if (manquements.length > 0 || zonesVides.length > 0) {
+      lignes.push('### 📉 Zones sous leur seuil de couverture');
+      lignes.push('');
+      lignes.push(
+        'Ce n’est **pas** un test en échec : aucun comportement n’est cassé, il en manque un ' +
+          'qui soit *vérifié*. Cela se corrige en écrivant les tests qui manquent dans la zone ' +
+          'nommée — **jamais** en abaissant le seuil, qui vient de l’annexe T § 7.'
+      );
+      lignes.push('');
+      for (const m of manquements) lignes.push(`- ${decrireManquement(m)}`);
+      for (const z of zonesVides) lignes.push(`- ${decrireZoneVide(z)}`);
+      lignes.push('');
+    }
   }
 
   if (environnement.length > 0) {
@@ -214,6 +252,42 @@ export function genererRapport(options = {}) {
     );
   }
   lignes.push('');
+
+  // ── Couverture par zone — annexe T § 7
+  //
+  // Toujours affichée quand elle a été mesurée, y compris au vert : c'est le seul endroit où
+  // l'on voit une zone se rapprocher de son seuil AVANT qu'elle ne le franchisse.
+  const avecCouverture = etapes.find((e) => e.couverture?.mesuree);
+  if (avecCouverture) {
+    const { zones } = avecCouverture.couverture;
+    lignes.push('## Couverture par zone — annexe T § 7');
+    lignes.push('');
+    lignes.push(
+      'Cibler par zone, pas globalement : « une couverture globale à 80 % ne dit rien d’utile » ' +
+        '(annexe T § 7). La marge est l’écart au seuil ; une marge négative est un manquement.'
+    );
+    lignes.push('');
+    lignes.push('| Zone | Fichiers | Critère | Mesuré | Seuil | Marge |');
+    lignes.push('|---|---:|---|---:|---:|---:|');
+    const nombre = (n) => String(n).replace('.', ',');
+    for (const zone of zones) {
+      if (zone.vide) {
+        lignes.push(
+          `| \`${zone.glob}\` | **0** | — | — | — | ⚠ **aucun fichier : ce seuil ne mesure rien** |`
+        );
+        continue;
+      }
+      zone.criteres.forEach((c, i) => {
+        const marge = Number((c.mesure - c.exigence).toFixed(2));
+        lignes.push(
+          `| ${i === 0 ? `\`${zone.glob}\`` : ''} | ${i === 0 ? zone.fichiers : ''} | ${c.critere} ` +
+            `| ${nombre(c.mesure)} % | ${nombre(c.exigence)} % ` +
+            `| ${c.atteint ? '+' : ''}${nombre(marge)} pt ${c.atteint ? '✅' : '❌'} |`
+        );
+      });
+    }
+    lignes.push('');
+  }
 
   if (vides.length > 0) {
     lignes.push('## Ce qui n’a rien vérifié, et pourquoi');

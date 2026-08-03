@@ -62,10 +62,16 @@
  * Aucune attente de durée. Les deux seules attentes de ce fichier attendent un ÉTAT : une
  * image peinte (`requestAnimationFrame`) et une réponse du serveur.
  */
-import { appendFileSync, existsSync, mkdirSync, readFileSync } from 'node:fs';
-import { dirname } from 'node:path';
+import { appendFileSync, existsSync, mkdirSync, readFileSync, readdirSync } from 'node:fs';
+import { basename, dirname, join } from 'node:path';
 
-import { expect, test as base } from '@playwright/test';
+import { expect } from '@playwright/test';
+
+// LE HARNAIS D'ISOLATION (lot P1) — un serveur neuf par cas, donc une base et un `Alea` neufs.
+// C'est LUI qui rend le parallélisme légitime : sans lui, deux recettes qui tournent en même
+// temps se partagent un profil. La sentinelle ci-dessous s'ajoute par-dessus, elle ne le
+// remplace pas.
+import { test as base } from '../harnais-serveur.js';
 
 import { CIBLE_MINIMALE_PX, SELECTEUR_INTERACTIF, cheminDepot } from './qa-outils.js';
 
@@ -302,9 +308,35 @@ export const CAMPAGNE_COURANTE = process.ppid;
  * est la vérification, le nom du fichier n'est que la commodité.
  *
  * Sous `tests/rapports/`, donc jamais versionné (`.gitignore`).
+ *
+ * ── UN FICHIER PAR TRAVAILLEUR, ET C'EST LE LOT P1 QUI L'IMPOSE ───────────────────────────
+ *
+ * `CAMPAGNE_COURANTE` vaut `process.ppid` : elle est donc DÉJÀ commune à tous les travailleurs
+ * d'une même campagne — c'était la bonne granularité, et elle survit intacte au parallélisme.
+ * Ce qui ne survivait pas, c'est le fichier UNIQUE : avec `workers: 1` un seul processus y
+ * écrivait, avec seize ils s'y bousculent. `appendFileSync` n'offre aucune garantie
+ * d'atomicité au-delà de la taille d'un tampon, et un bilan fait plusieurs kilo-octets quand
+ * l'audit a visité vingt écrans : deux lignes entrelacées auraient rendu le journal
+ * INANALYSABLE — un `JSON.parse` en échec au milieu de la clôture, c'est-à-dire un rouge qui
+ * ressemble à un défaut de produit.
+ *
+ * Le numéro de travailleur dans le nom supprime le problème au lieu de le rattraper : deux
+ * processus n'écrivent jamais dans le même fichier, donc il n'y a plus rien à sérialiser.
+ * `TEST_WORKER_INDEX` est posée par Playwright et vaut l'indice UNIQUE de l'instance de
+ * travailleur — un travailleur redémarré après un dépassement de délai en reçoit un neuf, et
+ * n'écrase donc pas le journal de celui qu'il remplace. Ni horloge ni tirage : la règle non
+ * négociable de CLAUDE.md n'est pas contournée.
  */
-export const JOURNAL_INVARIANTS = cheminDepot(
-  `tests/rapports/invariants-e2e.${String(CAMPAGNE_COURANTE)}.ndjson`,
+const TRAVAILLEUR = process.env['TEST_WORKER_INDEX'] ?? '0';
+
+/** Le préfixe commun à tous les journaux de CETTE campagne — la clé de relecture. */
+const PREFIXE_JOURNAL = `invariants-e2e.${String(CAMPAGNE_COURANTE)}.w`;
+
+const DOSSIER_JOURNAUX = cheminDepot('tests/rapports');
+
+export const JOURNAL_INVARIANTS = join(
+  DOSSIER_JOURNAUX,
+  `${PREFIXE_JOURNAL}${TRAVAILLEUR}.ndjson`,
 );
 
 function ecrireAuJournal(bilan: BilanDInvariants): void {
@@ -312,13 +344,29 @@ function ecrireAuJournal(bilan: BilanDInvariants): void {
   appendFileSync(JOURNAL_INVARIANTS, `${JSON.stringify(bilan)}\n`, 'utf8');
 }
 
-/** Les bilans de CETTE campagne, et d'aucune autre. */
+/**
+ * Les bilans de CETTE campagne, et d'aucune autre — TOUS TRAVAILLEURS CONFONDUS.
+ *
+ * La clôture (`parcours-zz-invariants.spec.ts` § 5) juge la couverture de la campagne ENTIÈRE :
+ * « cet écran a reçu des gestes et aucun n'a jamais mené ailleurs » n'a de sens que sur la
+ * réunion des relevés. Ne lire que le fichier du travailleur qui exécute la clôture
+ * publierait un chiffre amputé — et pire, inventerait des impasses sur des écrans dont la
+ * sortie a été prouvée par un travailleur voisin.
+ *
+ * Le champ `campagne` de chaque ligne reste la VÉRIFICATION : le nom du fichier n'est qu'une
+ * commodité, et la clôture refuse toujours de compter une ligne étrangère.
+ */
 export function lireLeJournalDesInvariants(): readonly BilanDInvariants[] {
-  if (!existsSync(JOURNAL_INVARIANTS)) return [];
-  return readFileSync(JOURNAL_INVARIANTS, 'utf8')
-    .split('\n')
-    .filter((ligne) => ligne.trim().length > 0)
-    .map((ligne) => JSON.parse(ligne) as BilanDInvariants);
+  if (!existsSync(DOSSIER_JOURNAUX)) return [];
+  const bilans: BilanDInvariants[] = [];
+  for (const fichier of readdirSync(DOSSIER_JOURNAUX)) {
+    if (!basename(fichier).startsWith(PREFIXE_JOURNAL) || !fichier.endsWith('.ndjson')) continue;
+    for (const ligne of readFileSync(join(DOSSIER_JOURNAUX, fichier), 'utf8').split('\n')) {
+      if (ligne.trim().length === 0) continue;
+      bilans.push(JSON.parse(ligne) as BilanDInvariants);
+    }
+  }
+  return bilans;
 }
 
 // ═══════════════════════════════════════════════════════════════════ 3. LE CODE INJECTÉ

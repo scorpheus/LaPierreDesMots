@@ -34,6 +34,8 @@ Le GPU n'était pas disponible : **aucune image n'a été générée**. Tout ce 
    quatorze points qui *promettaient* un mouvement unique faisaient tous exactement le même.
 5. **Les six objets rapportés existaient dans les données et n'atteignaient aucun écran.** L'enfant
    terminait la Clairière, en rapportait le fanion, revenait au campement — et rien n'avait changé.
+6. **Vérifier le jeu prend maintenant trois minutes au lieu de dix.** Et la suite ne rougit plus au
+   hasard : cinq campagnes complètes d'affilée, cinq fois vertes. Détail juste en dessous.
 
 ---
 
@@ -45,17 +47,52 @@ Mesurés le 2026-08-03, sur un dépôt dont je suis le seul écrivain.
 |---|---|---|
 | `npx tsc -b` | **0** | — |
 | `npx eslint .` | **0** | 0 erreur, 17 avertissements (variables inutilisées) |
-| `npx vitest run` | **0** | **1 975 tests, 136 fichiers, 0 échec** (1 787 la veille) |
+| `npm run test` | **0** | **2 005 tests, 138 fichiers, 0 échec** (1 975 la veille) |
 | `npm run test:contenu` | **0** | **590 contrôles, 0 problème** |
-| `npm run test:e2e` | **0** | **372 verts, 0 rouge** |
+| `npm run test:e2e` | **0** | **372 verts, 0 rouge** — et **5 fois de suite** |
 | `npm run test:rejeu` | **0** | vert |
 | `npm run test:qualite` | **0** | vert, budget de bundle tenu |
 | `npm run qa:trompeurs` | **0** | 0 bloquant, **66** avertissements (plafond gelé à 66) |
 | `npm run qa:mutations` | **0** | voir juste en dessous |
-| `npm run verifier` | **1** | **9 étapes vertes sur 11** — voir « ce qui reste rouge » |
+| `npm run verifier` | **1** | **10 étapes vertes sur 11**, en **2 min 55 s** — voir plus bas |
 
 Couverture, mesurée avec les seuils par zone de l'annexe T : **94,2 % des instructions**,
-85,8 % des branches.
+85,8 % des branches. **20 critères évalués sur 5 zones, aucun sous son seuil** — et ces seuils
+mordent enfin : jusqu'ici leurs globs ne désignaient aucun fichier sur Windows, ce qui les rendait
+satisfaits sans rien mesurer.
+
+---
+
+## La vérification est redevenue une boucle courte
+
+**`npm run verifier` : 10 min 18 s → 2 min 55 s.** Facteur **3,5**. C'est le chiffre qui décide si
+on vérifie avant chaque changement ou une fois par jour. Trois chaînes complètes chronométrées :
+**178,5 · 178,8 · 174,6 s** — le tableau ci-dessous détaille la deuxième.
+
+| Étape | Avant | Après | Facteur |
+|---|---:|---:|---:|
+| `test:e2e` (372 recettes) | 390 s | **87,8 s** | 4,4 × |
+| `test` (2 005 tests) | 78 s | **43,2 s** | 1,8 × |
+| `test:qualite` (106 audits) | 100 s | **22,6 s** | 4,4 × |
+| `test:visuel` (15 captures) | 39 s | **14,2 s** | 2,7 × |
+| lint, TypeScript, constructions, contenu, rejeu | 10 s | **11,0 s** | — |
+| **total** | **618 s** | **178,8 s** | **3,5 ×** |
+
+**Ce qui a changé, et ce qui n'a PAS changé.** Les 372 recettes s'exécutaient une par une sur une
+machine à 32 cœurs, et ce réglage avait une bonne raison : elles partageaient un serveur et une
+base. La réponse n'a pas été de les paralléliser quand même, mais de **supprimer le partage** —
+chaque recette reçoit maintenant un serveur neuf, base vierge, port réservé par le système. Contrôle
+qui l'établit : à isolation active mais **une seule recette à la fois**, la campagne dure 393 s
+contre 390 s avant. **L'isolation coûte 0,8 % ; tout le reste du gain vient du parallélisme.**
+
+Trois bénéfices qui n'ont rien à voir avec la vitesse :
+
+- **Les tests ne se marchent plus dessus.** Quatre recettes tenaient au vert grâce à ce qu'une
+  *voisine* avait laissé derrière elle — dont le contrat de sortie du verrou parent, qui attendait
+  une réponse du serveur d'avant-hier. Elles prouvent maintenant ce qu'elles annoncent.
+- **Lancer les tests ne coupe plus la Pierre.** La campagne réclamait le port 8080 et échouait s'il
+  était pris — c'est-à-dire quand tu faisais jouer l'enfant.
+- **La suite ne rougit plus toute seule** : voir juste en dessous.
 
 ### Ce que la QA attrape, mesuré en cassant le code exprès
 
@@ -81,38 +118,68 @@ suit pas encore**. Les chiffres ci-dessus sont ceux d'après le commit. Et M11b 
 « détectée » puis « survivante » entre deux exécutions : voir Q-INT-9, c'est un vrai problème de
 mesure, pas une coquetterie.
 
-Le dépôt : **25 commits**, **76 exercices** pour **76 nœuds** cités par la carte (écart nul),
+Le dépôt : **28 commits**, **76 exercices** pour **76 nœuds** cités par la carte (écart nul),
 **656 clips audio**, **115 SVG** tous contrôlés en régions fermées, **10 migrations**,
-**164 fichiers de test**.
+**166 fichiers de test** (2 de plus qu'hier, **aucun perdu** — vérifié fichier par fichier).
 
 ---
 
 ## Ce qui reste rouge
 
-**`test:visuel`** — rouge **par décision** (D39), inchangé. Le décor et Gobi vont être refaits ;
-figer des références maintenant serait les refaire aussitôt. **Aucune référence n'a été figée par
-cette campagne** — elles attendent tes yeux. Ça se lève en regardant les images
-(`tests/rapports/artefacts/`), puis `npm run test:visuel -- --maj`.
+**`test:visuel`** — rouge **par décision** (D39). C'est la SEULE étape rouge sur onze. Le décor et
+Gobi vont être refaits ; figer des références maintenant serait les refaire aussitôt. **Aucune
+référence n'a été figée par cette campagne** — elles attendent tes yeux. Ça se lève en regardant les
+images (`tests/rapports/artefacts/`), puis `npm run test:visuel -- --maj`.
 
-**La suite peut rougir toute seule** — mesuré : sept exécutions du **même commit**, sur un arbre
-propre, **trois rouges**. Et ce n'est pas un caprice d'outillage, c'est le signal d'un vrai
-problème de conception que le lot S3 avait déjà trouvé.
+Les **8 rouges** ne disent pourtant pas tous la même chose, et le rapport les nommait mal — il en
+annonçait 7 et appelait le huitième une « création », alors que rien n'est plus jamais créé
+automatiquement. Corrigé ; ils se lisent maintenant en trois tas :
 
-Les trois mêmes cas tombent à chaque fois, et ils passent tous par le composeur de sortie. Le plus
-parlant est celui-ci : *« les six régions demandées, au moins deux répondent »*. Or pour un profil
-neuf, **exactement deux régions sur six répondent** — les quatre autres refusent avec
-« 0 nœud éligible ». L'assertion est donc posée **sur son propre plancher, sans un millimètre de
-marge** : il suffit qu'une région bascule pour qu'elle passe au rouge.
+| | | ce qu'il faut pour le lever |
+|---:|---|---|
+| **4** | l'image diffère de sa référence | tes yeux, puis `--maj` (D39) |
+| **1** | la référence **n'existe pas** — cette capture n'a rien vérifié du tout | tes yeux, puis `--maj` (D39) |
+| **3** | **ce ne sont pas des images** — voir juste en dessous | du contenu, pas du graphisme |
 
-Ce n'est pas un test à détendre. C'est un test honnête **posé au bord d'une falaise** : « partir en
-sortie » ne sait proposer que **10 nœuds sur 76**, parce qu'un exercice qui déclare en compétence
-secondaire un code plus avancé se ferme lui-même. Tant que ce point n'est pas tranché (S3-Q2), ces
-trois recettes resteront au bord du vide.
+Les trois derniers ne s'effaceront pas avec le nouveau graphisme, et ils sont **antérieurs à cette
+campagne** :
 
-**Ce que ça coûte** : le banc de mutation compte tout échec comme « la QA a détecté le défaut ». Un
-rouge intermittent gonfle donc son score. C'est pour ça que je **n'ai pas resserré le cliquet** sur
-les cinq mutations que le banc proposait de graver : on ne grave pas un chiffre qu'un bruit a
-fabriqué. Détail complet en Q-INT-9.
+- Deux attendent « la Clairière est terminée » après **un** nœud joué. La Clairière en compte
+  **douze** aujourd'hui, et la règle H1 exige la région **entièrement** recoloriée. La recette dit
+  encore, dans son propre commentaire, « l'unique nœud livré » : c'est sa prémisse qui a vieilli
+  quand le contenu a grandi, pas le code qui a cassé.
+- Un mesure la maîtresse de la cour d'école par rapport à une élève, et ne trouve **ni l'une ni
+  l'autre** : le décor v2 n'est pas livré. Il attend le GPU, comme le reste des images.
+
+Je ne les ai pas retouchés : réécrire l'attente d'une recette de recette visuelle demande de savoir
+ce que tu veux voir, et c'est du contenu.
+
+**~~La suite peut rougir toute seule~~ — c'est réglé, et la cause n'était pas celle qu'on croyait.**
+
+La version d'hier de cette page annonçait « sept exécutions du même commit, trois rouges », et en
+imputait la cause au composeur de sortie posé « au bord d'une falaise ». **Les deux moitiés étaient
+fausses.** Mesuré depuis :
+
+- Les trois rouges étaient **rigoureusement identiques**, aux mêmes vingt lignes près. Trois rouges
+  identiques ne sont pas de l'aléa. L'horodatage des fichiers l'a montré : une campagne voisine
+  modifiait le code du serveur **pendant** la mesure. Un `git status` avant et après une campagne de
+  dix minutes ne dit rien de ce qui s'est passé pendant.
+- Le « plancher sans marge » du composeur n'existe pas : sondé sur **500 graines**, deux régions
+  répondent **500 fois sur 500**, et 200 passes rendent une empreinte unique. La décision S3-Q2
+  reste utile pour l'enfant — elle ne conditionne plus la fiabilité de la QA.
+
+Éprouvé après correction, et c'est le chiffre à retenir :
+
+```
+suite E2E complète, 5 exécutions consécutives ....... 5 codes 0,  372 verts à chaque fois
+suite unitaire,    10 exécutions consécutives ....... 10 codes 0, 2 005 verts à chaque fois
+serveurs de test encore vivants après tout ça ....... 0     (port 8080 libre)
+```
+
+**Ce que ça change pour le banc de mutation** : il comptait tout rouge comme « la QA a détecté le
+défaut », donc un rouge spontané gonflait son score. Le banc empreinte désormais l'arbre avant et
+après chaque essai ; un rouge qui survit à la restauration du code devient **indécis**, sort du
+dénominateur, et fait échouer le banc plutôt que de mentir sur la valeur de la QA.
 
 ---
 
@@ -175,9 +242,10 @@ Détail et mesures dans **`Docs/questions-en-attente.md`**.
 
 1. **Les captures visuelles** — les regarder, puis figer ou refuser. C'est ce qui débloque
    `npm run verifier`.
-2. **Le verrou du composeur de sortie** (S3-Q2) — c'est devenu la décision la plus urgente : elle
-   commande à la fois ce que l'enfant peut jouer (10 nœuds sur 76 en sortie) et la fiabilité de
-   toute la QA (Q-INT-9).
+2. **Le verrou du composeur de sortie** (S3-Q2) — toujours à trancher pour ce que l'enfant peut
+   jouer (10 nœuds sur 76 en sortie), mais **plus du tout urgent pour la QA** : la prémisse de
+   Q-INT-9, qui en faisait la cause des rouges spontanés, est réfutée (Q-INT-10). Ce point ne
+   bloque plus rien d'autre que lui-même.
 3. **Les trois compétences muettes** (Q-INT-4) — contenu, garde, ou code. C'est la décision qui a
    le plus d'effet sur ce que tu liras dans le suivi.
 4. **Le seuil de couverture lexicale CE1**, inchangé : 93,0 % des mots lus en jeu figurent dans la
