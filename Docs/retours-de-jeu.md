@@ -247,6 +247,140 @@ touche un fichier que tous les moteurs partagent.
 
 ---
 
+## R14. La bonne réponse était TOUJOURS le premier bouton — **corrigé**
+
+« ça sélectionne toujours le premier ». Mesuré sur les 76 exercices livrés :
+
+```
+consignes à options : 34   dont la bonne réponse en PREMIÈRE position : 34   (100,0 %)
+```
+
+**Trente-quatre sur trente-quatre.** Un enfant qui tapait toujours le premier bouton gagnait à
+tous les coups sans lire une lettre. L'exercice ne mesurait rien, et le BKT engrangeait des
+réussites vides. L'ordre est désormais tiré une fois par `Alea` à la création de l'état —
+reproductible à la graine près, donc le rejeu reste exact. Contrôle négatif exécuté : sans le
+mélange, le garde redevient rouge sur **100,0 % (170/170)**.
+
+---
+
+## R15. Gobi « a aidé » alors que l'enfant n'a rien demandé — **ouvert, cause trouvée**
+
+« ça met, tu n'as que deux étoiles parce que Gobi a aidé, alors que c'est pas vrai, on l'a fait
+sans ». Cause, dans `partage/src/moteurs/commun/delais.ts` :
+
+```
+indiceMs : 45 000        →  45 s d'INACTIVITÉ et le niveau d'aide monte tout seul
+erreursAvantIndice : 2
+```
+
+`niveauAideSuivant` fait monter l'aide **automatiquement**, et `commun/etapes.ts` recopie ce
+niveau dans `resume.aideUtilisee` — qui décide de la deuxième étoile, alimente le BKT et le
+Leitner. **Un enfant qui réfléchit plus de 45 secondes est enregistré comme aidé.** Depuis R11,
+la porte « Prêt ? » ajoute encore du temps de lecture avant le premier geste.
+
+**La correction conçue, non appliquée** : séparer l'aide PROPOSÉE (ce que Gobi montre, spontané,
+qui doit rester) de l'aide DEMANDÉE (ce que l'enfant a réclamé, qui seule doit compter). Un champ
+de plus sur l'état d'étape, alimenté par la seule action explicite, et `resume.aideUtilisee` le
+lit à la place de `niveauAide`.
+
+**Pourquoi ce n'est pas fait dans la foulée** : `aideUtilisee` est une sémantique de JOURNAL. Elle
+décide des étoiles, nourrit le BKT et le Leitner, et le test de rejeu compare des journaux de
+référence. La changer demande son propre lot, avec le rejeu sous les yeux.
+
+---
+
+## R16. Le déplacement au doigt ne marche pas — **ouvert**
+
+« Range dans la grotte de gauche les mots avec la lettre B… sur la tablette ça marche pas, on
+n'arrive pas à déplacer. »
+
+**Mesuré** : `MoteurTri.tsx` ne contient **aucun** gestionnaire de glisser — `grep` sur
+`onPointer`, `onTouch`, `onDrag`, `draggable`, `dnd-kit` ne rend **aucune ligne**. Le moteur est
+un **tap-puis-tap** : on touche l'étiquette, puis on touche le panier.
+
+Ce n'est donc pas un défaut tactile, c'est un défaut d'AFFORDANCE et de consigne : le mot
+« range » appelle un geste de glisser que le moteur ne propose pas, et rien à l'écran ne dit
+« touche, puis touche ». Même famille que le campement du premier jour — l'enfant ne comprend pas
+ce qu'on attend, et le dessin n'est pas en cause.
+
+**À trancher** : ajouter le glisser (dnd-kit est au socle technique) **ou** rendre le tap-puis-tap
+évident et reformuler la consigne. La seconde voie est moins coûteuse et plus sûre sur tablette.
+
+---
+
+## R17. Gobi ne répond pas dans certains exercices — **ouvert**
+
+« Quand on appuie sur Gobi, ça ne fait rien non plus. » Signalé sur le `tri`. À relier à R15 : le
+niveau d'aide monte peut-être déjà au maximum tout seul, auquel cas un tap n'a plus rien à
+escalader et ne produit aucun changement visible. À mesurer moteur par moteur avec la sonde de R10.
+
+---
+
+## R18. La carte ne montre ni l'avancement, ni le lien entre les régions ouvertes — **ouvert**
+
+« je vois pas vraiment l'évolution de la révélation de la couleur… et il faut bien montrer le lien
+entre les deux, vu que les deux sont bien ouverts, on sait pas trop qu'on les a bien ouverts. »
+
+D51 a rendu le rallumage visible **par région**, mais deux choses manquent encore : un enfant qui
+a joué 2 nœuds sur 12 ne voit qu'un petit halo, et rien ne dit que **deux** régions sont ouvertes
+en parallèle (D38) ni ce qui les relie. Le chemin d'encre existe et n'est pas lu comme tel.
+
+---
+
+## R19. L'histoire de la Pierre passe toute seule — **ouvert, mesuré**
+
+« il faut enlever le chronomètre parce qu'on n'a pas le temps de lire, ça passe directement. On
+peut changer de panneau que si on a cliqué sur passer. Il faudrait un tout petit bouton pour
+revenir en arrière au cas où. »
+
+**Mesuré** — `EcranOuverture.tsx:126` porte un `setTimeout(…, tableau.dureeMs)`, et les cinq
+panneaux déclarent :
+
+```
+6000 ms · 6000 ms · 6000 ms · 6000 ms · 5000 ms
+```
+
+**Six secondes par panneau pour un enfant qui déchiffre.** C'est le même défaut que l'éclair, au
+même endroit du raisonnement : une durée n'a de sens que si l'on a fini de lire. La correction est
+symétrique de R11 — on avance au tap, jamais au chronomètre — plus un retour arrière discret.
+
+---
+
+## R20. Tout devrait tenir sur un écran, sans défilement — **ouvert**
+
+« sur une tablette il y a largement de la place et il y a besoin de scroller alors qu'il n'y a pas
+besoin, et clairement c'est pas bien placé. »
+
+Cible : Galaxy Tab S10 FE, 1920 × 1200. Un enfant de 7 ans qui doit faire défiler pour trouver le
+bouton perd le fil de l'exercice. Refonte de mise en page à faire écran par écran, avec une
+recette qui MESURE l'absence de défilement à cette résolution — sans quoi elle reviendra.
+
+---
+
+## R21. Rafraîchir ou revenir en arrière fait perdre la partie — **ouvert**
+
+« quand on appuie dans le navigateur sur rafraîchir ou sur retour en arrière, ça enlève le site. »
+
+L'application n'a pas de routage : l'écran vit dans le magasin, jamais dans l'URL. Un rafraîchissement
+repart donc du choix de profil, et le bouton « retour » du navigateur sort du site. TanStack Router
+est au socle technique et n'est pas utilisé pour ça.
+
+**Conséquence pédagogique**, et c'est elle qui compte : un enfant qui touche par mégarde le bouton
+retour de sa tablette perd son exercice en cours. C'est un état sans issue déguisé.
+
+---
+
+## R22. Changer de région ramène au même exercice — **ouvert**
+
+« on est revenu en arrière, on a sélectionné un autre monde, en fait ça t'amène vers le même
+exercice. Il faudrait plutôt avoir des changements d'exercice en fonction des mondes où on est. »
+
+À reproduire et à mesurer : la carte calcule pourtant un nœud de reprise PAR région
+(`repriseDeRegion`, R3). Hypothèse à vérifier avant toute correction — le magasin garde-t-il le
+`paquet` précédent quand le chargement du nouveau échoue ou tarde ?
+
+---
+
 ## Ce que la QA doit apprendre de ces six
 
 Trois recettes manquantes, formulées comme des propriétés et non comme des captures :

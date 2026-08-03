@@ -32,7 +32,20 @@ Chacun porte sa mesure et son état dans **[retours-de-jeu.md](retours-de-jeu.md
 | **R6** | Montrer Gobi quand il évolue | demandé |
 | **R7** | La maîtresse avait la tête dans le sol | ✅ corrigé (`8aa1fc6`) |
 | **R8** | Aucune police sur le disque — jamais d'Andika | ✅ 6/8 (`839febc`, `524019a`) |
-| **R9** | **12 moteurs sur 14 ne dessinent aucun décor** | ouvert — structurel |
+| **R9** | 12 moteurs sur 14 ne dessinaient aucun décor | ✅ 14/14 (`e2de431`) |
+| **R10** | 11 « Écouter » muets, 11 Gobi en double | ✅ corrigé (`e0679d9`) |
+| **R11** | L'éclair partait sans prévenir, options illisibles | ✅ corrigé (`1cc6dd7`) |
+| **R12** | L'ordre ignorait le graphe des prérequis | ✅ 3 → 0 (`07cec3d`) |
+| **R13** | 32 % des libellés échappent au contrôle lexical | ouvert |
+| **R14** | **La bonne réponse était toujours le 1ᵉʳ bouton (34/34)** | ✅ corrigé |
+| **R15** | Gobi « a aidé » après 45 s d'inactivité, sans qu'on demande | ouvert — cause trouvée |
+| **R16** | « Range » appelle un glisser que le moteur n'offre pas | ouvert |
+| **R17** | Gobi ne répond pas dans certains exercices | ouvert |
+| **R18** | La carte ne montre ni l'avancement ni le lien entre régions | ouvert |
+| **R19** | L'histoire de la Pierre passe seule (6 s/panneau) | ouvert — mesuré |
+| **R20** | Il faut faire défiler alors que l'écran est assez grand | ouvert |
+| **R21** | Rafraîchir ou revenir en arrière perd la partie | ouvert |
+| **R22** | Changer de région ramène au même exercice | à reproduire |
 
 ---
 
