@@ -552,6 +552,171 @@ et c'est exactement ce que D25 point 3 appelle « le vide restant ».
 
 ---
 
+## R25 → R30. Six retours du 2026-08-03 au soir — **tous corrigés**
+
+Ces six-là partagent une racine, et c'est elle qui vaut d'être retenue.
+
+### La racine : sept boutons qui ne faisaient rien, et le père en a trouvé deux
+
+Deux de ses retours décrivent le MÊME défaut à deux bouts opposés du site :
+
+> « Le chaudron dans le campement devrait fonctionner directement, je ne sais pas ce qu'il attend,
+> ce qu'il mijote. »
+> « dans le profil il y a les exercices, il y a le bouton lancer l'exercice, mais ça ne fait rien. »
+
+Dans les deux cas : un rappel optionnel **déclaré** sur l'écran, **relayé** jusqu'au bouton,
+**jamais fourni** par l'hôte. Le bouton s'affiche, il se désactive même proprement
+(`disabled={surLancer === undefined}`), et rien ne signale qu'il ne mène nulle part.
+
+Recensé par OBJET plutôt que par occurrence (`bac-a-sable/rappels-morts/auditer.mjs`), sortie
+citée :
+
+```
+27 rappel(s) optionnel(s) DÉCLARÉ(S) sur 21 composant(s)
+ 7 ne sont fourni(s) NULLE PART
+
+  composants/Compagnon.tsx      surChoisir      ← rendait la bande NON tapable
+  ecrans/EcranCampement.tsx     surOuvrirChaudron
+  ecrans/EcranDashboard.tsx     surTravailler
+  ecrans/EcranDashboard.tsx     surLancerExercice
+  monde/MurDesNoms.tsx          surRejouer
+  monde/PastilleSortie.tsx      surRepli
+  monde/PointLibre.tsx          surVisite
+```
+
+**Aucun test ne pouvait les voir.** Chaque recette injecte elle-même les rappels dont elle a
+besoin, donc **aucune ne traverse le câblage réel du routeur**. C'est le mode de défaillance
+« champ déclaré, câblé jusqu'à la sortie, jamais affecté » : invisible au compilateur, invisible à
+la relecture, et parfaitement visible au premier enfant qui tape.
+
+Les deux nouvelles recettes passent donc par le CHEMIN DE L'ENFANT — profil, écran, tap — sans rien
+injecter. `parcours-chaudron.spec.ts` et `parcours-lancer-exercice.spec.ts` étaient **rouges avant
+correction**, 4/4 et 2/3.
+
+### R25. Le chaudron ne mijotait pas, il n'était pas branché — **corrigé**
+
+Le message que le père a lu est le message d'attente du composant : « Le chaudron mijote encore ».
+Sa destination existe désormais (`galeries-12` / `paroi-libre-01`, moteur `libre`), et elle est
+déclarée dans le **contenu** (`campement.coloriageLibre`), pas dans le code : le campement déclare
+déjà sa scène, ses trente points et ses objets, sa sortie de secours y appartient au même titre.
+Sans déclaration, le chaudron retombe sur son message calme — jamais un écran d'erreur (R14).
+
+### R26. Le butin et la bande s'ouvrent comme l'étagère — **corrigé**
+
+> « Tu as fait dans l'étagère de Gobi, on peut cliquer et voir les Gobi. Il faudrait la même chose
+> en fait dans ce que tu as rapporté et dans la bande aussi. »
+
+Le panneau de R24 est devenu `FicheObjet`, partagé par quatre collections. La bande était un cas
+particulier : sa tuile n'était un bouton **que si** le compagnon était rallié **et** qu'un hôte
+fournissait `surChoisir` — qui n'était fourni nulle part. Aucune tuile n'était donc tapable, jamais.
+
+### R27. L'étagère de Gobi quitte le campement — **corrigé**
+
+> « Dans le coffre, il y a aussi les Gobi. Je pense qu'il faut les laisser dans le coffre, ça sert
+> à rien de les mettre dans le campement. Dans le coffre, c'est bien. »
+
+Elle était rendue aux deux endroits, à l'identique. Le campement est le hub — ce qu'on y fait ; le
+coffre est l'album — ce qu'on y garde.
+
+**Effet inattendu, et il solde une dette :** l'étagère occupait 298 px des 1 578 du campement. Le
+garde de R20 le tenait à 378 px de débordement, avec cette conclusion écrite le matin même — « les
+378 px restants demandent de retirer ou de déplacer du contenu, et cet arbitrage appartient au
+père ». **Mesure après retrait : 0 px.** La dette est éteinte et sa ligne supprimée.
+
+C'est la démonstration du procédé : chiffrer une dette au lieu de l'exempter en silence est ce qui
+rend son extinction visible. Et la cause n'était pas celle que je croyais — j'avais écrit que ce
+n'était pas un défaut de mise en page, sans voir que c'était un panneau au mauvais endroit.
+
+### R28. Les fiches du coffre ne révèlent pas la couleur — **corrigé**
+
+> « Il faudrait aussi du coup dans les Éclats de Pierre et ce que tu as rapporté, bah cette
+> prévisualisation quoi, sans donner les couleurs, parce que ça c'est à deviner. »
+
+Le coffre porte maintenant **deux contrats opposés sur la même page**, et c'est délibéré :
+
+| collection | la couleur | pourquoi |
+|---|---|---|
+| Les formes de Gobi | **montrée** | R24 — « et on aura la couleur ». Une promesse assumée, annoncée en toutes lettres |
+| Les Éclats de Pierre | **cachée** | R28 — « c'est à deviner » |
+| Ce que tu as rapporté | **cachée** | R28 |
+
+L'un donne envie en montrant, l'autre en cachant. Deux règles opposées dans un même écran dérivent
+si rien ne les tient : `EcranCoffre.test.tsx` les garde côte à côte, pour qu'on ne puisse pas
+aligner l'une sur l'autre par distraction.
+
+### R29. Supprimer un compte joueur — **corrigé**, et c'est un dégât que j'ai causé
+
+> « tu as créé plein de comptes de joueurs qui s'appellent Mesure, déjà il faudrait les enlever.
+> Et dans l'espace des parents, il faudrait pouvoir les supprimer en fait, supprimer un compte. »
+
+**Six profils « Mesure » écrits dans sa VRAIE base**, entre 19:06 et 19:07 le 2026-08-03, par mes
+sondes de mise en page qui pointaient sur `donnees/pierre.db` au lieu d'une base jetable.
+
+> **Un outil de mesure qui écrit dans les données du joueur n'est pas un outil de mesure.** Toute
+> sonde future monte son propre serveur sur une base jetable, comme le fait déjà
+> `tests/harnais-serveur.ts`. C'est la vraie leçon de ce retour.
+
+Sans écran de suppression, il n'avait aucun moyen de nettoyer sans ouvrir SQLite — c'est-à-dire
+aucun moyen. `DELETE /api/parent/:profil` reprend les gardes de la remise à zéro, parce qu'il fait
+quelque chose de **strictement plus destructeur** : jeton parent, aperçu chiffré avant toute
+confirmation, prénom retapé vérifié **au serveur**. Pas de portée : supprimer n'a qu'un sens.
+
+Le service ne réécrit pas de seconde liste de tables — il réutilise `tablesPorteusesDeProfil`, qui
+les DÉCOUVRE par le schéma. Une table ajoutée demain avec une colonne `profil_id` est vidée toute
+seule, par les deux chemins à la fois.
+
+Nettoyage effectué avec sauvegarde préalable, sortie citée :
+
+```
+Sauvegarde écrite : donnees/sauvegardes/pierre-avant-retrait-mesure.db
+6 profils retirés · 42 ligne(s) de données effacée(s)
+Profils restants : Ezékiel
+✅ Aucun « Mesure » restant, « Ezékiel » intact.
+```
+
+### R30. « Lancer cet exercice » lance vraiment l'exercice — **corrigé**
+
+Deux manques, pas un. Le rappel n'était fourni par personne, **et** l'entrée de catalogue ne portait
+pas de quoi jouer : le catalogue liste des exercices, on n'entre dans le jeu que par un nœud. Le
+serveur résolvait pourtant ce nœud depuis toujours, trois lignes plus haut, pour en déduire la
+région. Mesuré : 76 exercices sur 76 déclarent `jeu.noeud`.
+
+**La moitié qui compte le plus n'était gardée par rien.** Une partie lancée par le parent ne doit
+rien journaliser — `tentatives` fait foi pour le BKT, le Leitner et le sélecteur. `LANCEMENT_PARENT
+= { journalise: false }` existait depuis N5 et **personne ne le lisait**. Son propre commentaire
+annonçait le risque : « un drapeau qui ne vit que dans une variable JavaScript est un drapeau
+qu'aucun test de bout en bout ne peut constater. » Il vit maintenant dans le magasin et se lit sur
+`data-journalise`.
+
+`tests/unitaires/galerie-non-journalisee.test.ts` prétendait garder ce contrat depuis N5. Son
+« lancement » est un `GET /api/contenu/noeuds/{exercice}` **qui accepte un 404 comme succès** : il
+ne traverse aucune ligne de client, et son « 100 % des exercices sont lançables » ne mesurait rien.
+Le nouveau garde joue réellement jusqu'à la récompense et recompte le journal au serveur.
+
+### Ce que le contrôle positif a attrapé, encore une fois
+
+Ma première sonde du journal renvoyait `0` en silence quand la requête échouait, **et** lisait
+`etat().profil?.id` alors que `etat().profil` EST l'identifiant. Deux mesures creuses qui
+s'annulaient : le cas « le parent ne journalise rien » comparait zéro à zéro et passait au vert.
+C'est le contrôle positif — « une partie de l'ENFANT, elle, compte bien » — et lui seul, qui a fait
+tomber les deux.
+
+### Ce qui reste, et que le père n'a pas encore vu
+
+Deux rappels du recensement ne sont toujours fournis par personne, et ce ne sont plus des boutons
+morts mais des **fonctionnalités absentes** :
+
+- **`MurDesNoms.surRejouer`** — la v2 § 3.4 promet « le mur des noms (mots maîtrisés, chacun
+  rejouable en un tap) ». Les noms sont bien tapables et jouent un son ; ils ne rejouent rien.
+- **`EcranDashboard.surTravailler`** — le bouton « Travailler ça » de la v2 § 14 n'est simplement
+  pas rendu, faute de destination.
+
+Les trois autres (`Compagnon.surChoisir`, `EcranCampement.surOuvrirChaudron`,
+`PastilleSortie.surRepli`, `PointLibre.surVisite`) sont désormais des **surcharges** : le composant
+fait son travail sans elles.
+
+---
+
 ## Ce que la QA doit apprendre de ces six
 
 Trois recettes manquantes, formulées comme des propriétés et non comme des captures :

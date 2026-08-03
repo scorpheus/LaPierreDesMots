@@ -372,6 +372,25 @@ const DESCRIPTEURS: readonly Descripteur[] = [
     statutNominal: 200
   },
   {
+    // ── R29 — LA SUPPRESSION D'UN COMPTE, ET LE CAS NOMINAL EST L'APERÇU ─────────────────
+    //
+    // `apercu: true` COMPTE sans rien effacer. C'est le seul cas nominal acceptable ici : un
+    // fuzzer qui supprimerait pour de bon détruirait le profil de son propre contexte au
+    // premier passage, et tous les cas suivants tomberaient sur un 404 — le banc mesurerait
+    // alors la robustesse d'une route qui n'a plus rien à faire.
+    //
+    // La route a été ajoutée à ce banc parce que ce banc l'a EXIGÉ : il inventorie les routes
+    // depuis Fastify, pas depuis une liste écrite à la main, et il a rougi tout seul —
+    // « des routes échappent au fuzzer: [ 'DELETE /api/parent/:profil' ] ». C'est exactement
+    // la forme de garde qui ne pourrit pas.
+    methode: 'DELETE',
+    motif: '/api/parent/:profil',
+    params: (c) => ({ profil: c.profil }),
+    corps: () => ({ apercu: true }),
+    entetes: (c) => ({ [ENTETE_JETON_PARENT]: c.jeton }),
+    statutNominal: 200
+  },
+  {
     methode: 'GET',
     motif: '/api/contenu/noeuds/:id',
     params: () => ({ id: 'clairiere-01' }),

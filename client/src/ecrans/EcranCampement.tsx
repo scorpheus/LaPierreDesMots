@@ -18,20 +18,19 @@
 import { useCallback, useMemo } from 'react';
 import type { ReactElement } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import type { EtatMonde, PointInteraction } from '@pierre/partage';
+import type { EtatMonde, IdNoeud, PointInteraction } from '@pierre/partage';
 import {
-  campementDuDocument, construireEtagere, prochainStade, stadesDuDocument
+  campementDuDocument, prochainStade, stadesDuDocument
 } from '@pierre/partage/monde';
 // `DocumentCampement` et `StadeGobi` viennent du SOUS-CHEMIN : le barillet racine ne réexporte
 // que les seize types du § 4.5 (convention C1), et `DocumentCampement` n'en fait pas partie.
-import type { DocumentCampement, FormeDeclaree, StadeGobi } from '@pierre/partage/monde';
-import { lireMonde, urlAsset } from '../api/client.js';
+import type { DocumentCampement, StadeGobi } from '@pierre/partage/monde';
+import { lireMonde, lirePaquetNoeud, urlAsset } from '../api/client.js';
 import { Compagnon } from '../composants/Compagnon.js';
 import { Gobi } from '../composants/Gobi.js';
 import { useEtatJeu, useMagasin } from '../etat/services.js';
 import { Butin } from '../monde/Butin.js';
 import { Chaudron } from '../monde/Chaudron.js';
-import { Etagere, useCatalogueFormes } from '../monde/Etagere.js';
 import { MurDesNoms } from '../monde/MurDesNoms.js';
 import type { NomDuMur } from '../monde/MurDesNoms.js';
 import { PastilleSortie } from '../monde/PastilleSortie.js';
@@ -51,8 +50,27 @@ export interface ProprietesEcranCampement {
   readonly stades?: readonly StadeGobi[] | null;
   readonly surAllerCarte?: () => void;
   readonly surAllerCoffre?: () => void;
-  /** Ouvre le coloriage libre. Absent tant qu'aucun nœud `libre` n'est livré (L2-E). */
-  readonly surOuvrirChaudron?: () => void;
+  /**
+   * ── R25 — LE CHAUDRON NE MIJOTAIT PAS, IL N'ÉTAIT PAS BRANCHÉ ──────────────────────────────
+   *
+   * « Le chaudron dans le campement devrait fonctionner directement, je ne sais pas ce qu'il
+   * attend, ce qu'il mijote. »
+   *
+   * Il attendait un rappel que **personne ne lui donnait**. `surOuvrirChaudron` était déclaré
+   * ici, relayé jusqu'au bouton de `Chaudron.tsx`, et absent de `HoteCampement` dans le
+   * routeur : le composant retombait alors sur son message d'attente, « Le chaudron mijote
+   * encore » — la phrase même que le père a lue.
+   *
+   * Recensé par objet plutôt que par occurrence (`bac-a-sable/rappels-morts/auditer.mjs`), ce
+   * défaut n'était pas isolé : **7 rappels optionnels sur 27 ne sont fournis nulle part**, et
+   * le père en a trouvé deux en jouant. Le bouton s'affiche, il se désactive même proprement,
+   * et rien ne signale qu'il ne mène à rien.
+   *
+   * Ce rappel devient donc un OVERRIDE de test, plus un prérequis : l'écran sait ouvrir le
+   * chaudron tout seul, comme `EcranCarte` sait entrer dans un nœud. La destination vient du
+   * contenu (`campement.coloriageLibre`), jamais d'ici.
+   */
+  readonly surOuvrirChaudron?: (noeud: IdNoeud) => void;
   /**
    * Rejoue la séquence d'ouverture — D35, point 3.
    *
@@ -62,11 +80,6 @@ export interface ProprietesEcranCampement {
    * absence, et ce lot refuse d'en poser un.
    */
   readonly surRejouerOuverture?: () => void;
-  /**
-   * Le catalogue des formes, injecté par les tests. Lu par requête sinon — c'est le même
-   * fichier que `stades`, et la même clé de requête : il n'est téléchargé qu'une fois.
-   */
-  readonly catalogueFormes?: { readonly formes: readonly FormeDeclaree[] } | null;
 }
 
 /** `0 0 1200 800` → `[1200, 800]`. Retombe sur le gabarit par défaut si la chaîne est illisible. */
@@ -91,7 +104,6 @@ export function EcranCampement({
   campement: campementInjecte = null,
   monde: mondeInjecte = null,
   stades: stadesInjectes = null,
-  catalogueFormes: catalogueInjecte = null,
   surAllerCarte,
   surAllerCoffre,
   surOuvrirChaudron,
@@ -128,24 +140,40 @@ export function EcranCampement({
   const monde = mondeInjecte ?? requeteMonde.data ?? null;
   const stades = stadesInjectes ?? requeteStades.data ?? [];
 
-  // Le catalogue des formes — la même clé de requête que `stades`, donc le même téléchargement.
-  const catalogueCharge = useCatalogueFormes();
-  const catalogue = catalogueInjecte ?? catalogueCharge;
-
-  /**
-   * L'étagère, cases vides comprises — D44.
-   *
-   * C'est la réponse à « le père n'a pas compris le campement » : le mur des noms grave ce qui
-   * est acquis, l'étagère montre ce qui reste. Sans elle, le campement ne disait nulle part
-   * combien de formes il y a en tout, donc ne donnait aucune raison d'y revenir.
-   */
-  const etagere = useMemo(
-    () => construireEtagere(catalogue, monde?.gobi.formes ?? []),
-    [catalogue, monde]
-  );
+  // R27 — le catalogue des formes et `construireEtagere` ont suivi l'étagère au coffre. Les
+  // garder ici aurait laissé un téléchargement et un calcul dont plus rien ne se sert : du code
+  // mort qui porte un nom, exactement ce que le recensement des rappels vient de traquer.
 
   const points: readonly PointInteraction[] = campement?.points ?? [];
   const [largeurScene, hauteurScene] = dimensions(campement?.scene.viewBox ?? '0 0 1200 800');
+
+  /**
+   * R25 — LE CHAUDRON OUVRE SON NŒUD, ET IL SAIT LE FAIRE SEUL.
+   *
+   * Même geste que `EcranCarte.entrer` : on lit le paquet, on le donne au magasin, et le
+   * routeur suit — il est le miroir de l'écran, pas son maître. C'est pour ça qu'aucune route
+   * n'est nommée ici, et que rien ne casse si un hôte n'injecte rien.
+   *
+   * `surOuvrirChaudron` reste accepté en OVERRIDE — c'est ainsi que les recettes l'observent
+   * sans traverser le réseau. Il n'est plus un prérequis : c'est justement de l'avoir été qui
+   * laissait le bouton inerte.
+   *
+   * Rendu `undefined` quand le contenu ne déclare aucun nœud libre : `Chaudron` retombe alors
+   * sur son message calme, jamais sur un écran d'erreur (R14).
+   */
+  const noeudLibre = campement?.coloriageLibre ?? null;
+  const ouvrirLeChaudron = useCallback(() => {
+    if (noeudLibre === null) {
+      return;
+    }
+    if (surOuvrirChaudron !== undefined) {
+      surOuvrirChaudron(noeudLibre);
+      return;
+    }
+    void lirePaquetNoeud(noeudLibre).then((paquet) => {
+      magasin.getState().demarrerNoeud(paquet);
+    });
+  }, [magasin, noeudLibre, surOuvrirChaudron]);
 
   /** Le mur des noms est bâti sur les formes de Gobi — voir la note PLACEHOLDER de `MurDesNoms`. */
   const noms: readonly NomDuMur[] = useMemo(
@@ -361,15 +389,17 @@ export function EcranCampement({
       {/* L'étagère : l'album des formes, cases vides comprises (D44). Elle est posée AVANT le
           mur des noms parce qu'elle répond à la question que le mur ne répond pas — « combien
           y en a-t-il en tout ? ». Le mur grave l'acquis, l'étagère montre le reste. */}
-      {/* ── LES DEUX PANNEAUX QUI VEULENT DE LA LARGEUR ───────────────────────────────────
-          Mesuré : l'étagère fait 298 px sur 1 872 de large et 686 px sur 608 — rétrécir un
-          panneau qui aligne 25 cases le fait grandir de 388 px. Les compagnons de même,
-          297 contre 505. Leur donner la rangée entière fait GAGNER 270 px au total (1 848 →
-          1 578), là où trois colonnes uniformes en perdaient. Un panneau qui aligne des
-          vignettes n'a pas la même faim de largeur qu'un panneau de texte. */}
-      <div style={{ gridColumn: '1 / -1' }}>
-        <Etagere etagere={etagere} titre="L’étagère de Gobi" />
-      </div>
+      {/* ── R27 — L'ÉTAGÈRE DE GOBI A QUITTÉ LE CAMPEMENT ────────────────────────────────
+          « Dans le coffre, il y a aussi les Gobi. Je pense qu'il faut les laisser dans le
+          coffre, ça sert à rien de les mettre dans le campement. Dans le coffre, c'est bien. »
+
+          Elle était rendue aux DEUX endroits, à l'identique. Le campement est le hub — ce
+          qu'on y fait ; le coffre est l'album — ce qu'on y garde. Une collection montrée deux
+          fois ne double pas l'envie, elle dilue le rôle des deux écrans.
+
+          Effet mesuré sur la dette R20, et il est le bienvenu : l'étagère occupait 298 px sur
+          les 1 578 du campement, gaps compris. Son retrait n'est pas une correction de mise en
+          page — c'en est le résultat, pas la cause. */}
 
       {/* ── CE QUE L'ENFANT A RAPPORTÉ — lot S5 ──────────────────────────────────────────────
           Six objets déclarés dans `contenu/monde/campement.json`, un par région, servis par le
@@ -382,7 +412,10 @@ export function EcranCampement({
 
       <MurDesNoms noms={noms} />
 
-      <Chaudron surOuvrir={surOuvrirChaudron} animationsDesactivees={animationsDesactivees} />
+      <Chaudron
+        {...(noeudLibre === null ? {} : { surOuvrir: ouvrirLeChaudron })}
+        animationsDesactivees={animationsDesactivees}
+      />
 
       <section className="panneau" aria-label="Les compagnons" style={{ gridColumn: '1 / -1' }}>
         <h2 className="panneau-titre" style={{ fontSize: '1.5rem' }}>

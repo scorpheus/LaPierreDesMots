@@ -37,7 +37,8 @@ import {
 } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import type { CodeEcran, Profil } from '@pierre/partage';
-import { listerProfils } from './api/client.js';
+import type { EntreeGalerie, OptionsLancement } from '@pierre/partage/parent';
+import { lirePaquetNoeud, listerProfils } from './api/client.js';
 import { EcranCampement } from './ecrans/EcranCampement.js';
 import { EcranCarte } from './ecrans/EcranCarte.js';
 import { EcranCodeParent } from './ecrans/EcranCodeParent.js';
@@ -379,6 +380,7 @@ function ChoixProfilParent({
 
 function HoteDashboard(): ReactElement {
   const naviguer = useNavigate();
+  const magasin = useMagasin();
   const profilDeSession = useEtatJeu((etat) => etat.profil);
   // Le profil suivi par le PARENT. Distinct de celui du jeu, et volontairement : la zone
   // parent « n'emprunte ni le magasin de session, ni les écrans de jeu » (`EcranDashboard`).
@@ -387,6 +389,31 @@ function HoteDashboard(): ReactElement {
 
   const rendreLaMainAuJeu = (): void => {
     void naviguer({ to: CHEMIN_PAR_ECRAN.profils });
+  };
+
+  /**
+   * R30 — lancer un exercice depuis la galerie parent.
+   *
+   * Deux précautions, et aucune n'est décorative :
+   *
+   *  1. **Le profil de SESSION est choisi si besoin.** Le parent est souvent entré par la porte
+   *     du pied de l'écran des profils, donc sans avoir choisi de joueur : `profil` vient alors
+   *     de `profilSuivi`, et le magasin de jeu, lui, n'a personne. Sans ce `choisirProfil`,
+   *     l'écran de nœud s'ouvrirait sur un profil nul.
+   *  2. **`options` est transmis tel quel**, et vaut toujours `LANCEMENT_PARENT` : la fiche n'a
+   *     pas le choix de journaliser, et l'hôte ne le lui rend pas. C'est le magasin qui porte
+   *     désormais le drapeau, et `data-journalise` le rend constatable.
+   */
+  const lancerUnExercice = (entree: EntreeGalerie, options: OptionsLancement): void => {
+    if (entree.noeud === null) {
+      return;
+    }
+    if (profilDeSession === null && profilSuivi !== null) {
+      magasin.getState().choisirProfil(profilSuivi);
+    }
+    void lirePaquetNoeud(entree.noeud).then((paquet) => {
+      magasin.getState().demarrerNoeud(paquet, options);
+    });
   };
 
   if (profil === null) {
@@ -400,6 +427,31 @@ function HoteDashboard(): ReactElement {
       surSortie={rendreLaMainAuJeu}
       surGaleriePleinEcran={() => {
         void naviguer({ to: CHEMINS.parentGalerie });
+      }}
+      // ── R30 — « le bouton lancer l'exercice, mais ça ne fait rien » ────────────────────
+      //
+      // Il ne faisait rien parce qu'AUCUN hôte ne fournissait `surLancerExercice`. Le rappel
+      // était déclaré sur `EcranDashboard`, relayé jusqu'au bouton de `FicheExercice` — qui
+      // se désactivait proprement, `disabled={surLancer === undefined}` — et le parent voyait
+      // un bouton gris sans savoir pourquoi.
+      //
+      // Recensé par objet : 7 rappels optionnels sur 27 ne sont fournis nulle part. Le père en
+      // a trouvé deux en jouant, celui-ci et le chaudron. Aucune recette ne pouvait les voir,
+      // puisque chacune injecte elle-même les rappels dont elle a besoin et ne traverse donc
+      // jamais le câblage réel.
+      surLancerExercice={lancerUnExercice}
+      // ── R29 — APRÈS LA SUPPRESSION, ON NE PEUT PLUS PARLER DE CE PROFIL ───────────────
+      //
+      // Sans ce rappel, le dashboard resterait affiché sur un compte qui n'existe plus :
+      // chacune de ses requêtes rendrait 404 et le parent verrait une page d'erreurs. On le
+      // ramène donc au choix du joueur, en oubliant AUSSI le profil de session s'il se trouve
+      // que c'était le même — sinon le jeu rouvrirait sur un enfant effacé.
+      surProfilSupprime={() => {
+        fixerProfilSuivi(null);
+        if (profilDeSession !== null) {
+          magasin.getState().quitterProfil();
+        }
+        void naviguer({ to: CHEMIN_PAR_ECRAN.profils });
       }}
     />
   );

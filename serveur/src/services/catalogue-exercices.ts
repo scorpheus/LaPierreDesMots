@@ -155,8 +155,20 @@ function versEntree(
       ? exercice.competences.filter((c): c is string => typeof c === 'string').map((c) => c as CodeCompetence)
       : [],
     statut: statutParExercice.get(id) ?? 'livre',
-    // La région vient du NŒUD porteur, jamais du nom du dossier : un exercice rangé ailleurs
-    // reste de sa région, et un exercice sans nœud n'en invente pas une.
+    // ── R30 — LE NŒUD ÉTAIT DÉJÀ LÀ, IL N'ÉTAIT PAS PUBLIÉ ──────────────────────────────
+    //
+    // « dans le profil il y a les exercices, il y a le bouton lancer l'exercice, mais ça ne
+    // fait rien. »
+    //
+    // Le bouton était bien câblé jusqu'à `FicheExercice`, mais `surLancerExercice` n'était
+    // fourni par aucun hôte, et l'entrée de catalogue ne portait pas de quoi jouer : le
+    // catalogue liste des EXERCICES, et on n'entre dans le jeu que par un NŒUD.
+    //
+    // Ce nœud était pourtant résolu ici depuis toujours — trois lignes plus haut — et servait
+    // uniquement à déduire la région. Le publier ne coûte rien et évite au client une
+    // seconde table de correspondance qui aurait pu diverger. Mesuré : 76 exercices sur 76
+    // déclarent `jeu.noeud`, aucun ne rend `null`.
+    noeud,
     region: noeud === null ? null : (regionParNoeud.get(noeud) ?? null),
     chemin: fichier.relatif
   };

@@ -247,8 +247,58 @@ describe('le campement montre le monde sans jamais le cacher', () => {
     expect(filou!.getAttribute('data-rallie')).toBe('non');
   });
 
-  it('ouvre le chaudron sans jamais afficher d’erreur quand aucun nœud libre n’existe', () => {
-    monter();
+  /**
+   * ── CE CAS A DÛ ÊTRE COUPÉ EN DEUX, ET LA RAISON EST INSTRUCTIVE ─────────────────────────
+   *
+   * Il s'appelait « ouvre le chaudron sans jamais afficher d'erreur quand aucun nœud libre
+   * n'existe » et montait le VRAI `contenu/monde/campement.json`. Sa prémisse a cessé d'être
+   * vraie le jour où ce fichier a déclaré `coloriageLibre` (R25) : le chaudron est branché, il
+   * ne dit plus « mijote », et le cas est tombé.
+   *
+   * Un test dont la prémisse dépend du contenu réel doit dire LAQUELLE il éprouve. Les deux
+   * branches sont donc montées explicitement, chacune avec son document.
+   */
+  it('R25 — le chaudron du CONTENU RÉEL est branché, et il ouvre le nœud déclaré', () => {
+    // ── POURQUOI LA SURCHARGE EST UTILISÉE ICI, ET C'EST SA RAISON D'ÊTRE ─────────────────
+    //
+    // Sans elle, l'écran fait ce qu'il doit faire en vrai : il appelle `lirePaquetNoeud`, donc
+    // un `fetch`. En test de composant, ce `fetch` part vers `localhost:3000` et échoue HORS
+    // de tout test — `verifier` l'a signalé en clair : « 2 erreur(s) NON CAPTURÉE(S), hors de
+    // tout test ». Une erreur non capturée peut rendre vert un test qui aurait dû rougir.
+    //
+    // `surOuvrirChaudron` est précisément l'override prévu pour ça : on observe la DÉCISION
+    // (quel nœud, et qu'il y en ait un) sans traverser le réseau. Que le câblage réel
+    // fonctionne est gardé ailleurs, par `parcours-chaudron.spec.ts`, qui n'injecte rien.
+    const ouverts: string[] = [];
+    monter({
+      surOuvrirChaudron: (noeud) => {
+        ouverts.push(String(noeud));
+      }
+    });
+
+    const chaudron = document.querySelector('[data-chaudron-entree="oui"]');
+    expect(chaudron).not.toBeNull();
+    expect(
+      CAMPEMENT.coloriageLibre,
+      'le contenu ne déclare plus de nœud libre : le chaudron redevient muet'
+    ).not.toBeNull();
+
+    fireEvent.click(chaudron!);
+
+    expect(ouverts, 'taper le chaudron n’ouvre aucun nœud').toEqual([
+      String(CAMPEMENT.coloriageLibre)
+    ]);
+    expect(document.querySelectorAll('[data-etat="echec"]')).toHaveLength(0);
+    expect(
+      document.body.textContent,
+      'le chaudron affiche encore son message d’attente alors qu’il a une destination'
+    ).not.toContain('mijote');
+  });
+
+  it('et SANS nœud libre déclaré, il reste calme — jamais une erreur (R14)', () => {
+    // La garde d'origine, conservée : le jour où le contenu perdrait sa déclaration, le
+    // chaudron doit retomber sur son message d'attente et surtout pas sur un écran d'erreur.
+    monter({ campement: { ...CAMPEMENT, coloriageLibre: null } });
     const chaudron = document.querySelector('[data-chaudron-entree="oui"]');
     expect(chaudron).not.toBeNull();
     fireEvent.click(chaudron!);

@@ -199,4 +199,77 @@ describe('l’exigence commune des dix écrans', () => {
     fireEvent.click(document.querySelector('[data-vers="campement"]')!);
     expect(retours).toHaveLength(1);
   });
+
+  /**
+   * ══════════════════════════════════════════════════════════════════════════════════════════
+   * R28 — LA PRÉVISUALISATION DU COFFRE, ET LES DEUX CONTRATS DE COULEUR QUI Y COHABITENT
+   *
+   * « Il faudrait aussi du coup dans les Éclats de Pierre et ce que tu as rapporté, bah cette
+   * prévisualisation quoi, sans donner les couleurs, parce que ça c'est à deviner. »
+   *
+   * Le coffre porte TROIS collections, et deux règles opposées sur la même page :
+   *
+   *     Les formes de Gobi    → la couleur est MONTRÉE   (R24, demandé explicitement)
+   *     Les Éclats de Pierre  → la couleur est CACHÉE    (R28, « c'est à deviner »)
+   *     Ce que tu as rapporté → la couleur est CACHÉE    (R28)
+   *
+   * Ce n'est pas une incohérence, c'est la conception : l'étagère donne envie en montrant, le
+   * reste en cachant. Mais deux règles opposées dans un même écran DÉRIVENT si rien ne les
+   * tient — c'est exactement le genre d'écart qu'aucun outil ne voit. Ces cas les tiennent
+   * toutes les deux, côte à côte, pour qu'on ne puisse pas en aligner une sur l'autre par
+   * distraction.
+   * ══════════════════════════════════════════════════════════════════════════════════════════
+   */
+  it('R28 — un Éclat NON gagné s’ouvre, et sa couleur reste à deviner', async () => {
+    await monterEtAttendre();
+    const nonGagne = document.querySelector(
+      '[data-collection="eclat"][data-obtenue="non"]'
+    );
+    expect(nonGagne, 'aucun Éclat non gagné dans la fixture : le cas serait creux').not.toBeNull();
+
+    fireEvent.click(nonGagne!);
+    const fiche = document.querySelector('[data-fiche-collection="eclat"]');
+    expect(fiche, 'taper un Éclat n’ouvre rien').not.toBeNull();
+    expect(
+      fiche?.querySelector('[data-fiche-visuel]')?.getAttribute('data-couleur-revelee'),
+      'la couleur de l’Éclat est montrée : elle devait rester à deviner'
+    ).toBe('non');
+    expect(fiche?.querySelector('[data-couleur-a-deviner]')).not.toBeNull();
+    expect(
+      fiche?.querySelector('[data-promesse-couleur]'),
+      'la fiche promet la couleur comme le fait l’étagère de Gobi : ce n’est pas le même contrat'
+    ).toBeNull();
+  });
+
+  it('R28 — un objet rapporté s’ouvre aussi, et dit ce qu’il attend', async () => {
+    await monterEtAttendre();
+    const piece = document.querySelector('[data-collection="objet"]');
+    expect(piece).not.toBeNull();
+    fireEvent.click(piece!);
+
+    const fiche = document.querySelector('[data-fiche-collection="objet"]');
+    expect(fiche).not.toBeNull();
+    expect(fiche?.textContent ?? '').toMatch(/campement/iu);
+  });
+
+  it('AUCUN mot d’échec dans une fiche du coffre, gagnée ou non (R14)', async () => {
+    await monterEtAttendre();
+    fireEvent.click(document.querySelector('[data-collection="eclat"]')!);
+    const texte = (document.querySelector('[data-fiche-coffre]')?.textContent ?? '').toLowerCase();
+    for (const interdit of ['verrou', 'bloqué', 'cadenas', 'raté', 'échec', 'perdu']) {
+      expect(texte, `« ${interdit} » n’a rien à faire dans un album`).not.toContain(interdit);
+    }
+  });
+
+  it('la fiche du coffre se referme — un panneau sans sortie est un piège (D46)', async () => {
+    await monterEtAttendre();
+    fireEvent.click(document.querySelector('[data-collection="eclat"]')!);
+    expect(document.querySelector('[data-fiche-coffre]')).not.toBeNull();
+
+    fireEvent.click(document.querySelector('[data-fermer-fiche]')!);
+    expect(
+      document.querySelector('[data-fiche-coffre]'),
+      'la fiche ne se referme pas : l’enfant est piégé dedans'
+    ).toBeNull();
+  });
 });

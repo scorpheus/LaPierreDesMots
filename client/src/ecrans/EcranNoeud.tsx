@@ -172,6 +172,7 @@ export function EcranNoeud(): ReactElement {
   const aide = useEtatJeu((etat) => etat.aide);
   const animationsDesactivees = useEtatJeu((etat) => etat.animationsDesactivees);
   const serie = useEtatJeu((etat) => etat.serie);
+  const journalise = useEtatJeu((etat) => etat.journalise);
   const cascade = useEtatJeu((etat) => etat.cascade);
   const seuils = useEtatJeu((etat) => etat.seuils);
 
@@ -392,6 +393,14 @@ export function EcranNoeud(): ReactElement {
       data-aide={niveauAide}
       // Longueur de la série de bonnes réponses en cours — contrat des features v2 § 7.
       data-serie={String(serie)}
+      // ── R30 — LE RÉGIME DE LA PARTIE, RENDU OBSERVABLE ────────────────────────────────
+      //
+      // `non` quand le parent a lancé l'exercice depuis sa galerie : rien ne sera journalisé.
+      // `LANCEMENT_PARENT` le disait déjà en commentaire — « un drapeau qui ne vit que dans
+      // une variable JavaScript est un drapeau qu'aucun test de bout en bout ne peut
+      // constater ». Il vit maintenant dans le magasin ET sur le DOM, donc une recette peut
+      // l'exiger au lieu de faire confiance.
+      data-journalise={journalise ? 'oui' : 'non'}
       // ⚠ `data-appui` — ADDITION au § 7, signalée au rapport de L2-A. Ce n'est pas qu'un
       // crochet de test : c'est l'IMPLANTATION de la règle des 100 ms de la v2 § 8. La marque
       // est posée dans le gestionnaire lui-même, donc avant tout traitement.

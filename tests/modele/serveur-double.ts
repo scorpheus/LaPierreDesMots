@@ -456,7 +456,23 @@ export function creerDoubleDeReseau(): DoubleDeReseau {
     },
 
     parentReinitialiser: () =>
-      json({ portee: 'progression', lignes: [], confirmationDemandee: true })
+      json({ portee: 'progression', lignes: [], confirmationDemandee: true }),
+
+    /**
+     * R29 — la suppression d'un compte.
+     *
+     * Le double rend TOUJOURS la forme de l'APERÇU, jamais celle d'une suppression effectuée :
+     * l'exploration ouvre les panneaux et tape ce qu'elle trouve, et une réponse de suppression
+     * ferait disparaître le profil sur lequel tout le reste du modèle s'appuie.
+     *
+     * Cette entrée a été ajoutée parce que le modèle l'a EXIGÉE — sortie citée :
+     *
+     *     DELETE /api/parent/profil-1 (motif parentSupprimerProfil non servi)
+     *
+     * Le garde « aucun appel réseau non servi » a vu la route neuve tout seul, sans qu'aucune
+     * liste écrite à la main n'ait à être tenue à jour. C'est la forme qui ne pourrit pas.
+     */
+    parentSupprimerProfil: () => json({ profil: 'profil-1', prenom: 'Alma', lignes: [] })
   };
 
   /** Les motifs compilés, dans l'ordre du plus long au plus court : le plus spécifique gagne. */

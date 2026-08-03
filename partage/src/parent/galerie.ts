@@ -13,7 +13,7 @@
  */
 
 import type {
-  CodeCompetence, CodeMoteur, CodeRegion, IdExercice, IdHabillage,
+  CodeCompetence, CodeMoteur, CodeRegion, IdExercice, IdHabillage, IdNoeud,
 } from '../identifiants.js';
 
 export type StatutValidation = 'en-attente' | 'valide' | 'rejete' | 'livre';
@@ -25,6 +25,17 @@ export interface EntreeGalerie {
   readonly habillage: IdHabillage;
   readonly competences: readonly CodeCompetence[];
   readonly statut: StatutValidation;
+  /**
+   * Le nœud qui joue cet exercice — R30.
+   *
+   * Le catalogue liste des exercices ; on n'entre dans le jeu que par un nœud. Sans ce champ,
+   * « Lancer cet exercice » n'avait rien à ouvrir, et le bouton restait désactivé sans que
+   * rien ne le dise. Le serveur le résolvait déjà pour en déduire la région : il le publie.
+   *
+   * `null` quand l'exercice ne déclare aucun nœud — l'entrée reste au catalogue, elle n'est
+   * simplement pas lançable, et la fiche le dit au parent au lieu de le laisser deviner.
+   */
+  readonly noeud: IdNoeud | null;
   readonly region: CodeRegion | null;
   /** Chemin sur disque — c'est aussi l'écran de relecture de l'annexe P § 6.3. */
   readonly chemin: string;

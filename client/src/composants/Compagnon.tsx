@@ -13,7 +13,10 @@
 //
 // PLACEHOLDER — les quatre dessins sont des SVG bouchons écrits à la main (D2). La forme
 // canonique des compagnons n'est pas plus validée que celle de Gobi (D7, D31 étape A).
+import { useState } from 'react';
 import type { ReactElement } from 'react';
+
+import { FicheObjet } from '../monde/FicheObjet.js';
 import type { Compagnon as CompagnonDuMonde } from '@pierre/partage';
 
 export interface ProprietesCompagnon {
@@ -40,6 +43,7 @@ export function Compagnon({
 }: ProprietesCompagnon): ReactElement {
   const rallie = compagnon.rallieLe !== null;
   const silhouette = SILHOUETTES[String(compagnon.code)] ?? SILHOUETTE_DE_REPLI;
+  const [ficheOuverte, fixerFicheOuverte] = useState(false);
 
   const contenu = (
     <>
@@ -79,34 +83,83 @@ export function Compagnon({
     textAlign: 'center' as const
   };
 
-  // Un compagnon non rallié n'est pas un bouton désactivé — `disabled` se lit comme un verrou.
-  // C'est une tuile qui raconte où on le trouvera.
-  if (!rallie || surChoisir === undefined) {
-    return (
-      <div
+  // ── R26 — LA BANDE SE TAPE, RALLIÉE OU NON ────────────────────────────────────────────────
+  //
+  // « on peut cliquer et voir les Gobi. Il faudrait la même chose en fait dans […] la bande
+  // aussi. »
+  //
+  // Avant ce lot, la tuile n'était un bouton QUE si le compagnon était rallié ET qu'un hôte
+  // fournissait `surChoisir`. Or `surChoisir` n'était fourni nulle part — recensé par objet,
+  // c'est l'un des 7 rappels morts du client. **Aucune tuile n'était donc tapable, jamais**, et
+  // le père a tapé dans le vide.
+  //
+  // Chaque tuile ouvre désormais sa fiche. `surChoisir` reste prioritaire quand un hôte le
+  // donne : le jour où « avant une mission, l'enfant choisit qui l'accompagne » (v2 § 4.3) sera
+  // implanté, il reprend la main sans qu'on touche à ce fichier.
+  const ouvrir = (): void => {
+    if (rallie && surChoisir !== undefined) {
+      surChoisir(compagnon);
+      return;
+    }
+    fixerFicheOuverte(true);
+  };
+
+  return (
+    <>
+      <button
+        type="button"
         className="cible"
         data-compagnon={compagnon.code}
         data-rallie={rallie ? 'oui' : 'non'}
-        style={{ ...style, cursor: 'default' }}
+        // Le libellé dit ce qui va se passer, et il n'est pas le même dans les deux cas : un
+        // compagnon non rallié ne « part » avec personne, il se regarde.
+        aria-label={
+          rallie && surChoisir !== undefined
+            ? `Partir avec ${compagnon.libelle}`
+            : `Regarder ${compagnon.libelle}`
+        }
+        onClick={ouvrir}
+        style={style}
       >
         {contenu}
-      </div>
-    );
-  }
+      </button>
 
-  return (
-    <button
-      type="button"
-      className="cible"
-      data-compagnon={compagnon.code}
-      data-rallie="oui"
-      aria-label={`Partir avec ${compagnon.libelle}`}
-      onClick={() => {
-        surChoisir(compagnon);
-      }}
-      style={style}
-    >
-      {contenu}
-    </button>
+      {ficheOuverte ? (
+        <FicheObjet
+          marqueRacine={{ 'data-fiche-compagnon': String(compagnon.code) }}
+          libelleAria={
+            rallie
+              ? `${compagnon.libelle}, dans ta bande`
+              : `${compagnon.libelle}, pas encore rencontré`
+          }
+          titre={compagnon.libelle}
+          obtenu={rallie}
+          // Comme le butin et les Éclats : la couleur se découvre. C'est déjà ce que la tuile
+          // fait avec son `saturate(0)` ; la fiche ne pouvait pas dire l'inverse.
+          couleurRevelee={false}
+          phrase={
+            rallie
+              ? compagnon.valeur
+              : `On le rencontre ${
+                  libelleRegion === undefined ? 'plus loin' : `à ${libelleRegion}`
+                }.`
+          }
+          visuel={
+            <svg width="96" height="96" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+              <path
+                d={silhouette.d}
+                fill={silhouette.teinte}
+                stroke="var(--trait)"
+                strokeWidth="4"
+                strokeLinejoin="round"
+              />
+            </svg>
+          }
+          surFermer={() => {
+            fixerFicheOuverte(false);
+          }}
+        />
+      ) : null}
+    </>
   );
 }

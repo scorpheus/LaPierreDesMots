@@ -36,6 +36,7 @@ import type { CodeCompagnon, EtatMaitrise, ItemLeitner, PlanSortie } from '@pier
 import type { CodeObjetCampement, EtatMonde } from '@pierre/partage/monde';
 import type {
   ApercuReinitialisation,
+  ApercuSuppression,
   CatalogueGalerie,
   CodeExport,
   DecisionRelecture,
@@ -45,6 +46,7 @@ import type {
   OuvertureParent,
   PorteeReinitialisation,
   RapportReinitialisation,
+  RapportSuppressionProfil,
   ResumeDashboard
 } from '@pierre/partage/parent';
 import { ENTETE_JETON_PARENT } from '@pierre/partage/parent';
@@ -360,6 +362,40 @@ export function reinitialiserProfilParent(
 ): Promise<RapportReinitialisation> {
   return demander<RapportReinitialisation>(CHEMINS_API.parentReinitialiser(profil), {
     ...corpsJson({ portee, confirmation }),
+    headers: entetesParent()
+  });
+}
+
+/**
+ * ══════════════════════════════════════════════════════════════════════════════════════════════
+ * SUPPRIMER UN COMPTE JOUEUR — R29
+ *
+ * « dans l'espace des parents, il faudrait pouvoir les supprimer en fait, supprimer un compte. »
+ *
+ * Deux fonctions, comme pour la remise à zéro, et pour la même raison : le parent voit CE QU'IL
+ * PERD avant de taper quoi que ce soit. Un écran qui demanderait de confirmer sans avoir montré
+ * l'ampleur ne demande pas un consentement, il demande un réflexe.
+ *
+ * `confirmation` est **le prénom de l'enfant, retapé**. Le serveur le vérifie et répond 409
+ * sinon : la garde n'existe pas qu'à l'écran, parce qu'une garde qui n'existerait qu'en React ne
+ * garderait rien.
+ * ══════════════════════════════════════════════════════════════════════════════════════════════
+ */
+export function apercuSuppressionProfil(profil: IdProfil): Promise<ApercuSuppression> {
+  return demander<ApercuSuppression>(CHEMINS_API.parentSupprimerProfil(profil), {
+    method: 'DELETE',
+    body: JSON.stringify({ apercu: true }),
+    headers: entetesParent()
+  });
+}
+
+export function supprimerProfilParent(
+  profil: IdProfil,
+  confirmation: string
+): Promise<RapportSuppressionProfil> {
+  return demander<RapportSuppressionProfil>(CHEMINS_API.parentSupprimerProfil(profil), {
+    method: 'DELETE',
+    body: JSON.stringify({ confirmation }),
     headers: entetesParent()
   });
 }

@@ -43,11 +43,17 @@ Chacun porte sa mesure et son état dans **[retours-de-jeu.md](retours-de-jeu.md
 | **R17** | Gobi ne répond pas dans certains exercices | ouvert |
 | **R18** | La carte ne montre ni l'avancement ni le lien entre régions | ouvert |
 | **R19** | L'histoire de la Pierre passe seule (6 s/panneau) | ouvert — mesuré |
-| **R20** | Il faut faire défiler alors que l'écran est assez grand | corrigé (89 cas verts) — reste 378 px au campement, **arbitrage** |
+| **R20** | Il faut faire défiler alors que l'écran est assez grand | corrigé (90 cas verts) — dette du campement ÉTEINTE par R27 ; reste `colorie`, que R16 impose |
 | **R21** | Rafraîchir ou revenir en arrière perd la partie | ouvert |
 | **R22** | Changer de région ramène au même exercice | à reproduire |
 | **R23** | Le nom des régions est trop petit sur la carte | ouvert |
-| **R24** | Voir tout ce qu'il y a à gagner, même non obtenu | ouvert |
+| **R24** | Voir tout ce qu'il y a à gagner, même non obtenu | corrigé |
+| **R25** | Le chaudron du campement ne fait rien | corrigé — rappel jamais fourni ; garde rouge avant, 4/4 vert après |
+| **R26** | Ouvrir une fiche depuis le butin et la bande | corrigé — `FicheObjet` partagé par 4 collections |
+| **R27** | L'étagère de Gobi n'a rien à faire au campement | corrigé — et cela éteint la dette R20 du campement |
+| **R28** | Fiches du coffre sans révéler la couleur | corrigé — deux contrats opposés, gardés côte à côte |
+| **R29** | Supprimer un compte joueur depuis la zone parent | corrigé — `DELETE /api/parent/:profil` + écran ; 6 profils « Mesure » retirés |
+| **R30** | « Lancer cet exercice » ne fait rien | corrigé — rappel câblé, nœud publié, et la partie du parent ne compte pas |
 
 ---
 

@@ -151,13 +151,34 @@ test.describe('parcours campement — R11', () => {
     await expect(page.locator('[data-ecran="campement"]')).toBeVisible();
   });
 
+  /**
+   * ── CE CAS A CHANGÉ AVEC R25, ET SA PROPRIÉTÉ N'A PAS BOUGÉ ──────────────────────────────
+   *
+   * Il exigeait qu'après le tap on soit ENCORE au campement (`[data-chaudron="oui"]` visible).
+   * C'était juste tant que le chaudron ne menait nulle part : `surOuvrirChaudron` n'était fourni
+   * par aucun hôte et le composant retombait sur « Le chaudron mijote encore ».
+   *
+   * Le père a tranché : « le chaudron devrait fonctionner directement ». Rester sur place est
+   * donc devenu le DÉFAUT, pas la garantie. Ce que ce cas protégeait — « une sortie de secours,
+   * jamais un échec » — est intact et vérifié ci-dessous ; c'est la destination qui a changé.
+   *
+   * Le détail (le moteur atteint, l'absence de mot d'échec, la déclaration du contenu) vit dans
+   * `parcours-chaudron.spec.ts`, qui a été vu ROUGE 4/4 avant la correction.
+   */
   test('le chaudron reste une sortie de secours, jamais un échec', async ({ page }) => {
     await preparer(page);
     await allerAuCampement(page);
 
     await page.locator('[data-chaudron-entree="oui"]').click();
+
+    // Il MÈNE quelque part — c'est R25.
+    await expect(
+      page.locator('[data-ecran="noeud"]'),
+      'le chaudron ne mène nulle part : c’est le défaut que R25 a corrigé'
+    ).toBeVisible();
+
+    // Et il reste une sortie de secours — c'est la propriété d'origine, inchangée.
     expect(await page.locator('[data-etat="echec"]').count()).toBe(0);
-    await expect(page.locator('[data-chaudron="oui"]')).toBeVisible();
   });
 
   test('aucun appel sortant depuis le campement — R10, R4', async ({ page }) => {

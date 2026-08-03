@@ -76,6 +76,11 @@
       "required": ["scene", "points", "objets"],
       "properties": {
         "$commentaire": { "$ref": "#/$defs/commentaire" },
+        "coloriageLibre": {
+          "type": "string",
+          "minLength": 1,
+          "description": "R29 — le nœud qu'ouvre le chaudron, « la sortie de secours à un tap » (v2 § 3.4). Il est déclaré ici et non dans le code : le campement déclare déjà sa scène, ses points et ses objets, sa sortie de secours y appartient au même titre. Absent = le chaudron affiche son message d'attente, jamais une erreur (R14). `minLength: 1` parce qu'une chaîne vide enverrait l'enfant vers un nœud nommé « »."
+        },
         "scene": {
           "type": "object",
           "additionalProperties": false,

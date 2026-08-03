@@ -1048,6 +1048,86 @@ la fonction, `scrollIntoView` qui traverse ce qui rogne. Voir D52 pour les deux 
 
 ---
 
+### D54. Le rappel optionnel jamais fourni — un bouton mort qu'aucun test ne peut voir
+
+**Établi le 2026-08-03**, après que le père a trouvé DEUX instances du même défaut en jouant, à
+deux bouts opposés du site : « le chaudron, je ne sais pas ce qu'il mijote » et « le bouton lancer
+l'exercice, mais ça ne fait rien ».
+
+**Le mécanisme.** Un écran déclare `readonly surX?: () => void`. Le rappel est relayé jusqu'à un
+bouton, qui se garde proprement — `disabled={surX === undefined}`, ou pire, il n'est pas rendu du
+tout. Et **aucun hôte ne le fournit**. Le compilateur est content : la propriété est optionnelle,
+c'est son rôle. La relecture est contente : chaque fichier, pris seul, est irréprochable.
+
+**Pourquoi aucun test ne pouvait les voir**, et c'est le cœur : chaque recette de composant
+**injecte elle-même les rappels dont elle a besoin**. C'est justement ce qui rend les écrans
+montables isolément — une bonne propriété — et c'est exactement ce qui fait qu'**aucune recette ne
+traverse le câblage réel du routeur**. Le seul chemin qu'un humain emprunte est le seul que
+personne ne prenait.
+
+**Le recensement, par OBJET et non par occurrence** (`bac-a-sable/rappels-morts/auditer.mjs`) —
+énumérer les `readonly surX?:` déclarés, puis chercher qui les fournit. Sortie citée :
+
+```
+27 rappel(s) optionnel(s) DÉCLARÉ(S) sur 21 composant(s)
+ 7 ne sont fourni(s) NULLE PART
+```
+
+Chercher `surX=` dans le code n'aurait recensé que les occurrences ; c'est l'écart entre les deux
+comptes qui est la trouvaille. **Sept**, quand le joueur en avait trouvé deux.
+
+**Les deux remèdes, et le second est le plus important.**
+
+1. **Un rappel de navigation devient un OVERRIDE, jamais un prérequis.** L'écran sait faire son
+   travail seul — le campement ouvre le chaudron comme la carte entre dans un nœud — et le rappel
+   ne sert plus qu'aux recettes. Un bouton dont l'existence dépend d'un câblage extérieur est un
+   bouton qui ne sera pas câblé un jour.
+2. **La recette passe par le CHEMIN DE L'ENFANT, sans rien injecter.** `parcours-chaudron.spec.ts`
+   et `parcours-lancer-exercice.spec.ts` partent du choix de profil et tapent. Les deux ont été
+   vues **rouges avant correction** — 4/4 et 2/3. Une recette qui injecte le rappel qu'elle teste
+   ne teste que sa propre injection.
+
+**Corollaire mesuré le même jour.** Quand la donnée nécessaire manque, elle est souvent déjà là :
+`EntreeGalerie` n'avait pas de `noeud`, alors que le serveur le résolvait **trois lignes plus
+haut** pour en déduire la région. Avant d'ajouter une source, chercher qui calcule déjà la valeur
+et ne la publie pas — 76 exercices sur 76 la portaient.
+
+---
+
+### D55. Un outil de mesure qui écrit dans les données du joueur n'est pas un outil de mesure
+
+**Établi le 2026-08-03**, et c'est un dégât que j'ai causé.
+
+> « tu as créé plein de comptes de joueurs qui s'appellent Mesure, déjà il faudrait les enlever. »
+
+**Six profils « Mesure » dans sa VRAIE base**, entre 19:06 et 19:07, écrits par mes sondes de mise
+en page (R20). Elles lançaient un serveur sur `donnees/pierre.db` — la base du jeu — parce que
+c'était la ligne de commande la plus courte pour obtenir une page à mesurer.
+
+**La règle.** Toute sonde, tout script d'inspection, tout banc hors ligne monte **son propre
+serveur sur une base jetable**. Le dépôt sait déjà le faire : `tests/harnais-serveur.ts` donne un
+serveur neuf par cas, base `:memory:`, port réservé par le noyau. Une sonde de `bac-a-sable/` n'a
+aucune raison de faire moins.
+
+**Ce que ça a coûté, et ce que ça a révélé.** Le nettoyage était impossible sans ouvrir SQLite :
+la zone parent savait remettre à zéro, pas supprimer. Mon dégât a donc mis au jour une
+fonctionnalité manquante que le père voulait de toute façon (R29). Ce n'est pas une excuse — c'est
+la seule chose qu'on peut en tirer.
+
+**La forme du nettoyage, opposable.** `bac-a-sable/rappels-morts/retirer-profils-mesure.mjs` :
+sauvegarde d'abord, liste blanche par **identifiant** et jamais par motif (`LIKE 'Mesure%'`
+effacerait une Mesurine), critères **revérifiés en base** juste avant chaque suppression, et un
+contrat de sortie qui exige que « Ezékiel » soit intact. Mode énumération par défaut ; il faut
+`--pour-de-vrai` pour écrire. Sortie citée :
+
+```
+6 profils retirés · 42 ligne(s) de données effacée(s)
+Profils restants : Ezékiel
+✅ Aucun « Mesure » restant, « Ezékiel » intact.
+```
+
+---
+
 ## Points encore ouverts
 
 | # | Point | Source | Bloque quoi |

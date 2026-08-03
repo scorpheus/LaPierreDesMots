@@ -53,6 +53,7 @@ import { etatDuProfil } from '../services/etat-profil.js';
 import {
   previsualiserReinitialisation,
   reinitialiserProfil,
+  supprimerProfil,
   tablesNonVidees
 } from '../services/reinitialisation-profil.js';
 
@@ -177,4 +178,82 @@ export function enregistrerRoutesParentProfil(
       return reponse.send(rapport);
     }
   );
+
+  // ──────────────────────────── DELETE /api/parent/:profil
+  //
+  // ═══════════════════════════════════════════════════════════════════════════════════════════
+  // SUPPRIMER UN COMPTE — R29, et pourquoi il porte les MÊMES gardes que la remise à zéro
+  //
+  // « dans l'espace des parents, il faudrait pouvoir les supprimer en fait, supprimer un
+  // compte. »
+  //
+  // Supprimer est strictement plus destructeur que remettre à zéro : la remise à zéro `complete`
+  // laisse au moins l'enfant, ici il ne reste rien. Il aurait donc été absurde de lui donner
+  // MOINS de gardes. Les trois sont reprises telles quelles :
+  //
+  //   1. **Le jeton parent.** Comme pour lire une courbe de latence.
+  //   2. **Le prénom retapé**, vérifié AU SERVEUR. Un tap distrait ne produit pas un prénom,
+  //      une requête égarée non plus, et une garde qui n'existerait qu'en React ne garderait
+  //      rien — la commande hors interface passe par la même porte.
+  //   3. **Un aperçu**, `?apercu=1`, qui compte sans rien effacer. Le parent voit ce qu'il perd
+  //      avant de taper quoi que ce soit.
+  //
+  // Il n'y a PAS de portée ici : supprimer n'a qu'un sens. Offrir un choix là où il n'y en a
+  // qu'un serait une case de plus à cocher pour rien.
+  // ═══════════════════════════════════════════════════════════════════════════════════════════
+  app.delete<{ Params: ParametresProfil }>('/api/parent/:profil', (requete, reponse) => {
+    if (!jetonValide(requete, reponse)) {
+      return reponse;
+    }
+
+    const profilId = requete.params.profil;
+    const profil = lireProfil(contexte.base, profilId);
+    if (profil === null) {
+      return reponse
+        .code(404)
+        .send(erreurApi(CODES_ERREUR.introuvable, `Profil inconnu : ${profilId}`));
+    }
+
+    const corps = requete.body as { confirmation?: unknown; apercu?: unknown } | null;
+
+    if (corps?.apercu === true) {
+      // Compter sans effacer. La portée est `complete` parce que c'est ce que la suppression
+      // fait : montrer moins que ce qu'on va perdre serait un mensonge poli.
+      return reponse.send({
+        profil: profilId,
+        prenom: profil.prenom,
+        lignes: previsualiserReinitialisation(contexte.base, profilId, 'complete')
+      });
+    }
+
+    if (!confirmationValide(profil.prenom, corps?.confirmation)) {
+      // 409 et non 400 : la requête est bien formée, c'est l'ÉTAT de la confirmation qui ne
+      // permet pas d'agir. Le message dit le geste attendu, pas la faute commise (C7).
+      return reponse
+        .code(409)
+        .send(
+          erreurApi(
+            CODES_ERREUR.conflit,
+            `Pour supprimer ce compte, retape le prénom tel qu’il est affiché : ${profil.prenom}.`
+          )
+        );
+    }
+
+    const rapport = supprimerProfil(contexte.base, profilId, contexte.horloge);
+
+    // Le contrat de sortie de la route. `profilRetire` est RELU en base par le service ; on
+    // refuse d'annoncer une suppression que la base n'a pas faite.
+    if (!rapport.profilRetire) {
+      return reponse
+        .code(500)
+        .send(
+          erreurApi(
+            CODES_ERREUR.interne,
+            'Le compte est toujours là. Rien n’a été annoncé comme fait.'
+          )
+        );
+    }
+
+    return reponse.send(rapport);
+  });
 }

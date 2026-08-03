@@ -219,3 +219,69 @@ export function tablesNonVidees(
     (ligne) => ligne.lignesEffacees > 0
   );
 }
+
+/**
+ * ══════════════════════════════════════════════════════════════════════════════════════════════
+ * SUPPRIMER UN PROFIL — R29, demandé par le père le 2026-08-03.
+ *
+ * « tu as créé plein de comptes de joueurs qui s'appellent Mesure, déjà il faudrait les enlever.
+ * Et dans l'espace des parents, il faudrait pouvoir les supprimer en fait, supprimer un compte. »
+ *
+ * Le besoin est né d'un dégât que j'ai causé : **six profils « Mesure » écrits dans sa vraie
+ * base** par mes sondes de mise en page, qui pointaient sur le serveur de jeu au lieu d'une base
+ * jetable. Un outil de mesure qui écrit dans les données du joueur n'est pas un outil de mesure.
+ *
+ * ── POURQUOI CE N'EST PAS UNE ROUTE DE PLUS, MAIS LA MÊME AVEC UNE LIGNE EN FIN ────────────────
+ * Supprimer = remettre à zéro en portée `complete`, puis retirer la ligne de `profils`. Réécrire
+ * une seconde énumération de tables aurait créé la pire dette possible : deux listes qui doivent
+ * rester d'accord, dont l'une ne se voit qu'au moment d'un effacement.
+ *
+ * `tablesPorteusesDeProfil` DÉCOUVRE les tables par le schéma. Une table ajoutée demain avec une
+ * colonne `profil_id` est vidée toute seule, par les deux chemins à la fois. C'est la seule forme
+ * qui ne pourrit pas.
+ * ══════════════════════════════════════════════════════════════════════════════════════════════
+ */
+export interface RapportSuppression {
+  readonly profil: IdProfil;
+  readonly prenom: string;
+  readonly effectueLe: string;
+  readonly lignes: readonly LigneRapportReinitialisation[];
+  readonly lignesEffaceesTotal: number;
+  /** Vrai quand la ligne de `profils` a bien disparu — RELU en base, jamais supposé. */
+  readonly profilRetire: boolean;
+}
+
+export function supprimerProfil(
+  base: DatabaseSync,
+  profilId: string,
+  horloge: Horloge
+): RapportSuppression {
+  const profil = lireProfil(base, profilId);
+  if (profil === null) {
+    // Comme `reinitialiserProfil` : on n'efface jamais « dans le vide » en rendant un rapport
+    // vert. Le parent croirait avoir supprimé un compte qu'il vient de mal désigner.
+    throw new Error(`Profil inconnu : ${profilId}`);
+  }
+
+  // La portée `complete` d'abord — elle vide TOUTES les tables porteuses de `profil_id`, y
+  // compris celles que la portée `progression` conserve (prénom, avatar, réglages de lecture).
+  const rapport = reinitialiserProfil(base, profilId, 'complete', horloge);
+
+  dansTransaction(base, () => {
+    base.exec('PRAGMA defer_foreign_keys = ON;');
+    base.prepare('DELETE FROM profils WHERE id = ?').run(profilId);
+  });
+
+  return {
+    profil: profilId as IdProfil,
+    prenom: profil.prenom,
+    effectueLe: rapport.effectueLe,
+    lignes: rapport.lignes,
+    lignesEffaceesTotal: rapport.lignesEffaceesTotal,
+    // ── LE CONTRAT DE SORTIE : ON RELIT, ON NE CROIT PAS ────────────────────────────────────
+    // `lireProfil` doit maintenant rendre `null`. Un service qui se contenterait d'annoncer
+    // « supprimé » parce qu'il a exécuté un DELETE est un service qui s'auto-certifie — et
+    // c'est exactement le mode de défaillance « le champ déclaré, jamais affecté ».
+    profilRetire: lireProfil(base, profilId) === null
+  };
+}

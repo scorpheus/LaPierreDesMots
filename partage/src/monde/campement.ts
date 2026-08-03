@@ -8,7 +8,7 @@
  */
 
 import { ErreurPierre } from '../erreurs.js';
-import type { CheminAsset, CodeRegion } from '../identifiants.js';
+import type { CheminAsset, CodeRegion, IdNoeud } from '../identifiants.js';
 import type {
   AuditCampement, CodeObjetCampement, CodeReaction, PointInteraction,
 } from './types.js';
@@ -31,6 +31,24 @@ export interface DocumentCampement {
   readonly scene: { readonly fichier: CheminAsset; readonly viewBox: string };
   readonly points: readonly PointInteraction[];
   readonly objets: readonly ObjetDeclare[];
+  /**
+   * Le nœud qu'ouvre le chaudron — « la sortie de secours à un tap » (v2 § 3.4 et § 5.4).
+   *
+   * ── POURQUOI C'EST UNE DONNÉE ET NON UNE CONSTANTE DU CODE ────────────────────────────────
+   * `Chaudron.tsx` portait « PLACEHOLDER — à valider : le nœud ouvert par le chaudron », et le
+   * bouton affichait « Le chaudron mijote encore » faute de destination. Le père a tranché :
+   * « le chaudron devrait fonctionner directement, je ne sais pas ce qu'il attend, ce qu'il
+   * mijote ».
+   *
+   * Écrire l'identifiant dans le composant en ferait une décision de code. Le campement est du
+   * CONTENU — c'est déjà lui qui déclare sa scène, ses trente points et ses objets ; sa sortie
+   * de secours y appartient au même titre. Changer de nœud libre ne demandera pas de toucher au
+   * client.
+   *
+   * `null` quand rien n'est déclaré : le chaudron retombe alors sur son message calme, jamais
+   * sur un écran d'erreur (R14).
+   */
+  readonly coloriageLibre: IdNoeud | null;
 }
 
 const REACTIONS: readonly CodeReaction[] = ['animation', 'replique', 'son', 'aucune'];
@@ -115,12 +133,29 @@ export function sceneDuDocument(document: unknown): DocumentCampement['scene'] {
   };
 }
 
+/**
+ * Le nœud de coloriage libre déclaré par le document, ou `null`.
+ *
+ * Une chaîne vide vaut `null` : un champ présent mais vide est une absence de décision, pas un
+ * identifiant. Sans cela le chaudron enverrait l'enfant vers un nœud nommé « », et l'écran de
+ * nœud lui rendrait une erreur — exactement ce que R14 interdit.
+ */
+export function coloriageLibreDuDocument(document: unknown): IdNoeud | null {
+  const champs = objet(document, 'Le document du campement');
+  const declare = champs['coloriageLibre'];
+  if (typeof declare !== 'string' || declare.trim() === '') {
+    return null;
+  }
+  return declare as IdNoeud;
+}
+
 /** Le document entier, lu et validé d'un bloc. */
 export function campementDuDocument(document: unknown): DocumentCampement {
   return {
     scene: sceneDuDocument(document),
     points: pointsDuDocument(document),
-    objets: objetsDuDocument(document)
+    objets: objetsDuDocument(document),
+    coloriageLibre: coloriageLibreDuDocument(document)
   };
 }
 

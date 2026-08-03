@@ -12,6 +12,7 @@
 // Ce qui n'est pas encore obtenu est affiché **en creux**, jamais caché : c'est la même règle
 // que les étoiles en creux (v2 § 6.2) et que le voile de Grisaille. Montrer le vide restant est
 // le moteur de retour du jeu ; le cacher le supprimerait.
+import { useState } from 'react';
 import type { ReactElement } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import type { EtatMonde } from '@pierre/partage';
@@ -20,6 +21,7 @@ import { lireMonde, urlAsset } from '../api/client.js';
 import { useEtatJeu } from '../etat/services.js';
 import { DessinButin } from '../monde/Butin.js';
 import { Etagere, useCatalogueFormes } from '../monde/Etagere.js';
+import { FicheObjet } from '../monde/FicheObjet.js';
 
 export interface ProprietesEcranCoffre {
   /** Le monde du profil. Injecté par les tests et par un hôte qui l'a déjà ; chargé sinon. */
@@ -70,31 +72,72 @@ export const NOM_DE_REGION: Readonly<Record<string, string>> = {
  */
 const SILHOUETTE_ECLAT = 'M24 3l13 15-5 19-8 10-8-10-5-19z';
 
-/** Une case de collection : pleine ou en creux, jamais absente. */
+/** La pièce dont la fiche est ouverte — R28. `null` quand aucune ne l'est. */
+interface PieceOuverte {
+  readonly categorie: string;
+  readonly cle: string;
+  readonly libelle: string;
+  readonly obtenu: boolean;
+}
+
+/**
+ * Ce que la fiche raconte, par collection.
+ *
+ * Ces phrases sont ici et non dans `FicheObjet` : le panneau est partagé par quatre
+ * collections, et c'est chacune qui sait ce qu'elle promet. Un texte écrit dans le composant
+ * commun aurait fini par dire « il t'attend » d'un compagnon.
+ */
+const PHRASE_GAGNE: Readonly<Record<string, string>> = {
+  eclat: 'Tu as terminé cette région. Son Éclat est à toi.',
+  objet: 'Tu l’as rapporté au campement. Il est à sa place.'
+};
+
+const PHRASE_A_GAGNER: Readonly<Record<string, string>> = {
+  eclat: 'Termine cette région pour gagner son Éclat.',
+  objet: 'Tu ne l’as pas encore rapporté au campement.'
+};
+
+/**
+ * Une case de collection : pleine ou en creux, jamais absente.
+ *
+ * ── R28 — ELLE S'OUVRE DÉSORMAIS, ET SANS DIRE SA COULEUR ────────────────────────────────────
+ * « Il faudrait aussi du coup dans les Éclats de Pierre et ce que tu as rapporté, bah cette
+ * prévisualisation quoi, sans donner les couleurs, parce que ça c'est à deviner. »
+ *
+ * Un `<button>` et non un `<li>` inerte : c'est ce qui la rend atteignable au clavier et
+ * annonçable par un lecteur d'écran. Les marques `data-collection`, `data-piece` et
+ * `data-obtenue` RESTENT sur cet élément — plusieurs recettes les visent déjà, et déplacer une
+ * prise casserait des gardes qui n'ont rien demandé.
+ */
 function Case({
   cle,
   libelle,
   asset,
   obtenu,
-  categorie
+  categorie,
+  surOuvrir
 }: {
   readonly cle: string;
   readonly libelle: string;
   readonly asset: string | null;
   readonly obtenu: boolean;
   readonly categorie: string;
+  readonly surOuvrir: () => void;
 }): ReactElement {
   return (
-    <li
+    <li style={{ display: 'contents' }}>
+    <button
+      type="button"
       data-collection={categorie}
       data-piece={cle}
       data-obtenue={obtenu ? 'oui' : 'non'}
       className="cible"
+      aria-label={obtenu ? `${libelle}, gagné` : `${libelle}, pas encore gagné`}
+      onClick={surOuvrir}
       style={{
         flexDirection: 'column',
         gap: '0.35rem',
-        inlineSize: '9rem',
-        cursor: 'default'
+        inlineSize: '9rem'
         // `opacity` / `filter` ne sont plus ici : voir l'encadré sur le dessin, ci-dessous.
       }}
     >
@@ -151,6 +194,7 @@ function Case({
         />
       )}
       <span style={{ fontSize: '0.95rem', textAlign: 'center' }}>{libelle}</span>
+    </button>
     </li>
   );
 }
@@ -169,6 +213,7 @@ export function EcranCoffre({
   surRetour
 }: ProprietesEcranCoffre = {}): ReactElement {
   const profil = useEtatJeu((etat) => etat.profil);
+  const [ouverte, fixerOuverte] = useState<PieceOuverte | null>(null);
 
   const requete = useQuery({
     queryKey: ['monde', profil === null ? null : String(profil.id)],
@@ -240,6 +285,14 @@ export function EcranCoffre({
               asset={null}
               obtenu={region.eclatObtenuLe !== null}
               categorie="eclat"
+              surOuvrir={() => {
+                fixerOuverte({
+                  categorie: 'eclat',
+                  cle: String(region.region),
+                  libelle: NOM_DE_REGION[String(region.region)] ?? String(region.region),
+                  obtenu: region.eclatObtenuLe !== null
+                });
+              }}
             />
           ))}
         </ul>
@@ -259,10 +312,64 @@ export function EcranCoffre({
               asset={null}
               obtenu={objet.placeLe !== null}
               categorie="objet"
+              surOuvrir={() => {
+                fixerOuverte({
+                  categorie: 'objet',
+                  cle: String(objet.code),
+                  libelle: objet.libelle,
+                  obtenu: objet.placeLe !== null
+                });
+              }}
             />
           ))}
         </ul>
       </section>
+
+      {ouverte === null ? null : (
+        <FicheObjet
+          marqueRacine={{
+            'data-fiche-coffre': ouverte.cle,
+            'data-fiche-collection': ouverte.categorie
+          }}
+          libelleAria={
+            ouverte.obtenu
+              ? `${ouverte.libelle}, gagné`
+              : `${ouverte.libelle}, pas encore gagné`
+          }
+          titre={ouverte.libelle}
+          obtenu={ouverte.obtenu}
+          // ── R28 — LA COULEUR RESTE À DEVINER ────────────────────────────────────────────
+          // « sans donner les couleurs, parce que ça c'est à deviner. » C'est l'inverse exact
+          // de l'étagère de Gobi, juste au-dessus dans le même écran, où la couleur est une
+          // promesse montrée (R24). Les deux contrats coexistent volontairement : l'un donne
+          // envie en montrant, l'autre en cachant.
+          couleurRevelee={false}
+          phrase={
+            ouverte.obtenu
+              ? PHRASE_GAGNE[ouverte.categorie] ?? 'Tu l’as gagné.'
+              : PHRASE_A_GAGNER[ouverte.categorie] ?? 'Il t’attend encore.'
+          }
+          visuel={
+            ouverte.categorie === 'objet' ? (
+              <DessinButin code={ouverte.cle} taille={96} />
+            ) : (
+              <svg width="96" height="96" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+                <path
+                  d={SILHOUETTE_ECLAT}
+                  fill={ouverte.obtenu ? 'var(--soleil)' : 'var(--grisaille)'}
+                  stroke="var(--trait)"
+                  strokeWidth="4"
+                  strokeLinejoin="round"
+                  strokeLinecap="round"
+                />
+              </svg>
+            )
+          }
+          surFermer={() => {
+            fixerOuverte(null);
+          }}
+        />
+      )}
     </main>
   );
 }

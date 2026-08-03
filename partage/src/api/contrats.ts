@@ -187,6 +187,15 @@ export const CHEMINS_API = {
   parentReinitialiser: (profil: IdProfil): string =>
     `/api/parent/${encodeURIComponent(profil)}/reinitialiser`,
 
+  /**
+   * R29 — la suppression d'un compte joueur. **DELETE**, et le verbe est l'information : il dit
+   * au serveur, au navigateur et à tout intermédiaire que cette requête n'est ni sûre ni
+   * rejouable. Une URL qu'un navigateur peut précharger ne doit jamais pouvoir effacer un
+   * enfant, et c'est déjà la raison qui a mis `parentReinitialiser` en POST.
+   */
+  parentSupprimerProfil: (profil: IdProfil): string =>
+    `/api/parent/${encodeURIComponent(profil)}`,
+
   motifs: {
     sante: '/api/sante',
     profils: '/api/profils',
@@ -215,6 +224,8 @@ export const CHEMINS_API = {
     // ── lot H2 ──────────────────────────────────────────────────────────────────────────
     parentEtatProfil: '/api/parent/:profil/etat',
     parentReinitialiser: '/api/parent/:profil/reinitialiser',
+    // ── R29 ─────────────────────────────────────────────────────────────────────────────
+    parentSupprimerProfil: '/api/parent/:profil',
   },
 } as const;
 

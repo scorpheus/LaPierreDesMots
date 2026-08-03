@@ -61,11 +61,16 @@ export {
 // ci-dessus : un type que le barillet n'exporte pas est un type que personne ne peut importer.
 export type {
   ApercuReinitialisation,
+  // ── R29 ────────────────────────────────────────────────────────────────────────────────
+  // « un type que le barillet n'exporte pas est un type que personne ne peut importer » —
+  // la note juste au-dessus, écrite pour le lot précédent, vaut mot pour mot pour celui-ci.
+  ApercuSuppression,
   EtatProfil,
   EtatRegionProfil,
   LigneRapportReinitialisation,
   PorteeReinitialisation,
   RapportReinitialisation,
+  RapportSuppressionProfil,
   TentativeRecente,
 } from './reinitialisation.js';
 

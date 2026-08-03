@@ -24,7 +24,12 @@ import { useCallback, useState } from 'react';
 import type { ReactElement } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { CodeCompetence, IdExercice, IdProfil } from '@pierre/partage';
-import type { DecisionRelecture, EntreeGalerie, OptionsLancement } from '@pierre/partage/parent';
+import type {
+  DecisionRelecture,
+  EntreeGalerie,
+  OptionsLancement,
+  RapportSuppressionProfil
+} from '@pierre/partage/parent';
 import {
   fermerZoneParent,
   lireDashboardParent,
@@ -36,6 +41,7 @@ import { GalerieExercices } from '../parent/GalerieExercices.js';
 // AJOUT H2 — l'onglet « le profil » : ce que l'enfant a réellement fait, et repartir à zéro.
 import { EtatProfil } from '../parent/EtatProfil.js';
 import { ReinitialiserProfil } from '../parent/ReinitialiserProfil.js';
+import { SupprimerProfil } from '../parent/SupprimerProfil.js';
 import { BoutonExport } from '../parent/BoutonExport.js';
 import { CarteCouverture } from '../parent/CarteCouverture.js';
 import { CourbeLatence } from '../parent/CourbeLatence.js';
@@ -68,6 +74,14 @@ export interface ProprietesEcranDashboard {
    * posee. Ce rappel est ce qui la rend atteignable.
    */
   readonly surGaleriePleinEcran?: () => void;
+  /**
+   * R29 — le compte vient d'être supprimé, et l'écran ne peut plus parler de lui.
+   *
+   * Sans ce rappel, le dashboard resterait affiché sur un profil qui n'existe plus : chacune de
+   * ses requêtes rendrait 404, et le parent verrait une page d'erreurs au lieu d'un retour
+   * tranquille. C'est l'hôte qui sait où aller — le composant ne connaît aucune route.
+   */
+  readonly surProfilSupprime?: (rapport: RapportSuppressionProfil) => void;
 }
 
 /**
@@ -86,7 +100,8 @@ export function EcranDashboard({
   surSortie,
   surTravailler,
   surLancerExercice,
-  surGaleriePleinEcran
+  surGaleriePleinEcran,
+  surProfilSupprime
 }: ProprietesEcranDashboard): ReactElement {
   const clientRequetes = useQueryClient();
   const [onglet, fixerOnglet] = useState<OngletParent>('suivi');
@@ -234,6 +249,16 @@ export function EcranDashboard({
             profil={profil}
             prenom={etatProfil.data?.prenom ?? prenom ?? ''}
             surTermine={() => void etatProfil.refetch()}
+          />
+          {/* ── R29 — « il faudrait pouvoir les supprimer en fait, supprimer un compte » ────
+              Sous la remise à zéro, et repliée : c'est le seul geste irréversible de toute la
+              zone parent. `surSupprime` est câblé par l'hôte — sans lui, ce panneau serait un
+              huitième rappel mort, et c'est exactement le défaut que ce lot vient de corriger
+              deux fois. */}
+          <SupprimerProfil
+            profil={profil}
+            prenom={etatProfil.data?.prenom ?? prenom ?? ''}
+            {...(surProfilSupprime === undefined ? {} : { surSupprime: surProfilSupprime })}
           />
         </div>
       ) : null}

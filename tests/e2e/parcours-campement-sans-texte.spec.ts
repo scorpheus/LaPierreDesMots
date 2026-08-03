@@ -56,6 +56,22 @@ async function preparer(page: Page): Promise<void> {
   );
 }
 
+/**
+ * R27 — l'étagère de Gobi a QUITTÉ le campement pour le coffre.
+ *
+ * « Dans le coffre, il y a aussi les Gobi. Je pense qu'il faut les laisser dans le coffre, ça
+ * sert à rien de les mettre dans le campement. »
+ *
+ * Les deux gardes de l'étagère ci-dessous ne sont ni retirés ni assouplis : ils changent
+ * d'écran, parce que l'objet qu'ils gardent a changé d'écran. Une exigence qui disparaîtrait
+ * avec le déménagement n'aurait jamais rien gardé.
+ */
+async function allerAuCoffre(page: Page): Promise<void> {
+  await allerAuCampement(page);
+  await page.locator('[data-vers="coffre"]').click();
+  await expect(page.locator('[data-ecran="coffre"]')).toBeVisible();
+}
+
 async function allerAuCampement(page: Page): Promise<void> {
   await expect(page.locator('[data-ecran="profils"]')).toBeVisible();
   await page.getByText(String(fixtureProfil['prenom']), { exact: false }).first().click();
@@ -182,9 +198,9 @@ test.describe('R18 — le campement se comprend sans lire', () => {
     page
   }) => {
     await preparer(page);
-    await allerAuCampement(page);
+    await allerAuCoffre(page);
 
-    const etagere = page.locator('[data-ecran="campement"] [data-etagere="oui"]');
+    const etagere = page.locator('[data-ecran="coffre"] [data-etagere="oui"]');
     await expect(etagere).toBeVisible();
 
     /** Les quatre nombres, pris sur LE MÊME rendu. */
@@ -227,9 +243,9 @@ test.describe('R18 — le campement se comprend sans lire', () => {
 
   test('l’étagère ne cadenasse rien et ne peut rien rater — R14', async ({ page }) => {
     await preparer(page);
-    await allerAuCampement(page);
+    await allerAuCoffre(page);
 
-    const cases = page.locator('[data-ecran="campement"] [data-case-etagere]');
+    const cases = page.locator('[data-ecran="coffre"] [data-case-etagere]');
     // Même fenêtre que le cas précédent, même remède : `count()` ne réessaie pas, et
     // l'étagère se peuple à l'arrivée de son catalogue. `not.toHaveCount(0)` réessaie et dit
     // rigoureusement la même chose — la stabilité change, l'exigence non.

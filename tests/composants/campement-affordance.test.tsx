@@ -224,10 +224,23 @@ describe('les destinations du campement se lisent sans savoir lire', () => {
       element.getAttribute('data-pictogramme')
     );
     console.log(`[S5] pictogrammes rendus : ${pictogrammes.join(', ')}`);
-    // Les sorties (M8) et les deux collections que S5 rend comptables.
-    for (const attendu of ['carte', 'coffre', 'etagere', 'butin']) {
+    // ── `etagere` A QUITTÉ CETTE LISTE AVEC R27, ET CE N'EST PAS UN ASSOUPLISSEMENT ──────
+    //
+    // « Dans le coffre, il y a aussi les Gobi. Je pense qu'il faut les laisser dans le coffre,
+    // ça sert à rien de les mettre dans le campement. » L'étagère n'est plus rendue ici, donc
+    // exiger son pictogramme ICI reviendrait à exiger qu'elle revienne.
+    //
+    // L'exigence n'est pas perdue : elle suit l'objet. `EcranCoffre` rend l'étagère et son
+    // pictogramme, et `parcours-campement-sans-texte.spec.ts` a déplacé au coffre ses deux
+    // gardes — les cases vides et l'absence de cadenas. Une exigence qui disparaîtrait avec un
+    // déménagement n'aurait jamais rien gardé.
+    for (const attendu of ['carte', 'coffre', 'butin']) {
       expect(pictogrammes).toContain(attendu);
     }
+    expect(
+      pictogrammes,
+      'l’étagère est revenue au campement : elle appartient au coffre depuis R27'
+    ).not.toContain('etagere');
   });
 
   it('n’affiche jamais d’échec au campement, quoi qu’on touche', () => {

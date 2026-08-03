@@ -283,3 +283,35 @@ export function compterRegionsIncoherentes(
 ): number {
   return regions.filter((region) => region.ecart !== 0).length;
 }
+
+/**
+ * ══════════════════════════════════════════════════════════════════════════════════════════════
+ * SUPPRIMER UN COMPTE — R29, le contrat des deux réponses
+ *
+ * « dans l'espace des parents, il faudrait pouvoir les supprimer en fait, supprimer un compte. »
+ *
+ * Il n'y a PAS de portée ici, et c'est délibéré : supprimer n'a qu'un sens. La remise à zéro en
+ * offre deux parce qu'elles diffèrent vraiment (« garde le prénom » contre « remet à neuf ») ;
+ * offrir un choix là où il n'y en a qu'un ajouterait une case à cocher pour rien, et une case
+ * de plus sur un écran destructeur est une occasion de plus de se tromper.
+ * ══════════════════════════════════════════════════════════════════════════════════════════════
+ */
+export interface ApercuSuppression {
+  readonly profil: IdProfil;
+  readonly prenom: string;
+  readonly lignes: readonly LigneRapportReinitialisation[];
+}
+
+export interface RapportSuppressionProfil {
+  readonly profil: IdProfil;
+  readonly prenom: string;
+  readonly effectueLe: string;
+  readonly lignes: readonly LigneRapportReinitialisation[];
+  readonly lignesEffaceesTotal: number;
+  /**
+   * Vrai quand la ligne de `profils` a bien disparu — **relu en base par le serveur**, jamais
+   * déduit du fait qu'un DELETE a été exécuté. Un service qui s'auto-certifie ne certifie rien,
+   * et c'est exactement le défaut « champ déclaré, câblé jusqu'à la sortie, jamais affecté ».
+   */
+  readonly profilRetire: boolean;
+}

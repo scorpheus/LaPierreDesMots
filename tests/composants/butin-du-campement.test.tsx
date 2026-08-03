@@ -11,7 +11,7 @@
  * Les données viennent du DISQUE. Un test qui fabriquerait ses six objets passerait le jour où
  * le fichier de contenu en déclarerait sept — c'est-à-dire le jour où il faudrait qu'il parle.
  */
-import { cleanup, render } from '@testing-library/react';
+import { cleanup, fireEvent, render } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { objetsDuDocument } from '@partage/monde/campement.js';
@@ -135,14 +135,75 @@ describe('la case qui manque est visible, jamais cachée (D44, D25 point 3)', ()
     expect(livre?.textContent).toContain('le livre de la Cité des Histoires');
   });
 
-  it('n’est pas un menu : aucune prise, donc rien à rater (R14)', () => {
+  /**
+   * ── CE CAS A CHANGÉ DE FORME AVEC R26, ET IL FAUT DIRE POURQUOI ─────────────────────────
+   *
+   * Il exigeait « aucune prise » : `querySelectorAll('[data-butin="oui"] button')` devait
+   * rendre zéro. Le père a demandé l'inverse, mot pour mot : « on peut cliquer et voir les
+   * Gobi. Il faudrait la même chose en fait dans ce que tu as rapporté. »
+   *
+   * L'assertion n'est donc pas assouplie, elle est **remplacée par celle qui garde la vraie
+   * règle**. Ce que « pas un menu » protégeait n'était pas l'absence de boutons — c'était
+   * qu'il n'y ait RIEN À RATER : aucun échec, aucun verrou, aucune impasse. Ça reste vrai, et
+   * c'est vérifié ci-dessous. Compter les boutons n'en était qu'un indice, et il est devenu
+   * faux le jour où le père a voulu qu'on puisse regarder ses trouvailles.
+   */
+  it('reste un album et non un menu : on peut ouvrir, jamais rater (R14)', () => {
     render(<Butin objets={objets()} />);
-    expect(document.querySelectorAll('[data-butin="oui"] button')).toHaveLength(0);
-    expect(document.querySelectorAll('[data-butin="oui"] a')).toHaveLength(0);
+
+    // Chaque pièce s'ouvre — R26. Un bouton par objet, pas un de plus, pas un de moins.
+    const prises = document.querySelectorAll('[data-butin="oui"] button[data-butin-piece]');
+    expect(prises.length, 'chaque pièce du butin doit pouvoir s’ouvrir').toBe(6);
+
+    // Et rien ne s'y rate : c'est ça, « pas un menu ».
     expect(document.querySelectorAll('[data-etat="echec"]')).toHaveLength(0);
     // Jamais de cadenas, jamais de « verrouillé » : le vide est une invitation, pas un refus.
     expect(document.querySelector('[data-butin="oui"]')?.textContent ?? '').not.toMatch(
       /verrouill|cadenas|bloqu/iu
     );
+  });
+
+  it('R26 — ouvrir une pièce NON rapportée montre sa fiche, sans révéler sa couleur (R28)', () => {
+    // Les deux moitiés de la demande, dans un seul cas : « la même chose que les Gobi » ET
+    // « sans donner les couleurs, parce que ça c'est à deviner ».
+    render(<Butin objets={objets()} />);
+    fireEvent.click(document.querySelector('[data-butin-piece="livre-cite"]') as Element);
+
+    const fiche = document.querySelector('[data-fiche-butin="livre-cite"]');
+    expect(fiche, 'taper une pièce non rapportée n’ouvre rien').not.toBeNull();
+    expect(fiche?.getAttribute('data-obtenue')).toBe('non');
+
+    expect(
+      fiche?.querySelector('[data-fiche-visuel]')?.getAttribute('data-couleur-revelee'),
+      'la couleur est montrée : elle devait rester à deviner'
+    ).toBe('non');
+    expect(fiche?.querySelector('[data-couleur-a-deviner]')).not.toBeNull();
+    // Et surtout PAS la phrase de promesse de l'étagère de Gobi : ce n'est pas le même contrat.
+    expect(fiche?.querySelector('[data-promesse-couleur]')).toBeNull();
+  });
+
+  it('une pièce RAPPORTÉE se montre en couleur — elle est gagnée, il n’y a plus à deviner', () => {
+    render(<Butin objets={objets(['braise-volcan'])} />);
+    fireEvent.click(document.querySelector('[data-butin-piece="braise-volcan"]') as Element);
+
+    const fiche = document.querySelector('[data-fiche-butin="braise-volcan"]');
+    expect(fiche?.getAttribute('data-obtenue')).toBe('oui');
+    expect(
+      fiche?.querySelector('[data-fiche-visuel]')?.getAttribute('data-couleur-revelee'),
+      'un objet rapporté reste en silhouette : la récompense ne se voit pas'
+    ).toBe('oui');
+    expect(fiche?.querySelector('[data-couleur-a-deviner]')).toBeNull();
+  });
+
+  it('la fiche se referme — un panneau sans sortie est le pire défaut possible (D46)', () => {
+    render(<Butin objets={objets()} />);
+    fireEvent.click(document.querySelector('[data-butin-piece="livre-cite"]') as Element);
+    expect(document.querySelector('[data-fiche-butin]')).not.toBeNull();
+
+    fireEvent.click(document.querySelector('[data-fermer-fiche]') as Element);
+    expect(
+      document.querySelector('[data-fiche-butin]'),
+      'la fiche ne se referme pas : l’enfant est piégé dedans'
+    ).toBeNull();
   });
 });

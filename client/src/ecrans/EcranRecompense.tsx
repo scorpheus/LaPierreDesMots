@@ -49,6 +49,7 @@ export function EcranRecompense(): ReactElement {
   const demarreLe = useEtatJeu((etat) => etat.demarreLe);
   const termineLe = useEtatJeu((etat) => etat.termineLe);
   const dejaEnvoyee = useEtatJeu((etat) => etat.tentativeEnvoyee);
+  const journalise = useEtatJeu((etat) => etat.journalise);
   const dernierGain = useEtatJeu((etat) => etat.dernierGain);
   const animationsDesactivees = useEtatJeu((etat) => etat.animationsDesactivees);
 
@@ -68,6 +69,19 @@ export function EcranRecompense(): ReactElement {
 
   useEffect(() => {
     if (dejaEnvoyee || envoiEnCours.current) {
+      return;
+    }
+    // ── R30 — LA PARTIE DU PARENT NE COMPTE PAS ────────────────────────────────────────────
+    //
+    // `tentatives` fait foi pour toute la pédagogie : BKT, Leitner et sélecteur s'en
+    // recalculent. Une partie que le parent lance depuis sa galerie pour VOIR à quoi ressemble
+    // un exercice n'est pas une donnée sur l'enfant ; l'y inscrire fausserait les trois, et de
+    // la pire façon — silencieusement, et dans le sens « il sait faire ».
+    //
+    // Le garde est ici, au seul endroit qui écrit. `LANCEMENT_PARENT` portait déjà l'intention
+    // depuis N5 (`journalise: false`) sans que personne ne la lise : le drapeau existait, la
+    // constante existait, et rien ne s'en servait.
+    if (!journalise) {
       return;
     }
     if (profil === null || paquet === null || resume === null) {
@@ -135,6 +149,7 @@ export function EcranRecompense(): ReactElement {
     })();
   }, [
     dejaEnvoyee,
+    journalise,
     profil,
     paquet,
     resume,

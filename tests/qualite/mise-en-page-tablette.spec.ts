@@ -78,26 +78,28 @@ const DEFILEMENT_TOLERE = new Set(['dashboard', 'galerie-parent']);
 /**
  * ── LA DETTE, CHIFFRÉE, DATÉE, ET QUI NE PEUT QUE DÉCROÎTRE ───────────────────────────────────
  *
- * Le campement ne tient pas, et ce n'est plus un défaut de mise en page. Mesuré le 2026-08-03 :
+ * ── LE CAMPEMENT EST SORTI DE CETTE TABLE, ET C'EST LA DÉMONSTRATION DU PROCÉDÉ ───────────────
  *
- *     une colonne (l'état d'origine, décor rendu)          2 607 px
- *     3 colonnes de 608                                    1 848 px
- *     + étagère et compagnons en pleine largeur            1 578 px   ← état actuel
- *     cadre de la tablette                                 1 200 px
+ * Il y est entré le 2026-08-03 à **378 px**, avec cette conclusion : « aucun assemblage ne
+ * descend sous 1 578 px ; les 378 restants demandent de retirer ou de déplacer du contenu, et
+ * cet arbitrage appartient au père. » Le balayage avait essayé 1, 2, 3 et 4 colonnes, le décor
+ * borné et le décor pleine largeur.
  *
- * Le balayage a essayé 1, 2, 3 et 4 colonnes, le décor borné et le décor pleine largeur : AUCUN
- * assemblage ne descend sous 1 578. La raison est mesurable — rétrécir un panneau l'ALLONGE
- * (l'étagère fait 298 px sur 1 872 de large, 686 px sur 608) — et il reste huit blocs pour
- * 1 200 px. **Les 378 px restants demandent de retirer ou de déplacer du contenu**, ce qui
- * touche une règle écrite en tête de `EcranCampement.tsx` : « Rien n'est caché. Un compagnon non
- * rallié, un objet non rapporté : visibles et gris. » Cet arbitrage appartient au père, pas ici.
+ * Le père a rendu l'arbitrage le jour même, et pas du tout où je l'attendais : « Dans le coffre,
+ * il y a aussi les Gobi. Je pense qu'il faut les laisser dans le coffre, ça sert à rien de les
+ * mettre dans le campement. » L'étagère occupait 298 px plus son gap. **Mesure après retrait :
+ * 0 px de débordement.** La dette est éteinte, sa ligne est donc supprimée — une dette qu'on
+ * garderait « par prudence » après l'avoir soldée est un mensonge de plus dans le contrat.
  *
- * ⚠ CE N'EST PAS UNE ASSERTION ASSOUPLIE, C'EST UN CLIQUET. La valeur exacte est opposable : si
- * le campement grandit d'un pixel, ce garde échoue. Elle ne peut que descendre, et elle doit
- * descendre à zéro. La ligne disparaît le jour où l'arbitrage est rendu.
+ * Ce qu'il faut en retenir : la dette n'était pas un défaut de mise en page, et je l'avais écrit.
+ * C'était un défaut de CONTENU — un panneau au mauvais endroit — et c'est le joueur qui l'a vu.
+ * Chiffrer la dette au lieu de l'exempter en silence est ce qui a rendu son extinction visible.
+ *
+ * ⚠ CE QUI RESTE N'EST PAS UNE ASSERTION ASSOUPLIE, C'EST UN CLIQUET. La valeur exacte est
+ * opposable : si l'écran grandit d'un pixel, ce garde échoue. Elle ne peut que descendre, et
+ * elle doit descendre à zéro. La ligne disparaît le jour où la cause est levée.
  */
 const DETTE_MESUREE = new Map([
-  ['campement', 378],
   /**
    * `colorie` — LA DETTE QUE R16 IMPOSE, ET QUI EST LA BONNE DÉCISION
    *

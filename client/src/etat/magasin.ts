@@ -9,6 +9,8 @@
 import { createStore } from 'zustand/vanilla';
 import type { StoreApi } from 'zustand/vanilla';
 import { calculerEtoiles, obtenirMoteur } from '@pierre/partage';
+import { LANCEMENT_ENFANT } from '@pierre/partage/parent';
+import type { OptionsLancement } from '@pierre/partage/parent';
 import type {
   AideProposee,
   CodeEcran,
@@ -68,6 +70,20 @@ export interface EtatMagasin {
   readonly demarreLe: string | null;
   readonly termineLe: string | null;
   readonly tentativeEnvoyee: boolean;
+  /**
+   * Cette partie compte-t-elle dans le journal de l'enfant ? — R30.
+   *
+   * Faux quand le parent lance un exercice depuis sa galerie : « il faut que le parent puisse
+   * essayer un exercice sans que ça compte », et `tentatives` fait foi pour toute la
+   * pédagogie. Une partie du parent qui s'y inscrirait fausserait le BKT, le Leitner et le
+   * sélecteur — sur la seule base d'un adulte qui voulait voir à quoi ça ressemble.
+   *
+   * **Le drapeau vit ICI, dans l'état, et pas dans une variable de l'écran de lancement.**
+   * `LANCEMENT_PARENT` le disait déjà en commentaire : « un drapeau qui ne vit que dans une
+   * variable JavaScript est un drapeau qu'aucun test de bout en bout ne peut constater ».
+   * Porté par le magasin, il se lit sur `data-journalise` et une recette peut l'exiger.
+   */
+  readonly journalise: boolean;
 
   readonly graine: number;
   readonly animationsDesactivees: boolean;
@@ -91,7 +107,11 @@ export interface EtatMagasin {
   naviguer(ecran: CodeEcran): void;
   choisirProfil(profil: Profil): void;
   quitterProfil(): void;
-  demarrerNoeud(paquet: PaquetNoeudAttendu): void;
+  /**
+   * Ouvre un nœud. `options.journalise` vaut `true` par défaut : c'est l'enfant qui joue, et
+   * un défaut qui n'enregistrerait rien serait la pire des valeurs par défaut possibles.
+   */
+  demarrerNoeud(paquet: PaquetNoeudAttendu, options?: OptionsLancement): void;
   emettre(action: unknown): void;
   rejouer(): void;
   fixerGraine(graine: number): void;
@@ -158,6 +178,9 @@ export function creerMagasin(
     demarreLe: null,
     termineLe: null,
     tentativeEnvoyee: false,
+    // Vrai par défaut : c'est l'enfant qui joue. Un défaut à `false` serait la pire valeur
+    // possible — un journal muet ne se voit nulle part avant que la pédagogie n'ait dérivé.
+    journalise: true,
 
     graine: graineInitiale,
     animationsDesactivees: animationsInitiales,
@@ -221,7 +244,7 @@ export function creerMagasin(
       services.retour.reinitialiserSerie();
     },
 
-    demarrerNoeud(paquet: PaquetNoeudAttendu): void {
+    demarrerNoeud(paquet: PaquetNoeudAttendu, options: OptionsLancement = LANCEMENT_ENFANT): void {
       const code = paquet.exercice.jeu.moteur;
       const moteur = obtenirMoteur(code);
       const etatMoteur = moteur.creerEtat({
@@ -243,6 +266,7 @@ export function creerMagasin(
         demarreLe: maintenantIso(services.horloge),
         termineLe: null,
         tentativeEnvoyee: false,
+        journalise: options.journalise,
         ecran: 'noeud',
         // Nouveau nœud, nouvelle série : la hauteur du son repart de la tonique (v2 § 8).
         serie: 0
@@ -351,7 +375,9 @@ export function creerMagasin(
         fixer({ ecran: 'carte' });
         return;
       }
-      lire().demarrerNoeud(paquet);
+      // Rejouer garde le RÉGIME du lancement : une partie lancée par le parent ne doit pas se
+      // mettre à compter au second tour parce qu'on a retapé « Rejouer ».
+      lire().demarrerNoeud(paquet, { journalise: lire().journalise });
     },
 
     fixerGraine(graine: number): void {
