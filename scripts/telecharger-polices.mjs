@@ -112,6 +112,57 @@ const POLICES = [
     url: null,
     sha256: null,
     note: 'Cursive scolaire française. Sert à reconnaître ce qu’il voit sur son cahier.'
+  },
+
+  // ══════════════════════════════════════════════════════════════════════════════════════════
+  // LES TROIS QUE CE SCRIPT NE CONNAISSAIT PAS — ajoutées le 2026-08-03, sur la console du père.
+  //
+  // Après la correction d'Andika, il restait exactement trois erreurs `OTS parsing error` :
+  // Atkinson Hyperlegible (deux graisses) et Fredoka. Mesuré, sortie citée :
+  //
+  //     réclamées par le CSS    : 8   (global.css 3, polices.css 5)
+  //     connues du téléchargeur : 5
+  //     intersection            : 5   → 3 réclamées que RIEN ne va jamais chercher
+  //
+  // Les deux listes vivaient côte à côte sans que rien ne les rapproche. Une police déclarée
+  // dans une feuille de style et absente de cette table est une requête qui recevra du HTML,
+  // pour toujours, en silence — c'est exactement ce que le père a vu.
+  //
+  // `tests/unitaires/polices-declarees.test.ts` croise désormais les deux listes : ajouter un
+  // `@font-face` sans l'ajouter ici fait rougir la chaîne.
+  // ══════════════════════════════════════════════════════════════════════════════════════════
+  {
+    fichier: 'atkinson-hyperlegible-regular.woff2',
+    famille: 'Atkinson Hyperlegible',
+    graisse: 400,
+    licence: 'SIL Open Font License 1.1',
+    auteur: 'Braille Institute of America',
+    page: 'https://www.brailleinstitute.org/freefont/',
+    url: 'https://cdn.jsdelivr.net/npm/@fontsource/atkinson-hyperlegible@5.2.5/files/atkinson-hyperlegible-latin-400-normal.woff2',
+    sha256: 'b09653e3ba9d95e26da5c408979f40451990a4573ce5f96abe6982e2fcb09e6c',
+    note: 'Interface hors zone de lecture. Dessinée pour la basse vision : caractères très différenciés, ce qui sert aussi un enfant qui déchiffre.'
+  },
+  {
+    fichier: 'atkinson-hyperlegible-bold.woff2',
+    famille: 'Atkinson Hyperlegible',
+    graisse: 700,
+    licence: 'SIL Open Font License 1.1',
+    auteur: 'Braille Institute of America',
+    page: 'https://www.brailleinstitute.org/freefont/',
+    url: 'https://cdn.jsdelivr.net/npm/@fontsource/atkinson-hyperlegible@5.2.5/files/atkinson-hyperlegible-latin-700-normal.woff2',
+    sha256: 'd8e8b1e0e929651439e25e23ade4b9d6cac073f2444aadb8e8b85431726c2036',
+    note: 'Graisse de l’interface. Jamais dans une zone de déchiffrage — là, c’est Andika.'
+  },
+  {
+    fichier: 'fredoka-variable.woff2',
+    famille: 'Fredoka',
+    graisse: 'variable',
+    licence: 'SIL Open Font License 1.1',
+    auteur: 'Milena Brandão, Hafontia',
+    page: 'https://fonts.google.com/specimen/Fredoka',
+    url: 'https://cdn.jsdelivr.net/npm/@fontsource-variable/fredoka@5.2.5/files/fredoka-latin-wght-normal.woff2',
+    sha256: '5acd18c3fcaab27993b4702c2631653014bb733877d87f99a0d4a0c9a20606de',
+    note: 'Titres et boutons. Ronde et gaie — l’habillage du monde, jamais le texte que l’enfant déchiffre.'
   }
 ];
 
