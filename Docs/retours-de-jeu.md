@@ -733,3 +733,191 @@ Trois recettes manquantes, formulées comme des propriétés et non comme des ca
 La quatrième leçon n'est pas une recette, c'est une discipline : **le père a trouvé en vingt
 minutes ce que 2 498 cas n'avaient pas vu.** Une session de jeu réel vaut une campagne, et elle
 doit précéder les campagnes plutôt que les suivre.
+
+---
+
+## R31 → R38. Huit retours du 2026-08-07 — **session d'Ezékiel et du père**
+
+Verbatim et mesure ici ; le plan de travail, les arbitrages et l'ordre des lots sont dans
+[feuille-de-route-debug.md](feuille-de-route-debug.md), qui est né de cette session.
+
+### R31. Rien de ce qu'on gagne n'est jamais enregistré — **ouvert, cause trouvée, priorité 1**
+
+> « si on finit un exercice, il y a écrit qu'on gagne une évolution mais en fait il n'y a rien du
+> tout dans le campement. »
+
+Mesuré sur `donnees/pierre.db`, en lecture seule, sortie citée :
+
+```
+tentatives            23        formes_gobi            0
+progression_cascade    0        campement              0
+compagnons             0        stade_gobi   {oeuf, rang 1}
+```
+
+**Vingt-trois exercices joués, zéro ligne de cascade.** Recensé par OBJET, chaque écrivain d'acquis
+et son atteignabilité :
+
+```
+appliquerTentativeALaCascade   →  appelé par PERSONNE
+enregistrerFormeGobi           →  appelé par PERSONNE
+poserObjetCampement            →  route OK, aucun client ne l'appelle
+compagnons, etagere_rang       →  aucun écrivain nulle part
+```
+
+L'annonce, elle, est sincère : `client/src/etat/magasin.ts:345` calcule la cascade **dans le
+client**, et `magasin.ts:240` la remet à `ETAT_CASCADE_VIDE` à chaque choix de profil. Rien ne la
+lit du serveur (`grep -n cascade client/src/api/client.ts` → aucune ligne). **C'est un compteur de
+session qui repart de zéro à chaque rechargement, et qui n'attribue rien.**
+
+Conséquence qui n'était pas dans le retour : `formes_gobi` vide ⇒ le stade reste `oeuf` ⇒
+**`EvolutionGobi`, écrit et livré pour R6, est inatteignable.** Le coffre restera vide à vie.
+
+`tests/e2e/parcours-cascade.spec.ts` vérifie l'affichage d'une cascade que le client fabrique
+lui-même : il ne pouvait rien voir.
+
+### R32. `histoire` : la bonne réponse est TOUJOURS le premier bouton — **ouvert**
+
+> « mélanger un peu plus les réponses aussi qui sont juste à cocher à la suite »
+
+R14 avait corrigé exactement ce défaut — sur `eclair` seulement. Mesuré sur les 76 exercices :
+
+```
+eclair    34 consignes à options, 34 avec la bonne en 1re position  →  MÉLANGÉ au rendu
+histoire  32 consignes à options, 32 avec la bonne en 1re position  →  ORDRE D'ÉCRITURE
+```
+
+`grep -rn "melanger" partage/src/moteurs/*/moteur.ts` ne rend qu'**une** ligne, celle d'`eclair`.
+
+### R33. Le jeu refuse une bonne réponse — **ouvert, tranché, lot B3**
+
+> « la sélection des mots dans la page les mots de couleur et autre qui n'est pas facile, on
+> devrait juste pouvoir prendre n'importe quel mot et le mettre dans l'une des deux cases, sans
+> ordre particulier, ça devrait juste fonctionner. »
+
+**Il avait parfaitement compris l'exercice, et c'est moi qui n'avais pas ouvert le fichier.** Je
+lui ai d'abord posé la question comme s'il avait pu se tromper sur la mécanique. Sa réponse — « on
+a des mots mélangés, des mots qui indiquent une couleur et d'autres mots, il y a 2 cases » —
+décrit `paniers-couleurs-01.json` à la lettre : deux paniers, douze mots, il faut trier.
+
+Le code, lui, découpe ce tri en **quatre consignes de trois mots**, affiche les **douze**
+(`MoteurTri.tsx:178` ne filtre jamais sur `etape.restantes`) et refuse les neuf autres
+(`validation.ts:66`). Donc la consigne dit « range les mots de couleur à gauche », l'enfant tape
+**vert** — qui *est* un mot de couleur — le pose dans le bon panier, et le jeu le refuse par une
+oscillation de 6 px sans un mot. **Ce n'est pas un ordre imposé, c'est le refus d'une bonne
+réponse.**
+
+Mesuré sur les 11 exercices de `tri` :
+
+```
+122 mots affichés au premier écran  ·  27 acceptés  ·  95 refusés   →  77,9 %
+wagons-tri-01 : 14 affichés, 2 acceptés, 12 refusés
+```
+
+Et le découpage ne porte aucune pédagogie — les 53 consignes de `tri` :
+
+```
+« Range AUSSI les mots … » (règle identique à la précédente)   16
+« ces mots » / « les derniers mots » (aucun critère)           13
+portant un critère neuf                                        24
+→ sans aucune règle nouvelle : 29  (54,7 %)
+```
+
+`rayonnages-tri-01` dit *« Range les mots du renard. »* puis *« Range **aussi** les mots du
+renard. »* : deux consignes, une règle, des lots de deux mots.
+
+**Tranché** : `tri` accepte n'importe quel mot à n'importe quel moment (voie A). Le lotissement
+disparaît, le critère reste. **Se fait avec le rejeu sous les yeux** — la forme des résumés change,
+et le journal fait foi pour le BKT et le Leitner.
+
+### R34. Le glisser au doigt sur tablette — **question tranchée : c'est possible, et c'est déjà fait**
+
+> « voir pour le glissement d'un texte vers une zone si en web sur la tablette au doigt c'est
+> possible ou pas ? »
+
+**Oui.** `place` le fait, et les trois pièces indispensables sont dans le dépôt :
+`PointerSensor` de dnd-kit (`MoteurPlace.tsx:21`), `activationConstraint: { distance: 8 }`
+(`:137`) pour qu'un tap reste un tap, et surtout **`touchAction: 'none'`** (`Reserve.tsx:90`) —
+sans lequel le navigateur fait défiler la page au lieu de glisser, ce qui est la cause n°1 des
+« ça ne marche pas au doigt » en web.
+
+Recensé par objet, **commentaires exclus** : aucun geste de pointeur dans **11 moteurs sur 14**.
+Seul `place` fait réellement du glisser-déposer — et il porte 1 exercice sur 76 ; `colorie` peint
+et `trace` trace, ce sont d'autres gestes. `tri` a reçu son affordance au lot R16, jamais son
+glisser.
+
+> Le premier passage de ce recensement comptait `tri` comme ayant un glisser : les motifs
+> `onPointer`, `draggable`, `dnd-kit` étaient trouvés **dans le commentaire de R16 qui dit qu'ils
+> sont absents**. Un recensement qui lit ses propres notes ne mesure rien.
+
+**Garde manquant** : aucune recette n'exerce un vrai glisser tactile, même sur `place` qui marche.
+
+### R35. Les mots à déchiffrer ignorent les réglages de lecture — **ouvert**
+
+> « la mise en page pour chaque page, actuellement, le texte est trop petit »
+
+Réglages d'Ezékiel en base : `andika · corps 27 px · interlettrage 0,06 em · interligne 2`. Ils ne
+sortent que par `ZoneDeLecture`, qui rend la **consigne**. Les mots sur lesquels porte la lecture
+sont en dur, recensé sur les 14 moteurs :
+
+```
+fontSize: '1.25rem' (20 px) en dur  →  11 moteurs sur 14
+```
+
+**27 px demandés, 20 px rendus, sans interlettrage** — alors que l'interlettrage est noté dans le
+dépôt lui-même comme « le levier le plus prouvé » (Zorzi 2012).
+
+### R36. « Marcher sur les mots » : le design existait, il n'a jamais été dessiné — **ouvert**
+
+> « certaines règles sont incomprises… comme marcher sur les mots, est-ce qu'il y avait un design
+> graphique en tête ? »
+
+**Oui, et il est écrit noir sur blanc** — specs v2, ligne 216 : *« `chemin` · Tracer une route en
+enchaînant les bonnes cases · Sauts de nénuphars · pas japonais · lianes »*.
+
+Ce qui est rendu (`MoteurChemin.tsx:119`) : `display: flex, flexWrap: wrap` — **une rangée de
+boutons qui passe à la ligne**. Le pion, l'adjacence et le franchissement sont dans le DOM
+(`data-pion`, `data-atteignable`, `data-franchie`) et **aucun des trois n'a de rendu**. Ni plateau,
+ni pion visible, ni trace du chemin.
+
+Même famille que R16 : **le dessin manquant a été pris pour un défaut de compréhension.**
+
+### R37. Le décor est un lavis gris à 14 %, pas une image qui accompagne — **à arbitrer**
+
+> « il devrait y avoir des images aussi pour accompagner, exemple avec les lucioles »
+
+R9 a bien été corrigé : `EcranNoeud` monte `DecorDeFond` derrière les 12 moteurs sans scène propre.
+Mais `DecorDeFond.tsx:77` pose `OPACITE_FOND = 0.14`, en grisaille, `aria-hidden`,
+`pointerEvents: none`. **Cette opacité est juste** — elle a été dérivée de la contrainte de
+contraste du texte, pas choisie à l'œil.
+
+Elle répond simplement à une autre question. Quand l'exercice parle de lucioles, l'enfant doit
+**voir une luciole** en couleur à côté du mot, pas un lavis gris derrière le texte. Coexistence
+possible (la vignette est hors du champ de lecture), mais elle heurte D51 — le décor de l'exercice
+reste gris pour ne pas voler son signal au coloriage.
+
+**Le père a refusé de trancher dans l'abstrait, et il a raison** : « il faut qu'on revoie le
+design en particulier dans une tâche liée à cet exercice ». La question de l'illustration se pose
+**par exercice, devant l'exercice** — donc après R38. Lot C4, après V1.
+
+### R38. Aucun moyen de revoir les écrans sans jouer — **demandé, ouvert**
+
+> « niveau design, faire des retours page par page, donc à me donner des pages en mode parent
+> juste pour faire des retours »
+
+La zone parent donne accès aux 76 **exercices** (galerie, R30) et à **aucun des 13 écrans**. Voir
+le campement ou la carte demande de jouer jusqu'à eux.
+
+De quoi le faire existe déjà : `tests/e2e/qa-outils.ts` porte `recettesDEcrans()`, qui **dérive du
+code** la liste des écrans et sait atteindre chacun **en tapant comme l'enfant**. Une « Visite des
+écrans » dans le dashboard la lit — écrire une seconde liste d'écrans à la main serait le doublon
+qui se met à mentir, comme les deux listes de polices de R8.
+
+**Tranché le 2026-08-07 : la visite dans la zone parent**, pas une planche de captures. Et le père
+l'a élargie de lui-même : « il faut qu'on trouve un moyen pour que je voie chaque exercice et que
+je fasse des retours de design » — donc **29 pages + les 76 exercices**, ces derniers par le
+chemin non journalisé de R30. **C'est l'outil dont dépend toute la revue de design** : lot V1,
+juste après A1.
+
+### Le compte cumulé
+
+**14 défauts trouvés par le père en deux sessions de jeu. 0 par la QA.**

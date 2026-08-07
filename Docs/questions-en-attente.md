@@ -8300,3 +8300,107 @@ mission détaillée et le contrat chiffré. Les deux agents ont dû aller relire
 retrouver leur propre mission. Le signalement est resté sans effet parce qu'il vivait dans un
 rapport d'agent : il est consigné ici pour qu'il survive au changement de conversation. Un
 orchestrateur qui écrit un brief en trois champs et n'en lit que deux paie l'agent deux fois.
+
+---
+
+## Session de jeu du 2026-08-07 — trois arbitrages qui bloquent des lots
+
+Mesures complètes dans [feuille-de-route-debug.md](feuille-de-route-debug.md) ; retours bruts en
+R31 → R38 de [retours-de-jeu.md](retours-de-jeu.md). Ici, seulement ce qui attend une décision.
+
+### J1. `tri` — faut-il supprimer l'ordre des consignes, ou le rendre invisible ?
+
+**Le fait, mesuré.** `partage/src/moteurs/tri/validation.ts:66` refuse tout mot absent de
+`etape.restantes`, et `ordreEtapesImpose: true` vaut sur **13 moteurs sur 14**. Le refus ne compte
+pas comme erreur, mais à l'écran il ne produit qu'une oscillation de 6 px : l'enfant tape, ça
+bouge, rien ne se range, personne ne lui dit pourquoi. Il mord sur **11 exercices de `tri` sur
+11** (4,8 consignes en moyenne), et sur **73 exercices sur 76** tous moteurs confondus.
+
+**Le retour du père** : « on devrait juste pouvoir prendre n'importe quel mot et le mettre dans
+l'une des deux cases, sans ordre particulier, ça devrait juste fonctionner. »
+
+| voie | ce que ça change | ce que ça coûte |
+|---|---|---|
+| **A. accepter n'importe quel mot** | l'ordre disparaît ; la consigne courante devient un guide | le découpage en consignes de 73 exercices se dissout en une seule grande consigne |
+| **B. ne montrer que les mots de la consigne courante** *(recommandée)* | le geste refusé devient impossible ; l'ordre reste mais ne heurte plus le doigt | des mots apparaissent en cours de route |
+| **C. garder l'ordre et dire le refus** | « celui-là, c'est pour tout à l'heure » | on explique une règle au lieu de la supprimer — le moins bon pour 7 ans |
+
+**Bloque le lot B3, et le lot B2 (le glisser) en dépend** : inutile d'ajouter un glisser vers une
+case qui refusera le mot.
+
+### J2. Une vignette d'illustration en COULEUR pendant que le décor reste gris ?
+
+**Le fait, mesuré.** `client/src/habillages/DecorDeFond.tsx:77` pose `OPACITE_FOND = 0.14`, en
+grisaille, `aria-hidden`, `pointerEvents: none`. Cette valeur est **dérivée de la contrainte de
+contraste du texte**, pas choisie à l'œil : la relever ferait échouer `test:qualite`, et il aurait
+raison.
+
+**Le retour du père** : « il devrait y avoir des images aussi pour accompagner, exemple avec les
+lucioles ». Un lavis gris à 14 % derrière le texte n'est pas une image qui accompagne.
+
+**La contradiction à trancher.** Une vignette en couleur à côté de la consigne respecte « le décor
+s'agite, le texte jamais » (elle est hors du champ de lecture). Mais elle heurte **D51** : le
+décor de l'exercice reste gris pour ne pas voler son signal au coloriage, qui est *la* récompense
+du jeu. Trois positions possibles :
+
+1. **vignette en couleur** — l'illustration gagne, D51 perd un peu de son exclusivité ;
+2. **vignette en trait noir sur parchemin**, nette et grande, sans couleur — respecte D51 à la
+   lettre, et reste infiniment plus lisible qu'un fond à 14 % ;
+3. **rien de plus** — on tient D51 et on accepte que l'exercice ne montre pas ce dont il parle.
+
+**Bloque le lot C4.**
+
+### J3. La revue design page par page — visite intégrée ou planche de captures ?
+
+**Le retour du père** : « me donner des pages en mode parent juste pour faire des retours ».
+
+`tests/e2e/qa-outils.ts` porte déjà `recettesDEcrans()`, qui dérive du code la liste des écrans et
+sait atteindre chacun **en tapant comme l'enfant**. Deux façons de s'en servir :
+
+| voie | ce que ça donne | ce que ça coûte |
+|---|---|---|
+| **planche de captures** | 29 images, revue hors ligne, immédiate | périme au premier commit, aucune interaction |
+| **« Visite des écrans » dans le dashboard** *(recommandée)* | on ouvre n'importe quel écran, on y touche, bandeau « retour à la visite » | un écran de plus à écrire ; ne périme jamais |
+
+Les deux sont compatibles : la visite d'abord, la planche ensuite si le père veut annoter à froid.
+**Bloque le lot V1** — ou plutôt, décide de sa forme.
+
+### Réponses du père, le 2026-08-07 — J1, J2 et J3 sont tranchées
+
+Consignées ici sans réécrire les questions au-dessus (règle du fichier), pour qu'on voie **ce qui
+a été demandé et ce qui a été répondu**.
+
+**J1 → voie A, et la question était mal posée.** Sa réponse : « c'est que je n'ai pas compris
+l'exercice que tu proposes. Ce que j'ai compris : on a des mots mélangés, des mots qui indiquent
+une couleur et d'autres mots, en brouillon. Il y a 2 cases, les mots de couleurs et les autres, et
+il faut trier les mots. »
+
+**Il avait raison sur toute la ligne, et c'est moi qui n'avais pas ouvert le fichier.** Sa
+description est `paniers-couleurs-01.json` mot pour mot. En allant le lire, le défaut s'est révélé
+plus grave que « un ordre imposé » : les douze mots sont affichés, quatre consignes de trois mots
+n'en acceptent que trois à la fois, et **77,9 % des mots affichés au premier écran sont refusés au
+doigt** — y compris quand la réponse est juste (« vert » est un mot de couleur, le panier est le
+bon, le jeu refuse). Le découpage ne porte d'ailleurs aucune règle : **29 des 53 consignes de
+`tri`, soit 54,7 %, n'introduisent aucun critère nouveau** (« Range *aussi* les mots du renard »,
+« Range les derniers mots »).
+
+→ **`tri` accepte n'importe quel mot à n'importe quel moment.** Lot B3, avec le rejeu sous les
+yeux : la forme des résumés change, et le journal fait foi pour le BKT et le Leitner.
+
+> **La leçon d'orchestration, et elle est pour moi.** J'ai proposé trois voies et recommandé la
+> mauvaise (« ne montrer que le lot courant ») parce que j'avais mesuré le *mécanisme*
+> — `ordreEtapesImpose`, 13 moteurs sur 14 — sans jamais ouvrir **l'exercice dont il parlait**.
+> C'est exactement le mode de défaillance noté dans CLAUDE.md : *raisonner juste sur le mécanisme
+> et se tromper sur l'endroit où il mord.* Et le réflexe de demander un arbitrage plutôt que
+> d'aller lire le fichier a failli faire cacher 78 % des mots pour protéger une structure vide.
+
+**J2 → pas d'arbitrage global, une tâche par exercice.** Sa réponse : « il faut qu'on revoie le
+design en particulier dans une tâche liée à cet exercice, et il faut qu'on trouve un moyen pour
+que je voie chaque exercice et que je fasse des retours de design. »
+
+→ La question « vignette en couleur ou pas » ne se pose pas dans l'abstrait : elle se pose devant
+chaque exercice. Lot C4, **après V1**.
+
+**J3 → la visite dans la zone parent**, et élargie aux exercices : 29 pages + les 76 exercices, ces
+derniers par le chemin non journalisé de R30. C'est l'outil dont dépendent J2 et toute la revue de
+design. Lot V1, juste après A1.
