@@ -1,6 +1,51 @@
 # Briefs de lancement — les deux chantiers du 2026-08-07
 
-Prêts à copier-coller. Deux agents, **périmètres de fichiers disjoints, vérifié mécaniquement** :
+## § 0. Comment lancer — le brief de l'ORCHESTRATEUR
+
+**On ne recopie pas ce document dans un message.** On donne son chemin. Le recopier dans N briefs,
+c'est N occasions de le déformer (D10). Ouvrir une session neuve et coller ceci suffit :
+
+```
+Tu orchestres les deux chantiers de Docs/briefs-agents-2026-08-07.md. Lis-le en entier
+avant de lancer quoi que ce soit, ainsi que Docs/feuille-de-route-debug.md et
+Docs/specs-qa-des-promesses-v1.md qu'il cite.
+
+Tes règles d'orchestrateur, et elles sont à toi seul :
+- TU es le seul à compiler, lancer `npm run verifier` et installer. Aucun sous-agent ne
+  compile ni n'installe : jeton unique.
+- Tu LIS le rapport de chaque sous-agent AVANT l'action qu'il devait informer. Un rapport
+  commandé et non lu se paie deux fois.
+- Tu vérifies toi-même que chaque symbole déclaré a trouvé son propriétaire : un contrat
+  gelé n'oblige personne tant qu'un fichier n'est pas nommé pour chaque morceau.
+- Tu ne donnes à chaque sous-agent que les lignes qu'il POSSÈDE, plus le chemin du plan.
+  Tu ne lui recopies pas le plan.
+- Tu relances `node scripts/qa/mesures-feuille-de-route.mjs` et
+  `node scripts/qa/detecteurs-qa-aveugle.mjs` avant le premier lot, et tu signales tout
+  écart avec les chiffres du document au lieu de les recopier.
+
+Ordre de lancement imposé :
+1. AGENT QA d'abord — § « AGENT 1 » du document. Attends son rapport.
+   Motif : si un correctif atterrit avant qu'un garde soit écrit, son contrôle positif naît
+   vert et le garde ne prouve plus rien. La preuve « rouge avant correction » se périme.
+2. Puis les lots correctifs, § « AGENT 2 », UN SOUS-AGENT PAR LOT, dans l'ordre du document :
+   A1, V1, B1, C1, B3, B2, C2, C3. Tu compiles et tu lis le rapport entre chaque.
+
+Arrête-toi et demande-moi un arbitrage si un rejeu de journal diverge, si une règle non
+négociable de CLAUDE.md est en jeu, ou si un lot demande de toucher l'un des quatre
+documents de référence.
+```
+
+**Pourquoi un sous-agent par lot correctif, et non un seul pour les huit** : un agent qui
+enchaîne huit lots épuise son contexte et perd le début. Un lot = un agent = un rapport lu =
+une compilation. C'est aussi ce qui permet de s'arrêter net après A1 si quelque chose surprend.
+
+**Modèle et effort, rappel** : `sonnet`/`medium` partout, sauf **Q2 et Q5** (`opus`/`high`, ils
+conçoivent une instrumentation) et **B3** (`opus`/`high`, il change la sémantique du journal).
+Ne monter l'effort nulle part ailleurs : cela ne rend rien de meilleur et ralentit tout le monde.
+
+---
+
+Deux agents, **périmètres de fichiers disjoints, vérifié mécaniquement** :
 
 ```
 périmètre AGENT QA   :  tests/  ·  scripts/qa/
