@@ -1,5 +1,9 @@
 # Feuille de route de debug — page par page
 
+> **Pour lancer un agent** : les deux briefs prêts à copier, avec leurs périmètres de fichiers
+> (disjoints, vérifié) et leurs contrats de sortie, sont dans
+> [briefs-agents-2026-08-07.md](briefs-agents-2026-08-07.md).
+
 Ouvert le **2026-08-07**, après une session de jeu d'Ezékiel et du père. Ce document est le plan
 de travail des sessions suivantes : **quelles pages existent, ce qui ne va pas sur chacune, dans
 quel ordre s'y mettre.**
