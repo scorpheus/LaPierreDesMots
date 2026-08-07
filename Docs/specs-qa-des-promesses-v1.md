@@ -238,9 +238,33 @@ huit étaient inutiles.
 | **population** | **dérivée** des unions littérales de `partage/src`, recensées par les fonctions de nom que le compilateur force déjà à être exhaustives |
 | **contrôle positif** | `objet-campement` doit être signalé. **Le détecteur textuel de l'étude échoue ce contrôle** : Q2 ne peut donc pas être un `grep`, il doit instrumenter l'exécution |
 | **échoue si** | un membre n'est jamais produit et ne figure pas sur la liste d'exemptions nommée |
-| **vit dans** | `tests/e2e/couverture-enumerants.spec.ts` + une sonde `window.__test.emissions()` |
+| **vit dans** | `tests/unitaires/couverture-enumerants.test.ts` — **corrigé le 2026-08-07, voir ci-dessous** |
 
 C'est le garde qui **ne pourrit pas** : une loi ajoutée demain entre dans le contrat toute seule.
+
+> **Correction du chemin, arbitrée par l'orchestrateur le 2026-08-07.** Cette ligne disait
+> `tests/e2e/couverture-enumerants.spec.ts` + une sonde `window.__test.emissions()`. L'agent du
+> lot Q a signalé deux obstacles mécaniques ; j'ai vérifié le second moi-même sur
+> `playwright.config.ts`, sortie citée :
+>
+> ```
+> parcours    testDir tests/e2e     testMatch /parcours-.*\.spec\.ts$/
+> robustesse  testDir tests/e2e     testMatch /(cassecou|singe)\.spec\.ts$/
+> bilan       testDir tests/e2e     testMatch /parcours-zz-invariants\.spec\.ts$/
+> qualite     testDir tests/qualite · visuel  testDir tests/visuel
+> ```
+>
+> **Aucun projet ne collecte ce nom.** Le fichier que cette spec exigeait n'aurait jamais été
+> exécuté — un garde silencieusement absent, exactement le mode de défaillance que le § 5 de
+> cette même spec interdit. Le second obstacle est de périmètre : la sonde vivrait dans
+> `client/src/testabilite/`, que le lot Q ne possède pas.
+>
+> Ce qui comptait dans l'exigence est **tenu** : Q2 instrumente l'**exécution** (2 506 réductions
+> sur les 76 exercices et la cascade, 620 champs observés), il n'est pas un `grep`, et son
+> contrôle positif signale `objet-campement` **là où le détecteur textuel D2 est aveugle**.
+> Seul le chemin change. Ce que Q2 ne couvre pas encore : les énumérants que seul le **client**
+> émet — s'il en apparaît, la sonde `window.__test.emissions()` redevient nécessaire, et c'est
+> alors un lot qui possède `client/src/testabilite/`.
 
 ### Q3 — Ce que l'écran annonce comme gagné existe en base
 

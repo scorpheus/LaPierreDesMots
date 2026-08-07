@@ -75,6 +75,14 @@ export interface ProprietesEcranDashboard {
    */
   readonly surGaleriePleinEcran?: () => void;
   /**
+   * AJOUT V1 — ouvre la « Visite des écrans » (R38, `Docs/questions-en-attente.md` § J3).
+   *
+   * Même disposition que `surGaleriePleinEcran` juste au-dessus : l'écran ne connaît aucun
+   * chemin, il reçoit un rappel, et `routeur.tsx` reste le seul fichier qui sait où mène
+   * `CHEMINS.parentVisite`.
+   */
+  readonly surAllerVisite?: () => void;
+  /**
    * R29 — le compte vient d'être supprimé, et l'écran ne peut plus parler de lui.
    *
    * Sans ce rappel, le dashboard resterait affiché sur un profil qui n'existe plus : chacune de
@@ -101,6 +109,7 @@ export function EcranDashboard({
   surTravailler,
   surLancerExercice,
   surGaleriePleinEcran,
+  surAllerVisite,
   surProfilSupprime
 }: ProprietesEcranDashboard): ReactElement {
   const clientRequetes = useQueryClient();
@@ -158,6 +167,19 @@ export function EcranDashboard({
         <h1 className="titre" style={{ fontSize: '2rem', margin: 0 }}>
           {prenom === undefined ? 'Suivi' : `Suivi de ${prenom}`}
         </h1>
+        {/* AJOUT V1 — R38 : « me donner des pages en mode parent juste pour faire des retours ».
+            `data-vers` reprend la convention déjà en usage pour « galerie-parent » deux lignes
+            plus bas dans ce fichier — un seul motif à connaître pour toute la QA. */}
+        {surAllerVisite === undefined ? null : (
+          <button
+            type="button"
+            className="cible cible-secondaire"
+            data-vers="visite-parent"
+            onClick={surAllerVisite}
+          >
+            Visite des écrans
+          </button>
+        )}
         <button type="button" className="cible cible-secondaire" onClick={sortir}>
           Fermer l’espace parent
         </button>

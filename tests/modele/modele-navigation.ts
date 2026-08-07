@@ -149,7 +149,18 @@ export const ETATS: readonly EtatModele[] = [
   { code: 'code-parent', nature: 'jouable', role: 'la porte de la zone parent' },
   { code: 'choix-profil-parent', nature: 'jouable', role: 'quel joueur le parent suit' },
   { code: 'dashboard', nature: 'jouable', role: 'le suivi parent' },
-  { code: 'galerie-parent', nature: 'jouable', role: 'le catalogue d’exercices (D34)' }
+  { code: 'galerie-parent', nature: 'jouable', role: 'le catalogue d’exercices (D34)' },
+  /**
+   * AJOUT V1 — R38, `Docs/feuille-de-route-debug.md` § 1.4 : « Tranché par le père le
+   * 2026-08-07 : une « Visite des écrans » dans la zone parent, plutôt qu'une planche de
+   * captures — une planche périme au premier commit et ne montre aucune interaction. »
+   * Le quatorzième `data-ecran` de la source, et le premier que ce lot ajoute au modèle.
+   */
+  {
+    code: 'visite-parent',
+    nature: 'jouable',
+    role: 'la visite des 13 écrans et des 76 exercices, sans jouer (R38)'
+  }
 ];
 
 /** L'état d'entrée. C'est de là que part toute exploration. */
@@ -230,6 +241,13 @@ export const TRANSITIONS: readonly TransitionModele[] = [
     motif: 'le parent rend la main au jeu'
   },
   {
+    // AJOUT V1 — la porte d'entrée de la visite depuis le dashboard.
+    depuis: 'dashboard',
+    vers: 'visite-parent',
+    prise: { selecteur: 'button', libelle: 'Visite des écrans' },
+    motif: 'R38 — le père : « me donner des pages en mode parent juste pour faire des retours »'
+  },
+  {
     // La porte du plein écran vit DANS l'onglet « Les exercices » : elle n'existe pas tant
     // que l'onglet n'est pas actif. Mesuré par l'explorateur, qui a rendu `[data-vers=
     // "galerie-parent"] INTROUVABLE` sur le dashboard fraîchement ouvert. Ce n'était pas un
@@ -239,18 +257,128 @@ export const TRANSITIONS: readonly TransitionModele[] = [
     prise: null,
     motif: 'D34 — la galerie en plein écran, derrière l’onglet « Les exercices »'
   },
+  /**
+   * ⚠ CORRIGÉ PAR LE LOT V1, ET C'EST LA MARQUE `defaut` QUI A ATTRAPÉ LE CHANGEMENT.
+   *
+   * Cette transition visait `choix-profil-parent`, marquée `defaut` : « elle DEVRAIT ramener
+   * au `dashboard` du même enfant, et elle redemande quel joueur suivre » (Q2-2 —
+   * `HoteDashboard` et `HoteGalerieParent` tenaient chacun leur PROPRE `profilSuivi` en état
+   * local). Le lot V1 a dû corriger EXACTEMENT ce défaut pour que sa propre visite survive à la
+   * navigation entre les trois hôtes de la zone parent (`FournisseurZoneParent`,
+   * `client/src/routeur.tsx`) : `profilSuivi` est maintenant PARTAGÉ. Mesuré après correction :
+   * `[data-galerie-retour="oui"]` mène désormais à `dashboard`, directement, sans redemander.
+   *
+   * Ce fichier documente lui-même la règle qui s'applique ici : « le jour où le profil suivi
+   * sera partagé, ce cas rougira et demandera qu'on retire la marque » — c'est fait. La marque
+   * `defaut` disparaît ; `tests/unitaires/modele-navigation-coherence.test.ts` en a été averti
+   * (son cas « les transitions marquées DÉFAUT » attendait cette entrée nommément).
+   */
   {
     depuis: 'galerie-parent',
-    vers: 'choix-profil-parent',
+    vers: 'dashboard',
     prise: { selecteur: '[data-galerie-retour="oui"]' },
-    motif: 'la sortie est dans l’en-tête, visible sans défiler',
-    defaut:
-      'elle DEVRAIT ramener au `dashboard` du même enfant, et elle redemande quel joueur ' +
-      'suivre. `HoteDashboard` et `HoteGalerieParent` tiennent chacun leur PROPRE ' +
-      '`profilSuivi` en état local (`routeur.tsx`) : le choix fait dans l’un est invisible ' +
-      'dans l’autre. Ce n’est pas une impasse — la sortie existe — mais le parent choisit ' +
-      'son enfant trois fois pour un aller-retour. Arbitrage consigné dans ' +
-      '`Docs/questions-en-attente.md` (Q2-2)'
+    motif:
+      'la sortie est dans l’en-tête, visible sans défiler ; le profil suivi étant partagé ' +
+      '(lot V1), elle ramène directement au dashboard du même enfant'
+  },
+
+  /**
+   * ══════════════════════════════════════════════════════════════════════════════════════
+   * AJOUT V1 — depuis la visite des écrans (R38).
+   *
+   * Onze sauts DIRECTS, un par écran nommé de `VisiteDesEcrans.tsx`, plus le lancement d'un
+   * exercice — chacun est un point de navigation RÉEL câblé par `HoteVisiteDesEcrans`
+   * (`client/src/routeur.tsx`), jamais une recette inventée pour ce fichier. `recompense` n'a
+   * volontairement PAS de transition directe depuis `visite-parent` : elle s'atteint en
+   * TERMINANT un exercice, pas en le lançant — même dérogation que `noeud → recompense`
+   * plus bas, pour le même motif.
+   *
+   * ⚠ `visite-parent → noeud` A D'ABORD ÉTÉ LAISSÉE NON DÉCLARÉE, ET C'EST DEVENU LE
+   * SIGNALEMENT, PAS LA DÉCISION.
+   *
+   * `tests/modele/serveur-double.ts` construisait ses entrées de catalogue SANS poser
+   * `EntreeGalerie.noeud` — mesuré, `entree.noeud` y valait `undefined` à l'exécution. Sur le
+   * VRAI serveur, chaque exercice porte un nœud (mesuré : bijection exacte entre les 76
+   * fichiers de `contenu/noeuds/` et les 76 de `contenu/exercices/`), et le lancement mène bien
+   * à `noeud` — mais rien, dans le double d'ALORS, ne pouvait l'exercer, et aucun fichier
+   * n'existait pour justifier une dérogation `horsPorteeExplorateur` honnête. Signalé plutôt
+   * que masqué par une fausse citation, comme demandé.
+   *
+   * L'agent QA a mesuré l'écart, complété le double (`exercice → nœud`, DÉRIVÉ de
+   * `contenu/noeuds/`, jamais écrit à la main — voir l'en-tête de `noeudParExercice` dans
+   * `serveur-double.ts`), puis rendu le fichier sans trancher la déclaration : « compléter le
+   * double sans déclarer la transition rend l'exploration rouge sur une surprise ; la
+   * déclaration appartient au fichier que V1 possède. » C'est cette moitié-ci.
+   * ══════════════════════════════════════════════════════════════════════════════════════
+   */
+  {
+    depuis: 'visite-parent',
+    vers: 'noeud',
+    prise: { selecteur: '[data-galerie-lancer]' },
+    motif:
+      'R38/R30 — lancer n’importe quel exercice du catalogue affiché sur la visite ; ' +
+      '`data-galerie-lancer` porte un exercice différent par tuile, la prise en désigne ' +
+      'une, représentative des 76'
+  },
+  {
+    depuis: 'visite-parent',
+    vers: 'profils',
+    prise: { selecteur: '[data-visite-ecran="profils"]' },
+    motif: 'R38 — le saut direct vers l’accueil, sans jouer'
+  },
+  {
+    depuis: 'visite-parent',
+    vers: 'carte',
+    prise: { selecteur: '[data-visite-ecran="carte"]' },
+    motif: 'R38 — le saut direct vers la carte'
+  },
+  {
+    depuis: 'visite-parent',
+    vers: 'ouverture',
+    prise: { selecteur: '[data-visite-ecran="ouverture"]' },
+    motif: 'R38 — le saut direct vers la séquence d’ouverture'
+  },
+  {
+    depuis: 'visite-parent',
+    vers: 'campement',
+    prise: { selecteur: '[data-visite-ecran="campement"]' },
+    motif: 'R38 — le saut direct vers le campement'
+  },
+  {
+    depuis: 'visite-parent',
+    vers: 'coffre',
+    prise: { selecteur: '[data-visite-ecran="coffre"]' },
+    motif: 'R38 — le saut direct vers le coffre'
+  },
+  {
+    depuis: 'visite-parent',
+    vers: 'reglages-lecture',
+    prise: { selecteur: '[data-visite-ecran="reglages-lecture"]' },
+    motif: 'R38 — le saut direct vers les réglages de lecture'
+  },
+  {
+    depuis: 'visite-parent',
+    vers: 'code-parent',
+    prise: { selecteur: '[data-visite-ecran="code-parent"]' },
+    motif: 'R38 — le saut direct vers la porte de la zone parent'
+  },
+  {
+    depuis: 'visite-parent',
+    vers: 'choix-profil-parent',
+    prise: { selecteur: '[data-visite-ecran="choix-profil-parent"]' },
+    motif: 'R38 — la prévisualisation, sur sa route dédiée (`parentVisiteApercuProfil`)'
+  },
+  {
+    depuis: 'visite-parent',
+    vers: 'dashboard',
+    prise: { selecteur: '[data-visite-ecran="dashboard"]' },
+    motif: 'R38 — le saut direct vers le suivi parent'
+  },
+  {
+    depuis: 'visite-parent',
+    vers: 'galerie-parent',
+    prise: { selecteur: '[data-visite-ecran="galerie-parent"]' },
+    motif: 'R38 — le saut direct vers la galerie plein écran'
   },
 
   // ── depuis la carte ───────────────────────────────────────────────────────────────────
@@ -433,21 +561,23 @@ export const RECETTES: readonly RecetteModele[] = [
     ],
     motif: 'la porte à quatre chiffres — v2 § 11 et contrat de finition v3 § 1.8'
   },
+  /**
+   * ⚠ RACCOURCIE PAR LE LOT V1. Le troisième geste (`[data-suivre-profil]`) existait pour
+   * contourner Q2-2 — `profilSuivi` n'étant PAS partagé, arriver en plein écran redemandait le
+   * joueur. Le lot V1 a partagé `profilSuivi` (`FournisseurZoneParent`, `client/src/
+   * routeur.tsx`) pour que sa propre visite tienne d'une route à l'autre ; cette recette en
+   * bénéficie sans rien y faire de spécial. Mesuré : `[data-suivre-profil]` n'apparaît plus sur
+   * `galerie-parent` une fois qu'un profil est déjà suivi — deux gestes suffisent désormais.
+   */
   {
     nom: 'ouvrir la galerie en plein écran',
     depuis: 'dashboard',
     vers: 'galerie-parent',
     gestes: [
       { selecteur: '[data-onglet-parent="galerie"]' },
-      { selecteur: '[data-vers="galerie-parent"]' },
-      // Le TROISIÈME geste ne devrait pas exister. `HoteGalerieParent` ne partage pas le
-      // profil suivi par `HoteDashboard` : arrivé en plein écran, le parent doit redésigner
-      // son enfant. Même défaut que `galerie-parent → choix-profil-parent`, consigné une fois
-      // pour les deux dans `Docs/questions-en-attente.md` (Q2-2). Le geste est ici parce que
-      // la recette décrit ce qu'un parent doit RÉELLEMENT faire — pas ce qu'on souhaiterait.
-      { selecteur: '[data-suivre-profil]' }
+      { selecteur: '[data-vers="galerie-parent"]' }
     ],
-    motif: 'D34 — l’onglet, la porte du plein écran, puis le choix du joueur imposé une 2ᵉ fois'
+    motif: 'D34 — l’onglet, puis la porte du plein écran'
   }
 ];
 
@@ -583,18 +713,16 @@ export function routesOrphelines(table: TableDesRoutes): readonly string[] {
  * `modele-navigation-coherence.test.ts` exige l'égalité STRICTE avec la mesure, dans les deux
  * sens : une nouvelle orpheline fait rougir, et une orpheline réparée AUSSI — parce qu'il
  * faudra alors la retirer d'ici. Ce n'est pas une exemption, c'est une dette datée.
+ *
+ * ⚠ `/reglages-lecture` EN EST RETIRÉE PAR LE LOT V1 — dette réparée, pas oubliée. Elle était
+ * orpheline parce qu'AUCUN `naviguer` ne visait la route montée. `HoteVisiteDesEcrans` en pose
+ * un désormais (`surAllerReglagesLecture`, `client/src/routeur.tsx:717`) : mesuré,
+ * `grep -n "reglagesLecture" client/src/routeur.tsx` rend maintenant sa déclaration, SON
+ * `naviguer`, et son `createRoute` — trois lignes, plus une seule. La route a une entrée ; la
+ * seconde moitié de la question Q2-1 (« lui donner une entrée, ou la retirer ? ») est tranchée
+ * par le fait, pas par un arbitrage écrit.
  */
-export const ROUTES_ORPHELINES_CONNUES: Readonly<Record<string, string>> = {
-  '/reglages-lecture':
-    'La route est montée (`HoteReglagesLecture`) et AUCUN `naviguer` ne la vise : mesuré, ' +
-    '`grep -n "reglagesLecture" client/src/routeur.tsx` ne rend que sa déclaration et son ' +
-    '`createRoute`. L’écran `reglages-lecture` est bien atteignable — mais par un autre ' +
-    'chemin : `EcranProfils` le rend LUI-MÊME quand `reglagesPour !== null`, sans passer par ' +
-    'le routeur. La route et son hôte sont donc du code que personne n’exécute, et la sortie ' +
-    'qu’ils câblent (« Retour » → `/`) n’est jamais éprouvée. Deux issues, et c’est au père ' +
-    'de trancher : lui donner une entrée, ou la retirer. Consigné dans ' +
-    '`Docs/questions-en-attente.md` (Q2-1).'
-};
+export const ROUTES_ORPHELINES_CONNUES: Readonly<Record<string, string>> = {};
 
 // ──────────────────────────────────────────────────── l'audit du modèle, en fonction PURE
 

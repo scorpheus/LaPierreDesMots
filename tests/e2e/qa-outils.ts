@@ -272,6 +272,38 @@ export async function preparerSansProfil(page: Page): Promise<void> {
   await page.unrouteAll({ behavior: 'ignoreErrors' });
   await installerMouchardDEcrans(page);
   await page.goto('/');
+  // ══════════════════════════════════════════════════════════════════════════════════════════
+  // LE PROFIL MÉMORISÉ SUR L'APPAREIL EST EFFACÉ ICI — sans quoi cette fonction ment sur son
+  // propre nom, et c'est mesuré, pas supposé.
+  //
+  // `client/src/etat/profil-memorise.ts` garde le dernier joueur dans `localStorage` sous
+  // `pierre.joueur`. Un `goto('/')` ne le touche pas : l'application le relit au démarrage et
+  // saute droit à la carte. « Démarrage SANS profil » ne sautait donc `chargerProfil` que pour
+  // retomber sur le profil de la recette PRÉCÉDENTE.
+  //
+  // Mesuré dans la séquence du contrat de sortie QA, sortie citée :
+  //
+  //     [diag] après « galerie parent (plein écran) » : data-ecran=galerie-parent
+  //     [diag] après preparerSansProfil               : data-ecran=carte
+  //     [diag] prises : acces-parent=0 · profils=0
+  //
+  // `[data-acces-parent]` vit sur l'écran des PROFILS. Sur la carte il n'existe pas, et
+  // `ouvrirLaZoneParent` attendait donc 270 s un bouton qui ne viendrait jamais — puis le
+  // navigateur se fermait et les 80 recettes suivantes tombaient avec lui. La recette
+  // « choix du joueur à suivre » passait SEULE en 1,9 s et échouait en séquence : la signature
+  // exacte d'une fuite d'état entre cas, pas d'un défaut de produit.
+  //
+  // On efface la SEULE clé du joueur, pas tout `localStorage` : les réglages du foyer
+  // (`client/src/parent/reglages-foyer.ts`) appartiennent à l'appareil et plusieurs recettes
+  // parent s'appuient dessus. Puis on recharge — la lecture se fait au démarrage, donc effacer
+  // après coup ne suffirait pas.
+  // ══════════════════════════════════════════════════════════════════════════════════════════
+  const memorise = await page.evaluate(() => {
+    const present = globalThis.localStorage?.getItem('pierre.joueur') ?? null;
+    globalThis.localStorage?.removeItem('pierre.joueur');
+    return present;
+  });
+  if (memorise !== null) await page.goto('/');
   await page.waitForFunction(() => (window as unknown as FenetreTest).__test !== undefined);
   await page.evaluate(
     ({ graine, instant }) => {
@@ -860,6 +892,53 @@ export function recettesDEcrans(): readonly EcranQA[] {
       await expect(page.locator('[data-ecran="dashboard"]')).toBeVisible();
       await page.locator('[data-onglet-parent="galerie"]').click();
       await page.locator('[data-vers="galerie-parent"]').click();
+    },
+  },
+  /**
+   * LA VISITE DES ÉCRANS — R38, livrée par le lot V1, et le 14ᵉ `data-ecran` du dépôt.
+   *
+   * ── POURQUOI CETTE RECETTE EXISTE, ET POURQUOI ELLE N'EST PAS UN DÉTAIL ──────────────────
+   *
+   * `ecransDeclares()` lit les littéraux `data-ecran="…"` du client : le jour où V1 a livré
+   * `visite-parent`, elle est passée de 13 à 14 **toute seule**, sans que personne ne la
+   * touche. `recettesDEcrans()`, elle, est une liste de chemins écrits à la main — c'est
+   * inévitable, un chemin de navigation ne se devine pas — et elle est donc restée à 13
+   * écrans nommés. L'écart entre les deux est exactement ce que
+   * `parcours-audit-tout-le-site.spec.ts` fait échouer sous le nom « CONTRAT DE SORTIE QA :
+   * écrans déclarés = écrans visités, écart nul ».
+   *
+   * **C'est le mécanisme qui fonctionne, pas une négligence** : un écran ajouté sans recette
+   * QA fait rougir la suite, au lieu de disparaître en silence. La recette ci-dessous est la
+   * réponse attendue, pas un contournement.
+   *
+   * ── LE CHEMIN, ET IL EST CELUI DU PÈRE ───────────────────────────────────────────────────
+   *
+   *     accueil → « Espace des parents » → code à 4 chiffres → « Entrer »
+   *            → suivi (dashboard) → « Visite des écrans » (en-tête)
+   *
+   * On passe par `ouvrirLaZoneParent`, comme les trois autres recettes parent : elle porte le
+   * diagnostic du verrou de 15 minutes et l'attente de la bascule du pavé. Rien n'est injecté —
+   * `data-vers="visite-parent"` est la même convention que `data-vers="galerie-parent"` deux
+   * lignes plus bas dans `EcranDashboard.tsx`, donc un seul motif à connaître pour toute la QA.
+   *
+   * ── UNE SUBTILITÉ QUI VAUT D'ÊTRE ÉCRITE : POURQUOI `preparer` ET NON `preparerSansProfil` ─
+   *
+   * `HoteVisiteDesEcrans` rend `profil = profilDeSession ?? profilSuivi`, et **retombe sur
+   * `ChoixProfilParent` quand les deux sont nuls** (`routeur.tsx`). Partir sans profil
+   * n'atteindrait donc pas `visite-parent` mais `choix-profil-parent` — que la recette suivante
+   * couvre déjà, et par ce chemin-là précisément. Deux recettes, deux écrans, aucune
+   * redondance : c'est le repli de l'hôte qui les sépare, pas une convention de test.
+   */
+  {
+    nom: 'visite des écrans (zone parent)',
+    attendu: 'visite-parent',
+    aller: async (page) => {
+      await preparer(page);
+      await ouvrirLaZoneParent(page);
+      // On attend l'ÉTAT « le dashboard est monté », jamais un délai : le bouton de la visite
+      // vit dans son en-tête, et `ouvrirLaZoneParent` rend la main dès la validation du code.
+      await expect(page.locator('[data-ecran="dashboard"]')).toBeVisible();
+      await page.locator('[data-vers="visite-parent"]').click();
     },
   },
   {

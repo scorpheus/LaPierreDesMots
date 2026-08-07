@@ -24,8 +24,8 @@
 // partagée, ni mise en favori, ni rechargée à la main, et un retour navigateur au milieu d'un
 // exercice n'a aucun sens pour un enfant de 7 ans. Les tests E2E ouvrent `/` et pilotent tout
 // par `window.__test`.
-import { useEffect, useState } from 'react';
-import type { ReactElement } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import {
   Outlet,
   RouterProvider,
@@ -51,6 +51,8 @@ import { EcranProfils } from './ecrans/EcranProfils.js';
 import { EcranRecompense } from './ecrans/EcranRecompense.js';
 import { EcranReglagesLecture } from './ecrans/EcranReglagesLecture.js';
 import { useEtatJeu, useMagasin } from './etat/services.js';
+// AJOUT V1 — la visite des écrans et des exercices, en zone parent (R38).
+import { VisiteDesEcrans } from './parent/VisiteDesEcrans.js';
 // AJOUT N4 — la table des chemins de la sequence, ecrite UNE fois dans `partage` et lue par le
 // client comme par le serveur (convention C5 : aucune donnee en deux exemplaires).
 import { CHEMINS_OUVERTURE } from '@pierre/partage/ouverture';
@@ -95,6 +97,28 @@ export const CHEMINS = {
    * vers le même écran ferait deux chemins pour un seul état.
    */
   parentGalerie: '/parent/galerie',
+  /**
+   * AJOUT V1 — la visite des écrans et des exercices (R38, `Docs/questions-en-attente.md` § J3).
+   *
+   * Même disposition que `parentGalerie` juste au-dessus : une route à elle seule, plutôt qu'un
+   * onglet de plus dans `EcranDashboard`, parce que le bandeau « retour à la visite »
+   * (`BandeauRetourVisite`, plus bas dans ce fichier) doit pouvoir y ramener depuis N'IMPORTE
+   * QUELLE page — y compris une page de jeu, où aucun onglet de dashboard n'est monté.
+   */
+  parentVisite: '/parent/visite',
+  /**
+   * AJOUT V1, second correctif — la prévisualisation de « choix du joueur à suivre » depuis la
+   * visite (R38).
+   *
+   * UNE ROUTE À PART, et pas un drapeau affiché par-dessus `parentVisite` : un booléen partagé
+   * a été essayé d'abord (`useState` local à `HoteVisiteDesEcrans`, puis un magasin partagé
+   * hors composant) et les DEUX ont produit un cul-de-sac, mesuré par l'orchestrateur — le
+   * bandeau navigue vers `parentVisite`, LA ROUTE OÙ L'ON EST DÉJÀ pendant la prévisualisation,
+   * donc TanStack Router ne remonte rien et aucun drapeau qui vivrait hors du routeur ne se
+   * réinitialise. Une route SÉPARÉE n'a pas ce problème par construction : y revenir EST un
+   * changement de chemin, donc une vraie navigation, donc un remontage garanti.
+   */
+  parentVisiteApercuProfil: '/parent/visite/quel-joueur',
   /**
    * AJOUT N4 — la séquence d'ouverture (D35, contrat de finition v3 § 4.4 et § 6.2).
    *
@@ -378,13 +402,94 @@ function ChoixProfilParent({
   );
 }
 
+/**
+ * ═════════════════════════════════════════════════════════════════════════════════════════════
+ * LE CONTEXTE DE LA ZONE PARENT — profil suivi et visite en cours, partagés entre les hôtes.
+ *
+ * ── HISTORIQUE DES DEUX FAUSSES PISTES, ET POURQUOI AUCUNE DES DEUX NE TENAIT ─────────────────
+ *
+ * 1. `useState` LOCAL à chaque hôte (`HoteDashboard`, `HoteGalerieParent`, `HoteVisiteDesEcrans`).
+ *    Mesuré : entrer par la porte du pied de l'accueil (AVANT tout choix de joueur — voir
+ *    l'en-tête de `ChoixProfilParent`), choisir un enfant sur le dashboard, puis cliquer
+ *    « Visite des écrans » retombait sur `ChoixProfilParent` — un SECOND choix, pour la MÊME
+ *    session, parce que chaque hôte démonté-remonté reperd son `useState`.
+ *
+ * 2. Un magasin PARTAGÉ hors composant (`let` de module + `useSyncExternalStore`), pour
+ *    survivre à la navigation d'un hôte vers l'autre. Ça a réglé le cas ci-dessus — mesuré,
+ *    confirmé par l'orchestrateur, « les dix liens atteignent leur cible ». Mais soumis ensuite
+ *    à `npm run verifier`, ce module a fait diverger `tests/modele/explorateur.tsx` : chaque
+ *    « nouvelle session » de l'explorateur monte une `<Application>` FRAÎCHE et vide
+ *    `localStorage`, en simulant un appareil neuf — mais un `let` de module ne se réinitialise
+ *    PAS entre deux montages dans le même process Vitest, contrairement à un vrai rechargement
+ *    de page. Le résidu d'une exploration antérieure fuyait dans la suivante : mesuré, sortie
+ *    citée dans le rapport du lot — « rejeu de … attendu « choix-profil-parent », arrivé sur
+ *    « dashboard » », puis toute une cascade de 40 « transitions non déclarées » qui étaient en
+ *    réalité les tuiles de la visite, mal étiquetées `depuis: 'dashboard'` parce que le rejeu
+ *    avait dérivé sans que l'explorateur puisse le savoir.
+ *
+ * ── LE REMÈDE : LE CONTEXTE REACT DE `Routeur`, PAS UN MODULE ─────────────────────────────────
+ *
+ * `Routeur` (fin de ce fichier) instancie ce contexte en `useState`, une fois par montage de
+ * `<Application>`. Il se réinitialise donc exactement quand un vrai rechargement de page le
+ * ferait ET exactement quand `tests/modele/explorateur.tsx` monte une session fraîche — les
+ * DEUX bornes de remise à zéro coïncident enfin, parce que c'est la MÊME chose : une nouvelle
+ * instance de l'arbre React.
+ *
+ * Coût assumé : `profilSuivi` ne survit plus à un rechargement de page en cours de visite (il
+ * survivait avec le magasin de module). C'est un renoncement mineur — re-choisir une fois le
+ * joueur après un F5 accidentel — face à un test qui garde une classe entière de régressions.
+ * ═════════════════════════════════════════════════════════════════════════════════════════════
+ */
+interface ContexteZoneParent {
+  readonly profilSuivi: Profil | null;
+  readonly fixerProfilSuivi: (profil: Profil | null) => void;
+  readonly visiteEnCours: boolean;
+  readonly demarrerVisite: () => void;
+  readonly terminerVisite: () => void;
+}
+
+const ContexteZoneParentReact = createContext<ContexteZoneParent | null>(null);
+
+function useZoneParent(): ContexteZoneParent {
+  const contexte = useContext(ContexteZoneParentReact);
+  if (contexte === null) {
+    throw new Error('`FournisseurZoneParent` manquant au-dessus de ce composant.');
+  }
+  return contexte;
+}
+
+function FournisseurZoneParent({ children }: { readonly children: ReactNode }): ReactElement {
+  const [profilSuivi, fixerProfilSuivi] = useState<Profil | null>(null);
+  const [visiteEnCours, fixerVisiteEnCours] = useState(false);
+
+  const valeur = useMemo<ContexteZoneParent>(
+    () => ({
+      profilSuivi,
+      fixerProfilSuivi,
+      visiteEnCours,
+      demarrerVisite: () => {
+        fixerVisiteEnCours(true);
+      },
+      terminerVisite: () => {
+        fixerVisiteEnCours(false);
+      }
+    }),
+    [profilSuivi, visiteEnCours]
+  );
+
+  return (
+    <ContexteZoneParentReact.Provider value={valeur}>{children}</ContexteZoneParentReact.Provider>
+  );
+}
+
 function HoteDashboard(): ReactElement {
   const naviguer = useNavigate();
   const magasin = useMagasin();
   const profilDeSession = useEtatJeu((etat) => etat.profil);
   // Le profil suivi par le PARENT. Distinct de celui du jeu, et volontairement : la zone
   // parent « n'emprunte ni le magasin de session, ni les écrans de jeu » (`EcranDashboard`).
-  const [profilSuivi, fixerProfilSuivi] = useState<Profil | null>(null);
+  // PARTAGÉ entre les hôtes via `FournisseurZoneParent` — voir l'en-tête ci-dessus.
+  const { profilSuivi, fixerProfilSuivi } = useZoneParent();
   const profil = profilDeSession ?? profilSuivi;
 
   const rendreLaMainAuJeu = (): void => {
@@ -403,9 +508,18 @@ function HoteDashboard(): ReactElement {
    *  2. **`options` est transmis tel quel**, et vaut toujours `LANCEMENT_PARENT` : la fiche n'a
    *     pas le choix de journaliser, et l'hôte ne le lui rend pas. C'est le magasin qui porte
    *     désormais le drapeau, et `data-journalise` le rend constatable.
+   *
+   * ⚠ GARDE ÉLARGIE À `== null` — trouvé en corrigeant V1, sur le même patron. `EntreeGalerie.
+   * noeud` est typé `IdNoeud | null`, jamais `undefined` — mais `tests/modele/serveur-double.ts`
+   * (le double de réseau de la QA Q2, hors de mon périmètre) construit ses entrées de catalogue
+   * SANS poser cette clé du tout, via un `as never` qui contourne le type. `entree.noeud` y vaut
+   * alors `undefined` à l'exécution, `=== null` ne l'attrape pas, et l'appel suivant partait sur
+   * `GET /api/contenu/noeuds/undefined` — mesuré, sortie citée dans le rapport du lot (`404`,
+   * rejet de promesse non intercepté). `== null` couvre les deux : c'est un garde-fou contre un
+   * contenu réel tout aussi incomplet, pas seulement contre le double de test.
    */
   const lancerUnExercice = (entree: EntreeGalerie, options: OptionsLancement): void => {
-    if (entree.noeud === null) {
+    if (entree.noeud == null) {
       return;
     }
     if (profilDeSession === null && profilSuivi !== null) {
@@ -427,6 +541,10 @@ function HoteDashboard(): ReactElement {
       surSortie={rendreLaMainAuJeu}
       surGaleriePleinEcran={() => {
         void naviguer({ to: CHEMINS.parentGalerie });
+      }}
+      // AJOUT V1 — la porte d'entrée de la visite depuis le dashboard (R38).
+      surAllerVisite={() => {
+        void naviguer({ to: CHEMINS.parentVisite });
       }}
       // ── R30 — « le bouton lancer l'exercice, mais ça ne fait rien » ────────────────────
       //
@@ -473,7 +591,8 @@ function HoteDashboard(): ReactElement {
 function HoteGalerieParent(): ReactElement {
   const naviguer = useNavigate();
   const profilDeSession = useEtatJeu((etat) => etat.profil);
-  const [profilSuivi, fixerProfilSuivi] = useState<Profil | null>(null);
+  // PARTAGÉ avec `HoteDashboard` et `HoteVisiteDesEcrans` — voir `FournisseurZoneParent`.
+  const { profilSuivi, fixerProfilSuivi } = useZoneParent();
   const profil = profilDeSession ?? profilSuivi;
 
   const retourAuSuivi = (): void => {
@@ -494,10 +613,254 @@ function HoteGalerieParent(): ReactElement {
   return <EcranGalerieParent profil={profil.id} surRetour={retourAuSuivi} />;
 }
 
+/**
+ * ═════════════════════════════════════════════════════════════════════════════════════════════
+ * LA VISITE DES ÉCRANS ET DES EXERCICES — R38, lot V1.
+ *
+ * Même repli que `HoteDashboard` et `HoteGalerieParent` juste au-dessus : sans profil, on rend
+ * `ChoixProfilParent` plutôt qu'un écran vide — c'est d'ailleurs EXACTEMENT ce chemin qui fait
+ * de « choix du joueur à suivre » un écran atteignable depuis la visite elle-même (§ « Les 11
+ * écrans nommés » de `VisiteDesEcrans.tsx`) : y revenir sans profil choisi montre cet écran.
+ *
+ * Les rappels de navigation ci-dessous sont les SEULS endroits du dépôt qui savent comment
+ * atteindre chacun des 13 écrans sans jouer — `VisiteDesEcrans.tsx` ne connaît, comme tous les
+ * écrans, aucun chemin (voir son en-tête). C'est la même règle que `HoteCarte`, `HoteCampement`,
+ * etc. plus haut dans ce fichier, appliquée une fois de plus.
+ * ═════════════════════════════════════════════════════════════════════════════════════════════
+ */
+function HoteVisiteDesEcrans(): ReactElement {
+  const naviguer = useNavigate();
+  const magasin = useMagasin();
+  const profilDeSession = useEtatJeu((etat) => etat.profil);
+  // PARTAGÉ avec `HoteDashboard` et `HoteGalerieParent` — voir `FournisseurZoneParent`.
+  const { profilSuivi, fixerProfilSuivi, demarrerVisite, terminerVisite } = useZoneParent();
+  const profil = profilDeSession ?? profilSuivi;
+
+  // La visite démarre dès que cet hôte est monté avec un profil connu — c'est CE geste qui
+  // fait apparaître le bandeau sur tout ce qu'on ouvrira ensuite. `VisiteDesEcrans.tsx` ne le
+  // déclenche plus lui-même : un composant purement présentatif, qui ne connaît ni chemin ni
+  // état global, est plus facile à monter isolément (`tests/composants/**`).
+  useEffect(() => {
+    if (profil !== null) {
+      demarrerVisite();
+    }
+  }, [profil, demarrerVisite]);
+
+  if (profil === null) {
+    return (
+      <ChoixProfilParent
+        surChoix={fixerProfilSuivi}
+        surRetour={() => {
+          void naviguer({ to: CHEMIN_PAR_ECRAN.profils });
+        }}
+      />
+    );
+  }
+
+  return (
+    <VisiteDesEcrans
+      profil={profil}
+      // « profils » — une simple navigation d'URL. Le routeur reconcilie lui-même l'écran du
+      // magasin vers 'profils' (voir l'écouteur d'historique plus bas) SANS appeler
+      // `quitterProfil()` : contrairement à `rendreLaMainAuJeu` de `HoteDashboard`, la visite
+      // ne doit RIEN effacer — ni le profil de session, ni le profil mémorisé sur l'appareil.
+      surAllerProfils={() => {
+        void naviguer({ to: CHEMIN_PAR_ECRAN.profils });
+      }}
+      // « carte » — `choisirProfil` pose `ecran: 'carte'` ET mémorise le joueur ; le routeur
+      // pousse `/carte` tout seul (effet de `Routeur`, plus bas). C'est la SEULE des cinq
+      // destinations qui veut vraiment `ecran: 'carte'` ; les quatre suivantes s'en passent —
+      // voir DÉFAUT B ci-dessous.
+      surAllerCarte={() => {
+        magasin.getState().choisirProfil(profil);
+      }}
+      /**
+       * ═════════════════════════════════════════════════════════════════════════════════════
+       * DÉFAUT B, signalé par l'orchestrateur : « ouverture → visite-parent, il reste sur la
+       * visite ». `HoteOuverture` ne renvoie nulle part de son propre chef (relu : aucune
+       * condition « déjà vue » n'existe côté client, `lireOuverture` n'est même pas appelée) —
+       * la vraie cause est ICI, une ligne au-dessus dans l'ancienne version.
+       *
+       * `choisirProfil(profil)` pose DEUX choses à la fois : le profil ET `ecran: 'carte'`. Ce
+       * second effet poussait `/carte` sur l'historique (l'abonnement au magasin, plus bas dans
+       * ce fichier) DANS LA MÊME TÂCHE JS que le `naviguer({ to: CHEMINS.ouverture })` qui
+       * suivait — deux navigations tirées coup sur coup sur le MÊME objet d'historique, l'une
+       * brute (`history.push`), l'autre via le routeur (`naviguer`, asynchrone). Une course, et
+       * pas une supposition : `choisirProfil` est la SEULE des actions du magasin qui pose
+       * `ecran`, donc le SEUL des cinq rappels de cet hôte à fabriquer une seconde navigation
+       * que personne n'a demandée.
+       *
+       * Le remède ne devine pas où était la course, il la retire : `magasin.setState({ profil })`
+       * pose le SEUL champ dont `EcranOuverture`/`EcranCampement`/`EcranCoffre` ont besoin
+       * (ils lisent `useEtatJeu(etat => etat.profil)`), sans toucher `ecran` — donc sans
+       * déclencher la moindre navigation concurrente. Une seule poussée d'historique par clic,
+       * exactement comme `surAllerReglagesLecture` juste plus bas, qui n'a jamais montré ce
+       * défaut parce qu'il ne posait déjà aucun profil.
+       * ═════════════════════════════════════════════════════════════════════════════════════
+       */
+      surAllerOuverture={() => {
+        magasin.setState({ profil });
+        void naviguer({ to: CHEMINS.ouverture });
+      }}
+      surAllerCampement={() => {
+        magasin.setState({ profil });
+        void naviguer({ to: CHEMINS.campement });
+      }}
+      surAllerCoffre={() => {
+        magasin.setState({ profil });
+        void naviguer({ to: CHEMINS.coffre });
+      }}
+      // Même correctif qu'au-dessus : sans lui, un profil connu seulement par `profilSuivi`
+      // (chemin de la porte du pied) laissait `EcranReglagesLecture` sans profil de session.
+      surAllerReglagesLecture={() => {
+        magasin.setState({ profil });
+        void naviguer({ to: CHEMINS.reglagesLecture });
+      }}
+      surAllerCodeParent={() => {
+        void naviguer({ to: CHEMINS.parent });
+      }}
+      // DÉFAUT A, sa forme définitive — voir l'en-tête de `CHEMINS.parentVisiteApercuProfil` :
+      // une route à part, plutôt qu'un drapeau que ni un `useState` local ni un magasin partagé
+      // n'ont réussi à faire survivre correctement au clic du bandeau global.
+      surAllerChoixProfilParent={() => {
+        void naviguer({ to: CHEMINS.parentVisiteApercuProfil });
+      }}
+      surAllerDashboard={() => {
+        void naviguer({ to: CHEMINS.parentDashboard });
+      }}
+      surAllerGalerieParent={() => {
+        void naviguer({ to: CHEMINS.parentGalerie });
+      }}
+      // ── R30, repris tel quel — même logique que `HoteDashboard.lancerUnExercice` ─────────
+      //
+      // `options` vaut toujours `LANCEMENT_PARENT` (posé par `FicheExercice`, jamais ici) :
+      // rien de ce que le père joue depuis la visite n'entre dans le journal de l'enfant.
+      // `choisirProfil` reste volontairement ICI (et pas `setState`) : lancer un exercice VEUT
+      // `ecran: 'noeud'` juste après, et la navigation qui compte est celle que `demarrerNoeud`
+      // posera — la brève étape par `'carte'` ne se voit jamais, `lirePaquetNoeud` est asynchrone.
+      //
+      // `== null` et non `=== null` : voir la même garde, avec sa mesure, sur
+      // `HoteDashboard.lancerUnExercice` plus haut dans ce fichier.
+      surLancerExercice={(entree, options) => {
+        if (entree.noeud == null) {
+          return;
+        }
+        if (profilDeSession === null) {
+          magasin.getState().choisirProfil(profil);
+        }
+        void lirePaquetNoeud(entree.noeud).then((paquet) => {
+          magasin.getState().demarrerNoeud(paquet, options);
+        });
+      }}
+      surFermerLaVisite={() => {
+        terminerVisite();
+        void naviguer({ to: CHEMINS.parentDashboard });
+      }}
+    />
+  );
+}
+
+/**
+ * La prévisualisation de « choix du joueur à suivre » depuis la visite — sa route dédiée. Voir
+ * l'en-tête de `CHEMINS.parentVisiteApercuProfil` pour le pourquoi de cette forme.
+ *
+ * Les deux sorties ramènent au MÊME endroit, la visite elle-même — `surChoix` comme `surRetour`,
+ * volontairement : choisir un joueur ici ne fait qu'informer `profilSuivi` (partagé), il n'y a
+ * rien de plus à faire que revenir. `ChoixProfilParent` ne connaît toujours aucun chemin ; c'est
+ * cet hôte, comme tous les autres de ce fichier, qui les lui fournit.
+ */
+function HoteApercuChoixProfilVisite(): ReactElement {
+  const naviguer = useNavigate();
+  const { fixerProfilSuivi } = useZoneParent();
+  const retour = (): void => {
+    void naviguer({ to: CHEMINS.parentVisite });
+  };
+  return (
+    <ChoixProfilParent
+      surChoix={(profil) => {
+        fixerProfilSuivi(profil);
+        retour();
+      }}
+      surRetour={retour}
+    />
+  );
+}
+
+/**
+ * Le bandeau « retour à la visite » — R38, exigence n° 3 : « toujours atteignable, sur chaque
+ * page ». Monté à la RACINE du routeur (voir `construireRouteur`) : il survole donc les 13
+ * écrans, tous les moteurs, les deux panneaux — tout ce que `<Outlet />` peut rendre.
+ *
+ * ── POURQUOI IL S'ÉTEINT TOUT SEUL DÈS QU'UNE VRAIE PARTIE D'ENFANT COMMENCE ────────────────
+ *
+ * Le drapeau (`visiteEnCours`, `FournisseurZoneParent`) vit dans l'état React de `Routeur` —
+ * réinitialisé à chaque montage de `<Application>`, donc à chaque vrai rechargement de page.
+ * Mais TANT QUE l'onglet reste ouvert, il survit à toute navigation en son sein : si un parent
+ * quitte la visite sans cliquer « Fermer » et que l'enfant reprend la MÊME tablette SANS
+ * recharger, le bandeau resterait affiché PENDANT une vraie partie. `EtatMagasin.journalise`
+ * vaut `true` par défaut et ne vaut `false` QUE pour un lancement `LANCEMENT_PARENT`
+ * (contrat § R30) : dès qu'un nœud démarre journalisé (donc joué par l'enfant, par la carte),
+ * on éteint le drapeau. Aucune écriture dans `magasin.ts` (propriété du lot A1) : on ne fait que
+ * LIRE `journalise` et `ecran`, déjà publics via `useEtatJeu`.
+ */
+function BandeauRetourVisite(): ReactElement | null {
+  const { visiteEnCours, terminerVisite } = useZoneParent();
+  const journalise = useEtatJeu((etat) => etat.journalise);
+  const ecran = useEtatJeu((etat) => etat.ecran);
+  const naviguer = useNavigate();
+
+  useEffect(() => {
+    if (visiteEnCours && ecran === 'noeud' && journalise) {
+      terminerVisite();
+    }
+  }, [visiteEnCours, ecran, journalise, terminerVisite]);
+
+  if (!visiteEnCours) {
+    return null;
+  }
+
+  return (
+    <div
+      data-bandeau-visite="oui"
+      style={{
+        position: 'fixed',
+        insetBlockEnd: '1rem',
+        insetInlineStart: '1rem',
+        zIndex: 9999
+      }}
+    >
+      <button
+        type="button"
+        className="cible cible-appel"
+        data-retour-visite
+        onClick={() => {
+          // Naviguer suffit désormais : la prévisualisation vit sur SA PROPRE route
+          // (`CHEMINS.parentVisiteApercuProfil`), donc y revenir EST un changement de chemin —
+          // un vrai remontage de `HoteVisiteDesEcrans`, pas un drapeau à éteindre à la main.
+          void naviguer({ to: CHEMINS.parentVisite });
+        }}
+        style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.35)' }}
+      >
+        ← Retour à la visite
+      </button>
+    </div>
+  );
+}
+
 // Type de retour volontairement inféré : `createRouter` est générique sur l'arbre de routes,
 // et l'écrire à la main reviendrait à recopier cet arbre.
 function construireRouteur() {
-  const routeRacine = createRootRoute({ component: () => <Outlet /> });
+  // AJOUT V1 — `<BandeauRetourVisite />` survole TOUT ce que `<Outlet />` rend, à la racine de
+  // l'arbre de routes : c'est la seule façon de le rendre « toujours atteignable, sur chaque
+  // page » sans le poser dans chacun des 13 écrans un par un.
+  const routeRacine = createRootRoute({
+    component: () => (
+      <>
+        <BandeauRetourVisite />
+        <Outlet />
+      </>
+    )
+  });
 
   const arbre = routeRacine.addChildren([
     createRoute({ getParentRoute: () => routeRacine, path: '/', component: RacineOuProfils }),
@@ -544,6 +907,18 @@ function construireRouteur() {
       getParentRoute: () => routeRacine,
       path: CHEMINS.parentGalerie,
       component: HoteGalerieParent
+    }),
+    // AJOUT V1 — la visite des écrans et des exercices (R38).
+    createRoute({
+      getParentRoute: () => routeRacine,
+      path: CHEMINS.parentVisite,
+      component: HoteVisiteDesEcrans
+    }),
+    // AJOUT V1, second correctif — la prévisualisation de « choix du joueur à suivre ».
+    createRoute({
+      getParentRoute: () => routeRacine,
+      path: CHEMINS.parentVisiteApercuProfil,
+      component: HoteApercuChoixProfilVisite
     })
   ]);
 
@@ -635,5 +1010,13 @@ export function Routeur(): ReactElement {
     };
   }, [magasin, routeur]);
 
-  return <RouterProvider router={routeur} />;
+  // `FournisseurZoneParent` ENVELOPPE le routeur, pas l'inverse : `profilSuivi` et
+  // `visiteEnCours` doivent survivre à CHAQUE navigation entre les routes de la zone parent,
+  // et une instance neuve à chaque montage de `Routeur` — donc de `<Application>` — est
+  // exactement la portée voulue. Voir l'en-tête de `FournisseurZoneParent`.
+  return (
+    <FournisseurZoneParent>
+      <RouterProvider router={routeur} />
+    </FournisseurZoneParent>
+  );
 }

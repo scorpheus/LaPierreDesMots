@@ -38,6 +38,7 @@
     "qa:mutations": "node scripts/qa/banc-de-mutation.mjs",
     "qa:trompeurs": "node scripts/qa/tests-trompeurs.mjs",
     "qa:tableau": "node scripts/qa/tableau-de-bord.mjs",
+    "qa:controles": "node scripts/qa/controles-positifs.mjs",
     "verifier": "node scripts/verifier.mjs"
   },
   "dependencies": {

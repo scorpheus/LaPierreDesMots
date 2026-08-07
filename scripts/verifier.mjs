@@ -87,7 +87,18 @@ const CHAINE = [
     // `bundle` de son côté.
     etapesFilles: ['bundle']
   },
-  { cle: 'test:rejeu', script: 'test:rejeu', propreRapport: true }
+  { cle: 'test:rejeu', script: 'test:rejeu', propreRapport: true },
+  // ── Q8, le méta-garde — DERNIÈRE étape, et cette place est une contrainte ────────────────
+  //
+  // Q8 ne mesure pas le produit : il mesure les GARDES. Il relit les rapports bruts que les
+  // étapes ci-dessus viennent d'écrire (`tests/rapports/brut/`, son défaut) et exige de chaque
+  // garde déclaré dans `Docs/specs-qa-des-promesses-v1.md` qu'un contrôle positif ait
+  // RÉELLEMENT tourné ce tour-ci. Lancé avant elles, il ne verrait que des rapports périmés et
+  // rougirait pour la mauvaise raison.
+  //
+  // Sans lui, les sept autres gardes sont des affirmations : rien ne vérifierait qu'ils savent
+  // encore échouer. Mesuré le 2026-08-07 — on retire le contrôle positif de Q4, Q8 sort en 1.
+  { cle: 'qa:controles', script: 'qa:controles' }
 ];
 
 /**
@@ -295,6 +306,23 @@ for (const etape of CHAINE) {
     // campagnes Playwright écrivaient toutes dans le même fichier. `playwright.config.ts`
     // lit la nôtre.
     variables['PIERRE_RAPPORT_JSON'] = etape.brut;
+  }
+
+  // ── L'INSTANT DE DÉPART DE LA CHAÎNE, POUR Q8 SEUL ──────────────────────────────────────
+  //
+  // Q8 dérive déjà la liste des rapports qu'il lit des `brut:` de `CHAINE` ci-dessus, ce qui
+  // l'empêche de lire un fichier que personne n'écrit. Il restait un trou : un rapport
+  // CANONIQUE peut lui-même dater d'une chaîne précédente si l'on relance une chaîne
+  // partielle. Q8 dirait alors « contrôle positif VERT » sur une course qui n'a pas eu lieu.
+  //
+  // On lui passe donc l'instant où CETTE chaîne a commencé. Aucune comparaison de dates entre
+  // étapes — c'est fragile, elles ne se terminent pas ensemble —, un seul repère pour toutes.
+  //
+  // Mesuré le 2026-08-07, et c'est ce qui a motivé la ligne : Q8 a déclaré AVEUGLE un garde qui
+  // voyait, parce qu'il lisait `tests/rapports/brut/playwright.json` — le nom de REPLI de
+  // `playwright.config.ts`, écrit par un lancement à la main une heure plus tôt.
+  if (etape.cle === 'qa:controles') {
+    variables['PIERRE_COURSE_DEBUT'] = String(debutGlobal);
   }
 
   const resultat = lancerNpm(etape.script, etape.argumentsSupplementaires ?? [], variables);

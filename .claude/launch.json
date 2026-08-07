@@ -6,6 +6,13 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev", "-w", "@pierre/client"],
       "port": 5173
+    },
+    {
+      "_note": "Vite SEUL ne suffit pas : le proxy /api tape sur 127.0.0.1:8080 et échoue en ECONNREFUSED. Cette entrée lance le serveur Fastify ET Vite, comme demarrer.bat.",
+      "name": "pierre-complet-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "port": 5173
     }
   ]
 }

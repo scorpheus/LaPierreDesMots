@@ -220,6 +220,24 @@ export function creerDoubleDeReseau(): DoubleDeReseau {
   const referentiel = lireReferentiel();
   const noeuds = indexerParId('contenu/noeuds');
   const exercices = indexerParId('contenu/exercices');
+  /**
+   * `exercice → nœud qui le joue`, DÉRIVÉ de `contenu/noeuds/`, jamais écrit à la main —
+   * même principe que `noeuds`/`exercices` juste au-dessus.
+   *
+   * Comble la lacune signalée par le lot V1 (`Docs/…`, repro citée) et mesurée par l'agent QA
+   * avant de rendre ce fichier : `parentGalerie` ne posait aucune clé `noeud` sur ses entrées de
+   * catalogue, alors que `EntreeGalerie.noeud` est ce que `FicheExercice` lit pour activer
+   * « Lancer cet exercice » (R30). Sans elle, la tuile restait inerte dans TOUT double de test
+   * — y compris pour la galerie existante — et `visite-parent → noeud` ne pouvait jamais être
+   * emprunté par l'explorateur. Le vrai serveur le publie déjà ; ce double se met à jour.
+   */
+  const noeudParExercice = new Map<string, string>();
+  for (const [idNoeud, brut] of noeuds) {
+    const idExercice = String((brut as { exercice?: unknown }).exercice ?? '');
+    if (idExercice !== '' && !noeudParExercice.has(idExercice)) {
+      noeudParExercice.set(idExercice, idNoeud);
+    }
+  }
   const habillages = indexerParId('contenu/habillages');
   const monde = mondeNeuf(referentiel);
 
@@ -415,6 +433,12 @@ export function creerDoubleDeReseau(): DoubleDeReseau {
               habillage: String(exercice.jeu?.habillage ?? ''),
               competences: (exercice.competences as readonly string[] | undefined) ?? [],
               statut: 'valide',
+              // MESURE, PUIS CORRIGÉ — voir l'en-tête de `noeudParExercice` plus haut dans ce
+              // fichier. `?? null` et non un accès direct : `EntreeGalerie.noeud` est typé
+              // `IdNoeud | null`, jamais `undefined`, et un exercice orphelin (aucun nœud ne le
+              // joue) doit rendre EXACTEMENT l'état que le vrai serveur rendrait — la fiche le
+              // dit au parent au lieu de le laisser deviner (`FicheExercice`, R30).
+              noeud: noeudParExercice.get(id) ?? null,
               region: String(id.split('-')[0] ?? ''),
               chemin: `contenu/exercices/${id}.json`
             };

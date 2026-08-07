@@ -116,18 +116,30 @@ describe('l’audit du modèle se déclenche vraiment', () => {
   });
 
   it('un état qu’aucun chemin n’atteint est refusé — le défaut des Galeries', () => {
-    // On coupe les deux seules entrées du campement : il reste déclaré, il devient injoignable.
+    // On coupe les deux entrées HISTORIQUES du campement : il reste déclaré, il devient
+    // injoignable.
+    //
+    // ⚠ Le lot V1 a donné au coffre un SECOND chemin, indépendant du campement
+    // (`visite-parent → coffre`, `tests/modele/modele-navigation.ts`) — sans le couper aussi
+    // ici, ce cas ne démontrerait plus la CASCADE qu'il existe pour prouver (« le coffre tombe
+    // avec lui »), il redeviendrait un simple test d'accessibilité directe. On coupe donc les
+    // TROIS entrées : les deux du campement, et celle, neuve, de la visite.
     const anomalies = auditerModele({
       ...ENTREE,
-      transitions: TRANSITIONS.filter((transition) => transition.vers !== 'campement')
+      transitions: TRANSITIONS.filter(
+        (transition) =>
+          transition.vers !== 'campement' &&
+          !(transition.depuis === 'visite-parent' && transition.vers === 'coffre')
+      )
     });
     expect(declenchees(anomalies)).toContain(REGLES_MODELE.ETAT_INATTEIGNABLE);
     const nommes = anomalies
       .filter((anomalie) => anomalie.regle === REGLES_MODELE.ETAT_INATTEIGNABLE)
       .map((anomalie) => anomalie.ou)
       .sort();
-    // Le coffre tombe avec lui : il n'était atteignable QUE par le campement. C'est ce que
-    // « atteignable » veut dire, et un audit qui ne le verrait pas ne servirait à rien.
+    // Le coffre tombe avec lui : sans campement NI visite, plus aucun chemin ne l'atteint.
+    // C'est ce que « atteignable » veut dire, et un audit qui ne le verrait pas ne servirait
+    // à rien.
     expect(nommes).toEqual(['campement', 'coffre']);
   });
 
@@ -262,10 +274,17 @@ describe('chaque dérogation est nommée, motivée, ET couverte par un fichier q
   it('les transitions marquées DÉFAUT sont exactement celles-ci', () => {
     // Un défaut consigné dans le modèle ne peut ni s'ajouter ni se corriger en silence : le
     // jour où le profil suivi sera partagé, ce cas rougira et demandera qu'on retire la marque.
+    //
+    // ⚠ C'EST ARRIVÉ — le lot V1 a partagé `profilSuivi` (`FournisseurZoneParent`,
+    // `client/src/routeur.tsx`) pour que sa propre visite tienne d'une route à l'autre, et ce
+    // partage a réparé Q2-2 du même geste : `galerie-parent → choix-profil-parent` mène
+    // maintenant à `dashboard`, sans redemander. La marque a été retirée du modèle
+    // (`tests/modele/modele-navigation.ts`) exactement comme ce commentaire l'annonçait ;
+    // cette assertion suit le fait mesuré, elle ne l'invente pas.
     const defauts = TRANSITIONS.filter((transition) => transition.defaut !== undefined)
       .map((transition) => `${transition.depuis} → ${transition.vers}`)
       .sort();
-    expect(defauts).toEqual(['galerie-parent → choix-profil-parent']);
+    expect(defauts).toEqual([]);
     for (const transition of TRANSITIONS) {
       if (transition.defaut === undefined) continue;
       expect(transition.defaut.length, `${transition.depuis} : défaut sans explication`)
