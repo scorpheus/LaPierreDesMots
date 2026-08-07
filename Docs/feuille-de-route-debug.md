@@ -497,6 +497,7 @@ Chaque lot nomme **ses** fichiers. Deux lots de la même colonne ne se lancent p
 | lot | quoi | fichiers possédés | dépend de |
 |---|---|---|---|
 | **A1** | La cascade est enregistrée et attribue vraiment (R31) | `serveur/src/routes/tentatives.ts`, `serveur/src/depots/tentatives.ts`, `client/src/etat/magasin.ts`, `client/src/api/client.ts` | rien — **à faire en premier** |
+| **Q** | **La QA des promesses**, 8 gardes — [specs-qa-des-promesses-v1.md](specs-qa-des-promesses-v1.md) | `tests/**` neufs, `scripts/qa/controles-positifs.mjs` | A1 pour Q3 seulement |
 | **A2** | Le rejeu et le dashboard après A1 | `tests/rejeu/**`, journaux de référence | A1 |
 | **B1** | Mélanger les options d'`histoire` (R32) | `partage/src/moteurs/histoire/{moteur,types}.ts`, `client/src/moteurs/histoire/MoteurHistoire.tsx` | rien |
 | **B3** | `tri` accepte n'importe quel mot, voie A **tranchée** (R33) | `partage/src/moteurs/tri/*`, `client/src/moteurs/tri/MoteurTri.tsx`, `contenu/exercices/**/*tri*`, `paniers-*` | rejeu sous les yeux |
@@ -509,6 +510,11 @@ Chaque lot nomme **ses** fichiers. Deux lots de la même colonne ne se lancent p
 
 **Enchaînement arrêté avec le père le 2026-08-07 :**
 
+0. **Q** — *« ta QA n'a pas remonté tous ses problèmes, donc il y en a sûrement d'autres de pas
+   détectés »*. Le lot est spécifié dans
+   [specs-qa-des-promesses-v1.md](specs-qa-des-promesses-v1.md), à partir de cinq détecteurs
+   **déjà exécutés** sur le dépôt. Il court en parallèle des lots correctifs — il ne corrige rien,
+   il rend visible. Q8 (le méta-garde) et Q1/Q4 se font tout de suite ; Q3 attend A1 ;
 1. **A1** — sans elle, rien de ce que l'enfant gagne n'existe ;
 2. **V1** — c'est l'outil de tout le reste. Le père l'a dit : *« il faut qu'on trouve un moyen
    pour que je voie chaque exercice et que je fasse des retours de design. »* Tant qu'il n'existe
@@ -525,6 +531,14 @@ l'exercice — donc après V1.
 ---
 
 ## § 6. Ce que la QA doit apprendre de cette session
+
+> **Devenu le lot Q, spécifié à part.** Le père a tranché : *« ta QA n'a pas remonté tous ses
+> problèmes, donc il y en a sûrement d'autres de pas détectés. Inscris comme tâche prioritaire un
+> QA. »* Les trois recettes ci-dessous sont restées ici comme le point de départ ; les huit gardes
+> qui en découlent, les huit modes de défaillance qui les justifient et **ce que cinq détecteurs
+> déjà exécutés ont trouvé en plus** (36 fonctions sans appelant, 11 moteurs sur 14 qui ne rendent
+> pas ce que les specs promettent, `points_visites` à zéro après 23 parties) sont dans
+> [specs-qa-des-promesses-v1.md](specs-qa-des-promesses-v1.md).
 
 Trois recettes manquantes, formulées comme des **propriétés** et non comme des captures. Chacune
 aurait attrapé un défaut de cette session le jour de sa livraison.
