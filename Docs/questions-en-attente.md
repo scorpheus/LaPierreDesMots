@@ -8456,3 +8456,59 @@ NOUVEAU                                                 : 4 sur 4
 **C'est une dette, pas un pardon.** Aucun test existant ne s'est dégradé : ce sont des tests
 neufs qui n'assertent pas ce qu'ils impriment. Le plafond redescend à chaque correction, et la
 commande imprime elle-même la valeur à recopier dès qu'elle mesure moins.
+
+---
+
+## Le critère « fuite » du QC image mesure la CONVEXITÉ, pas la fermeture — 2026-08-08
+
+**Mesuré en produisant les cinq objets absents de `ecole-02-place.json`.** Trois d'entre eux ont
+été rejetés pour `fuite`, et trois passes de correction du prompt n'y ont rien changé — parce que
+le défaut n'était pas dans les images.
+
+`production/essais/qc_technique.py` calcule :
+
+```python
+interieur   = np.isin(lab[y0:y1+1, x0:x1+1], list(fond_ids))   # la BOÎTE ENGLOBANTE
+remplissage = float(interieur.mean() * 100)
+fuite       = bool(remplissage > 55)
+```
+
+Le remplissage est la part de la **boîte englobante** envahie par le fond extérieur. Pour un sujet
+**creux** — un parapluie est un dôme plus un manche fin, un oiseau a des pattes — cette boîte est
+pleine de blanc extérieur parfaitement légitime, et le seuil de 55 % tombe **même sur un contour
+parfaitement fermé**.
+
+Les cinq objets, mesurés côte à côte :
+
+| objet | remplissage % | régions fermées | verdict `fuite` |
+|---|---:|---:|---|
+| soleil | 54,5 | 22 | accepté — **à 0,5 point du rejet** |
+| ballon | 21,7 | 4 | accepté |
+| poisson | 43,5 | 12 | accepté |
+| oiseau | 70,4 | 11 | rejeté à tort |
+| parapluie | 69,4 | 11 | rejeté à tort |
+
+**Le témoin décisif est `regions`.** Un sujet dont le remplissage fuirait vraiment n'aurait AUCUNE
+région fermée : l'inondation depuis les quatre coins les aurait toutes atteintes. Onze régions
+intactes prouvent la fermeture. Et le soleil, accepté, était à un demi-point du rejet pour la même
+raison — ce n'est donc pas un cas limite, c'est le critère qui est mal posé pour cette famille.
+
+### Ce qui n'a pas été fait, et pourquoi
+
+`qc_technique.py` **n'a pas été modifié**. C'est l'instrument qui garde toute la chaîne image, et
+le changer sur une mesure de cinq objets serait exactement la faute qu'il existe pour empêcher.
+Le skill `generer-asset` documente déjà deux exemptions de la même nature — « cette porte ne vaut
+que pour UN sujet détouré sur fond blanc », elle rejette à tort un décor et une planche. Celle-ci
+est la troisième, et elle appelle la même réponse : **corriger le critère, pas contourner la
+porte.**
+
+**Proposition à arbitrer** : remplacer `remplissage > 55` par une comparaison à l'**enveloppe
+convexe** du sujet plutôt qu'à sa boîte englobante — le blanc extérieur légitime en sort, la fuite
+réelle y reste. Ou, plus simple et déjà disponible : conjuguer avec `regions == 0`, qui est la
+signature vraie d'une silhouette ouverte.
+
+### Les cinq objets sont produits, et ils ne sont pas encore utilisables
+
+`production/objets/*.png` — cinq PNG mesurés bons. Mais `ecole-02-place.json` réclame des `.svg`,
+et **`potrace` est absent** (`outils/bin/` ne contient que `tts`, vérifié le même jour). La
+vectorisation attend cet outil ; les rendus, eux, sont faits et n'auront pas à être refaits.
