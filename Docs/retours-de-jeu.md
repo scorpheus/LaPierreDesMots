@@ -1454,3 +1454,64 @@ ce point — le vrai défaut était R49 ci-dessus.
 Portrait 720×1017 et 960×1356 (les deux bornes de R39, aucune mesure sur l'appareil réel) et
 1920×1200 (le format du banc, pour chiffrer la dette R20). Dit explicitement : aucune mesure de ce
 lot ne vaut pour le format réel de la tablette du père, non mesuré à ce jour.
+
+---
+
+## R62. Le glisser ajouté au tap — R16 se referme, et par les deux voies à la fois
+
+**2026-08-08.** R16 était resté **ouvert** depuis « sur la tablette ça marche pas, on n'arrive pas
+à déplacer », avec deux voies écrites noir sur blanc : *« ajouter le glisser (dnd-kit est au
+socle) **ou** rendre le tap-puis-tap évident et reformuler la consigne »*.
+
+La seconde a été prise le 2026-08-07, sur arbitrage du père : « Touche les mots dans l'ordre », et
+le mot vole tout seul jusqu'à sa case. Restait un conflit que **Q6** a nommé : les specs v2 § 5
+promettent « **faire glisser** des blocs-syllabes », et trois moteurs ne portaient aucun
+gestionnaire de glisser.
+
+**Les deux voies ont été prises, et c'est ce qui referme R16.** Le glisser s'AJOUTE, le tap reste
+le chemin principal :
+
+```
+seuil de glisse    8 px   (repris de `place`, en service depuis L2-C — pas réinventé)
+sous 8 px          le geste reste un CLIC, `onClick` part, rien ne change pour l'enfant
+au-delà            dnd-kit prend la main, la pastille suit le doigt
+```
+
+Aucune coordination fine n'est donc EXIGÉE — c'est la lettre de R16 — et la promesse des specs
+est honorée sans qu'il faille les modifier.
+
+**Le dépôt émet exactement la même action que le tap.** `poser` pour `assemble`, `placer` pour
+`phrase`, `numeroter` pour `chrono`. Deux gestes, une seule règle : sinon le jeu se comporterait
+autrement selon la façon dont l'enfant touche l'écran, ce qui est le pire des deux mondes.
+
+| moteur | avant | après |
+|---|---|---|
+| `assemble` | gestes manquants : glisser | — |
+| `chrono` | gestes manquants : réordonnancement | — |
+| `phrase` | gestes manquants : réordonnancement | — |
+
+**Q6 : 11/14 → 14/14.** 421 tests de composants verts : le tap n'a pas été mangé.
+
+### Ce que l'instrument cachait, et qui valait le détour
+
+Q6 a continué de déclarer `assemble` « sans gestionnaire de glisser » **alors que le glisser
+fonctionnait**. La cause n'était pas dans le moteur : `sourceDuMoteur()` ne lisait que les
+fichiers du dossier `client/src/moteurs/<code>/`, et le glisser vit dans le module partagé
+`client/src/moteurs/commun/glisser.tsx`.
+
+**L'instrument récompensait donc le copier-coller de dnd-kit dans chaque moteur et pénalisait la
+factorisation** — l'inverse exact de l'axe « moteur × habillage × contenu » qui porte R12 et R13.
+Il suit maintenant les imports relatifs, à profondeur 1, et son contrôle positif (« source muette
+→ glisser ») reste rouge comme il doit.
+
+Même famille, deux fichiers plus loin : `decor-de-fond.test.ts` énumérait les sous-dossiers de
+`client/src/moteurs/` et tenait chacun pour un moteur. Le module partagé a fait virer trois cas au
+rouge sur « aucun composant Moteur*.tsx dans commun ». La population vient maintenant de l'union
+`CodeMoteur` — la même source que Q6, pour que deux gardes ne comptent pas deux populations. Le
+disque reste vérifié **dans l'autre sens** : un dossier non déclaré ne doit porter aucun
+`Moteur*.tsx`, sinon c'est un moteur que le sélecteur ne proposera jamais.
+
+> **La leçon, et elle n'est pas propre à ce lot.** Deux gardes ont puni une bonne pratique parce
+> que leur population venait du DISQUE et non du code. Un test dont la population est un dossier
+> décrit l'organisation des fichiers ; un test dont la population vient d'une union du domaine
+> décrit le jeu. Seul le second survit à une refactorisation.

@@ -66,6 +66,7 @@ import {
   centreDuReceptacle,
   decalageEntre,
 } from './receptacles.js';
+import { ZoneDeGlisser, useCibleDeDepot, useJetonGlissable } from '../commun/glisser.js';
 import type { VolDuJeton } from './receptacles.js';
 
 /** Cadence du `battementHorloge`. Le moteur ne connaît aucun `setTimeout` : c'est ici. */
@@ -208,6 +209,64 @@ function planifier(parametres: {
   }
 
   return plans;
+}
+
+/**
+ * UNE ÉTIQUETTE-MOT, SAISISSABLE AU DOIGT ET TAPABLE — les deux, jamais l'un OU l'autre.
+ *
+ * Le tap reste le chemin PRINCIPAL, et c'est celui que le père a validé le 2026-08-07 :
+ * « une fois sélectionner, c'est bien que le mot se déplace tout seul sur la case vide ». Le
+ * glisser s'ajoute pour honorer « remettre les mots dans l'ordre » des specs § 5, sans rien
+ * exiger de plus de l'enfant — sous 8 px de déplacement, le geste reste un clic.
+ *
+ * Composant et non `<button>` en ligne : `useDraggable` est un hook, et un hook ne s'appelle
+ * pas dans un `.map`. C'est la seule façon de donner à CHAQUE étiquette sa propre prise.
+ */
+function EtiquetteSaisissable({
+  cle,
+  mot,
+  classes,
+  region,
+  placee,
+  styleTexte,
+  surTap,
+}: {
+  readonly cle: string;
+  readonly mot: string;
+  readonly classes: readonly string[];
+  readonly region: string;
+  readonly placee: boolean;
+  readonly styleTexte: CSSProperties;
+  readonly surTap: (evenement: { clientX: number; clientY: number }) => void;
+}): ReactElement {
+  const prise = useJetonGlissable(cle, placee);
+  return (
+    <button
+      {...prise.attributs}
+      {...prise.ecouteurs}
+      ref={prise.brancher}
+      type="button"
+      className={classes.join(' ')}
+      data-etiquette={cle}
+      data-placee={placee ? 'oui' : 'non'}
+      data-glisse={prise.enVol ? 'oui' : 'non'}
+      data-region-visee={region}
+      hidden={placee}
+      style={
+        {
+          ...styleTexte,
+          ...prise.style,
+          pointerEvents: 'auto',
+          // La pastille porte SON PROPRE FOND OPAQUE — c'est la réponse à R37. Le contraste du
+          // mot ne dépend donc jamais de ce qui passe derrière.
+          whiteSpace: 'nowrap',
+        } as CSSProperties
+      }
+      onClick={surTap}
+    >
+      {mot}
+    </button>
+  );
 }
 
 export function MoteurPhrase(
@@ -583,7 +642,35 @@ export function MoteurPhrase(
     };
   };
 
+  /**
+   * LE GLISSER, EN PLUS DU TAP — specs § 5 « remettre les mots dans l'ordre », sans trahir R16.
+   *
+   * Le dépôt émet EXACTEMENT la même action que le tap : `placer`, avec le même vol vers la
+   * case. Deux gestes, une seule règle — sinon le jeu se comporterait autrement selon la façon
+   * dont l'enfant touche l'écran.
+   *
+   * Une seule zone d'accueil, la ligne de la phrase : le moteur n'offre aucun choix de
+   * destination — c'est l'ORDRE qui fait la règle — donc plusieurs cibles inventeraient une
+   * décision qu'il ne prend pas. C'est `moteurPhrase` qui dira si le mot lâché était le bon.
+   */
+  const accueilPhrase = useCibleDeDepot('fentes-de-la-phrase');
+
+  const deposerLEtiquette = useCallback(
+    (cle: string) => {
+      const emplacement = planCourant?.resultat.emplacements.find((e: { cle: string }) => e.cle === cle);
+      if (emplacement === undefined) return;
+      const mot = etiquetteParId.get(cle)?.mot ?? '';
+      fixerVol(null);
+      viser(emplacement, mot);
+      jouer({ type: 'placer', etiquette: cle }, { clientX: emplacement.x, clientY: emplacement.y });
+    },
+    // `viser` est une fonction de rendu, pas un `useCallback` : la lister ici la rendrait
+    // instable à chaque image. Ce qu'elle lit sont des `ref`, jamais du state.
+    [etiquetteParId, planCourant, jouer],
+  );
+
   return (
+    <ZoneDeGlisser surDepot={(jeton) => { deposerLEtiquette(jeton); }}>
     <div
       ref={racine}
       data-moteur="phrase"
@@ -735,32 +822,19 @@ export function MoteurPhrase(
                     pointerEvents: 'none',
                   }}
                 >
-                  <button
-                    // Une animation CSS ne REJOUE pas parce qu'une classe revient : il faut
-                    // que l'élément soit neuf. La clé du BOUTON change donc au refus — celle
-                    // du porteur ne bouge pas, donc la position ne bouge pas non plus.
+                  <EtiquetteSaisissable
                     key={
                       emplacement.cle === etiquetteRefusee
                         ? `${emplacement.cle}-${String(marqueRefusCourante)}`
                         : emplacement.cle
                     }
-                    type="button"
-                    className={classes.join(' ')}
-                    data-etiquette={emplacement.cle}
-                    data-placee={placee ? 'oui' : 'non'}
-                    data-region-visee={emplacement.region ?? ''}
-                    hidden={placee}
-                    style={
-                      {
-                        ...styleLecture,
-                        pointerEvents: 'auto',
-                        // La pastille porte SON PROPRE FOND OPAQUE — c'est la réponse à R37.
-                        // Le contraste du mot ne dépend donc jamais de ce qui passe derrière :
-                        // décor gris, région rallumée ou trait de 4 px.
-                        whiteSpace: 'nowrap',
-                      } as CSSProperties
-                    }
-                    onClick={(evenement) => {
+                    cle={emplacement.cle}
+                    mot={etiquette.mot}
+                    classes={classes}
+                    region={emplacement.region ?? ''}
+                    placee={placee}
+                    styleTexte={styleLecture as CSSProperties}
+                    surTap={(evenement) => {
                       // Viser AVANT d'émettre : après, la case est remplie et n'existe plus.
                       // Un tap interrompt aussi le vol en cours — aucune animation ne bloque
                       // le geste suivant (v2 § 8).
@@ -768,9 +842,7 @@ export function MoteurPhrase(
                       viser(emplacement, etiquette.mot);
                       jouer({ type: 'placer', etiquette: emplacement.cle }, evenement);
                     }}
-                  >
-                    {etiquette.mot}
-                  </button>
+                  />
                 </span>
               );
             })}
@@ -843,6 +915,8 @@ export function MoteurPhrase(
             « aucune animation dans le champ de lecture » tient **par géométrie** et non par
             promesse. Posée en dessous, chaque mot traverserait la phrase à lire. */}
         <div
+          ref={accueilPhrase.brancher}
+          data-survolee={accueilPhrase.survolee ? 'oui' : 'non'}
           data-fentes="phrase"
           data-restantes={String(restants.length)}
           style={{
@@ -925,5 +999,6 @@ export function MoteurPhrase(
           `<exercice>/<consigne>`, et `ProprietesMoteur` ne porte pas l'identifiant
           d'exercice. Seul l'écran le connaît. */}
     </div>
+    </ZoneDeGlisser>
   );
 }

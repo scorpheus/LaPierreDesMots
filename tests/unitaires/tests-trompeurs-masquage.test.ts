@@ -56,7 +56,6 @@ function chargerMasquer(): (source: string) => string {
   const finMasquer = source.indexOf('\n}', source.indexOf('function masquer(source)'));
   expect(finMasquer, 'masquer doit exister dans le script').toBeGreaterThan(0);
   const extrait = source.slice(debut, finMasquer + 2);
-  // eslint-disable-next-line no-new-func
   return new Function(`${extrait}; return masquer;`)() as (source: string) => string;
 }
 

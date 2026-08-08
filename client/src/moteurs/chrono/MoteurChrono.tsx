@@ -59,6 +59,7 @@ import {
   centreDuReceptacle,
   decalageEntre,
 } from '../phrase/receptacles.js';
+import { ZoneDeGlisser, useCibleDeDepot, useJetonGlissable } from '../commun/glisser.js';
 import type { VolDuJeton } from '../phrase/receptacles.js';
 
 /** Cadence du `battementHorloge`. Le moteur ne connaît aucun `setTimeout` : c'est ici. */
@@ -169,6 +170,70 @@ function planifier(parametres: {
   }
 
   return plans;
+}
+
+/**
+ * UNE VIGNETTE D'HISTOIRE, SAISISSABLE AU DOIGT ET TAPABLE — les deux, jamais l'un OU l'autre.
+ *
+ * Le tap reste le chemin PRINCIPAL : on touche la vignette, elle prend son numéro et vole vers
+ * sa fente. Le glisser s'ajoute pour honorer « remettre les images dans l'ordre » des specs § 5
+ * sans rien exiger de plus — sous 8 px de déplacement, le geste reste un clic.
+ *
+ * Composant et non `<button>` en ligne : `useDraggable` est un hook, et un hook ne s'appelle pas
+ * dans un `.map`.
+ */
+function VignetteSaisissable({
+  cle,
+  libelle,
+  classes,
+  numero,
+  region,
+  placee,
+  largeurMax,
+  styleTexte,
+  surTap,
+}: {
+  readonly cle: string;
+  readonly libelle: string;
+  readonly classes: readonly string[];
+  readonly numero: number | string;
+  readonly region: string;
+  readonly placee: boolean;
+  readonly largeurMax: number;
+  readonly styleTexte: CSSProperties;
+  readonly surTap: (evenement: { clientX: number; clientY: number }) => void;
+}): ReactElement {
+  const prise = useJetonGlissable(cle, placee);
+  return (
+    <button
+      {...prise.attributs}
+      {...prise.ecouteurs}
+      ref={prise.brancher}
+      type="button"
+      className={classes.join(' ')}
+      data-vignette={cle}
+      data-numero={numero}
+      data-pose={placee ? 'oui' : 'non'}
+      data-glisse={prise.enVol ? 'oui' : 'non'}
+      data-region-visee={region}
+      hidden={placee}
+      style={
+        {
+          ...styleTexte,
+          ...prise.style,
+          pointerEvents: 'auto',
+          // Une légende peut ENJAMBER — c'est `mesurer()` qui en tient compte : `nowrap` ferait
+          // déborder la pastille de la boîte que la dérivation lui a réservée.
+          whiteSpace: 'normal',
+          maxInlineSize: `${String(largeurMax)}px`,
+          textAlign: 'center',
+        } as CSSProperties
+      }
+      onClick={surTap}
+    >
+      {libelle}
+    </button>
+  );
 }
 
 export function MoteurChrono(
@@ -419,7 +484,31 @@ export function MoteurChrono(
     };
   };
 
+  /**
+   * LE GLISSER, EN PLUS DU TAP — specs § 5 « remettre les images dans l'ordre », sans trahir R16.
+   *
+   * Le dépôt émet EXACTEMENT la même action que le tap : `numeroter`, avec le même vol. Deux
+   * gestes, une seule règle. Une seule zone d'accueil — la frise — parce que le moteur n'offre
+   * aucun choix de destination : c'est l'ORDRE qui fait la règle, et `moteurChrono` seul dit si
+   * la vignette lâchée était la suivante.
+   */
+  const accueilFrise = useCibleDeDepot('fentes-de-la-frise');
+
+  const deposerLaVignette = useCallback(
+    (cle: string) => {
+      const emplacement = planCourant?.resultat.emplacements.find((e: { cle: string }) => e.cle === cle);
+      if (emplacement === undefined) return;
+      const libelle = vignetteParId.get(cle)?.libelle ?? '';
+      fixerVol(null);
+      viser(emplacement, libelle);
+      jouer({ type: 'numeroter', vignette: cle }, { clientX: emplacement.x, clientY: emplacement.y });
+    },
+    // `viser` est une fonction de rendu, pas un `useCallback` : la lister la rendrait instable.
+    [vignetteParId, planCourant, jouer],
+  );
+
   return (
+    <ZoneDeGlisser surDepot={(jeton) => { deposerLaVignette(jeton); }}>
     <div
       ref={racine}
       data-moteur="chrono"
@@ -489,39 +578,26 @@ export function MoteurChrono(
                     pointerEvents: 'none',
                   }}
                 >
-                  <button
+                  <VignetteSaisissable
                     key={
                       emplacement.cle === vignetteRefusee
                         ? `${emplacement.cle}-${String(marqueRefusCourante)}`
                         : emplacement.cle
                     }
-                    type="button"
-                    className={classes.join(' ')}
-                    data-vignette={emplacement.cle}
-                    data-numero={etat.acquis[emplacement.cle] ?? ''}
-                    data-pose={placee ? 'oui' : 'non'}
-                    data-region-visee={emplacement.region ?? ''}
-                    hidden={placee}
-                    style={
-                      {
-                        ...styleLecture,
-                        pointerEvents: 'auto',
-                        // Une légende peut ENJAMBER — c'est `mesurer()` qui en tient compte
-                        // (voir `LARGEUR_MAX_PASTILLE`, même valeur ici) : `nowrap` ferait
-                        // déborder la pastille de la boîte que la dérivation lui a réservée.
-                        whiteSpace: 'normal',
-                        maxInlineSize: `${String(LARGEUR_MAX_PASTILLE)}px`,
-                        textAlign: 'center',
-                      } as CSSProperties
-                    }
-                    onClick={(evenement) => {
+                    cle={emplacement.cle}
+                    libelle={vignette.libelle}
+                    classes={classes}
+                    numero={etat.acquis[emplacement.cle] ?? ''}
+                    region={emplacement.region ?? ''}
+                    placee={placee}
+                    largeurMax={LARGEUR_MAX_PASTILLE}
+                    styleTexte={styleLecture as CSSProperties}
+                    surTap={(evenement) => {
                       fixerVol(null);
                       viser(emplacement, vignette.libelle);
                       jouer({ type: 'numeroter', vignette: emplacement.cle }, evenement);
                     }}
-                  >
-                    {vignette.libelle}
-                  </button>
+                  />
                 </span>
               );
             })}
@@ -615,5 +691,6 @@ export function MoteurChrono(
 
       {/* ── LES DEUX CONTRÔLES SONT PORTÉS PAR L'ÉCRAN, PAS PAR LE MOTEUR (R10) ────────────── */}
     </div>
+    </ZoneDeGlisser>
   );
 }

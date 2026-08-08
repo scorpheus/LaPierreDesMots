@@ -40,10 +40,38 @@ import { lireTexte, RACINE_DEPOT } from '../configuration/preparation.js';
 
 const DOSSIER_MOTEURS = 'client/src/moteurs';
 
-/** Les moteurs réellement présents sur le disque, par leur dossier. */
+/**
+ * Les moteurs, DÉRIVÉS de l'union `CodeMoteur` — la même source que Q6.
+ *
+ * ── POURQUOI PLUS LE CONTENU DU DOSSIER ───────────────────────────────────────────────────
+ * Cette fonction énumérait les sous-dossiers de `client/src/moteurs/` et tenait chacun pour un
+ * moteur. Le 2026-08-08, `client/src/moteurs/commun/glisser.tsx` est né — un module PARTAGÉ par
+ * `assemble`, `chrono` et `phrase`, qui n'est le moteur de personne — et trois cas ont viré au
+ * rouge sur « aucun composant Moteur*.tsx dans commun ».
+ *
+ * Le défaut n'était pas le module : c'était l'hypothèse « un dossier = un moteur », qui rendait
+ * la factorisation impossible sans casser un test. La population vient donc maintenant de la
+ * SOURCE QUI FAIT FOI, l'union `CodeMoteur` de `partage/src/identifiants.ts` — celle-là même
+ * que `promesses-des-specs.spec.ts` interroge, pour que les deux gardes ne puissent pas compter
+ * deux populations différentes.
+ *
+ * Le disque reste vérifié, mais dans l'autre sens : un dossier qui n'est pas un code déclaré ne
+ * doit porter AUCUN `Moteur*.tsx`, sinon c'est un moteur qui existe sans être déclaré — et
+ * celui-là, personne ne le jouerait jamais.
+ */
 function moteurs(): readonly string[] {
+  const bloc = /export type CodeMoteur\s*=([\s\S]*?);/.exec(
+    lireTexte('partage/src/identifiants.ts'),
+  );
+  expect(bloc, 'l’union `CodeMoteur` est introuvable : la population ne tient pas').not.toBeNull();
+  return [...bloc![1]!.matchAll(/'([a-z]+)'/g)].map((m) => m[1]!).sort();
+}
+
+/** Les sous-dossiers de `client/src/moteurs/` qui ne sont le moteur de personne. */
+function dossiersPartages(): readonly string[] {
+  const codes = new Set(moteurs());
   return readdirSync(join(RACINE_DEPOT, DOSSIER_MOTEURS), { withFileTypes: true })
-    .filter((entree) => entree.isDirectory())
+    .filter((entree) => entree.isDirectory() && !codes.has(entree.name))
     .map((entree) => entree.name)
     .sort();
 }
@@ -70,6 +98,30 @@ function monteSaPropreScene(code: string): boolean {
 }
 
 describe('le décor atteint l’enfant, quel que soit le moteur', () => {
+  /**
+   * LE DOSSIER PARTAGÉ EST LÉGITIME, MAIS IL NE DOIT PAS CACHER UN MOTEUR.
+   *
+   * Depuis que la population vient de `CodeMoteur` et non du disque, un dossier peut exister
+   * sans être un moteur — `commun/`, qui porte le glisser de trois moteurs. Le risque nouveau
+   * est l'inverse : un `Moteur*.tsx` posé dans un dossier NON déclaré serait un moteur que
+   * `CodeMoteur` ignore, donc que le sélecteur ne proposerait jamais et que personne ne verrait
+   * manquer. Ce cas est le prix de la souplesse qu'on vient de prendre.
+   */
+  test('un dossier partagé ne cache aucun moteur non déclaré', () => {
+    const coupables: string[] = [];
+    for (const dossier of dossiersPartages()) {
+      const composants = readdirSync(join(RACINE_DEPOT, DOSSIER_MOTEURS, dossier)).filter(
+        (nom) => nom.startsWith('Moteur') && nom.endsWith('.tsx'),
+      );
+      if (composants.length > 0) coupables.push(`${dossier} → ${composants.join(', ')}`);
+    }
+    expect(
+      coupables,
+      'ces dossiers portent un composant de moteur sans être déclarés dans `CodeMoteur` : le ' +
+        'sélecteur ne les proposera jamais, et personne ne les verra manquer',
+    ).toEqual([]);
+  });
+
   test('CONTRÔLE POSITIF — les quatorze moteurs sont bien trouvés et lisibles', () => {
     // Sans ce cas, un chemin faux rendrait une liste vide, toutes les boucles seraient vides,
     // et le fichier serait vert en ne vérifiant rien.

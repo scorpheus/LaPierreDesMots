@@ -201,7 +201,18 @@ export function genererRapport(options = {}) {
     for (const etape of bloquantes) {
       // `cause` dit POURQUOI en une ligne. Sans elle on retombe sur le comptage, qui a
       // longtemps affiché « 0 échec(s) sur 1975 » — un énoncé exact et parfaitement inutile.
-      const raison = etape.cause ?? `${etape.echecs} échec(s) sur ${etape.total}`;
+      //
+      // UNE ÉTAPE JAMAIS ATTEINTE LE DIT, au lieu d'afficher un verdict. Le 2026-08-08,
+      // `bundle` figurait au rapport comme « 1 échec(s) sur 0 » : elle est enchaînée derrière
+      // `test:qualite`, qui avait rendu 1, donc elle n'avait JAMAIS TOURNÉ. Le compte était
+      // exact — la chaîne pose délibérément chaque étape en échec avant de la lancer, pour
+      // qu'un maillon sauté ne passe pas inaperçu — mais l'énoncé faisait lire un défaut de
+      // budget de bundle là où il n'y avait aucune mesure. Un rapport qui affiche un verdict
+      // sans avoir mesuré est exactement ce que ce dépôt traque partout ailleurs.
+      const jamaisAtteinte = etape.note !== undefined && /non exécutée/.test(etape.note);
+      const raison = jamaisAtteinte
+        ? `**jamais exécutée** — ${etape.note}`
+        : (etape.cause ?? `${etape.echecs} échec(s) sur ${etape.total}`);
       lignes.push(`- **${etape.etape}** — ${raison}`);
     }
     lignes.push('');

@@ -92,6 +92,7 @@ import {
   centreDuReceptacle,
   decalageEntre,
 } from '../phrase/receptacles.js';
+import { ZoneDeGlisser, useCibleDeDepot, useJetonGlissable } from '../commun/glisser.js';
 import type { VolDuJeton } from '../phrase/receptacles.js';
 
 /** Cadence du `battementHorloge`. Le moteur ne connaît aucun `setTimeout` : c'est ici. */
@@ -205,6 +206,63 @@ function planifier(parametres: {
   }
 
   return plans;
+}
+
+/**
+ * UN BLOC-SYLLABE, SAISISSABLE AU DOIGT ET TAPABLE — les deux, jamais l'un OU l'autre.
+ *
+ * C'est un composant et non un `<button>` en ligne pour une raison mécanique : `useDraggable`
+ * est un hook, et un hook ne s'appelle pas dans un `.map`. Le sortir ici est la seule façon de
+ * donner à CHAQUE bloc sa propre prise, sans quoi les huit blocs partageraient la même.
+ *
+ * L'ordre des attributs est normatif, et `Reserve.tsx` le documentait déjà : les attributs de
+ * dnd-kit d'abord, les nôtres ENSUITE. `useDraggable` pose son propre `style` et son propre
+ * `role` ; les écraser après coup est voulu — le `data-bloc` que les recettes visent ne doit
+ * jamais être remplacé par un attribut de bibliothèque.
+ */
+function BlocSaisissable({
+  cle,
+  libelle,
+  classes,
+  region,
+  placee,
+  styleTexte,
+  surTap,
+}: {
+  readonly cle: string;
+  readonly libelle: string;
+  readonly classes: readonly string[];
+  readonly region: string;
+  readonly placee: boolean;
+  readonly styleTexte: CSSProperties;
+  readonly surTap: (evenement: { clientX: number; clientY: number }) => void;
+}): ReactElement {
+  const prise = useJetonGlissable(cle, placee);
+  return (
+    <button
+      {...prise.attributs}
+      {...prise.ecouteurs}
+      ref={prise.brancher}
+      type="button"
+      className={classes.join(' ')}
+      data-bloc={cle}
+      data-pose={placee ? 'oui' : 'non'}
+      data-glisse={prise.enVol ? 'oui' : 'non'}
+      data-region-visee={region}
+      hidden={placee}
+      style={
+        {
+          ...styleTexte,
+          ...prise.style,
+          pointerEvents: 'auto',
+          whiteSpace: 'nowrap',
+        } as CSSProperties
+      }
+      onClick={surTap}
+    >
+      {libelle}
+    </button>
+  );
 }
 
 export function MoteurAssemble(
@@ -526,7 +584,36 @@ export function MoteurAssemble(
     };
   };
 
+  const accueil = useCibleDeDepot('fentes-du-mot');
+
+  /**
+   * LE GLISSER, EN PLUS DU TAP — R16, et la promesse « faire glisser des blocs-syllabes ».
+   *
+   * Le dépôt émet EXACTEMENT la même action que `onClick` : `poser`, avec le même vol vers la
+   * fente. Deux gestes, une seule règle — sans quoi le jeu se comporterait autrement selon la
+   * façon dont l'enfant touche l'écran, ce qui est le pire des deux mondes.
+   *
+   * La cible est unique : la ligne du mot. `assemble` n'a pas de choix de destination — l'ordre
+   * fait la règle — donc offrir plusieurs zones inventerait une décision qui n'existe pas.
+   */
+  const deposerLeBloc = useCallback(
+    (bloc: string) => {
+      const emplacement = planAffiche?.resultat.emplacements.find((e) => e.cle === bloc);
+      if (emplacement === undefined) return;
+      const libelle = blocParId.get(bloc)?.libelle ?? '';
+      fixerVol(null);
+      viser(emplacement, libelle);
+      // Le glisser n'a pas de coordonnées de clic : on note le centre du bloc, qui est
+      // précisément d'où le jeton part.
+      jouer({ type: 'poser', bloc }, { clientX: emplacement.x, clientY: emplacement.y });
+    },
+    // `viser` est une fonction de rendu (pas un `useCallback`) : la lister ici la rendrait
+    // instable à chaque image. Les valeurs qu'elle lit sont des `ref`, jamais du state.
+    [blocParId, planAffiche, jouer],
+  );
+
   return (
+    <ZoneDeGlisser surDepot={(jeton) => { deposerLeBloc(jeton); }}>
     <div
       ref={racine}
       data-moteur="assemble"
@@ -598,33 +685,24 @@ export function MoteurAssemble(
                     pointerEvents: 'none',
                   }}
                 >
-                  <button
+                  <BlocSaisissable
                     key={
                       emplacement.cle === blocRefuse
                         ? `${emplacement.cle}-${String(marqueRefusCourante)}`
                         : emplacement.cle
                     }
-                    type="button"
-                    className={classes.join(' ')}
-                    data-bloc={emplacement.cle}
-                    data-pose={placee ? 'oui' : 'non'}
-                    data-region-visee={emplacement.region ?? ''}
-                    hidden={placee}
-                    style={
-                      {
-                        ...styleLecture,
-                        pointerEvents: 'auto',
-                        whiteSpace: 'nowrap',
-                      } as CSSProperties
-                    }
-                    onClick={(evenement) => {
+                    cle={emplacement.cle}
+                    libelle={bloc.libelle}
+                    classes={classes}
+                    region={emplacement.region ?? ''}
+                    placee={placee}
+                    styleTexte={styleLecture as CSSProperties}
+                    surTap={(evenement) => {
                       fixerVol(null);
                       viser(emplacement, bloc.libelle);
                       jouer({ type: 'poser', bloc: emplacement.cle }, evenement);
                     }}
-                  >
-                    {bloc.libelle}
-                  </button>
+                  />
                 </span>
               );
             })}
@@ -657,15 +735,25 @@ export function MoteurAssemble(
         }}
       >
         {/* ── R59 — LA LIGNE DE FENTES *EST* LE MOT QU'ON RECONSTRUIT ──────────────────────── */}
+        {/* LA LIGNE DU MOT EST LA ZONE D'ACCUEIL DU GLISSER. Une seule cible, et c'est voulu :
+            `assemble` n'offre aucun choix de destination — c'est l'ORDRE qui fait la règle —
+            donc plusieurs zones inventeraient une décision que le moteur ne prend pas.
+            Le liseré n'apparaît QUE pendant le survol : une affordance permanente ferait du
+            bruit pour l'enfant qui joue au tap, c'est-à-dire pour le chemin principal. */}
         <div
+          ref={accueil.brancher}
           data-fentes="mot"
           data-restantes={String(restants.length)}
+          data-survolee={accueil.survolee ? 'oui' : 'non'}
           style={{
             display: 'flex',
             flexWrap: 'wrap',
             alignItems: 'center',
             gap: '0.5rem',
             marginBlockEnd: '0.6rem',
+            outline: accueil.survolee ? '3px dashed var(--soleil)' : undefined,
+            outlineOffset: '4px',
+            borderRadius: 'var(--rayon-carte)',
           }}
         >
           {solution.map((id) => {
@@ -722,5 +810,6 @@ export function MoteurAssemble(
 
       {/* ── LES DEUX CONTRÔLES SONT PORTÉS PAR L'ÉCRAN, PAS PAR LE MOTEUR (R10) ────────────── */}
     </div>
+    </ZoneDeGlisser>
   );
 }

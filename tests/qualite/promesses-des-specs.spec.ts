@@ -51,7 +51,7 @@
  * Il ne juge pas si la scène est BELLE : le jugement esthétique appartient au père (D50, et
  * § 7 point 1 de la spec QA). Q6 vérifie qu'une scène est montée, jamais qu'elle est réussie.
  */
-import { readFileSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 
 import { expect, test } from '../harnais-serveur.js';
 
@@ -143,17 +143,61 @@ const GESTES: readonly {
 const sansCommentaires = (source: string): string =>
   source.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/^\s*\/\/.*$/gm, ' ');
 
-/** Le source du moteur côté client, commentaires retirés. */
+/**
+ * Le source du moteur cote client, commentaires retires, **modules importes compris**.
+ *
+ * -- POURQUOI LES IMPORTS, ET CE QUE LA MESURE RATAIT SANS EUX ------------------------------
+ * Le 2026-08-08, `assemble` a recu son glisser : `DndContext`, `PointerSensor` a 8 px,
+ * `useDraggable` sur chaque bloc, `useDroppable` sur la ligne du mot. Q6 a continue de le
+ * declarer « sans gestionnaire de glisser ».
+ *
+ * La cause n'etait pas dans le moteur mais dans CETTE fonction : elle ne lisait que les
+ * fichiers du dossier `client/src/moteurs/<code>/`, et le glisser vit dans le module partage
+ * `client/src/moteurs/commun/glisser.tsx`. L'instrument **recompensait donc le copier-coller de
+ * dnd-kit dans chaque moteur et penalisait la factorisation** -- exactement l'inverse de ce que
+ * l'axe « moteur x habillage x contenu » demande.
+ *
+ * On suit maintenant les imports RELATIFS vers d'autres dossiers de `client/src/moteurs/`.
+ * Deux garde-fous, pour que la mesure ne devienne pas laxiste :
+ *   - seuls les modules REELLEMENT importes par ce moteur sont lus : un moteur qui n'importe
+ *     rien n'est credite de rien, et le controle positif « source muette » reste rouge ;
+ *   - la profondeur est de 1. Suivre les imports des imports finirait par aspirer la moitie du
+ *     client, et un `onPointerDown` trouve a trois modules de distance ne prouve rien du geste
+ *     que CE moteur propose.
+ */
 function sourceDuMoteur(code: string, fabriquee?: string): string {
   if (fabriquee !== undefined) return sansCommentaires(fabriquee);
   const dossier = cheminDepot(`client/src/moteurs/${code}`);
   let entier = '';
+  const propres: string[] = [];
   for (const fichier of readdirSync(dossier)) {
-    if (!/\.tsx?$/.test(fichier)) continue;
-    entier += `\n${sansCommentaires(readFileSync(`${dossier}/${fichier}`, 'utf8'))}`;
+    if (!/[.]tsx?$/.test(fichier)) continue;
+    const brut = readFileSync(`${dossier}/${fichier}`, 'utf8');
+    propres.push(brut);
+    entier += `
+${sansCommentaires(brut)}`;
   }
   if (entier.trim() === '') {
     throw new Error(`Q6 : aucun source lu pour le moteur « ${code} ».`);
+  }
+
+  // Les imports relatifs qui SORTENT du dossier du moteur : `../commun/glisser.js`,
+  // `../phrase/receptacles.js`. On essaie `.tsx` puis `.ts` : la source porte l'extension `.js`
+  // de sortie, jamais celle du fichier reel.
+  const vus = new Set<string>();
+  for (const brut of propres) {
+    for (const trouve of brut.matchAll(/from '[.][.]\/([a-z-]+)\/([a-zA-Z-]+)[.]js'/g)) {
+      const chemin = `${trouve[1]}/${trouve[2]}`;
+      if (vus.has(chemin)) continue;
+      vus.add(chemin);
+      for (const extension of ['tsx', 'ts']) {
+        const complet = cheminDepot(`client/src/moteurs/${chemin}.${extension}`);
+        if (!existsSync(complet)) continue;
+        entier += `
+${sansCommentaires(readFileSync(complet, 'utf8'))}`;
+        break;
+      }
+    }
   }
   return entier;
 }
