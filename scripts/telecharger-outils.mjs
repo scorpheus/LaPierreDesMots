@@ -22,7 +22,7 @@
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
-import { dirname, join, resolve } from 'node:path';
+import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const RACINE = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -59,7 +59,21 @@ const OUTILS = [
     nom: 'potrace',
     libelle: 'Vectorisation du trait noir en SVG (annexe P § 3.2, lot L2-G)',
     url: 'https://potrace.sourceforge.net/download/1.16/potrace-1.16.win64.zip',
-    empreinte: null,
+    // ÉPINGLÉE LE 2026-08-08, et vérifiée contre la publication de l'éditeur — pas seulement
+    // recopiée de ce qu'on venait de télécharger, ce qui n'aurait rien prouvé du tout.
+    //
+    // Le site de potrace publie des SHA1, pas des SHA256, à `download/SHA1SUMS`. On a donc
+    // comparé sur SON terrain, en calculant les deux empreintes de la MÊME archive :
+    //
+    //     publié par l'éditeur   7e360015c8ac0e6efdffa6c26974daf65ab596e9   (sha1)
+    //     archive téléchargée    7e360015c8ac0e6efdffa6c26974daf65ab596e9   (sha1)
+    //     archive téléchargée    63699f9885b5ed05…                          (sha256, ci-dessous)
+    //
+    // 186 345 octets, potrace 1.16 (17 septembre 2019), la version courante. Le sha256 est
+    // celui que ce manifeste vérifiera désormais : il est plus solide que le sha1, et il porte
+    // la confiance qu'on vient d'établir une fois pour toutes. Quiconque clone le dépôt obtient
+    // donc exactement ce binaire-là, sans avoir à refaire cette vérification.
+    empreinte: '63699f9885b5ed053977fd94452a7bdbb77ee62b77bf28a3f17b2f14b9b9c65d',
     // Forme RÉELLE de l'archive officielle 1.16 : elle se déplie dans un sous-dossier
     // versionné. On ne l'aplatit pas — le témoin décrit ainsi la vraie forme, et un
     // changement de forme se voit au lieu de passer inaperçu.
@@ -200,7 +214,45 @@ async function installerOutil(outil, options) {
 
   if (outil.archive) {
     // `tar` est fourni par Windows 10/11 (bsdtar) et lit les .zip. Aucune dépendance npm.
-    const extraction = spawnSync('tar', ['-xf', archive, '-C', destination], {
+    //
+    // ── IL Y A DEUX `tar` SUR CETTE MACHINE, ET UN SEUL LIT LES .ZIP ────────────────────────
+    // Première installation de potrace, le 2026-08-08. Deux messages successifs, et aucun des
+    // deux ne disait la vraie cause :
+    //
+    //     tar: Cannot connect to C: resolve failed          (chemin absolu pris pour un hôte)
+    //     tar: This does not look like a tar archive        (après --force-local)
+    //
+    // L'archive était pourtant intacte : 186 345 octets, signature `PK\x03\x04`, sha1 conforme
+    // à la publication de l'éditeur. Le défaut était d'ENVIRONNEMENT :
+    //
+    //     Git Bash   GNU tar        ne lit PAS les .zip, et lit `C:\…` comme `hôte:chemin`
+    //     Windows    bsdtar 3.8.4   les lit, et n'a aucun des deux problèmes
+    //
+    // `npm run preparer` lancé depuis Git Bash hérite de son PATH, donc de GNU tar. Lancé
+    // depuis PowerShell ou par `demarrer.bat` — c'est-à-dire comme le parent le lance — il
+    // trouve bsdtar et tout fonctionne du premier coup.
+    //
+    // On vérifie donc AVANT, et on nomme le défaut au lieu de laisser lire un message de tar
+    // qui désigne l'archive. C'est ce que ce script fait déjà pour Python : « bruyant en cas
+    // de doute », et le doute porte ici sur l'outil, jamais sur le fichier.
+    //
+    // Les chemins restent RELATIFS : sans `:` dans les arguments, le premier des deux pièges
+    // ne peut plus se produire du tout, quel que soit le `tar` trouvé.
+    const versionTar = spawnSync('tar', ['--version'], { encoding: 'utf8', windowsHide: true });
+    if (process.platform === 'win32' && !/bsdtar|libarchive/i.test(versionTar.stdout ?? '')) {
+      mal(
+        `${outil.nom} — le \`tar\` du PATH ne lit pas les .zip.\n` +
+          `     Trouvé : ${(versionTar.stdout ?? 'aucun tar').split('\n')[0]}\n` +
+          '     C’est GNU tar (celui de Git Bash), pas bsdtar. L’archive est intacte ; c’est\n' +
+          '     l’outil qui ne convient pas. Relancer `npm run preparer` depuis PowerShell,\n' +
+          '     l’invite de commandes, ou `demarrer.bat` — Windows y fournit bsdtar.'
+      );
+      return;
+    }
+
+    const relatif = (chemin) => relative(RACINE, chemin).replace(/\\/gu, '/');
+    const extraction = spawnSync('tar', ['-xf', relatif(archive), '-C', relatif(destination)], {
+      cwd: RACINE,
       stdio: 'inherit',
       windowsHide: true
     });

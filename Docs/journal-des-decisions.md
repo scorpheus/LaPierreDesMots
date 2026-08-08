@@ -1128,6 +1128,31 @@ Profils restants : Ezékiel
 
 ---
 
+### D56. Portage Android autonome — un port `Base` + un port `Api`, deux adaptateurs, zéro duplication
+
+**Établi le 2026-08-08.** Demande du propriétaire : *« que le code puisse faire les deux [serveur
+LAN et app Android hors-ligne], et que le code reste propre. »*
+
+Deux audits factuels ont montré que l'architecture s'y prête déjà : `serveur/src/depots/*.ts` (10
+fichiers) ont déjà la forme d'un repository typé, `serveur/src/services/*.ts` n'importe déjà rien
+de Fastify, et `client/src/etat/services.ts` porte déjà la règle « un seul fichier appelle le
+réseau côté client ». Seule brique réellement non portable : `node:sqlite` (`DatabaseSync`),
+absent d'une WebView Android.
+
+**La décision.** La logique (SQL, orchestration, validation, BKT/Leitner/sélecteur) migre dans
+`partage/src/base/`, sous un contrat `Base` **async** — parce que tout adaptateur SQLite mobile
+(WASM ou plugin natif) traverse un pont async, alors que `DatabaseSync` est synchrone. Chaque
+cible ne fournit plus qu'un adaptateur mince : `node:sqlite` côté serveur,
+`@capacitor-community/sqlite` côté Android. Le client gagne symétriquement un port `Api`
+(`PortApiHttp`/`PortApiLocal`) aux mêmes signatures que `client/src/api/client.ts` aujourd'hui.
+
+**Motif du choix `@capacitor-community/sqlite`** plutôt qu'un moteur WASM (`wa-sqlite`/`sql.js`) :
+sémantique la plus proche de `node:sqlite` (PRAGMA, transactions, fichier réel), et le besoin
+exprimé est un packaging Capacitor, pas une PWA sans app store.
+
+Contrat détaillé, séquencement en 5 lots et vérifications :
+[addendum-portage-android.md](addendum-portage-android.md).
+
 ## Points encore ouverts
 
 | # | Point | Source | Bloque quoi |
