@@ -30,7 +30,7 @@
       "consignes": [
         {
           "id": "c1",
-          "texte": "Range les mots pour lire : le feu est rouge.",
+          "texte": "Touche les mots dans l’ordre.",
           "forme": "imperative",
           "audio": null,
           "phrase": "Le feu est rouge.",
@@ -49,7 +49,7 @@
         },
         {
           "id": "c2",
-          "texte": "Range les mots pour lire : les voitures sont sur la route.",
+          "texte": "Touche les mots dans l’ordre.",
           "forme": "imperative",
           "audio": null,
           "phrase": "Les voitures sont sur la route.",

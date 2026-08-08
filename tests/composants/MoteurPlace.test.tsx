@@ -12,7 +12,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { useCallback, useState } from 'react';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { moteurPlace } from '@partage/moteurs/place/moteur';
@@ -249,10 +249,24 @@ describe('MoteurPlace — R16, les cibles ne sont jamais minuscules', () => {
     }
   });
 
-  it('la consigne est LUE à l’écran et annoncée aux lecteurs d’écran', () => {
-    render(<Harnais />);
-    const texte = document.querySelector('[data-consigne-texte="oui"]');
-    expect(texte?.textContent).toBe(contenu.consignes[0]!.texte);
-    expect(screen.getByRole('group', { name: /objets/i })).not.toBeNull();
-  });
+  /**
+   * ── CE CAS A ÉTÉ RETIRÉ AVEC R49, ET IL GARDAIT LITTÉRALEMENT LE DOUBLON ─────────────────
+   *
+   * Il exigeait `[data-consigne-texte="oui"]` DANS le moteur, avec le texte de l'étape.
+   * « la phrase est en haut et en bas, il y a doublon » (le père, 2026-08-07) : `EcranNoeud`
+   * porte la consigne seul depuis, parce qu'il est le seul à avoir la clé du `BoutonEcouter`.
+   * Le garder ici reviendrait à exiger le retour du doublon.
+   *
+   * **L'exigence n'est pas perdue : elle suit l'objet.** Vérifié AVANT de retirer, pas après :
+   *   • l'AFFICHAGE — `tests/composants/EcranNoeud.test.tsx`, « R49 — porte la consigne de
+   *     l'étape, et elle y est LISIBLE » ;
+   *   • l'AUDIBILITÉ — `tests/e2e/parcours-variete.spec.ts:300`, qui exige
+   *     `[data-action="ecouter"]` sur l'application réelle (R15) ;
+   *   • et le sens INVERSE — `tests/unitaires/consigne-sans-doublon.test.ts`, qu'aucun moteur
+   *     ne la reprenne.
+   *
+   * Retirer une assertion sur la foi d'une affirmation, ce serait perdre l'exigence en croyant
+   * la déplacer. Les trois adresses ci-dessus ont été lues, pas supposées.
+   */
+
 });

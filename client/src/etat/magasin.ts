@@ -24,7 +24,7 @@ import type {
   ResumeTentative,
   SeuilsCascade
 } from '@pierre/partage';
-import { ETAT_CASCADE_VIDE, appliquerEtoiles } from '@pierre/partage/recompenses';
+import { ETAT_CASCADE_VIDE } from '@pierre/partage/recompenses';
 import type { PaquetNoeudAttendu } from '../api/client.js';
 import { memoriserProfil, oublierProfil } from './profil-memorise.js';
 import type { ServicesJeu } from '../moteurs/types.js';
@@ -121,6 +121,16 @@ export interface EtatMagasin {
   fixerSeuils(seuils: SeuilsCascade): void;
   /** Mémorise le point du dernier appui. Appelé par `EcranNoeud` sur `pointerdown`. */
   marquerAppui(x: number, y: number): void;
+  /**
+   * Pose le gain de cascade RENDU PAR LE SERVEUR — lot A1 (R31).
+   *
+   * Le client ne calcule plus la cascade lui-même : `POST /api/tentatives` la calcule, l'ENREGISTRE
+   * et la rend dans sa réponse (contrat § 3.4, `ReponseTentative.gainCascade`). Appelé par
+   * `EcranRecompense` une fois la réponse revenue ; les sons de palier partent d'ici, au même
+   * endroit qu'avant (D26), parce que c'est le seul endroit qui voit à la fois le geste et son
+   * résultat.
+   */
+  appliquerGainCascade(gain: GainCascade): void;
 }
 
 export type MagasinJeu = StoreApi<EtatMagasin>;
@@ -206,6 +216,16 @@ export function creerMagasin(
       fixer({ dernierAppui: [x, y] });
     },
 
+    appliquerGainCascade(gain: GainCascade): void {
+      fixer({ cascade: gain.etat, dernierGain: gain });
+      // Le son de chaque palier franchi, dans l'ordre. `EcranRecompense` les AFFICHE ; c'est ici
+      // qu'ils SONNENT — même endroit qu'avant ce lot, seule la SOURCE du gain a changé : le
+      // serveur, plus le calcul client (R31).
+      for (const palier of gain.paliersFranchis) {
+        void services.retour.palierFranchi(palier);
+      }
+    },
+
     choisirProfil(profil: Profil): void {
       // Un tap suffit, aucun mot de passe (v2 § 11).
       //
@@ -288,8 +308,6 @@ export function creerMagasin(
         etatMoteur,
         resume,
         progression: avant,
-        cascade,
-        seuils,
         dernierAppui,
         serie: serieAvant
       } = lire();
@@ -337,13 +355,6 @@ export function creerMagasin(
         const resumeFinal = moteur.resume(suivant);
         const etoiles: NombreEtoiles = calculerEtoiles(resumeFinal);
 
-        // La cascade de D25 s'applique À LA CLÔTURE d'un nœud, jamais en cours de route :
-        // « une étoile par exercice réussi », pas une étoile par bonne réponse.
-        const gain =
-          seuils === null
-            ? null
-            : appliquerEtoiles(cascade, etoiles, seuils, maintenantIso(services.horloge));
-
         fixer({
           etatMoteur: suivant,
           progression,
@@ -353,15 +364,12 @@ export function creerMagasin(
           termineLe: maintenantIso(services.horloge),
           ecran: 'recompense',
           serie,
-          cascade: gain === null ? cascade : gain.etat,
-          dernierGain: gain
+          // La cascade de D25 n'est plus calculée ici — lot A1 (R31) : elle vient du serveur, à
+          // la réponse du `POST /api/tentatives` qu'`EcranRecompense` envoie juste après. On
+          // efface le gain du nœud PRÉCÉDENT pour ne pas l'afficher par erreur pendant que la
+          // requête est en vol ; `appliquerGainCascade` le repose dès que la réponse arrive.
+          dernierGain: null
         });
-
-        // Le son de chaque palier franchi, dans l'ordre. `EcranRecompense` les AFFICHE ; c'est
-        // ici qu'ils SONNENT, pour que le déclenchement reste au même endroit que les autres.
-        for (const palier of gain?.paliersFranchis ?? []) {
-          void services.retour.palierFranchi(palier);
-        }
         return;
       }
 

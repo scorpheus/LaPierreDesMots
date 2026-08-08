@@ -224,23 +224,51 @@ describe('les destinations du campement se lisent sans savoir lire', () => {
       element.getAttribute('data-pictogramme')
     );
     console.log(`[S5] pictogrammes rendus : ${pictogrammes.join(', ')}`);
-    // ── `etagere` A QUITTÉ CETTE LISTE AVEC R27, ET CE N'EST PAS UN ASSOUPLISSEMENT ──────
+    // ══════════════════════════════════════════════════════════════════════════════════════
+    // LA LISTE ÉCRITE À LA MAIN A DISPARU — ELLE S'ÉTAIT DÉJÀ PÉRIMÉE DEUX FOIS
     //
-    // « Dans le coffre, il y a aussi les Gobi. Je pense qu'il faut les laisser dans le coffre,
-    // ça sert à rien de les mettre dans le campement. » L'étagère n'est plus rendue ici, donc
-    // exiger son pictogramme ICI reviendrait à exiger qu'elle revienne.
+    // Elle disait `['carte', 'coffre', 'butin']`. R27 en a fait tomber `etagere` ; l'arbitrage
+    // du 2026-08-07 — « déplace le butin dans le coffre » — en a fait tomber `butin`. **Deux
+    // déménagements, deux fois rouge, deux fois pour une bonne raison.** Une liste de noms ne
+    // survit pas à un écran qui bouge : c'est le recensement par OCCURRENCE que ce dépôt
+    // combat partout ailleurs.
     //
-    // L'exigence n'est pas perdue : elle suit l'objet. `EcranCoffre` rend l'étagère et son
-    // pictogramme, et `parcours-campement-sans-texte.spec.ts` a déplacé au coffre ses deux
-    // gardes — les cases vides et l'absence de cadenas. Une exigence qui disparaîtrait avec un
-    // déménagement n'aurait jamais rien gardé.
-    for (const attendu of ['carte', 'coffre', 'butin']) {
-      expect(pictogrammes).toContain(attendu);
-    }
+    // La règle DÉRIVÉE dit la même chose sans se périmer : **toute destination que cet écran
+    // rend porte un pictogramme.** La population, ce sont les `[data-vers]` réellement montés —
+    // trois aujourd'hui, quatre demain si l'on en ajoute une, et le garde suivra tout seul.
+    // Un panneau qui déménage n'y figure plus ; une destination neuve y entre sans qu'on
+    // touche ce fichier.
+    // ══════════════════════════════════════════════════════════════════════════════════════
+    const destinations = [...document.querySelectorAll('[data-vers]')];
     expect(
-      pictogrammes,
-      'l’étagère est revenue au campement : elle appartient au coffre depuis R27'
-    ).not.toContain('etagere');
+      destinations.length,
+      'le campement ne rend aucune destination : la règle serait vraie par vacuité'
+    ).toBeGreaterThanOrEqual(2);
+    const sansPictogramme = destinations
+      .filter((lien) => lien.querySelector('[data-pictogramme]') === null &&
+        !lien.hasAttribute('data-pictogramme'))
+      .map((lien) => lien.getAttribute('data-vers'));
+    expect(
+      sansPictogramme,
+      'ces destinations du hub n’ont pas de pictogramme : un enfant qui ne sait pas encore ' +
+        'lire ne peut pas les distinguer'
+    ).toEqual([]);
+
+    // ── LES DEUX OBJETS QUI ONT DÉMÉNAGÉ, ET LEUR EXIGENCE LES A SUIVIS ─────────────────────
+    //
+    // « Dans le coffre, il y a aussi les Gobi. Je pense qu'il faut les laisser dans le coffre »
+    // (R27) puis « déplace le butin dans le coffre » (2026-08-07). Exiger leurs pictogrammes
+    // ICI reviendrait à exiger qu'ils reviennent.
+    //
+    // **L'exigence n'est pas perdue : elle suit l'objet.** `tests/composants/EcranCoffre.test.tsx`
+    // porte désormais les deux — « le coffre rend les pictogrammes des collections qui l'ont
+    // rejoint ». Une exigence qui disparaîtrait avec un déménagement n'aurait jamais rien gardé.
+    for (const parti of ['etagere', 'butin']) {
+      expect(
+        pictogrammes,
+        `« ${parti} » est revenu au campement : il appartient au coffre`
+      ).not.toContain(parti);
+    }
   });
 
   it('n’affiche jamais d’échec au campement, quoi qu’on touche', () => {

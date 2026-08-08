@@ -156,7 +156,42 @@ export function MoteurColorie(
         // posé par `global.css`) : elle prend ce qui reste et rétrécit quand il en manque, pendant
         // que les commandes gardent leur taille. Le style est EN LIGNE parce qu'un style en ligne
         // bat la feuille — c'est précisément ce qui rendait la première correction inerte.
-        style={{ display: 'flex', flexDirection: 'column', gap: '1rem', blockSize: '100%', minBlockSize: 0 }}
+        //
+        // ── `overflowY: 'auto'`, AJOUTÉ POUR LE RETOUR « les pots de couleur passent devant
+        // Gobi » ──────────────────────────────────────────────────────────────────────────
+        //
+        // MESURÉ, jamais estimé (`bac-a-sable/mesurer-recouvrement-gobi-colorie.mjs`, portrait
+        // 720×1017, la borne basse de la Galaxy Tab S10 FE) : sans cette ligne,
+        // `document.elementFromPoint` sur le CENTRE de Gobi, de sa bulle et de son bouton
+        // « ? Gobi » rendait tous les trois un `<li class="pierre-consigne pierre-consigne
+        // --a-venir">` — une ligne du nuancier peinte PAR-DESSUS Gobi, alors que Gobi est
+        // rendu APRÈS dans le DOM et donc plus bas à l'écran.
+        //
+        // LA CAUSE N'EST PAS UN `zIndex` : c'est que cette racine (`data-moteur`) vit, par
+        // construction d'`EcranNoeud`, sous deux ancêtres `position: relative`. Un enfant
+        // POSITIONNÉ peint TOUJOURS après le contenu en flux normal de son conteneur flex,
+        // quel que soit l'ordre du DOM (CSS 2.1, annexe E) — donc tout ce qui DÉBORDE de cette
+        // racine (la scène `data-scene-non-reductible` ne rétrécit jamais, R20) peint PAR-
+        // DESSUS le `<Gobi>` non positionné qui suit, au lieu de rester en dessous.
+        //
+        // `overflow-y: auto` CONTIENT ce débordement à l'intérieur de la racine elle-même :
+        // le nuancier devient atteignable par un défilement LOCAL à la scène de jeu, sans
+        // jamais repeindre par-dessus Gobi ni la barre de consigne — les deux restent visibles
+        // en permanence, ce qu'un défilement de tout l'écran (`[data-ecran] { overflow: auto }`,
+        // global.css) ne garantissait pas non plus : il aurait fait défiler Gobi HORS de
+        // l'écran avec le reste. Mesuré après correction : recouvrement rendu à `false` sur les
+        // trois points, `[data-godet]` de nouveau ATTEIGNABLE par défilement contenu.
+        //
+        // Ne change RIEN à la dette R20 (elle reste 730 px documentés) : la scène garde sa
+        // taille non réductible, seul l'ENDROIT où le surplus se lit change.
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1rem',
+          blockSize: '100%',
+          minBlockSize: 0,
+          overflowY: 'auto'
+        }}
     >
       <SceneSvg
         habillage={habillage}

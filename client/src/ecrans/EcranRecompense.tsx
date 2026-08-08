@@ -132,8 +132,14 @@ export function EcranRecompense(): ReactElement {
           resume
         };
 
-        await enregistrerTentative(charge);
+        const reponse = await enregistrerTentative(charge);
         magasin.getState().marquerTentativeEnvoyee();
+        // ── LA CASCADE VIENT DU SERVEUR — lot A1 (R31) ────────────────────────────────────
+        // Avant ce lot, `magasin.ts` calculait `dernierGain` lui-même, dans une variable qui
+        // repartait de zéro à chaque rechargement : rien de ce que l'enfant gagnait n'était
+        // jamais enregistré. Le serveur calcule et enregistre désormais la cascade DANS la
+        // même transaction que la tentative, et la rend ici : le client ne fait plus que LIRE.
+        magasin.getState().appliquerGainCascade(reponse.gainCascade);
         await fileDAttente.invalidateQueries({ queryKey: ['progression', profilId] });
         // R6 — le monde AUSSI. Gobi évolue en fonction des formes qu'il vient de gagner, et
         // sans cette invalidation la carte comme l'écran garderaient le Gobi d'avant : son

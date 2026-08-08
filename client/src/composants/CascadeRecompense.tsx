@@ -22,11 +22,15 @@ const ANNONCE: Readonly<Record<CodePalier, string>> = {
   rare: 'Une zone du monde se rallume !'
 };
 
-/** Ce que le palier remet, dit à l'enfant. */
+/**
+ * Ce que le palier remet, dit à l'enfant.
+ *
+ * `'objet-campement'` retiré par le lot A1 (R31) : `NatureRecompense` n'en a plus que trois —
+ * voir `partage/src/recompenses/types.ts`, aucun palier ne pouvait le produire.
+ */
 const NATURE_DITE: Readonly<Record<NatureRecompense, string>> = {
   etoile: 'une étoile',
   'forme-gobi': 'une nouvelle forme pour Gobi',
-  'objet-campement': 'un objet pour le campement',
   'zone-recoloriee': 'une zone qui reprend ses couleurs'
 };
 

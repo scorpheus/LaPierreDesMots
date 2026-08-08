@@ -18,7 +18,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { PointerEvent as PointerEventReact, ReactElement } from 'react';
+import type { CSSProperties, PointerEvent as PointerEventReact, ReactElement } from 'react';
 import type {
   ActionTrace,
   ContenuTrace,
@@ -28,6 +28,7 @@ import type {
   Point,
 } from '@pierre/partage';
 import type { ProprietesMoteur } from '../types.js';
+import { styleDeLecture, useReglagesLecture } from '../../lecture/ZoneDeLecture.js';
 import { GuidageLettre } from './GuidageLettre.js';
 import { PAS_ECHANTILLONNAGE, reechantillonner } from './echantillonnage.js';
 
@@ -94,6 +95,13 @@ export function MoteurTrace(
   proprietes: ProprietesMoteur<ContenuTrace, EtatTrace, ActionTrace>,
 ): ReactElement {
   const { contenu, habillage, etat, emettre, services, animationsDesactivees } = proprietes;
+
+  // R35 — mêmes réglages de lecture que `phrase` : la consigne et les deux textes de statut
+  // héritent du profil (police, corps, interlettrage) au lieu des styles du navigateur par
+  // défaut. `FournisseurReglagesLecture` n'étant monté nulle part (dette déjà signalée pour
+  // `phrase`), le contexte rend `REGLAGES_PAR_DEFAUT` ici aussi ; ces textes suivront sans
+  // qu'on y touche le jour où le fournisseur sera monté.
+  const reglages = useReglagesLecture();
 
   const refSvg = useRef<SVGSVGElement | null>(null);
   const [echelle, setEchelle] = useState(1);
@@ -226,6 +234,7 @@ export function MoteurTrace(
 
   /** UN axe, jamais deux (D23). Absent quand l'exercice ne travaille aucune paire. */
   const axe = contenu.paire?.axe;
+  const styleLecture = styleDeLecture(reglages);
 
   return (
     <div
@@ -235,71 +244,120 @@ export function MoteurTrace(
       data-termine={etat.termineMs === null ? 'non' : 'oui'}
       data-lettre={lettre?.lettre ?? ''}
       data-axe-confondu={etat.axeConfondu ?? undefined}
-      style={{ display: 'grid', gap: '1rem', justifyItems: 'center' }}
+      style={{
+        // DEUX LIGNES, LA PREMIÈRE PREND TOUT CE QUI RESTE — même principe que `MoteurPhrase` :
+        // « une hauteur DÉFINIE, la scène s'adapte au reste ». Avant ce lot, ce `<div>` n'avait
+        // pas de `blockSize` propre : sa hauteur était celle de son contenu (consigne + ardoise
+        // plafonnée à 420 px + deux lignes de texte), pas celle du cadre que `EcranNoeud` lui
+        // réserve (`blockSize: '100%'` sur son porteur direct). Sur une tablette en portrait,
+        // l'écart entre les deux se voyait comme du vide sous l'ardoise — la même famille de
+        // défaut que R51 sur `phrase` avant sa mise en scène.
+        //
+        // R49 (le père, 2026-08-07 : « la phrase est en haut et en bas, il y a doublon ») a
+        // retiré la ligne de consigne qui occupait ici la première rangée `auto` : `EcranNoeud`
+        // la porte seule désormais, avec son `BoutonEcouter`. L'ardoise en profite — elle
+        // récupère la place, ce qui réduit encore le vide mesuré ci-dessus.
+        display: 'grid',
+        gridTemplateRows: '1fr auto',
+        rowGap: '0.75rem',
+        blockSize: '100%',
+        minBlockSize: 0,
+        justifyItems: 'center',
+        paddingInline: '0.25rem',
+      }}
     >
-      <p data-consigne-texte="oui" role="status" aria-live="polite">
-        {contenu.consigne}
-      </p>
-
-      <svg
-        ref={refSvg}
-        data-scene="trace"
-        viewBox={viewBox}
-        role="application"
-        aria-label={`Trace la lettre ${lettre?.lettre ?? ''}`}
+      {/* ── L'ARDOISE ───────────────────────────────────────────────────────────────────────
+          Avant ce lot : `width: min(100%, 420px)`, un plafond fixe quel que soit l'écran. Sur
+          la tablette du père, en portrait, ce plafond laissait le vrai geste — le tracé — dans
+          une colonne étroite entourée de vide. Le plafond disparaît : l'ardoise remplit
+          maintenant la ligne `1fr`, et c'est `preserveAspectRatio="xMidYMid meet"` (le défaut
+          SVG, posé ici en toutes lettres) qui la contient sans jamais la déformer ni la
+          rogner — aucun trait du modèle ne doit sortir du cadre visible, sans quoi un enfant
+          pourrait viser un point que l'écran ne montre plus.
+          `R16` grandit avec elle, jamais en dessous : `RAYON_DEPART` (`GuidageLettre.tsx`) est
+          un rayon FIXE en unités `viewBox`, et l'échelle px/unité ne peut que MONTER quand
+          l'ardoise s'agrandit — elle ne redescend jamais sous le `420 / 100` déjà mesuré
+          64 px et plus. */}
+      <div
         style={{
-          width: 'min(100%, 420px)',
-          height: 'auto',
-          background: 'var(--parchemin, #FBF6EA)',
-          borderRadius: '1rem',
-          touchAction: 'none',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          inlineSize: '100%',
+          blockSize: '100%',
+          minBlockSize: 0,
         }}
-        onPointerDown={auContact}
-        onPointerMove={auDeplacement}
-        onPointerUp={auRelachement}
-        onPointerCancel={auRelachement}
-        onPointerLeave={auRelachement}
       >
-        {(lettre?.traits ?? []).map((trait, index) => {
-          const etatTrait = etat.traits[rangDebutLettre + index];
-          const etatVisuel =
-            etatTrait?.termine === true
-              ? 'trace'
-              : index === etat.indexTrait
-                ? 'en-cours'
-                : 'a-tracer';
-          return (
-            <GuidageLettre
-              key={trait.id}
-              trait={trait}
-              etat={etatVisuel}
-              tolerance={toleranceViewBox}
-              animationsDesactivees={animationsDesactivees}
-              enDemonstration={enDemonstration && index === etat.indexTrait}
+        <svg
+          ref={refSvg}
+          data-scene="trace"
+          viewBox={viewBox}
+          preserveAspectRatio="xMidYMid meet"
+          role="application"
+          aria-label={`Trace la lettre ${lettre?.lettre ?? ''}`}
+          style={{
+            inlineSize: '100%',
+            blockSize: '100%',
+            display: 'block',
+            background: 'var(--parchemin, #FBF6EA)',
+            borderRadius: 'var(--rayon-carte, 1rem)',
+            boxShadow: '0 4px 18px rgba(27, 36, 64, 0.15)',
+            touchAction: 'none',
+          }}
+          onPointerDown={auContact}
+          onPointerMove={auDeplacement}
+          onPointerUp={auRelachement}
+          onPointerCancel={auRelachement}
+          onPointerLeave={auRelachement}
+        >
+          {(lettre?.traits ?? []).map((trait, index) => {
+            const etatTrait = etat.traits[rangDebutLettre + index];
+            const etatVisuel =
+              etatTrait?.termine === true
+                ? 'trace'
+                : index === etat.indexTrait
+                  ? 'en-cours'
+                  : 'a-tracer';
+            return (
+              <GuidageLettre
+                key={trait.id}
+                trait={trait}
+                etat={etatVisuel}
+                tolerance={toleranceViewBox}
+                animationsDesactivees={animationsDesactivees}
+                enDemonstration={enDemonstration && index === etat.indexTrait}
+              />
+            );
+          })}
+
+          {gesteLisse.length < 2 ? null : (
+            <polyline
+              data-geste="en-cours"
+              points={gesteLisse.map((e) => `${e.point[0]},${e.point[1]}`).join(' ')}
+              fill="none"
+              stroke={ENCRE}
+              strokeWidth={5}
+              strokeLinecap="round"
+              strokeLinejoin="round"
             />
-          );
-        })}
+          )}
+        </svg>
+      </div>
 
-        {gesteLisse.length < 2 ? null : (
-          <polyline
-            data-geste="en-cours"
-            points={gesteLisse.map((e) => `${e.point[0]},${e.point[1]}`).join(' ')}
-            fill="none"
-            stroke={ENCRE}
-            strokeWidth={5}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        )}
-      </svg>
+      <div style={{ display: 'grid', gap: '0.35rem', justifyItems: 'center' }}>
+        <p
+          role="status"
+          aria-live="polite"
+          data-refus={etat.dernierRefus?.motif ?? 'non'}
+          style={{ ...styleLecture, margin: 0, textAlign: 'center' } as CSSProperties}
+        >
+          {messageDeRefus(etat, traitAttendu?.libelle ?? null)}
+        </p>
 
-      <p role="status" aria-live="polite" data-refus={etat.dernierRefus?.motif ?? 'non'}>
-        {messageDeRefus(etat, traitAttendu?.libelle ?? null)}
-      </p>
-
-      <span data-trait-libelle="oui" style={{ color: TRAIT }}>
-        {traitAttendu?.libelle ?? ''}
-      </span>
+        <span data-trait-libelle="oui" style={{ color: TRAIT, fontWeight: 700 }}>
+          {traitAttendu?.libelle ?? ''}
+        </span>
+      </div>
     </div>
   );
 }

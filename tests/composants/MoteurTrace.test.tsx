@@ -195,10 +195,14 @@ describe('MoteurTrace — bonne réponse, mauvaise, aide, geste interrompu', () 
     render(<Harnais contenu={contenuBd} />);
     const libelle = document.querySelector('[data-trait-libelle="oui"]');
     expect(libelle?.textContent).toBe(contenuBd.lettres[0]!.traits[0]!.libelle);
-    // La consigne est annoncée aux lecteurs d'écran (R15 : jamais uniquement à l'écrit).
-    const consigne = document.querySelector('[data-consigne-texte="oui"]');
-    expect(consigne?.getAttribute('aria-live')).toBe('polite');
-    expect(consigne?.textContent).toBe(contenuBd.consigne);
+    // ── LES TROIS LIGNES SUR LA CONSIGNE ONT ÉTÉ RETIRÉES AVEC R49 ────────────────────────
+    //
+    // Elles exigeaient `[data-consigne-texte="oui"]` DANS le moteur — c'est-à-dire le doublon
+    // que le père a signalé (« la phrase est en haut et en bas »). `EcranNoeud` la porte seul.
+    // Ce cas-ci garde ce qui lui appartient vraiment : le libellé du trait pour Gobi.
+    //
+    // L'exigence a suivi l'objet : affichage chez `EcranNoeud.test.tsx` (« R49 »), audibilité
+    // chez `parcours-variete.spec.ts:300` (R15), non-retour chez `consigne-sans-doublon.test.ts`.
   });
 
   it('L’EXERCICE VA JUSQU’AU BOUT, les deux lettres tracées', () => {

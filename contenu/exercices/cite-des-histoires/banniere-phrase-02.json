@@ -29,7 +29,7 @@
       "consignes": [
         {
           "id": "c1",
-          "texte": "Range les mots pour lire : mon ami a un ballon.",
+          "texte": "Touche les mots dans l’ordre.",
           "forme": "imperative",
           "audio": null,
           "phrase": "Mon ami a un ballon.",
@@ -49,7 +49,7 @@
         },
         {
           "id": "c2",
-          "texte": "Range les mots pour lire : la cour est grande.",
+          "texte": "Touche les mots dans l’ordre.",
           "forme": "imperative",
           "audio": null,
           "phrase": "La cour est grande.",

@@ -159,6 +159,41 @@ describe('rien ne sort jamais du coffre, et le vide se montre (R14, D25)', () =>
     expect(titres).toEqual(['formes', 'eclats', 'objets']);
   });
 
+  /**
+   * ══════════════════════════════════════════════════════════════════════════════════════════
+   * L'EXIGENCE QUI A SUIVI SES OBJETS — R27, puis l'arbitrage du 2026-08-07
+   *
+   * Deux collections ont quitté le campement pour le coffre, et le père a tranché les deux :
+   *
+   *   • R27 — « Dans le coffre, il y a aussi les Gobi. Je pense qu'il faut les laisser dans le
+   *     coffre, ça sert à rien de les mettre dans le campement. » (l'étagère)
+   *   • 2026-08-07 — « déplace le butin dans le coffre, ce n'est pas grave le défilement dans
+   *     cet écran » (le butin)
+   *
+   * `campement-affordance.test.tsx` exigeait leurs pictogrammes AU CAMPEMENT. L'exiger encore
+   * là-bas reviendrait à exiger qu'ils reviennent ; le retirer sans plus reviendrait à perdre
+   * l'exigence avec le déménagement — et **une exigence qui disparaît avec un déménagement
+   * n'aurait jamais rien gardé**. Elle se pose donc ICI, sur l'écran qui les rend désormais.
+   *
+   * Le besoin, lui, n'a pas bougé d'un pouce : un enfant de sept ans qui ne déchiffre pas
+   * encore distingue ses collections par leur DESSIN. C'est le même garde, sur un autre écran.
+   * ══════════════════════════════════════════════════════════════════════════════════════════
+   */
+  it('rend le pictogramme de chaque collection qui l’a rejoint (R27, et le butin depuis)', async () => {
+    await monterEtAttendre();
+    const pictogrammes = [...document.querySelectorAll('[data-pictogramme]')].map((element) =>
+      element.getAttribute('data-pictogramme')
+    );
+    console.log(`[coffre] pictogrammes rendus : ${pictogrammes.join(', ') || 'aucun'}`);
+    for (const attendu of ['etagere', 'butin']) {
+      expect(
+        pictogrammes,
+        `« ${attendu} » a déménagé au coffre : son pictogramme doit être rendu ICI, ` +
+          'sinon l’exigence a disparu avec le déménagement'
+      ).toContain(attendu);
+    }
+  });
+
   it('aucune case n’est désactivée ni retirée : un acquis n’est jamais repris (R14)', async () => {
     await monterEtAttendre();
     for (const boite of document.querySelectorAll('[data-piece]')) {

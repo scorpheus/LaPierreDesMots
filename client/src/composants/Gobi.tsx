@@ -48,11 +48,41 @@
 // bundle initial fixé à 250 Ko gzip. C'est ce que la règle « le corps ne change jamais » fait
 // économiser : sans elle il aurait fallu embarquer 10 stades × 5 états = 50 dessins complets,
 // et non 1 corps + 10 parures + 5 gestes.
+//
+// ── CE QUE R46 ET R41 CHANGENT, ET LE DÉFAUT EXACT QU'ILS RÉPARENT ────────────────────────
+//
+// Ce fichier écrivait, à deux lignes d'intervalle :
+//
+//     const texte = aide?.texte ?? INVITE_PAR_DEFAUT;
+//     const parle = aide !== null && aide.texte !== null;
+//
+// **Le `??` masquait la panne.** Les douze moteurs sur quatorze qui passent `texte: null`
+// faisaient retomber la première ligne sur l'invitation — la MÊME chaîne qu'avant le tap. Le
+// père a donc tapé sur « ? Gobi » et vu l'écran ne pas bouger d'un pixel, deux soirs de suite.
+// Ce n'était pas une bulle vide (ce qui se serait vu) : c'était l'absence de changement, qui
+// ne se voit pas. Un repli posé sur un champ qu'aucun émetteur ne remplit fait passer « rien
+// à dire » pour « rien de nouveau à dire ».
+//
+// TROIS CHANGEMENTS, ET AUCUN N'EST COSMÉTIQUE :
+//
+//   1. **Le repli ne peut plus ressembler à une aide.** Dès qu'une aide est proposée, la bulle
+//      porte SON texte ; l'invitation n'est plus jamais servie à sa place. L'état « aide sans
+//      texte » n'est pas maquillé, il est NOMMÉ (`data-aide-source="manquant"`) et donc
+//      comptable — et il est mesuré à zéro sur les 76 exercices livrés.
+//   2. **`data-gobi-dit`** distingue l'invitation de l'aide dans le DOM. Même si deux textes
+//      se ressemblaient, « avant » et « après » cessent d'être indiscernables pour un test.
+//   3. **`surDemande` accepte `null`** — et alors le bouton ne s'affiche pas. C'est R41 : au
+//      campement il valait `() => undefined`, un bouton présent qui ne répond pas. D42 a déjà
+//      arbitré cette forme-là pour le bouton « écouter » : « un bouton qui ne répond pas casse
+//      la confiance plus sûrement qu'un bouton absent ». La propriété reste OBLIGATOIRE — en
+//      la rendant seulement optionnelle, un appelant pourrait l'oublier ; en la rendant
+//      nullable, il doit trancher.
 import { useMemo } from 'react';
 import type { ReactElement } from 'react';
 import type {
   AideProposee, CheminAsset, CodeStadeGobi, EtatAnimationGobi, NiveauAide,
 } from '@pierre/partage';
+import type { AideResolue } from './aide-de-gobi.js';
 import { BoutonEcouter } from './BoutonEcouter.js';
 import { GOBI_CORPS, GOBI_GESTE, GOBI_PARURE, GOBI_VUE } from './gobi-dessin.gen.js';
 
@@ -61,8 +91,25 @@ export interface ProprietesGobi {
   readonly aide: AideProposee | null;
   /** Palier atteint sur la tentative entière. Monotone croissant (§ 5.6). */
   readonly niveau: NiveauAide;
-  /** Appel volontaire. Produit le palier `indice`, au même coût qu'un palier automatique. */
-  readonly surDemande: () => void;
+  /**
+   * Appel volontaire. Produit le palier `indice`, au même coût qu'un palier automatique.
+   *
+   * **`null` = Gobi n'a rien à proposer ICI, et le bouton ne s'affiche pas** (R41). Jamais
+   * optionnelle : chaque appelant doit trancher, et un oubli ne peut pas se glisser.
+   */
+  readonly surDemande: (() => void) | null;
+  /**
+   * R46 — l'aide RÉSOLUE par la coquille : le texte à montrer ET le clip qui le dit.
+   *
+   * **Un seul objet, jamais trois propriétés.** Le texte, la clé et leur provenance doivent
+   * s'accorder ; les passer séparément, c'est trois occasions de les faire diverger — et une
+   * bulle qui montrerait un texte pendant que le haut-parleur en dit un autre serait un
+   * mensonge de plus, exactement du genre que R46 répare.
+   *
+   * Absent : Gobi retombe sur `aide.texte`, le comportement d'avant R46 — c'est ce qui garde
+   * les appelants qui n'ont pas de consigne à offrir (le campement) valides sans rien feindre.
+   */
+  readonly aideResolue?: AideResolue | null;
   /** Stade d'évolution (D28). `oeuf` par défaut : c'est le départ, jamais un manque. */
   readonly stade?: CodeStadeGobi;
   /** Le CRISTAL de la forme portée. `null` = crête de base. Jamais un corps complet (D20). */
@@ -124,19 +171,45 @@ export function Gobi({
   aide,
   niveau,
   surDemande,
+  aideResolue = null,
   stade = 'oeuf',
   cristal = null,
   libelleForme = null,
   animation = 'repos',
   taille = 64
 }: ProprietesGobi): ReactElement {
-  const texte = aide?.texte ?? INVITE_PAR_DEFAUT;
-  const parle = aide !== null && aide.texte !== null;
+  // ── R46 — LA RÉSOLUTION EST EXPLICITE, ET SES TROIS ISSUES SONT NOMMÉES ─────────────────
+  //
+  // Aucun `??` ne saute par-dessus le cas qui compte. `texteDeLAide` vaut `null` UNIQUEMENT
+  // quand une aide est proposée sans que personne ait su dire quoi — un état qui ne doit pas
+  // exister, et qui est désormais publié sous `data-aide-source="manquant"` au lieu d'être
+  // repeint en invitation.
+  const resolue: AideResolue | null =
+    aide === null
+      ? null
+      : (aideResolue ??
+        // Appelant sans coquille de nœud : on n'invente rien, on republie ce que le moteur a
+        // dit — et `manquant` quand il n'a rien dit, au lieu de repeindre le trou en invitation.
+        (aide.texte !== null && aide.texte !== ''
+          ? { texte: aide.texte, cle: null, source: 'moteur' as const }
+          : { texte: null, cle: null, source: 'manquant' as const }));
+
+  const texteDeLAide = resolue === null ? null : resolue.texte;
+  const source = resolue === null ? null : resolue.source;
+
+  // L'invitation ne sert QUE quand Gobi n'a rien proposé. Elle ne remplace jamais une aide :
+  // c'est exactement le repli qui a permis au défaut de survivre trois campagnes.
+  const texte = texteDeLAide ?? INVITE_PAR_DEFAUT;
 
   return (
     <aside
       className="gobi"
       data-gobi-niveau={niveau}
+      // « Gobi parle-t-il, ou attend-il ? » — la distinction que le DOM ne portait pas, et
+      // sans laquelle « avant le tap » et « après le tap » étaient indiscernables pour un
+      // test comme pour l'œil.
+      data-gobi-dit={aide === null ? 'invite' : 'aide'}
+      {...(source === null ? {} : { 'data-aide-source': source })}
       data-stade-gobi={stade}
       data-animation-gobi={animation}
       {...(libelleForme === null ? {} : { 'data-forme-gobi': libelleForme })}
@@ -195,15 +268,32 @@ export function Gobi({
         <p style={{ margin: 0 }}>{texte}</p>
       </div>
 
-      {/* Réécouter l'aide : R15 s'applique à Gobi comme au reste. */}
-      {parle ? (
+      {/* ── Réécouter l'aide : R15 s'applique à Gobi comme au reste ────────────────────────
+          Le garde `parle` a disparu, et il était la moitié du défaut : il exigeait
+          `aide.texte !== null`, ce qu'aucun des douze moteurs ne fournissait — mais surtout,
+          AUCUNE `cle` n'était passée, donc `aUnClip(null)` valait `false` et le bouton était
+          de toute façon injoignable, y compris sur `trace` et `libre` qui portent un texte.
+          Mesuré dans le DOM monté, avant correction : « Écouter=ABSENT » sur les quatre cas.
+
+          Un seul garde subsiste, et c'est le bon : `BoutonEcouter` interroge le MANIFESTE
+          (D42). Rendre le bouton ici quand il n'y a pas de clip serait recréer le bouton muet
+          que D42 interdit ; le cacher quand il y en a un serait taire une aide qui existe.
+          Un seul objet sait — celui qui joue le son. */}
+      {aide === null ? null : (
         <BoutonEcouter
           texte={texte}
+          cle={resolue?.cle ?? null}
           locuteur="gobi"
           libelle="Réécouter ce que dit Gobi"
         />
-      ) : null}
+      )}
 
+      {/* ── R41 — LE BOUTON N'EXISTE QUE LÀ OÙ IL RÉPOND ───────────────────────────────────
+          « quand j'appuie sur le bouton "? gobi" ça ne fait rien » — au campement, où
+          `surDemande` valait `() => undefined`. Un bouton fourni avec du néant est invisible
+          au détecteur de rappels morts, qui cherche les rappels NON fournis. Il ne l'est plus
+          au type : `null` est une valeur qu'on écrit, et qu'on lit. */}
+      {surDemande === null ? null : (
       <button
         type="button"
         className="cible cible-secondaire"
@@ -225,6 +315,7 @@ export function Gobi({
         <span aria-hidden="true">?</span>
         <span>Gobi</span>
       </button>
+      )}
     </aside>
   );
 }

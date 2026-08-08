@@ -921,3 +921,536 @@ juste après A1.
 ### Le compte cumulé
 
 **14 défauts trouvés par le père en deux sessions de jeu. 0 par la QA.**
+
+---
+
+## Troisième session — le 2026-08-07, sur la tablette, en portrait
+
+Le père ouvre la **visite des écrans** (R38, livrée le jour même) sur la Galaxy Tab S10 FE, en
+navigateur, **orientation portrait**. Cinq retours, dont un qui invalide une garantie qu'on croyait
+tenue.
+
+### R39 — Toute la garantie « tient dans l'écran » est mesurée en PAYSAGE
+
+> « j'utilise une tablette vertical, une samsung s10 fe, c'est 1440 * 2034. et je suis dans un
+> navigateur, donc on perd en hauteur aussi, ça veut scrolle. »
+
+Mesuré, `playwright.config.ts:98`, projet `qualite` :
+
+```
+viewport: { width: 1920, height: 1200 }        ← PAYSAGE
+appareil réel, tel que rapporté               1440 × 2034   ← PORTRAIT
+```
+
+Les **91 cas** de `tests/qualite/mise-en-page-tablette.spec.ts` mesurent donc R20 dans une
+orientation que l'enfant n'utilise jamais. Le lot R20 a été livré, ses cas sont verts, et l'écran
+défile quand même chez l'utilisateur. **Un banc qui ne reproduit pas le réel n'autorise aucune
+conclusion sur le réel** (CLAUDE.md).
+
+À faire, et dans cet ordre : d'abord **établir le format CSS réel** (les 1440 px sont des pixels
+d'appareil ; le rapport de pixels de la tablette donne la largeur CSS effective, et c'est elle
+qu'il faut au banc), ensuite décider si le banc bascule en portrait ou couvre les deux. Ne pas
+supposer le format : le mesurer sur l'appareil.
+
+### R40 — Le décor du campement flotte dans son cadre, les points ne suivent pas
+
+> « pour le campement, l'image ne remplit pas la largeur, et du coup le tour noir et les petits
+> carrés jaunes qui clignotent ne correspondent pas à l'image. »
+
+Cause mécanique, localisée. `client/src/ecrans/EcranCampement.tsx:326-351` :
+
+```
+maxInlineSize : 1200px          ← plafonne la largeur sous les 1440 de l'appareil
+maxBlockSize  :  260px          ← écrête la hauteur…
+aspectRatio   : largeurScene / hauteurScene   ← …et CONTREDIT donc ce rapport
+backgroundSize: contain · backgroundPosition: center
+```
+
+Quand la hauteur est écrêtée, le cadre n'a plus le rapport du décor ; `contain` centre alors
+l'image en laissant des marges. Mais les points sont posés **en pourcentage du CADRE**, pas de
+l'image — `client/src/monde/PointLibre.tsx:123-126` :
+
+```
+insetInlineStart: (x / largeurScene) * 100 %
+```
+
+Le trait noir cerne le cadre, les points se répartissent sur le cadre, et le décor flotte au
+milieu. Le désalignement est garanti par construction dès que le rapport diffère.
+
+Remède à concevoir, pas à bricoler : le cadre doit porter **le rapport du décor et rien d'autre**
+(retirer l'écrêtage de hauteur, ou passer le décor en `<svg>` posé dans le flux avec les points
+dans son propre système de coordonnées). Un décor et ses prises doivent partager **un seul**
+référentiel.
+
+### R41 — Le bouton « ? Gobi » du campement est câblé sur le vide
+
+> « quand j'appuie sur le bouton "? gobi" ça ne fait rien. »
+
+Mesuré, `client/src/ecrans/EcranCampement.tsx:369` :
+
+```tsx
+surDemande={() => undefined}
+```
+
+Le composant `Gobi` rend toujours son bouton `data-action="aide"` ; au campement il reçoit une
+fonction vide. **Il ne peut rien faire par construction.**
+
+Ce cas est instructif au-delà du défaut : **le détecteur de rappels morts (D4) ne le voit pas.**
+Il recense les propriétés `sur…?` **déclarées optionnelles et fournies nulle part** ; celle-ci est
+fournie — avec du néant. C'est le même mode de défaillance que « le champ déclaré, câblé jusqu'à la
+sortie, jamais affecté » (CLAUDE.md) : le câblage existe, la valeur est morte.
+
+Deux issues, et c'est une décision de conception : soit Gobi a quelque chose à dire au campement
+et le bouton le dit, soit il n'a rien à y dire et le bouton **ne s'affiche pas**. Un bouton qui
+existe et ne répond pas est le pire des trois — R16 et R33 l'ont déjà montré au doigt.
+
+Élargissement à faire dans le même lot, par OBJET et non par occurrence : recenser **tous** les
+rappels fournis avec une fonction vide (`() => undefined`, `() => {}`, `noop`), pas seulement
+celui-ci.
+
+### R42 — « forme(s) » : le pluriel n'est pas rendu
+
+> « puis fais un effort pour mettre un s ou pas en fonction du nombre de formes. »
+
+`client/src/ecrans/EcranCampement.tsx:384` :
+
+```
+Encore {suivant.formesRestantes} forme(s) et Gobi deviendra « {suivant.stade.libelle} ».
+```
+
+C'est un texte lu par un enfant de CE1 qui apprend à lire. La parenthèse est une notation
+d'adulte : elle n'existe pas dans ce qu'il déchiffre à l'école, et elle contredit la règle
+« aucune consigne n'existe uniquement à l'écrit » — celle-ci sera lue à voix haute telle quelle.
+
+Le même lot recense les autres `(s)` du texte destiné à l'enfant, par objet.
+
+### R43 — L'annonce d'évolution ne montre pas ce qu'elle annonce
+
+> « il y a écrit "encore 1 forme(s) et Gobi deviendra la lueur qui perce", mais le dessin ne
+> change pas. »
+
+À distinguer de R31 : ici Gobi ne peut **jamais** évoluer, puisque `formes_gobi` reste à 0 — c'est
+A1 qui le débloque. Mais la phrase promet un changement de dessin, et **rien à l'écran ne montre à
+quoi ressemblera « la lueur qui perce »**. L'enfant lit une promesse sans image.
+
+À reprendre **après A1**, quand l'évolution sera possible : montrer le prochain stade en creux, à
+côté du stade actuel — le même contrat que l'étagère de R24, où la case vide est la même case en
+Grisaille. Ne pas le faire avant : on habillerait une promesse que rien ne peut encore tenir.
+
+### Le compte cumulé
+
+**19 défauts trouvés par le père en trois sessions de jeu. 0 par la QA** — mais les sept gardes
+posés le 2026-08-07 en tiennent désormais quatre familles, et R39 dit pourquoi ils n'auraient pas
+attrapé les cinq d'aujourd'hui : **ils mesurent tous en paysage.**
+
+---
+
+## Même session, dans la visite — les exercices vus un par un
+
+### R44 — Dans `phrase`, les mots à ranger sont déjà rangés
+
+> « je commence par le premier avec le feu rouge. […] il faut ranger les mots, mais ils sont déjà
+> dans l'ordre. »
+
+Mesuré sur `contenu/exercices/cite-des-histoires/banniere-phrase-01.json` :
+
+```
+consigne c1 : « Range les mots pour lire : le feu est rouge. »
+  ordre attendu      : mot-le · mot-feu · mot-est · mot-rouge
+  étiquettes du fichier, dans l'ordre du fichier :
+                       mot-le · mot-feu · mot-est · mot-rouge · mot-les · mot-voitures …
+```
+
+Et `client/src/moteurs/phrase/MoteurPhrase.tsx:137` rend `contenu.etiquettes.map(…)` — **l'ordre
+du fichier, sans aucun mélange**. Ni `Alea`, ni tirage : la recherche de `melange|Alea|shuffle`
+dans le moteur et dans son rendu ne rend **rien**.
+
+L'enfant tape de gauche à droite et gagne **sans lire**. Le BKT engrange alors des réussites vides,
+ce qui est pire qu'un échec : il croit l'acquis acquis.
+
+**C'est R32 qui recommence, sur un autre moteur** — et il faut dire pourquoi on ne l'a pas vu :
+
+- le détecteur D3 cherchait un champ nommé `options`. `phrase` range ses mots dans `etiquettes` +
+  `ordre`. **Recensement par occurrence, pas par objet** — le défaut que CLAUDE.md nomme, commis
+  par l'instrument censé le trouver ;
+- le garde **Q4** a hérité du même angle mort : sa population dit « 14 moteurs, dont **2** portent
+  des choix », détectés à la forme « tableau d'ids + scalaire qui en fait partie ». `phrase` a la
+  forme « tableau d'ids + **tableau** d'ids ». Elle lui échappe.
+
+**Q4 doit être élargi avant le lot B1**, sinon B1 corrigera `histoire` et laissera `phrase`, et
+personne ne le saura. La bonne population n'est pas « les moteurs qui ont un champ `options` » :
+c'est **tout moteur dont le contenu porte une réponse ordonnée**.
+
+### R45 — « c'est quasiment le même design partout »
+
+> « le design est le même partout, c'est juste une liste de mots les uns à côté des autres avec un
+> fond gris avec des formes, donc il faut qu'on réfléchisse à ça. »
+
+Le père confirme depuis le siège de l'enfant ce que le détecteur D5 avait mesuré : **11 moteurs sur
+14 sont une rangée de boutons**, alors que les specs v2 § 5 leur promettent une scène nommée.
+`MoteurPhrase.tsx:136` : `<div data-plateau="etiquettes" style={{ display: 'flex', flexWrap:
+'wrap' }}>` — pour un habillage qui s'appelle `cite.banniere`.
+
+C'est la **promesse de variété** du projet qui tombe (R12 : ≥ 3 moteurs par compétence ; R13 :
+jamais deux fois le même habillage dans une sortie). Trois moteurs par compétence ne servent à rien
+si les trois se ressemblent.
+
+Ce n'est pas un lot de correction, c'est une **question de conception à instruire**, et le père
+demande qu'on y réfléchisse — pas qu'on la corrige au jugé. Elle se pose devant les exercices, dans
+la visite, exercice par exercice. Lot C2 (le plateau de `chemin`) en est le premier cas concret ;
+C3 le recensement qui l'alimente.
+
+### R46 — L'aide de Gobi est vide : 13 moteurs sur 14
+
+> « et aussi le bouton "? gobi" ne fait rien. »
+
+Signalé une deuxième fois, cette fois **dans un exercice**. Le premier signalement portait sur le
+campement (R41, `surDemande={() => undefined}`) ; ici la cause est **autre**, et elle est plus
+large.
+
+L'action arrive bien jusqu'au moteur — `demanderAide` est traité par les 14. Mais :
+
+```
+partage/src/moteurs/commun/aide.ts:130
+  return { niveau: 'indice', code: 'relire-consigne', cible, texte };
+```
+
+et **tous les appelants passent `texte: null`**. Mesuré, par objet :
+
+```
+appels à construireAide(niveau, cible, TEXTE) dans partage/src :
+  13 moteurs passent  null
+   1 moteur  passe un texte réel  →  trace  (trait?.libelle)
+   colorie  a son propre construireAide, local
+```
+
+Or `client/src/composants/Gobi.tsx` :
+
+```
+134:  const parle = aide !== null && aide.texte !== null;
+195:  <p style={{ margin: 0 }}>{texte}</p>
+199:  {parle ? <BoutonEcouter … /> : null}
+```
+
+Taper « ? Gobi » change donc l'état, pose une aide dont le texte est `null`, et rend **une bulle
+vide sans bouton Écouter**. À l'écran : rien.
+
+**Deux règles non négociables tombent en même temps** : « l'aide de Gobi ne coûte rien » — elle ne
+donne rien non plus —, et « aucune consigne n'existe uniquement à l'écrit, tout est audible en un
+tap » — ici il n'y a ni écrit ni audible.
+
+**Le garde Q2 avait déjà la moitié de la réponse** et personne ne l'avait reliée : il signale
+`CodeAideGobi — JAMAIS produits : souffle-syllabe, surligne-graphene, montre-couleur`. La cause est
+la même ligne : `construireAide` ne produit jamais que `relire-consigne` et `montre-cible`. Le
+contenu déclare des aides — `banniere-phrase-01` demande `souffle-syllabe` — que **rien ne peut
+émettre**.
+
+Lot à créer, prioritaire, et il est plus gros qu'il n'en a l'air : ce n'est pas un texte à
+brancher, c'est **l'étage d'aide entier qui est inerte**, alors que 354 assertions sont vertes
+autour. Signature exacte du « banc qui ne peut pas ATTEINDRE le mécanisme qu'il garde ».
+
+### Le compte cumulé
+
+**22 défauts trouvés par le père en trois sessions de jeu.** La QA en a trouvé la **moitié** de
+deux d'entre eux sans que personne ne fasse le lien : Q2 tenait la cause de R46 depuis la veille,
+Q4 aurait tenu R44 si sa population avait été dérivée par objet.
+
+---
+
+### R47 — Le décor de l'exercice ne se colorie jamais. C'est la promesse centrale du jeu.
+
+> « j'aimerais qu'on voie aussi la base de design […] au lieu de pur texte mis en haut à gauche de
+> l'écran, ça n'utilise pas le fond, et le fond devait se colorier en plus non ? »
+
+**Oui.** Specs v2, deux lignes qui portent le projet entier :
+
+> ligne 70 — « Toute zone non conquise est affichée **en gris désaturé, immobile, silencieuse**.
+> Chaque mini-jeu réussi **recolorie une portion du décor** : les feuilles reprennent leur vert,
+> l'eau se remet à couler, un animal se met à bouger, un instrument rejoint la musique. »
+>
+> ligne 79 — « chaque décor est un SVG en calques, servi avec un filtre `saturate(0)` global et des
+> calques **dé-grisés un par un**, avec une transition de **900 ms** qui balaie depuis le point
+> touché. »
+
+**Ce qui est livré, mesuré.** L'habillage existe et il est riche —
+`contenu/habillages/cite-des-histoires/banniere.habillage.json` déclare **neuf régions coloriables
+nommées**, chacune avec son centroïde et sa surface : le ciel de la cité, la place, le toit de
+tuiles, le balcon, le mât, les deux bannières, la fenêtre de la tour, la lanterne. Le SVG porte
+`calque-fond`, `calque-zones`, `calque-trait`.
+
+Et voici ce que l'écran en fait — `client/src/habillages/DecorDeFond.tsx:109-129` :
+
+```
+opacity: 0.14           ← R37 : réglé par contraste, pour NE PAS gêner le texte
+pointerEvents: 'none'   ← jamais le doigt
+aria-hidden: 'true'     ← jamais annoncé
+zIndex: 0               ← derrière tout
+```
+
+**Aucune désaturation, aucune recoloration.** Recherche de `saturate` dans tout `client/src`,
+sortie citée — cinq emplois, **aucun sur le décor d'exercice** :
+
+```
+Compagnon.tsx   ·  EcranCoffre.tsx  ·  Etagere.tsx  ·  FicheObjet.tsx
+global.css:631  →  .case-butin[data-rapporte="non"] .dessin-butin   (le coffre, pas le décor)
+```
+
+Et `MOTEURS_AVEC_SCENE_PROPRE = ['colorie', 'place']` : **2 moteurs sur 14** montent réellement
+leur scène. Les douze autres reçoivent le même papier peint à 14 %, derrière une rangée de mots.
+
+**C'est la racine commune de R45.** Si le décor est une décoration derrière le jeu au lieu d'être
+la **surface de jeu**, alors douze moteurs se ressemblent nécessairement : ce qu'on voit d'eux,
+c'est la rangée de boutons, et le décor ne les distingue pas — il est à 14 % pour tous.
+
+La recoloration, elle, existe bel et bien : au niveau de la **région**, sur la carte
+(`pourcentageColorie`, recalculé depuis `progression_noeud`). L'enfant la voit donc **après** avoir
+quitté l'exercice, jamais pendant. Ce qui manque, c'est le geste immédiat que les specs décrivent
+au § « Boucle de 30 secondes » : *« Consigne animée et audible → action → retour immédiat →
+fragment de décor recolorié. »* Le fragment ne se recolorie pas.
+
+**Trois questions à instruire, et aucune ne se tranche au jugé :**
+
+1. **Le décor est-il le fond ou le plateau ?** Si les mots à ranger étaient posés SUR la bannière —
+   à la place des bannières, sur le balcon, au mât — alors le décor devient le jeu, la variété
+   revient gratuitement, et chaque région réussie recolorie sa zone. C'est ce que `place` fait déjà
+   avec ses centroïdes : il y a un précédent qui marche dans le dépôt.
+2. **Que devient R37 ?** Les 14 % ont été réglés par contrainte de contraste, pour que le fond ne
+   passe jamais sous le champ de lecture. Un décor qui devient le plateau doit résoudre ce
+   contraste autrement — le champ de lecture porte déjà son propre fond opaque.
+3. **Le coût par habillage.** La promesse du projet est « ajouter un habillage ne demande **zéro
+   ligne de code** » (axe moteur × habillage × contenu). Une conception qui exigerait du code par
+   habillage violerait R12/R13 et tuerait la variété. Le remède doit rester déclaratif : les
+   centroïdes et surfaces sont **déjà dans les fichiers d'habillage**, personne n'a à les écrire.
+
+**Ce n'est pas un lot de correction, c'est la conception à reprendre**, et c'est le père qui l'a
+demandée : « il faut qu'on réfléchisse à ça ». Elle se pose devant les exercices, dans la visite,
+un par un — et elle commande C2, C3 et R45.
+
+---
+
+## La capture d'écran du 2026-08-07 — ce que la mesure n'avait pas vu
+
+Le père envoie une capture de `banniere-phrase-01` (« Le feu rouge de la ville »), jouée depuis la
+visite, sur sa tablette en **portrait**. Elle rend visibles cinq choses d'un coup, dont trois
+qu'aucune mesure de cette session n'avait attrapées.
+
+### ~~R48 — Le bandeau « retour à la visite » recouvre la bulle de Gobi~~ — RETIRÉ
+
+> **Ce n'était pas un défaut. C'est moi qui ai mal lu la capture, et le père m'a corrigé :**
+>
+> > « le panneau devant le Gobi c'est juste parce que j'utilise le menu pour la visite, mais le Gobi
+> > est derrière, c'est pas le problème, le problème c'est le décor et les mots à trouver. »
+>
+> Le bandeau n'existe **qu'en visite**, c'est-à-dire dans l'outil du parent. L'enfant ne le voit
+> jamais. J'avais transformé un outil posé par-dessus une page qu'on inspecte en « régression qui
+> annule l'aide sur les 76 exercices », et j'avais lancé un agent dessus — arrêté avant toute
+> écriture.
+>
+> Le fait observé reste vrai (`position: fixed`, coin bas-gauche, `zIndex: 9999`, monté à la racine
+> du routeur) ; c'est son **interprétation** qui était fausse. On garde la trace parce que la leçon
+> vaut plus que l'entrée : **une capture montre un état, pas une gêne.** La gêne, seul celui qui
+> joue peut la dire. J'ai déduit une urgence d'un pixel au lieu de demander.
+>
+> Numéro conservé, jamais réattribué : R48 est retiré, pas recyclé.
+
+### R49 — La consigne est affichée DEUX fois
+
+L'en-tête porte « Range les mots pour lire : le feu est rouge. » et `ZoneDeLecture`, quinze pixels
+plus bas, porte **exactement la même phrase**. Mesuré : `EcranNoeud` monte une barre de consigne
+(`data-consigne`), et `MoteurPhrase.tsx:114` monte `ZoneDeLecture` avec `consigne.texte`. Aucun des
+deux ne sait que l'autre existe.
+
+Pour un enfant qui déchiffre, lire deux fois la même ligne n'est pas neutre : il cherche la
+différence entre les deux.
+
+### R50 — `phrase` montre les mots des DEUX consignes à la fois
+
+La capture montre dix mots en une seule rangée :
+
+```
+Le  feu  est  rouge.  Les  voitures  sont  sur  la  route.
+```
+
+Or la consigne courante est « le feu est rouge » — quatre mots. Les six autres appartiennent à la
+consigne suivante. `MoteurPhrase.tsx:137` rend `contenu.etiquettes.map(…)` : **toutes** les
+étiquettes de l'exercice, sans filtrer sur l'étape.
+
+**C'est R33 à l'identique, sur un autre moteur.** Sur `tri`, 95 mots sur 122 étaient refusés au
+doigt parce qu'ils appartenaient à une autre étape. La décision du père y était la voie A —
+n'importe quel mot, n'importe quand. Ici la même question se pose, et elle se posera sur tout
+moteur qui affiche un stock d'éléments : **le lot B3 doit être conçu pour la famille, pas pour
+`tri` seul.**
+
+### R51 — La mise en page ne se sert pas de l'écran
+
+> « c'est pas beau design »
+
+Sur 2034 px de haut, la capture montre : l'en-tête, la consigne, la consigne encore, une rangée de
+mots minuscules — puis **environ 250 px de vide**, un décor de 310 px de haut flottant au centre,
+**encore 350 px de vide**, et Gobi tout en bas. Les mots à déchiffrer sont en haut à gauche, à
+`1.25rem` (R35), sans rapport avec le décor.
+
+Trois défauts déjà consignés se voient ici en même temps, et c'est utile de les voir ensemble :
+R35 (le texte de jeu n'hérite pas des réglages), R39 (le banc mesure en paysage, donc ce vide n'est
+mesuré nulle part), R47 (le décor est un papier peint à 14 %).
+
+### R52 — La décision du père sur le décor, et elle tranche R47
+
+> « le décor c'est le fond, il se colore avec l'avancée de l'exercice, en tout cas si ma mémoire est
+> bonne. et on met les mots à trouver de la bonne taille, de la bonne font et à des endroits sympa
+> et les mots devant mais à des endroits lisibles. »
+
+Sa mémoire est bonne : c'est exactement les specs v2, lignes 70 et 79. **Décidé, et cela répond aux
+trois questions ouvertes de R47 :**
+
+1. **Le décor est le FOND**, pas le plateau. Il occupe l'écran au lieu de flotter au centre.
+2. **Il se colorie à l'avancée de l'exercice**, pas seulement à la fin sur la carte — le « fragment
+   de décor recolorié » de la boucle de 30 secondes.
+3. **Les mots sont DEVANT**, à la bonne taille, à la bonne police, posés à des endroits choisis —
+   « sympas » mais **lisibles**. La lisibilité l'emporte sur la mise en scène, et R37 (le contraste
+   du champ de lecture) reste la contrainte à respecter.
+
+**Ce qui reste à instruire, et qui n'est pas tranché par cette décision** : le coût par habillage.
+La promesse du projet est qu'ajouter un habillage ne demande **zéro ligne de code** (moteur ×
+habillage × contenu). Les régions coloriables, leurs centroïdes et leurs surfaces sont **déjà** dans
+les fichiers d'habillage — `banniere.habillage.json` en déclare neuf. Une conception qui exigerait
+d'écrire du code ou des coordonnées à la main par habillage violerait R12/R13 et tuerait la
+variété. Les emplacements des mots doivent donc se **dériver** des données déjà présentes.
+
+**Et le principe de dimensionnement du projet s'applique** : on le prouve sur **un** moteur, devant
+le père, avant de le porter aux douze. `phrase` est le bon candidat — c'est celui qu'il a sous les
+yeux.
+
+### Le compte cumulé
+
+**26 défauts trouvés par le père.** Quatre de plus sur une seule capture d’écran — R48 retiré, il était de mon fait et non du jeu, et
+un lot livré le jour même — et trois que la mesure n'avait pas vus parce qu'elle regardait au bon
+endroit dans le mauvais format.
+
+---
+
+## R53 → R55 — le prototype de mise en scène, testé sur la tablette
+
+Le père relance le serveur avec le build complet et joue « Le feu rouge de la ville ». Verdict
+d'ensemble : **« ça progresse vers du mieux en design »**. Trois défauts précis.
+
+### R53 — L'indice jaune s'allume tout seul, avant qu'on ait demandé
+
+> « le premier mot clignote en jaune direct, il faudrait attendre que "?gobi" soit cliqué. j'ai
+> fait rejouer après une première fois, ça vient peut-être de là. »
+
+Il donne lui-même la piste, et elle vaut d'être vérifiée avant toute autre : **le rejeu**. À
+rapprocher de **R15**, déjà mesuré et non corrigé — `delais.ts` fait monter le niveau d'aide
+**automatiquement** après 45 s d'inactivité, et `commun/etapes.ts` recopie ce niveau dans
+`resume.aideUtilisee`. Si l'horloge d'inactivité n'est pas remise à zéro au rejeu, l'aide naît déjà
+montée.
+
+**Ce n'est pas qu'un défaut d'affichage** : l'aide montée toute seule coûte une étoile (R15). Un
+enfant qui rejoue perdrait donc son étoile avant d'avoir touché l'écran.
+
+### R54 — Le mot refusé saute en bas à droite au lieu de vibrer sur place
+
+> « quand on a faux, le mot se décale en bas à droite et vibre, il faudrait qu'il vibre mais autour
+> de sa position initiale. »
+
+Un refus qui **déplace** l'élément est doublement mauvais : l'enfant perd des yeux le mot qu'il
+visait, et le déplacement se lit comme « ce n'est pas là qu'il va » alors que le mot n'a pas bougé
+de rôle. La vibration doit être **symétrique autour de la position d'origine**, et finir exactement
+là où elle a commencé.
+
+### R55 — Les cases à remplir sont trop discrètes
+
+> « les cases en bas à remplir, il faudrait revoir un peu, c'est un peu trop caché. »
+
+Sur la capture, la bande du bas porte des cases en pointillé gris pâle, sous la phrase en train de
+se faire. C'est **la cible du geste** : c'est là que le mot va. Elle doit se voir au moins autant
+que les mots eux-mêmes.
+
+### Portée — à ne pas se tromper
+
+Le nouveau rendu ne concerne **que `phrase`**. Les treize autres moteurs sont inchangés. Le père a
+supposé l'inverse (« je suppose que ça prend le design partout ») : à corriger avant qu'il ne teste
+un autre exercice et n'y voie une régression.
+
+### Consigne de travail donnée par le père
+
+> « ne fais pas de screenshot toi-même, ni d'analyse, ça coûte trop cher de token. je préfère
+> tester. »
+
+**Retenu comme règle d'orchestration** : la vérification visuelle appartient au père, qui joue sur
+le vrai appareil. L'orchestrateur compile, délègue et consigne ; il ne mesure à l'écran que ce
+qu'aucun agent ne peut mesurer à sa place.
+
+---
+
+## 2026-08-08 — `colorie`, exercice « L'école des petits mots »
+
+> « dans l'écran "le toit de l'école est rouge", les couleurs, les taches rondes sont devant Gobi.
+> en haut, il n'y a pas la consigne mais la phrase en cours, c'est à redesigner aussi. »
+
+### R61 — Le nuancier passait devant Gobi
+
+MESURÉ (`bac-a-sable/mesurer-recouvrement-gobi-colorie.mjs`, sur le vrai serveur de dev, nœud
+`clairiere-10`, portrait 720×1017 — la borne basse de la Galaxy Tab S10 FE) : `document.
+elementFromPoint` sur le centre de Gobi, de sa bulle et de son bouton « ? Gobi » rendait tous
+les trois un `<li class="pierre-consigne pierre-consigne--a-venir">` — une ligne du nuancier
+peinte PAR-DESSUS Gobi.
+
+**La cause n'est pas un `zIndex`** : `[data-moteur="colorie"]` vit sous deux ancêtres `position:
+relative` posés par `EcranNoeud`. Un enfant POSITIONNÉ peint toujours après le contenu en flux
+normal de son conteneur flex, quel que soit l'ordre du DOM (CSS 2.1, annexe E) — donc tout ce qui
+DÉBORDE de cette racine (la scène `data-scene-non-reductible` ne rétrécit jamais, R20) peint
+par-dessus le `<Gobi>` non positionné qui le suit, au lieu de rester en dessous de lui.
+
+**Corrigé** en posant `overflow-y: auto` sur la racine du moteur (`client/src/moteurs/colorie/
+MoteurColorie.tsx`) : le débordement est désormais CONTENU dans la racine elle-même, atteignable
+par un défilement local, sans jamais repeindre par-dessus Gobi ni la barre de consigne — qui, de
+surcroît, restent visibles en permanence (avant, un défilement de toute la page les aurait fait
+défiler hors champ eux aussi). Mesuré après correction : recouvrement `false` sur les trois
+points.
+
+**Effet mesuré sur la dette R20** (`tests/qualite/mise-en-page-tablette.spec.ts`,
+`DETTE_MESUREE['colorie'] = 730`, format du banc 1920×1200) : le débordement vertical, désormais
+porté par `[data-moteur]` et non plus par `[data-ecran]`, se mesure maintenant à **703 / 810 / 827
+/ 810 / 873 / 873 px** selon le nœud (clairière-01 · forêt-muette-08 · clairière-10 · marais-
+jumeau-08 · cité-des-histoires-10 · volcan-08) — un maximum de **873 px**, contre 730 avant. La
+hausse du CHIFFRE ne traduit pas une régression : le même contenu (la scène ne rétrécit toujours
+pas, R16) est désormais rapporté à une boîte plus petite (celle du moteur seul, qui exclut
+désormais le budget de hauteur qu'occupaient la barre de consigne et Gobi), là où l'ancienne mesure
+portait sur toute la page. Whoever possède `tests/` doit décider s'il faut porter `730` à `873`
+dans `DETTE_MESUREE` — je ne l'ai pas fait, `tests/` n'est pas dans mon périmètre.
+
+### R49 (`colorie`) — La consigne était dite deux fois
+
+Même défaut que R49 sur `phrase`, sur un autre moteur : `EcranNoeud` porte `consigne.texte` dans sa
+barre d'en-tête, et `PaletteConsigne` (le moteur) le redisait, verbatim, pour la consigne courante.
+**Ce n'est pas un défaut de FORME** (le père l'a précisé après une première lecture erronée de ma
+part — voir ci-dessous) : le mélange affirmatif/impératif des consignes de `colorie` est
+délibéré et n'est pas en cause.
+
+**Corrigé** : `PaletteConsigne` ne rend plus le texte de la consigne courante. Ce qui reste, et
+qui est propre à cette ligne : la TRACE des consignes déjà faites et à venir (inchangée, et
+qu'aucun autre endroit de l'écran ne montre), et — au palier d'aide `indice` seulement — les
+MOTS-CLÉS SEULS de la consigne courante (pas la phrase reconstruite : une phrase surlignée reste
+la même phrase pour un enfant qui déchiffre).
+
+**Dette laissée à `tests/`** : `tests/composants/MoteurColorie.test.tsx` gate 17 de ses 25 cas sur
+`await screen.findByText(contenu.consignes[0]!.texte)`, qui ne trouve plus rien puisque le moteur,
+monté ISOLÉMENT dans ce test (sans `EcranNoeud`), ne rend plus la phrase nulle part. Mesuré,
+sortie citée : `17 failed | 8 passed`, tous les échecs à cette même ligne d'attente. C'est le même
+sort que le lot `phrase` a payé pour R49 (voir plus haut, § M6/M7 dans `Docs/decision-decor-de-
+fond-et-mots-poses.md`) — ce fichier n'est pas dans mon périmètre, je ne l'ai pas modifié.
+
+### Correction de mon propre brief — la forme des consignes n'est pas un défaut
+
+J'ai d'abord lu « il n'y a pas la consigne mais la phrase » comme un défaut de FORME (mélange
+affirmatif/impératif) et proposé de le recenser. Le père a corrigé avant que je n'écrive quoi que
+ce soit dans `contenu/brouillons/` : « c'est pas la forme, "le toit est rouge" ça fonctionne […]
+lire les phrases c'est normal, même s'il y a plusieurs sens. » Rien n'a été recensé ni proposé sur
+ce point — le vrai défaut était R49 ci-dessus.
+
+### Format mesuré
+
+Portrait 720×1017 et 960×1356 (les deux bornes de R39, aucune mesure sur l'appareil réel) et
+1920×1200 (le format du banc, pour chiffrer la dette R20). Dit explicitement : aucune mesure de ce
+lot ne vaut pour le format réel de la tablette du père, non mesuré à ce jour.

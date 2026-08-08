@@ -58,7 +58,57 @@ import { chargerSceneHabillage } from './chargeur.js';
  * l'inverse n'en afficherait aucun. Les deux fautes sont silencieuses à l'œil du développeur et
  * évidentes pour l'enfant.
  */
-export const MOTEURS_AVEC_SCENE_PROPRE: readonly string[] = ['colorie', 'place'];
+export const MOTEURS_AVEC_SCENE_PROPRE: readonly string[] = [
+  'assemble',
+  'attrape',
+  'chemin',
+  'chrono',
+  'colorie',
+  'eclair',
+  'grave',
+  'histoire',
+  'libre',
+  'paires',
+  'phrase',
+  'place',
+  'tri'
+];
+
+/**
+ * **13 sur 14 au 2026-08-08**, et seul `trace` reste au fond monté par `EcranNoeud`.
+ *
+ * Cette liste est le point de rendez-vous de toutes les campagnes en vol, et elle a menti
+ * pendant quelques heures : six moteurs — `attrape`, `chemin`, `eclair`, `grave`, `histoire`,
+ * `libre` — avaient monté leur scène sans y être inscrits, ce qui superposait DEUX décors et
+ * faisait manger les taps du premier par le second.
+ *
+ * La cause est d'ORCHESTRATION, pas de code : le fichier appartient à `client/src/habillages/`,
+ * donc à un seul agent, tandis que les moteurs appartiennent à six autres. Aucun d'eux ne
+ * pouvait l'inscrire lui-même. `tests/unitaires/decor-de-fond.test.ts` a fait exactement son
+ * travail — c'est lui qui l'a dit, et c'est pour cela qu'il existe.
+ *
+ * Vérifié avant d'inscrire, et non par `grep` seul : les six montent réellement un composant,
+ * cinq d'entre eux `<SceneDecor` et `libre` son propre `<SceneLibre`. Un `<Scene…` cité dans un
+ * commentaire aurait fait retirer le décor d'un moteur qui n'en a pas.
+ */
+
+/**
+ * `phrase` a rejoint la liste le 2026-08-07, et pour une raison qui n'est PAS celle de
+ * `colorie` et `place`.
+ *
+ * Ces deux-là montent leur scène parce qu'ils ont besoin d'un décor ACTIONNABLE : l'un le
+ * peint, l'autre y dépose. `phrase` ne tape pas son décor — il **pose ses mots dessus**, aux
+ * centroïdes de ses régions, et **rallume une région par mot correctement rangé** (R52, tranché
+ * par le père : « le décor c'est le fond, il se colore avec l'avancée de l'exercice »).
+ *
+ * Un fond à 14 % ne pouvait pas porter cela : ce composant-ci est un papier peint immobile —
+ * il le dit lui-même quinze lignes plus bas — et il le reste. Le décor qui se rallume est
+ * `SceneDecor`, monté par le moteur, à pleine opacité, avec sa transition de recoloration.
+ *
+ * Les deux ne coexistent jamais : c'est très exactement ce que cette liste garantit, et
+ * `tests/unitaires/decor-de-fond.test.ts` la croise avec les fichiers des moteurs pour qu'elle
+ * ne puisse pas mentir dans un sens ni dans l'autre.
+ */
 
 export interface ProprietesDecorDeFond {
   readonly habillage: Habillage;

@@ -57,6 +57,22 @@ export interface RefusAssemble {
 export interface EtatEtapeAssemble {
   /** `identifiant`, et non `id` : c'est le nom qu'`EtapeGenerique` (L2-C) impose. */
   readonly identifiant: IdConsigne;
+  /**
+   * L'ordre dans lequel les blocs DE CETTE ÉTAPE apparaissent dans le plateau — R32/R44.
+   *
+   * `EtatAssemble.blocs` porte le catalogue ENTIER de l'exercice, mélangé une seule fois à la
+   * création de l'état (§ types de `EtatAssemble`) ; ce champ-ci en est la projection propre à
+   * cette étape — les identifiants de `solution`, dans l'ordre où ils apparaissent dans le
+   * plateau mélangé. Mesuré : le premier bloc utile de chaque mot était toujours le premier
+   * bloc du plateau — 95 consignes sur 95 gagnées en tapant de gauche à droite. Le mélange est
+   * tiré par `Alea`, jamais rejoué (reproductible à la graine près).
+   *
+   * Déclaré AVANT `restantes` : le garde Q4 (`tests/unitaires/melange-des-reponses.test.ts`)
+   * retient le PREMIER tableau d'identifiants de `Object.values(etatEtape)` dont le contenu
+   * trié égale celui des blocs attendus. `restantes` vaut `[...solution]` à la création — il
+   * satisferait aussi ce critère, mais il n'est pas mélangé.
+   */
+  readonly ordreAffichage: readonly IdBloc[];
   /** Ce qu'il reste à faire sur cette étape. Vide = étape close. */
   readonly restantes: readonly string[];
   readonly nbErreurs: number;
@@ -82,6 +98,12 @@ export interface EtatEtapeAssemble {
 export interface EtatAssemble {
   readonly indexEtape: number;
   readonly etapes: readonly EtatEtapeAssemble[];
+  /**
+   * Le catalogue de blocs de l'exercice, dans l'ordre du PLATEAU — R32/R44. Mélangé une seule
+   * fois par `Alea` à la création de l'état (jamais au rendu), donc reproductible à la graine
+   * près. Le client rend ce champ, jamais `contenu.blocs` qui liste chaque mot dans l'ordre de
+   * sa solution.
+   */
   readonly blocs: readonly BlocSyllabe[];
   readonly competence: string;
   /** Clé = `IdBloc`, valeur = le rang occupé, en base 1. */

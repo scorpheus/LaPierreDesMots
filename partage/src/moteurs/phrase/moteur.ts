@@ -188,6 +188,19 @@ export const moteurPhrase: Moteur<ContenuPhrase, EtatPhrase, ActionPhrase> = {
     const etapes = entree.contenu.consignes.map(
       (etape, index): EtatEtapePhrase => ({
         identifiant: etape.id,
+        // R44 — LE MÉLANGE, ICI ET UNE SEULE FOIS.
+        //
+        // « il faut ranger les mots, mais ils sont déjà dans l'ordre » : `ordre` est l'ordre de
+        // la réponse, et le rendre tel quel faisait gagner sans lire. Le BKT engrangeait alors
+        // des réussites vides, ce qui est pire qu'un échec — il croyait l'acquis acquis.
+        //
+        // Le tirage passe par `Alea` (jamais `Math.random`, règle ESLint à l'appui) et n'a lieu
+        // qu'à la création de l'état : l'ordre ne bouge donc plus sous les yeux de l'enfant, et
+        // il se rejoue à l'identique à graine égale. Copie littérale du contrat d'`eclair`.
+        //
+        // ⚠ La position de cette ligne compte : voir le commentaire de `ordreAffichage` dans
+        // `types.ts`. Déclarée après `restantes`, elle serait invisible au garde Q4.
+        ordreAffichage: entree.alea.melanger(etape.ordre),
         restantes: [...etape.ordre],
         nbErreurs: 0,
         niveauAide: 'aucune',

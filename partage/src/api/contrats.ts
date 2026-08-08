@@ -9,6 +9,7 @@
 import type { Habillage } from '../moteurs/types.js';
 import type { Exercice, Noeud } from '../contenu/types.js';
 import type { NombreEtoiles, Tentative } from '../journal/types.js';
+import type { GainCascade } from '../recompenses/types.js';
 import type {
   CheminAsset,
   CodeMoteur,
@@ -68,6 +69,12 @@ export interface ReponseTentative {
   readonly deja: boolean;
   /** L'état de la progression après coup ; les étoiles ne décroissent jamais. */
   readonly progression: ProgressionNoeud;
+  /**
+   * Le gain de la cascade de récompenses (D25), calculé et enregistré par le SERVEUR — lot A1
+   * (R31). Sur un rejeu idempotent (`deja: true`), c'est l'état courant sans rien de neuf :
+   * `paliersFranchis` et `recompenses` sont vides, `jauges` reste à jour.
+   */
+  readonly gainCascade: GainCascade;
 }
 
 export interface ReponseSante {

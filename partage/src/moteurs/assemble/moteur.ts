@@ -177,7 +177,11 @@ export const moteurAssemble: Moteur<ContenuAssemble, EtatAssemble, ActionAssembl
   version: 1,
   capacites: {
     ordreEtapesImpose: true,
-    recolorieLeDecor: false,
+    // Corrigé au portage de la mise en scène de `phrase` (R47/R52) : `MoteurAssemble.tsx`
+    // monte désormais `SceneDecor` et rallume une région à chaque bloc correctement rangé.
+    // `false` décrivait un rendu qui n'existe plus — voir `phrase/moteur.ts` pour le même
+    // écart, non corrigé là-bas faute de propriétaire dans ce lot.
+    recolorieLeDecor: true,
     // Aligné sur `maxItems` du schéma de contenu : les deux doivent bouger ensemble.
     nbEtapesMax: 6,
   },
@@ -185,9 +189,19 @@ export const moteurAssemble: Moteur<ContenuAssemble, EtatAssemble, ActionAssembl
 
   creerEtat(entree: EntreeMoteur<ContenuAssemble>): EtatAssemble {
     const instant = entree.horloge.maintenantMs();
+    // R32/R44 — LE MÉLANGE DU PLATEAU, ICI ET UNE SEULE FOIS.
+    //
+    // `contenu.blocs` liste chaque mot dans l'ordre de sa solution : le premier bloc utile d'un
+    // mot était toujours le premier bloc du plateau, et taper de gauche à droite gagnait sans
+    // lire. Le mélange porte sur le CATALOGUE ENTIER (tous les mots de l'exercice) — c'est lui
+    // qui fixe l'ordre réel du plateau. Le tirage passe par `Alea`, jamais `Math.random`.
+    const blocsMelanges = entree.alea.melanger(entree.contenu.blocs);
+    const idsMelanges = blocsMelanges.map((b) => b.id);
     const etapes = entree.contenu.consignes.map(
       (etape, index): EtatEtapeAssemble => ({
         identifiant: etape.id,
+        // La projection, propre à cette étape, de l'ordre du plateau mélangé ci-dessus.
+        ordreAffichage: idsMelanges.filter((id) => etape.solution.includes(id)),
         restantes: [...etape.solution],
         nbErreurs: 0,
         niveauAide: 'aucune',
@@ -209,7 +223,7 @@ export const moteurAssemble: Moteur<ContenuAssemble, EtatAssemble, ActionAssembl
     return {
       indexEtape: 0,
       etapes,
-      blocs: [...entree.contenu.blocs],
+      blocs: blocsMelanges,
       competence: entree.contenu.competence,
       acquis: {},
 

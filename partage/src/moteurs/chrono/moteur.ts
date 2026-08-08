@@ -177,7 +177,9 @@ export const moteurChrono: Moteur<ContenuChrono, EtatChrono, ActionChrono> = {
   version: 1,
   capacites: {
     ordreEtapesImpose: true,
-    recolorieLeDecor: false,
+    // Corrigé au portage de la mise en scène de `phrase` (R47/R52) : `MoteurChrono.tsx` monte
+    // désormais `SceneDecor` et rallume une région à chaque vignette correctement numérotée.
+    recolorieLeDecor: true,
     // Aligné sur `maxItems` du schéma de contenu : les deux doivent bouger ensemble.
     nbEtapesMax: 5,
   },
@@ -185,9 +187,19 @@ export const moteurChrono: Moteur<ContenuChrono, EtatChrono, ActionChrono> = {
 
   creerEtat(entree: EntreeMoteur<ContenuChrono>): EtatChrono {
     const instant = entree.horloge.maintenantMs();
+    // R32/R44 — LE MÉLANGE DU PLATEAU, ICI ET UNE SEULE FOIS.
+    //
+    // Les vignettes sont listées dans l'ordre du récit, et le plateau les rendait toutes en une
+    // fois, dans cet ordre-là : taper de gauche à droite numérotait juste à 100 %. Le mélange
+    // porte sur le CATALOGUE ENTIER (toutes les étapes), pas étape par étape — c'est lui qui
+    // fixe l'ordre réel du plateau. Le tirage passe par `Alea`, jamais `Math.random`.
+    const vignettesMelangees = entree.alea.melanger(entree.contenu.vignettes);
+    const idsMelanges = vignettesMelangees.map((v) => v.id);
     const etapes = entree.contenu.consignes.map(
       (etape, index): EtatEtapeChrono => ({
         identifiant: etape.id,
+        // La projection, propre à cette étape, de l'ordre du plateau mélangé ci-dessus.
+        ordreAffichage: idsMelanges.filter((id) => etape.ordre.includes(id)),
         restantes: [...etape.ordre],
         nbErreurs: 0,
         niveauAide: 'aucune',
@@ -209,7 +221,7 @@ export const moteurChrono: Moteur<ContenuChrono, EtatChrono, ActionChrono> = {
     return {
       indexEtape: 0,
       etapes,
-      vignettes: [...entree.contenu.vignettes],
+      vignettes: vignettesMelangees,
       competence: entree.contenu.competence,
       acquis: {},
 

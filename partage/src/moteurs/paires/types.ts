@@ -59,6 +59,23 @@ export interface RefusPaires {
 export interface EtatEtapePaires {
   /** `identifiant`, et non `id` : c'est le nom qu'`EtapeGenerique` (L2-C) impose. */
   readonly identifiant: IdConsigne;
+  /**
+   * Les paires DE CETTE ÉTAPE, dans l'ordre où elles se rencontrent en scannant le plateau
+   * mélangé (`EtatPaires.cartes`) de gauche à droite — R32/R44.
+   *
+   * Les cartes étaient rangées deux par deux, `mot-X · image-X`, exactement dans l'ordre
+   * d'`aApparier` : retourner les deux premières cartes visibles complétait toujours LA BONNE
+   * paire. Mesuré : 130 consignes sur 130. Ce champ ne pilote aucune règle — `paires` n'impose
+   * aucun ordre de complétion, une paire quelconque de `restantes` est acceptée à tout moment
+   * (`validation.ts`) — il ne fait que PROJETER, pour cette étape, l'ordre réel du plateau
+   * mélangé une seule fois à la création de l'état, par `Alea`.
+   *
+   * Déclaré AVANT `restantes` : le garde Q4 (`tests/unitaires/melange-des-reponses.test.ts`)
+   * retient le PREMIER tableau d'identifiants de `Object.values(etatEtape)` dont le contenu
+   * trié égale celui des paires attendues. `restantes` vaut `[...aApparier]` à la création — il
+   * satisferait aussi ce critère, mais il n'est pas mélangé.
+   */
+  readonly ordreAffichage: readonly IdPaire[];
   /** Ce qu'il reste à faire sur cette étape. Vide = étape close. */
   readonly restantes: readonly string[];
   readonly nbErreurs: number;
@@ -88,6 +105,11 @@ export interface EtatEtapePaires {
 export interface EtatPaires {
   readonly indexEtape: number;
   readonly etapes: readonly EtatEtapePaires[];
+  /**
+   * Le catalogue de cartes de l'exercice, dans l'ordre du PLATEAU — R32/R44. Mélangé une seule
+   * fois par `Alea` à la création de l'état (jamais au rendu), donc reproductible à la graine
+   * près. Le client rend ce champ, jamais `contenu.cartes` qui range les paires côte à côte.
+   */
   readonly cartes: readonly CartePaires[];
   readonly competence: string;
   /** Clé = `IdPaire`, valeur = `'appariee'`. Une paire faite est faite (R14). */

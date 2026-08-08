@@ -25,7 +25,7 @@
       "consignes": [
         {
           "id": "c1",
-          "texte": "Range les mots pour lire : le grand enfant danse.",
+          "texte": "Touche les mots dans l’ordre.",
           "forme": "imperative",
           "audio": null,
           "phrase": "Le grand enfant danse.",
@@ -44,7 +44,7 @@
         },
         {
           "id": "c2",
-          "texte": "Range les mots pour lire : maman range les gants.",
+          "texte": "Touche les mots dans l’ordre.",
           "forme": "imperative",
           "audio": null,
           "phrase": "Maman range les gants.",

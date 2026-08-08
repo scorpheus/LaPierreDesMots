@@ -18,6 +18,7 @@ import type { DatabaseSync } from 'node:sqlite';
 
 import type {
   CodeMoteur,
+  GainCascade,
   Horloge,
   Horodatage,
   IdExercice,
@@ -27,19 +28,26 @@ import type {
   NiveauAide,
   NombreEtoiles,
   ParametresPedagogie,
+  RecompenseObtenue,
   ResumeTentative,
+  SeuilsCascade,
   Tentative
 } from '@pierre/partage';
 import { calculerEtoiles } from '@pierre/partage';
+import { jaugesDe } from '@pierre/partage/recompenses';
+import type { FormeDeclaree } from '@pierre/partage/monde';
 
 import { dansTransaction } from '../base/connexion.js';
+import { appliquerTentativeALaCascadeAvecGain, chargerSeuilsCascade, lireCascade } from './cascade.js';
 import { journaliserEtapes, listerEtapes } from './etapes.js';
 import { appliquerRevue, revueReussie } from './leitner.js';
 import { appliquerObservation, observationDeLEtape } from './maitrise.js';
+import { chargerReferentielMonde, enregistrerFormeGobi, lireFormes } from './monde.js';
 import { toucherProfil } from './profils.js';
 import { appliquerTentativeALaProgression } from './progression.js';
 
 import type { EtapeAJournaliser } from './etapes.js';
+import type { ReferentielMonde } from './monde.js';
 
 /** Les trois paliers de la v2 § 5.4, tels que la contrainte CHECK de la table les accepte. */
 const NIVEAUX_AIDE: readonly string[] = ['aucune', 'indice', 'demonstration'];
@@ -103,6 +111,15 @@ export interface ResultatEnregistrement {
    * La route le journalise en `warn` — un filet silencieux est un defaut qui dort.
    */
   readonly etapesEcartees: number;
+  /**
+   * Le gain de la cascade de recompenses (D25) — lot A1 (R31).
+   *
+   * Jamais `null` : meme un profil qui n'a rien gagne a une cascade, vide mais reelle. Sur un
+   * rejeu idempotent (`deja: true`), c'est l'etat COURANT sans rien de neuf — `paliersFranchis`
+   * et `recompenses` vides, `jauges` a jour — parce qu'un second envoi de la meme tentative ne
+   * doit RIEN faire bouger deux fois (contrat § 6.3, meme regle que la progression).
+   */
+  readonly gainCascade: GainCascade;
 }
 
 /**
@@ -207,6 +224,87 @@ export function compterTentatives(base: DatabaseSync, profilId: string): number 
 }
 
 /**
+ * Le gain de cascade tel qu'il est AUJOURD'HUI, sans rien y appliquer — lot A1 (R31).
+ *
+ * Sert les deux chemins qui ne doivent RIEN faire bouger : le rejeu idempotent (une meme cle
+ * envoyee deux fois) et la course concurrente absorbee par la contrainte UNIQUE. Le contrat
+ * § 6.3 dit deja « rien d'autre ne bouge » pour la progression ; la cascade suit la meme regle,
+ * sans quoi un double-tap sur reseau capricieux compterait deux fois les etoiles d'un seul nœud.
+ */
+function gainCascadeActuel(
+  base: DatabaseSync,
+  profilId: string,
+  seuils: SeuilsCascade
+): GainCascade {
+  const etat = lireCascade(base, profilId);
+  return { etat, paliersFranchis: [], recompenses: [], jauges: jaugesDe(etat, seuils) };
+}
+
+/**
+ * Le PROCHAIN grapheme du referentiel que ce profil ne possede pas encore — lot A1 (R31).
+ *
+ * L'ordre est celui declare par `contenu/monde/gobi-stades.json` (a, e, i, o, u, b, …) : c'est
+ * l'ordre pedagogique du jeu, et `stadeApresFormes` (`partage/src/monde/gobi.ts`) ne se soucie
+ * que du NOMBRE de formes obtenues, jamais de leur identite — aucun autre ordre n'est prescrit
+ * ailleurs dans les specs. `null` quand les 25 formes sont deja toutes obtenues : il n'y a alors
+ * plus rien a attribuer, et ce n'est pas une erreur.
+ */
+function prochaineFormeAOffrir(
+  base: DatabaseSync,
+  profilId: string,
+  referentiel: ReferentielMonde
+): FormeDeclaree | null {
+  const possedees = new Set(lireFormes(base, profilId, referentiel).map((forme) => forme.grapheme));
+  return referentiel.formes.find((forme) => !possedees.has(forme.grapheme)) ?? null;
+}
+
+/**
+ * Applique la cascade de D25 au nœud qui vient de se clore, et attribue VRAIMENT ce qu'elle
+ * annonce — lot A1, point 3 du § 2 de la feuille de route (R31).
+ *
+ * `appliquerTentativeALaCascadeAvecGain` fait le calcul pur et l'ecriture de
+ * `progression_cascade` ; elle ne peut pas faire plus, par construction (elle ne connait ni
+ * Gobi ni le referentiel — `partage/src/recompenses/cascade.ts` le dit explicitement : « choisir
+ * QUELLE forme de Gobi ou QUELLE zone est remise appartient au monde, pas a la cascade »). C'est
+ * ici, au niveau du DEPOT serveur, que ce choix se fait : pour chaque palier `intermediaire`
+ * franchi par CETTE tentative, on offre le prochain grapheme non possede et on l'ecrit dans
+ * `formes_gobi` via `enregistrerFormeGobi` — qui existait deja et n'etait appelee par personne
+ * (feuille-de-route § 2). Le palier `rare` (« zone-recoloriee ») n'a besoin d'aucune ecriture
+ * supplementaire : la recoloration des regions est deja une PROJECTION recalculee depuis
+ * `progression_noeud` (`depots/monde.ts`, regle H1) — corriger R31 la rend deja « vraie ».
+ */
+function appliquerCascadeEtRecompenses(
+  base: DatabaseSync,
+  profilId: string,
+  etoiles: NombreEtoiles,
+  termineLe: Horodatage,
+  horloge: Horloge,
+  seuils: SeuilsCascade,
+  referentiel: ReferentielMonde
+): GainCascade {
+  const gain = appliquerTentativeALaCascadeAvecGain(base, profilId, etoiles, seuils, termineLe);
+
+  if (!gain.paliersFranchis.includes('intermediaire')) {
+    return gain;
+  }
+
+  const recompenses: RecompenseObtenue[] = gain.recompenses.map((recompense) => {
+    if (recompense.palier !== 'intermediaire') {
+      return recompense;
+    }
+    const forme = prochaineFormeAOffrir(base, profilId, referentiel);
+    if (forme === null) {
+      // Les 25 formes sont deja toutes obtenues : rien de plus a donner, on ne journalise rien.
+      return recompense;
+    }
+    enregistrerFormeGobi(base, profilId, forme.grapheme, referentiel, horloge);
+    return { ...recompense, reference: forme.grapheme, asset: forme.cristal };
+  });
+
+  return { ...gain, recompenses };
+}
+
+/**
  * Ecrit une tentative au journal, ou constate qu'elle y est deja.
  *
  * L'insertion et la mise a jour de la projection se font dans UNE transaction : il n'existe
@@ -224,15 +322,33 @@ export function enregistrerTentative(
   // Le bareme vit uniquement dans `calculerEtoiles` (contrat § 5.7) : le serveur ne le rejoue
   // pas. Le bornage a [0, 3] n'est pas un second bareme, c'est le respect de la contrainte CHECK
   // de la colonne — une tentative reellement jouee ne doit pas etre perdue sur un 500.
-  const etoiles = Math.min(3, Math.max(0, Math.trunc(Number(calculerEtoiles(validee.resume)))));
+  // Le bornage rendait `number`, ce qui suffisait tant que `etoiles` n'allait qu'en base. Le lot
+  // A1 le passe maintenant a `appliquerCascadeEtRecompenses(… etoiles: NombreEtoiles …)`, et
+  // `tsc -b` l'a refuse (TS2345, mesure de l'orchestrateur). On garde le bornage — il protege la
+  // contrainte CHECK — mais on le fait rendre le type etroit PAR CONSTRUCTION, sans transtypage :
+  // l'index est deja borne a [0, 3] juste au-dessus, le `?? 0` n'est la que pour TypeScript.
+  const ETOILES: readonly NombreEtoiles[] = [0, 1, 2, 3];
+  const etoiles: NombreEtoiles =
+    ETOILES[Math.min(3, Math.max(0, Math.trunc(Number(calculerEtoiles(validee.resume)))))] ?? 0;
   const aideUtilisee = NIVEAUX_AIDE.includes(validee.resume.aideUtilisee)
     ? validee.resume.aideUtilisee
     : 'aucune';
 
+  // Lot A1 (R31) : charges une fois par chemin (memoises), lus AVANT la branche qui en a besoin
+  // pour que les trois issues de la transaction — rejeu, course concurrente, ecriture reelle —
+  // rendent toutes un `gainCascade` construit de la meme facon.
+  const seuilsCascade = chargerSeuilsCascade();
+
   return dansTransaction(base, () => {
     const dejaLa = lireParCle(base, validee.cleIdempotence);
     if (dejaLa !== null) {
-      return { deja: true, tentative: dejaLa, etapesJournalisees: 0, etapesEcartees: 0 };
+      return {
+        deja: true,
+        tentative: dejaLa,
+        etapesJournalisees: 0,
+        etapesEcartees: 0,
+        gainCascade: gainCascadeActuel(base, validee.profil, seuilsCascade)
+      };
     }
 
     try {
@@ -266,7 +382,13 @@ export function enregistrerTentative(
       // est le doublon que l'idempotence doit absorber — pas une erreur a remonter a l'enfant.
       const concurrente = lireParCle(base, validee.cleIdempotence);
       if (concurrente !== null) {
-        return { deja: true, tentative: concurrente, etapesJournalisees: 0, etapesEcartees: 0 };
+        return {
+          deja: true,
+          tentative: concurrente,
+          etapesJournalisees: 0,
+          etapesEcartees: 0,
+          gainCascade: gainCascadeActuel(base, validee.profil, seuilsCascade)
+        };
       }
       throw erreur;
     }
@@ -291,11 +413,35 @@ export function enregistrerTentative(
     // une maitrise refleterait une etape que le journal ignore.
     const alimentation = alimenterPedagogie(base, inseree.id, validee, pedagogie);
 
+    // ══════════════════════════════════════════════════════════════════════════════════════
+    // LA CASCADE DE D25, ENFIN APPLIQUEE ICI — lot A1, LE DEFAUT N°1 DU JEU (R31).
+    //
+    // `appliquerTentativeALaCascadeAvecGain` et `enregistrerFormeGobi` existaient deja, etaient
+    // justes, etaient testees, et n'etaient appelees par PERSONNE (feuille-de-route § 2). Le
+    // client calculait la cascade lui-meme, dans une variable qui repartait de zero a chaque
+    // rechargement (`magasin.ts`) : rien de ce que l'enfant gagnait n'etait jamais ecrit.
+    //
+    // DANS LA MEME TRANSACTION que la tentative, comme la progression et la pedagogie ci-dessus :
+    // il ne doit jamais exister d'instant ou une tentative est journalisee sans que sa cascade
+    // le soit aussi.
+    // ══════════════════════════════════════════════════════════════════════════════════════
+    const referentielMonde = chargerReferentielMonde();
+    const gainCascade = appliquerCascadeEtRecompenses(
+      base,
+      validee.profil,
+      etoiles,
+      validee.termineLe,
+      horloge,
+      seuilsCascade,
+      referentielMonde
+    );
+
     return {
       deja: false,
       tentative: inseree,
       etapesJournalisees: alimentation.journalisees,
-      etapesEcartees: alimentation.ecartees
+      etapesEcartees: alimentation.ecartees,
+      gainCascade
     };
   });
 }

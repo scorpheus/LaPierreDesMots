@@ -91,35 +91,25 @@ const MARQUEUR = 'CONTRÔLE POSITIF';
  * Chaque entrée porte les trois champs que la spec exige : la raison, et LA SCÈNE QUI
  * L'ÉTEINDRAIT.
  */
-const DETTES = [
-  {
-    garde: 'Q3',
-    raison:
-      'Q3 mesure qu’un palier annoncé à l’écran a sa contrepartie en base. Il attend le lot A1 : ' +
-      'aujourd’hui la cascade est calculée dans le client et n’atteint jamais le serveur ' +
-      '(feuille-de-route § 2, progression_cascade = 0 après 23 tentatives). Un garde de ' +
-      'persistance écrit contre un code qu’on va justement réécrire ne garde rien.',
-    scene:
-      'A1 applique la cascade dans la transaction de POST /api/tentatives et la rend au client. ' +
-      'Q3 s’écrit alors, et son contrôle positif est une partie LANCEMENT_PARENT qui ne doit ' +
-      'RIEN écrire.'
-  }
-  // ── LA DETTE Q2 A ÉTÉ RETIRÉE LE 2026-08-07, ET C'EST Q8 QUI L'A EXIGÉ ───────────────────
-  //
-  // Elle disait : « la spec loge Q2 dans `tests/e2e/couverture-enumerants.spec.ts`, il vit en
-  // Vitest ». L'orchestrateur a tranché en corrigeant la SPEC (§ 4 Q2), après avoir vérifié
-  // lui-même sur `playwright.config.ts` qu'aucun projet ne collecte ce nom — le fichier exigé
-  // n'aurait jamais été exécuté. La dette est donc devenue caduque le jour même.
-  //
-  // Q8 l'a vu tout seul, au premier tour où les deux se contredisaient :
-  //     ✗ Q2 : la dette « … » n’a plus lieu d’être — tests/unitaires/couverture-enumerants.test.ts
-  //       EXISTE. Retirer la dette de scripts/qa/controles-positifs.mjs.
-  //
-  // C'est la propriété qui compte dans ce fichier, plus que la liste elle-même : une exemption
-  // est une DETTE, pas un pardon, et elle ROUGIT quand elle cesse d'être nécessaire. Sans quoi
-  // les exemptions s'accumulent et le contrat devient un mensonge (six des huit exemptions du
-  // premier recensement du 3 août étaient déjà inutiles).
-];
+/**
+ * LES DETTES NOMMÉES — il n'y en a plus AUCUNE, et c'est un résultat.
+ *
+ * Il y en a eu deux, et les deux se sont éteintes exactement par la scène qu'elles nommaient :
+ *
+ *   • **Q2** — « la spec le loge en `tests/e2e/` où aucun projet Playwright ne le collecte ».
+ *     L'orchestrateur a vérifié `playwright.config.ts` et corrigé le § 4 Q2 de la spec.
+ *   • **Q3** — « il attend le lot A1 : la cascade n'atteint jamais le serveur ». A1 a atterri,
+ *     `tests/e2e/parcours-recompense-persistee.spec.ts` est écrit, et **c'est Q8 qui a réclamé
+ *     le retrait de cette dette** dès que le fichier est apparu :
+ *
+ *         ✗ Q3 : la dette « … » n'a plus lieu d'être — …spec.ts EXISTE.
+ *
+ * C'est la propriété qu'on voulait : une exemption est une DETTE, pas un pardon, et elle ne
+ * peut pas survivre à sa propre condition d'extinction. Au premier passage du contrat de
+ * couverture de CLAUDE.md, six exemptions sur huit étaient inutiles ; ici, zéro reste.
+ */
+const DETTES = [];
+
 
 // ══════════════════════════════════════════════════════════════════ outillage de lecture
 

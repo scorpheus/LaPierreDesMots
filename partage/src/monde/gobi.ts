@@ -177,7 +177,35 @@ export function prochainStade(
 }
 
 /**
- * Ajoute une forme à la collection, sans jamais en retirer ni en doubler, et remonte le stade.
+ * La forme ACTIVE : celle obtenue en dernier — `null` sans aucune forme.
+ *
+ * Mesuré (`Docs/decision-aide-de-gobi.md`) : `EtatGobi.formeActive` n'était jamais renseigné
+ * ailleurs que par `null`, donc `cristal` et `libelleForme` valaient toujours `null` au
+ * campement — Gobi ne portait jamais le cristal que l'enfant venait de gagner. Aucun mécanisme
+ * de CHOIX n'existe encore côté enfant (contrat § 9, question Q4 : « le choix porte sur la
+ * forme active, pas sur le stade » reste une question ouverte, pas une fonctionnalité livrée) ;
+ * en son absence, la forme la plus récemment obtenue est le seul repère qui rende la récompense
+ * VISIBLE sans rien inventer — c'est exactement ce que R6 demande (« montre le Gobi » au moment
+ * où il vient de gagner).
+ *
+ * Comparaison lexicographique de `obtenueLe` : les horodatages sont ISO 8601 UTC, donc l'ordre
+ * lexicographique est l'ordre chronologique (même convention que `depots/monde.ts`, carte).
+ * Une comparaison par POSITION dans le tableau aurait suffi dans les deux chemins d'appel
+ * actuels, mais aurait pu mentir le jour où `formes` arrive dans un ordre différent — cette
+ * fonction ne suppose rien de l'ordre d'entrée.
+ */
+export function formeActiveDe(formes: readonly FormeGobi[]): CodeGrapheme | null {
+  if (formes.length === 0) {
+    return null;
+  }
+  return formes.reduce((recente, courante) =>
+    courante.obtenueLe > recente.obtenueLe ? courante : recente
+  ).grapheme;
+}
+
+/**
+ * Ajoute une forme à la collection, sans jamais en retirer ni en doubler, remonte le stade et
+ * porte la forme neuve comme ACTIVE — R6, « montre le Gobi » (voir `formeActiveDe` ci-dessus).
  *
  * C'est le seul chemin d'écriture de la collection côté logique pure : le dépôt serveur en est
  * la projection SQL (`formes_gobi`, `stade_gobi` écrits en `MAX`).
@@ -192,7 +220,7 @@ export function ajouterForme(
   const formes: readonly FormeGobi[] = deja
     ? etat.formes
     : [...etat.formes, { ...forme, obtenueLe: quand }];
-  const apres: EtatGobi = { ...etat, formes };
+  const apres: EtatGobi = { ...etat, formes, formeActive: formeActiveDe(formes) };
   return { ...apres, stade: stadeApresFormes(apres, stades) };
 }
 

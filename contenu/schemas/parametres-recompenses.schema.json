@@ -27,12 +27,12 @@
       "description": "Nombre de paliers intermediaires qui donnent un palier rare. ~10 a l'ecole (D25)."
     },
     "natureIntermediaire": {
-      "enum": ["etoile", "forme-gobi", "objet-campement", "zone-recoloriee"],
-      "description": "Ce que rapporte le palier intermediaire : une forme de Gobi ou un objet de campement (D25, tableau)."
+      "enum": ["etoile", "forme-gobi", "zone-recoloriee"],
+      "description": "Ce que rapporte le palier intermediaire : une forme de Gobi (D25, tableau). `objet-campement` retire par le lot A1 (R31) : aucun palier ne le produisait."
     },
     "natureRare": {
-      "enum": ["forme-gobi", "objet-campement", "zone-recoloriee"],
-      "description": "Ce que rapporte le palier rare. « etoile » est EXCLU par construction : D25 point 2 exige une image ou son equivalent, et une etoile de plus n'en est pas une."
+      "enum": ["forme-gobi", "zone-recoloriee"],
+      "description": "Ce que rapporte le palier rare. « etoile » est EXCLU par construction : D25 point 2 exige une image ou son equivalent, et une etoile de plus n'en est pas une. `objet-campement` retire par le lot A1 (R31) : aucun palier ne le produisait."
     }
   }
 }

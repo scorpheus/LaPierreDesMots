@@ -116,29 +116,118 @@ function sourcesDeProduction(): readonly string[] {
 }
 
 const SOURCES = sourcesDeProduction();
-const TEXTE = new Map(SOURCES.map((f) => [f, sansCommentaires(readFileSync(f, 'utf8'))] as const));
-const lire = (f: string): string => TEXTE.get(f) ?? '';
 
-/** Nom de fonction → fichier où elle est déclarée. */
-const DECLAREE_DANS = new Map<string, string>();
-for (const fichier of SOURCES) {
-  for (const trouve of lire(fichier).matchAll(
-    /^\s*(?:export\s+)?(?:async\s+)?function\s+(\w+)/gm,
-  )) {
-    if (!DECLAREE_DANS.has(trouve[1]!)) DECLAREE_DANS.set(trouve[1]!, fichier);
+/**
+ * L'ANALYSE COMPLÈTE, EN FONCTION DE SES SOURCES — et c'est ce qui rend le contrôle positif
+ * ré-ancrable.
+ *
+ * ══════════════════════════════════════════════════════════════════════════════════════════
+ * POURQUOI CE N'EST PLUS UN ÉTAT DE MODULE
+ *
+ * Le contrôle positif de ce garde était `enregistrerFormeGobi` : « elle doit être signalée
+ * aujourd'hui ». **Le lot A1 l'a branchée, et le contrôle est tombé.** C'était écrit dans ce
+ * fichier — « soit A1 a branché la fonction, alors ce contrôle est à remplacer » — et c'est
+ * arrivé.
+ *
+ * Un contrôle ancré sur un défaut RÉEL se périme par construction : le jour où le produit
+ * guérit, l'instrument perd sa preuve. On l'ancre donc sur un TÉMOIN FABRIQUÉ, comme le
+ * bouton de 40 px de Q7 : une source de production synthétique, injectée le temps de la
+ * mesure, qui déclare un écrivain que personne n'appelle. Ce contrôle-là ne dépend d'aucun
+ * défaut du produit, donc il ne se périmera jamais.
+ * ══════════════════════════════════════════════════════════════════════════════════════════
+ *
+ * `sourcesFabriquees` : chemin relatif (au dépôt) → contenu. Elles entrent dans l'analyse
+ * exactement comme un fichier du disque, y compris pour le calcul des racines.
+ */
+export interface Analyse {
+  readonly ecrivains: readonly Ecrivain[];
+  readonly atteignables: ReadonlySet<string>;
+  readonly orphelins: readonly Ecrivain[];
+  readonly nbFonctions: number;
+  readonly nbFichiers: number;
+}
+
+function analyser(sourcesFabriquees: ReadonlyMap<string, string> = new Map()): Analyse {
+  const fichiers = [...SOURCES, ...sourcesFabriquees.keys()];
+  const texte = new Map<string, string>();
+  for (const fichier of SOURCES) texte.set(fichier, sansCommentaires(readFileSync(fichier, 'utf8')));
+  for (const [chemin, contenu] of sourcesFabriquees) texte.set(chemin, sansCommentaires(contenu));
+  const lire = (f: string): string => texte.get(f) ?? '';
+
+  const declareeDans = new Map<string, string>();
+  for (const fichier of fichiers) {
+    for (const trouve of lire(fichier).matchAll(
+      /^\s*(?:export\s+)?(?:async\s+)?function\s+(\w+)/gm,
+    )) {
+      if (!declareeDans.has(trouve[1]!)) declareeDans.set(trouve[1]!, fichier);
+    }
   }
-}
 
-/** Le corps d'une fonction nommée, de sa déclaration à la première `}` en colonne 0. */
-function corpsDe(fichier: string, nom: string): string | null {
-  const motif = new RegExp(
-    `^\\s*(?:export\\s+)?(?:async\\s+)?function\\s+${nom}\\b[\\s\\S]*?\\n\\}`,
-    'm',
+  const corpsDe = (fichier: string, nom: string): string | null => {
+    const motif = new RegExp(
+      `^\\s*(?:export\\s+)?(?:async\\s+)?function\\s+${nom}\\b[\\s\\S]*?\\n\\}`,
+      'm',
+    );
+    return motif.exec(lire(fichier))?.[0] ?? null;
+  };
+
+  // ── la population : écrivains DIRECTS puis INDIRECTS
+  const directs: Ecrivain[] = [];
+  for (const [nom, fichier] of declareeDans) {
+    const corps = corpsDe(fichier, nom);
+    if (corps !== null && ECRITURE.test(corps)) {
+      directs.push({ nom, fichier, genre: 'direct', via: null });
+    }
+  }
+  const nomsDirects = new Set(directs.map((e) => e.nom));
+  const indirects: Ecrivain[] = [];
+  for (const [nom, fichier] of declareeDans) {
+    if (nomsDirects.has(nom)) continue;
+    const corps = corpsDe(fichier, nom);
+    if (corps === null) continue;
+    for (const direct of nomsDirects) {
+      if (new RegExp(`\\b${direct}\\s*\\(`).test(corps)) {
+        indirects.push({ nom, fichier, genre: 'indirect', via: direct });
+        break;
+      }
+    }
+  }
+  const ecrivains = [...directs, ...indirects];
+
+  // ── l'atteignabilité, au grain FICHIER (voir l'en-tête)
+  const cite = (fichier: string, nom: string): boolean => {
+    const occurrences = (lire(fichier).match(new RegExp(`\\b${nom}\\b`, 'g')) ?? []).length;
+    return declareeDans.get(nom) === fichier ? occurrences >= 2 : occurrences >= 1;
+  };
+  const racines = fichiers.filter(
+    (f) =>
+      relatif(f).startsWith('serveur/src/routes/') ||
+      relatif(f).startsWith('scripts/') ||
+      f.endsWith('.tsx'),
   );
-  return motif.exec(lire(fichier))?.[0] ?? null;
-}
+  const fichiersAtteints = new Set<string>(racines);
+  const atteignables = new Set<string>();
+  let bouge = true;
+  while (bouge) {
+    bouge = false;
+    for (const fichier of [...fichiersAtteints]) {
+      for (const [nom, declaration] of declareeDans) {
+        if (atteignables.has(nom) || !cite(fichier, nom)) continue;
+        atteignables.add(nom);
+        bouge = true;
+        fichiersAtteints.add(declaration);
+      }
+    }
+  }
 
-// ═══════════════════════════════════════════════════════════ la population, DÉRIVÉE du code
+  return {
+    ecrivains,
+    atteignables,
+    orphelins: ecrivains.filter((e) => !atteignables.has(e.nom)),
+    nbFonctions: declareeDans.size,
+    nbFichiers: fichiers.length,
+  };
+}
 
 /** Ce qui écrit dans SQLite. Aucune liste de noms : on lit les corps. */
 const ECRITURE = /INSERT\s+INTO|UPDATE\s+\w|DELETE\s+FROM|\.run\(/i;
@@ -151,83 +240,16 @@ export interface Ecrivain {
   readonly via: string | null;
 }
 
-function ecrivainsDEtat(): readonly Ecrivain[] {
-  const directs: Ecrivain[] = [];
-  for (const [nom, fichier] of DECLAREE_DANS) {
-    const corps = corpsDe(fichier, nom);
-    if (corps !== null && ECRITURE.test(corps)) {
-      directs.push({ nom, fichier, genre: 'direct', via: null });
-    }
-  }
-  const nomsDirects = new Set(directs.map((e) => e.nom));
+const ANALYSE = analyser();
+const ECRIVAINS = ANALYSE.ecrivains;
+const ATTEIGNABLES = ANALYSE.atteignables;
+const ORPHELINS = ANALYSE.orphelins;
 
-  const indirects: Ecrivain[] = [];
-  for (const [nom, fichier] of DECLAREE_DANS) {
-    if (nomsDirects.has(nom)) continue;
-    const corps = corpsDe(fichier, nom);
-    if (corps === null) continue;
-    for (const direct of nomsDirects) {
-      if (new RegExp(`\\b${direct}\\s*\\(`).test(corps)) {
-        indirects.push({ nom, fichier, genre: 'indirect', via: direct });
-        break;
-      }
-    }
-  }
-  return [...directs, ...indirects];
+/** Le fichier de production le plus banal : pour savoir si un nom y est cité, on relit. */
+function citeDansLeDepot(cheminRelatif: string, nom: string): boolean {
+  const source = sansCommentaires(readFileSync(chemin(cheminRelatif), 'utf8'));
+  return new RegExp(`\\b${nom}\\b`).test(source);
 }
-
-// ═════════════════════════════════════════════════════════════════ l'atteignabilité, dérivée
-
-/**
- * Le fichier `f` cite-t-il le nom `nom` ?
- *
- * Dans le fichier qui le DÉCLARE, une seule occurrence n'est que la déclaration elle-même :
- * il en faut deux. C'est la troisième correction du détecteur D1, et elle a sauvé
- * `ecrireProgressionRegion`, appelée par `lireMonde` vingt lignes plus bas.
- */
-function cite(fichier: string, nom: string): boolean {
-  const occurrences = (lire(fichier).match(new RegExp(`\\b${nom}\\b`, 'g')) ?? []).length;
-  return DECLAREE_DANS.get(nom) === fichier ? occurrences >= 2 : occurrences >= 1;
-}
-
-/**
- * LES RACINES — les points d'entrée d'où part un geste réel.
- *
- * Dérivées, jamais listées : toute route HTTP (`serveur/src/routes/**`), tout composant du
- * client (`*.tsx` — c'est ce que l'enfant a sous le doigt), tout outil du dépôt (`scripts/`
- * hors `scripts/qa/`).
- */
-function fichiersRacines(): readonly string[] {
-  return SOURCES.filter(
-    (f) =>
-      relatif(f).startsWith('serveur/src/routes/') ||
-      relatif(f).startsWith('scripts/') ||
-      f.endsWith('.tsx'),
-  );
-}
-
-/** Clôture transitive : tous les noms qu'un geste peut finir par atteindre. */
-function nomsAtteignables(): ReadonlySet<string> {
-  const fichiersAtteints = new Set<string>(fichiersRacines());
-  const noms = new Set<string>();
-  let bouge = true;
-  while (bouge) {
-    bouge = false;
-    for (const fichier of [...fichiersAtteints]) {
-      for (const [nom, declaration] of DECLAREE_DANS) {
-        if (noms.has(nom) || !cite(fichier, nom)) continue;
-        noms.add(nom);
-        bouge = true;
-        fichiersAtteints.add(declaration);
-      }
-    }
-  }
-  return noms;
-}
-
-const ECRIVAINS = ecrivainsDEtat();
-const ATTEIGNABLES = nomsAtteignables();
-const ORPHELINS = ECRIVAINS.filter((e) => !ATTEIGNABLES.has(e.nom));
 
 /**
  * EXEMPTIONS — il n'y en a AUCUNE, et c'est un résultat.
@@ -261,36 +283,80 @@ describe('Q1 — tout écrivain d’état est atteignable depuis un geste d’en
       `[Q1] population : ${String(ECRIVAINS.length)} écrivains d’état ` +
         `(${String(ECRIVAINS.filter((e) => e.genre === 'direct').length)} directs, ` +
         `${String(ECRIVAINS.filter((e) => e.genre === 'indirect').length)} indirects) ` +
-        `sur ${String(DECLAREE_DANS.size)} fonctions nommées de ${String(SOURCES.length)} fichiers.`,
+        `sur ${String(ANALYSE.nbFonctions)} fonctions nommées de ${String(ANALYSE.nbFichiers)} fichiers.`,
     );
   });
 
-  test('CONTRÔLE POSITIF — `enregistrerFormeGobi` est signalée aujourd’hui', () => {
-    // Le contrôle exigé par le § 4 Q1. Il doit CESSER de valoir quand A1 branchera la
-    // fonction : ce jour-là, ce cas échouera et il faudra le remplacer par un témoin vivant.
-    // Un contrôle positif qui ne mord plus est un instrument devenu aveugle (§ 2.2).
-    const dansLaPopulation = ECRIVAINS.some((e) => e.nom === 'enregistrerFormeGobi');
+  test('CONTRÔLE POSITIF — un écrivain FABRIQUÉ que personne n’appelle est signalé', () => {
+    // ── POURQUOI UN TÉMOIN FABRIQUÉ, ET PLUS `enregistrerFormeGobi` ─────────────────────────
+    //
+    // L'ancien contrôle exigeait qu'`enregistrerFormeGobi` soit signalée « aujourd'hui ». Le
+    // lot A1 l'a branchée : le contrôle est tombé, exactement comme ce fichier l'annonçait.
+    // Un contrôle ancré sur un défaut RÉEL meurt le jour où le produit guérit — c'est-à-dire
+    // au pire moment, celui où l'on a le plus besoin de croire l'instrument.
+    //
+    // Le témoin ci-dessous est une source de production SYNTHÉTIQUE : elle écrit en base et
+    // personne ne la cite. Elle ne dépend d'aucun défaut du produit, donc elle ne se périme
+    // jamais. C'est la même forme que le bouton de 40 px de Q7.
+    const temoin = new Map([
+      [
+        chemin('serveur/src/depots/temoin-q1-jamais-appele.ts'),
+        `export function ecrireTemoinQ1(base: unknown): void {\n` +
+          `  base.prepare('INSERT INTO temoin (x) VALUES (?)').run(1);\n}\n`,
+      ],
+    ]);
+    const avec = analyser(temoin);
+    const trouve = avec.orphelins.find((e) => e.nom === 'ecrireTemoinQ1');
+    console.log(
+      `[Q1] contrôle positif — témoin fabriqué : ${trouve === undefined ? 'MANQUÉ' : 'SIGNALÉ ✔'} ` +
+        `(population ${String(ANALYSE.ecrivains.length)} → ${String(avec.ecrivains.length)})`,
+    );
     expect(
-      dansLaPopulation,
-      '`enregistrerFormeGobi` n’est plus recensée comme écrivain : la dérivation de la ' +
-        'population a changé de définition — redemander au contrôle de prouver qu’il sait échouer.',
-    ).toBe(true);
+      avec.ecrivains.map((e) => e.nom),
+      'un `INSERT … .run()` fabriqué n’entre même pas dans la population : la dérivation des ' +
+        'écrivains ne reconnaît plus une écriture.',
+    ).toContain('ecrireTemoinQ1');
     expect(
-      ORPHELINS.map((e) => e.nom),
-      'Q1 ne retrouve plus le défaut de référence qui l’a inspiré. Soit A1 a branché la ' +
-        'fonction — alors ce contrôle est à remplacer —, soit l’instrument est devenu aveugle.',
-    ).toContain('enregistrerFormeGobi');
+      trouve,
+      'Q1 ne signale pas un écrivain que PERSONNE n’appelle. L’instrument est aveugle, et tout ' +
+        'vert rendu par ce fichier serait sans valeur.',
+    ).toBeDefined();
+    expect(
+      ANALYSE.ecrivains.some((e) => e.nom === 'ecrireTemoinQ1'),
+      'le témoin fabriqué a fui dans l’analyse du dépôt réel : la mesure laisse sa propre trace.',
+    ).toBe(false);
   });
 
-  test('CONTRÔLE NÉGATIF — `journaliserEtapes` n’est PAS signalée : l’instrument ne fabrique pas de mort', () => {
-    // `serveur/src/depots/tentatives.ts:402` l'appelle, à travers `alimenterPedagogie`. Le
-    // premier essai de Q1, au grain « corps de fonction », la déclarait morte. Ce témoin
-    // garde la propriété qui rend Q1 lisible : ce qu'il signale, il le signale pour de bon.
+  test('CONTRÔLE NÉGATIF — un écrivain FABRIQUÉ qu’une route appelle n’est PAS signalé', () => {
+    // Le pendant, et il est aussi important : un instrument qui déclarerait TOUT inatteignable
+    // serait aussi inutile qu'un instrument aveugle. On fabrique le même écrivain, plus une
+    // route qui l'appelle — il doit alors disparaître des orphelins.
+    const temoin = new Map([
+      [
+        chemin('serveur/src/depots/temoin-q1-appele.ts'),
+        `export function ecrireTemoinQ1Vivant(base: unknown): void {\n` +
+          `  base.prepare('INSERT INTO temoin (x) VALUES (?)').run(1);\n}\n`,
+      ],
+      [
+        chemin('serveur/src/routes/temoin-q1-route.ts'),
+        `import { ecrireTemoinQ1Vivant } from '../depots/temoin-q1-appele.js';\n` +
+          `export function enregistrerRouteTemoin(): void { ecrireTemoinQ1Vivant(null); }\n`,
+      ],
+    ]);
+    const avec = analyser(temoin);
+    const signale = avec.orphelins.some((e) => e.nom === 'ecrireTemoinQ1Vivant');
+    console.log(
+      `[Q1] contrôle négatif — témoin appelé par une route : ${signale ? 'SIGNALÉ À TORT' : 'atteint ✔'}`,
+    );
     expect(
-      ATTEIGNABLES.has('journaliserEtapes'),
-      '`journaliserEtapes` est appelée par la route des tentatives et Q1 ne la voit pas : ' +
-        'l’instrument fabrique des faux positifs, et un rapport de faux positifs ne se lit pas.',
-    ).toBe(true);
+      avec.ecrivains.map((e) => e.nom),
+      'le témoin vivant n’entre pas dans la population : la comparaison ne prouverait rien.',
+    ).toContain('ecrireTemoinQ1Vivant');
+    expect(
+      signale,
+      'Q1 déclare inatteignable un écrivain qu’une route HTTP appelle : il fabrique des morts, ' +
+        'et un rapport de faux positifs ne se lit pas.',
+    ).toBe(false);
   });
 
   test('LE DÉFAUT — aucun écrivain d’état n’est inatteignable', () => {
@@ -302,13 +368,13 @@ describe('Q1 — tout écrivain d’état est atteignable depuis un geste d’en
       `[Q1] population : ${String(ECRIVAINS.length)} ecrivains d'etat (` +
         `${String(ECRIVAINS.filter((e) => e.genre === 'direct').length)} directs, ` +
         `${String(ECRIVAINS.filter((e) => e.genre === 'indirect').length)} indirects) sur ` +
-        `${String(DECLAREE_DANS.size)} fonctions nommees de ${String(SOURCES.length)} fichiers.`,
+        `${String(ANALYSE.nbFonctions)} fonctions nommees de ${String(ANALYSE.nbFichiers)} fichiers.`,
     );
 
     // Observation, jamais une assertion : la spec accepte qu'une route suffise. Le trancher
     // appartient au lot A1 (feuille-de-route § 2, point 4).
     const routeSansClient = ECRIVAINS.filter(
-      (e) => ATTEIGNABLES.has(e.nom) && !cite(chemin('client/src/api/client.ts'), e.nom),
+      (e) => ATTEIGNABLES.has(e.nom) && !citeDansLeDepot('client/src/api/client.ts', e.nom),
     ).filter((e) => e.nom === 'poserObjetCampement');
     for (const observe of routeSansClient) {
       console.log(

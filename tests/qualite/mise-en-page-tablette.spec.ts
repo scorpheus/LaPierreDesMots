@@ -73,7 +73,99 @@ const MOTEURS = [...new Set(noeudsLivres().map((noeud) => noeud.moteur))].sort()
  * Tout le reste de la zone parent — le pavé de code, le choix du joueur — doit tenir : ce sont
  * des écrans bornés, et rien ne justifierait qu'ils débordent.
  */
-const DEFILEMENT_TOLERE = new Set(['dashboard', 'galerie-parent']);
+interface DefilementTolere {
+  readonly raison: string;
+  /** Ce qui ÉTEINDRAIT l'exemption. « perpétuelle » se déclare, ne se sous-entend pas. */
+  readonly scene: string;
+  /**
+   * La largeur de fenêtre à laquelle le grief a été MESURÉ et l'arbitrage RENDU.
+   * `null` = tous formats, quand la raison ne dépend pas du format.
+   */
+  readonly largeurArbitree: number | null;
+  readonly date: string;
+}
+
+const DEFILEMENT_TOLERE = new Map<string, DefilementTolere>([
+  [
+    'dashboard',
+    {
+      raison:
+        'liste non bornée par nature : le dashboard affiche TOUS les brouillons à valider. ' +
+        'Exiger qu’elle tienne dans 1 200 px reviendrait à exiger qu’il n’y ait jamais plus ' +
+        'de six brouillons.',
+      scene: 'perpétuelle tant que la liste est non bornée — une pagination l’éteindrait.',
+      largeurArbitree: null,
+      date: '2026-08-03'
+    }
+  ],
+  [
+    'galerie-parent',
+    {
+      raison: 'liste non bornée par nature : la galerie affiche TOUS les assets produits.',
+      scene: 'perpétuelle tant que la liste est non bornée — une pagination l’éteindrait.',
+      largeurArbitree: null,
+      date: '2026-08-03'
+    }
+  ],
+  [
+    /**
+     * ── LE CAMPEMENT — ARBITRAGE DU PÈRE, 2026-08-07, ET LE RAISONNEMENT DERRIÈRE ───────────
+     *
+     * Verbatim, après qu'on lui a donné la table des prix du décor en pleine largeur — 820 px
+     * de défilement en paysage :
+     *
+     *     « déplace le butin dans le coffre, ce n'est pas grave le défilement dans cet écran »
+     *
+     * ── POURQUOI CE N'EST PAS LA MÊME RAISON QUE LES DEUX AUTRES ────────────────────────────
+     *
+     * Le dashboard et la galerie sont exemptés parce que leur contenu est NON BORNÉ. Le
+     * campement, lui, a un contenu parfaitement borné : trente points d'interaction, comptés.
+     * Sa raison est d'un autre ordre, et elle tient à ce que l'écran EST :
+     *
+     *   • **c'est un hub qu'on explore, pas un exercice qu'on enchaîne.** Le grief de R20 —
+     *     « un enfant de 7 ans qui défile perd le fil » — vise l'écran où l'on JOUE, où
+     *     chaque seconde de recherche est une seconde volée à la lecture. Au campement on
+     *     flâne : le défilement y est le geste de l'exploration, pas un obstacle à une tâche ;
+     *   • **et les trente points doivent rester touchables.** Le père veut qu'ils soient assez
+     *     grands pour le doigt ; le recouvrement entre points ne s'éteint qu'au-delà de 640 px
+     *     de large. Borner le décor pour supprimer le défilement les ramènerait sous cette
+     *     largeur, donc les ferait se chevaucher — on échangerait « il faut défiler » contre
+     *     « on tape à côté », c'est-à-dire un grief de confort contre un grief d'atteignabilité.
+     *     C'est exactement l'arbitrage R16-contre-R20 déjà rendu pour `colorie`, et il se
+     *     tranche du même côté : la règle des cibles l'emporte sur le retour de confort.
+     *
+     * ── LA BORNE DE FORMAT, ET ELLE N'EST PAS COSMÉTIQUE ────────────────────────────────────
+     *
+     * Mesuré le 2026-08-07 : le débordement vaut `H + 20 px` en PAYSAGE et `H − 700 px` en
+     * PORTRAIT, où `H` est la hauteur du décor. Le format qui mord est le paysage — celui du
+     * banc (1920 × 1200, `playwright.config.ts`) — **pas celui du père, qui joue en portrait**
+     * (R39). L'exemption est donc bornée à la largeur où le grief a été mesuré et l'arbitrage
+     * rendu. Le jour où un banc portrait existera, le campement y sera jugé de nouveau au lieu
+     * d'hériter d'un pardon qu'on ne lui a pas accordé.
+     *
+     * ── CE QUI L'ÉTEINDRAIT ─────────────────────────────────────────────────────────────────
+     *
+     * `H + 20` en paysage veut dire que **toute** hauteur de décor déborde : le reste de la
+     * page remplit déjà la fenêtre. Aucun réglage de taille ne peut donc la solder — seule une
+     * mise en page où le décor cesse d'être EMPILÉ sous le reste (fond de page plutôt que bloc
+     * dans le flux) ferait cesser H de s'ajouter à la hauteur. Tant que le décor est un bloc du
+     * flux, cette exemption est **perpétuelle**, et c'est dit plutôt que sous-entendu.
+     */
+    'campement',
+    {
+      raison:
+        'hub qu’on explore, pas exercice qu’on enchaîne ; et borner le décor ramènerait les ' +
+        '30 points d’interaction sous les 640 px où ils se chevauchent — on échangerait « il ' +
+        'faut défiler » contre « on tape à côté ».',
+      scene:
+        'perpétuelle tant que le décor est un bloc du flux (le débordement vaut H + 20 px en ' +
+        'paysage, donc toute hauteur déborde). Seul un décor en FOND de page, qui cesse de ' +
+        's’empiler sous le reste, l’éteindrait.',
+      largeurArbitree: 1920,
+      date: '2026-08-07'
+    }
+  ]
+]);
 
 /**
  * ── LA DETTE, CHIFFRÉE, DATÉE, ET QUI NE PEUT QUE DÉCROÎTRE ───────────────────────────────────
@@ -240,10 +332,41 @@ async function exiger(nom: string, ecran: string, page: Page): Promise<void> {
       'elles sont introuvables'
   ).toEqual([]);
 
-  if (DEFILEMENT_TOLERE.has(ecran)) return;
+  // ── L'EXEMPTION NE PORTE QUE SUR LE DÉFILEMENT, ET JAMAIS SUR L'ATTEIGNABILITÉ ───────────
+  //
+  // Elle est placée APRÈS l'assertion `horsDAtteinte` ci-dessus, et cette place est la garantie :
+  // « une commande hors d'atteinte » reste opposable partout, sans exception, campement compris.
+  const tolere = DEFILEMENT_TOLERE.get(ecran);
+  if (tolere !== undefined) {
+    const largeur = page.viewportSize()?.width ?? 0;
+    if (tolere.largeurArbitree === null || tolere.largeurArbitree === largeur) {
+      // On MESURE quand même, et on l'imprime : une exemption muette laisserait le débordement
+      // grandir sans que personne ne le voie. Exempté n'est pas invisible.
+      console.log(
+        `[R20] ${nom} — défilement toléré (${tolere.date}) : ${String(mesure.vertical)} px ` +
+          `vertical, ${String(mesure.horizontal)} px horizontal, à ${String(largeur)} px de large. ` +
+          `Ce qui l’éteindrait : ${tolere.scene}`
+      );
+      return;
+    }
+    // Le format n'est pas celui où l'arbitrage a été rendu : on ne pardonne pas plus large.
+    console.log(
+      `[R20] ${nom} — exemption NON applicable : elle a été rendue à ` +
+        `${String(tolere.largeurArbitree)} px de large, le banc mesure ${String(largeur)} px. ` +
+        'L’écran est jugé comme les autres.'
+    );
+  }
 
   const dette = DETTE_MESUREE.get(ecran);
   if (dette !== undefined) {
+    // La valeur MESURÉE est imprimée à chaque course, pas seulement quand le cliquet casse :
+    // une dette qu'on ne voit que le jour où elle explose est une dette qu'on découvre trop
+    // tard. C'est aussi ce qui permet de vérifier un chiffre annoncé par un autre lot au lieu
+    // de le recopier.
+    console.log(
+      `[R20] ${nom} — dette « ${ecran} » : mesuré ${String(mesure.vertical)} px, ` +
+        `cliquet à ${String(dette)} px`
+    );
     // Un CLIQUET, jamais un pardon : la dette ne peut que descendre. Voir son encadré.
     expect(
       mesure.vertical,
@@ -334,7 +457,7 @@ test.describe('R20 — rien ne dépasse sur la tablette', () => {
     console.log(
       `[R20] ${String(ECRANS.length)} écran(s) gardé(s) · ${String(MOTEURS.length)} moteur(s) : ` +
         MOTEURS.join(', ') +
-        ` · défilement toléré sur ${[...DEFILEMENT_TOLERE].join(' et ')}` +
+        ` · défilement toléré sur ${[...DEFILEMENT_TOLERE.keys()].join(', ')}` +
         ` · dette restante : ${[...DETTE_MESUREE]
           .map(([ecran, px]) => `${ecran} ${String(px)} px`)
           .join(', ')}`

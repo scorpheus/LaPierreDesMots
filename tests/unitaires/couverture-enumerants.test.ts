@@ -384,18 +384,40 @@ interface VerdictUnion {
   readonly absents: readonly string[];
 }
 
-const VERDICTS: readonly VerdictUnion[] = UNIONS.map((union) => {
-  const dedies = champsDedies(SONDE.vues, union.membres);
-  const produits = new Set<string>();
-  for (const champ of dedies) {
-    for (const valeur of SONDE.vues.get(champ) ?? []) produits.add(valeur);
-  }
-  return {
-    union,
-    produits: union.membres.filter((m) => produits.has(m)),
-    absents: union.membres.filter((m) => !produits.has(m)),
-  };
-});
+/**
+ * Les verdicts, EN FONCTION de leurs entrées — et c'est ce qui rend le contrôle ré-ancrable.
+ *
+ * ══════════════════════════════════════════════════════════════════════════════════════════
+ * POURQUOI CE N'EST PLUS UN CALCUL DE MODULE
+ *
+ * Le contrôle positif de ce garde était `objet-campement` : « il doit être signalé, là où le
+ * détecteur textuel était aveugle ». **Le lot A1 a retiré l'énumérant**, et le contrôle est
+ * tombé — ce fichier l'annonçait mot pour mot.
+ *
+ * Un contrôle ancré sur un défaut RÉEL se périme quand le produit guérit. On l'ancre donc sur
+ * une union FABRIQUÉE, injectée le temps de la mesure, dont un membre n'est jamais produit :
+ * elle ne dépend d'aucun défaut du produit, donc elle ne se périmera jamais.
+ * ══════════════════════════════════════════════════════════════════════════════════════════
+ */
+function verdictsPour(
+  unions: readonly UnionLitterale[],
+  emissions: Emissions,
+): readonly VerdictUnion[] {
+  return unions.map((union) => {
+    const dedies = champsDedies(emissions, union.membres);
+    const produits = new Set<string>();
+    for (const champ of dedies) {
+      for (const valeur of emissions.get(champ) ?? []) produits.add(valeur);
+    }
+    return {
+      union,
+      produits: union.membres.filter((m) => produits.has(m)),
+      absents: union.membres.filter((m) => !produits.has(m)),
+    };
+  });
+}
+
+const VERDICTS: readonly VerdictUnion[] = verdictsPour(UNIONS, SONDE.vues);
 
 const EXERCEES = VERDICTS.filter((v) => v.produits.length > 0);
 const NON_EXERCEES = VERDICTS.filter((v) => v.produits.length === 0);
@@ -432,26 +454,60 @@ describe('Q2 — chaque énumérant est réellement PRODUIT au moins une fois', 
     }
   });
 
-  test('CONTRÔLE POSITIF — `objet-campement` est signalé, là où le détecteur textuel était aveugle', () => {
-    // Le contrôle exigé par le § 4 Q2, et il porte la leçon entière du lot : `objet-campement`
-    // est CITÉ dans deux écrans qui le traduisent, et PRODUIT par personne. Un `grep` le voit
-    // vivant ; une sonde d'exécution le voit absent.
-    const natures = VERDICTS.find((v) => v.union.nom === 'NatureRecompense');
-    expect(natures, 'l’union `NatureRecompense` a disparu de partage/src').toBeDefined();
-    expect(
-      natures!.produits.length,
-      '`NatureRecompense` n’est plus exercée du tout par la sonde : la cascade ne tourne plus, ' +
-        'et le contrôle comparerait zéro à zéro — exactement ce qui est arrivé à R30.',
-    ).toBeGreaterThanOrEqual(2);
+  test('CONTRÔLE POSITIF — un énumérant FABRIQUÉ que rien ne produit est signalé', () => {
+    // Le témoin : une union de trois membres dont DEUX sont émis sur un champ qui leur est
+    // dédié — donc l'union est « exercée » — et dont le troisième ne l'est jamais. C'est
+    // exactement la signature de la loi remplacée dont le NOM survit, en éprouvette.
+    const temoin: UnionLitterale = {
+      nom: 'TemoinQ2',
+      fichier: 'partage/src/temoin-fabrique.ts',
+      membres: ['temoin-emis-a', 'temoin-emis-b', 'temoin-jamais-produit'],
+    };
+    const emissions: Emissions = new Map(SONDE.vues);
+    emissions.set('temoin#champ', new Set(['temoin-emis-a', 'temoin-emis-b']));
+
+    const [verdict] = verdictsPour([temoin], emissions);
     console.log(
-      `[Q2] contrôle positif — NatureRecompense : produits ${natures!.produits.join(', ')} · ` +
-        `jamais produits ${natures!.absents.join(', ') || 'aucun'}`,
+      `[Q2] contrôle positif — témoin fabriqué : produits ${verdict!.produits.join(', ')} · ` +
+        `jamais produits ${verdict!.absents.join(', ') || 'aucun'}`,
     );
     expect(
-      natures!.absents,
-      'Q2 ne retrouve plus le défaut de référence. Soit A1 a tranché `objet-campement` — alors ' +
-        'ce contrôle est à remplacer par un témoin vivant —, soit la sonde est devenue aveugle.',
-    ).toContain('objet-campement');
+      verdict!.produits,
+      'l’union fabriquée n’est même pas reconnue comme EXERCÉE : la règle du champ dédié ne ' +
+        'reconnaît plus une émission, et tout « rien à signaler » serait sans valeur.',
+    ).toEqual(['temoin-emis-a', 'temoin-emis-b']);
+    expect(
+      verdict!.absents,
+      'Q2 ne signale pas un membre qu’AUCUN champ ne produit, dans une union par ailleurs ' +
+        'vivante. L’instrument est aveugle — c’est précisément ce qui est arrivé au détecteur ' +
+        'textuel D2 sur `objet-campement`.',
+    ).toEqual(['temoin-jamais-produit']);
+
+    // Et le témoin ne doit pas avoir fui dans la mesure du dépôt réel.
+    expect(
+      VERDICTS.some((v) => v.union.nom === 'TemoinQ2'),
+      'le témoin fabriqué a fui dans le recensement réel : la mesure laisse sa propre trace.',
+    ).toBe(false);
+  });
+
+  test('CONTRÔLE NÉGATIF — une union FABRIQUÉE entièrement produite n’est PAS signalée', () => {
+    // Le pendant : un instrument qui signalerait tout serait aussi inutile qu'un aveugle.
+    const temoin: UnionLitterale = {
+      nom: 'TemoinQ2Complet',
+      fichier: 'partage/src/temoin-fabrique.ts',
+      membres: ['complet-a', 'complet-b'],
+    };
+    const emissions: Emissions = new Map(SONDE.vues);
+    emissions.set('temoin#complet', new Set(['complet-a', 'complet-b']));
+    const [verdict] = verdictsPour([temoin], emissions);
+    console.log(
+      `[Q2] contrôle négatif — union complète : ${String(verdict!.absents.length)} membre(s) manquant(s)`,
+    );
+    expect(
+      verdict!.absents,
+      'Q2 réclame un membre qui EST produit : il fabrique des orphelins, et un rapport de faux ' +
+        'positifs ne se lit pas.',
+    ).toEqual([]);
   });
 
   test('CONTRÔLE NÉGATIF — la sonde produit bien des valeurs qu’aucune déclaration ne cite en dur', () => {

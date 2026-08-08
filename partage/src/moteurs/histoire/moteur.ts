@@ -189,6 +189,14 @@ export const moteurHistoire: Moteur<ContenuHistoire, EtatHistoire, ActionHistoir
     const etapes = entree.contenu.questions.map(
       (etape, index): EtatEtapeHistoire => ({
         identifiant: etape.id,
+        // R32/R44 — LE MÉLANGE, ICI ET UNE SEULE FOIS.
+        //
+        // « range les mots, mais ils sont déjà dans l'ordre » : `options` liste la bonne
+        // réponse en tête sur la quasi-totalité des questions livrées. Le rendre tel quel
+        // faisait gagner sans lire. Le tirage passe par `Alea` (jamais `Math.random`, règle
+        // ESLint à l'appui) et n'a lieu qu'à la création de l'état : l'ordre ne bouge plus sous
+        // les yeux de l'enfant, et il se rejoue à l'identique à graine égale.
+        ordreAffichage: entree.alea.melanger(etape.options),
         restantes: [etape.reponse],
         nbErreurs: 0,
         niveauAide: 'aucune',

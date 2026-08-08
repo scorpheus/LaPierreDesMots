@@ -119,6 +119,28 @@ export function relecturesDues(
  * `indice` → Gobi relit et souffle. `demonstration` → la cible s'anime. Le `texte` n'est
  * JAMAIS affiché seul (R15) : il est dit par `FournisseurVoix`, et l'écrit ne le remplace
  * pas.
+ *
+ * ══════════════════════════════════════════════════════════════════════════════════════════
+ * CE QUE `texte: null` VEUT DIRE — précisé par R46, parce que l'ambiguïté a coûté cher.
+ *
+ * Recensement PAR OBJET, les quatorze moteurs montés sur un exercice réellement livré :
+ *
+ *     aide.texte === null : 12   (assemble attrape chemin chrono colorie eclair grave
+ *                                 histoire paires phrase place tri)
+ *     aide.texte porteur  :  2   (trace « la grande barre », libre « ici, il n'y a rien… »)
+ *
+ * Douze `null` sur quatorze ne sont PAS douze oublis : un moteur ne connaît ni l'identifiant
+ * de son exercice ni le manifeste des voix, donc il ne peut produire aucun texte que le jeu
+ * sache PRONONCER — et « rien n'est synthétisé à l'exécution » (CLAUDE.md) fait d'un texte
+ * imprononçable un texte inutile.
+ *
+ * **`texte: null` signifie donc « rien de particulier à dire : la consigne suffit »**, et non
+ * « on a oublié ». C'est la coquille qui le résout — `client/src/composants/aide-de-gobi.ts` —
+ * en servant la consigne courante et la clé `<idExercice>/<idConsigne>` de son clip.
+ *
+ * Un moteur ne renseigne `texte` que lorsqu'il a quelque chose que la consigne ne dit pas :
+ * `trace` nomme le trait attendu, `libre` désamorce la notion même de réussite.
+ * ══════════════════════════════════════════════════════════════════════════════════════════
  */
 export function construireAide(
   niveau: NiveauAide,

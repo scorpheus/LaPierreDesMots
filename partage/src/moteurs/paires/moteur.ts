@@ -42,6 +42,7 @@ import type {
   ContenuPaires,
   EtatPaires,
   EtatEtapePaires,
+  IdPaire,
   RefusPaires,
 } from './types.js';
 
@@ -186,9 +187,24 @@ export const moteurPaires: Moteur<ContenuPaires, EtatPaires, ActionPaires> = {
 
   creerEtat(entree: EntreeMoteur<ContenuPaires>): EtatPaires {
     const instant = entree.horloge.maintenantMs();
+    // R32/R44 — LE MÉLANGE DU PLATEAU, ICI ET UNE SEULE FOIS.
+    //
+    // Les cartes étaient rangées deux par deux, `mot-X · image-X`, dans l'ordre d'`aApparier` :
+    // retourner les deux premières cartes visibles gagnait toujours la BONNE paire. Le mélange
+    // porte sur le CATALOGUE ENTIER (toutes les étapes) — c'est lui qui fixe l'ordre réel du
+    // plateau. Le tirage passe par `Alea`, jamais `Math.random`.
+    const cartesMelangees = entree.alea.melanger(entree.contenu.cartes);
+    // L'ordre des PAIRES tel qu'une main qui scanne le plateau mélangé de gauche à droite les
+    // rencontrerait — première apparition de chaque `IdPaire`, cartes dédoublonnées.
+    const ordrePairesGlobal: IdPaire[] = [];
+    for (const carte of cartesMelangees) {
+      if (!ordrePairesGlobal.includes(carte.paire)) ordrePairesGlobal.push(carte.paire);
+    }
     const etapes = entree.contenu.consignes.map(
       (etape, index): EtatEtapePaires => ({
         identifiant: etape.id,
+        // La projection, propre à cette étape, de l'ordre des paires du plateau mélangé.
+        ordreAffichage: ordrePairesGlobal.filter((id) => etape.aApparier.includes(id)),
         restantes: [...etape.aApparier],
         nbErreurs: 0,
         niveauAide: 'aucune',
@@ -209,7 +225,7 @@ export const moteurPaires: Moteur<ContenuPaires, EtatPaires, ActionPaires> = {
     return {
       indexEtape: 0,
       etapes,
-      cartes: [...entree.contenu.cartes],
+      cartes: cartesMelangees,
       competence: entree.contenu.competence,
       acquis: {},
       carteRetournee: null,

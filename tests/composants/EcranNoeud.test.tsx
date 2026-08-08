@@ -125,6 +125,50 @@ describe('l’écran du nœud a une sortie, et elle mène ailleurs (M2)', () => 
     expect(document.querySelector('[data-ecran="chargement"]')).toBeNull();
   });
 
+  /**
+   * ══════════════════════════════════════════════════════════════════════════════════════════
+   * L'EXIGENCE QUI A SUIVI SON OBJET — R49
+   *
+   * « la phrase est en haut et en bas, il y a doublon » (le père, 2026-08-07). Les moteurs ont
+   * cessé de redire la consigne ; `EcranNoeud` la porte seul, parce qu'il est le seul à avoir
+   * la clé du `BoutonEcouter`.
+   *
+   * `tests/composants/MoteurColorie.test.tsx` l'exigeait dix-sept fois DANS LE MOTEUR, monté
+   * isolément. L'y exiger encore reviendrait à exiger le retour du doublon ; l'en retirer sans
+   * plus reviendrait à perdre l'exigence avec le déménagement — et **une exigence qui disparaît
+   * avec un déménagement n'aurait jamais rien gardé** (le précédent est écrit dans
+   * `campement-affordance.test.tsx`, pour `etagere` puis `butin`).
+   *
+   * Elle se pose donc ICI, une fois, sur l'écran qui la rend pour les QUATORZE moteurs — au
+   * lieu de dix-sept fois sur un seul. Le sens inverse — qu'aucun moteur ne la reprenne — est
+   * gardé par `tests/unitaires/consigne-sans-doublon.test.ts`.
+   * ══════════════════════════════════════════════════════════════════════════════════════════
+   */
+  it('R49 — porte la consigne de l’étape, et elle y est LISIBLE', () => {
+    monter();
+    const barre = document.querySelector('[data-consigne]');
+    expect(barre, 'la barre de consigne a disparu : plus personne ne dit à l’enfant quoi faire')
+      .not.toBeNull();
+    const texte = (barre?.textContent ?? '').trim();
+    console.log(`[R49] consigne rendue par EcranNoeud : « ${texte.slice(0, 60)} »`);
+    expect(
+      texte.length,
+      'la barre de consigne est vide : depuis R49 elle est le SEUL endroit qui la dit, donc ' +
+        'son vide laisse l’enfant sans consigne du tout',
+    ).toBeGreaterThan(0);
+
+    // ── ET L'AUDIBILITÉ ? ELLE EST GARDÉE AILLEURS, ET J'AI VÉRIFIÉ AVANT DE RETIRER ──────
+    //
+    // `MoteurPlace.test.tsx` gardait « la consigne est LUE à l'écran ET annoncée ». Retirer ce
+    // cas sans savoir où va la seconde moitié aurait perdu l'exigence en croyant la déplacer.
+    //
+    // Mesuré : `tests/e2e/parcours-variete.spec.ts:300` exige déjà `[data-action="ecouter"]`
+    // sur l'application réelle — c'est la prise mécanique de R15, « aucune consigne n'existe
+    // uniquement à l'écrit ». Elle y est mieux gardée qu'ici : ce harnais monte l'écran sans
+    // étape courante, donc `EcranNoeud` n'y rend pas encore son bouton, et l'exiger ICI
+    // rougirait pour l'état du harnais, pas pour un défaut du produit.
+  });
+
   it('porte la prise `[data-vers="carte"]`, avec un libellé qu’un lecteur d’écran annonce', () => {
     monter();
     const sortie = document.querySelector('[data-vers="carte"]');

@@ -12,7 +12,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { useCallback, useState } from 'react';
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -143,11 +143,37 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
+/**
+ * Attend que la SCÈNE soit montée — un ÉTAT, jamais un délai (annexe T § 6).
+ *
+ * Ces cas attendaient jusqu'ici l'apparition du texte de la consigne, qui servait d'accusé de
+ * montage. R49 l'a déplacé chez `EcranNoeud` : ce fichier attend désormais ce qu'il teste
+ * réellement, la première région coloriable.
+ */
+async function attendreLaScene(): Promise<void> {
+  await waitFor(() => {
+    expect(document.querySelector('[data-region-svg]')).not.toBeNull();
+  });
+}
+
 describe('MoteurColorie — rendu', () => {
-  it('rend la consigne active et les godets du nuancier autorisé', async () => {
+  /**
+   * ── LA CONSIGNE A QUITTÉ CE FICHIER AVEC R49, ET CE N'EST PAS UN ASSOUPLISSEMENT ──────────
+   *
+   * « la phrase est en haut et en bas, il y a doublon » (le père, 2026-08-07). `EcranNoeud`
+   * porte désormais la consigne SEUL — il est le seul à avoir la clé du `BoutonEcouter`. Ce
+   * fichier monte `MoteurColorie` isolément, sans `EcranNoeud` : plus rien ne rend cette
+   * phrase ici, et l'exiger reviendrait à exiger le retour du doublon.
+   *
+   * **L'exigence n'est pas perdue : elle suit l'objet.** `tests/composants/EcranNoeud.test.tsx`
+   * porte « R49 — porte la consigne de l'étape, et elle y est LISIBLE », une fois, pour les
+   * quatorze moteurs au lieu de dix-sept fois pour un seul. Et
+   * `tests/unitaires/consigne-sans-doublon.test.ts` garde le sens inverse — qu'aucun moteur ne
+   * la reprenne. Une exigence qui disparaîtrait avec un déménagement n'aurait jamais rien gardé.
+   */
+  it('rend les godets du nuancier autorisé', async () => {
     render(<Harnais />);
-    const consigne = await screen.findByText(contenu.consignes[0]!.texte);
-    expect(consigne).toBeTruthy();
+    await attendreLaScene();
     for (const couleur of contenu.nuancierAutorise) {
       expect(godet(couleur)).toBeTruthy();
     }
@@ -155,7 +181,7 @@ describe('MoteurColorie — rendu', () => {
 
   it('rend une région par région coloriable de l’habillage, toutes non peintes', async () => {
     render(<Harnais />);
-    await screen.findByText(contenu.consignes[0]!.texte);
+    await attendreLaScene();
     const coloriables = habillage.scene.calques
       .filter((calque) => calque.role === 'coloriable')
       .flatMap((calque) => calque.regions);
@@ -175,7 +201,7 @@ describe('MoteurColorie — rendu', () => {
 
   it('n’émet JAMAIS `data-etat="echec"` — R14', async () => {
     render(<Harnais />);
-    await screen.findByText(contenu.consignes[0]!.texte);
+    await attendreLaScene();
     expect(document.querySelector('[data-etat="echec"]')).toBeNull();
   });
 });
@@ -184,7 +210,7 @@ describe('MoteurColorie — bonne réponse', () => {
   it('peint la région et marque la consigne faite', async () => {
     const utilisateur = userEvent.setup();
     render(<Harnais />);
-    await screen.findByText(contenu.consignes[0]!.texte);
+    await attendreLaScene();
 
     await utilisateur.click(godet(premiereCible.couleur));
     expect(godet(premiereCible.couleur).getAttribute('data-choisie')).toBe('oui');
@@ -201,7 +227,7 @@ describe('MoteurColorie — bonne réponse', () => {
     const utilisateur = userEvent.setup();
     let dernier: EtatColorie | null = null;
     render(<Harnais surEtat={(etat) => (dernier = etat)} />);
-    await screen.findByText(contenu.consignes[0]!.texte);
+    await attendreLaScene();
 
     for (const cible of contenu.consignes[0]!.cibles) {
       await utilisateur.click(godet(cible.couleur));
@@ -220,7 +246,7 @@ describe('MoteurColorie — mauvaise réponse', () => {
     const utilisateur = userEvent.setup();
     let dernier: EtatColorie | null = null;
     render(<Harnais surEtat={(etat) => (dernier = etat)} />);
-    await screen.findByText(contenu.consignes[0]!.texte);
+    await attendreLaScene();
 
     await utilisateur.click(godet(couleurFausse));
     await utilisateur.click(region(premiereCible.region));
@@ -235,7 +261,7 @@ describe('MoteurColorie — mauvaise réponse', () => {
     const utilisateur = userEvent.setup();
     let dernier: EtatColorie | null = null;
     render(<Harnais surEtat={(etat) => (dernier = etat)} />);
-    await screen.findByText(contenu.consignes[0]!.texte);
+    await attendreLaScene();
 
     await utilisateur.click(region(premiereCible.region));
 
@@ -250,7 +276,7 @@ describe('MoteurColorie — aide de Gobi', () => {
     const utilisateur = userEvent.setup();
     let dernier: EtatColorie | null = null;
     render(<Harnais surEtat={(etat) => (dernier = etat)} />);
-    await screen.findByText(contenu.consignes[0]!.texte);
+    await attendreLaScene();
 
     await utilisateur.click(godet(couleurFausse));
     await utilisateur.click(region(premiereCible.region));
@@ -264,7 +290,7 @@ describe('MoteurColorie — aide de Gobi', () => {
     const utilisateur = userEvent.setup();
     let dernier: EtatColorie | null = null;
     render(<Harnais surEtat={(etat) => (dernier = etat)} />);
-    await screen.findByText(contenu.consignes[0]!.texte);
+    await attendreLaScene();
 
     await utilisateur.click(godet(couleurFausse));
     await utilisateur.click(region(premiereCible.region));
@@ -282,7 +308,7 @@ describe('MoteurColorie — double-tap rapide', () => {
     const utilisateur = userEvent.setup();
     let dernier: EtatColorie | null = null;
     render(<Harnais surEtat={(etat) => (dernier = etat)} />);
-    await screen.findByText(contenu.consignes[0]!.texte);
+    await attendreLaScene();
 
     await utilisateur.click(godet(premiereCible.couleur));
     const cible = region(premiereCible.region);
@@ -306,7 +332,7 @@ describe('MoteurColorie — désordre de rendu', () => {
     const utilisateur = userEvent.setup();
     let dernier: EtatColorie | null = null;
     render(<Harnais surEtat={(etat) => (dernier = etat)} />);
-    await screen.findByText(contenu.consignes[0]!.texte);
+    await attendreLaScene();
 
     // Atteindre la consigne à plusieurs cibles, dans l'ordre imposé.
     for (const consigne of contenu.consignes) {
@@ -331,7 +357,7 @@ describe('MoteurColorie — désordre de rendu', () => {
 
   it('les godets restent tous disponibles : le nuancier n’est jamais restreint à la consigne', async () => {
     render(<Harnais />);
-    await screen.findByText(contenu.consignes[0]!.texte);
+    await attendreLaScene();
     const nuancier = document.querySelectorAll('[data-godet]');
     expect(nuancier.length).toBe(contenu.nuancierAutorise.length);
     for (const element of nuancier) {
@@ -341,7 +367,7 @@ describe('MoteurColorie — désordre de rendu', () => {
 
   it('chaque godet porte un libellé accessible — a11y, annexe T § T5', async () => {
     render(<Harnais />);
-    await screen.findByText(contenu.consignes[0]!.texte);
+    await attendreLaScene();
     for (const couleur of contenu.nuancierAutorise) {
       const element = godet(couleur);
       const libelle =
@@ -376,14 +402,14 @@ async function attendreDecorReel(): Promise<void> {
 describe('MoteurColorie — le décor réel', () => {
   it('monte bien le décor déclaratif, et non le repli', async () => {
     render(<Harnais />);
-    await screen.findByText(contenu.consignes[0]!.texte);
+    await attendreLaScene();
     await attendreDecorReel();
   });
 
   it('l’erreur fait osciller la région SUR LE DÉCOR RÉEL — D16, contrat § 5.6', async () => {
     const utilisateur = userEvent.setup();
     render(<Harnais />);
-    await screen.findByText(contenu.consignes[0]!.texte);
+    await attendreLaScene();
     await attendreDecorReel();
 
     await utilisateur.click(godet(couleurFausse));
@@ -399,7 +425,7 @@ describe('MoteurColorie — le décor réel', () => {
   it('le décor réel s’annonce actionnable au clavier ET répond à Entrée', async () => {
     const utilisateur = userEvent.setup();
     render(<Harnais />);
-    await screen.findByText(contenu.consignes[0]!.texte);
+    await attendreLaScene();
     await attendreDecorReel();
 
     await utilisateur.click(godet(premiereCible.couleur));
@@ -417,7 +443,7 @@ describe('MoteurColorie — le décor réel', () => {
   it('la barre d’espace peint aussi, et l’événement est consommé', async () => {
     const utilisateur = userEvent.setup();
     render(<Harnais />);
-    await screen.findByText(contenu.consignes[0]!.texte);
+    await attendreLaScene();
     await attendreDecorReel();
 
     await utilisateur.click(godet(premiereCible.couleur));

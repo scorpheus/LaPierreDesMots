@@ -14,7 +14,7 @@
 import { useCallback, useMemo } from 'react';
 import type { ReactElement, ReactNode } from 'react';
 import type { CouleurColoriage, NiveauAide } from '@pierre/partage';
-import { hexDeCouleur, normaliserTexte } from '@pierre/partage';
+import { hexDeCouleur } from '@pierre/partage';
 import type { ConsigneColorie } from '@pierre/partage';
 
 /** Cibles tactiles ≥ 64 px (v2 § 8, R16). 72 px laisse de la marge au bord de l'écran. */
@@ -77,20 +77,20 @@ const STYLES_PALETTE = `
 `;
 
 /**
- * Surligne les mots-clés de la consigne, au palier `indice` seulement.
- * La comparaison passe par `normaliserTexte` : « maîtresse » doit reconnaître
- * « maitresse », et l'apostrophe typographique ne doit pas casser l'appariement.
+ * Les mots-clés de la consigne courante, SEULS — au palier `indice`.
+ *
+ * ⚠ NE REND PLUS LA PHRASE ENTIÈRE (R49, arbitrage du père du 2026-08-08 : « la phrase est en
+ * haut et en bas, il y a doublon »). `EcranNoeud` porte déjà `consigne.texte` dans sa barre
+ * d'en-tête ; reconstruire la même phrase ici — même surlignée — resterait le même doublon pour
+ * un enfant qui déchiffre. Cette liste ne montre que le SOUS-ENSEMBLE `motsCles`, dans l'ordre
+ * du contenu : c'est une information que la barre d'en-tête ne donne pas, jamais une répétition
+ * de ce qu'elle donne déjà.
  */
-function surlignerMotsCles(texte: string, motsCles: readonly string[]): ReactNode {
-  if (motsCles.length === 0) return texte;
-  const cles = new Set(motsCles.map((mot) => normaliserTexte(mot)));
-  const morceaux = texte.split(/(\s+)/);
-  return morceaux.map((morceau, index) => {
-    const nu = normaliserTexte(morceau.replace(/[.,;:!?«»"()]/g, ''));
-    const cle = `${String(index)}-${morceau}`;
-    if (nu.length > 0 && cles.has(nu)) return <mark key={cle}>{morceau}</mark>;
-    return <span key={cle}>{morceau}</span>;
-  });
+function motsClesEnIndice(motsCles: readonly string[]): ReactNode {
+  if (motsCles.length === 0) return null;
+  return motsCles.map((mot, index) => (
+    <mark key={`${String(index)}-${mot}`}>{mot}</mark>
+  ));
 }
 
 export interface ProprietesPaletteConsigne {
@@ -163,9 +163,32 @@ export function PaletteConsigne(proprietes: ProprietesPaletteConsigne): ReactEle
             data-consigne-etat={etat}
             data-forme={consigne.forme}
             aria-current={etat === 'courante' ? 'step' : undefined}
+            // ── LA CONSIGNE COURANTE N'EST PLUS RÉPÉTÉE ICI — arbitrage du père, R49 ──────────
+            //
+            // « la phrase est en haut et en bas, il y a doublon […] lire les phrases c'est
+            // normal ». `EcranNoeud` porte déjà `consigne.texte` dans sa barre d'en-tête (le
+            // seul endroit qui connaît `<idExercice>/<idConsigne>` et peut donc porter le
+            // bouton « Écouter » — l'arbitrage déjà rendu pour le bouton d'écoute, repris ici
+            // mot pour mot pour le texte). Ce composant ne le redit plus — ni même surlignée :
+            // une phrase reconstruite avec des `<mark>` reste la MÊME phrase pour un enfant qui
+            // déchiffre.
+            //
+            // Ce qui reste PROPRE à cette ligne, et qui n'existe nulle part ailleurs : la
+            // TRACE des consignes déjà faites et à venir (« faite »/« à-venir », en dessous),
+            // et — pour la consigne courante seulement, au palier `indice` — les MOTS-CLÉS
+            // SEULS (pas la phrase), qu'aucun autre endroit de l'écran ne montre.
+            aria-label={
+              etat === 'courante'
+                ? niveauAide === 'aucune'
+                  ? 'Consigne en cours — lue en haut de l’écran'
+                  : `Indice — mots-clés : ${consigne.motsCles.join(', ')}`
+                : undefined
+            }
           >
-            {etat === 'courante' && niveauAide !== 'aucune'
-              ? surlignerMotsCles(consigne.texte, consigne.motsCles)
+            {etat === 'courante'
+              ? niveauAide !== 'aucune' && consigne.motsCles.length > 0
+                ? motsClesEnIndice(consigne.motsCles)
+                : null
               : consigne.texte}
           </li>
         ))}

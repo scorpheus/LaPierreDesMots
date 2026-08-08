@@ -15,7 +15,7 @@
       "consignes": [
         {
           "id": "c1",
-          "texte": "Range les fanions pour lire : le chat est noir.",
+          "texte": "Touche les fanions dans l’ordre.",
           "forme": "imperative",
           "audio": null,
           "phrase": "Le chat est noir.",
@@ -24,7 +24,7 @@
         },
         {
           "id": "c2",
-          "texte": "Range les fanions pour lire : les fleurs sont roses.",
+          "texte": "Touche les fanions dans l’ordre.",
           "forme": "imperative",
           "audio": null,
           "phrase": "Les fleurs sont roses.",

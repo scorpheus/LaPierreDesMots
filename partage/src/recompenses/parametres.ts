@@ -18,11 +18,13 @@
 import { ErreurPierre } from '../erreurs.js';
 import type { NatureRecompense, SeuilsCascade } from './types.js';
 
-/** Les quatre natures de `NatureRecompense`, en valeur : la validation en a besoin. */
+/**
+ * Les trois natures de `NatureRecompense`, en valeur : la validation en a besoin.
+ * `'objet-campement'` retiré par le lot A1 — voir `types.ts`, aucun palier ne peut le produire.
+ */
 const NATURES: readonly NatureRecompense[] = [
   'etoile',
   'forme-gobi',
-  'objet-campement',
   'zone-recoloriee',
 ];
 

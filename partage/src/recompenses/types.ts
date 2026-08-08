@@ -19,8 +19,18 @@ export type CodePalier = 'etoile' | 'intermediaire' | 'rare';
 /**
  * Ce que rapporte le palier. `rare` est une IMAGE, ou son équivalent (D25, point 2) :
  * « une portion de monde qui reprend ses couleurs — quelque chose qu'il peut montrer ».
+ *
+ * `'objet-campement'` RETIRÉ par le lot A1 (R31, feuille-de-route § 2 point 4). C'était un
+ * énumérant sans émetteur : la cascade n'a que deux natures configurables
+ * (`natureIntermediaire`, `natureRare`), et les deux sont déjà prises par `forme-gobi` et
+ * `zone-recoloriee` — les seules exigées par D25 (« étoile → tampon spécial → image ») et par
+ * ce même lot (« le palier intermédiaire attribue vraiment une forme… et le palier rare
+ * recolorie vraiment »). Aucun troisième palier n'existe pour l'accueillir, et lui en inventer
+ * un serait une décision de jeu que ce lot n'a pas mandat de prendre. Un énumérant qu'aucun
+ * palier ne peut produire ne survit pas (CLAUDE.md, « le nom, sa casse de switch, sa couleur et
+ * sa colonne disparaissent »).
  */
-export type NatureRecompense = 'etoile' | 'forme-gobi' | 'objet-campement' | 'zone-recoloriee';
+export type NatureRecompense = 'etoile' | 'forme-gobi' | 'zone-recoloriee';
 
 export interface SeuilsCascade {
   /** ~5 à l'école. Déclaré en données (C2), jamais en dur. */

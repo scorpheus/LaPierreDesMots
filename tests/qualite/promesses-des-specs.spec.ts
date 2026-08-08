@@ -144,7 +144,8 @@ const sansCommentaires = (source: string): string =>
   source.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/^\s*\/\/.*$/gm, ' ');
 
 /** Le source du moteur côté client, commentaires retirés. */
-function sourceDuMoteur(code: string): string {
+function sourceDuMoteur(code: string, fabriquee?: string): string {
+  if (fabriquee !== undefined) return sansCommentaires(fabriquee);
   const dossier = cheminDepot(`client/src/moteurs/${code}`);
   let entier = '';
   for (const fichier of readdirSync(dossier)) {
@@ -158,9 +159,9 @@ function sourceDuMoteur(code: string): string {
 }
 
 /** Les gestes promis par les specs à ce moteur, et qui manquent au code. */
-function gestesManquants(promesse: PromesseDesSpecs): readonly string[] {
+function gestesManquants(promesse: PromesseDesSpecs, sourceFabriquee?: string): readonly string[] {
   const texte = `${promesse.mecanique} ${promesse.habillages}`;
-  const source = sourceDuMoteur(promesse.moteur);
+  const source = sourceDuMoteur(promesse.moteur, sourceFabriquee);
   return GESTES.filter((g) => g.promis.test(texte) && !g.preuve.test(source)).map((g) => g.nom);
 }
 
@@ -179,9 +180,9 @@ interface RenduMesure {
  * scène d'une icône. `rangeesDeBoutons` : un conteneur qui met ses enfants en `flex-wrap`,
  * c'est-à-dire la rangée de boutons de R36.
  */
-async function mesurerLeRendu(page: Page): Promise<RenduMesure> {
-  return page.evaluate(() => {
-    const hote = document.querySelector('[data-moteur]') ?? document.body;
+async function mesurerLeRendu(page: Page, selecteur = '[data-moteur]'): Promise<RenduMesure> {
+  return page.evaluate((ou) => {
+    const hote = document.querySelector(ou) ?? document.body;
     let svgHabites = 0;
     for (const svg of hote.querySelectorAll('svg')) {
       if (svg.querySelectorAll('path, circle, rect, polygon, polyline, ellipse, image, g').length >= 4) {
@@ -200,7 +201,7 @@ async function mesurerLeRendu(page: Page): Promise<RenduMesure> {
       rangeesDeBoutons,
       prises: hote.querySelectorAll('button, [role="button"]').length,
     };
-  });
+  }, selecteur);
 }
 
 const PROMESSES = promessesDesSpecs();
@@ -231,28 +232,103 @@ test.describe('Q6 — chaque moteur rend ce que les specs lui promettent', () =>
     }
   });
 
-  test('CONTRÔLE POSITIF — `chemin` est signalé aujourd’hui', async ({ page }) => {
-    // Le contrôle exigé par le § 4 Q6 : « sauts de nénuphars » contre une rangée de boutons.
-    // Le jour où C2 dessinera le plateau, ce cas échouera — et il faudra alors le remplacer
-    // par un témoin vivant. Un contrôle positif qui ne mord plus est un instrument aveugle.
-    const promesse = PROMESSES.find((p) => p.moteur === 'chemin');
-    expect(promesse, '`chemin` a disparu de la table des specs § 5').toBeDefined();
-    const noeud = premierNoeud('chemin');
-    expect(noeud, 'aucun nœud livré n’emploie `chemin`').not.toBeNull();
-
+  test('CONTRÔLE POSITIF — un moteur FABRIQUÉ sans scène est signalé, un autre avec scène ne l’est pas', async ({
+    page,
+  }) => {
+    // ── POURQUOI UN TÉMOIN FABRIQUÉ, ET PLUS `chemin` ──────────────────────────────────────
+    //
+    // L'ancien contrôle exigeait que `chemin` soit signalé « aujourd'hui » : 0 svg habité,
+    // une rangée de boutons, la promesse « sauts de nénuphars » non tenue. **Le plateau a été
+    // livré cette nuit**, et le contrôle est tombé — ce fichier l'annonçait : « soit C2 a livré
+    // le plateau, alors ce contrôle est à remplacer ».
+    //
+    // C'est la quatrième fois de la campagne qu'un contrôle ancré sur un défaut RÉEL meurt de
+    // sa réparation (Q1, Q2, Q4, puis celui-ci). On fabrique donc les deux cas — une rangée de
+    // boutons sans scène, et une scène habitée — et on les mesure comme n'importe quel moteur.
+    // Il en reste à réparer ; ce contrôle-ci ne mourra pas avec eux.
     await preparer(page);
-    await entrerDansLeNoeud(page, noeud!);
-    const rendu = await mesurerLeRendu(page);
+    await entrerDansLeNoeud(page, premierNoeud(PROMESSES[0]!.moteur)!);
+
+    await page.evaluate(() => {
+      const sansScene = document.createElement('div');
+      sansScene.setAttribute('data-qa-temoin', 'sans-scene');
+      // La rangée est un DESCENDANT de l'hôte, pas l'hôte lui-même : `mesurerLeRendu` balaie
+      // `hote.querySelectorAll('*')`, donc un hôte qui serait sa propre rangée passerait
+      // inaperçu. Le témoin doit reproduire la forme réelle — un moteur qui CONTIENT sa rangée.
+      const rangee = document.createElement('div');
+      rangee.style.cssText = 'display:flex;flex-wrap:wrap';
+      for (let rang = 0; rang < 4; rang += 1) {
+        const bouton = document.createElement('button');
+        bouton.type = 'button';
+        bouton.textContent = `mot ${String(rang)}`;
+        rangee.append(bouton);
+      }
+      sansScene.append(rangee);
+      const avecScene = document.createElement('div');
+      avecScene.setAttribute('data-qa-temoin', 'avec-scene');
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      for (let rang = 0; rang < 5; rang += 1) {
+        svg.append(document.createElementNS('http://www.w3.org/2000/svg', 'path'));
+      }
+      avecScene.append(svg);
+      document.body.append(sansScene, avecScene);
+    });
+
+    const sansScene = await mesurerLeRendu(page, '[data-qa-temoin="sans-scene"]');
+    const avecScene = await mesurerLeRendu(page, '[data-qa-temoin="avec-scene"]');
+    const reelAvant = await mesurerLeRendu(page);
+
+    await page.evaluate(() => {
+      for (const temoin of document.querySelectorAll('[data-qa-temoin]')) temoin.remove();
+    });
+    const reelApres = await mesurerLeRendu(page);
+
     console.log(
-      `[Q6] contrôle positif — chemin : ${String(rendu.svgHabites)} svg habité(s), ` +
-        `${String(rendu.rangeesDeBoutons)} rangée(s) flex-wrap, ${String(rendu.prises)} prises.`,
+      `[Q6] contrôle positif — témoin SANS scène : ${String(sansScene.svgHabites)} svg, ` +
+        `${String(sansScene.rangeesDeBoutons)} rangée(s) · témoin AVEC scène : ` +
+        `${String(avecScene.svgHabites)} svg`,
     );
     expect(
-      rendu.svgHabites,
-      'Q6 ne retrouve plus le défaut de référence : `chemin` monterait désormais une scène. ' +
-        'Soit C2 a livré le plateau — alors ce contrôle est à remplacer —, soit la mesure de ' +
-        'la scène est devenue aveugle.',
+      sansScene.svgHabites,
+      'une rangée de boutons sans le moindre `<svg>` est comptée comme une scène : la mesure ' +
+        'ne distingue plus rien, et tout vert de ce fichier serait sans valeur.',
     ).toBe(0);
+    expect(
+      sansScene.rangeesDeBoutons,
+      'la rangée `flex-wrap` fabriquée n’est pas vue : c’est pourtant la signature exacte de R36',
+    ).toBeGreaterThanOrEqual(1);
+    expect(
+      avecScene.svgHabites,
+      'un `<svg>` de cinq formes n’est pas compté comme une scène : la mesure accuserait alors ' +
+        'les quatorze moteurs, et un rapport de faux positifs ne se lit pas.',
+    ).toBeGreaterThanOrEqual(1);
+    expect(
+      reelApres,
+      'les témoins fabriqués ont changé la mesure réelle : la mesure laisse sa propre trace.',
+    ).toEqual(reelAvant);
+
+    // ── ET LE VOLET STATIQUE, fabriqué lui aussi ───────────────────────────────────────────
+    const promesseFabriquee = {
+      moteur: PROMESSES[0]!.moteur,
+      mecanique: 'Faire glisser des blocs pour former un mot',
+      habillages: 'un ponton',
+    };
+    const sansGeste = gestesManquants(promesseFabriquee, 'export function Faux() { return null; }');
+    const avecGeste = gestesManquants(promesseFabriquee, 'onPointerDown={() => {}} useDraggable()');
+    console.log(
+      `[Q6] contrôle positif — promesse « glisser » : source muette → ${sansGeste.join(',') || '—'} · ` +
+        `source gesticulante → ${avecGeste.join(',') || '—'}`,
+    );
+    expect(
+      sansGeste,
+      'une promesse « faire glisser » confrontée à un source qui ne porte aucun gestionnaire ' +
+        'ne rend rien : le volet statique est aveugle.',
+    ).toContain('glisser');
+    expect(
+      avecGeste,
+      'un source qui porte `onPointerDown` et `useDraggable` est quand même accusé de ne pas ' +
+        'savoir glisser : le volet statique accuse à tort.',
+    ).not.toContain('glisser');
   });
 
   for (const promesse of PROMESSES) {

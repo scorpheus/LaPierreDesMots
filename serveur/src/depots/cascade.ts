@@ -17,10 +17,17 @@
  * a la meme milliseconde, ce que l'horloge figee des tests produit systematiquement.
  */
 
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+
 import type { DatabaseSync } from 'node:sqlite';
 
-import type { EtatCascade, Horodatage, NombreEtoiles, SeuilsCascade } from '@pierre/partage';
-import { ETAT_CASCADE_VIDE, appliquerEtoiles } from '@pierre/partage/recompenses';
+import type {
+  EtatCascade, GainCascade, Horodatage, NombreEtoiles, SeuilsCascade
+} from '@pierre/partage';
+import { ETAT_CASCADE_VIDE, appliquerEtoiles, lireSeuilsCascade } from '@pierre/partage/recompenses';
+
+import { RACINE_DEPOT } from '../configuration.js';
 
 interface LigneCascade {
   readonly etoiles_total: number;
@@ -64,6 +71,36 @@ ON CONFLICT (profil_id) DO UPDATE SET
 `;
 
 /**
+ * Le fichier des seuils de la cascade — seul endroit ou ils vivent (D25, convention C2).
+ *
+ * Lot A1 (R31) : jusqu'ici, seul le CLIENT les chargeait (`client/src/etat/services.ts`), pour
+ * calculer la cascade lui-meme. Le serveur doit desormais faire ce calcul dans la transaction du
+ * POST — il lui faut donc sa propre lecture, sur le meme fichier, avec la meme discipline que
+ * `chargerParametresPedagogie` (`depots/maitrise.ts`) : lu et valide une fois par chemin, mis en
+ * cache, et `lireSeuilsCascade` LEVE plutot que de completer un parametre manquant.
+ */
+export const CHEMIN_PARAMETRES_RECOMPENSES = path.join(
+  RACINE_DEPOT,
+  'contenu',
+  'referentiel',
+  'parametres-recompenses.json'
+);
+
+const CACHE_SEUILS = new Map<string, SeuilsCascade>();
+
+export function chargerSeuilsCascade(
+  chemin: string = CHEMIN_PARAMETRES_RECOMPENSES
+): SeuilsCascade {
+  const memorise = CACHE_SEUILS.get(chemin);
+  if (memorise !== undefined) {
+    return memorise;
+  }
+  const seuils = lireSeuilsCascade(JSON.parse(readFileSync(chemin, 'utf8')));
+  CACHE_SEUILS.set(chemin, seuils);
+  return seuils;
+}
+
+/**
  * L'etat de cascade d'un profil. Un profil qui n'a rien joue rend `ETAT_CASCADE_VIDE` plutot
  * que `null` : il n'existe pas d'enfant « sans cascade », seulement un enfant qui commence.
  */
@@ -87,11 +124,31 @@ function ecrire(base: DatabaseSync, profilId: string, etat: EtatCascade): void {
 }
 
 /**
- * Chemin incremental. A appeler dans la MEME transaction que l'insertion de la tentative,
- * exactement comme `appliquerTentativeALaProgression`.
+ * Chemin incremental, RICHE. A appeler dans la MEME transaction que l'insertion de la
+ * tentative, exactement comme `appliquerTentativeALaProgression`.
  *
- * Rend le gain, pour que l'appelant sache quels paliers viennent d'etre franchis sans
- * relire la table.
+ * Rend le `GainCascade` COMPLET (etat, paliers franchis, recompenses, jauges) — pas seulement
+ * l'etat qui en resulte. Lot A1 (R31) : `depots/tentatives.ts` en a besoin pour savoir QUELS
+ * paliers viennent d'etre franchis, afin d'attribuer une vraie forme de Gobi au palier
+ * intermediaire (`enregistrerFormeGobi`, qui existait deja et n'etait appelee par personne), et
+ * pour rendre au client la meme richesse que celle qu'il calculait lui-meme avant ce lot.
+ */
+export function appliquerTentativeALaCascadeAvecGain(
+  base: DatabaseSync,
+  profilId: string,
+  etoiles: NombreEtoiles,
+  seuils: SeuilsCascade,
+  termineLe: Horodatage
+): GainCascade {
+  const gain = appliquerEtoiles(lireCascade(base, profilId), etoiles, seuils, termineLe);
+  ecrire(base, profilId, gain.etat);
+  return gain;
+}
+
+/**
+ * Chemin incremental, comme ci-dessus, mais ne rend que l'ETAT — la forme que
+ * `tests/unitaires/cascade.test.ts` attend depuis L2-A. INCHANGEE par le lot A1 : elle delegue
+ * simplement a `appliquerTentativeALaCascadeAvecGain`, rien de son comportement ne bouge.
  */
 export function appliquerTentativeALaCascade(
   base: DatabaseSync,
@@ -100,9 +157,7 @@ export function appliquerTentativeALaCascade(
   seuils: SeuilsCascade,
   termineLe: Horodatage
 ): EtatCascade {
-  const gain = appliquerEtoiles(lireCascade(base, profilId), etoiles, seuils, termineLe);
-  ecrire(base, profilId, gain.etat);
-  return gain.etat;
+  return appliquerTentativeALaCascadeAvecGain(base, profilId, etoiles, seuils, termineLe).etat;
 }
 
 /**

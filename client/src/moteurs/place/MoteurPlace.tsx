@@ -90,7 +90,6 @@ export function MoteurPlace(
   }, [emettre]);
 
   const etatConsigne = etat.consignes[etat.indexConsigne];
-  const consigne = contenu.consignes[etat.indexConsigne];
 
   // --- la relecture automatique, avec son quota ----------------------------
   const refRelectures = useRef<{ consigne: string; faites: number }>({ consigne: '', faites: 0 });
@@ -186,10 +185,13 @@ export function MoteurPlace(
         // bat la feuille — c'est précisément ce qui rendait la première correction inerte.
         style={{ display: 'flex', flexDirection: 'column', gap: '1rem', blockSize: '100%', minBlockSize: 0 }}
       >
-        <p data-consigne-texte="oui" role="status" aria-live="polite">
-          {consigne?.texte ?? ''}
-        </p>
-
+        {/* R49 (le père, 2026-08-07 : « la phrase est en haut et en bas, il y a doublon ») —
+            la consigne était redite ici ET dans l'en-tête d'`EcranNoeud`, seul propriétaire du
+            `BoutonEcouter`. La ligne qui la portait (`data-consigne-texte`) est retirée : ce
+            moteur n'a pas de meilleur usage à lui donner, contrairement à `phrase` qui y a mis
+            la phrase en train de se construire. L'exigence d'AFFICHAGE n'a rien perdu — elle
+            vit désormais dans `tests/composants/EcranNoeud.test.tsx`. La scène récupère
+            l'espace : un enfant de plus pour la réserve et les zones, avant le pied. */}
         <ScenePlace
           contenu={contenu}
           habillage={habillage}

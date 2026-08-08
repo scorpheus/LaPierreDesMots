@@ -1,42 +1,78 @@
 /**
- * `MoteurGrave` — le composant hôte du moteur `grave`. Lot L2-E.
+ * `MoteurGrave` — le composant hôte du moteur `grave`. Lot L2-E, mise en scène portée depuis
+ * `phrase` (R51/R52) après la lecture du décor par le père.
  *
- * Il ne décide de RIEN. Toute la règle vit dans `moteurGrave` (paquet `partage`) ; ce
- * composant fait quatre choses et pas une de plus : traduire un geste en `ActionGrave`,
- * faire battre l'horloge du moteur, déclencher le retour sensoriel, et donner à voir l'état.
+ * Il ne décide de RIEN de la RÈGLE. Toute la règle vit dans `moteurGrave` (paquet `partage`) ;
+ * ce composant traduit un geste en `ActionGrave`, fait battre l'horloge, déclenche le retour
+ * sensoriel, et donne à voir l'état.
  *
- * TROIS INVARIANTS DE RENDU, opposables en revue :
- *   - **aucun `data-etat="echec"` n'est émis ici, ni ailleurs.** C'est la traduction mécanique
- *     de R14, et l'assertion centrale de `tests/e2e/cassecou.spec.ts` ;
- *   - **aucun rouge sur un refus** : la cible oscille, elle ne se colore pas ;
- *   - **toute cible fait au moins 64 px**, avec 24 px de tolérance (R16) — d'où `CIBLE_PX`.
+ * ══════════════════════════════════════════════════════════════════════════════════════════════
+ * CE QUI A CHANGÉ, ET POURQUOI
  *
- * Le son, la vibration et les particules passent **tous** par `services.retour` (L2-A) : un
- * composant qui appellerait `FournisseurAudio` directement obligerait à réécrire la
- * dégradation par `prefers-reduced-motion` à chaque site d'appel, et un seul oubli la
- * casserait (contrat § 4.1).
+ * Avant ce lot, le clavier était une rangée de boutons en `flexWrap`, sur un fond vide : aucun
+ * décor, aucune récompense visuelle à mesure que les trous se remplissent. `phrase` a établi la
+ * règle (R52, v2 lignes 70 et 79) : le décor COUVRE la zone de jeu, il se RALLUME à mesure que
+ * l'exercice avance, et ce qu'on touche est posé DESSUS, à des emplacements DÉRIVÉS.
+ *
+ * Deux populations, deux dérivations, sur le MÊME jeu de régions (`client/src/moteurs/eclair/
+ * mise-en-scene.ts`, qui ne connaît ni clavier ni trou) :
+ *   1. **le clavier** — les touches offertes sont CONSTANTES du début à la fin de l'exercice
+ *      (une lettre peut servir à plusieurs trous), donc une seule dérivation, calculée une fois,
+ *      donne à chaque touche une place stable ;
+ *   2. **les trous** — un par consigne, dans l'ordre des consignes, en cascade comme les mots de
+ *      `phrase` : c'est cette cascade, croisée avec `etat.acquis`, qui dit quelles régions se
+ *      rallument. Rien n'y est posé visuellement : le trou vit dans le mot affiché, qui reste
+ *      dans la bande de lecture, immobile.
+ *
+ * ── LA CASE À TROUS RESTE DANS LE CHAMP DE LECTURE ────────────────────────────────────────────
+ * « Le décor s'agite, le texte jamais » (v2 § 9.3). Le mot à compléter est ce qu'il y a de plus
+ * précisément à déchiffrer dans ce moteur ; il reste donc dans la bande statique du bas, jamais
+ * sur le décor animé.
+ *
+ * ── LA CONSIGNE N'EST PLUS RÉPÉTÉE ICI ────────────────────────────────────────────────────────
+ * R49 : `EcranNoeud` affiche déjà `consigne.texte` dans sa barre de consigne (il lit
+ * `jeu.contenu.consignes[].texte`, générique à tous les moteurs). La répéter ici faisait lire
+ * deux fois la même ligne à un enfant qui déchiffre — « il cherche la différence entre les
+ * deux ». Ce moteur ne montre donc que ce qu'AUCUN autre endroit ne montre : le mot à trous.
+ *
+ * TROIS INVARIANTS DE RENDU, inchangés et opposables :
+ *   - **aucun `data-etat="echec"` n'est émis ici, ni ailleurs** (R14) ;
+ *   - **aucun rouge sur un refus** : la touche oscille, elle ne se colore pas ;
+ *   - **toute cible fait au moins 64 px** — la classe `.cible` le pose, jamais un nombre recopié.
  */
 
-import { useCallback, useEffect, useRef } from 'react';
-import type { ReactElement } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
+import type { CSSProperties, ReactElement } from 'react';
 import type { ActionGrave, ContenuGrave, EtatGrave } from '@pierre/partage';
-import { ZoneDeLecture } from '../../lecture/ZoneDeLecture.js';
+
+import { SceneDecor } from '../../habillages/SceneDecor.js';
+import { ZoneDeLecture, styleDeLecture, useReglagesLecture } from '../../lecture/ZoneDeLecture.js';
 import type { ProprietesMoteur } from '../types.js';
+import {
+  cadreJeuEtBornes,
+  mesurerTexte,
+  planifierCascade,
+  regionsAllumeesDepuisAcquis,
+  regionsColoriables,
+  styleZoneDeJeu,
+  useDerniereAllumee,
+  useMesureCadre,
+} from '../eclair/mise-en-scene.js';
+import { PorteurPose } from '../eclair/porteur-pose.js';
 
 /** Cadence du `battementHorloge`. Le moteur ne connaît aucun `setTimeout` : c'est ici. */
 const PERIODE_BATTEMENT_MS = 1000;
 
-/** R16 : 64 px de côté au minimum, 24 px de tolérance obtenus par l'écart entre cibles. */
-const CIBLE_PX = 64;
-const TOLERANCE_PX = 24;
-
-const STYLE_CIBLE = {
-  minWidth: CIBLE_PX,
-  minHeight: CIBLE_PX,
-  margin: TOLERANCE_PX / 2,
-  fontSize: '1.25rem',
-  cursor: 'pointer',
-} as const;
+/**
+ * CE QUE LE REFUS DIT — jamais le graphème attendu, sans quoi le refus deviendrait une aide
+ * gratuite et il n'y aurait plus rien à déchiffrer. Même discipline que `MESSAGES_DE_REFUS` de
+ * `phrase` : sans « tu », sans « non », sans « erreur ».
+ */
+const MESSAGES_DE_REFUS: Readonly<Record<string, string>> = {
+  'lettre-fausse': 'On cherche une autre lettre pour cette case-là.',
+  'trous-remplis': 'Ce mot est déjà complet.',
+  'lettre-hors-clavier': 'Cette lettre-là n’est pas sur le clavier.',
+};
 
 export function MoteurGrave(
   proprietes: ProprietesMoteur<ContenuGrave, EtatGrave, ActionGrave>,
@@ -54,10 +90,6 @@ export function MoteurGrave(
   }, [emettre]);
 
   // --- le retour sensoriel --------------------------------------------------
-  //
-  // La série est comptée ICI, pas dans le moteur : c'est une notion de PLAISIR, pas de règle
-  // (v2 § 8, D26 — « 2ᵉ bonne réponse = un demi-ton plus haut »). Le moteur reste pur, et le
-  // jour où la hauteur montante changera, aucune logique de jeu ne bougera.
   const serie = useRef(0);
   const nbAcquis = Object.keys(etat.acquis).length;
   const precedents = useRef(nbAcquis);
@@ -75,7 +107,6 @@ export function MoteurGrave(
   useEffect(() => {
     const marque = etat.dernierRefus === null ? 0 : etat.dernierRefus.instantMs;
     if (marque !== 0 && marque !== marqueRefus.current) {
-      // Refus : oscillation de 6 px et son NEUTRE. Aucune vibration, aucun rouge (§ 4.1).
       serie.current = 0;
       services.retour.reinitialiserSerie();
       void services.retour.depotRefuse();
@@ -83,7 +114,6 @@ export function MoteurGrave(
     marqueRefus.current = marque;
   }, [etat.dernierRefus, services]);
 
-  /** Mémorise le point du geste : c'est l'origine des particules et du balayage. */
   const noter = useCallback((evenement: { clientX: number; clientY: number }) => {
     origine.current = [evenement.clientX, evenement.clientY];
   }, []);
@@ -99,74 +129,186 @@ export function MoteurGrave(
   const etape = etat.etapes[etat.indexEtape];
   const consigne = contenu.consignes[etat.indexEtape] ?? null;
 
+  // --- la typographie de lecture ---------------------------------------------
+  const reglages = useReglagesLecture();
+  const styleLecture = useMemo(() => styleDeLecture(reglages), [reglages]);
+
+  // --- la mesure du cadre ------------------------------------------------------
+  const { racine, bande, cadre, hauteurBande } = useMesureCadre();
+  const { cadreJeu, bornes } = useMemo(() => cadreJeuEtBornes(cadre, hauteurBande), [cadre, hauteurBande]);
+
+  const regions = useMemo(() => regionsColoriables(habillage), [habillage]);
+  const centroideParRegion = useMemo(
+    () => new Map(regions.map((r) => [r.id, r.centroide] as const)),
+    [regions],
+  );
+
+  const mesurerLettre = useCallback(
+    (cle: string) => mesurerTexte(cle, reglages),
+    [reglages],
+  );
+
+  // --- le clavier : population CONSTANTE, une seule dérivation -----------------
+  const plansClavier = useMemo(
+    () =>
+      planifierCascade({
+        habillage,
+        listesParEtape: [contenu.clavier],
+        regions,
+        cadre: cadreJeu,
+        bornes,
+        mesurer: mesurerLettre,
+      }),
+    [habillage, contenu.clavier, regions, cadreJeu, bornes, mesurerLettre],
+  );
+  const emplacementsClavier = plansClavier[0]?.resultat.emplacements ?? [];
+
+  // --- les trous : cascade par consigne, pour la seule RECOLORATION ------------
+  const listesTrous = useMemo(
+    () => contenu.consignes.map((c) => c.trous.map((t) => t.id)),
+    [contenu.consignes],
+  );
+  const boiteTrou = useMemo(() => ({ largeur: 64, hauteur: 64 }), []);
+  const plansTrous = useMemo(
+    () =>
+      planifierCascade({
+        habillage,
+        listesParEtape: listesTrous,
+        regions,
+        cadre: cadreJeu,
+        bornes,
+        mesurer: () => boiteTrou,
+      }),
+    [habillage, listesTrous, regions, cadreJeu, bornes, boiteTrou],
+  );
+
+  const allumees = useMemo(
+    () => regionsAllumeesDepuisAcquis(plansTrous, etat.acquis, centroideParRegion),
+    [plansTrous, etat.acquis, centroideParRegion],
+  );
+  const derniere = useDerniereAllumee(allumees);
+
+  const lettreRefusee = etat.dernierRefus === null ? null : etat.dernierRefus.lettre;
+  const marqueRefusCourante = etat.dernierRefus === null ? 0 : etat.dernierRefus.instantMs;
+  const messageDeRefus =
+    etat.dernierRefus === null ? '' : (MESSAGES_DE_REFUS[etat.dernierRefus.motif] ?? '');
+
+  const motAffiche =
+    consigne === null
+      ? ''
+      : [...consigne.mot]
+          .map((caractere, rang) => {
+            const trou = consigne.trous.find((t) => t.position === rang);
+            if (trou === undefined) return caractere;
+            return etat.acquis[trou.id] ?? '_';
+          })
+          .join('');
+
   return (
     <div
+      ref={racine}
       data-moteur="grave"
       data-habillage={habillage.id}
       data-termine={etat.termineMs === null ? 'non' : 'oui'}
       data-aide={etat.niveauAide}
       data-etape={etape === undefined ? '' : etape.identifiant}
-      style={{ display: 'grid', gap: '1rem' }}
+      data-regions-allumees={String(allumees.length)}
+      style={{
+        position: 'relative',
+        blockSize: '100%',
+        minBlockSize: 0,
+        overflow: 'hidden',
+        borderRadius: 'var(--rayon-carte)',
+      }}
     >
-      {/* La consigne passe par `ZoneDeLecture` : c'est le SEUL composant qui affiche du
-          texte à déchiffrer (§ 5.1). Sans quoi « le décor s'agite, le texte jamais » ne
-          tiendrait qu'à la discipline de onze fichiers. */}
-      <ZoneDeLecture
-        texte={consigne === null ? '' : consigne.texte}
-        motsCles={consigne === null ? [] : consigne.motsCles}
-      />
-
-      <div data-plateau="mot">
-        <ZoneDeLecture
-          texte={
-            consigne === null
-              ? ''
-              : [...consigne.mot]
-                  .map((caractere, rang) => {
-                    const trou = consigne.trous.find((t) => t.position === rang);
-                    if (trou === undefined) return caractere;
-                    return etat.acquis[trou.id] ?? '_';
-                  })
-                  .join('')
-          }
-          motsCles={consigne === null ? [] : consigne.motsCles}
+      {/* ------------------------------------------------------------- le décor, en fond */}
+      <div style={styleZoneDeJeu(hauteurBande)}>
+        <SceneDecor
+          habillage={habillage}
+          allumees={allumees}
+          derniere={derniere}
+          animationsDesactivees={animationsDesactivees}
         />
       </div>
 
-      <div data-plateau="clavier" style={{ display: 'flex', flexWrap: 'wrap' }}>
-        {contenu.clavier.map((lettre) => (
-          <button
-            key={lettre}
-            type="button"
-            data-lettre={lettre}
-            style={STYLE_CIBLE}
-            onClick={(evenement) => {
-              jouer({ type: 'graver', lettre }, evenement);
-            }}
-          >
-            {lettre}
-          </button>
-        ))}
-      </div>
-      {/* ── LES DEUX CONTRÔLES SONT PORTÉS PAR L'ÉCRAN, PAS PAR LE MOTEUR (R10) ──────────────
-          Ce moteur rendait ici son propre « Écouter » et son propre « Gobi, aide-moi ». Les
-          deux étaient MUETS : leur `onClick` émettait une action et n'appelait jamais le
-          service de voix. Le père a tapé dessus et n'a rien eu — onze moteurs sur quatorze
-          faisaient pareil, alors que « tout est audible en un tap » n'est pas négociable.
-
-          `EcranNoeud` monte le vrai `BoutonEcouter` (qui joue le clip, et DISPARAÎT quand il
-          n'y en a pas — D42) et le vrai `<Gobi>`, qui porte la même prise `data-action="aide"`.
-          Un moteur ne peut pas héberger le vrai bouton d'écoute : il lui faudrait la clé
-          `<exercice>/<consigne>`, et `ProprietesMoteur` ne porte pas l'identifiant d'exercice.
-          Seul l'écran le connaît. */}
-
-      <p
-        role="status"
-        aria-live="polite"
-        data-animations={animationsDesactivees ? 'calmes' : 'vives'}
+      {/* ------------------------------------------------------- le clavier, posé dessus */}
+      <div
+        data-plateau="clavier"
+        style={{ ...styleZoneDeJeu(hauteurBande), zIndex: 1, pointerEvents: 'none' }}
       >
-        {etat.aide === null ? '' : (etat.aide.texte ?? '')}
-      </p>
+        {emplacementsClavier.map((emplacement) => {
+          const refusee = lettreRefusee === emplacement.cle;
+          const classes = ['cible'];
+          if (!animationsDesactivees && refusee) classes.push('oscillation');
+          return (
+            <PorteurPose key={emplacement.cle} x={emplacement.x} y={emplacement.y}>
+              <button
+                key={refusee ? `${emplacement.cle}-${String(marqueRefusCourante)}` : emplacement.cle}
+                type="button"
+                className={classes.join(' ')}
+                data-lettre={emplacement.cle}
+                style={{ ...styleLecture, pointerEvents: 'auto', whiteSpace: 'nowrap' } as CSSProperties}
+                onClick={(evenement) => {
+                  jouer({ type: 'graver', lettre: emplacement.cle }, evenement);
+                }}
+              >
+                {emplacement.cle}
+              </button>
+            </PorteurPose>
+          );
+        })}
+      </div>
+
+      {/* ------------------------------------------------------------ la bande de lecture
+          Le mot à trous : c'est ce qu'il y a de plus précis à déchiffrer, il reste donc
+          immobile, sur fond parchemin, jamais sur le décor qui s'agite. */}
+      <div
+        ref={bande}
+        data-plateau="mot"
+        style={{
+          position: 'absolute',
+          insetInlineStart: 0,
+          insetInlineEnd: 0,
+          insetBlockEnd: 0,
+          zIndex: 2,
+        }}
+      >
+        <ZoneDeLecture
+          texte={motAffiche}
+          motsCles={consigne === null ? [] : consigne.motsCles}
+          etiquette={consigne === null ? 'Le mot à compléter.' : `Le mot à compléter : ${consigne.mot}`}
+        />
+
+        <p
+          role="status"
+          aria-live="polite"
+          data-refus-texte={messageDeRefus === '' ? 'non' : 'oui'}
+          data-animations={animationsDesactivees ? 'calmes' : 'vives'}
+          style={{ ...styleLecture, margin: 0, minBlockSize: '1.5em' } as CSSProperties}
+        >
+          {messageDeRefus === '' ? (etat.aide === null ? '' : (etat.aide.texte ?? '')) : messageDeRefus}
+        </p>
+
+        <p
+          role="status"
+          aria-live="polite"
+          data-annonce="coloriage"
+          style={{
+            position: 'absolute',
+            inlineSize: 1,
+            blockSize: 1,
+            overflow: 'hidden',
+            clip: 'rect(0 0 0 0)',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {derniere === null
+            ? ''
+            : `${regions.find((r) => r.id === derniere.id)?.libelle ?? derniere.id} reprend ses couleurs.`}
+        </p>
+      </div>
+
+      {/* ── LES DEUX CONTRÔLES SONT PORTÉS PAR L'ÉCRAN, PAS PAR LE MOTEUR (R10) ────────────── */}
     </div>
   );
 }

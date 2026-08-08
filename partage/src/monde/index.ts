@@ -19,7 +19,8 @@ export type {
 
 export type { DocumentStadesGobi, FormeDeclaree } from './gobi.js';
 export {
-  ajouterForme, formesDuDocument, gobiInitial, prochainStade, stadeApresFormes, stadesDuDocument,
+  ajouterForme, formeActiveDe, formesDuDocument, gobiInitial, prochainStade, stadeApresFormes,
+  stadesDuDocument,
 } from './gobi.js';
 
 export type { DocumentCampement, ObjetDeclare } from './campement.js';

@@ -71,6 +71,7 @@ import {
   compagnonParRegion,
   compagnonsDuDocument,
   compagnonsDuProfil,
+  formeActiveDe,
   formesDuDocument,
   gobiInitial,
   ouvrirCeQuiDoitLEtre,
@@ -408,7 +409,15 @@ function ecrireStade(
   return { ...gobi, stade: (ligne?.stade_code ?? stade.code) as EtatGobi['stade'] };
 }
 
-/** L'etat de Gobi pour ce profil, stade recalcule et ecrit. */
+/**
+ * L'etat de Gobi pour ce profil, stade recalcule et ecrit.
+ *
+ * `formeActive` est une PROJECTION, exactement comme `stade` : recalculee depuis `formes` a
+ * chaque lecture, jamais stockee. Avant ce lot, ce champ ne valait jamais que `null`
+ * (`Docs/decision-aide-de-gobi.md`) — Gobi ne portait donc jamais le cristal que l'enfant venait
+ * de gagner. `formeActiveDe` (partage/monde/gobi.ts) retient la forme la plus RECENTE ; aucune
+ * colonne de plus n'est necessaire, `formes_gobi.obtenue_le` porte deja toute l'information.
+ */
 export function lireGobi(
   base: DatabaseSync,
   profilId: string,
@@ -420,10 +429,12 @@ export function lireGobi(
     .get(profilId) as unknown as { readonly stade_code: string } | undefined;
 
   const depart = gobiInitial(referentiel.stades);
+  const formes = lireFormes(base, profilId, referentiel);
   const gobi: EtatGobi = {
     ...depart,
     stade: (ligne?.stade_code ?? depart.stade) as EtatGobi['stade'],
-    formes: lireFormes(base, profilId, referentiel)
+    formes,
+    formeActive: formeActiveDe(formes)
   };
 
   return ecrireStade(base, profilId, gobi, referentiel, String(horodatage(horloge)));
@@ -452,10 +463,12 @@ export function enregistrerFormeGobi(
     .run(profilId, grapheme, quand);
 
   const declaree = referentiel.formes.find((forme) => forme.grapheme === grapheme);
+  const formesActuelles = lireFormes(base, profilId, referentiel);
   const courant: EtatGobi = {
     ...gobiInitial(referentiel.stades),
     stade: lireGobi(base, profilId, referentiel, horloge).stade,
-    formes: lireFormes(base, profilId, referentiel)
+    formes: formesActuelles,
+    formeActive: formeActiveDe(formesActuelles)
   };
 
   const apres =

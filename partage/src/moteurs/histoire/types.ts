@@ -62,6 +62,23 @@ export interface RefusHistoire {
 export interface EtatEtapeHistoire {
   /** `identifiant`, et non `id` : c'est le nom qu'`EtapeGenerique` (L2-C) impose. */
   readonly identifiant: IdConsigne;
+  /**
+   * L'ordre dans lequel les options sont OFFERTES à l'enfant — R32/R44.
+   *
+   * Le contenu range `options` avec la bonne réponse en tête : mesuré sur les 76 exercices
+   * livrés, 160 consignes sur 160 tapaient juste en choisissant toujours la première option. Le
+   * mélange est tiré **une seule fois, à la création de l'état**, par `Alea` — donc
+   * reproductible à la graine près, donc le rejeu (annexe T § T2) reste exact. Même mécanisme
+   * qu'`ordreOptions` d'`eclair` et qu'`ordreAffichage` de `phrase` : quatre moteurs portaient
+   * le même biais, et deux mécanismes pour une seule règle finissent par diverger (R8).
+   *
+   * Déclaré AVANT `restantes` : le garde Q4 (`tests/unitaires/melange-des-reponses.test.ts`)
+   * cherche l'ordre affiché en parcourant `Object.values(etatEtape)` et retient le PREMIER
+   * tableau d'identifiants dont le contenu trié égale celui des options présentées. `restantes`
+   * vaut `[reponse]` — un seul élément — donc il ne collisionne pas ici, mais la convention
+   * vaut pour les quatre moteurs et elle est gardée uniforme.
+   */
+  readonly ordreAffichage: readonly IdOptionHistoire[];
   /** Ce qu'il reste à faire sur cette étape. Vide = étape close. */
   readonly restantes: readonly string[];
   readonly nbErreurs: number;

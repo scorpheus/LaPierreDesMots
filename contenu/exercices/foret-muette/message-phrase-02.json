@@ -25,7 +25,7 @@
       "consignes": [
         {
           "id": "c1",
-          "texte": "Range les mots pour lire : mon chat est petit.",
+          "texte": "Touche les mots dans l’ordre.",
           "forme": "imperative",
           "audio": null,
           "phrase": "Mon chat est petit.",
@@ -44,7 +44,7 @@
         },
         {
           "id": "c2",
-          "texte": "Range les mots pour lire : ton rat a un nid.",
+          "texte": "Touche les mots dans l’ordre.",
           "forme": "imperative",
           "audio": null,
           "phrase": "Ton rat a un nid.",

@@ -299,7 +299,16 @@ export function EcranCoffre({
       </section>
 
       <section className="panneau" aria-label="Les objets du campement" data-collection-titre="objets">
+        {/* ── R40 — LE PICTOGRAMME SUIT L'OBJET, LA MIGRATION EST FINIE ──────────────────────
+            Même principe que l'étagère (R27, `Etagere.tsx:150`) : le butin a quitté le
+            campement pour vivre ici, et son pictogramme (`Butin.tsx:200`, 🎒) le suit — REPRIS
+            à l'identique, jamais réinventé, sinon deux pictogrammes pour un même objet sur
+            deux écrans se seraient mis à mentir. `campement-affordance.test.tsx` documentait
+            déjà la règle pour l'étagère ; elle vaut ici sans changer un mot. */}
         <h2 className="panneau-titre" style={{ fontSize: '1.5rem' }}>
+          <span aria-hidden="true" data-pictogramme="butin">
+            🎒
+          </span>
           Ce que tu as rapporté —{' '}
           {objets.filter((objet) => objet.placeLe !== null).length} sur {objets.length}
         </h2>

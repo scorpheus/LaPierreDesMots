@@ -27,6 +27,8 @@ import { enregistrerRoutesMonde } from '@serveur/routes/monde';
 import { enregistrerRoutesProfils } from '@serveur/routes/profils';
 import { enregistrerRoutesTentatives } from '@serveur/routes/tentatives';
 import { chargerReferentielMonde, enregistrerFormeGobi } from '@serveur/depots/monde';
+import { calculerEtoiles } from '@partage/etoiles';
+import { lireSeuilsCascade } from '@pierre/partage/recompenses';
 
 import { readdirSync } from 'node:fs';
 import { join } from 'node:path';
@@ -414,7 +416,39 @@ describe('étanchéité stricte entre profils — v2 § 11', () => {
     // Et le monde d'Alma, lui, n'a rien perdu au passage.
     const madameAlma = await lireMondeHttp(alma);
     expect(region(madameAlma, 'clairiere').pourcentageColorie).toBe(1);
-    expect(madameAlma.gobi.formes).toHaveLength(1);
+    // ── LE CHIFFRE EST RECALCULÉ, JAMAIS RECOPIÉ — et il a changé pour une bonne raison ────
+    //
+    // Cette assertion attendait **1**. Elle mesurait l'ancien monde, où la cascade n'atteignait
+    // jamais la base : seule l'injection manuelle d'`enregistrerFormeGobi`, deux lignes plus
+    // haut, comptait. Le lot A1 a branché la cascade, et `terminerClairiere` fait maintenant
+    // ce que fait un enfant : chaque nœud terminé donne ses étoiles, et chaque palier
+    // intermédiaire attribue une forme de Gobi.
+    //
+    // On DÉRIVE donc l'attendu des seuils livrés et du barème, plutôt que de figer un nombre
+    // qu'un recalibrage ferait mentir (« ces valeurs vivent en données parce qu'elles seront
+    // recalibrées », `parametres-recompenses.json`).
+    const seuils = lireSeuilsCascade(lireJson('contenu/referentiel/parametres-recompenses.json'));
+    const etoilesParNoeud = calculerEtoiles({
+      reussi: true,
+      nbErreurs: 0,
+      aideUtilisee: 'aucune',
+      dureeMs: 60_000,
+      etapes: []
+    });
+    const formesAttendues = Math.floor(
+      (noeudsDeLaClairiere().length * etoilesParNoeud) / seuils.etoilesParIntermediaire
+    );
+    // Le palier intermédiaire n'attribue une forme que s'il est réglé sur ça : si le
+    // référentiel change de nature, ce cas doit le dire au lieu de compter dans le vide.
+    expect(seuils.natureIntermediaire, 'le palier intermédiaire n’attribue plus de forme').toBe(
+      'forme-gobi'
+    );
+    expect(formesAttendues, 'aucun palier franchi : le cas ne mesurerait plus rien').toBeGreaterThan(
+      1
+    );
+    // L'injection manuelle ci-dessus porte `referentiel.formes[0]`, que la cascade a déjà
+    // attribuée : elle ne compte donc pas une seconde fois (les formes sont un ensemble).
+    expect(madameAlma.gobi.formes).toHaveLength(formesAttendues);
   });
 });
 

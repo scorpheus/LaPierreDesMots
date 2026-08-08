@@ -357,7 +357,10 @@ export function enregistrerRoutesTentatives(
     const corps: ReponseTentative = {
       deja: resultat.deja,
       tentative: resultat.tentative,
-      progression
+      progression,
+      // Lot A1 (R31) : le gain de la cascade de D25 vient du serveur, calcule et enregistre
+      // dans la meme transaction que la tentative — le client ne le recalcule plus.
+      gainCascade: resultat.gainCascade
     };
 
     return reponse.code(resultat.deja ? 200 : 201).send(corps);

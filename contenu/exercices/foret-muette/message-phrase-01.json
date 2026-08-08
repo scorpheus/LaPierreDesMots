@@ -25,7 +25,7 @@
       "consignes": [
         {
           "id": "c1",
-          "texte": "Range les mots pour lire : un ours est grand.",
+          "texte": "Touche les mots dans l’ordre.",
           "forme": "imperative",
           "audio": null,
           "phrase": "Un ours est grand.",
@@ -44,7 +44,7 @@
         },
         {
           "id": "c2",
-          "texte": "Range les mots pour lire : les oiseaux sont noirs.",
+          "texte": "Touche les mots dans l’ordre.",
           "forme": "imperative",
           "audio": null,
           "phrase": "Les oiseaux sont noirs.",

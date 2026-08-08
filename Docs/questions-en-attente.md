@@ -8404,3 +8404,55 @@ chaque exercice. Lot C4, **après V1**.
 **J3 → la visite dans la zone parent**, et élargie aux exercices : 29 pages + les 76 exercices, ces
 derniers par le chemin non journalisé de R30. C'est l'outil dont dépendent J2 et toute la revue de
 design. Lot V1, juste après A1.
+
+---
+
+## Le plafond des tests trompeurs — monté de 66 à 98 le 2026-08-08
+
+**Justification écrite, exigée par `scripts/qa/tests-trompeurs.mjs` : monter le cliquet en
+silence le rendrait inutile.**
+
+Mesuré ce matin, deux valeurs et leur écart :
+
+```
+avant la correction du masquage    92
+après                              98
+plafond en vigueur                 66
+```
+
+**Les 26 premiers** viennent de la nuit du 7 au 8 : sept gardes neuves et leurs bancs, qui
+impriment des chiffres sans toujours les asserter. Le commentaire du plafond réclamait de le
+re-geler avant le premier commit — le geste n'avait pas été fait.
+
+**Les 6 derniers sont des détections réelles que l'instrument effaçait lui-même.** Le masquage
+ignorait les littéraux d'expression régulière : une regex portant un guillemet — `/["\]/g` —
+faisait croire qu'une chaîne s'ouvrait, et blanchissait tout le reste du fichier. Ce qui suivait
+échappait à l'analyse. Le détecteur mesurait donc MOINS que la dette réelle, et son plafond
+rassurait d'autant.
+
+Le même défaut a produit un **faux bloquant** : `tests/e2e/parcours-aucun-geste-mort.spec.ts`
+déclaré « aucun `expect(` dans tout le fichier » alors qu'il en porte quatre. Le détecteur est
+branché en `pre-commit` ; le seul recours apparent était de le contourner, c'est-à-dire de
+désactiver la QA à cause d'un défaut de la QA.
+
+Corrigé, avec son contrôle positif et son contrôle négatif dans
+`tests/unitaires/tests-trompeurs-masquage.test.ts`. Preuve que le banc naît rouge, mesurée sur
+la version d'avant correction :
+
+```
+ANCIEN masquage sur le fichier accusé — assertions vues : 0 sur 4 réelles
+NOUVEAU                                                 : 4 sur 4
+```
+
+### Ce que 98 recouvre, et qui reste à faire
+
+| code | nombre | ce que c'est |
+|---|---:|---|
+| `CHIFFRE-JAMAIS-ASSERTE` | 64 | un chiffre imprimé au rapport et jamais asserté |
+| `FRACTION-NON-ASSERTEE` | 22 | deux comptes affichés côte à côte, aucune comparaison |
+| `MESSAGE-QUI-SURPROMET` | 9 | le message annonce une propriété plus forte que l'assertion |
+| `ASSERTION-TAUTOLOGIQUE` | 3 | l'attendu est recalculé depuis l'obtenu |
+
+**C'est une dette, pas un pardon.** Aucun test existant ne s'est dégradé : ce sont des tests
+neufs qui n'assertent pas ce qu'ils impriment. Le plafond redescend à chaque correction, et la
+commande imprime elle-même la valeur à recopier dès qu'elle mesure moins.

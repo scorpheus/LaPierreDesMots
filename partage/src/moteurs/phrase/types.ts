@@ -55,6 +55,29 @@ export interface RefusPhrase {
 export interface EtatEtapePhrase {
   /** `identifiant`, et non `id` : c'est le nom qu'`EtapeGenerique` (L2-C) impose. */
   readonly identifiant: IdConsigne;
+  /**
+   * L'ordre dans lequel les étiquettes sont OFFERTES à l'enfant — R44.
+   *
+   * Le contenu range `ordre` dans l'ordre de la RÉPONSE ; le rendre tel quel laissait gagner
+   * sans lire. Le mélange est tiré **une seule fois, à la création de l'état**, par `Alea` —
+   * donc reproductible à la graine près, donc le rejeu reste exact. C'est le même contrat que
+   * `ordreOptions` d'`eclair`, et c'est délibérément le même mécanisme : quatre autres moteurs
+   * portent le même biais, et deux mécanismes pour une seule règle finissent par diverger
+   * (c'est ce qui est arrivé aux deux listes de polices, R8).
+   *
+   * ── POURQUOI CE CHAMP EST DÉCLARÉ AVANT `restantes`, ET POURQUOI CE N'EST PAS COSMÉTIQUE ───
+   * Le garde Q4 (`tests/unitaires/melange-des-reponses.test.ts`) cherche l'ordre affiché en
+   * parcourant `Object.values(etatEtape)` et retient le PREMIER tableau d'identifiants dont le
+   * contenu trié égale celui des éléments présentés. Or `restantes` vaut `[...ordre]` à la
+   * création : il satisfait ce critère lui aussi, et il n'est pas mélangé. Déclaré après
+   * `restantes`, ce champ serait invisible au garde — et le mélange resterait « non mesuré »
+   * tout en existant.
+   *
+   * Le tri des clés est donc porteur de sens ici, ce qui est fragile. La levée d'ambiguïté
+   * durable appartient au garde — chercher un champ NOMMÉ plutôt qu'une forme — et elle est
+   * signalée à la campagne qui possède `tests/`.
+   */
+  readonly ordreAffichage: readonly IdEtiquette[];
   /** Ce qu'il reste à faire sur cette étape. Vide = étape close. */
   readonly restantes: readonly string[];
   readonly nbErreurs: number;

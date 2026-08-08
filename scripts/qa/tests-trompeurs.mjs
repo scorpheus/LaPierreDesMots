@@ -71,8 +71,26 @@ const CHEMIN_JSON = join(DOSSIER_QA, 'tests-trompeurs.json');
  *     npm run qa:trompeurs        # lire la ligne « avertissements » et la recopier ici
  *
  * La commande imprime elle-même la valeur à écrire dès qu'elle mesure moins que le plafond.
+ *
+ * ── RE-GELÉ À 98 LE 2026-08-08, ET C'EST UNE DETTE, PAS UN PARDON ───────────────────────
+ * Le geste que le paragraphe ci-dessus réclamait — re-geler avant le premier commit — n'avait
+ * jamais été fait. Mesuré ce matin, en deux temps :
+ *
+ *     avant la correction du masquage   92
+ *     après                             98
+ *
+ * Les 26 premiers viennent de la nuit du 7 au 8 : sept gardes neuves et leurs bancs, qui
+ * impriment des chiffres sans toujours les asserter. Les **6 derniers sont des détections
+ * réelles que le masquage cassé effaçait** — une regex portant un guillemet blanchissait la
+ * fin de son fichier, et tout ce qui suivait échappait à l'analyse. Le plafond montait donc
+ * moins vite que la dette, ce qui est le pire des deux mondes : un cliquet qui rassure.
+ *
+ * Aucun test existant ne s'est dégradé. Ce que 98 décrit reste du travail à faire :
+ * 64 `CHIFFRE-JAMAIS-ASSERTE`, 22 `FRACTION-NON-ASSERTEE`, 9 `MESSAGE-QUI-SURPROMET`,
+ * 3 `ASSERTION-TAUTOLOGIQUE`. Justification écrite : `Docs/questions-en-attente.md`, entrée
+ * « Le plafond des tests trompeurs ».
  */
-export const PLAFOND_AVERTISSEMENTS = 66;
+export const PLAFOND_AVERTISSEMENTS = 98;
 
 // ────────────────────────────────────────────────────────── lecture et masquage du code
 
@@ -93,12 +111,53 @@ function fichiersSous(dossier, garder) {
 }
 
 /**
- * Remplace le CONTENU des commentaires et des chaînes par des espaces, **en gardant les
- * longueurs et donc tous les décalages**.
+ * Le dernier caractère significatif avant `i` autorise-t-il un littéral d'expression
+ * régulière ? C'est la seule façon de distinguer `/["\\]/g` d'une division `a / b`.
+ *
+ * On regarde en arrière en sautant les blancs. Une regex ne peut commencer qu'en POSITION
+ * D'EXPRESSION : après un opérateur, une virgule, une parenthèse ou une accolade ouvrante,
+ * un `return`, ou en début de fichier. Après un identifiant, un nombre ou une parenthèse
+ * FERMANTE, le `/` est une division.
+ */
+function positionDExpression(source, i) {
+  let k = i - 1;
+  while (k >= 0 && /\s/.test(source[k])) k -= 1;
+  if (k < 0) return true;
+  const c = source[k];
+  if ('(,=:[!&|?{};+-*%<>~^'.includes(c)) return true;
+  // `return /…/`, `typeof /…/`, `case /…/` : un mot-clé, jamais un identifiant.
+  const mot = /([A-Za-z_$][\w$]*)$/.exec(source.slice(Math.max(0, k - 15), k + 1));
+  return mot !== null && ['return', 'typeof', 'case', 'in', 'of', 'new', 'delete', 'void', 'do', 'else', 'yield', 'await'].includes(mot[1]);
+}
+
+/**
+ * Remplace le CONTENU des commentaires, des chaînes **et des expressions régulières** par des
+ * espaces, **en gardant les longueurs et donc tous les décalages**.
  *
  * C'est ce qui rend l'équilibrage de parenthèses fiable : sans ça, un `'it('` dans un message
  * ou une accolade dans un commentaire fausse tout le découpage, et le détecteur se met à
  * mentir — ce qu'il est justement chargé de traquer.
+ *
+ * ── LE CAS DES REGEX, AJOUTÉ LE 2026-08-08 APRÈS UN FAUX BLOQUANT ─────────────────────────
+ * `parcours-aucun-geste-mort.spec.ts` a été déclaré « aucun `expect(` dans tout le fichier »
+ * alors qu'il en porte QUATRE, mesurés. La cause tient en une ligne, la 178 du fichier
+ * accusé :
+ *
+ *     valeur.replace(/["\\]/g, '\\$&')
+ *
+ * Le masquage ne connaissait pas les littéraux d'expression régulière. Il a vu le `"` À
+ * L'INTÉRIEUR de la regex, cru qu'une chaîne s'ouvrait, cherché sa fermeture jusqu'à la fin
+ * du fichier — et blanchi les 19 000 octets restants, assertions comprises.
+ *
+ * Ce défaut est exactement celui que ce script existe pour traquer, retourné contre lui :
+ * **un détecteur qui rend un verdict BLOQUANT sur une mesure qu'il a lui-même détruite.** Et
+ * il coûtait cher, parce qu'il est branché en `pre-commit` : il refusait un fichier
+ * parfaitement assertif, et le seul recours apparent était de le contourner.
+ *
+ * Le contrôle positif vit dans `tests/unitaires/tests-trompeurs-masquage.test.ts` : une regex
+ * portant un guillemet ne doit pas emporter le code qui la suit, et une VRAIE division ne doit
+ * pas être prise pour une regex.
+ * ──────────────────────────────────────────────────────────────────────────────────────────
  */
 function masquer(source) {
   const sortie = source.split('');
@@ -122,6 +181,28 @@ function masquer(source) {
       fin = fin === -1 ? n : fin + 2;
       blanchir(i, fin);
       i = fin;
+    } else if (c === '/' && positionDExpression(source, i)) {
+      // Un littéral regex. On avance jusqu'au `/` de fin, en sautant les échappements et en
+      // ignorant les `/` qui vivent dans une classe `[…]` — `/[/]/` est légal.
+      let k = i + 1;
+      let dansUneClasse = false;
+      let ferme = -1;
+      while (k < n && source[k] !== '\n') {
+        const e = source[k];
+        if (e === '\\') { k += 2; continue; }
+        if (e === '[') dansUneClasse = true;
+        else if (e === ']') dansUneClasse = false;
+        else if (e === '/' && !dansUneClasse) { ferme = k; break; }
+        k += 1;
+      }
+      if (ferme === -1) {
+        // Pas de fermeture sur la ligne : ce n'était pas une regex. On ne blanchit RIEN —
+        // se tromper dans ce sens efface du code, et c'est la faute qu'on vient de payer.
+        i += 1;
+      } else {
+        blanchir(i + 1, ferme);
+        i = ferme + 1;
+      }
     } else if (c === '"' || c === "'" || c === '`') {
       const guillemet = c;
       let k = i + 1;

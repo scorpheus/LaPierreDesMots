@@ -14,11 +14,14 @@
 import type { ReactElement } from 'react';
 import type { JaugePalier as ModeleJauge, NatureRecompense } from '@pierre/partage';
 
-/** Libellé lisible de chaque nature. Aucune ne compare, aucune ne juge (R14). */
+/**
+ * Libellé lisible de chaque nature. Aucune ne compare, aucune ne juge (R14).
+ *
+ * `'objet-campement'` retiré par le lot A1 (R31) — voir `partage/src/recompenses/types.ts`.
+ */
 const LIBELLE_NATURE: Readonly<Record<NatureRecompense, string>> = {
   etoile: 'étoile',
   'forme-gobi': 'forme de Gobi',
-  'objet-campement': 'objet du campement',
   'zone-recoloriee': 'zone à rallumer'
 };
 
