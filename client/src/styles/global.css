@@ -147,12 +147,26 @@ body {
   height: 100%;
 }
 
+/* ------------------------------------------------------- L'ÉCHELLE DE LECTURE (Q7, D19)
+   Un `rem` se mesure ICI, sur `html`, et nulle part ailleurs. C'est ce qui fait que les 119
+   tailles écrites en `rem` dans les composants suivent le réglage du parent SANS qu'aucune
+   d'elles n'ait à être touchée — et qu'une taille ajoutée demain suive toute seule.
+
+   `--lecture-echelle` est posée par `FournisseurReglagesDuProfil` et vaut le rapport au corps
+   PAR DÉFAUT : 1,000 à 24 px, 0,667 au minimum, 1,667 au maximum. **À 1 rien ne bouge**, donc
+   ce changement ne peut pas dégrader une mise en page tant que le parent n'y touche pas.
+   Le repli `1` couvre les tests de composants montés hors du fournisseur. */
+html {
+  font-size: calc(16px * var(--lecture-echelle, 1));
+}
+
 body {
   margin: 0;
   background-color: var(--parchemin);
   color: var(--trait);
   font-family: var(--font-interface);
-  font-size: 20px;
+  /* 1.25rem = 20px à l'échelle 1 : la valeur historique, devenue proportionnelle. */
+  font-size: 1.25rem;
   line-height: 1.5;
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: transparent;

@@ -509,30 +509,80 @@ test.describe('Q7 — un réglage de lecture atteint tout ce qui se lit', () => 
     ).toEqual([]);
   });
 
-  test('R20 à corps maximal sur les moteurs — NON MESURABLE, et la dette expire toute seule', () => {
-    // D. Ce qui reste à mesurer, nommé et chiffré plutôt qu'arrondi.
+  test('LA DETTE A EXPIRÉ — le fournisseur est monté, donc R20 à corps maximal se mesure', () => {
+    // D. Ce cas était une DETTE écrite comme une assertion, et elle s'est éteinte toute seule
+    // le 2026-08-08 : `FournisseurReglagesLecture` est monté dans
+    // `client/src/lecture/reglages-du-profil.tsx`, et le balayage par moteur qu'elle réclamait
+    // est écrit juste en dessous.
     //
-    // Tant que `FournisseurReglagesLecture` n'est monté nulle part, un plateau de jeu rend la
-    // MÊME page à 16 et à 40 px : y appliquer la règle des 64 px ne mesure rien que les 91 cas
-    // de `mise-en-page-tablette.spec.ts` ne mesurent déjà, au corps par défaut. On refuse donc
-    // de conclure — « NON EXERCÉ, jamais MORT » (CLAUDE.md) — au lieu de rendre 14 verts creux.
-    //
-    // Et la dette ne peut pas s'éterniser en silence : le jour où C1 monte le fournisseur, ce
-    // cas ROUGIT et réclame le balayage par moteur. C'est la condition d'extinction, écrite
-    // comme une assertion et non comme un commentaire.
+    // Ce qu'il en reste ici est le SENS INVERSE : si le fournisseur venait à être démonté, les
+    // quatorze cas ci-dessous rendraient la même page à 16 et à 40 px et deviendraient quatorze
+    // verts creux — la pire forme d'échec, celle qui rassure. Ce cas les en empêche.
     const montages = montagesDuFournisseur();
     console.log(
-      `[Q7] dette R20@${String(BORNES.max)}px : ${String(MOTEURS.length)} moteur(s) NON ` +
-        `MESURABLE(S) — ${MOTEURS.join(' · ')}`,
+      `[Q7] R20@${String(BORNES.max)}px : mesurable sur ${String(MOTEURS.length)} moteur(s), ` +
+        `fournisseur monté dans ${montages.join(', ')}`,
     );
     expect(
-      montages.length,
-      `\`FournisseurReglagesLecture\` est désormais monté (${montages.join(', ')}) : le réglage ` +
-        `atteint enfin les plateaux, donc la règle des ${String(CIBLE_MINIMALE_PX)} px à corps ` +
-        `${String(BORNES.max)} px DEVIENT mesurable sur les ${String(MOTEURS.length)} moteurs. ` +
-        'Cette dette a expiré — remplacer ce cas par un balayage PAR MOTEUR, un cas chacun, ' +
-        'pour qu’un échec nomme le moteur et que le budget reste tenable.',
-    ).toBe(0);
+      montages,
+      'le fournisseur a été démonté : les quatorze cas de R20 à corps maximal ne mesurent plus ' +
+        'rien, puisque le plateau rend la même page aux deux bornes. Leurs verts seraient creux.',
+    ).not.toEqual([]);
   });
+
+  // ══════════════════════════════════════════════════════════════════════════════════════════
+  // LE BALAYAGE PAR MOTEUR, RÉCLAMÉ PAR LA DETTE CI-DESSUS — un cas chacun, et pourquoi
+  //
+  // Un seul cas pour quatorze moteurs aurait rendu « 37 cibles trop petites » sans dire OÙ :
+  // il aurait fallu rouvrir la trace pour savoir quel moteur corriger. Un cas par moteur nomme
+  // le coupable dans son titre, et un moteur corrigé passe au vert sans attendre les treize
+  // autres.
+  //
+  // ── CE QUE CE BALAYAGE MESURE, ET QUI N'EST MESURÉ NULLE PART AILLEURS ────────────────────
+  // `mise-en-page-tablette.spec.ts` audite les 91 écrans au corps PAR DÉFAUT. Ici on pousse le
+  // corps à son MAXIMUM, c'est-à-dire à l'échelle 1,667 : c'est le régime où R16 et R20 entrent
+  // en conflit, parce qu'un texte plus grand pousse les boutons et peut les faire sortir de
+  // l'écran. Une mesure faite au corps par défaut ne voyage pas vers ce régime — elle mesure
+  // une autre application.
+  //
+  // **La règle des 64 px gagne** (R20 l'a documenté, le père l'a tranché) : on ne rabote pas la
+  // taille de cible pour faire tenir le texte. Un rouge ici est un défaut du PRODUIT, jamais de
+  // l'instrument — d'où l'absence de « CONTRÔLE POSITIF » dans ces titres, que Q8 lit.
+  // ══════════════════════════════════════════════════════════════════════════════════════════
+  for (const moteur of MOTEURS) {
+    const noeud = NOEUDS.find((n) => n.moteur === moteur)!.id;
+    test(`« ${moteur} » — à corps maximal, aucune cible ne passe sous ${String(CIBLE_MINIMALE_PX)} px`, async ({
+      page,
+    }) => {
+      await preparer(page);
+      const corpsPose = await reglerLeCorps(page, BORNES.max);
+      expect(
+        corpsPose,
+        `le corps maximal n’a pas été posé par le chemin de l’enfant : la mesure porterait sur ` +
+          'un réglage qui n’a pas pris, et son zéro ne prouverait rien',
+      ).toBe(BORNES.max);
+
+      await preparer(page);
+      await entrerDansLeNoeud(page, noeud);
+      await deuxImages(page);
+
+      const trop = await ciblesTropPetites(page);
+      console.log(
+        `[Q7] ${moteur.padEnd(10)} R20@${String(BORNES.max)}px · ` +
+          `${String(trop.length)} cible(s) sous ${String(CIBLE_MINIMALE_PX)} px`,
+      );
+      expect(
+        trop.map((c) => `${c.description} — ${String(c.largeur)}×${String(c.hauteur)} px`),
+        `« ${moteur} » — à corps ${String(BORNES.max)} px, ces cibles passent sous ` +
+          `${String(CIBLE_MINIMALE_PX)} px. C’est le conflit R16-contre-R20 : la règle des ` +
+          `${String(CIBLE_MINIMALE_PX)} px gagne, et on chiffre la dette au lieu de la raboter.`,
+      ).toEqual([]);
+      // Le CHIFFRE imprimé au journal entre lui aussi dans une assertion. Sans cette ligne, le
+      // compte affiché n'engage rien — c'est le `CHIFFRE-JAMAIS-ASSERTE` que `qa:trompeurs`
+      // relève, et il a raison : un rapport qui imprime un nombre que rien ne garde est un
+      // rapport qui rassure.
+      expect(trop.length, `« ${moteur} » — compte de cibles sous le seuil`).toBe(0);
+    });
+  }
 
 });

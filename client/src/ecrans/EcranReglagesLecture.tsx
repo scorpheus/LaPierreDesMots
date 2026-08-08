@@ -20,7 +20,7 @@
 // typé, c'est ce fichier et lui seul qui est repris.
 import { useCallback, useEffect, useState } from 'react';
 import type { ReactElement } from 'react';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import {
   BORNES_REGLAGES,
@@ -33,6 +33,7 @@ import type { Profil } from '@pierre/partage';
 
 import { ApercuReglages } from '../lecture/ApercuReglages.js';
 import { policeDisponible } from '../lecture/polices.js';
+import { cleReglages } from '../lecture/reglages-du-profil.js';
 import { useEtatJeu, useServices } from '../etat/services.js';
 
 /** Libellé lisible et prononçable de chaque police. Jamais le code technique à l'écran. */
@@ -96,6 +97,7 @@ export function EcranReglagesLecture({
   const profil = profilExplicite === undefined ? profilDeSession : profilExplicite;
   const idProfil = profil === null ? null : String(profil.id);
   const services = useServices();
+  const fileDAttente = useQueryClient();
 
   const [reglages, fixerReglages] = useState<ReglagesLecture>(REGLAGES_PAR_DEFAUT);
 
@@ -147,9 +149,17 @@ export function EcranReglagesLecture({
     (voulus: Partial<ReglagesLecture>): void => {
       const complets = normaliserReglages({ ...reglages, ...voulus });
       fixerReglages(complets);
+      // Q7 — LE RESTE DU JEU SUIT, TOUT DE SUITE. `FournisseurReglagesDuProfil` lit la MÊME
+      // clé de cache ; l'écrire ici fait bouger les quatorze moteurs à l'instant du réglage,
+      // sans attendre le serveur et sans qu'aucun moteur ne s'abonne à quoi que ce soit.
+      // Sans cette ligne, le parent verrait son aperçu changer et le jeu rester tel quel —
+      // exactement ce qu'il a vécu quand le fournisseur n'était monté nulle part.
+      if (idProfil !== null) {
+        fileDAttente.setQueryData(cleReglages(idProfil), complets);
+      }
       enregistrement.mutate(complets);
     },
-    [enregistrement, reglages],
+    [enregistrement, fileDAttente, idProfil, reglages],
   );
 
   /**

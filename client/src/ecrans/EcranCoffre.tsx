@@ -20,6 +20,7 @@ import { construireEtagere } from '@pierre/partage/monde';
 import { lireMonde, urlAsset } from '../api/client.js';
 import { useEtatJeu } from '../etat/services.js';
 import { DessinButin } from '../monde/Butin.js';
+import { eclatDeRegion } from '../monde/eclats.js';
 import { Etagere, useCatalogueFormes } from '../monde/Etagere.js';
 import { FicheObjet } from '../monde/FicheObjet.js';
 
@@ -171,11 +172,22 @@ function Case({
           style={obtenu ? undefined : { opacity: 0.55, filter: 'saturate(0)' }}
         >
           <path
-            d={SILHOUETTE_ECLAT}
+            // Un Éclat porte la silhouette ET la teinte de SA région (`client/src/monde/eclats.ts`).
+            // Les six étaient identiques : six trophées indiscernables ne disent pas ce qu'il
+            // reste à trouver, alors que c'est le propos de cet écran — « jamais une case vide,
+            // jamais un cadenas » (v2 § 9.1). Les autres collections gardent la silhouette
+            // générique, qui reste le repli de `eclatDeRegion`.
+            d={categorie === 'eclat' ? eclatDeRegion(cle).silhouette : SILHOUETTE_ECLAT}
             // La case GAGNÉE prend l'aplat de sa collection ; la case en creux garde la
             // Grisaille. C'est le contraste gris / couleur qui porte tout le jeu (v2 § 9.1) :
             // sans lui, obtenir un Éclat ne se verrait pas.
-            fill={obtenu ? 'var(--soleil)' : 'var(--grisaille)'}
+            fill={
+              obtenu
+                ? categorie === 'eclat'
+                  ? eclatDeRegion(cle).teinte
+                  : 'var(--soleil)'
+                : 'var(--grisaille)'
+            }
             stroke="var(--trait)"
             // 4 px — l'épaisseur de trait du projet (v2 § 9.1), et non 3.
             strokeWidth="4"

@@ -14,6 +14,7 @@ import { Particules } from './composants/Particules.js';
 import { lireProfil } from './api/client.js';
 import { lireProfilMemorise, oublierProfil } from './etat/profil-memorise.js';
 import type { IdProfil } from '@pierre/partage';
+import { FournisseurReglagesDuProfil } from './lecture/reglages-du-profil.js';
 import { Routeur } from './routeur.js';
 
 /**
@@ -128,7 +129,14 @@ export function Application({
   return (
     <QueryClientProvider client={file}>
       <FournisseurJeu valeur={contexte}>
-        <Routeur />
+        {/* Q7 — LE RÉGLAGE DE LECTURE DU PARENT ATTEINT TOUT CE QUI SE LIT.
+            Il est DANS `FournisseurJeu` (il lit le profil courant) et AUTOUR du routeur (tout
+            écran affiche du texte à déchiffrer). Avant le 2026-08-08, `FournisseurReglagesLecture`
+            n'était monté nulle part : `useReglagesLecture()` rendait toujours les valeurs par
+            défaut, et le réglage du parent ne changeait rien — pas même la consigne. */}
+        <FournisseurReglagesDuProfil>
+          <Routeur />
+        </FournisseurReglagesDuProfil>
         {/* En surimpression de tout, transparente aux doigts, absente si animations calmes. */}
         <CoucheParticules />
       </FournisseurJeu>
