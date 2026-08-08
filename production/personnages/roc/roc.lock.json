@@ -1,0 +1,28 @@
+{
+  "$commentaire": "VERROU DE ROC — cloture de l'etape (A) de D31 le 2026-08-08. Le pere a choisi la graine g6006 parmi six propositions rendues aux MEMES graines pour les quatre compagnons : les memes graines partout sont le TEMOIN, sans lequel on ne sait pas si deux compagnons se ressemblent a cause de la graine ou de leur description. Ce fichier porte la provenance exacte ; sans lui la bibliotheque devient un cimetiere d'images irregenerables (annexe P 3.6).",
+  "canonique": {
+    "fichier": "production/personnages/roc/canonique.png",
+    "largeur": 1024,
+    "hauteur": 1024,
+    "empreintePixels": "sha256:23ca9bae9678fbeb606e98e927a530b4015dffb7408c82e576e8a78fd19a0c6d",
+    "empreinteFichier": "sha256:af827e9f1f01d46d1a7a0a91f8fe3e7b5142b15a6c73f20615ff43afe0ecf1bc",
+    "$empreinte": "L'empreinte qui fait foi est celle des PIXELS. ComfyUI ecrit le graphe dans un bloc de texte du PNG : trois images identiques au pixel pres ont trois sha256 de fichier differents. Les deux valeurs ci-dessus different, ce qui le montre.",
+    "produitePar": {
+      "workflow": "production/workflows/personnage-exploration.api.json",
+      "graine": 6006,
+      "ckpt_name": "flux1-schnell-fp8.safetensors",
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1.0,
+      "source": "production/personnages/roc/exploration/g6006.png"
+    }
+  },
+  "validation": {
+    "decision": "D7 / D31 etape A",
+    "choisiPar": "le pere, sur planche de six propositions",
+    "date": "2026-08-08",
+    "$ecartConnu": "Cette canonique est en TRAIT NOIR (saturation mesuree sous 9), alors que la canonique de Gobi est en couleur (57,45). D29 pose que le trait noir ne concerne que les DECORS. Une passe de colorisation par declinaison, a profondeur de chaine 1, est donc due — et elle partira d'ICI, jamais du texte."
+  }
+}
