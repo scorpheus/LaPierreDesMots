@@ -3751,6 +3751,14 @@ des ACQUIS, et un recalcul sous des paramètres modifiés pourrait en faire déc
 interdit. Le pourcentage de recoloration, lui, n'est l'acquis de personne : c'est une proportion.
 Trancher demande de dire, paramètre par paramètre, ce qui est un acquis et ce qui est un calcul.
 
+**Mis à jour par le lot Q1 (2026-08-09) : les quatre recalculs sont maintenant ATTEIGNABLES, sans
+que la question ci-dessus soit tranchée.** `tests/unitaires/ecrivains-atteignables.test.ts` (garde
+Q1) signalait les quatre comme des écrivains sans aucun appelant — le même défaut que R31, appliqué
+à ces filets. `scripts/recalculer-projections.mjs` (`npm run profil:recalculer`) les rend
+atteignables **depuis un outil manuel**, jamais depuis le démarrage : il répond à Q1 (une chaîne
+d'appels existe) sans décider si elle doit un jour devenir automatique. La question de ce
+paragraphe reste donc entière et n'est pas escamotée par l'existence de l'outil.
+
 ### `etagere_rang` — une table déclarée, écrite par personne, lue par personne
 
 Mesuré sur tout le dépôt (hors `dist/`, `node_modules/`, `tests/rapports/`) :

@@ -387,6 +387,59 @@ describe('POST /api/profils/:id/campement', () => {
   });
 });
 
+// Lot Q1 (garde `ecrivains-atteignables.test.ts`) — R31/R11 : `noterVisitePoint` existait déjà,
+// juste et testé en isolation, et aucune route ne l'appelait. `points_visites` restait à 0 après
+// 23 parties réelles (feuille-de-route-debug.md § 2). Ce bloc prouve la chaîne HTTP -> dépôt.
+describe('POST /api/profils/:id/campement/points/:point', () => {
+  it('journalise une visite, sans rien changer au reste du monde (geste gratuit)', async () => {
+    const profil = await creerProfil();
+    const avant = await lireMondeHttp(profil);
+
+    const reponse = await monde.inject({
+      method: 'POST',
+      url: `/api/profils/${profil}/campement/points/tente`
+    });
+    expect(reponse.statusCode).toBe(204);
+
+    const ligne = base
+      .prepare('SELECT nb_visites FROM points_visites WHERE profil_id = ? AND point_code = ?')
+      .get(profil, 'tente') as { readonly nb_visites: number } | undefined;
+    expect(ligne?.nb_visites).toBe(1);
+
+    // Gratuit : ni étoile, ni acquis, ni changement de la carte, de Gobi ou du campement.
+    const apres = await lireMondeHttp(profil);
+    expect(apres).toEqual(avant);
+  });
+
+  it('cumule les visites répétées du même point', async () => {
+    const profil = await creerProfil();
+    for (let fois = 0; fois < 3; fois += 1) {
+      await monde.inject({ method: 'POST', url: `/api/profils/${profil}/campement/points/feu` });
+    }
+    const ligne = base
+      .prepare('SELECT nb_visites FROM points_visites WHERE profil_id = ? AND point_code = ?')
+      .get(profil, 'feu') as { readonly nb_visites: number } | undefined;
+    expect(ligne?.nb_visites).toBe(3);
+  });
+
+  it('refuse un point que le référentiel ne déclare pas, plutôt que d’écrire un code mort', async () => {
+    const profil = await creerProfil();
+    const reponse = await monde.inject({
+      method: 'POST',
+      url: `/api/profils/${profil}/campement/points/point-imaginaire`
+    });
+    expect(reponse.statusCode).toBe(404);
+  });
+
+  it('rend 404 sur un profil inconnu', async () => {
+    const reponse = await monde.inject({
+      method: 'POST',
+      url: `/api/profils/prf-inconnu/campement/points/tente`
+    });
+    expect(reponse.statusCode).toBe(404);
+  });
+});
+
 describe('étanchéité stricte entre profils — v2 § 11', () => {
   it('le monde d’Alma n’apparaît jamais chez Noé', async () => {
     const alma = await creerProfil('Alma');

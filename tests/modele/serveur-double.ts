@@ -374,6 +374,9 @@ export function creerDoubleDeReseau(): DoubleDeReseau {
 
     monde: () => json(monde),
     campement: () => json(monde),
+    // Geste gratuit (lot Q1, R11/R31) : le double ne fait rien d'autre que confirmer, comme
+    // la vraie route (`noterVisitePoint`, `serveur/src/depots/monde.ts`) qui répond 204.
+    campementPointVisite: () => json(null, 204),
 
     ouvertureProfil: ({ methode }) =>
       methode === 'POST' ? json({ ...OUVERTURE_JAMAIS_VUE, vue: true }) : json(OUVERTURE_JAMAIS_VUE),

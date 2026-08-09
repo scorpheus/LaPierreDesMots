@@ -25,7 +25,7 @@ import {
 // `DocumentCampement` et `StadeGobi` viennent du SOUS-CHEMIN : le barillet racine ne réexporte
 // que les seize types du § 4.5 (convention C1), et `DocumentCampement` n'en fait pas partie.
 import type { DocumentCampement, StadeGobi } from '@pierre/partage/monde';
-import { lireMonde, lirePaquetNoeud, urlAsset } from '../api/client.js';
+import { lireMonde, lirePaquetNoeud, noterVisitePointCampement, urlAsset } from '../api/client.js';
 import { Compagnon } from '../composants/Compagnon.js';
 import { Gobi } from '../composants/Gobi.js';
 import { useEtatJeu, useMagasin } from '../etat/services.js';
@@ -145,6 +145,22 @@ export function EcranCampement({
 
   const points: readonly PointInteraction[] = campement?.points ?? [];
   const [largeurScene, hauteurScene] = dimensions(campement?.scene.viewBox ?? '0 0 1200 800');
+
+  /**
+   * R31/R11 — journalise la visite d'un point libre. GRATUIT : aucune étoile, aucun acquis,
+   * et un échec réseau ne doit jamais se voir — le point a déjà réagi à l'écran (`PointLibre`)
+   * quand cet appel part. `.catch` avale pour la même raison que `jouerEffet` juste au-dessus
+   * dans ce composant : un geste sans conséquence pédagogique ne doit jamais lever d'erreur.
+   */
+  const noterVisite = useCallback(
+    (point: PointInteraction): void => {
+      if (profil === null) {
+        return;
+      }
+      void noterVisitePointCampement(profil.id, point.id).catch(() => undefined);
+    },
+    [profil]
+  );
 
   /**
    * R25 — LE CHAUDRON OUVRE SON NŒUD, ET IL SAIT LE FAIRE SEUL.
@@ -421,6 +437,7 @@ export function EcranCampement({
             largeurScene={largeurScene}
             hauteurScene={hauteurScene}
             animationsDesactivees={animationsDesactivees}
+            surVisite={noterVisite}
           />
         ))}
       </div>

@@ -229,6 +229,17 @@ export function poserObjetCampement(
   return demander<EtatMonde>(CHEMINS_API.campement(id), corpsJson({ objet }));
 }
 
+/**
+ * Journalise la visite d'un point d'interaction libre du campement (R11). Gratuit et sans
+ * retour utile : la route répond 204, et un échec réseau ne doit jamais faire échouer le
+ * geste à l'écran — c'est `PointLibre` qui l'avale (v2 § 3.4, « rien ne se rate au campement »).
+ */
+export function noterVisitePointCampement(id: IdProfil, point: string): Promise<void> {
+  return reponseBrute(CHEMINS_API.campementPointVisite(id, point), { method: 'POST' }).then(
+    () => undefined
+  );
+}
+
 // ---------------------------------------------------------------------- zone parent (L2-H)
 
 /**

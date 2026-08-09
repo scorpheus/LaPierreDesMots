@@ -100,10 +100,12 @@ export interface ErreurApi {
 }
 
 /**
- * Les chemins des **vingt-quatre** routes : les 7 de la v1, les 12 du contrat des features
- * v2 § 5.3, et les 5 de la campagne de finition v3 § 8 (`POST /api/profils/:id/ouverture`
- * partage son chemin avec le `GET`). `motifs` est la forme paramétrée pour l'enregistrement
- * côté serveur ; les fonctions construisent l'URL côté client, en encodant leurs arguments.
+ * Les chemins des routes — mesuré, pas recompté à la main (**27** aujourd'hui, `campement-
+ * PointVisite` ajoutée par le lot Q1) : les 7 de la v1, les 12 du contrat des features v2 § 5.3,
+ * les 5 de la campagne de finition v3 § 8 (`POST /api/profils/:id/ouverture` partage son chemin
+ * avec le `GET`), H2 et R29 en ajoutent chacune une. `motifs` est la forme paramétrée pour
+ * l'enregistrement côté serveur ; les fonctions construisent l'URL côté client, en encodant
+ * leurs arguments.
  *
  * **Le propriétaire de ce fichier déclare TOUS les chemins, y compris ceux qu'il n'implante
  * pas** (contrat v2 § 5.1, repris par le contrat de finition v3 § 8, qui confie le fichier à
@@ -134,6 +136,18 @@ export const CHEMINS_API = {
   // ── monde et campement — implantées par L2-F ────────────────────────────────────────────
   monde: (id: IdProfil): string => `/api/profils/${encodeURIComponent(id)}/monde`,
   campement: (id: IdProfil): string => `/api/profils/${encodeURIComponent(id)}/campement`,
+
+  /**
+   * R31 / R11 — la visite d'un point d'interaction libre du campement.
+   *
+   * Ajoutée par le lot Q1 (garde `ecrivains-atteignables.test.ts`) : `noterVisitePoint`
+   * (`serveur/src/depots/monde.ts`) écrivait déjà dans `points_visites` mais aucune route ne
+   * l'appelait — exactement le défaut R31 (« déclaré, câblé, jamais parcouru »), et la cause
+   * mesurée de `points_visites = 0` après 23 parties (feuille-de-route § 2). **Gratuit** :
+   * aucune étoile, aucun acquis, ne sert qu'à varier les réactions du décor (v2 § 3.4).
+   */
+  campementPointVisite: (id: IdProfil, point: string): string =>
+    `/api/profils/${encodeURIComponent(id)}/campement/points/${encodeURIComponent(point)}`,
 
   // ── zone parent — implantées par L2-H ───────────────────────────────────────────────────
   parentOuvrir: '/api/parent/ouvrir',
@@ -218,6 +232,7 @@ export const CHEMINS_API = {
     sortie: '/api/profils/:id/sortie',
     monde: '/api/profils/:id/monde',
     campement: '/api/profils/:id/campement',
+    campementPointVisite: '/api/profils/:id/campement/points/:point',
     parentOuvrir: '/api/parent/ouvrir',
     parentDashboard: '/api/parent/:profil/dashboard',
     parentExport: '/api/parent/:profil/export/:code',

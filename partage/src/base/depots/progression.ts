@@ -22,7 +22,8 @@
  * Porté sur le contrat `Base` — Docs/addendum-portage-android.md § 4.
  */
 
-import type { Horodatage, IdNoeud, NombreEtoiles } from '../../identifiants.js';
+import type { Horodatage, IdNoeud } from '../../identifiants.js';
+import type { NombreEtoiles } from '../../journal/types.js';
 import type { ProgressionNoeud } from '../../api/contrats.js';
 import type { Base } from '../contrat.js';
 

@@ -252,16 +252,47 @@ function citeDansLeDepot(cheminRelatif: string, nom: string): boolean {
 }
 
 /**
- * EXEMPTIONS — il n'y en a AUCUNE, et c'est un résultat.
+ * EXEMPTIONS — UNE SEULE, et les cinq autres écrivains signalés par le premier passage de ce
+ * garde ont été BRANCHÉS plutôt qu'exemptés (lot Q1, 2026-08-09) :
  *
- * Au premier passage du contrat de couverture de CLAUDE.md, six exemptions sur huit étaient
- * inutiles. On n'en ouvre donc pas par précaution : les huit écrivains signalés aujourd'hui
- * sont huit défauts réels, chacun rattaché à un lot de la feuille de route (A1 pour la
- * cascade et les formes de Gobi ; V1 et le campement pour `noterVisitePoint` ; la zone parent
- * pour `ouvrirEssai`). Une exemption est une dette, pas un pardon.
+ *   - `noterVisitePoint` — la route `POST /api/profils/:id/campement/points/:point` existait à
+ *     construire ; `PointLibre.surVisite` était déjà déclaré et jamais fourni (feuille-de-
+ *     route-debug.md § 2.4), c'était donc un branchement concret, pas une question ouverte.
+ *   - `recalculerToutesLesCascades`, `recalculerToutesLesMaitrises`, `recalculerLeitner`,
+ *     `recalculerToutesLesProgressions` — atteignables depuis `scripts/recalculer-
+ *     projections.mjs` (outil manuel d'administration). Un appel AUTOMATIQUE au démarrage
+ *     reste une question ouverte au père (`Docs/questions-en-attente.md` § Q-H1-4, risque de
+ *     régression d'un acquis sous des paramètres pédagogiques recalibrés, R14) : cet outil
+ *     répond à Q1 sans trancher cette question produit.
+ *
+ * `ouvrirEssai` reste exempté parce qu'aucun branchement concret n'existe encore à proposer
+ * sans DEVINER une décision produit : au premier passage du contrat de couverture de
+ * CLAUDE.md, six exemptions sur huit étaient inutiles, et celle-ci n'est ouverte qu'après
+ * avoir vérifié que les cinq autres, elles, avaient un branchement réel. Une exemption est une
+ * dette, pas un pardon.
  */
 const EXEMPTIONS: readonly { readonly nom: string; readonly raison: string; readonly scene: string }[] =
-  [];
+  [
+    {
+      nom: 'ouvrirEssai',
+      raison:
+        'Le protocole A/B de D19 (journal-des-decisions.md) dit QUOI comparer (police, ' +
+        'espacement) et POURQUOI (mesurer plutôt que croire), mais aucun document ne dit QUAND ' +
+        'un essai s’ouvre (au premier lancement d’un profil ? choisi par le parent depuis ' +
+        'l’écran de réglages ?), NI sur quelle compétence, NI quels sont les deux bras exacts à ' +
+        'comparer. `serveur/src/routes/reglages.ts` lit déjà la comparaison et commente ' +
+        'explicitement « aucun essai n’est ouvert tant que personne n’en a ouvert un » comme ' +
+        'un état LÉGITIME, pas une erreur. Câbler un déclenchement inventerait ces trois ' +
+        'décisions produit à la place du père — exactement ce que CLAUDE.md interdit ' +
+        '(« ne pas deviner à l’aveugle »), et elles touchent directement ce que l’enfant voit ' +
+        'à l’écran.',
+      scene:
+        'Un lot de la feuille de route (à côté de L2-B) spécifie le déclencheur — événement, ' +
+        'compétence testée, et les deux bras — puis une route ou un script appelle ' +
+        '`ouvrirEssai` avec ces valeurs décidées. Ce jour-là, cette exemption se retire : la ' +
+        'fonction redevient atteignable pour de vrai, pas en apparence.',
+    },
+  ];
 
 describe('Q1 — tout écrivain d’état est atteignable depuis un geste d’enfant', () => {
   test('la population est DÉRIVÉE du code, et elle n’est pas vide', () => {

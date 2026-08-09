@@ -305,6 +305,13 @@ const DESCRIPTEURS: readonly Descripteur[] = [
     corps: () => ({ objet: 'fanion-clairiere' }),
     statutNominal: 200
   },
+  {
+    methode: 'POST',
+    motif: '/api/profils/:id/campement/points/:point',
+    params: (c) => ({ id: c.profil, point: 'tente' }),
+    // Sans corps, et 204 : geste gratuit (lot Q1, R11/R31), voir depots/monde.ts::noterVisitePoint.
+    statutNominal: 204
+  },
   { methode: 'GET', motif: '/api/parent/etat', params: () => ({}), statutNominal: 200 },
   {
     methode: 'POST',

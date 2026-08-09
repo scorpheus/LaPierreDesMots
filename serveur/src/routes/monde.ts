@@ -1,8 +1,9 @@
 /**
  * Routes du monde — lot L2-F, contrat des features v2 § 5.3.
  *
- *   GET  /api/profils/:id/monde      -> EtatMonde
- *   POST /api/profils/:id/campement  -> EtatMonde   (corps : { objet })
+ *   GET  /api/profils/:id/monde                     -> EtatMonde
+ *   POST /api/profils/:id/campement                 -> EtatMonde   (corps : { objet })
+ *   POST /api/profils/:id/campement/points/:point   -> 204          (lot Q1, R31/R11)
  *
  * **Aucun jeton n'est demande** : ce sont des routes enfant, et « un tap suffit, aucun mot de
  * passe » (v2 § 11). L'etancheite entre profils est en revanche stricte — toutes les requetes
@@ -17,6 +18,7 @@
 import type { FastifyInstance } from 'fastify';
 
 import type { EtatMonde } from '@pierre/partage';
+import { CHEMINS_API } from '@pierre/partage';
 
 import type { ContexteServeur } from '../configuration.js';
 import { CODES_ERREUR, erreurApi } from '../configuration.js';
@@ -28,13 +30,20 @@ import {
   enregistrerOuvertureVue,
   lireMonde,
   lireOuverture,
+  noterVisitePoint,
   objetConnu,
+  pointConnu,
   poserObjetCampement
 } from '../depots/monde.js';
 import type { ReferentielMonde } from '../depots/monde.js';
 
 interface ParametresIdentifiant {
   readonly id: string;
+}
+
+interface ParametresPointCampement {
+  readonly id: string;
+  readonly point: string;
 }
 
 /** Un code d'objet reste court ; la borne evite un abus par le reseau. */
@@ -215,6 +224,42 @@ export function enregistrerRoutesMonde(
         contexte.horloge
       );
       return reponse.send(monde);
+    }
+  );
+
+  // ══════════════════════════════════════════════════════════════════════════════════════
+  // LA VISITE D'UN POINT D'INTERACTION LIBRE DU CAMPEMENT — lot Q1 (garde
+  // `tests/unitaires/ecrivains-atteignables.test.ts`), R31 et R11.
+  //
+  // `noterVisitePoint` existait deja et etait juste, mais aucune route ne l'appelait :
+  // exactement le defaut que Q1 traque, et la cause mesuree de `points_visites = 0` apres
+  // 23 parties (feuille-de-route-debug.md § 2). Le point est GRATUIT — aucune etoile, aucun
+  // acquis, «  sert a varier les reactions, jamais a noter  » (depots/monde.ts) — donc aucune
+  // 404 n'est levee sur un point inconnu au-dela de la validation la plus simple : un enfant
+  // qui touche un point ne doit jamais voir une erreur reseau pour un geste sans consequence.
+  // ══════════════════════════════════════════════════════════════════════════════════════
+  app.post<{ Params: ParametresPointCampement }>(
+    CHEMINS_API.motifs.campementPointVisite,
+    (requete, reponse) => {
+      if (lireProfil(contexte.base, requete.params.id) === null) {
+        return reponse
+          .code(404)
+          .send(erreurApi(CODES_ERREUR.introuvable, `Profil inconnu : ${requete.params.id}`));
+      }
+
+      if (!pointConnu(referentiel, requete.params.point)) {
+        return reponse
+          .code(404)
+          .send(
+            erreurApi(
+              CODES_ERREUR.introuvable,
+              `Point de campement inconnu : ${requete.params.point}`
+            )
+          );
+      }
+
+      noterVisitePoint(contexte.base, requete.params.id, requete.params.point, contexte.horloge);
+      return reponse.code(204).send();
     }
   );
 }

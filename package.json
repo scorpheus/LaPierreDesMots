@@ -23,6 +23,7 @@
     "construire:test": "npm run construire:test -w @pierre/client",
     "ingerer": "node scripts/ingerer.mjs",
     "profil:reinitialiser": "node scripts/reinitialiser-profil.mjs",
+    "profil:recalculer": "node scripts/recalculer-projections.mjs",
     "voix:preparer": "node scripts/telecharger-tts.mjs",
     "voix": "node scripts/rendre-voix.mjs",
     "voix:qc": "node scripts/qc-voix.mjs",

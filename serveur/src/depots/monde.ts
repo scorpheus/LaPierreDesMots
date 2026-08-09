@@ -527,6 +527,11 @@ export function objetConnu(referentiel: ReferentielMonde, code: string): boolean
   return referentiel.campement.objets.some((objet) => String(objet.code) === code);
 }
 
+/** Vrai si le referentiel connait ce point d'interaction. Meme garde-fou que `objetConnu`. */
+export function pointConnu(referentiel: ReferentielMonde, id: string): boolean {
+  return referentiel.campement.points.some((point) => String(point.id) === id);
+}
+
 /**
  * Pose un objet au campement. Idempotent : la PREMIERE date de depot fait foi, un second appel
  * ne la reecrit pas — un acquis n'est jamais repris (R14).
