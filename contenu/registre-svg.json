@@ -36,6 +36,60 @@
       "consommateur": "partage/src/base/depots/monde.ts",
       "symbole": "assets/gobi/cristal-base.svg",
       "raison": "CE FICHIER N'A JAMAIS ÉTÉ MORT : il est le repli du serveur (et, depuis le portage Android, de l'app autonome — les deux partagent désormais ce dépôt). `lireFormes` écrit `cristal: declaree?.cristal ?? 'assets/gobi/cristal-base.svg'` — toute forme obtenue par l'enfant mais absente du référentiel est servie AVEC CE DESSIN, plutôt qu'avec un trou. C'est exactement le défaut que `contenu/schemas/monde.schema.json` nomme déjà pour la carte : « un décor déclaré dans du code n'est pas déclaré ». Le voir en « contenu mort » était donc un contresens du contrôle, pas un défaut du fichier. Il porte de surcroît le cristal seul, l'objet que D20 désigne comme le porteur des vingt-cinq déclinaisons — jamais le corps."
+    },
+    {
+      "fichier": "brouillons/assets/compagnons/filou.svg",
+      "consommateur": "partage/src/pedagogie/types.ts",
+      "symbole": "'filou'",
+      "raison": "Dessin canonique du compagnon, choisi par le père sur planche de six propositions à graine fixe (commit « Les quatre compagnons ont un visage… », 2026-08-08) — ce n'est pas un brouillon en attente d'arbitrage, l'arbitrage a eu lieu. `CodeCompagnon` le nomme depuis L2-D ; le fichier reste sous `brouillons/` parce que la passe de colorisation qu'il appelle (D29 : le trait vient de ComfyUI en noir, la couleur vient du code) et son verrou dans `production/assets.lock.json` n'ont pas encore eu lieu — MESURÉ, aucune entrée à son nom dans le fichier de verrou. Le dossier n'est donc pas le mauvais endroit, seulement l'étape n'est pas finie ; le fichier reste lisible et daté plutôt que caché."
+    },
+    {
+      "fichier": "brouillons/assets/compagnons/roc.svg",
+      "consommateur": "partage/src/pedagogie/types.ts",
+      "symbole": "'roc'",
+      "raison": "Même statut que `filou.svg` : choisi par le père le même jour, même graine par compagnon (g6006), colorisation et verrou encore à faire."
+    },
+    {
+      "fichier": "brouillons/assets/compagnons/plume.svg",
+      "consommateur": "partage/src/pedagogie/types.ts",
+      "symbole": "'plume'",
+      "raison": "Même statut que `filou.svg` : choisi par le père le même jour, même graine par compagnon (g6006), colorisation et verrou encore à faire."
+    },
+    {
+      "fichier": "brouillons/assets/compagnons/bulle.svg",
+      "consommateur": "partage/src/pedagogie/types.ts",
+      "symbole": "'bulle'",
+      "raison": "Même statut que `filou.svg` : choisi par le père le même jour, même graine par compagnon (g1001), colorisation et verrou encore à faire."
+    },
+    {
+      "fichier": "brouillons/assets/objets/soleil.svg",
+      "consommateur": "contenu/exercices/clairiere/ecole-02-place.json",
+      "symbole": "assets/objets/soleil.svg",
+      "raison": "L'exercice LIVRÉ `clairiere-ecole-02-place` (nœud `clairiere-04`) réclame ce dessin par son chemin final `assets/objets/soleil.svg` (`reserve[].asset`) — commit « Neuf assets manquants trouvés, cinq produits… », 2026-08-08, qui nomme les cinq objets un par un et la cause exacte de leur rejet initial par le critère `fuite` du QC (boîte englobante d'un objet creux, faussement pleine de fond). MESURÉ, aucune entrée à son nom dans `production/assets.lock.json` : la promotion vers `contenu/assets/objets/` — qui déplacerait ce fichier hors du périmètre de ce registre — n'a pas encore eu lieu. Tant qu'elle n'a pas eu lieu, l'exercice qui le réclame ne peut pas se jouer avec son propre décor ; ce n'est donc pas un fichier mort, c'est une promotion en attente, et elle appartient au père."
+    },
+    {
+      "fichier": "brouillons/assets/objets/ballon.svg",
+      "consommateur": "contenu/exercices/clairiere/ecole-02-place.json",
+      "symbole": "assets/objets/ballon.svg",
+      "raison": "Même statut que `soleil.svg` : réclamé par la même `reserve[]`, même promotion en attente."
+    },
+    {
+      "fichier": "brouillons/assets/objets/oiseau.svg",
+      "consommateur": "contenu/exercices/clairiere/ecole-02-place.json",
+      "symbole": "assets/objets/oiseau.svg",
+      "raison": "Même statut que `soleil.svg` : réclamé par la même `reserve[]`, même promotion en attente."
+    },
+    {
+      "fichier": "brouillons/assets/objets/poisson.svg",
+      "consommateur": "contenu/exercices/clairiere/ecole-02-place.json",
+      "symbole": "assets/objets/poisson.svg",
+      "raison": "Même statut que `soleil.svg` : réclamé par la même `reserve[]`, même promotion en attente."
+    },
+    {
+      "fichier": "brouillons/assets/objets/parapluie.svg",
+      "consommateur": "contenu/exercices/clairiere/ecole-02-place.json",
+      "symbole": "assets/objets/parapluie.svg",
+      "raison": "Même statut que `soleil.svg` — et c'est nommément l'objet dont le commit du 2026-08-08 décrit la forme creuse (un dôme et un manche fin) qui faisait échouer à tort le critère `fuite` du QC image, corrigé depuis. Réclamé par la même `reserve[]`, même promotion en attente."
     }
   ],
   "archives": [

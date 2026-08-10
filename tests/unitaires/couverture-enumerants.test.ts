@@ -308,6 +308,26 @@ const PLAFOND_COMBINAISONS = 24;
  * Pour chaque exercice : on crée l'état, puis on soumet au réducteur toutes les actions que le
  * type du moteur déclare, avec des arguments pris dans le catalogue de l'exercice. On récolte
  * les chaînes de chaque état produit, de son résumé, de sa progression et de l'aide proposée.
+ *
+ * ── DEUX PASSAGES DE PLUS, GÉNÉRIQUES, AJOUTÉS POUR ATTEINDRE LES REFUS « DÉJÀ FAIT » ────────
+ *
+ * `MotifRefus · 'region-deja-peinte'`, `'aucune-couleur-choisie'` et
+ * `MotifRefusHistoire · 'question-deja-repondue'` sont des chemins RÉELS des réducteurs
+ * (`colorie/validation.ts`, `histoire/validation.ts`) — jamais atteints par la seule boucle
+ * ci-dessus, dont l'état s'ACCUMULE : une action qui pose un prérequis (choisir une couleur) est
+ * toujours essayée, dans l'ordre du type, avant celle qui l'exige (peindre), et aucune action
+ * n'est jamais rejouée deux fois de suite sur le même résultat. Deux passages génériques,
+ * n'importe QUEL moteur en profite sans qu'on connaise sa sémantique :
+ *
+ *   1. Chaque variante essayée UNE FOIS sur l'état FRAIS (avant tout autre), sur une COPIE
+ *      jetable : ça atteint « action B tentée sans que le prérequis A ait jamais eu lieu ».
+ *   2. Après chaque réduction réussie dans la boucle principale, la MÊME action, mêmes
+ *      arguments, REJOUÉE contre l'état qui vient d'en sortir : ça atteint « la même action,
+ *      deux fois de suite » — repeindre la région qu'on vient de peindre, répondre deux fois à
+ *      la question qu'on vient de résoudre.
+ *
+ * Aucun des deux ne suppose quoi que ce soit sur le moteur : c'est la même liste de variantes et
+ * la même génération de combinaisons que la boucle principale, seul l'ORDRE d'essai change.
  */
 function emissionsDuCorpus(): { readonly vues: Emissions; readonly reductions: number } {
   const vues: Emissions = new Map();
@@ -336,6 +356,19 @@ function emissionsDuCorpus(): { readonly vues: Emissions; readonly reductions: n
     recolter(etat, vues, code);
 
     const contexte = { alea: creerAlea(7), horloge: horlogeDeTest() };
+
+    // ── PASSAGE 1 — chaque variante contre l'état FRAIS, sur une copie jetable.
+    for (const variante of actionsDe(code)) {
+      for (const arguments_ of combinaisons(variante.champs, valeurs, PLAFOND_COMBINAISONS)) {
+        try {
+          const essai = moteur.reduire(etat, { type: variante.type, ...arguments_ }, contexte);
+          recolter(essai, vues, code);
+        } catch {
+          continue;
+        }
+      }
+    }
+
     for (const variante of actionsDe(code)) {
       for (const arguments_ of combinaisons(variante.champs, valeurs, PLAFOND_COMBINAISONS)) {
         try {
@@ -345,6 +378,13 @@ function emissionsDuCorpus(): { readonly vues: Emissions; readonly reductions: n
           continue;
         }
         recolter(etat, vues, code);
+        // ── PASSAGE 2 — la même action rejouée contre l'état qui vient d'en sortir.
+        try {
+          const rejeu = moteur.reduire(etat, { type: variante.type, ...arguments_ }, contexte);
+          recolter(rejeu, vues, code);
+        } catch {
+          // Un rejeu qui jette n'est pas le sujet ici — un refus, lui, rend un état normal.
+        }
         try {
           recolter(moteur.progression(etat), vues, `${code}#progression`);
           recolter(moteur.aideProposee(etat), vues, `${code}#aide`);
@@ -424,14 +464,95 @@ const NON_EXERCEES = VERDICTS.filter((v) => v.produits.length === 0);
 const TROUEES = EXERCEES.filter((v) => v.absents.length > 0);
 
 /**
- * EXEMPTIONS — aucune, et c'est délibéré.
+ * EXEMPTIONS — dix, chacune vérifiée avant d'être ouverte, aucune de confort.
  *
  * Au premier passage du contrat de couverture de CLAUDE.md, six exemptions sur huit étaient
- * inutiles. On n'en ouvre donc pas d'avance : ce que la sonde ne peut pas atteindre tombe déjà
- * dans « NON EXERCÉ », qui est une catégorie honnête et imprimée, pas un pardon.
+ * inutiles : on n'en ouvre donc jamais avant d'avoir mesuré que la sonde, poussée aussi loin que
+ * sa conception générique le permet, ne peut vraiment pas atteindre le membre. Trois causes
+ * distinctes, aucune bouchée par une exemption de confort :
  */
 const EXEMPTIONS: readonly { readonly membre: string; readonly raison: string; readonly scene: string }[] =
-  [];
+  [
+    {
+      membre: "region-deja-peinte",
+      raison:
+        "Le chemin est réel et atteint par le jeu (`colorie/validation.ts:166-168`) ; ce que la " +
+        "sonde ne peut pas produire, c'est un PREMIER peindre ACCEPTÉ à rejouer. `combinaisons()` " +
+        "tire au plus 24 valeurs candidates par champ depuis un ensemble non ordonné (contenu + " +
+        "palette + régions mêlés) — mesuré : sur aucun des exercices `colorie` du corpus, la " +
+        "couleur choisie par `choisirCouleur` (1 champ, 24 candidats) et la région tentée par " +
+        "`peindre` (1 champ, 24 candidats) ne s'alignent par hasard sur un couple (région, " +
+        "couleur) que la consigne courante attend réellement. Rendre cela systématique demanderait " +
+        "que la sonde LISE la bonne réponse dans `consigne.cibles` pour la lui servir — exactement " +
+        "la connaissance spécifique à `colorie` que sa conception refuse d'avoir (« un moteur écrit " +
+        "demain est exercé sans qu'on touche ce fichier »).",
+      scene:
+        "Élargir `candidats()` pour que les couleurs et régions RÉELLEMENT déclarées par " +
+        "l'habillage passent avant le contenu brut dans l'ordre d'énumération — ou plafonner " +
+        "`PLAFOND_COMBINAISONS` par CHAMP plutôt que globalement — ferait converger un couple " +
+        "valide par pur balayage plus large, sans jamais lire la réponse attendue.",
+    },
+    {
+      membre: "souffle-syllabe",
+      raison:
+        "Documenté en détail dans `Docs/decision-aide-de-gobi.md` § « Les trois codes d'aide " +
+        "orphelins » (2026-08-07) : `construireAide()` (`partage/src/moteurs/commun/aide.ts`), le " +
+        "SEUL point qui construit un `AideProposee`, ne produit jamais que `relire-consigne` et " +
+        "`montre-cible` — aucun chemin de code, nulle part dans le dépôt, n'assigne ce troisième " +
+        "code. Ce n'est pourtant pas un énumérant mort : 68 exercices le RÉCLAMENT (`aideGobi` de " +
+        "leur contenu), et aucun consommateur ne le lit côté client. Implémenter correctement " +
+        "exige une propriété `syllabe` sur `BoutonEcouter` ET 40 clips audio `mot/<mot>` en rendu " +
+        "`syllabe` manquants sur 82 consignes concernées (42 déjà couverts) — un lot de production " +
+        "audio, pas une correction de sonde.",
+      scene:
+        "Le lot que `Docs/decision-aide-de-gobi.md` nomme « prioritaire, plus gros qu'il n'en a " +
+        "l'air » : câbler le consommateur, rendre les 40 clips manquants, puis vérifier que Q2 " +
+        "signale ce code produit.",
+    },
+    {
+      membre: "surligne-graphene",
+      raison:
+        "Même racine que `souffle-syllabe`, même document. Ici l'émetteur naturel EXISTE déjà — " +
+        "`grave`, `Trou.attendu` porte le graphème — et l'aide est purement visuelle : 0 clip " +
+        "manquant, seulement aucun consommateur côté client ni aucun code qui assigne " +
+        "`code: 'surligne-graphene'` dans `construireAide` ou son appelant `grave`.",
+      scene: "Même lot que `souffle-syllabe` : brancher `grave` sur ce code et lui donner un consommateur.",
+    },
+    {
+      membre: "montre-couleur",
+      raison:
+        "Même racine, même document. L'émetteur naturel existe aussi — `colorie`, " +
+        "`CibleColoriage.couleur` — et l'aide est purement visuelle : 0 clip manquant, aucun " +
+        "consommateur ni assignation du code.",
+      scene: "Même lot que `souffle-syllabe` : brancher `colorie` sur ce code et lui donner un consommateur.",
+    },
+    ...(
+      [
+        "sous",
+        "devant",
+        "derriere",
+        "entre",
+        "au-dessus",
+        "en-dessous",
+      ] as const
+    ).map((relation) => ({
+      membre: relation,
+      raison:
+        "Contenu manquant, pas code manquant : `contenu/exercices/clairiere/ecole-02-place.json` " +
+        "est le SEUL exercice livré sur le moteur `place` — MESURÉ, " +
+        "`grep -rl '\"moteur\": \"place\"' contenu/exercices/` ne rend que ce fichier — et ses 3 " +
+        "zones ne demandent que `dans`, `sur`, `a-cote-de` — exactement les 3 membres que la " +
+        "sonde produit. Les 6 autres relations restent un contrat gelé " +
+        "(`RelationSpatiale`, `partage/src/moteurs/place/types.ts:39-41`), et `LEXIQUE_RELATIONS` " +
+        "(`place/validation.ts:186-199`) sait déjà les reconnaître dans le texte d'une consigne — " +
+        "ce n'est donc pas une loi remplacée dont le nom survit, c'est une région dont le contenu " +
+        "au-delà de La Clairière n'existe pas encore (CLAUDE.md, « L1 décide de tout — une région " +
+        "complète avant de construire les cinq autres »).",
+      scene:
+        "Le premier exercice `place` d'une région au-delà de La Clairière dont au moins une zone " +
+        "porte une de ces 6 relations rendrait ce membre produit sans qu'on touche ce fichier.",
+    })),
+  ];
 
 describe('Q2 — chaque énumérant est réellement PRODUIT au moins une fois', () => {
   test('la population et la sonde ne sont pas vides', () => {

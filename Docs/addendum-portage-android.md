@@ -256,6 +256,15 @@ restent signalés à l'identique.
 
 ## 6quater. Lot 5 — livré : build autonome, projet Android, APK vérifié sur émulateur
 
+**`construire-apk.bat`, à la racine, même famille que `demarrer.bat`/`verifier.bat`.** Enchaîne
+partage → client en mode autonome → `cap sync android` → `gradlew assembleDebug`, JDK 21 et SDK
+détectés automatiquement (`outils/jdk-21/`, `ANDROID_HOME` ou l'emplacement standard), et régénère
+`client/android/local.properties` (jamais versionné, propre à chaque machine) à chaque lancement.
+Piège rencontré en le testant, gardé en commentaire dans le script : sur une machine où
+`NoDefaultCurrentDirectoryInExePath` est posée, `gradlew.bat` invoqué par son nom nu depuis son
+propre dossier n'est « pas reconnu » — le script l'appelle donc en `.\gradlew.bat`, résolu quelle
+que soit cette variable.
+
 **Cible de build.** `client/package.json` : `construire:autonome` → `vite build --mode autonome`,
 sortie dans `dist-autonome/` (troisième sortie, jamais confondue avec `dist/` LAN ni `dist-test/`
 Playwright — `client/vite.config.ts`). Script racine miroir : `npm run construire:autonome`.
