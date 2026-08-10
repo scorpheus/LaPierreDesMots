@@ -24,6 +24,7 @@ import type { ActionPlace, ContenuPlace, EtatPlace, Point } from '@pierre/partag
 import type { ProprietesMoteur } from '../types.js';
 import { ScenePlace } from './ScenePlace.js';
 import { Reserve } from './Reserve.js';
+import { urlAsset } from '../../api/client.js';
 
 /** Cadence du `battementHorloge`. Le moteur ne connaît aucun `setTimeout` : c'est ici. */
 const PERIODE_BATTEMENT_MS = 1000;
@@ -63,7 +64,7 @@ export function MoteurPlace(
     let annule = false;
     const fichier = habillage.scene.fichier;
     if (typeof fetch !== 'function' || fichier.length === 0) return undefined;
-    fetch(`/api/contenu/assets/${fichier}`)
+    fetch(urlAsset(fichier))
       .then((reponse) => (reponse.ok ? reponse.text() : null))
       .then((texte) => {
         if (annule || texte === null) return;

@@ -37,6 +37,7 @@ import { AudioMuet, VoixMuette } from '@pierre/partage/factices';
 import type { DatabaseSync } from 'node:sqlite';
 import type { FastifyInstance } from 'fastify';
 import type { Alea, Habillage, Horloge } from '@pierre/partage';
+import type { Base } from '@pierre/partage/base';
 
 /** Instant de référence de toute la suite — annexe T § 2.2, cité à la lettre. */
 export const INSTANT_DE_REFERENCE = '2026-09-01T08:00:00Z';
@@ -130,6 +131,8 @@ export const DOSSIER_MIGRATIONS = join(RACINE_DEPOT, 'serveur', 'migrations') + 
 export interface ApplicationDeTest {
   readonly application: FastifyInstance;
   readonly base: DatabaseSync;
+  /** L'adaptateur `Base` (Docs/addendum-portage-android.md § 4) sur la même connexion que `base`. */
+  readonly baseAsync: Base;
   fermer(): Promise<void>;
 }
 
@@ -141,17 +144,30 @@ export interface ApplicationDeTest {
  * `unitaires` et `composants`, qui n'ont rien à faire de Fastify ni de `node:sqlite`.
  */
 export async function monterApplication(): Promise<ApplicationDeTest> {
-  const [{ construireApplication }, { ouvrirBase }, { appliquerMigrations }, factices] =
-    await Promise.all([
-      import('@serveur/application'),
-      import('@serveur/base/connexion'),
-      import('@serveur/base/migrations'),
-      import('@pierre/partage/factices')
-    ]);
+  const [
+    { construireApplication },
+    { ouvrirBase },
+    { appliquerMigrations },
+    { creerBaseNodeSqlite },
+    factices
+  ] = await Promise.all([
+    import('@serveur/application'),
+    import('@serveur/base/connexion'),
+    import('@serveur/base/migrations'),
+    import('@serveur/base/adaptateur-node-sqlite'),
+    import('@pierre/partage/factices')
+  ]);
 
+  // `base` reste la connexion `DatabaseSync` BRUTE, exposée telle quelle aux tests qui font
+  // encore de l'assertion en SQL direct (`contexte.base.prepare(...)`, 3 fichiers) — aucun
+  // n'a besoin de changer pour le portage Android. `baseAsync` est l'adaptateur `Base`
+  // (Docs/addendum-portage-android.md § 4) que l'application monte réellement en interne :
+  // les deux vues coexistent sur la MÊME connexion, une lecture directe voit donc toujours
+  // ce que l'application vient d'écrire, et réciproquement.
   const base = ouvrirBase(':memory:');
+  const baseAsync = creerBaseNodeSqlite(base);
   const horlogeApplication = horlogeDeTest();
-  appliquerMigrations(base, DOSSIER_MIGRATIONS, horlogeApplication);
+  await appliquerMigrations(baseAsync, DOSSIER_MIGRATIONS, horlogeApplication);
 
   // ⚠ Hypothèse de L-G : le contrat § 11.2 exporte `DepotContenuMemoire` et le type
   // `ContenuEnMemoire` sans en donner la forme. On passe les trois collections de la v1 ;
@@ -164,7 +180,7 @@ export async function monterApplication(): Promise<ApplicationDeTest> {
   });
 
   const application = construireApplication({
-    base,
+    base: baseAsync,
     contenu,
     horloge: horlogeApplication,
     alea: aleaDeTest(),
@@ -175,6 +191,7 @@ export async function monterApplication(): Promise<ApplicationDeTest> {
   return {
     application,
     base,
+    baseAsync,
     async fermer() {
       await application.close();
       base.close();

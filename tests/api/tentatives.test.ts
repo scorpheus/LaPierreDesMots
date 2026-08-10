@@ -251,8 +251,8 @@ describe('le journal fait foi — append-only', () => {
     }
     const incrementale = progressionEnBase(profilId);
 
-    const { recalculerProgression } = await import('@serveur/depots/progression');
-    recalculerProgression(contexte.base, profilId);
+    const { recalculerProgression } = await import('@pierre/partage/base');
+    await recalculerProgression(contexte.baseAsync, profilId);
     const recalculee = progressionEnBase(profilId);
 
     expect(recalculee).toEqual(incrementale);

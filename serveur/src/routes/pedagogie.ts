@@ -20,9 +20,7 @@ import type { EtatMaitrise, ItemLeitner } from '@pierre/partage';
 
 import type { ContexteServeur } from '../configuration.js';
 import { CODES_ERREUR, erreurApi } from '../configuration.js';
-import { lireRevisionsDues } from '../depots/leitner.js';
-import { lireMaitrises } from '../depots/maitrise.js';
-import { profilExiste } from '../depots/profils.js';
+import { lireMaitrises, lireRevisionsDues, profilExiste } from '@pierre/partage/base';
 
 interface ParametresProfil {
   readonly id: string;
@@ -32,14 +30,14 @@ export function enregistrerRoutesPedagogie(
   app: FastifyInstance,
   contexte: ContexteServeur
 ): void {
-  app.get('/api/profils/:id/maitrise', (requete, reponse) => {
+  app.get('/api/profils/:id/maitrise', async (requete, reponse) => {
     const { id } = requete.params as ParametresProfil;
-    if (!profilExiste(contexte.base, id)) {
+    if (!(await profilExiste(contexte.base, id))) {
       return reponse
         .code(404)
         .send(erreurApi(CODES_ERREUR.introuvable, `Profil inconnu : ${id}`));
     }
-    const corps: readonly EtatMaitrise[] = lireMaitrises(contexte.base, id);
+    const corps: readonly EtatMaitrise[] = await lireMaitrises(contexte.base, id);
     return reponse.code(200).send(corps);
   });
 
@@ -49,14 +47,14 @@ export function enregistrerRoutesPedagogie(
    * L'instant vient de `contexte.horloge` : en test elle est figee, et c'est ce qui permet de
    * verifier qu'un item revient bien a J+35 sans attendre cinq semaines (annexe T § 2.2).
    */
-  app.get('/api/profils/:id/revisions', (requete, reponse) => {
+  app.get('/api/profils/:id/revisions', async (requete, reponse) => {
     const { id } = requete.params as ParametresProfil;
-    if (!profilExiste(contexte.base, id)) {
+    if (!(await profilExiste(contexte.base, id))) {
       return reponse
         .code(404)
         .send(erreurApi(CODES_ERREUR.introuvable, `Profil inconnu : ${id}`));
     }
-    const corps: readonly ItemLeitner[] = lireRevisionsDues(
+    const corps: readonly ItemLeitner[] = await lireRevisionsDues(
       contexte.base,
       id,
       contexte.horloge.maintenant()

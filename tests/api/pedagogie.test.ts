@@ -28,29 +28,38 @@ import type { FastifyInstance } from 'fastify';
 import type {
   Competence, EtatMaitrise, Exercice, Habillage, ItemLeitner, ModeReponse, Noeud,
 } from '@pierre/partage';
+import type { Base } from '@pierre/partage/base';
 
 const DOSSIER_MIGRATIONS = join(RACINE_DEPOT, 'serveur', 'migrations') + sep;
 
 interface Harnais {
   readonly application: FastifyInstance;
   readonly base: DatabaseSync;
+  readonly baseAsync: Base;
   fermer(): Promise<void>;
 }
 
 let contexte: Harnais;
 
 async function monter(): Promise<Harnais> {
-  const [{ construireApplication }, { ouvrirBase }, { appliquerMigrations }, factices] =
-    await Promise.all([
-      import('@serveur/application'),
-      import('@serveur/base/connexion'),
-      import('@serveur/base/migrations'),
-      import('@pierre/partage/factices'),
-    ]);
+  const [
+    { construireApplication },
+    { ouvrirBase },
+    { appliquerMigrations },
+    { creerBaseNodeSqlite },
+    factices
+  ] = await Promise.all([
+    import('@serveur/application'),
+    import('@serveur/base/connexion'),
+    import('@serveur/base/migrations'),
+    import('@serveur/base/adaptateur-node-sqlite'),
+    import('@pierre/partage/factices'),
+  ]);
 
   const base = ouvrirBase(':memory:');
+  const baseAsync = creerBaseNodeSqlite(base);
   const horloge = horlogeDeTest();
-  appliquerMigrations(base, DOSSIER_MIGRATIONS, horloge);
+  await appliquerMigrations(baseAsync, DOSSIER_MIGRATIONS, horloge);
 
   const contenu = new factices.DepotContenuMemoire({
     exercices: [lireJson<Exercice>('contenu/exercices/clairiere/ecole-01.json')],
@@ -60,7 +69,7 @@ async function monter(): Promise<Harnais> {
   });
 
   const application = construireApplication({
-    base,
+    base: baseAsync,
     contenu,
     horloge,
     alea: aleaDeTest(),
@@ -71,6 +80,7 @@ async function monter(): Promise<Harnais> {
   return {
     application,
     base,
+    baseAsync,
     async fermer() {
       await application.close();
       base.close();
@@ -191,15 +201,15 @@ describe('POST /api/tentatives alimente le journal d’étapes', () => {
     ]);
     expect(reponse.statusCode).toBe(201);
 
-    const { compterEtapes, compterConfusions, listerEtapes } = await import('@serveur/depots/etapes');
+    const { compterEtapes, compterConfusions, listerEtapes } = await import('@pierre/partage/base');
 
     // Depuis Q-INT-4, une étape produit une ligne PAR compétence déclarée. On ne peut donc plus
     // désigner « la deuxième étape » par `etapes[1]` : cet index tombe désormais sur la seconde
     // COMPÉTENCE de la première étape. On cherche par rang, qui identifie l'étape elle-même.
-    const etapes = listerEtapes(contexte.base, profil);
+    const etapes = await listerEtapes(contexte.baseAsync, profil);
     const rangs = new Set(etapes.map((ligne) => ligne.rang));
     expect(rangs.size, 'deux étapes envoyées, deux rangs journalisés').toBe(2);
-    expect(compterEtapes(contexte.base, profil)).toBeGreaterThanOrEqual(rangs.size);
+    expect(await compterEtapes(contexte.baseAsync, profil)).toBeGreaterThanOrEqual(rangs.size);
 
     const premiere = etapes.filter((ligne) => ligne.rang === 0);
     const seconde = etapes.filter((ligne) => ligne.rang === 1);
@@ -209,7 +219,7 @@ describe('POST /api/tentatives alimente le journal d’étapes', () => {
 
     // D23 : une confusion journalisée porte son AXE. Un moteur qui rendrait `null` partout
     // viderait le top 10 du dashboard sans que personne ne s'en aperçoive.
-    const comptes = compterConfusions(contexte.base, profil);
+    const comptes = await compterConfusions(contexte.baseAsync, profil);
     expect(comptes.avecConfusion).toBe(1);
     expect(comptes.avecAxe).toBe(1);
   });
@@ -266,8 +276,8 @@ describe('idempotence de la mise à jour', () => {
     expect(premier.statusCode).toBe(201);
 
     // Ce que le premier envoi a produit fait référence : c'est sa NON-CROISSANCE qu'on garde.
-    const { compterEtapes: compterApresPremier } = await import('@serveur/depots/etapes');
-    const etapesApresPremier = compterApresPremier(contexte.base, profil);
+    const { compterEtapes: compterApresPremier } = await import('@pierre/partage/base');
+    const etapesApresPremier = await compterApresPremier(contexte.baseAsync, profil);
     expect(etapesApresPremier).toBeGreaterThan(0);
     const apresPremier = await lireMaitrise(profil);
 
@@ -275,11 +285,11 @@ describe('idempotence de la mise à jour', () => {
     expect(second.statusCode).toBe(200);
     expect((second.json() as { deja: boolean }).deja).toBe(true);
 
-    const { compterEtapes } = await import('@serveur/depots/etapes');
+    const { compterEtapes } = await import('@pierre/partage/base');
     // L'idempotence se mesure par l'ABSENCE de croissance, pas par un nombre fixe : le second
     // envoi ne doit rien ajouter, quel que soit le nombre de lignes que le premier a produit
     // (Q-INT-4 : une ligne par compétence déclarée).
-    expect(compterEtapes(contexte.base, profil)).toBe(etapesApresPremier);
+    expect(await compterEtapes(contexte.baseAsync, profil)).toBe(etapesApresPremier);
     expect(await lireMaitrise(profil)).toEqual(apresPremier);
   });
 });
@@ -307,17 +317,18 @@ describe('le recalcul intégral rend exactement l’incrémental (annexe T § T2
     expect(incremental.length).toBeGreaterThan(0);
     expect(incremental[0]?.nbTentatives).toBe(6);
 
-    const { chargerParametresPedagogie, recalculerMaitrise } = await import('@serveur/depots/maitrise');
-    const { lireItems, recalculerLeitner } = await import('@serveur/depots/leitner');
+    const { recalculerMaitrise } = await import('@pierre/partage/base');
+    const { lireItems, recalculerLeitner } = await import('@pierre/partage/base');
+    const { chargerParametresPedagogie } = await import('@serveur/referentiels/pedagogie');
 
     const parametres = chargerParametresPedagogie();
-    const leitnerAvant = lireItems(contexte.base, profil);
+    const leitnerAvant = await lireItems(contexte.baseAsync, profil);
     expect(leitnerAvant.length).toBe(3);
 
-    const recalcule = recalculerMaitrise(contexte.base, profil, parametres);
+    const recalcule = await recalculerMaitrise(contexte.baseAsync, profil, parametres);
     expect(recalcule).toEqual(incremental);
 
-    const leitnerApres = recalculerLeitner(contexte.base, profil, parametres);
+    const leitnerApres = await recalculerLeitner(contexte.baseAsync, profil, parametres);
     expect(leitnerApres).toEqual(leitnerAvant);
   });
 
@@ -325,10 +336,11 @@ describe('le recalcul intégral rend exactement l’incrémental (annexe T § T2
     const profil = await creerProfil();
     await envoyerTentative(profil, [etape({ identifiant: 'toit-ecole', modeReponse: 'colorie' })], 1);
 
-    const { chargerParametresPedagogie, recalculerMaitrise } = await import('@serveur/depots/maitrise');
+    const { recalculerMaitrise } = await import('@pierre/partage/base');
+    const { chargerParametresPedagogie } = await import('@serveur/referentiels/pedagogie');
     const parametres = chargerParametresPedagogie();
-    const une = recalculerMaitrise(contexte.base, profil, parametres);
-    const deux = recalculerMaitrise(contexte.base, profil, parametres);
+    const une = await recalculerMaitrise(contexte.baseAsync, profil, parametres);
+    const deux = await recalculerMaitrise(contexte.baseAsync, profil, parametres);
     expect(deux).toEqual(une);
   });
 
@@ -338,13 +350,14 @@ describe('le recalcul intégral rend exactement l’incrémental (annexe T § T2
       etape({ identifiant: 'frise', modeReponse: 'ordre', nbElements: 5 }),
     ], 1);
 
-    const { listerEtapes } = await import('@serveur/depots/etapes');
-    expect(listerEtapes(contexte.base, profil)[0]?.nbElements).toBe(5);
+    const { listerEtapes } = await import('@pierre/partage/base');
+    expect((await listerEtapes(contexte.baseAsync, profil))[0]?.nbElements).toBe(5);
 
-    const { chargerParametresPedagogie, recalculerMaitrise } = await import('@serveur/depots/maitrise');
-    expect(() =>
-      recalculerMaitrise(contexte.base, profil, chargerParametresPedagogie())
-    ).not.toThrow();
+    const { recalculerMaitrise } = await import('@pierre/partage/base');
+    const { chargerParametresPedagogie } = await import('@serveur/referentiels/pedagogie');
+    await expect(
+      recalculerMaitrise(contexte.baseAsync, profil, chargerParametresPedagogie())
+    ).resolves.not.toThrow();
   });
 });
 
@@ -391,8 +404,8 @@ describe('GET /api/profils/:id/revisions', () => {
     expect(reponse.statusCode).toBe(200);
     expect(reponse.json() as ItemLeitner[]).toEqual([]);
 
-    const { lireItems } = await import('@serveur/depots/leitner');
-    const items = lireItems(contexte.base, profil);
+    const { lireItems } = await import('@pierre/partage/base');
+    const items = await lireItems(contexte.baseAsync, profil);
     expect(items).toHaveLength(1);
     expect(items[0]?.boite).toBe(2);
   });
@@ -410,8 +423,8 @@ describe('étanchéité stricte entre profils (v2 § 11)', () => {
     expect((await lireMaitrise(alma)).length).toBeGreaterThan(0);
     expect(await lireMaitrise(bruno)).toEqual([]);
 
-    const { compterEtapes } = await import('@serveur/depots/etapes');
-    expect(compterEtapes(contexte.base, bruno)).toBe(0);
+    const { compterEtapes } = await import('@pierre/partage/base');
+    expect(await compterEtapes(contexte.baseAsync, bruno)).toBe(0);
   });
 
   it('rend 404 sur un profil inconnu, jamais une liste vide', async () => {

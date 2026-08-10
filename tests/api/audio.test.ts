@@ -46,20 +46,27 @@ interface Montage {
  * préparation n'ait figé l'horloge.
  */
 async function monter(assets: Record<string, unknown>): Promise<Montage> {
-  const [{ construireApplication }, { ouvrirBase }, { appliquerMigrations }, factices] =
-    await Promise.all([
-      import('@serveur/application'),
-      import('@serveur/base/connexion'),
-      import('@serveur/base/migrations'),
-      import('@pierre/partage/factices'),
-    ]);
+  const [
+    { construireApplication },
+    { ouvrirBase },
+    { appliquerMigrations },
+    { creerBaseNodeSqlite },
+    factices
+  ] = await Promise.all([
+    import('@serveur/application'),
+    import('@serveur/base/connexion'),
+    import('@serveur/base/migrations'),
+    import('@serveur/base/adaptateur-node-sqlite'),
+    import('@pierre/partage/factices'),
+  ]);
 
   const base = ouvrirBase(':memory:');
+  const baseAsync = creerBaseNodeSqlite(base);
   const horloge = horlogeDeTest();
-  appliquerMigrations(base, DOSSIER_MIGRATIONS, horloge);
+  await appliquerMigrations(baseAsync, DOSSIER_MIGRATIONS, horloge);
 
   const application = construireApplication({
-    base,
+    base: baseAsync,
     contenu: new factices.DepotContenuMemoire({
       noeuds: [],
       exercices: [],
@@ -208,19 +215,26 @@ describe('la route lit le VRAI disque, pas seulement un dépôt en mémoire', ()
     // frais n'en a pas. Les deux branches assertent quelque chose de vrai — le manifeste
     // réel est servi, ou bien le manifeste VIDE l'est. Aucune ne passe par complaisance.
     // ══════════════════════════════════════════════════════════════════════════════════════
-    const [{ creerDepotContenuDisque }, { construireApplication }, { ouvrirBase }, { appliquerMigrations }] =
-      await Promise.all([
+    const [
+      { creerDepotContenuDisque },
+      { construireApplication },
+      { ouvrirBase },
+      { appliquerMigrations },
+      { creerBaseNodeSqlite }
+    ] = await Promise.all([
         import('@serveur/services/depot-contenu-disque'),
         import('@serveur/application'),
         import('@serveur/base/connexion'),
         import('@serveur/base/migrations'),
+        import('@serveur/base/adaptateur-node-sqlite'),
       ]);
 
     const base = ouvrirBase(':memory:');
+    const baseAsync = creerBaseNodeSqlite(base);
     const horloge = horlogeDeTest();
-    appliquerMigrations(base, DOSSIER_MIGRATIONS, horloge);
+    await appliquerMigrations(baseAsync, DOSSIER_MIGRATIONS, horloge);
     const application = construireApplication({
-      base,
+      base: baseAsync,
       contenu: creerDepotContenuDisque(join(RACINE_DEPOT, 'contenu')),
       horloge,
       alea: aleaDeTest(),

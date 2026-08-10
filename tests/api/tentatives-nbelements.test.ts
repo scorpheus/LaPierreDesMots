@@ -65,6 +65,7 @@ import { contenuPaires } from '../fixtures/moteurs/paires.js';
 import { contenuTri } from '../fixtures/moteurs/tri.js';
 
 import type { DatabaseSync } from 'node:sqlite';
+import type { Base } from '@pierre/partage/base';
 import type { FastifyInstance } from 'fastify';
 import type {
   Competence,
@@ -177,23 +178,31 @@ function resumeDuMoteur(cas: CasMoteur): ResumeTentative {
 interface Harnais {
   readonly application: FastifyInstance;
   readonly base: DatabaseSync;
+  readonly baseAsync: Base;
   fermer(): Promise<void>;
 }
 
 let contexte: Harnais;
 
 async function monter(): Promise<Harnais> {
-  const [{ construireApplication }, { ouvrirBase }, { appliquerMigrations }, factices] =
-    await Promise.all([
-      import('@serveur/application'),
-      import('@serveur/base/connexion'),
-      import('@serveur/base/migrations'),
-      import('@pierre/partage/factices'),
-    ]);
+  const [
+    { construireApplication },
+    { ouvrirBase },
+    { appliquerMigrations },
+    { creerBaseNodeSqlite },
+    factices
+  ] = await Promise.all([
+    import('@serveur/application'),
+    import('@serveur/base/connexion'),
+    import('@serveur/base/migrations'),
+    import('@serveur/base/adaptateur-node-sqlite'),
+    import('@pierre/partage/factices'),
+  ]);
 
   const base = ouvrirBase(':memory:');
+  const baseAsync = creerBaseNodeSqlite(base);
   const horloge = horlogeDeTest();
-  appliquerMigrations(base, DOSSIER_MIGRATIONS, horloge);
+  await appliquerMigrations(baseAsync, DOSSIER_MIGRATIONS, horloge);
 
   const contenu = new factices.DepotContenuMemoire({
     exercices: [lireJson<Exercice>('contenu/exercices/clairiere/ecole-01.json')],
@@ -203,7 +212,7 @@ async function monter(): Promise<Harnais> {
   });
 
   const application = construireApplication({
-    base,
+    base: baseAsync,
     contenu,
     horloge,
     alea: aleaDeTest(),
@@ -214,6 +223,7 @@ async function monter(): Promise<Harnais> {
   return {
     application,
     base,
+    baseAsync,
     async fermer() {
       await application.close();
       base.close();
@@ -394,14 +404,12 @@ describe.each(CAS.map((cas) => [cas.code, cas] as const))(
       ).toBe(201);
 
       // « Le journal fait foi » : la tentative, puis tout ce qui s'en recalcule.
-      const { compterTentatives } = await import('@serveur/depots/tentatives');
-      const { compterEtapes } = await import('@serveur/depots/etapes');
-      const { lireProgressionNoeud } = await import('@serveur/depots/progression');
-      const { lireMaitrises } = await import('@serveur/depots/maitrise');
+      const { compterTentatives, compterEtapes, lireProgressionNoeud, lireMaitrises } =
+        await import('@pierre/partage/base');
 
-      expect(compterTentatives(contexte.base, profil), `${code} : tentative perdue`).toBe(1);
+      expect(await compterTentatives(contexte.baseAsync, profil), `${code} : tentative perdue`).toBe(1);
 
-      const progression = lireProgressionNoeud(contexte.base, profil, 'clairiere-01');
+      const progression = await lireProgressionNoeud(contexte.baseAsync, profil, 'clairiere-01');
       expect(progression, `${code} : aucune progression`).not.toBeNull();
       expect(progression?.nbTentatives).toBe(1);
 
@@ -418,18 +426,18 @@ describe.each(CAS.map((cas) => [cas.code, cas] as const))(
       if (resume.etapes.length > 0) {
         const exerciceServi = lireJson<Exercice>('contenu/exercices/clairiere/ecole-01.json');
         const nbCompetences = exerciceServi.competences.length;
-        expect(compterEtapes(contexte.base, profil), `${code} : journal fin vide`).toBe(
+        expect(await compterEtapes(contexte.baseAsync, profil), `${code} : journal fin vide`).toBe(
           resume.etapes.length * nbCompetences,
         );
-        expect(lireMaitrises(contexte.base, profil).length, `${code} : BKT non alimenté`)
+        expect((await lireMaitrises(contexte.baseAsync, profil)).length, `${code} : BKT non alimenté`)
           .toBeGreaterThan(0);
       }
 
       // Le plancher de D13 vit ICI, dans le journal fin : `pDevinette` refuse `n < 2`, et
       // `journaliserEtapes` borne. C'est cette valeur-là que les DEUX chemins du BKT relisent,
       // l'incrémental comme le recalcul intégral — donc c'est elle qu'il faut vérifier.
-      const { listerEtapes } = await import('@serveur/depots/etapes');
-      for (const ligne of listerEtapes(contexte.base, profil)) {
+      const { listerEtapes } = await import('@pierre/partage/base');
+      for (const ligne of await listerEtapes(contexte.baseAsync, profil)) {
         if (MODES_CALCULES.includes(ligne.modeReponse)) {
           expect(ligne.nbElements, `${code}/${ligne.identifiant} : plancher D13`).toBeGreaterThanOrEqual(
             2,
@@ -441,12 +449,11 @@ describe.each(CAS.map((cas) => [cas.code, cas] as const))(
 
       // Et le recalcul intégral doit rester possible pour toujours : c'est lui qui prouve que
       // le journal n'a pas été empoisonné par une ligne que `pDevinette` refuserait (annexe T § T2).
-      const { chargerParametresPedagogie, recalculerMaitrise } = await import(
-        '@serveur/depots/maitrise'
-      );
-      expect(() =>
-        recalculerMaitrise(contexte.base, profil, chargerParametresPedagogie()),
-      ).not.toThrow();
+      const { recalculerMaitrise } = await import('@pierre/partage/base');
+      const { chargerParametresPedagogie } = await import('@serveur/referentiels/pedagogie');
+      await expect(
+        recalculerMaitrise(contexte.baseAsync, profil, chargerParametresPedagogie()),
+      ).resolves.not.toThrow();
     });
   },
 );
@@ -482,12 +489,11 @@ describe('A1 — filet : une étape mal formée ne fait plus perdre la tentative
     const reponse = await envoyer(profil, 'phrase', resume);
     expect(reponse.statusCode, reponse.payload.slice(0, 300)).toBe(201);
 
-    const { compterTentatives } = await import('@serveur/depots/tentatives');
-    const { compterEtapes, listerEtapes } = await import('@serveur/depots/etapes');
-    const { lireProgressionNoeud } = await import('@serveur/depots/progression');
+    const { compterTentatives, compterEtapes, listerEtapes, lireProgressionNoeud } =
+      await import('@pierre/partage/base');
 
-    expect(compterTentatives(contexte.base, profil)).toBe(1);
-    expect(lireProgressionNoeud(contexte.base, profil, 'clairiere-01')).not.toBeNull();
+    expect(await compterTentatives(contexte.baseAsync, profil)).toBe(1);
+    expect(await lireProgressionNoeud(contexte.baseAsync, profil, 'clairiere-01')).not.toBeNull();
 
     // L'étape saine est journalisée ; la fautive est ÉCARTÉE, jamais complétée d'un défaut
     // inventé — un `p_devinette` supposé ferait monter la maîtrise sur des réponses au hasard.
@@ -497,10 +503,10 @@ describe('A1 — filet : une étape mal formée ne fait plus perdre la tentative
     // on l'exprime donc par les identifiants distincts présents, seule formulation qui reste
     // vraie quel que soit le nombre de compétences de l'exercice.
     const identifiants = new Set(
-      listerEtapes(contexte.base, profil).map((ligne) => ligne.identifiant),
+      (await listerEtapes(contexte.baseAsync, profil)).map((ligne) => ligne.identifiant),
     );
     expect([...identifiants]).toEqual(['phrase-02']);
-    expect(compterEtapes(contexte.base, profil)).toBeGreaterThan(0);
+    expect(await compterEtapes(contexte.baseAsync, profil)).toBeGreaterThan(0);
   });
 
   it('le recalcul intégral reste possible : le journal n’est jamais empoisonné', async () => {
@@ -517,13 +523,12 @@ describe('A1 — filet : une étape mal formée ne fait plus perdre la tentative
       } as unknown as ResumeTentative,
     );
 
-    const { chargerParametresPedagogie, recalculerMaitrise } = await import(
-      '@serveur/depots/maitrise'
-    );
+    const { recalculerMaitrise } = await import('@pierre/partage/base');
+    const { chargerParametresPedagogie } = await import('@serveur/referentiels/pedagogie');
     // Une étape `ordre` sans `nbElements` inscrite au journal ferait lever `recalculerMaitrise`
     // à chaque appel, pour toujours : le rejeu (annexe T § T2) deviendrait impossible.
-    expect(() =>
-      recalculerMaitrise(contexte.base, profil, chargerParametresPedagogie()),
-    ).not.toThrow();
+    await expect(
+      recalculerMaitrise(contexte.baseAsync, profil, chargerParametresPedagogie()),
+    ).resolves.not.toThrow();
   });
 });

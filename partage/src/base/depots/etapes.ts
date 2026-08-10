@@ -16,8 +16,8 @@
 
 import type { AxeMiroir, ModeReponse } from '../../pedagogie/types.js';
 import type { ConfusionObservee } from '../../pedagogie/types.js';
-import type { Horodatage } from '../../identifiants.js';
 import type { NiveauAide } from '../../moteurs/types.js';
+import type { Horodatage } from '../../identifiants.js';
 import { hacherSha256Hex } from '../hachage.js';
 import type { Base } from '../contrat.js';
 

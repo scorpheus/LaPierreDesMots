@@ -26,7 +26,9 @@ import type { FastifyInstance } from 'fastify';
 import { enregistrerRoutesMonde } from '@serveur/routes/monde';
 import { enregistrerRoutesProfils } from '@serveur/routes/profils';
 import { enregistrerRoutesTentatives } from '@serveur/routes/tentatives';
-import { chargerReferentielMonde, enregistrerFormeGobi } from '@serveur/depots/monde';
+import { chargerReferentielMonde } from '@serveur/referentiels/monde';
+import { enregistrerFormeGobi } from '@pierre/partage/base';
+import type { Base } from '@pierre/partage/base';
 import { calculerEtoiles } from '@partage/etoiles';
 import { lireSeuilsCascade } from '@pierre/partage/recompenses';
 
@@ -45,6 +47,7 @@ import {
 /** L'application qui porte les trois modules de routes utiles au lot. */
 let monde: FastifyInstance;
 let base: DatabaseSync;
+let baseAsync: Base;
 
 const horloge = horlogeDeTest();
 
@@ -66,17 +69,19 @@ interface EtatMondeLu {
 }
 
 beforeEach(async () => {
-  const [{ ouvrirBase }, { appliquerMigrations }, factices] = await Promise.all([
+  const [{ ouvrirBase }, { appliquerMigrations }, { creerBaseNodeSqlite }, factices] = await Promise.all([
     import('@serveur/base/connexion'),
     import('@serveur/base/migrations'),
+    import('@serveur/base/adaptateur-node-sqlite'),
     import('@pierre/partage/factices')
   ]);
 
   base = ouvrirBase(':memory:');
-  appliquerMigrations(base, DOSSIER_MIGRATIONS, horloge);
+  baseAsync = creerBaseNodeSqlite(base);
+  await appliquerMigrations(baseAsync, DOSSIER_MIGRATIONS, horloge);
 
   const contexteServeur = {
-    base,
+    base: baseAsync,
     contenu: new factices.DepotContenuMemoire({}),
     horloge,
     alea: aleaDeTest()
@@ -304,7 +309,7 @@ describe('un acquis n’est jamais repris — la régression est TENTÉE (R14)',
     const profil = await creerProfil();
     const referentiel = chargerReferentielMonde();
     for (const forme of referentiel.formes.slice(0, 8)) {
-      enregistrerFormeGobi(base, profil, forme.grapheme, referentiel, horloge);
+      await enregistrerFormeGobi(baseAsync,profil, forme.grapheme, referentiel, horloge);
     }
     expect((await lireMondeHttp(profil)).gobi.stade).toBe('crete');
 
@@ -323,12 +328,12 @@ describe('un acquis n’est jamais repris — la régression est TENTÉE (R14)',
   it('garde la première date d’obtention d’une forme rejouée', async () => {
     const profil = await creerProfil();
     const referentiel = chargerReferentielMonde();
-    enregistrerFormeGobi(base, profil, referentiel.formes[0]!.grapheme, referentiel, horloge);
+    await enregistrerFormeGobi(baseAsync,profil, referentiel.formes[0]!.grapheme, referentiel, horloge);
     const premiere = base
       .prepare('SELECT obtenue_le FROM formes_gobi WHERE profil_id = ?')
       .get(profil) as { obtenue_le: string };
 
-    enregistrerFormeGobi(base, profil, referentiel.formes[0]!.grapheme, referentiel, horloge);
+    await enregistrerFormeGobi(baseAsync,profil, referentiel.formes[0]!.grapheme, referentiel, horloge);
     const lignes = base
       .prepare('SELECT obtenue_le FROM formes_gobi WHERE profil_id = ?')
       .all(profil) as { obtenue_le: string }[];
@@ -452,7 +457,7 @@ describe('étanchéité stricte entre profils — v2 § 11', () => {
       payload: { objet: 'fanion-clairiere' }
     });
     const referentiel = chargerReferentielMonde();
-    enregistrerFormeGobi(base, alma, referentiel.formes[0]!.grapheme, referentiel, horloge);
+    await enregistrerFormeGobi(baseAsync,alma, referentiel.formes[0]!.grapheme, referentiel, horloge);
 
     const monsieurNoe = await lireMondeHttp(noe);
     expect(region(monsieurNoe, 'clairiere').pourcentageColorie).toBe(0);

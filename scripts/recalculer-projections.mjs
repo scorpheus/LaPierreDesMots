@@ -35,6 +35,10 @@
  * journal fait foi »). C'est pourquoi ce script n'écrit PAS de sauvegarde automatique comme
  * `reinitialiser-profil.mjs` : il ne peut rien perdre que le journal ne sache déjà reconstruire.
  *
+ * Passe par le contrat `Base` (Docs/addendum-portage-android.md § 4), comme le reste du dépôt
+ * depuis le portage Android : les dépôts ne vivent plus dans `serveur/src/depots/`, mais dans
+ * `partage/src/base/depots/`, async, et `creerBaseNodeSqlite` est le seul pont vers `node:sqlite`.
+ *
  * Usage :
  *   npm run profil:recalculer -- --lister
  *   npm run profil:recalculer -- --profil Ezékiel              (aperçu, n'écrit rien)
@@ -111,12 +115,12 @@ async function principal() {
     return 1;
   }
 
-  const base = new DatabaseSync(CHEMIN_BASE);
-  base.exec('PRAGMA foreign_keys = ON;');
-  base.exec('PRAGMA busy_timeout = 8000;');
+  const baseSqlite = new DatabaseSync(CHEMIN_BASE);
+  baseSqlite.exec('PRAGMA foreign_keys = ON;');
+  baseSqlite.exec('PRAGMA busy_timeout = 8000;');
 
   try {
-    const liste = profils(base);
+    const liste = profils(baseSqlite);
 
     if (arguments_.includes('--lister') || arguments_.length === 0) {
       console.log(`\nBase : ${CHEMIN_BASE}`);
@@ -167,31 +171,33 @@ async function principal() {
       return 0;
     }
 
-    const [progressionMod, cascadeMod, maitriseMod, leitnerMod] = await Promise.all([
-      chargerModule('serveur/src/depots/progression.ts'),
-      chargerModule('serveur/src/depots/cascade.ts'),
-      chargerModule('serveur/src/depots/maitrise.ts'),
-      chargerModule('serveur/src/depots/leitner.ts'),
-    ]);
+    const [{ creerBaseNodeSqlite }, depots, { chargerSeuilsCascade }, { chargerParametresPedagogie }] =
+      await Promise.all([
+        chargerModule('serveur/src/base/adaptateur-node-sqlite.ts'),
+        chargerModule('partage/src/base/index.ts'),
+        chargerModule('serveur/src/referentiels/recompenses.ts'),
+        chargerModule('serveur/src/referentiels/pedagogie.ts'),
+      ]);
 
-    const seuils = cascadeMod.chargerSeuilsCascade();
-    const parametresPedagogie = maitriseMod.chargerParametresPedagogie();
+    const base = creerBaseNodeSqlite(baseSqlite);
+    const seuils = chargerSeuilsCascade();
+    const parametresPedagogie = chargerParametresPedagogie();
 
     if (arguments_.includes('--tous')) {
       // Les trois reconstructions « toutes les » existent déjà, tables et profils confondus :
       // les appeler ICI est exactement le branchement que Q1 réclamait, sans rien dupliquer.
-      progressionMod.recalculerToutesLesProgressions(base);
-      cascadeMod.recalculerToutesLesCascades(base, seuils);
-      maitriseMod.recalculerToutesLesMaitrises(base, parametresPedagogie);
+      await depots.recalculerToutesLesProgressions(base);
+      await depots.recalculerToutesLesCascades(base, seuils);
+      await depots.recalculerToutesLesMaitrises(base, parametresPedagogie);
       for (const cible of cibles) {
-        leitnerMod.recalculerLeitner(base, String(cible.id), parametresPedagogie);
+        await depots.recalculerLeitner(base, String(cible.id), parametresPedagogie);
       }
     } else {
       const id = String(cibles[0].id);
-      progressionMod.recalculerProgression(base, id);
-      cascadeMod.recalculerCascade(base, id, seuils);
-      maitriseMod.recalculerMaitrise(base, id, parametresPedagogie);
-      leitnerMod.recalculerLeitner(base, id, parametresPedagogie);
+      await depots.recalculerProgression(base, id);
+      await depots.recalculerCascade(base, id, seuils);
+      await depots.recalculerMaitrise(base, id, parametresPedagogie);
+      await depots.recalculerLeitner(base, id, parametresPedagogie);
     }
 
     for (const cible of cibles) {
@@ -200,7 +206,7 @@ async function principal() {
     console.log(`\n${String(cibles.length)} profil(s) recalculé(s).\n`);
     return 0;
   } finally {
-    base.close();
+    baseSqlite.close();
   }
 }
 

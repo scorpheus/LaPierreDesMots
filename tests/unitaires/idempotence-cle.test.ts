@@ -46,14 +46,17 @@
  */
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { deriverCleIdempotence, compterTentatives, enregistrerTentative, listerTentatives } from '@serveur/depots/tentatives';
-import { creerProfil } from '@serveur/depots/profils';
+import { deriverCleIdempotence, compterTentatives, creerProfil, enregistrerTentative, listerTentatives } from '@pierre/partage/base';
 import { ouvrirBase } from '@serveur/base/connexion';
 import { appliquerMigrations } from '@serveur/base/migrations';
+import { creerBaseNodeSqlite } from '@serveur/base/adaptateur-node-sqlite';
+import { chargerSeuilsCascade } from '@serveur/referentiels/recompenses';
+import { chargerReferentielMonde } from '@serveur/referentiels/monde';
 
 import { calculerCleIdempotence } from '@client/api/client';
 
 import type { DatabaseSync } from 'node:sqlite';
+import type { Base } from '@pierre/partage/base';
 import type { ResumeTentative } from '@pierre/partage';
 
 import { DOSSIER_MIGRATIONS, horlogeDeTest } from '../configuration/preparation.js';
@@ -78,7 +81,7 @@ const ENTREES_MINIMUM = VARIATIONS.length * 3;
 
 type Quadruplet = (typeof VARIATIONS)[number]['quadruplet'] | typeof REFERENCE;
 
-function cleServeur(q: Quadruplet): string {
+async function cleServeur(q: Quadruplet): Promise<string> {
   return deriverCleIdempotence(q.profilId, q.noeudId, q.demarreLe, q.graine);
 }
 
@@ -118,20 +121,20 @@ afterEach(() => {
 // ───────────────────────────────────────────────────────────── étage 1 — la formule serveur
 
 describe('la clé du serveur dépend de CHACUNE de ses quatre entrées', () => {
-  it('elle est stable : deux appels avec le même quadruplet rendent la même chaîne', () => {
-    expect(cleServeur(REFERENCE)).toBe(cleServeur(REFERENCE));
+  it('elle est stable : deux appels avec le même quadruplet rendent la même chaîne', async () => {
+    expect(await cleServeur(REFERENCE)).toBe(await cleServeur(REFERENCE));
   });
 
-  it('elle a la forme d’un sha256 : 64 caractères hexadécimaux minuscules', () => {
-    expect(cleServeur(REFERENCE)).toMatch(/^[0-9a-f]{64}$/u);
+  it('elle a la forme d’un sha256 : 64 caractères hexadécimaux minuscules', async () => {
+    expect(await cleServeur(REFERENCE)).toMatch(/^[0-9a-f]{64}$/u);
   });
 
   for (const { entree, quadruplet } of VARIATIONS) {
-    it(`changer \`${entree}\` — et lui seul — change la clé`, () => {
+    it(`changer \`${entree}\` — et lui seul — change la clé`, async () => {
       // C'est CE cas qui attrape M20 : une entrée retirée de la matière du hachage rend ici
       // deux clés identiques, donc deux tentatives distinctes confondues en une.
-      const reference = cleServeur(REFERENCE);
-      const variante = cleServeur(quadruplet);
+      const reference = await cleServeur(REFERENCE);
+      const variante = await cleServeur(quadruplet);
       expect(
         variante,
         `\`${entree}\` ne participe pas à la clé : deux tentatives distinctes la partagent`,
@@ -148,7 +151,7 @@ describe('la clé du client dépend des mêmes quatre entrées, sur ses DEUX che
     // casser l'idempotence sans qu'aucune suite ne bronche — le dépôt le dit lui-même :
     // « deux facons de concatener suffiraient a casser l'idempotence ».
     avecSousCouche();
-    expect(await cleClient(REFERENCE)).toBe(cleServeur(REFERENCE));
+    expect(await cleClient(REFERENCE)).toBe(await cleServeur(REFERENCE));
   });
 
   for (const { entree, quadruplet } of VARIATIONS) {
@@ -157,18 +160,27 @@ describe('la clé du client dépend des mêmes quatre entrées, sur ses DEUX che
       const reference = await cleClient(REFERENCE);
       const variante = await cleClient(quadruplet);
       expect(variante, `\`${entree}\` ne participe pas à la clé du client`).not.toBe(reference);
-      expect(variante, `client et serveur divergent sur \`${entree}\``).toBe(cleServeur(quadruplet));
+      expect(variante, `client et serveur divergent sur \`${entree}\``).toBe(await cleServeur(quadruplet));
     });
   }
 
   it('sans `crypto.subtle`, le repli reste déterministe et large de 64 caractères', async () => {
+    // La référence serveur est calculée AVANT `sansSousCouche()` : depuis le portage Android
+    // (Docs/addendum-portage-android.md § 4), le serveur hache aussi via `globalThis.crypto.
+    // subtle` (portable), et non plus via `node:crypto`. En PRODUCTION le serveur tourne sur
+    // Node 24, où `crypto.subtle` est toujours présent — seul le CLIENT, servi en HTTP clair
+    // sur le LAN, peut en manquer. `sansSousCouche()` ci-dessous simule donc l'environnement du
+    // client, pas celui du serveur ; lui demander une clé fraîche après coup testerait un
+    // scénario serveur qui n'existe pas.
+    const cleServeurDeReference = await cleServeur(REFERENCE);
+
     sansSousCouche();
     const premiere = await cleClient(REFERENCE);
     const seconde = await cleClient(REFERENCE);
     expect(premiere).toBe(seconde);
     expect(premiere).toMatch(/^[0-9a-f]{64}$/u);
     // Le repli n'est PAS un sha256 et n'a pas à l'être ; il doit seulement être stable.
-    expect(premiere).not.toBe(cleServeur(REFERENCE));
+    expect(premiere).not.toBe(cleServeurDeReference);
   });
 
   for (const { entree, quadruplet } of VARIATIONS) {
@@ -196,14 +208,16 @@ const RESUME: ResumeTentative = {
 
 describe('deux nœuds joués au même instant produisent DEUX tentatives au journal', () => {
   let base: DatabaseSync;
+  let baseAsync: Base;
   let profil: string;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     const horloge = horlogeDeTest();
     base = ouvrirBase(':memory:');
-    appliquerMigrations(base, DOSSIER_MIGRATIONS, horloge);
-    profil = creerProfil(
-      base,
+    baseAsync = creerBaseNodeSqlite(base);
+    await appliquerMigrations(baseAsync, DOSSIER_MIGRATIONS, horloge);
+    profil = (await creerProfil(
+      baseAsync,
       {
         prenom: 'Alma',
         avatar: {
@@ -216,20 +230,20 @@ describe('deux nœuds joués au même instant produisent DEUX tentatives au jour
         paletteVariante: 'clairiere',
       },
       horloge,
-    ).id;
+    )).id;
   });
 
   afterEach(() => {
     base.close();
   });
 
-  function enregistrer(noeud: string): ReturnType<typeof enregistrerTentative> {
+  async function enregistrer(noeud: string): ReturnType<typeof enregistrerTentative> {
     // Tout est identique SAUF le nœud : profil, instant de départ, graine. C'est le seul cas
     // de figure où M20 se voit, et c'est celui que la clé est censée distinguer.
     return enregistrerTentative(
-      base,
+      baseAsync,
       {
-        cleIdempotence: deriverCleIdempotence(profil, noeud, REFERENCE.demarreLe, REFERENCE.graine),
+        cleIdempotence: await deriverCleIdempotence(profil, noeud, REFERENCE.demarreLe, REFERENCE.graine),
         profil,
         noeud,
         exercice: `ex-${noeud}`,
@@ -241,40 +255,42 @@ describe('deux nœuds joués au même instant produisent DEUX tentatives au jour
         resume: RESUME,
       },
       horlogeDeTest(),
+      chargerSeuilsCascade(),
+      chargerReferentielMonde(),
     );
   }
 
-  it('la seconde n’est pas avalée comme un doublon — « l’enfant termine, rien n’est sauvé »', () => {
-    const premiere = enregistrer('clairiere-03');
-    const seconde = enregistrer('clairiere-04');
+  it('la seconde n’est pas avalée comme un doublon — « l’enfant termine, rien n’est sauvé »', async () => {
+    const premiere = await enregistrer('clairiere-03');
+    const seconde = await enregistrer('clairiere-04');
 
     expect(premiere.deja, 'la première tentative doit être insérée').toBe(false);
     expect(
       seconde.deja,
       'la seconde tentative est prise pour un doublon : la clé ne distingue plus les nœuds',
     ).toBe(false);
-    expect(compterTentatives(base, profil), 'tentatives au journal').toBe(2);
+    expect(await compterTentatives(baseAsync, profil), 'tentatives au journal').toBe(2);
   });
 
-  it('leurs identifiants `tnt-…` sont distincts et bien formés', () => {
+  it('leurs identifiants `tnt-…` sont distincts et bien formés', async () => {
     // `deriverIdentifiant` n'est pas exporté ; il n'est observable que par ici.
-    const premiere = enregistrer('clairiere-03');
-    const seconde = enregistrer('clairiere-04');
+    const premiere = await enregistrer('clairiere-03');
+    const seconde = await enregistrer('clairiere-04');
     expect(premiere.tentative.id).toMatch(/^tnt-[0-9a-f]{16}$/u);
     expect(seconde.tentative.id).toMatch(/^tnt-[0-9a-f]{16}$/u);
     expect(seconde.tentative.id).not.toBe(premiere.tentative.id);
-    expect(new Set(listerTentatives(base, profil).map((t) => t.id)).size).toBe(2);
+    expect(new Set((await listerTentatives(baseAsync, profil)).map((t) => t.id)).size).toBe(2);
   });
 
-  it('le renvoi EXACT de la même tentative, lui, reste un doublon — l’idempotence tient', () => {
+  it('le renvoi EXACT de la même tentative, lui, reste un doublon — l’idempotence tient', async () => {
     // Contrôle négatif du cas précédent : sans lui, un test vert prouverait seulement qu'on
     // a cassé l'idempotence, pas qu'on l'a rendue exacte.
-    const premiere = enregistrer('clairiere-03');
-    const renvoi = enregistrer('clairiere-03');
+    const premiere = await enregistrer('clairiere-03');
+    const renvoi = await enregistrer('clairiere-03');
     expect(premiere.deja).toBe(false);
     expect(renvoi.deja, 'un double tap doit être absorbé, jamais doublé').toBe(true);
     expect(renvoi.tentative.id).toBe(premiere.tentative.id);
-    expect(compterTentatives(base, profil)).toBe(1);
+    expect(await compterTentatives(baseAsync, profil)).toBe(1);
   });
 });
 

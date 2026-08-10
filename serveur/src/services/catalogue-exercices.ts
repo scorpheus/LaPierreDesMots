@@ -31,8 +31,6 @@
 import { readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
 
-import type { DatabaseSync } from 'node:sqlite';
-
 import type {
   CodeCompetence,
   CodeMoteur,
@@ -43,8 +41,8 @@ import type {
 } from '@pierre/partage';
 import type { CatalogueGalerie, EntreeGalerie, StatutValidation } from '@pierre/partage/parent';
 import { construireCatalogue } from '@pierre/partage/parent';
-
-import { listerRelecture } from '../depots/parent.js';
+import { listerRelecture } from '@pierre/partage/base';
+import type { Base } from '@pierre/partage/base';
 
 /** Forme minimale attendue d'un JSON d'exercice. Rien n'est supposé au-delà. */
 interface ExerciceLu {
@@ -78,7 +76,7 @@ interface FichierJson {
  * une divergence de plus à surveiller.
  */
 export async function construireCatalogueExercices(
-  base: DatabaseSync,
+  base: Base,
   racineDepot: string,
   racineContenu: string
 ): Promise<CatalogueGalerie> {
@@ -88,7 +86,7 @@ export async function construireCatalogueExercices(
   ]);
 
   const regionParNoeud = indexerRegions(fichiersNoeuds);
-  const statutParExercice = indexerStatuts(base);
+  const statutParExercice = await indexerStatuts(base);
 
   const entrees: EntreeGalerie[] = [];
   for (const fichier of fichiersExercices) {
@@ -111,9 +109,9 @@ export async function construireCatalogueExercices(
  * dans `contenu/exercices/` » (CLAUDE.md), « aucun contenu n'atteint l'enfant sans validation
  * humaine ». Un exercice encore dans la file porte, lui, le statut que la file lui donne.
  */
-function indexerStatuts(base: DatabaseSync): ReadonlyMap<string, StatutValidation> {
+async function indexerStatuts(base: Base): Promise<ReadonlyMap<string, StatutValidation>> {
   const index = new Map<string, StatutValidation>();
-  for (const entree of listerRelecture(base)) {
+  for (const entree of await listerRelecture(base)) {
     index.set(String(entree.exercice), entree.statut);
   }
   return index;

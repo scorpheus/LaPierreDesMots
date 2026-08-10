@@ -19,6 +19,7 @@ import {
 import type { DatabaseSync } from 'node:sqlite';
 import type { FastifyInstance } from 'fastify';
 import type { Competence, Exercice, Noeud, PlanSortie, TempsNoeud } from '@pierre/partage';
+import type { Base } from '@pierre/partage/base';
 
 const DOSSIER_MIGRATIONS = join(RACINE_DEPOT, 'serveur', 'migrations') + sep;
 
@@ -64,23 +65,31 @@ function contenuDeTest(): { exercices: Exercice[]; noeuds: Noeud[] } {
 interface Harnais {
   readonly application: FastifyInstance;
   readonly base: DatabaseSync;
+  readonly baseAsync: Base;
   fermer(): Promise<void>;
 }
 
 let contexte: Harnais;
 
 async function monter(): Promise<Harnais> {
-  const [{ construireApplication }, { ouvrirBase }, { appliquerMigrations }, factices] =
-    await Promise.all([
-      import('@serveur/application'),
-      import('@serveur/base/connexion'),
-      import('@serveur/base/migrations'),
-      import('@pierre/partage/factices'),
-    ]);
+  const [
+    { construireApplication },
+    { ouvrirBase },
+    { appliquerMigrations },
+    { creerBaseNodeSqlite },
+    factices
+  ] = await Promise.all([
+    import('@serveur/application'),
+    import('@serveur/base/connexion'),
+    import('@serveur/base/migrations'),
+    import('@serveur/base/adaptateur-node-sqlite'),
+    import('@pierre/partage/factices'),
+  ]);
 
   const base = ouvrirBase(':memory:');
+  const baseAsync = creerBaseNodeSqlite(base);
   const horloge = horlogeDeTest();
-  appliquerMigrations(base, DOSSIER_MIGRATIONS, horloge);
+  await appliquerMigrations(baseAsync, DOSSIER_MIGRATIONS, horloge);
 
   const { exercices, noeuds } = contenuDeTest();
   const contenu = new factices.DepotContenuMemoire({
@@ -91,13 +100,14 @@ async function monter(): Promise<Harnais> {
   });
 
   const application = construireApplication({
-    base, contenu, horloge, alea: aleaDeTest(), racineClient: null,
+    base: baseAsync, contenu, horloge, alea: aleaDeTest(), racineClient: null,
   });
   await application.ready();
 
   return {
     application,
     base,
+    baseAsync,
     async fermer() {
       await application.close();
       base.close();
@@ -186,10 +196,10 @@ describe('les révisions dues entrent au rang de révision, et nulle part ailleu
     const profil = await creerProfil();
 
     // Un item Leitner déjà dû : échéance à l'instant figé de l'application.
-    const { appliquerRevue } = await import('@serveur/depots/leitner');
-    const { chargerParametresPedagogie } = await import('@serveur/depots/maitrise');
+    const { appliquerRevue } = await import('@pierre/partage/base');
+    const { chargerParametresPedagogie } = await import('@serveur/referentiels/pedagogie');
     const parametres = chargerParametresPedagogie();
-    appliquerRevue(contexte.base, profil, 'gph.a', false, parametres, '2026-08-01T08:00:00.000Z');
+    await appliquerRevue(contexte.baseAsync, profil, 'gph.a', false, parametres, '2026-08-01T08:00:00.000Z');
 
     const plan = (await composer(profil)).json() as PlanSortie;
     const porteuses = plan.etapes.filter((e) => e.revisions.length > 0);

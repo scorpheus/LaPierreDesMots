@@ -63,8 +63,8 @@ import type {
 } from '@pierre/partage';
 import { regionsOuvertes } from '@pierre/partage/monde';
 
-import { chargerReferentielMonde } from '@serveur/depots/monde';
-import type { ReferentielMonde } from '@serveur/depots/monde';
+import { chargerReferentielMonde } from '@serveur/referentiels/monde';
+import type { ReferentielMonde } from '@pierre/partage/base';
 import { enregistrerRoutesContenu } from '@serveur/routes/contenu';
 import { enregistrerRoutesMonde } from '@serveur/routes/monde';
 import { enregistrerRoutesPedagogie } from '@serveur/routes/pedagogie';
@@ -220,17 +220,22 @@ export interface OptionsAtelier {
  * et sans devenir un second écrivain de `serveur/src/application.ts`.
  */
 export async function monterAtelier(options: OptionsAtelier = {}): Promise<AtelierVecu> {
-  const [{ ouvrirBase }, { appliquerMigrations }, factices] = await Promise.all([
+  const [{ ouvrirBase }, { appliquerMigrations }, { creerBaseNodeSqlite }, factices] = await Promise.all([
     import('@serveur/base/connexion'),
     import('@serveur/base/migrations'),
+    import('@serveur/base/adaptateur-node-sqlite'),
     import('@pierre/partage/factices')
   ]);
 
   const horloge = options.horloge ?? horlogeDeTest();
   let base = options.base;
+  let baseAsync;
   if (base === undefined) {
     base = ouvrirBase(':memory:');
-    appliquerMigrations(base, DOSSIER_MIGRATIONS, horloge);
+    baseAsync = creerBaseNodeSqlite(base);
+    await appliquerMigrations(baseAsync, DOSSIER_MIGRATIONS, horloge);
+  } else {
+    baseAsync = creerBaseNodeSqlite(base);
   }
 
   const catalogue = catalogueDuDepot();
@@ -246,7 +251,7 @@ export async function monterAtelier(options: OptionsAtelier = {}): Promise<Ateli
       ? referentielComplet()
       : referentielTronque(options.noeudsParRegion);
 
-  const contexte = { base, contenu, horloge, alea: aleaDeTest() };
+  const contexte = { base: baseAsync, contenu, horloge, alea: aleaDeTest() };
 
   const application = Fastify({ logger: false });
   enregistrerRoutesProfils(application, contexte);

@@ -1,10 +1,11 @@
 /**
- * Le code parent et son verrou — contrat des features v2 § 4.6, lot L2-H, v2 § 11.
+ * Le code parent et son verrou — contrat des features v2 § 4.6, lot L2-H, v2 § 11. Portable
+ * depuis le Lot 4 du portage Android (Docs/addendum-portage-android.md § 6bis) : `scrypt` +
+ * `node:crypto` sont devenus PBKDF2-SHA256 + Web Crypto, pour que ce service tourne aussi bien
+ * côté serveur que dans la WebView Android. Trois propriétés sont gardées ici, et aucune n'est
+ * décorative :
  *
- * « Zone parent protégée par un code à 4 chiffres, `scrypt`, verrouillage temporaire après
- * 5 échecs. » Trois propriétés sont gardées ici, et aucune n'est décorative :
- *
- * 1. **`scrypt`, pas un stockage en clair.** Le code ne se retrouve jamais dans l'empreinte.
+ * 1. **PBKDF2, pas un stockage en clair.** Le code ne se retrouve jamais dans l'empreinte.
  * 2. **Comparaison à temps constant.** Un code à 4 chiffres est déjà faible ; une fuite par le
  *    temps de réponse le rendrait trivial à retrouver chiffre par chiffre.
  * 3. **Le verrou tient après 5 échecs, et il expire.** C'est le contrat de sortie du lot :
@@ -23,45 +24,62 @@ import {
   estVerrouille,
   selNeuf,
   verifierCode
-} from '@serveur/services/code-parent';
+} from '@partage/base';
 
 import type { VerrouParent } from '@partage/parent/types';
 
 const INSTANT = '2026-09-01T08:00:00.000Z';
 
-describe('deriverCode / verifierCode — scrypt', () => {
-  it('ne stocke jamais le code en clair dans l’empreinte', () => {
+function memesOctets(a: Uint8Array, b: Uint8Array): boolean {
+  if (a.length !== b.length) return false;
+  return a.every((octet, index) => octet === b[index]);
+}
+
+function contientSousSequence(haystack: Uint8Array, needle: Uint8Array): boolean {
+  if (needle.length === 0) return true;
+  recherche: for (let i = 0; i <= haystack.length - needle.length; i += 1) {
+    for (let j = 0; j < needle.length; j += 1) {
+      if (haystack[i + j] !== needle[j]) continue recherche;
+    }
+    return true;
+  }
+  return false;
+}
+
+describe('deriverCode / verifierCode — PBKDF2-SHA256', () => {
+  it('ne stocke jamais le code en clair dans l’empreinte', async () => {
     const sel = selNeuf();
-    const empreinte = deriverCode('1234', sel);
-    expect(empreinte.includes(Buffer.from('1234', 'utf8'))).toBe(false);
+    const empreinte = await deriverCode('1234', sel);
+    expect(contientSousSequence(empreinte, new TextEncoder().encode('1234'))).toBe(false);
     expect(empreinte.length).toBeGreaterThanOrEqual(32);
   });
 
-  it('rend la même empreinte pour le même code et le même sel', () => {
+  it('rend la même empreinte pour le même code et le même sel', async () => {
     const sel = selNeuf();
-    expect(deriverCode('4271', sel).equals(deriverCode('4271', sel))).toBe(true);
+    expect(memesOctets(await deriverCode('4271', sel), await deriverCode('4271', sel))).toBe(true);
   });
 
-  it('rend une empreinte différente pour le même code sur deux sels', () => {
-    expect(deriverCode('4271', selNeuf()).equals(deriverCode('4271', selNeuf()))).toBe(false);
+  it('rend une empreinte différente pour le même code sur deux sels', async () => {
+    const [a, b] = await Promise.all([deriverCode('4271', selNeuf()), deriverCode('4271', selNeuf())]);
+    expect(memesOctets(a, b)).toBe(false);
   });
 
-  it('accepte le bon code et refuse tous les autres', () => {
+  it('accepte le bon code et refuse tous les autres', async () => {
     const sel = selNeuf();
-    const empreinte = deriverCode('4271', sel);
-    expect(verifierCode('4271', sel, empreinte)).toBe(true);
+    const empreinte = await deriverCode('4271', sel);
+    expect(await verifierCode('4271', sel, empreinte)).toBe(true);
     for (const faux of ['4270', '1427', '0000', '9999', '427', '42710', '']) {
-      expect(verifierCode(faux, sel, empreinte)).toBe(false);
+      expect(await verifierCode(faux, sel, empreinte)).toBe(false);
     }
   });
 
-  it('refuse une empreinte de longueur différente sans jeter — `timingSafeEqual` en jetterait', () => {
+  it('refuse une empreinte de longueur différente sans jeter', async () => {
     const sel = selNeuf();
-    expect(verifierCode('4271', sel, Buffer.alloc(3))).toBe(false);
+    expect(await verifierCode('4271', sel, new Uint8Array(3))).toBe(false);
   });
 
   it('rend deux sels distincts sur deux appels : le sel n’est pas dérivé de la graine', () => {
-    expect(selNeuf().equals(selNeuf())).toBe(false);
+    expect(memesOctets(selNeuf(), selNeuf())).toBe(false);
   });
 });
 

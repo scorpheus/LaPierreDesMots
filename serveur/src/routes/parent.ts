@@ -70,26 +70,25 @@ import {
   lireVerrou,
   listerRelecture,
   reinitialiserVerrou,
-  synchroniserBrouillons,
-  trancherRelecture
-} from '../depots/parent.js';
-import { enregistrerRoutesParentGalerie } from './parent-galerie.js';
-// AJOUT H2 — les deux routes « profil » de la zone parent (etat reel, remise a zero).
-import { enregistrerRoutesParentProfil } from './parent-profil.js';
-import {
+  trancherRelecture,
   appliquerEchec,
   deriverCode,
   estVerrouille,
   isoDepuisMs,
   selNeuf,
-  verifierCode
-} from '../services/code-parent.js';
-import { construireExport, estCodeExport, nomFichierExport } from '../services/export-csv.js';
-import {
+  verifierCode,
+  versHex,
+  construireExport,
+  estCodeExport,
+  nomFichierExport,
   confusionsDuProfil,
   couvertureDuProfil,
   latencesDuProfil
-} from '../services/indicateurs.js';
+} from '@pierre/partage/base';
+import { synchroniserBrouillons } from '../referentiels/brouillons.js';
+import { enregistrerRoutesParentGalerie } from './parent-galerie.js';
+// AJOUT H2 — les deux routes « profil » de la zone parent (etat reel, remise a zero).
+import { enregistrerRoutesParentProfil } from './parent-profil.js';
 
 /**
  * Duree de vie d'un jeton parent. PLACEHOLDER — a valider.
@@ -148,7 +147,7 @@ export function enregistrerRoutesParent(app: FastifyInstance, contexte: Contexte
         jetons.delete(existant);
       }
     }
-    const jeton = selNeuf().toString('hex') + selNeuf().toString('hex');
+    const jeton = versHex(selNeuf()) + versHex(selNeuf());
     const expirationMs = maintenantMs + DUREE_JETON_MS;
     jetons.set(jeton, expirationMs);
     return { jeton, expireLe: isoDepuisMs(expirationMs) };
@@ -187,10 +186,10 @@ export function enregistrerRoutesParent(app: FastifyInstance, contexte: Contexte
   // ne lui reste qu'a deviner. C'est en devinant que la v1 posait le code du foyer au premier
   // enfant qui passait.
 
-  app.get('/api/parent/etat', (_requete, reponse) => {
-    const verrou = lireVerrou(contexte.base);
+  app.get('/api/parent/etat', async (_requete, reponse) => {
+    const verrou = await lireVerrou(contexte.base);
     const etat: EtatPorteParent = {
-      codeDefini: codeEstDefini(contexte.base),
+      codeDefini: await codeEstDefini(contexte.base),
       verrouilleJusqua: verrou.verrouilleJusqua === null ? null : String(verrou.verrouilleJusqua),
       nbEchecs: verrou.nbEchecs
     };
@@ -222,7 +221,7 @@ export function enregistrerRoutesParent(app: FastifyInstance, contexte: Contexte
   // jeton, donc par `ouvrir`, donc par le verrou. Aucun trou : le chemin qui remplace un code
   // existant est exactement celui qui compte les echecs.
 
-  app.post('/api/parent/definir', (requete, reponse) => {
+  app.post('/api/parent/definir', async (requete, reponse) => {
     const corps = requete.body as { code?: unknown } | null;
     const code = typeof corps?.code === 'string' ? corps.code.trim() : '';
     const maintenant = String(horodatage(contexte.horloge));
@@ -236,7 +235,7 @@ export function enregistrerRoutesParent(app: FastifyInstance, contexte: Contexte
         .send(erreurApi(CODES_ERREUR.invalide, 'Le code parent compte exactement 4 chiffres.'));
     }
 
-    const dejaDefini = codeEstDefini(contexte.base);
+    const dejaDefini = await codeEstDefini(contexte.base);
     const avecJeton = jetonDeLaRequete(requete);
     const jetonVivant =
       avecJeton !== null &&
@@ -257,25 +256,25 @@ export function enregistrerRoutesParent(app: FastifyInstance, contexte: Contexte
     }
 
     const sel = selNeuf();
-    ecrireCodeParent(
+    await ecrireCodeParent(
       contexte.base,
       sel,
-      deriverCode(code, sel),
+      await deriverCode(code, sel),
       maintenant,
       dejaDefini ? 'redefinition' : 'ecran-definition'
     );
-    reinitialiserVerrou(contexte.base);
+    await reinitialiserVerrou(contexte.base);
     return reponse.send(poserJeton(Date.parse(maintenant)));
   });
 
   // ────────────────────────────────────────────────────────── POST /api/parent/ouvrir
 
-  app.post('/api/parent/ouvrir', (requete, reponse) => {
+  app.post('/api/parent/ouvrir', async (requete, reponse) => {
     const corps = requete.body as { code?: unknown } | null;
     const code = typeof corps?.code === 'string' ? corps.code.trim() : '';
     const maintenant = String(horodatage(contexte.horloge));
 
-    const verrou = lireVerrou(contexte.base);
+    const verrou = await lireVerrou(contexte.base);
     if (estVerrouille(verrou, maintenant)) {
       return repondreVerrouille(reponse, verrou);
     }
@@ -284,7 +283,7 @@ export function enregistrerRoutesParent(app: FastifyInstance, contexte: Contexte
       // Un format invalide compte comme un echec : sinon un robot enumererait les 10 000 codes
       // en envoyant `code: 12345` entre deux essais pour ne jamais faire monter le compteur.
       const apres = appliquerEchec(verrou, maintenant);
-      ecrireVerrou(contexte.base, apres);
+      await ecrireVerrou(contexte.base, apres);
       if (estVerrouille(apres, maintenant)) {
         // L'echec qui ferme le verrou l'annonce, quelle que soit sa nature : sinon le parent
         // lirait « 4 chiffres » et taperait un code juste dans le vide.
@@ -295,7 +294,7 @@ export function enregistrerRoutesParent(app: FastifyInstance, contexte: Contexte
         .send(erreurApi(CODES_ERREUR.invalide, 'Le code parent compte exactement 4 chiffres.'));
     }
 
-    const stocke = lireCodeParent(contexte.base);
+    const stocke = await lireCodeParent(contexte.base);
 
     if (stocke === null) {
       // CORRIGE N5 — la route NE POSE PLUS RIEN (contrat de finition v3 § 1.8 et § 8).
@@ -313,22 +312,22 @@ export function enregistrerRoutesParent(app: FastifyInstance, contexte: Contexte
         );
     }
 
-    if (!verifierCode(code, stocke.sel, stocke.empreinte)) {
+    if (!(await verifierCode(code, stocke.sel, stocke.empreinte))) {
       const apres = appliquerEchec(verrou, maintenant);
-      ecrireVerrou(contexte.base, apres);
+      await ecrireVerrou(contexte.base, apres);
       if (estVerrouille(apres, maintenant)) {
         return repondreVerrouille(reponse, apres);
       }
       return reponse.code(401).send(erreurApi(CODES_ERREUR.invalide, 'Ce code ne convient pas.'));
     }
 
-    reinitialiserVerrou(contexte.base);
+    await reinitialiserVerrou(contexte.base);
     return reponse.send(poserJeton(Date.parse(maintenant)));
   });
 
   // ─────────────────────────────────────────── GET /api/parent/:profil/dashboard
 
-  app.get<{ Params: ParametresProfil }>('/api/parent/:profil/dashboard', (requete, reponse) => {
+  app.get<{ Params: ParametresProfil }>('/api/parent/:profil/dashboard', async (requete, reponse) => {
     if (!jetonValide(requete, reponse)) {
       return reponse;
     }
@@ -336,14 +335,14 @@ export function enregistrerRoutesParent(app: FastifyInstance, contexte: Contexte
     const profilId = requete.params.profil;
     // La file se cale sur le disque a chaque ouverture : un brouillon depose par L2-G entre
     // deux visites doit apparaitre sans qu'on redemarre quoi que ce soit.
-    synchroniserBrouillons(contexte.base, RACINE_BROUILLONS, horodatage(contexte.horloge));
+    await synchroniserBrouillons(contexte.base, RACINE_BROUILLONS, horodatage(contexte.horloge));
 
-    const confusions = confusionsDuProfil(contexte.base, profilId);
+    const confusions = await confusionsDuProfil(contexte.base, profilId);
     const resume: ResumeDashboard = {
-      latences: latencesDuProfil(contexte.base, profilId),
+      latences: await latencesDuProfil(contexte.base, profilId),
       confusions: confusions.top,
-      couverture: couvertureDuProfil(contexte.base, profilId),
-      relecture: listerRelecture(contexte.base)
+      couverture: await couvertureDuProfil(contexte.base, profilId),
+      relecture: await listerRelecture(contexte.base)
     };
 
     // `confusionsEcartees` accompagne le resume sans entrer dans `ResumeDashboard` : c'est le
@@ -353,7 +352,7 @@ export function enregistrerRoutesParent(app: FastifyInstance, contexte: Contexte
 
   // ──────────────────────────────────────── GET /api/parent/:profil/export/:code
 
-  app.get<{ Params: ParametresExport }>('/api/parent/:profil/export/:code', (requete, reponse) => {
+  app.get<{ Params: ParametresExport }>('/api/parent/:profil/export/:code', async (requete, reponse) => {
     if (!jetonValide(requete, reponse)) {
       return reponse;
     }
@@ -365,7 +364,7 @@ export function enregistrerRoutesParent(app: FastifyInstance, contexte: Contexte
         .send(erreurApi(CODES_ERREUR.introuvable, `Export inconnu : ${code}`));
     }
 
-    const csv = construireExport(contexte.base, profil, code);
+    const csv = await construireExport(contexte.base, profil, code);
     return reponse
       .header('content-type', 'text/csv; charset=utf-8')
       .header('content-disposition', `attachment; filename="${nomFichierExport(code, profil)}"`)
@@ -376,7 +375,7 @@ export function enregistrerRoutesParent(app: FastifyInstance, contexte: Contexte
 
   app.post<{ Params: ParametresExercice }>(
     '/api/parent/relecture/:exercice',
-    (requete, reponse) => {
+    async (requete, reponse) => {
       if (!jetonValide(requete, reponse)) {
         return reponse;
       }
@@ -398,7 +397,7 @@ export function enregistrerRoutesParent(app: FastifyInstance, contexte: Contexte
         ? corps.motif.trim()
         : null;
 
-      const entree = trancherRelecture(
+      const entree = await trancherRelecture(
         contexte.base,
         requete.params.exercice,
         statut as StatutRelecture,

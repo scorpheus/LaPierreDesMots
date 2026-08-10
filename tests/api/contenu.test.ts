@@ -55,20 +55,27 @@ interface Montage {
  * qui ne correspond pas). Le montage est donc local, et il fait les mêmes imports dynamiques.
  */
 async function monter(contenuEnMemoire: Record<string, unknown>): Promise<Montage> {
-  const [{ construireApplication }, { ouvrirBase }, { appliquerMigrations }, factices] =
-    await Promise.all([
-      import('@serveur/application'),
-      import('@serveur/base/connexion'),
-      import('@serveur/base/migrations'),
-      import('@pierre/partage/factices')
-    ]);
+  const [
+    { construireApplication },
+    { ouvrirBase },
+    { appliquerMigrations },
+    { creerBaseNodeSqlite },
+    factices
+  ] = await Promise.all([
+    import('@serveur/application'),
+    import('@serveur/base/connexion'),
+    import('@serveur/base/migrations'),
+    import('@serveur/base/adaptateur-node-sqlite'),
+    import('@pierre/partage/factices')
+  ]);
 
   const base = ouvrirBase(':memory:');
+  const baseAsync = creerBaseNodeSqlite(base);
   const horloge = horlogeDeTest();
-  appliquerMigrations(base, DOSSIER_MIGRATIONS, horloge);
+  await appliquerMigrations(baseAsync, DOSSIER_MIGRATIONS, horloge);
 
   const application = construireApplication({
-    base,
+    base: baseAsync,
     contenu: new factices.DepotContenuMemoire(contenuEnMemoire),
     horloge,
     alea: aleaDeTest(),

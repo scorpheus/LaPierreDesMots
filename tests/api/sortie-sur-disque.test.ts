@@ -103,18 +103,21 @@ async function monterSurDisque(): Promise<Harnais> {
     { construireApplication },
     { ouvrirBase },
     { appliquerMigrations },
+    { creerBaseNodeSqlite },
   ] = await Promise.all([
     import('@serveur/services/depot-contenu-disque'),
     import('@serveur/application'),
     import('@serveur/base/connexion'),
     import('@serveur/base/migrations'),
+    import('@serveur/base/adaptateur-node-sqlite'),
   ]);
 
   const base = ouvrirBase(':memory:');
+  const baseAsync = creerBaseNodeSqlite(base);
   const horloge = horlogeDeTest();
-  appliquerMigrations(base, DOSSIER_MIGRATIONS, horloge);
+  await appliquerMigrations(baseAsync, DOSSIER_MIGRATIONS, horloge);
   const application = construireApplication({
-    base,
+    base: baseAsync,
     contenu: creerDepotContenuDisque(join(RACINE_DEPOT, 'contenu')),
     horloge,
     alea: aleaDeTest(),

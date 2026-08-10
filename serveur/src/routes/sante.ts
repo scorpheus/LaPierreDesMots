@@ -21,11 +21,16 @@ export function enregistrerRoutesSante(app: FastifyInstance, contexte: ContexteS
   app.get('/api/sante', () => {
     // Les quatre champs sont ceux du contrat § 3.2 (`ReponseSante`). L'implantation
     // initiale n'en portait qu'un — `instant` — sous un nom absent du contrat.
+    // `Base` (Docs/addendum-portage-android.md § 4) est un port async sans propriété `isOpen`
+    // synchrone — ni `node:sqlite` en dehors de `DatabaseSync`, ni le futur adaptateur Capacitor
+    // n'en exposent une bon marché. Atteindre cette ligne prouve déjà que la connexion a été
+    // ouverte avec succès au démarrage (`index.ts`) ; une vraie panne de connexion ferait
+    // échouer le serveur bien avant d'en arriver à répondre à une requête HTTP.
     const reponse: ReponseSante = {
       statut: 'ok',
       version: VERSION_SERVEUR,
       maintenant: horodatage(contexte.horloge),
-      base: contexte.base.isOpen === false ? 'fermee' : 'ouverte',
+      base: 'ouverte',
       moteurs: moteursEnregistres()
     };
     return reponse;

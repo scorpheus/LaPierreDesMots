@@ -56,6 +56,11 @@ const ALIAS_PARTAGE = {
   // convention C1 leur interdit le barillet, donc sans cette ligne le client ne les résout
   // pas et `voix-fichier.ts` ne se lie pas.
   '@pierre/partage/voix': source('voix/index.ts'),
+  // AJOUT portage Android — Docs/addendum-portage-android.md § 3. Résolu ici pour que
+  // `client/src/base/adaptateur-capacitor-sqlite.ts` et `migrations-autonome.ts` (mode
+  // autonome uniquement, Lot 3) compilent ; le mode LAN n'importe jamais ce sous-chemin, donc
+  // sa présence ici n'entraîne rien dans le bundle du contrat § 3.1 tant que rien ne l'importe.
+  '@pierre/partage/base': source('base/index.ts'),
   '@pierre/partage': source('index.ts')
 };
 
@@ -109,6 +114,7 @@ function prechargerPolices(): Plugin {
 
 export default defineConfig(({ mode }) => {
   const estTest = mode === 'test';
+  const estAutonome = mode === 'autonome';
 
   return {
     // ═══════════════════════════════════════════════════════════════════════════════════════
@@ -159,14 +165,20 @@ export default defineConfig(({ mode }) => {
     preview: { port: PORT_VITE + 1, strictPort: true, host: true, proxy: PROXY_API },
 
     build: {
-      outDir: estTest ? 'dist-test' : 'dist',
+      // Trois sorties, qui ne se croisent JAMAIS (§ 7.3, prolongé par le portage Android) :
+      // `dist/` (LAN, contrat § 7.3, `verifier-bundle.mjs` l'inspecte), `dist-test/` (Playwright),
+      // `dist-autonome/` (Capacitor `webDir`, Lot 5 — Docs/addendum-portage-android.md § 6).
+      outDir: estTest ? 'dist-test' : estAutonome ? 'dist-autonome' : 'dist',
       emptyOutDir: true,
       target: 'es2022',
       // Sources de débogage dans le build de test uniquement : elles ne doivent jamais
       // peser dans le budget de 250 Ko gzip mesuré sur `dist/` (§ 7.3).
       sourcemap: estTest,
       cssCodeSplit: false,
-      chunkSizeWarningLimit: 250
+      // Le budget de 250 Ko gzip (§ 7.3) est un contrat du mode LAN. Le mode autonome embarque
+      // `contenu/` (7,29 Mo) et le pont SQLite : lui appliquer la même alerte serait du bruit,
+      // pas un garde-fou — `verifier-bundle.mjs` ne mesure d'ailleurs que `dist/`.
+      chunkSizeWarningLimit: estAutonome ? 8192 : 250
     },
 
     // Le montage de `window.__test` est gardé par `import.meta.env.MODE === 'test'` dans

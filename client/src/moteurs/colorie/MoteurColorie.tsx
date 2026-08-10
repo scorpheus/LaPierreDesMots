@@ -17,15 +17,16 @@ import type { ActionColorie, ContenuColorie, EtatColorie } from '@pierre/partage
 import type { ProprietesMoteur } from '../types.js';
 import { PaletteConsigne } from './PaletteConsigne.js';
 import { SceneSvg } from './SceneSvg.js';
+import { urlAsset } from '../../api/client.js';
 
 /** Cadence du `battementHorloge`. Le moteur ne connaît aucun `setTimeout` : c'est ici. */
 const PERIODE_BATTEMENT_MS = 1000;
 
 /**
- * Le SVG d'habillage est un asset local du dépôt, servi par
- * `GET /api/contenu/assets/*` (contrat § 3.3) et validé par `test:contenu` avant
- * d'atteindre l'enfant. On en retire tout de même scripts et gestionnaires d'événements
- * avant injection : un asset ne doit jamais pouvoir exécuter du code.
+ * Le SVG d'habillage est un asset local du dépôt, servi par `urlAsset()` (`GET
+ * /api/contenu/assets/*` en mode LAN, un chemin embarqué en mode autonome — contrat § 3.3) et
+ * validé par `test:contenu` avant d'atteindre l'enfant. On en retire tout de même scripts et
+ * gestionnaires d'événements avant injection : un asset ne doit jamais pouvoir exécuter du code.
  */
 function extraireCorpsSvg(texte: string): string | null {
   const correspondance = /<svg[^>]*>([\s\S]*)<\/svg>/i.exec(texte);
@@ -51,7 +52,7 @@ export function MoteurColorie(
     let annule = false;
     const fichier = habillage.scene.fichier;
     if (typeof fetch !== 'function' || fichier.length === 0) return undefined;
-    fetch(`/api/contenu/assets/${fichier}`)
+    fetch(urlAsset(fichier))
       .then((reponse) => (reponse.ok ? reponse.text() : null))
       .then((texte) => {
         if (annule || texte === null) return;

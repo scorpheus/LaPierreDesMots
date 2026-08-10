@@ -38,7 +38,7 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import type { CodeEcran, Profil } from '@pierre/partage';
 import type { EntreeGalerie, OptionsLancement } from '@pierre/partage/parent';
-import { lirePaquetNoeud, listerProfils } from './api/client.js';
+import { lirePaquetNoeud, listerProfils, marquerOuvertureVue } from './api/client.js';
 import { EcranCampement } from './ecrans/EcranCampement.js';
 import { EcranCarte } from './ecrans/EcranCarte.js';
 import { EcranCodeParent } from './ecrans/EcranCodeParent.js';
@@ -53,9 +53,6 @@ import { EcranReglagesLecture } from './ecrans/EcranReglagesLecture.js';
 import { useEtatJeu, useMagasin } from './etat/services.js';
 // AJOUT V1 — la visite des écrans et des exercices, en zone parent (R38).
 import { VisiteDesEcrans } from './parent/VisiteDesEcrans.js';
-// AJOUT N4 — la table des chemins de la sequence, ecrite UNE fois dans `partage` et lue par le
-// client comme par le serveur (convention C5 : aucune donnee en deux exemplaires).
-import { CHEMINS_OUVERTURE } from '@pierre/partage/ouverture';
 
 /** Les 5 codes d'écran de § 7.1 vers les 4 routes. `chargement` partage la racine. */
 const CHEMIN_PAR_ECRAN: Readonly<Record<CodeEcran, string>> = {
@@ -193,29 +190,16 @@ function HoteCarte(): ReactElement {
  *     UNE ligne ici — et on l'aura alors décidé sur une mesure, pas sur une intention.
  * Arbitrage consigné dans `Docs/questions-en-attente.md` (N4-3), avec sa contradiction.
  *
- * ── LE FETCH EST ICI, ET IL NE DEVRAIT PAS Y ÊTRE ───────────────────────────────────────────
- * « Un seul fichier du client appelle le réseau, et c'est `api/client.ts` ». Cette règle est
- * juste et ce bloc l'enfreint. Motif, mesuré et non supposé : `client/src/api/client.ts` est
- * en cours d'écriture par **N5** au moment où N4 travaille (`lireEtatPorteParent`,
- * `definirCodeParent` y sont apparus pendant ce lot). Le § 4.4 n'attribue ce fichier à
- * personne, et « un seul écrivain par fichier » est une règle ABSOLUE, alors que la règle du
- * module réseau unique est une règle d'architecture. On paie la moins chère des deux.
- *
- * **À faire à l'intégration** : déplacer `lireOuverture` et `marquerOuvertureVue` dans
- * `client/src/api/client.ts`, et le chemin dans `CHEMINS_API` (possédé par N5, § 8). Signalé
- * au rapport de N4.
+ * ── LE FETCH N'EST PLUS ICI ─────────────────────────────────────────────────────────────────
+ * « Un seul fichier du client appelle le réseau, et c'est `api/client.ts` ». Ce bloc l'a
+ * enfreint pendant tout le lot N4 pour une raison d'écrivain unique (§ historique ci-dessus) —
+ * corrigé au Lot 4 du portage Android (Docs/addendum-portage-android.md § 6bis) :
+ * `marquerOuvertureVue` vit désormais dans `client/src/api/contrat.ts`/`port-http.ts`/
+ * `port-local.ts`, importée d'`api/client.ts` comme les 28 autres méthodes du port. Bénéfice
+ * au-delà de la règle : cet appel fonctionne maintenant aussi en mode autonome (Android), où il
+ * n'existe aucun serveur à interroger.
  * ═════════════════════════════════════════════════════════════════════════════════════════════
  */
-async function marquerOuvertureVue(profil: string, passee: boolean): Promise<void> {
-  // Un échec réseau ne coûte RIEN à l'enfant : il a vu l'histoire, elle reste rejouable, et la
-  // seule perte est une ligne de suivi pour le parent. On ne l'informe donc de rien.
-  await fetch(CHEMINS_OUVERTURE.pour(profil), {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-    body: JSON.stringify({ passee })
-  }).catch(() => undefined);
-}
-
 function HoteOuverture(): ReactElement {
   const naviguer = useNavigate();
   const profil = useEtatJeu((etat) => etat.profil);

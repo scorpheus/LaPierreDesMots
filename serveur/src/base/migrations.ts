@@ -1,53 +1,30 @@
 /**
- * Applique les migrations SQL numerotees de `serveur/migrations/`.
+ * Lecture des migrations SQL sur DISQUE, et application via le runner partagé.
  *
- * Contrat § 6.1 :
+ * `node:fs` est SERVEUR-SEUL (Docs/addendum-portage-android.md § 3) : la lecture des fichiers
+ * `NNN_nom.sql` reste ici, la logique d'application (idempotence, empreintes, table de suivi)
+ * est partagée avec l'app Android autonome via `@pierre/partage/base` — celle-ci reçoit ses
+ * migrations déjà lues (embarquées au build) plutôt que de les lire sur un disque qu'elle n'a
+ * pas.
+ *
+ * Contrat § 6.1, inchangé :
  * - fichiers `NNN_nom.sql`, `NNN` sur trois chiffres, appliques dans l'ordre lexical ;
- * - chacun dans une transaction ;
- * - la table de suivi est creee par le runner, jamais par une migration ;
- * - une migration deja appliquee dont l'empreinte a change est une **erreur bloquante**.
+ * - une migration deja appliquee dont l'empreinte a change est une erreur bloquante.
  */
 
 import { createHash } from 'node:crypto';
 import { readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 
-import type { DatabaseSync } from 'node:sqlite';
-
 import type { Horloge } from '@pierre/partage';
-
-import { horodatage } from '../configuration.js';
-import { dansTransaction } from './connexion.js';
-
-export interface RapportMigration {
-  readonly appliquees: readonly number[];
-  readonly versionCourante: number;
-}
+import type { Base, FichierMigration, RapportMigration } from '@pierre/partage/base';
+import { appliquerMigrations as appliquerMigrationsPartagees } from '@pierre/partage/base';
 
 /** `001_socle.sql` : trois chiffres, un souligne, un nom en minuscules. */
 const MOTIF_FICHIER = /^(\d{3})_([a-z0-9-]+)\.sql$/;
 
-const SQL_TABLE_SUIVI = `
-CREATE TABLE IF NOT EXISTS schema_migrations (
-  version     INTEGER PRIMARY KEY,
-  nom         TEXT NOT NULL,
-  empreinte   TEXT NOT NULL,
-  applique_le TEXT NOT NULL
-) STRICT;
-`;
-
-interface FichierMigration {
-  readonly version: number;
-  readonly nom: string;
+interface FichierMigrationLocal extends FichierMigration {
   readonly chemin: string;
-  readonly sql: string;
-  readonly empreinte: string;
-}
-
-interface LigneSuivi {
-  readonly version: number;
-  readonly nom: string;
-  readonly empreinte: string;
 }
 
 /**
@@ -63,9 +40,9 @@ function empreinteDe(sql: string): string {
 }
 
 /** Lit et trie les migrations du dossier. Un fichier hors motif est ignore en silence. */
-export function listerMigrations(dossier: string): readonly FichierMigration[] {
+export function listerMigrations(dossier: string): readonly FichierMigrationLocal[] {
   const entrees = readdirSync(dossier, { withFileTypes: true });
-  const fichiers: FichierMigration[] = [];
+  const fichiers: FichierMigrationLocal[] = [];
 
   for (const entree of entrees) {
     if (!entree.isFile()) {
@@ -104,59 +81,12 @@ export function listerMigrations(dossier: string): readonly FichierMigration[] {
   return fichiers;
 }
 
-/**
- * Applique tout ce qui manque et rend la liste des versions effectivement appliquees.
- *
- * Idempotent : un second appel sur la meme base rend `{ appliquees: [], versionCourante: N }`.
- */
-export function appliquerMigrations(
-  base: DatabaseSync,
+/** Lit le dossier de migrations et les applique. Voir `appliquerMigrations` (partagée) pour le contrat. */
+export async function appliquerMigrations(
+  base: Base,
   dossier: string,
   horloge: Horloge
-): RapportMigration {
-  base.exec(SQL_TABLE_SUIVI);
-
-  const deja = new Map<number, LigneSuivi>();
-  const lignes = base
-    .prepare('SELECT version, nom, empreinte FROM schema_migrations ORDER BY version')
-    .all() as unknown as LigneSuivi[];
-  for (const ligne of lignes) {
-    deja.set(Number(ligne.version), ligne);
-  }
-
+): Promise<RapportMigration> {
   const fichiers = listerMigrations(dossier);
-  const appliquees: number[] = [];
-
-  for (const fichier of fichiers) {
-    const enregistree = deja.get(fichier.version);
-
-    if (enregistree !== undefined) {
-      if (String(enregistree.empreinte) !== fichier.empreinte) {
-        throw new Error(
-          `Migration ${String(fichier.version)} (${fichier.nom}) modifiee apres coup : ` +
-            `empreinte en base ${String(enregistree.empreinte)}, empreinte du fichier ${fichier.empreinte}. ` +
-            `Une migration appliquee ne se reecrit pas — il en faut une nouvelle.`
-        );
-      }
-      continue;
-    }
-
-    dansTransaction(base, () => {
-      base.exec(fichier.sql);
-      base
-        .prepare(
-          'INSERT INTO schema_migrations (version, nom, empreinte, applique_le) VALUES (?, ?, ?, ?)'
-        )
-        .run(fichier.version, fichier.nom, fichier.empreinte, String(horodatage(horloge)));
-    });
-
-    appliquees.push(fichier.version);
-  }
-
-  const derniere = fichiers.at(-1);
-
-  return {
-    appliquees,
-    versionCourante: derniere === undefined ? 0 : derniere.version
-  };
+  return appliquerMigrationsPartagees(base, fichiers, horloge.maintenant());
 }

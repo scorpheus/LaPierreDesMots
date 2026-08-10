@@ -52,8 +52,9 @@ import type { FastifyInstance } from 'fastify';
 import { regionsOuvertes } from '@pierre/partage/monde';
 import type { EtatCarte } from '@pierre/partage';
 
-import { chargerReferentielMonde, reparerProgressionRegion } from '@serveur/depots/monde';
-import type { ReferentielMonde } from '@serveur/depots/monde';
+import { chargerReferentielMonde } from '@serveur/referentiels/monde';
+import { reparerProgressionRegion } from '@pierre/partage/base';
+import type { Base, ReferentielMonde } from '@pierre/partage/base';
 import { enregistrerRoutesMonde } from '@serveur/routes/monde';
 import { enregistrerRoutesProfils } from '@serveur/routes/profils';
 import { enregistrerRoutesTentatives } from '@serveur/routes/tentatives';
@@ -77,6 +78,7 @@ const CATALOGUE_D_HIER: Readonly<Record<string, number>> = { clairiere: 1, galer
 const TERMINE_LE = '2026-09-01T08:01:00Z';
 
 let base: DatabaseSync;
+let baseAsync: Base;
 let applicationHier: FastifyInstance;
 let applicationAujourdHui: FastifyInstance;
 
@@ -191,17 +193,19 @@ function etapeDe(noeudId: string): EtapeJouable {
  * il redémarre le serveur après avoir ajouté des nœuds : les données restent, le contenu change.
  */
 beforeEach(async () => {
-  const [{ ouvrirBase }, { appliquerMigrations }, factices] = await Promise.all([
+  const [{ ouvrirBase }, { appliquerMigrations }, { creerBaseNodeSqlite }, factices] = await Promise.all([
     import('@serveur/base/connexion'),
     import('@serveur/base/migrations'),
+    import('@serveur/base/adaptateur-node-sqlite'),
     import('@pierre/partage/factices')
   ]);
 
   base = ouvrirBase(':memory:');
-  appliquerMigrations(base, DOSSIER_MIGRATIONS, horloge);
+  baseAsync = creerBaseNodeSqlite(base);
+  await appliquerMigrations(baseAsync, DOSSIER_MIGRATIONS, horloge);
 
   const contexte = {
-    base,
+    base: baseAsync,
     contenu: new factices.DepotContenuMemoire({}),
     horloge,
     alea: aleaDeTest()
@@ -440,7 +444,7 @@ describe('la migration de réparation — sur une base déjà empoisonnée', () 
     // Le catalogue grandit, et la projection porte encore les valeurs d'hier.
     empoisonner(profil);
 
-    const traites = reparerProgressionRegion(base, REFERENTIEL_COURANT);
+    const traites = await reparerProgressionRegion(baseAsync, REFERENTIEL_COURANT);
     expect(traites, 'la réparation traite TOUS les profils, pas seulement le courant').toBe(1);
 
     const lignes = base
@@ -479,11 +483,11 @@ describe('la migration de réparation — sur une base déjà empoisonnée', () 
     await carteDe(applicationHier, profil);
     empoisonner(profil);
 
-    reparerProgressionRegion(base, REFERENTIEL_COURANT);
+    await reparerProgressionRegion(baseAsync, REFERENTIEL_COURANT);
     const apresUn = base
       .prepare('SELECT * FROM progression_region WHERE profil_id = ? ORDER BY region_code')
       .all(profil);
-    reparerProgressionRegion(base, REFERENTIEL_COURANT);
+    await reparerProgressionRegion(baseAsync, REFERENTIEL_COURANT);
     const apresDeux = base
       .prepare('SELECT * FROM progression_region WHERE profil_id = ? ORDER BY region_code')
       .all(profil);

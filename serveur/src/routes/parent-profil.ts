@@ -48,14 +48,15 @@ import {
 
 import type { ContexteServeur } from '../configuration.js';
 import { CODES_ERREUR, erreurApi } from '../configuration.js';
-import { lireProfil } from '../depots/profils.js';
-import { etatDuProfil } from '../services/etat-profil.js';
 import {
+  etatDuProfil,
+  lireProfil,
   previsualiserReinitialisation,
   reinitialiserProfil,
   supprimerProfil,
   tablesNonVidees
-} from '../services/reinitialisation-profil.js';
+} from '@pierre/partage/base';
+import { chargerReferentielMonde } from '../referentiels/monde.js';
 
 interface ParametresProfil {
   readonly profil: string;
@@ -74,7 +75,7 @@ export function enregistrerRoutesParentProfil(
   // L'écran qui aurait rendu le défaut visible sans SQL. En LECTURE SEULE : il constate, il ne
   // répare pas (la réparation est le lot H1, par migration, une fois).
 
-  app.get<{ Params: ParametresProfil }>('/api/parent/:profil/etat', (requete, reponse) => {
+  app.get<{ Params: ParametresProfil }>('/api/parent/:profil/etat', async (requete, reponse) => {
     if (!jetonValide(requete, reponse)) {
       return reponse;
     }
@@ -82,7 +83,11 @@ export function enregistrerRoutesParentProfil(
     // Aucune racine de contenu n'est passée : `ContexteServeur` n'en porte pas (il ne porte que
     // le `DepotContenu`), et `chargerReferentielMonde()` retombe sur `contenu/` du dépôt —
     // exactement ce que fait `routes/parent-galerie.ts` pour la même raison.
-    const etat: EtatProfil | null = etatDuProfil(contexte.base, requete.params.profil);
+    const etat: EtatProfil | null = await etatDuProfil(
+      contexte.base,
+      requete.params.profil,
+      chargerReferentielMonde()
+    );
     if (etat === null) {
       return reponse
         .code(404)
@@ -101,13 +106,13 @@ export function enregistrerRoutesParentProfil(
 
   app.post<{ Params: ParametresProfil }>(
     '/api/parent/:profil/reinitialiser',
-    (requete, reponse) => {
+    async (requete, reponse) => {
       if (!jetonValide(requete, reponse)) {
         return reponse;
       }
 
       const profilId = requete.params.profil;
-      const profil = lireProfil(contexte.base, profilId);
+      const profil = await lireProfil(contexte.base, profilId);
       if (profil === null) {
         return reponse
           .code(404)
@@ -132,7 +137,7 @@ export function enregistrerRoutesParentProfil(
       const portee = corps.portee;
 
       if (corps.apercu === true) {
-        const lignes = previsualiserReinitialisation(contexte.base, profilId, portee);
+        const lignes = await previsualiserReinitialisation(contexte.base, profilId, portee);
         return reponse.send({
           profil: profilId,
           prenom: profil.prenom,
@@ -155,7 +160,7 @@ export function enregistrerRoutesParentProfil(
           );
       }
 
-      const rapport: RapportReinitialisation = reinitialiserProfil(
+      const rapport: RapportReinitialisation = await reinitialiserProfil(
         contexte.base,
         profilId,
         portee,
@@ -164,7 +169,7 @@ export function enregistrerRoutesParentProfil(
 
       // Le contrat de sortie de la route : on RELIT la base au lieu de croire le rapport qu'on
       // vient d'écrire. Un service qui s'auto-certifie ne certifie rien.
-      const restes = tablesNonVidees(contexte.base, profilId, portee);
+      const restes = await tablesNonVidees(contexte.base, profilId, portee);
       if (restes.length > 0) {
         return reponse.code(500).send({
           ...erreurApi(
@@ -201,13 +206,13 @@ export function enregistrerRoutesParentProfil(
   // Il n'y a PAS de portée ici : supprimer n'a qu'un sens. Offrir un choix là où il n'y en a
   // qu'un serait une case de plus à cocher pour rien.
   // ═══════════════════════════════════════════════════════════════════════════════════════════
-  app.delete<{ Params: ParametresProfil }>('/api/parent/:profil', (requete, reponse) => {
+  app.delete<{ Params: ParametresProfil }>('/api/parent/:profil', async (requete, reponse) => {
     if (!jetonValide(requete, reponse)) {
       return reponse;
     }
 
     const profilId = requete.params.profil;
-    const profil = lireProfil(contexte.base, profilId);
+    const profil = await lireProfil(contexte.base, profilId);
     if (profil === null) {
       return reponse
         .code(404)
@@ -222,7 +227,7 @@ export function enregistrerRoutesParentProfil(
       return reponse.send({
         profil: profilId,
         prenom: profil.prenom,
-        lignes: previsualiserReinitialisation(contexte.base, profilId, 'complete')
+        lignes: await previsualiserReinitialisation(contexte.base, profilId, 'complete')
       });
     }
 
@@ -239,7 +244,7 @@ export function enregistrerRoutesParentProfil(
         );
     }
 
-    const rapport = supprimerProfil(contexte.base, profilId, contexte.horloge);
+    const rapport = await supprimerProfil(contexte.base, profilId, contexte.horloge);
 
     // Le contrat de sortie de la route. `profilRetire` est RELU en base par le service ; on
     // refuse d'annoncer une suppression que la base n'a pas faite.

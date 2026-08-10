@@ -9,6 +9,7 @@ outils/
 # --- artefacts de compilation
 dist/
 dist-test/
+dist-autonome/
 *.tsbuildinfo
 
 # --- données de jeu (le dossier `donnees/` est suivi par son `.gitkeep`, pas son contenu)

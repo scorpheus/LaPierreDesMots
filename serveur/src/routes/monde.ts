@@ -22,20 +22,20 @@ import { CHEMINS_API } from '@pierre/partage';
 
 import type { ContexteServeur } from '../configuration.js';
 import { CODES_ERREUR, erreurApi } from '../configuration.js';
-import { lireProfil } from '../depots/profils.js';
 import { CHEMINS_OUVERTURE } from '@pierre/partage/ouverture';
 
 import {
-  chargerReferentielMonde,
   enregistrerOuvertureVue,
   lireMonde,
   lireOuverture,
+  lireProfil,
   noterVisitePoint,
   objetConnu,
   pointConnu,
   poserObjetCampement
-} from '../depots/monde.js';
-import type { ReferentielMonde } from '../depots/monde.js';
+} from '@pierre/partage/base';
+import type { ReferentielMonde } from '@pierre/partage/base';
+import { chargerReferentielMonde } from '../referentiels/monde.js';
 
 interface ParametresIdentifiant {
   readonly id: string;
@@ -116,13 +116,13 @@ export function enregistrerRoutesMonde(
 ): void {
   app.get<{ Params: ParametresIdentifiant }>(
     '/api/profils/:id/monde',
-    (requete, reponse) => {
-      if (lireProfil(contexte.base, requete.params.id) === null) {
+    async (requete, reponse) => {
+      if ((await lireProfil(contexte.base, requete.params.id)) === null) {
         return reponse
           .code(404)
           .send(erreurApi(CODES_ERREUR.introuvable, `Profil inconnu : ${requete.params.id}`));
       }
-      const monde: EtatMonde = lireMonde(
+      const monde: EtatMonde = await lireMonde(
         contexte.base,
         requete.params.id,
         referentiel,
@@ -153,20 +153,20 @@ export function enregistrerRoutesMonde(
   // ══════════════════════════════════════════════════════════════════════════════════════
   app.get<{ Params: ParametresIdentifiant }>(
     CHEMINS_OUVERTURE.motif,
-    (requete, reponse) => {
-      if (lireProfil(contexte.base, requete.params.id) === null) {
+    async (requete, reponse) => {
+      if ((await lireProfil(contexte.base, requete.params.id)) === null) {
         return reponse
           .code(404)
           .send(erreurApi(CODES_ERREUR.introuvable, `Profil inconnu : ${requete.params.id}`));
       }
-      return reponse.send(lireOuverture(contexte.base, requete.params.id));
+      return reponse.send(await lireOuverture(contexte.base, requete.params.id));
     }
   );
 
   app.post<{ Params: ParametresIdentifiant }>(
     CHEMINS_OUVERTURE.motif,
-    (requete, reponse) => {
-      if (lireProfil(contexte.base, requete.params.id) === null) {
+    async (requete, reponse) => {
+      if ((await lireProfil(contexte.base, requete.params.id)) === null) {
         return reponse
           .code(404)
           .send(erreurApi(CODES_ERREUR.introuvable, `Profil inconnu : ${requete.params.id}`));
@@ -178,7 +178,7 @@ export function enregistrerRoutesMonde(
       }
 
       return reponse.send(
-        enregistrerOuvertureVue(
+        await enregistrerOuvertureVue(
           contexte.base,
           requete.params.id,
           validation.passee,
@@ -190,8 +190,8 @@ export function enregistrerRoutesMonde(
 
   app.post<{ Params: ParametresIdentifiant }>(
     '/api/profils/:id/campement',
-    (requete, reponse) => {
-      if (lireProfil(contexte.base, requete.params.id) === null) {
+    async (requete, reponse) => {
+      if ((await lireProfil(contexte.base, requete.params.id)) === null) {
         return reponse
           .code(404)
           .send(erreurApi(CODES_ERREUR.introuvable, `Profil inconnu : ${requete.params.id}`));
@@ -215,9 +215,9 @@ export function enregistrerRoutesMonde(
           );
       }
 
-      poserObjetCampement(contexte.base, requete.params.id, validation.objet, contexte.horloge);
+      await poserObjetCampement(contexte.base, requete.params.id, validation.objet, contexte.horloge);
 
-      const monde: EtatMonde = lireMonde(
+      const monde: EtatMonde = await lireMonde(
         contexte.base,
         requete.params.id,
         referentiel,
@@ -240,8 +240,8 @@ export function enregistrerRoutesMonde(
   // ══════════════════════════════════════════════════════════════════════════════════════
   app.post<{ Params: ParametresPointCampement }>(
     CHEMINS_API.motifs.campementPointVisite,
-    (requete, reponse) => {
-      if (lireProfil(contexte.base, requete.params.id) === null) {
+    async (requete, reponse) => {
+      if ((await lireProfil(contexte.base, requete.params.id)) === null) {
         return reponse
           .code(404)
           .send(erreurApi(CODES_ERREUR.introuvable, `Profil inconnu : ${requete.params.id}`));
@@ -258,7 +258,7 @@ export function enregistrerRoutesMonde(
           );
       }
 
-      noterVisitePoint(contexte.base, requete.params.id, requete.params.point, contexte.horloge);
+      await noterVisitePoint(contexte.base, requete.params.id, requete.params.point, contexte.horloge);
       return reponse.code(204).send();
     }
   );

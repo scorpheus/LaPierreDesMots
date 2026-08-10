@@ -12,12 +12,14 @@ import { mkdirSync } from 'node:fs';
 import path from 'node:path';
 
 import { creerAlea, horloge } from '@pierre/partage';
+import { reparerProgressionRegion } from '@pierre/partage/base';
 
 import { construireApplication } from './application.js';
 import { appliquerMigrations } from './base/migrations.js';
+import { creerBaseNodeSqlite } from './base/adaptateur-node-sqlite.js';
 import { BASE_EN_MEMOIRE, ouvrirBase } from './base/connexion.js';
 import { lireConfiguration } from './configuration.js';
-import { reparerProgressionRegion } from './depots/monde.js';
+import { chargerReferentielMonde } from './referentiels/monde.js';
 import { creerDepotContenuDisque } from './services/depot-contenu-disque.js';
 
 async function demarrer(): Promise<void> {
@@ -27,8 +29,9 @@ async function demarrer(): Promise<void> {
     mkdirSync(path.dirname(configuration.cheminBase), { recursive: true });
   }
 
-  const base = ouvrirBase(configuration.cheminBase);
-  const rapport = appliquerMigrations(base, configuration.dossierMigrations, horloge);
+  const connexionSqlite = ouvrirBase(configuration.cheminBase);
+  const base = creerBaseNodeSqlite(connexionSqlite);
+  const rapport = await appliquerMigrations(base, configuration.dossierMigrations, horloge);
 
   if (rapport.appliquees.length > 0) {
     process.stdout.write(
@@ -42,7 +45,7 @@ async function demarrer(): Promise<void> {
   // directement pour le tableau de bord du parent : sans cet appel, un parent qui ouvre sa page
   // avant que l'enfant n'ouvre la carte lirait le pourcentage que la migration 010 vient
   // d'invalider. Idempotent, et sans effet quand tout est deja juste.
-  const reparees = reparerProgressionRegion(base);
+  const reparees = await reparerProgressionRegion(base, chargerReferentielMonde(configuration.racineContenu));
   if (reparees > 0) {
     process.stdout.write(
       `[pierre] recoloration recalculee pour ${String(reparees)} profil(s).\n`
@@ -61,7 +64,7 @@ async function demarrer(): Promise<void> {
     process.stdout.write(`[pierre] ${signal} recu, fermeture.\n`);
     void application.close().then(
       () => {
-        base.close();
+        connexionSqlite.close();
         process.exit(0);
       },
       () => {

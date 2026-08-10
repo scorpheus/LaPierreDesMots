@@ -21,7 +21,7 @@ import type {
   Horloge,
   Horodatage
 } from '@pierre/partage';
-import type { DatabaseSync } from 'node:sqlite';
+import type { Base } from '@pierre/partage/base';
 
 /**
  * Racine du depot, absolue.
@@ -65,7 +65,7 @@ export interface Configuration {
  * la racine de composition qui les enregistre (ce serait un cycle d'import).
  */
 export interface ContexteServeur {
-  readonly base: DatabaseSync;
+  readonly base: Base;
   readonly contenu: DepotContenu;
   readonly horloge: Horloge;
   readonly alea: Alea;

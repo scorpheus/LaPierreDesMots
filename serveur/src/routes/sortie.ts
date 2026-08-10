@@ -34,9 +34,8 @@ import { composerSortie } from '@pierre/partage/pedagogie';
 
 import type { ContexteServeur } from '../configuration.js';
 import { CODES_ERREUR, erreurApi } from '../configuration.js';
-import { lireRevisionsDues } from '../depots/leitner.js';
-import { chargerParametresPedagogie, lireMaitrises } from '../depots/maitrise.js';
-import { profilExiste } from '../depots/profils.js';
+import { lireMaitrises, lireRevisionsDues, profilExiste } from '@pierre/partage/base';
+import { chargerParametresPedagogie } from '../referentiels/pedagogie.js';
 
 const COMPAGNONS: readonly string[] = ['filou', 'bulle', 'roc', 'plume'];
 
@@ -74,25 +73,24 @@ function construireCandidats(
   return candidats;
 }
 
-function archiver(
+async function archiver(
   contexte: ContexteServeur,
   profilId: string,
   plan: PlanSortie
-): string {
+): Promise<string> {
   const id = `srt-${createHash('sha256')
     .update(`${profilId}|${plan.region}|${plan.composeeLe}`, 'utf8')
     .digest('hex')
     .slice(0, 16)}`;
 
-  contexte.base
-    .prepare(
-      `INSERT INTO sorties (id, profil_id, region, compagnon, plan_json, composee_le, close_le)
-       VALUES (?, ?, ?, ?, ?, ?, NULL)
-       ON CONFLICT (id) DO UPDATE SET
-         plan_json = excluded.plan_json,
-         compagnon = excluded.compagnon`
-    )
-    .run(id, profilId, plan.region, plan.compagnon, JSON.stringify(plan), plan.composeeLe);
+  await contexte.base.lancer(
+    `INSERT INTO sorties (id, profil_id, region, compagnon, plan_json, composee_le, close_le)
+     VALUES (?, ?, ?, ?, ?, ?, NULL)
+     ON CONFLICT (id) DO UPDATE SET
+       plan_json = excluded.plan_json,
+       compagnon = excluded.compagnon`,
+    [id, profilId, plan.region, plan.compagnon, JSON.stringify(plan), plan.composeeLe]
+  );
 
   return id;
 }
@@ -100,7 +98,7 @@ function archiver(
 export function enregistrerRoutesSortie(app: FastifyInstance, contexte: ContexteServeur): void {
   app.post('/api/profils/:id/sortie', async (requete, reponse) => {
     const { id } = requete.params as ParametresProfil;
-    if (!profilExiste(contexte.base, id)) {
+    if (!(await profilExiste(contexte.base, id))) {
       return reponse
         .code(404)
         .send(erreurApi(CODES_ERREUR.introuvable, `Profil inconnu : ${id}`));
@@ -133,8 +131,8 @@ export function enregistrerRoutesSortie(app: FastifyInstance, contexte: Contexte
       profil: id,
       region: region as CodeRegion,
       compagnon,
-      maitrises: lireMaitrises(contexte.base, id),
-      revisionsDues: lireRevisionsDues(contexte.base, id, maintenant),
+      maitrises: await lireMaitrises(contexte.base, id),
+      revisionsDues: await lireRevisionsDues(contexte.base, id, maintenant),
       noeudsDisponibles: construireCandidats(noeuds, exercices),
       competences,
       maintenant
@@ -155,7 +153,7 @@ export function enregistrerRoutesSortie(app: FastifyInstance, contexte: Contexte
       throw erreur;
     }
 
-    archiver(contexte, id, plan);
+    await archiver(contexte, id, plan);
     return reponse.code(201).send(plan);
   });
 }

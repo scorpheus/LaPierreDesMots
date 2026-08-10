@@ -191,8 +191,8 @@ describe('l’inventaire des tables à remettre à zéro', () => {
   // LE CAS QUI EMPÊCHE CE FICHIER DE PÉRIMER. Il compare la liste que le SCHÉMA déclare à
   // celle que le fixture couvre : ni l'une ni l'autre n'est écrite deux fois.
   it('les semeurs couvrent EXACTEMENT les tables porteuses de `profil_id`', async () => {
-    const { tablesPorteusesDeProfil } = await import('@serveur/services/reinitialisation-profil');
-    const declarees = [...tablesPorteusesDeProfil(contexte.base)].sort();
+    const { tablesPorteusesDeProfil } = await import('@pierre/partage/base');
+    const declarees = [...(await tablesPorteusesDeProfil(contexte.baseAsync))].sort();
     const semees = Object.keys(SEMEURS).sort();
 
     expect(
@@ -284,8 +284,8 @@ describe('POST /api/parent/:profil/reinitialiser — portée « complete »', ()
     semer(contexte.base, profil);
     const entetes = { [ENTETE_JETON_PARENT]: await jeton() };
 
-    const { tablesPorteusesDeProfil } = await import('@serveur/services/reinitialisation-profil');
-    const tables = tablesPorteusesDeProfil(contexte.base);
+    const { tablesPorteusesDeProfil } = await import('@pierre/partage/base');
+    const tables = await tablesPorteusesDeProfil(contexte.baseAsync);
 
     // On mesure AVANT : un test qui ne prouve pas que la base était pleine ne prouve rien.
     const avant = tables.map((t) => [t, compter(contexte.base, t, profil)] as const);
@@ -394,8 +394,8 @@ describe('POST /api/parent/:profil/reinitialiser — portée « progression »',
     );
     expect(reponse.statusCode).toBe(200);
 
-    const { tablesPorteusesDeProfil } = await import('@serveur/services/reinitialisation-profil');
-    const restantes = tablesPorteusesDeProfil(contexte.base).filter(
+    const { tablesPorteusesDeProfil } = await import('@pierre/partage/base');
+    const restantes = (await tablesPorteusesDeProfil(contexte.baseAsync)).filter(
       (table) => compter(contexte.base, table, profil) > 0
     );
     expect([...restantes].sort()).toEqual([...TABLES_CONSERVEES_PAR_PROGRESSION].sort());
@@ -462,8 +462,8 @@ describe('l’invariant du journal, après remise à zéro', () => {
 
     await reinitialiser(profil, { portee: 'complete', confirmation: PRENOM }, entetes);
 
-    const { recalculerToutesLesProgressions } = await import('@serveur/depots/progression');
-    recalculerToutesLesProgressions(contexte.base);
+    const { recalculerToutesLesProgressions } = await import('@pierre/partage/base');
+    await recalculerToutesLesProgressions(contexte.baseAsync);
 
     expect(compter(contexte.base, 'progression_noeud', profil)).toBe(0);
     expect(compter(contexte.base, 'tentatives', profil)).toBe(0);

@@ -23,8 +23,7 @@ import type { ComparaisonTypographie, ReglagesLecture } from '@pierre/partage/le
 
 import type { ContexteServeur } from '../configuration.js';
 import { CODES_ERREUR, erreurApi } from '../configuration.js';
-import { lireComparaison, ecrireReglages, lireReglages } from '../depots/reglages.js';
-import { profilExiste } from '../depots/profils.js';
+import { lireComparaison, ecrireReglages, lireReglages, profilExiste } from '@pierre/partage/base';
 
 interface ParametresIdentifiant {
   readonly id: string;
@@ -70,21 +69,21 @@ export function enregistrerRoutesReglages(
 ): void {
   app.get<{ Params: ParametresIdentifiant }>(
     '/api/profils/:id/reglages',
-    (requete, reponse) => {
-      if (!profilExiste(contexte.base, requete.params.id)) {
+    async (requete, reponse) => {
+      if (!(await profilExiste(contexte.base, requete.params.id))) {
         return reponse
           .code(404)
           .send(erreurApi(CODES_ERREUR.introuvable, `Profil inconnu : ${requete.params.id}`));
       }
-      const reglages: ReglagesLecture = lireReglages(contexte.base, requete.params.id);
+      const reglages: ReglagesLecture = await lireReglages(contexte.base, requete.params.id);
       return reponse.send(reglages);
     },
   );
 
   app.put<{ Params: ParametresIdentifiant }>(
     '/api/profils/:id/reglages',
-    (requete, reponse) => {
-      if (!profilExiste(contexte.base, requete.params.id)) {
+    async (requete, reponse) => {
+      if (!(await profilExiste(contexte.base, requete.params.id))) {
         return reponse
           .code(404)
           .send(erreurApi(CODES_ERREUR.introuvable, `Profil inconnu : ${requete.params.id}`));
@@ -99,7 +98,7 @@ export function enregistrerRoutesReglages(
           );
       }
 
-      const ecrits: ReglagesLecture = ecrireReglages(
+      const ecrits: ReglagesLecture = await ecrireReglages(
         contexte.base,
         requete.params.id,
         delta,
@@ -111,15 +110,15 @@ export function enregistrerRoutesReglages(
 
   app.get<{ Params: ParametresIdentifiant }>(
     '/api/profils/:id/essai-typographie',
-    (requete, reponse) => {
-      if (!profilExiste(contexte.base, requete.params.id)) {
+    async (requete, reponse) => {
+      if (!(await profilExiste(contexte.base, requete.params.id))) {
         return reponse
           .code(404)
           .send(erreurApi(CODES_ERREUR.introuvable, `Profil inconnu : ${requete.params.id}`));
       }
       // `null` est une reponse LEGITIME, pas une erreur : aucun essai n'est ouvert tant que
       // personne n'en a ouvert un. Repondre 404 laisserait croire a un defaut.
-      const comparaison: ComparaisonTypographie | null = lireComparaison(
+      const comparaison: ComparaisonTypographie | null = await lireComparaison(
         contexte.base,
         requete.params.id,
       );

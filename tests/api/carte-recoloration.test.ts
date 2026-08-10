@@ -142,17 +142,19 @@ function etapesDe(code: string): readonly EtapeJouable[] {
 // ────────────────────────────────────────────────────────────────────────── le montage
 
 beforeEach(async () => {
-  const [{ ouvrirBase }, { appliquerMigrations }, factices] = await Promise.all([
+  const [{ ouvrirBase }, { appliquerMigrations }, { creerBaseNodeSqlite }, factices] = await Promise.all([
     import('@serveur/base/connexion'),
     import('@serveur/base/migrations'),
+    import('@serveur/base/adaptateur-node-sqlite'),
     import('@pierre/partage/factices')
   ]);
 
   base = ouvrirBase(':memory:');
-  appliquerMigrations(base, DOSSIER_MIGRATIONS, horloge);
+  const baseAsync = creerBaseNodeSqlite(base);
+  await appliquerMigrations(baseAsync, DOSSIER_MIGRATIONS, horloge);
 
   const contexteServeur = {
-    base,
+    base: baseAsync,
     contenu: new factices.DepotContenuMemoire({}),
     horloge,
     alea: aleaDeTest()

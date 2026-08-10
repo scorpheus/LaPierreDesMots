@@ -39,8 +39,10 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { appliquerMigrations } from '@serveur/base/migrations';
 import { ouvrirBase } from '@serveur/base/connexion';
+import { creerBaseNodeSqlite } from '@serveur/base/adaptateur-node-sqlite';
 
 import type { DatabaseSync } from 'node:sqlite';
+import type { Base } from '@pierre/partage/base';
 
 import {
   DOSSIER_MIGRATIONS,
@@ -75,9 +77,11 @@ const VERSIONS_ATTENDUES = MIGRATIONS_ATTENDUES.map((m) => m.version);
 const DERNIERE_VERSION = VERSIONS_ATTENDUES[VERSIONS_ATTENDUES.length - 1]!;
 
 let base: DatabaseSync;
+let baseAsync: Base;
 
 beforeEach(() => {
   base = ouvrirBase(':memory:');
+  baseAsync = creerBaseNodeSqlite(base);
 });
 
 afterEach(() => {
@@ -93,8 +97,8 @@ function tables(connexion: DatabaseSync): string[] {
 }
 
 describe('appliquerMigrations', () => {
-  it('applique toutes les migrations du dossier et crée les trois tables du socle — contrat § 6.2', () => {
-    const rapport = appliquerMigrations(base, DOSSIER_MIGRATIONS, horlogeDeTest());
+  it('applique toutes les migrations du dossier et crée les trois tables du socle — contrat § 6.2', async () => {
+    const rapport = await appliquerMigrations(baseAsync, DOSSIER_MIGRATIONS, horlogeDeTest());
 
     expect(rapport.appliquees).toEqual(VERSIONS_ATTENDUES);
     expect(rapport.versionCourante).toBe(DERNIERE_VERSION);
@@ -103,8 +107,8 @@ describe('appliquerMigrations', () => {
     }
   });
 
-  it('crée la table de suivi elle-même — jamais une migration ne s’en charge', () => {
-    appliquerMigrations(base, DOSSIER_MIGRATIONS, horlogeDeTest());
+  it('crée la table de suivi elle-même — jamais une migration ne s’en charge', async () => {
+    await appliquerMigrations(baseAsync, DOSSIER_MIGRATIONS, horlogeDeTest());
     expect(tables(base)).toContain('schema_migrations');
 
     const lignes = base
@@ -127,24 +131,24 @@ describe('appliquerMigrations', () => {
     }
   });
 
-  it('horodate avec l’horloge injectée, jamais avec l’heure réelle', () => {
-    appliquerMigrations(base, DOSSIER_MIGRATIONS, horlogeDeTest());
+  it('horodate avec l’horloge injectée, jamais avec l’heure réelle', async () => {
+    await appliquerMigrations(baseAsync, DOSSIER_MIGRATIONS, horlogeDeTest());
     const ligne = base.prepare('SELECT applique_le FROM schema_migrations').get() as {
       applique_le: string;
     };
     expect(ligne.applique_le).toContain('2026-09-01');
   });
 
-  it('est idempotente : la seconde application n’applique rien', () => {
-    appliquerMigrations(base, DOSSIER_MIGRATIONS, horlogeDeTest());
-    const second = appliquerMigrations(base, DOSSIER_MIGRATIONS, horlogeDeTest());
+  it('est idempotente : la seconde application n’applique rien', async () => {
+    await appliquerMigrations(baseAsync, DOSSIER_MIGRATIONS, horlogeDeTest());
+    const second = await appliquerMigrations(baseAsync, DOSSIER_MIGRATIONS, horlogeDeTest());
 
     expect(second.appliquees).toEqual([]);
     expect(second.versionCourante).toBe(DERNIERE_VERSION);
   });
 
-  it('pose les contraintes du socle : `foreign_keys` refuse une tentative orpheline', () => {
-    appliquerMigrations(base, DOSSIER_MIGRATIONS, horlogeDeTest());
+  it('pose les contraintes du socle : `foreign_keys` refuse une tentative orpheline', async () => {
+    await appliquerMigrations(baseAsync, DOSSIER_MIGRATIONS, horlogeDeTest());
     expect(() =>
       base
         .prepare(
@@ -158,8 +162,8 @@ describe('appliquerMigrations', () => {
     ).toThrow();
   });
 
-  it('refuse une étoile hors bornes — la contrainte CHECK est bien posée', () => {
-    appliquerMigrations(base, DOSSIER_MIGRATIONS, horlogeDeTest());
+  it('refuse une étoile hors bornes — la contrainte CHECK est bien posée', async () => {
+    await appliquerMigrations(baseAsync, DOSSIER_MIGRATIONS, horlogeDeTest());
     base
       .prepare(
         `INSERT INTO profils (id, prenom, avatar_json, palette_variante, cree_le, dernier_acces_le)
@@ -178,12 +182,12 @@ describe('appliquerMigrations', () => {
 });
 
 describe('une migration modifiée après coup est une erreur bloquante — contrat § 6.1', () => {
-  it('lève, et n’applique rien de plus', () => {
+  it('lève, et n’applique rien de plus', async () => {
     mkdirSync(DOSSIER_TEMPORAIRE, { recursive: true });
     cpSync(DOSSIER_MIGRATIONS, DOSSIER_TEMPORAIRE, { recursive: true });
 
     const horloge = horlogeDeTest();
-    const premier = appliquerMigrations(base, DOSSIER_TEMPORAIRE, horloge);
+    const premier = await appliquerMigrations(baseAsync, DOSSIER_TEMPORAIRE, horloge);
     expect(premier.appliquees).toEqual(VERSIONS_ATTENDUES);
 
     // On altère la copie : un commentaire suffit, l'empreinte est un sha256 du fichier.
@@ -191,6 +195,6 @@ describe('une migration modifiée après coup est une erreur bloquante — contr
     const contenu = readFileSync(fichier, 'utf8');
     writeFileSync(fichier, `${contenu}\n-- altération après application\n`, 'utf8');
 
-    expect(() => appliquerMigrations(base, DOSSIER_TEMPORAIRE, horloge)).toThrow();
+    await expect(appliquerMigrations(baseAsync, DOSSIER_TEMPORAIRE, horloge)).rejects.toThrow();
   });
 });

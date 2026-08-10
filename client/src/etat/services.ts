@@ -24,7 +24,7 @@
 // ─────────────────────────────────────────────────────────────────────────────────────────
 import { createContext, createElement, useContext, useSyncExternalStore } from 'react';
 import type { ReactElement, ReactNode } from 'react';
-import { CHEMINS_API, creerAlea, creerHorloge, graineParDefaut } from '@pierre/partage';
+import { creerAlea, creerHorloge, graineParDefaut } from '@pierre/partage';
 import type { Horloge, SeuilsCascade } from '@pierre/partage';
 import { lireSeuilsCascade } from '@pierre/partage/recompenses';
 import type { ServicesJeu } from '../moteurs/types.js';
@@ -34,6 +34,7 @@ import { creerVoixNavigateur } from '../services/voix-navigateur.js';
 import { creerHaptiqueNavigateur } from '../gamefeel/haptique-navigateur.js';
 import { creerRetourSensoriel } from '../gamefeel/retour.js';
 import { emettreSurCanevasCourant } from '../gamefeel/particules.js';
+import { urlAsset } from '../api/client.js';
 import type { EtatMagasin, MagasinJeu } from './magasin.js';
 
 /** Graine par défaut, telle que `partage/src/alea.ts` la calcule. */
@@ -124,20 +125,17 @@ export function creerServicesParDefaut(graine = resoudreGraineParDefaut()): Serv
  * rendre un défaut silencieux ; on capture ici, parce qu'un référentiel illisible ne doit pas
  * empêcher l'enfant de jouer — il doit seulement priver l'écran de ses jauges, visiblement.
  *
- * ⚠ DÉFAUT DU CONTRAT GELÉ, signalé au rapport de L2-A.
- * Le § 5.1 dit « un seul fichier appelle le réseau côté client, et c'est L2-H qui possède
- * `client/src/api/client.ts` ». Mais L2-A a besoin d'un chargeur pour ces paramètres, et
- * **aucun fichier n'est nommé pour lui** : les trois autres voies sont fermées — le paquet
- * `partage/` a `rootDir: "src"` et le paquet `client/` `rootDir: "."`, donc ni l'un ni l'autre
- * ne peut importer un JSON de `contenu/` ; et aucune des 12 routes nouvelles du § 5.3 ne sert
- * un référentiel. On emprunte donc la route d'assets EXISTANTE (`GET /api/contenu/assets/*`,
- * contrat technique v1 § 3.3) avec `CHEMINS_API`, ce qui n'ajoute aucune route et aucun
- * contrat — mais ajoute bien un second site d'appel réseau. À reprendre en une ligne le jour
- * où L2-H expose un `lireReferentiel(chemin)`.
+ * RÉSOLU au Lot 4 du portage Android (Docs/addendum-portage-android.md § 6bis) : le défaut
+ * signalé par L2-A tenait à l'absence d'un `lireReferentiel(chemin)` — ce qui existe désormais,
+ * c'est `urlAsset()` de `client/src/api/client.ts`, LE seul point d'appel réseau/accès aux
+ * assets, résolu par port (`PortApiHttp` en LAN, `PortApiLocal` en mode autonome — assets
+ * embarqués au build, aucun réseau). Un appel direct à `CHEMINS_API.asset()` fonctionnait en
+ * LAN mais échouait silencieusement en mode autonome (aucun serveur à interroger) : c'est
+ * exactement le bug que `urlAsset()` existe pour éviter.
  */
 export async function chargerSeuilsCascade(): Promise<SeuilsCascade | null> {
   try {
-    const reponse = await fetch(CHEMINS_API.asset('referentiel/parametres-recompenses.json'), {
+    const reponse = await fetch(urlAsset('referentiel/parametres-recompenses.json'), {
       headers: { Accept: 'application/json' }
     });
     if (!reponse.ok) {

@@ -38,8 +38,8 @@ import type { EtatOuverture } from '@pierre/partage/ouverture';
 
 import { enregistrerRoutesMonde, validerFinOuverture } from '@serveur/routes/monde';
 import { enregistrerRoutesProfils } from '@serveur/routes/profils';
-import { enregistrerOuvertureVue, lireOuverture } from '@serveur/depots/monde';
-import type { ReferentielMonde } from '@serveur/depots/monde';
+import { enregistrerOuvertureVue, lireOuverture } from '@pierre/partage/base';
+import type { Base, ReferentielMonde } from '@pierre/partage/base';
 
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
@@ -54,6 +54,7 @@ import {
 
 let application: FastifyInstance;
 let base: DatabaseSync;
+let baseAsync: Base;
 
 const horloge = horlogeDeTest();
 
@@ -81,17 +82,19 @@ const REFERENTIEL_VIDE = {
 } as unknown as ReferentielMonde;
 
 beforeEach(async () => {
-  const [{ ouvrirBase }, { appliquerMigrations }, factices] = await Promise.all([
+  const [{ ouvrirBase }, { appliquerMigrations }, { creerBaseNodeSqlite }, factices] = await Promise.all([
     import('@serveur/base/connexion'),
     import('@serveur/base/migrations'),
+    import('@serveur/base/adaptateur-node-sqlite'),
     import('@pierre/partage/factices')
   ]);
 
   base = ouvrirBase(':memory:');
-  appliquerMigrations(base, DOSSIER_MIGRATIONS, horloge);
+  baseAsync = creerBaseNodeSqlite(base);
+  await appliquerMigrations(baseAsync, DOSSIER_MIGRATIONS, horloge);
 
   const contexte = {
-    base,
+    base: baseAsync,
     contenu: new factices.DepotContenuMemoire({}),
     horloge,
     alea: aleaDeTest()
@@ -149,7 +152,7 @@ describe('007_ouverture.sql — la migration s’applique et la table existe', (
 describe('le dépôt — R14 : un acquis n’est jamais repris', () => {
   it('un profil neuf n’a jamais vu la séquence, et rien n’est écrit pour lui', async () => {
     const profil = await creerProfil();
-    expect(lireOuverture(base, profil)).toEqual(OUVERTURE_JAMAIS_VUE);
+    expect(await lireOuverture(baseAsync, profil)).toEqual(OUVERTURE_JAMAIS_VUE);
 
     const lignes = base
       .prepare('SELECT COUNT(*) AS n FROM ouverture_vue')
@@ -161,23 +164,23 @@ describe('le dépôt — R14 : un acquis n’est jamais repris', () => {
     const profil = await creerProfil();
 
     // L'enfant saute le récit la première fois.
-    expect(enregistrerOuvertureVue(base, profil, true, horloge).passee).toBe(true);
+    expect((await enregistrerOuvertureVue(baseAsync, profil, true, horloge)).passee).toBe(true);
     // Puis il le regarde en entier. C'est un acquis.
-    expect(enregistrerOuvertureVue(base, profil, false, horloge).passee).toBe(false);
+    expect((await enregistrerOuvertureVue(baseAsync, profil, false, horloge)).passee).toBe(false);
     // Il le saute de nouveau : la réponse au parent — « l'a-t-il vue ? » — reste OUI.
-    expect(enregistrerOuvertureVue(base, profil, true, horloge).passee).toBe(false);
+    expect((await enregistrerOuvertureVue(baseAsync, profil, true, horloge)).passee).toBe(false);
   });
 
   it('garde la PREMIÈRE date, et compte les rejeux au-delà du premier passage', async () => {
     const profil = await creerProfil();
 
-    enregistrerOuvertureVue(base, profil, false, horloge);
+    await enregistrerOuvertureVue(baseAsync, profil, false, horloge);
     const premiere = base
       .prepare('SELECT vue_le FROM ouverture_vue WHERE profil_id = ?')
       .get(profil) as unknown as { readonly vue_le: string };
 
-    const apresDeux = enregistrerOuvertureVue(base, profil, false, horlogeDeTest('2027-01-01T10:00:00Z'));
-    const apresTrois = enregistrerOuvertureVue(base, profil, false, horlogeDeTest('2027-02-01T10:00:00Z'));
+    const apresDeux = await enregistrerOuvertureVue(baseAsync, profil, false, horlogeDeTest('2027-01-01T10:00:00Z'));
+    const apresTrois = await enregistrerOuvertureVue(baseAsync, profil, false, horlogeDeTest('2027-02-01T10:00:00Z'));
 
     expect(apresDeux.nbRejeux).toBe(1);
     expect(apresTrois.nbRejeux).toBe(2);
@@ -193,10 +196,10 @@ describe('le dépôt — R14 : un acquis n’est jamais repris', () => {
     const alma = await creerProfil('Alma');
     const noe = await creerProfil('Noé');
 
-    enregistrerOuvertureVue(base, alma, false, horloge);
+    await enregistrerOuvertureVue(baseAsync, alma, false, horloge);
 
-    expect(lireOuverture(base, alma).vue).toBe(true);
-    expect(lireOuverture(base, noe)).toEqual(OUVERTURE_JAMAIS_VUE);
+    expect((await lireOuverture(baseAsync, alma)).vue).toBe(true);
+    expect(await lireOuverture(baseAsync, noe)).toEqual(OUVERTURE_JAMAIS_VUE);
   });
 });
 

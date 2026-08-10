@@ -12,10 +12,10 @@
 
 import Fastify from 'fastify';
 import type { FastifyError, FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import type { DatabaseSync } from 'node:sqlite';
 
 import type { Alea, DepotContenu, Horloge } from '@pierre/partage';
 import { initialiserRegistreMoteurs } from '@pierre/partage';
+import type { Base } from '@pierre/partage/base';
 
 import type { ContexteServeur } from './configuration.js';
 import { CODES_ERREUR, erreurApi } from './configuration.js';
@@ -37,7 +37,7 @@ import { enregistrerRoutesAudio } from './routes/audio.js';
 import { enregistrerStatique } from './statique.js';
 
 export interface OptionsApplication {
-  readonly base: DatabaseSync;
+  readonly base: Base;
   readonly contenu: DepotContenu;
   readonly horloge: Horloge;
   readonly alea: Alea;

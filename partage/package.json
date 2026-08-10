@@ -15,7 +15,8 @@
     "./parent": { "types": "./src/parent/index.ts", "default": "./dist/parent/index.js" },
     "./voix": { "types": "./src/voix/index.ts", "default": "./dist/voix/index.js" },
     "./ouverture": { "types": "./src/ouverture/index.ts", "default": "./dist/ouverture/index.js" },
-    "./ton": { "types": "./src/ton/index.ts", "default": "./dist/ton/index.js" }
+    "./ton": { "types": "./src/ton/index.ts", "default": "./dist/ton/index.js" },
+    "./base": { "types": "./src/base/index.ts", "default": "./dist/base/index.js" }
   },
   "scripts": { "construire": "tsc -b" },
   "dependencies": {

@@ -60,7 +60,7 @@
  * fichier, mais il ne fait pas échouer Q1 — le trancher appartient au lot A1.
  */
 import { readdirSync, readFileSync } from 'node:fs';
-import { extname, join, relative } from 'node:path';
+import { dirname, extname, join, relative } from 'node:path';
 
 import { describe, expect, test } from 'vitest';
 
@@ -199,6 +199,37 @@ function analyser(sourcesFabriquees: ReadonlyMap<string, string> = new Map()): A
     const occurrences = (lire(fichier).match(new RegExp(`\\b${nom}\\b`, 'g')) ?? []).length;
     return declareeDans.get(nom) === fichier ? occurrences >= 2 : occurrences >= 1;
   };
+
+  // ── arêtes fichier→fichier par SPÉCIFICATEUR D'IMPORT (statique ET dynamique)
+  //
+  // La marche par NOM ci-dessus ne voit rien d'un module qui n'est référencé que par un
+  // `import()` dynamique assemblé dans un objet exporté en `const` dont les méthodes sont en
+  // sténo ES (`nom() { ... }`) : aucun nom qu'il déclare n'a de raison d'être cité ailleurs par
+  // son propre nom — l'appelant ne voit que l'objet, jamais ses clés. C'est exactement la forme
+  // du découpage de code par mode (LAN / autonome, Docs/addendum-portage-android.md § 5) :
+  // `client/src/api/client.ts` choisit `port-http.js` ou `port-local.js` par un `import()` dont
+  // Rollup élimine la branche morte au build — un vrai lien de dépendance, invisible à la seule
+  // citation de nom. On ajoute donc une seconde arête, plus grossière mais correcte : un fichier
+  // qui IMPORTE un autre fichier du dépôt (chemin relatif résolu, `.js` un temps résolu en
+  // `.ts`/`.tsx`) l'atteint, quelle que soit la forme de ce que ce fichier exporte.
+  const EXTENSIONS_CANDIDATES = ['.ts', '.tsx', '/index.ts', '/index.tsx'];
+  const resoudreSpecificateur = (depuis: string, specificateur: string): string | null => {
+    if (!specificateur.startsWith('.')) return null; // paquet externe (@pierre/partage, react…)
+    const base = join(dirname(depuis), specificateur).replace(/\.js$/, '');
+    for (const suffixe of EXTENSIONS_CANDIDATES) {
+      const candidat = base + suffixe;
+      if (fichiers.includes(candidat)) return candidat;
+    }
+    return fichiers.includes(base) ? base : null;
+  };
+  const specificateursDe = (fichier: string): readonly string[] => {
+    const source = lire(fichier);
+    const trouves: string[] = [];
+    for (const m of source.matchAll(/\bfrom\s+['"]([^'"]+)['"]/g)) trouves.push(m[1]!);
+    for (const m of source.matchAll(/\bimport\(\s*['"]([^'"]+)['"]\s*\)/g)) trouves.push(m[1]!);
+    return trouves;
+  };
+
   const racines = fichiers.filter(
     (f) =>
       relatif(f).startsWith('serveur/src/routes/') ||
@@ -211,6 +242,13 @@ function analyser(sourcesFabriquees: ReadonlyMap<string, string> = new Map()): A
   while (bouge) {
     bouge = false;
     for (const fichier of [...fichiersAtteints]) {
+      for (const specificateur of specificateursDe(fichier)) {
+        const cible = resoudreSpecificateur(fichier, specificateur);
+        if (cible !== null && !fichiersAtteints.has(cible)) {
+          fichiersAtteints.add(cible);
+          bouge = true;
+        }
+      }
       for (const [nom, declaration] of declareeDans) {
         if (atteignables.has(nom) || !cite(fichier, nom)) continue;
         atteignables.add(nom);

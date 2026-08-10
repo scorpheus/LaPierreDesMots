@@ -116,6 +116,19 @@ export default tseslint.config(
       '**/node_modules/**',
       '**/dist/**',
       '**/dist-test/**',
+      // `dist-autonome/` — le build Android/Capacitor du portage (Docs/addendum-portage-android.md
+      // § 5) : mêmes bundles minifiés que `dist/`, juste un autre nom de dossier. Sans cette ligne,
+      // `npm run lint` relit du JS généré (`==`, expressions nues, `customElements`/`document`
+      // non déclarés) et le fait passer pour une infraction de code source.
+      '**/dist-autonome/**',
+      // `client/android/` — le projet natif Capacitor : Gradle, Java, et une COPIE du bundle web
+      // (`app/build/…`, `app/src/main/assets/…`) que Capacitor synchronise depuis `dist-autonome/`.
+      // Même raison que `dist-autonome/` ci-dessus, en pire : il contient aussi du Java et du XML.
+      'client/android/**',
+      // Un worktree imbriqué est un AUTRE checkout du même dépôt, pas du code de celui-ci — le
+      // lire ferait dépendre le verdict de `npm run lint` d'un répertoire qui ne sera jamais
+      // commité depuis ici, exactement le défaut de mesure que `bac-a-sable/**` documente déjà.
+      '.claude/worktrees/**',
       '**/.venv/**',
       'outils/**',
       'donnees/**',

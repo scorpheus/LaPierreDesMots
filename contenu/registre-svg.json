@@ -33,9 +33,9 @@
     },
     {
       "fichier": "assets/gobi/cristal-base.svg",
-      "consommateur": "serveur/src/depots/monde.ts",
+      "consommateur": "partage/src/base/depots/monde.ts",
       "symbole": "assets/gobi/cristal-base.svg",
-      "raison": "CE FICHIER N'A JAMAIS ÉTÉ MORT : il est le repli du serveur. `lireFormes` écrit `cristal: declaree?.cristal ?? 'assets/gobi/cristal-base.svg'` — toute forme obtenue par l'enfant mais absente du référentiel est servie AVEC CE DESSIN, plutôt qu'avec un trou. C'est exactement le défaut que `contenu/schemas/monde.schema.json` nomme déjà pour la carte : « un décor déclaré dans du code n'est pas déclaré ». Le voir en « contenu mort » était donc un contresens du contrôle, pas un défaut du fichier. Il porte de surcroît le cristal seul, l'objet que D20 désigne comme le porteur des vingt-cinq déclinaisons — jamais le corps."
+      "raison": "CE FICHIER N'A JAMAIS ÉTÉ MORT : il est le repli du serveur (et, depuis le portage Android, de l'app autonome — les deux partagent désormais ce dépôt). `lireFormes` écrit `cristal: declaree?.cristal ?? 'assets/gobi/cristal-base.svg'` — toute forme obtenue par l'enfant mais absente du référentiel est servie AVEC CE DESSIN, plutôt qu'avec un trou. C'est exactement le défaut que `contenu/schemas/monde.schema.json` nomme déjà pour la carte : « un décor déclaré dans du code n'est pas déclaré ». Le voir en « contenu mort » était donc un contresens du contrôle, pas un défaut du fichier. Il porte de surcroît le cristal seul, l'objet que D20 désigne comme le porteur des vingt-cinq déclinaisons — jamais le corps."
     }
   ],
   "archives": [

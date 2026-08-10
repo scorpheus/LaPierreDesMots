@@ -58,6 +58,12 @@ const alias = {
   // nommer les trois fichiers où un sous-chemin se déclare. L'ajout est purement additif :
   // N2 et N4 ont trouvé le trou indépendamment et leurs deux lignes fusionnent sans conflit.
   '@pierre/partage/voix': racine('./partage/src/voix/index.ts'),
+  // AJOUT portage Android — Docs/addendum-portage-android.md § 3. Même omission que les deux
+  // blocs ci-dessus si on l'oubliait ici : le sous-chemin existe dans `partage/package.json`
+  // (résolution Node), mais Vitest résout `@pierre/partage/*` par CET alias, pas par les
+  // `exports` du package — sans cette ligne, tout import de `@pierre/partage/base` échoue au
+  // chargement des tests avec « Cannot find module », quel que soit le contenu du fichier.
+  '@pierre/partage/base': racine('./partage/src/base/index.ts'),
   '@pierre/partage': racine('./partage/src/index.ts'),
   // Réservés aux tests — contrat § 11.3.
   '@partage': racine('./partage/src'),

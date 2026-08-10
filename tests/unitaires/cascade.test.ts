@@ -20,6 +20,7 @@ import { describe, expect, test } from 'vitest';
 import fc from 'fast-check';
 
 import type { DatabaseSync } from 'node:sqlite';
+import type { Base } from '@pierre/partage/base';
 
 import { ErreurPierre } from '@pierre/partage';
 import type { EtatCascade, NombreEtoiles, SeuilsCascade } from '@pierre/partage';
@@ -231,14 +232,17 @@ describe('progression_cascade — projection recalculable, jamais source de vér
 
   async function baseMigree(): Promise<{
     base: DatabaseSync;
+    baseAsync: Base;
     fermer(): void;
   }> {
-    const [{ ouvrirBase }, { appliquerMigrations }] = await Promise.all([
+    const [{ ouvrirBase }, { appliquerMigrations }, { creerBaseNodeSqlite }] = await Promise.all([
       import('@serveur/base/connexion'),
-      import('@serveur/base/migrations')
+      import('@serveur/base/migrations'),
+      import('@serveur/base/adaptateur-node-sqlite')
     ]);
     const base = ouvrirBase(':memory:');
-    appliquerMigrations(base, DOSSIER_MIGRATIONS, horlogeDeTest());
+    const baseAsync = creerBaseNodeSqlite(base);
+    await appliquerMigrations(baseAsync, DOSSIER_MIGRATIONS, horlogeDeTest());
     base
       .prepare(
         `INSERT INTO profils (id, prenom, avatar_json, palette_variante, cree_le, dernier_acces_le)
@@ -247,6 +251,7 @@ describe('progression_cascade — projection recalculable, jamais source de vér
       .run(PROFIL, INSTANT_DE_REFERENCE, INSTANT_DE_REFERENCE);
     return {
       base,
+      baseAsync,
       fermer: () => {
         base.close();
       }
@@ -275,54 +280,54 @@ describe('progression_cascade — projection recalculable, jamais source de vér
   }
 
   test('un profil sans tentative rend l’état vide, jamais `null`', async () => {
-    const { base, fermer } = await baseMigree();
+    const { baseAsync, fermer } = await baseMigree();
     try {
-      const { lireCascade } = await import('@serveur/depots/cascade');
-      expect(lireCascade(base, PROFIL)).toEqual(ETAT_CASCADE_VIDE);
+      const { lireCascade } = await import('@pierre/partage/base');
+      expect(await lireCascade(baseAsync, PROFIL)).toEqual(ETAT_CASCADE_VIDE);
     } finally {
       fermer();
     }
   });
 
   test('T2 — l’incrémental et le recalcul intégral rendent le MÊME état', async () => {
-    const { base, fermer } = await baseMigree();
+    const { base, baseAsync, fermer } = await baseMigree();
     try {
       const { appliquerTentativeALaCascade, lireCascade, recalculerCascade } =
-        await import('@serveur/depots/cascade');
+        await import('@pierre/partage/base');
       const seuils = seuilsReels();
 
       // 17 nœuds à 3 étoiles : 51 étoiles, 10 tampons, 1 image. La cascade entière.
       const etoilesParNoeud: readonly NombreEtoiles[] = Array.from({ length: 17 }, () => 3);
-      etoilesParNoeud.forEach((etoiles, index) => {
+      for (const [index, etoiles] of etoilesParNoeud.entries()) {
         journaliser(base, index, etoiles);
-        appliquerTentativeALaCascade(base, PROFIL, etoiles, seuils, INSTANT_DE_REFERENCE);
-      });
+        await appliquerTentativeALaCascade(baseAsync, PROFIL, etoiles, seuils, INSTANT_DE_REFERENCE);
+      }
 
-      const incremental = lireCascade(base, PROFIL);
+      const incremental = await lireCascade(baseAsync, PROFIL);
       expect(incremental.etoilesTotal).toBe(51);
       expect(incremental.intermediairesTotal).toBe(10);
       expect(incremental.raresTotal).toBe(1);
 
-      const integral = recalculerCascade(base, PROFIL, seuils);
+      const integral = await recalculerCascade(baseAsync, PROFIL, seuils);
       expect(integral).toEqual(incremental);
       // Et la table relue après recalcul dit bien la même chose.
-      expect(lireCascade(base, PROFIL)).toEqual(incremental);
+      expect(await lireCascade(baseAsync, PROFIL)).toEqual(incremental);
     } finally {
       fermer();
     }
   });
 
   test('rejouer plus mal ne fait redescendre AUCUN total (R14)', async () => {
-    const { base, fermer } = await baseMigree();
+    const { base, baseAsync, fermer } = await baseMigree();
     try {
-      const { appliquerTentativeALaCascade } = await import('@serveur/depots/cascade');
+      const { appliquerTentativeALaCascade } = await import('@pierre/partage/base');
       const seuils = seuilsReels();
 
       journaliser(base, 0, 3);
-      const apresBon = appliquerTentativeALaCascade(base, PROFIL, 3, seuils, INSTANT_DE_REFERENCE);
+      const apresBon = await appliquerTentativeALaCascade(baseAsync, PROFIL, 3, seuils, INSTANT_DE_REFERENCE);
       journaliser(base, 1, 1);
-      const apresMoinsBon = appliquerTentativeALaCascade(
-        base,
+      const apresMoinsBon = await appliquerTentativeALaCascade(
+        baseAsync,
         PROFIL,
         1,
         seuils,
