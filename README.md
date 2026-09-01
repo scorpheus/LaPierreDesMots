@@ -4,8 +4,9 @@ Application de lecture pour un enfant de 7 ans (CE1). Un monde gris que l'enfant
 mini-jeu réussi recolorie une portion de décor — c'est simultanément la barre de progression, la
 récompense et la justification narrative.
 
-Servie en local sur le réseau domestique depuis un PC Windows, jouée sur tablette,
-**entièrement hors-ligne**. Aucun compte, aucun serveur distant, aucune donnée qui sort de la
+Deux modes sont livrés : un site servi sur le réseau domestique depuis un PC Windows, et une APK
+Android autonome qui embarque l'application, la base et les contenus. Les deux fonctionnent
+**entièrement hors ligne**. Aucun compte, aucun serveur distant, aucune donnée qui sort de la
 maison.
 
 ---
@@ -66,6 +67,21 @@ pare-feu Windows.
 
 Pour arrêter : **`arreter.bat`**, ou `Ctrl+C` dans la fenêtre du serveur.
 
+## Jouer sans PC : construire l'APK Android
+
+Double-cliquer sur **`construire-apk.bat`**. Le script construit le client autonome, synchronise
+Capacitor puis produit :
+
+```
+client\android\app\build\outputs\apk\debug\app-debug.apk
+```
+
+Le SDK Android doit être installé par Android Studio. Le JDK 21 nécessaire à la construction reste
+dans `outils/jdk-21/` : rien n'est installé globalement. L'APK actuelle est une version de
+débogage destinée à l'installation manuelle dans le foyer ; une version `release` signée n'est pas
+encore configurée. L'architecture et la recette hors ligne sont détaillées dans
+`Docs/addendum-portage-android.md`.
+
 ## Vérifier
 
 Double-cliquer sur **`verifier.bat`** : la chaîne complète s'exécute et le rapport consolidé
@@ -93,17 +109,13 @@ Développement : `npm run dev` (serveur qui se recharge + Vite), `npm run lint`,
 
 ## Ce que contient cette version
 
-**Chiffres mesurés le 2026-08-02, à l'intégration des lots N1 à N8** — commandes citées dans
-`Docs/questions-en-attente.md`, jamais recopiées d'un document.
+**Chiffres remesurés le 2026-09-01 lors de la reprise du dépôt** — le détail et les commandes sont
+consignés dans `Docs/audit-reprise-2026-09-01.md`.
 
-- **Deux régions ouvertes dès la première seconde** (D38) — La Clairière et Les Galeries,
-  **6 nœuds chacune**, soit **12 nœuds** et **12 exercices**. Les Galeries travaillent
-  précisément les confusions `b`/`d`/`p`/`q`.
-- **8 moteurs de jeu réellement jouables** sur les 14 que le code déclare : `attrape`,
-  `colorie`, `eclair`, `grave`, `phrase`, `place`, `trace`, `tri`. Les six autres existent et
-  attendent leur contenu — la QA les compte et les nomme, pour qu'ils ne soient pas oubliés.
-- **132 clips de voix pré-rendus**, hors ligne, en Opus. **Toutes les consignes livrées ont une
-  voix** : le bouton « écouter » n'est plus masqué nulle part (D41, D42).
+- **Six régions**, **76 nœuds** et **76 exercices** validés par les schémas de contenu.
+- **14 moteurs de jeu** présents dans le client et couverts par les tests.
+- **713 clips de voix pré-rendus**, hors ligne, en Opus. Le bundle Android autonome en embarque
+  473, soit les clips réellement référencés par les contenus et écrans livrés.
 - **13 écrans**, tous parcourus par la QA, tous avec une sortie.
 - **Le campement** et ses 30 points d'interaction gratuits, l'étagère des formes à cases vides
   visibles, Gobi et ses **10 stades** d'évolution irréversible, **25 formes** de graphème.
@@ -111,19 +123,20 @@ Développement : `npm run dev` (serveur qui se recharge + Vite), `npm run lint`,
   à **un seul tap** depuis l'ouverture de l'application (D46).
 - **L'espace du parent** : suivi, galerie de tous les exercices lançables sans rien journaliser,
   relecture des contenus, exports, réglages.
-- **Un serveur** Fastify, base SQLite, **9 migrations** numérotées.
+- **Un serveur** Fastify, base SQLite, **10 migrations** numérotées.
+- **Une APK Android autonome** par Capacitor et SQLite natif, construite depuis le même métier et
+  les mêmes contenus que le serveur LAN.
 - **La chaîne de test complète** — unitaires, composants, API, parcours, robustesse, visuel,
   accessibilité.
 
-### Ce qui n'y est pas encore, et c'est délibéré
+### Ce qui reste à terminer ou à valider
 
-- **Les quatre autres régions** (Marais Jumeau, Forêt Muette, Volcan, Cité des Histoires). Leurs
-  décors existent, leur contenu non. « L1 décide de tout » : une région complète et jouable avant
-  d'en construire cinq.
-- **Les captures visuelles de référence** — `npm run test:visuel` est **rouge, et c'est déclaré**
-  (D39). Le graphisme vient d'être refait ; figer les références maintenant reviendrait à les
-  refaire aussitôt. **Aucune référence n'est figée sans un adulte qui a regardé l'image.** C'est
-  la seule étape rouge de la chaîne, et elle attend une validation, pas une correction.
+- **La chaîne complète de QA est rouge** au 2026-09-01 : parcours E2E, références visuelles et
+  qualité tablette/accessibilité. Les défauts et les priorités sont détaillés dans
+  `Docs/audit-reprise-2026-09-01.md`. Les 2 références visuelles absentes et les 10 divergences ne
+  seront pas acceptées sans validation visuelle d'un adulte.
+- **L'APK `release` signée** n'est pas configurée. Le build actuel produit une APK de débogage,
+  suffisante pour l'installation manuelle dans le foyer.
 - **Les cursives** : l'enfant sort du CP et lit du script. Le référentiel de ductus porte déjà le
   champ `casse` ; les ajouter n'ajoutera pas une ligne de code, seulement des données.
 - **Le clonage d'une voix de la famille** — les voix sont entièrement synthétiques (D41).
@@ -187,8 +200,10 @@ Tout est dans `Docs/`, en français.
 | `annexe-T-strategie-de-test.md` | Testabilité, six niveaux de test, définition de « terminé » |
 | `annexe-P-production-et-agent.md` | Production des images et des voix |
 | `addendum-animation-et-brief-de-reprise.md` | Animation, ordre de démarrage |
+| `addendum-portage-android.md` | Architecture et construction de l'APK autonome |
 | `contrat-technique-v1.md` | Le contrat gelé de cette version : arborescence, interfaces, propriétaire de chaque fichier |
 | `journal-des-decisions.md` | Les décisions prises, et leur motif |
+| `audit-reprise-2026-09-01.md` | État mesuré lors de la reprise, risques et ordre de remise au vert |
 
 Sur un point technique, l'ordre de préséance est : v2, puis annexe P, puis addendum — le plus
 récent gagne. Sur un point de conception ou de pédagogie, la v2 fait foi.
