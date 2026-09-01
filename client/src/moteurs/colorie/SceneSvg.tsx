@@ -31,7 +31,7 @@
  * un point est donc, par construction, ce que la visée nomme en ce point.
  */
 
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type {
   KeyboardEvent as KeyboardEventReact,
   PointerEvent as PointerEventReact,
@@ -87,6 +87,7 @@ const STYLES_SCENE = `
 .pierre-region:focus-visible { outline: 3px solid var(--soleil, #FFC93C); outline-offset: 2px; }
 .pierre-region--refus { animation: pierre-oscille 180ms ease-in-out 1; }
 .pierre-region--demonstration { animation: pierre-halo 900ms ease-in-out infinite; }
+.pierre-prise-colorie { cursor: pointer; fill: transparent; pointer-events: all; }
 @keyframes pierre-oscille {
   0%   { transform: translateX(0); }
   25%  { transform: translateX(-6px); }
@@ -169,6 +170,33 @@ export function SceneSvg(proprietes: ProprietesSceneSvg): ReactElement {
 
   const viewBox = habillage.scene.viewBox || VIEWBOX_PAR_DEFAUT;
   const dureeRecolorationMs = habillage.timings.recolorationMs;
+  const [rayonPrise, fixerRayonPrise] = useState(64);
+
+  // Une longueur SVG est mise à l'échelle avec tout le dessin : 80 unités donnaient 80 px sur
+  // la tablette de référence, mais seulement 40 px dans le viewport E2E plus bas. Le rayon est
+  // donc dérivé de la boîte RÉELLEMENT rendue pour garantir un diamètre de 64 px CSS partout.
+  useLayoutEffect(() => {
+    const svg = refSvg.current;
+    if (svg === null) return undefined;
+    const morceaux = viewBox.trim().split(/[\s,]+/u).map(Number);
+    const largeurViewBox = morceaux[2] ?? 1;
+    const hauteurViewBox = morceaux[3] ?? 1;
+    const mesurer = (): void => {
+      const boite = svg.getBoundingClientRect();
+      if (boite.width <= 0 || boite.height <= 0) return;
+      const echelle = Math.min(boite.width / largeurViewBox, boite.height / hauteurViewBox);
+      if (!Number.isFinite(echelle) || echelle <= 0) return;
+      // Une petite marge absorbe le cycle entre le changement de largeur du panneau d'aide
+      // et le rappel asynchrone de ResizeObserver. Sans elle, la scène pouvait être mesurée à
+      // 64 px puis tomber brièvement à 57–59 px au moment précis où Gobi ouvrait sa bulle.
+      fixerRayonPrise(Math.max(64, 36 / echelle));
+    };
+    mesurer();
+    if (typeof ResizeObserver !== 'function') return undefined;
+    const observateur = new ResizeObserver(mesurer);
+    observateur.observe(svg);
+    return () => observateur.disconnect();
+  }, [viewBox]);
 
   /** Les calques coloriables, seule source de régions — aucune table interne. */
   const calquesColoriables = useMemo(
@@ -207,12 +235,6 @@ export function SceneSvg(proprietes: ProprietesSceneSvg): ReactElement {
     () => (svgMarkup === null ? null : { __html: svgMarkup }),
     [svgMarkup]
   );
-
-  const libelles = useMemo(() => {
-    const table = new Map<string, string>();
-    for (const region of regionsDeclarees) table.set(region.id, region.libelle);
-    return table;
-  }, [regionsDeclarees]);
 
   const centroides = useMemo(() => {
     const table = new Map<string, readonly [number, number]>();
@@ -278,7 +300,7 @@ export function SceneSvg(proprietes: ProprietesSceneSvg): ReactElement {
     const precedents = refRemplissagesPrecedents.current;
     for (const [region, couleur] of Object.entries(remplissages)) {
       if (precedents[region] === couleur) continue;
-      const element = svg.querySelector(`[data-region-svg="${region}"]`);
+      const element = svg.querySelector(`[data-region-source="${region}"]`);
       if (element === null) continue;
       void jouerRecoloration(element as SVGGraphicsElement, couleur, {
         origine: refDernierPoint.current,
@@ -336,39 +358,28 @@ export function SceneSvg(proprietes: ProprietesSceneSvg): ReactElement {
     if (selecteur.length === 0) return undefined;
     const noeuds = Array.from(svg.querySelectorAll(selecteur));
 
-    const surTouche = (evenement: Event): void => {
-      const clavier = evenement as globalThis.KeyboardEvent;
-      if (!toucheDeValidation(clavier.key)) return;
-      evenement.preventDefault();
-      peindreAuClavier((evenement.currentTarget as Element).getAttribute('data-region-svg'));
-    };
-
     for (const noeud of noeuds) {
       const identifiant = noeud.getAttribute('id');
       if (identifiant === null) continue;
       const couleur = remplissages[identifiant];
-      noeud.setAttribute('data-region-svg', identifiant);
+      // Les SVG historiques portent déjà cet attribut sur la forme visible. Il désigne
+      // désormais exclusivement la prise interactive transparente, afin qu'une région ne
+      // soit annoncée qu'une fois aux technologies d'assistance et aux gardes de QA.
+      noeud.removeAttribute('data-region-svg');
+      noeud.setAttribute('data-region-source', identifiant);
       noeud.setAttribute('data-peinte', couleur === undefined ? 'non' : 'oui');
       noeud.setAttribute('fill', couleur === undefined ? REMPLISSAGE_VIDE : hexDeCouleur(couleur));
       noeud.classList.add('pierre-region');
       if (couleur === undefined) noeud.removeAttribute('data-couleur');
       else noeud.setAttribute('data-couleur', couleur);
-      const libelle = libelles.get(identifiant);
-      if (libelle !== undefined) noeud.setAttribute('aria-label', libelle);
-      noeud.setAttribute('role', 'button');
-      noeud.setAttribute('tabindex', '0');
       noeud.classList.toggle('pierre-region--demonstration', identifiant === regionEnDemonstration);
-      noeud.addEventListener('keydown', surTouche);
     }
 
-    return () => {
-      for (const noeud of noeuds) noeud.removeEventListener('keydown', surTouche);
-    };
+    return undefined;
   }, [
     svgMarkup,
     habillage,
     remplissages,
-    libelles,
     regionEnDemonstration,
     calquesColoriables,
     peindreAuClavier
@@ -390,12 +401,18 @@ export function SceneSvg(proprietes: ProprietesSceneSvg): ReactElement {
       noeud.classList.remove('pierre-region--refus');
     }
     if (regionEnRefus === null) return;
-    const cible = svg.querySelector(`[data-region-svg="${regionEnRefus}"]`);
-    if (cible === null) return;
-    if (typeof (cible as SVGGraphicsElement).getBoundingClientRect === 'function') {
-      void (cible as SVGGraphicsElement).getBoundingClientRect();
+    const cibles = svg.querySelectorAll(
+      `[data-region-source="${regionEnRefus}"], [data-region-svg="${regionEnRefus}"]`
+    );
+    if (cibles.length === 0) return;
+    const cibleVisible = cibles[0];
+    if (
+      cibleVisible !== undefined &&
+      typeof (cibleVisible as SVGGraphicsElement).getBoundingClientRect === 'function'
+    ) {
+      void (cibleVisible as SVGGraphicsElement).getBoundingClientRect();
     }
-    cible.classList.add('pierre-region--refus');
+    for (const cible of cibles) cible.classList.add('pierre-region--refus');
   }, [svgMarkup, regionEnRefus, marqueRefus]);
 
   return (
@@ -414,14 +431,43 @@ export function SceneSvg(proprietes: ProprietesSceneSvg): ReactElement {
       <style>{STYLES_SCENE}</style>
 
       {contenuDecor !== null ? (
-        <g
-          data-calque="habillage"
-          // Le SVG de l'habillage est un asset local du dépôt, validé par
-          // `test:contenu` avant d'atteindre l'enfant ; il ne vient d'aucun réseau.
-          // `contenuDecor` est MÉMORISÉ — voir son commentaire : un littéral ici
-          // réinjecterait le markup à chaque rendu et effacerait le coloriage.
-          dangerouslySetInnerHTML={contenuDecor}
-        />
+        <>
+          <g
+            data-calque="habillage"
+            // Le SVG de l'habillage est un asset local du dépôt, validé par
+            // `test:contenu` avant d'atteindre l'enfant ; il ne vient d'aucun réseau.
+            // `contenuDecor` est MÉMORISÉ — voir son commentaire : un littéral ici
+            // réinjecterait le markup à chaque rendu et effacerait le coloriage.
+            dangerouslySetInnerHTML={contenuDecor}
+          />
+          <g data-calque="prises" aria-label="Zones à colorier">
+            {regionsDeclarees.map((region) => {
+              const couleur = remplissages[region.id];
+              return (
+                <circle
+                  key={`prise-${region.id}`}
+                  className={`pierre-prise-colorie${
+                    region.id === regionEnRefus ? ' pierre-region--refus' : ''
+                  }${
+                    region.id === regionEnDemonstration
+                      ? ' pierre-region--demonstration'
+                      : ''
+                  }`}
+                  cx={region.centroide[0]}
+                  cy={region.centroide[1]}
+                  r={rayonPrise}
+                  data-region-svg={region.id}
+                  data-peinte={couleur === undefined ? 'non' : 'oui'}
+                  {...(couleur === undefined ? {} : { 'data-couleur': couleur })}
+                  aria-label={region.libelle}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={surClavier}
+                />
+              );
+            })}
+          </g>
+        </>
       ) : (
         habillage.scene.calques.map((calque) => (
           <g
@@ -447,7 +493,9 @@ export function SceneSvg(proprietes: ProprietesSceneSvg): ReactElement {
                       className={classes.join(' ')}
                       cx={region.centroide[0]}
                       cy={region.centroide[1]}
-                      r={rayonEquivalent(region.surface)}
+                      // Le repli est visible pendant le chargement asynchrone du décor réel.
+                      // Il doit donc respecter R16 lui aussi, dès le tout premier relevé E2E.
+                      r={Math.max(rayonEquivalent(region.surface), rayonPrise)}
                       fill={couleur === undefined ? REMPLISSAGE_VIDE : hexDeCouleur(couleur)}
                       stroke={TRAIT}
                       strokeWidth={4}

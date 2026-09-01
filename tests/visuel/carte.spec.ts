@@ -32,30 +32,28 @@ const RACINE = new URL('../../', import.meta.url);
 const fixtureProfil = JSON.parse(
   readFileSync(fileURLToPath(new URL('tests/fixtures/profils/enfant.json', RACINE)), 'utf8')
 ) as Record<string, unknown>;
+const monde = JSON.parse(
+  readFileSync(fileURLToPath(new URL('contenu/monde/regions.json', RACINE)), 'utf8')
+) as { readonly regions: ReadonlyArray<{ readonly region: string; readonly noeuds: readonly string[] }> };
+const noeudsClairiere =
+  monde.regions.find((region) => region.region === 'clairiere')?.noeuds ?? [];
+const fixtureClairiereTerminee = {
+  ...fixtureProfil,
+  progression: noeudsClairiere.map((noeud) => ({ noeud, etoiles: 3 })),
+};
 
-const NOEUD = 'clairiere-01';
 const GRAINE = Number(process.env['ATELIER_GRAINE'] ?? 20260801);
 const INSTANT = '2026-09-01T08:00:00Z';
 
 interface CrochetsTest {
   chargerProfil(fixture: unknown): Promise<void>;
-  allerAuNoeud(id: string): Promise<void>;
-  repondre(action: unknown): Promise<void>;
-  etat(): { readonly etatMoteur: unknown };
   sauterAnimations(): void;
   graine(n: number): void;
   figerHorloge(instant: string): void;
 }
 type FenetreTest = Window & { __test: CrochetsTest };
 
-interface EtatColorieLu {
-  readonly indexConsigne: number;
-  readonly consignes: ReadonlyArray<{
-    readonly ciblesRestantes: ReadonlyArray<{ readonly region: string; readonly couleur: string }>;
-  }>;
-}
-
-async function preparer(page: Page): Promise<void> {
+async function preparer(page: Page, fixture: Record<string, unknown> = fixtureProfil): Promise<void> {
   await page.goto('/');
   await page.waitForFunction(() => (window as FenetreTest).__test !== undefined);
   await page.evaluate(
@@ -66,7 +64,7 @@ async function preparer(page: Page): Promise<void> {
       crochets.figerHorloge(instant);
       await crochets.chargerProfil(fixture);
     },
-    { fixture: fixtureProfil, graine: GRAINE, instant: INSTANT }
+    { fixture, graine: GRAINE, instant: INSTANT }
   );
 }
 
@@ -76,30 +74,6 @@ async function ouvrirLaCarte(page: Page): Promise<void> {
   await expect(page.locator('[data-ecran="carte"]')).toBeVisible();
   // La carte est prête quand ses six régions portent leur état — jamais après une durée.
   await expect(page.locator('[data-region-etat]')).toHaveCount(6);
-}
-
-/** Termine l'unique nœud livré de la Clairière, cible par cible. */
-async function terminerLeNoeud(page: Page): Promise<void> {
-  await page.evaluate(async (noeud) => (window as FenetreTest).__test.allerAuNoeud(noeud), NOEUD);
-  await expect(page.locator('[data-test-pret="oui"]')).toBeVisible();
-
-  for (let tour = 0; tour < 64; tour += 1) {
-    const etat = (await page.evaluate(
-      () => (window as FenetreTest).__test.etat().etatMoteur
-    )) as EtatColorieLu;
-    const cible = etat.consignes[etat.indexConsigne]?.ciblesRestantes[0];
-    if (!cible) break;
-    await page.evaluate(
-      async (action) => (window as FenetreTest).__test.repondre(action),
-      { type: 'choisirCouleur', couleur: cible.couleur } as Record<string, unknown>
-    );
-    await page.evaluate(
-      async (action) => (window as FenetreTest).__test.repondre(action),
-      { type: 'peindre', region: cible.region } as Record<string, unknown>
-    );
-  }
-
-  await expect(page.locator('[data-ecran="recompense"]')).toBeVisible();
 }
 
 /** Compte les régions dans chacun des trois états d'affichage. */
@@ -130,14 +104,17 @@ test.describe('la carte du monde', () => {
   });
 
   test('après l’Éclat : la Clairière est terminée et deux régions s’ouvrent', async ({ page }) => {
-    await preparer(page);
-    await terminerLeNoeud(page);
+    // Une région est terminée quand TOUS ses nœuds le sont. L'ancien cas terminait seulement
+    // `clairiere-01`, vestige de l'époque où c'était l'unique nœud livré, et attendait encore
+    // l'Éclat : il validait une règle devenue pédagogiquement fausse. La population est lue
+    // dans `regions.json`, jamais recopiée ici.
+    await preparer(page, fixtureClairiereTerminee);
 
     // On revient à la carte comme l'enfant le ferait : en rechargeant la borne et en
     // rechoisissant son profil. Ce détour prouve du même coup que rien n'a été perdu.
     await page.reload();
     await page.waitForFunction(() => (window as FenetreTest).__test !== undefined);
-    await preparer(page);
+    await preparer(page, fixtureClairiereTerminee);
     await ouvrirLaCarte(page);
 
     await expect(page.locator('[data-region="clairiere"]')).toHaveAttribute(
@@ -156,18 +133,17 @@ test.describe('la carte du monde', () => {
   });
 
   test('et ça reste : un second rechargement ne reprend rien (R14)', async ({ page }) => {
-    await preparer(page);
-    await terminerLeNoeud(page);
+    await preparer(page, fixtureClairiereTerminee);
 
     await page.reload();
     await page.waitForFunction(() => (window as FenetreTest).__test !== undefined);
-    await preparer(page);
+    await preparer(page, fixtureClairiereTerminee);
     await ouvrirLaCarte(page);
     const premier = await comptes(page);
 
     await page.reload();
     await page.waitForFunction(() => (window as FenetreTest).__test !== undefined);
-    await preparer(page);
+    await preparer(page, fixtureClairiereTerminee);
     await ouvrirLaCarte(page);
 
     expect(await comptes(page)).toEqual(premier);

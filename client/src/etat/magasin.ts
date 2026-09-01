@@ -24,6 +24,7 @@ import type {
   ResumeTentative,
   SeuilsCascade
 } from '@pierre/partage';
+import type { PlanSortie } from '@pierre/partage/pedagogie';
 import { ETAT_CASCADE_VIDE } from '@pierre/partage/recompenses';
 import type { PaquetNoeudAttendu } from '../api/client.js';
 import { memoriserProfil, oublierProfil } from './profil-memorise.js';
@@ -56,6 +57,8 @@ function refusCourant(etat: unknown): unknown {
 export interface EtatMagasin {
   readonly ecran: CodeEcran;
   readonly profil: Profil | null;
+  /** Plan pédagogique courant : 4 à 6 étapes composées par le serveur, jamais une région entière. */
+  readonly sortie: PlanSortie | null;
 
   readonly paquet: PaquetNoeudAttendu | null;
   readonly moteur: MoteurQuelconque | null;
@@ -107,6 +110,8 @@ export interface EtatMagasin {
   naviguer(ecran: CodeEcran): void;
   choisirProfil(profil: Profil): void;
   quitterProfil(): void;
+  demarrerSortie(sortie: PlanSortie): void;
+  cloreSortie(): void;
   /**
    * Ouvre un nœud. `options.journalise` vaut `true` par défaut : c'est l'enfant qui joue, et
    * un défaut qui n'enregistrerait rien serait la pire des valeurs par défaut possibles.
@@ -175,6 +180,7 @@ export function creerMagasin(
   return createStore<EtatMagasin>()((fixer, lire) => ({
     ecran: 'chargement',
     profil: null,
+    sortie: null,
 
     paquet: null,
     moteur: null,
@@ -234,7 +240,16 @@ export function creerMagasin(
       // renvoyait au choix de profil. Les routes existaient pourtant toutes ; c'est le JOUEUR
       // qui manquait, pas l'URL.
       memoriserProfil(String(profil.id));
-      fixer({ profil, ecran: 'carte' });
+      const sortie = lire().profil?.id === profil.id ? lire().sortie : null;
+      fixer({ profil, sortie, ecran: 'carte' });
+    },
+
+    demarrerSortie(sortie: PlanSortie): void {
+      fixer({ sortie });
+    },
+
+    cloreSortie(): void {
+      fixer({ sortie: null });
     },
 
     quitterProfil(): void {
@@ -243,6 +258,7 @@ export function creerMagasin(
       oublierProfil();
       fixer({
         profil: null,
+        sortie: null,
         ecran: 'profils',
         paquet: null,
         moteur: null,

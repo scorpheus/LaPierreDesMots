@@ -165,6 +165,17 @@ describe('moteur libre', () => {
     expect(habillage.moteurs).toContain('libre');
   });
 
+  it('chaque région offerte expose une prise transparente d’au moins 80 unités', () => {
+    const { container } = render(<Harnais />);
+    const prises = [...container.querySelectorAll<SVGCircleElement>('[data-cible-frappe="oui"]')];
+    expect(prises).toHaveLength(contenu.regions.length);
+    for (const prise of prises) {
+      expect(prise.getAttribute('role')).toBe('button');
+      expect(Number(prise.getAttribute('r')) * 2).toBeGreaterThanOrEqual(80);
+      expect(prise.getAttribute('data-region-svg')).not.toBeNull();
+    }
+  });
+
   it('bonne réponse : l’étape avance, aucune erreur, aucun écran d’échec', () => {
     const { container } = render(<Harnais />);
     taper(container, ['[data-couleur="rouge"]', '[data-region-svg="flamme"]']);

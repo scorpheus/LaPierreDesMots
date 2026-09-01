@@ -23,17 +23,21 @@ import {
   calculerCleIdempotence,
   creerProfil,
   enregistrerTentative,
+  lireMonde,
   lirePaquetNoeud,
   lireProfil,
+  lireProgression,
   listerProfils
 } from '../api/client.js';
 import type { MagasinJeu } from '../etat/magasin.js';
 import { figerHorloge, maintenantIso } from '../etat/services.js';
 import type { ServicesJeu } from '../moteurs/types.js';
+import type { QueryClient } from '@tanstack/react-query';
 
 export interface DependancesCrochets {
   readonly magasin: MagasinJeu;
   readonly services: ServicesJeu;
+  readonly fileDAttente: QueryClient;
 }
 
 /**
@@ -85,7 +89,27 @@ function resumePourEtoiles(etoiles: number): ResumeTentative {
   return { ...commun, reussi: false, nbErreurs: 0, aideUtilisee: 'aucune' };
 }
 
-export function monterCrochetsDeTest({ magasin, services }: DependancesCrochets): void {
+/**
+ * Donne à chaque entrée d'une fixture une identité temporelle stable.
+ *
+ * Une fixture peut légitimement porter deux écritures sur le même nœud. Avec une horloge figée,
+ * elles auraient sinon même profil, même nœud, même instant et même graine : la seconde serait
+ * absorbée comme un double envoi. Le rang est déterministe, donc recharger la MÊME fixture reste
+ * idempotent, tandis que deux entrées distinctes ne fusionnent plus.
+ */
+export function horodatageEntreeFixture(instant: string, rang: number): string {
+  const morceaux = /^(.*:\d{2})(?:\.\d{3})?Z$/.exec(instant);
+  if (morceaux?.[1] === undefined || !Number.isInteger(rang) || rang < 0 || rang > 999) {
+    throw new Error(`[test] horodatage de fixture inutilisable : ${instant}, rang ${String(rang)}.`);
+  }
+  return `${morceaux[1]}.${String(rang).padStart(3, '0')}Z`;
+}
+
+export function monterCrochetsDeTest({
+  magasin,
+  services,
+  fileDAttente
+}: DependancesCrochets): void {
   /**
    * Journalise une tentative qui vaut exactement `entree.etoiles` sur `entree.noeud`.
    *
@@ -94,7 +118,11 @@ export function monterCrochetsDeTest({ magasin, services }: DependancesCrochets)
    * tombe pas juste. Un crochet de test qui installerait discrètement 3 étoiles là où la
    * fixture en demande 2 rendrait vertes des suites qui ne vérifient plus rien.
    */
-  async function installerEtoiles(profil: Profil, entree: EntreeProgressionTest): Promise<void> {
+  async function installerEtoiles(
+    profil: Profil,
+    entree: EntreeProgressionTest,
+    rang: number,
+  ): Promise<void> {
     const resume = resumePourEtoiles(Number(entree.etoiles));
     const obtenu = Number(calculerEtoiles(resume));
     if (obtenu !== Number(entree.etoiles)) {
@@ -107,7 +135,7 @@ export function monterCrochetsDeTest({ magasin, services }: DependancesCrochets)
     // Le paquet donne l'exercice, le moteur et l'habillage réels du nœud : la tentative
     // installée est de la même forme que celle qu'une vraie partie produirait.
     const paquet = await lirePaquetNoeud(entree.noeud);
-    const instant = maintenantIso(services.horloge);
+    const instant = horodatageEntreeFixture(maintenantIso(services.horloge), rang);
     const graine = magasin.getState().graine;
     const cleIdempotence = await calculerCleIdempotence(
       String(profil.id),
@@ -175,9 +203,19 @@ export function monterCrochetsDeTest({ magasin, services }: DependancesCrochets)
       // Idempotent par construction : la clé d'idempotence est dérivée de l'instant, que les
       // tests figent. Rejouer `chargerProfil` ne double aucune ligne du journal (§ 6.3), et
       // « un acquis n'est jamais repris » fait le reste si les étoiles varient.
-      for (const entree of fixture.progression ?? []) {
-        await installerEtoiles(profil, entree);
+      for (const [rang, entree] of (fixture.progression ?? []).entries()) {
+        await installerEtoiles(profil, entree, rang);
       }
+
+      // La fixture vient de modifier le journal qui fait foi. Les écrans doivent relire ses
+      // projections exactement comme après une vraie tentative, sans attendre le staleTime.
+      const [progression, monde] = await Promise.all([
+        lireProgression(profil.id),
+        lireMonde(profil.id)
+      ]);
+      fileDAttente.setQueryData(['progression', String(profil.id)], progression);
+      fileDAttente.setQueryData(['monde', String(profil.id)], monde);
+      await fileDAttente.invalidateQueries({ queryKey: ['pastille-sortie'] });
 
       magasin.getState().choisirProfil(profil);
       // On LAISSE React peindre la carte avant de revenir sur l'écran de choix. Enchaîner les

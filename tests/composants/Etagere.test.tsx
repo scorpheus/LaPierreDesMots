@@ -8,7 +8,7 @@
  *
  * Le catalogue vient du disque réel, jamais d'une maquette.
  */
-import { cleanup, render } from '@testing-library/react';
+import { cleanup, fireEvent, render } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { construireEtagere, formesDuDocument } from '@pierre/partage/monde';
@@ -103,11 +103,25 @@ describe('une case vide est EN CREUX, jamais cachée ni cadenassée', () => {
   });
 });
 
-describe('l’étagère ne peut rien coûter — R14', () => {
-  it('ne rend aucun bouton : une vignette se regarde, elle ne se joue pas', () => {
+describe('l’étagère reste une vraie liste dont chaque case ouvre sa fiche — R24', () => {
+  it('garde les `li` comme enfants directs et place un bouton natif dans chaque case', () => {
     monter([gagnee('a')]);
     const dansLEtagere = document.querySelector('[data-etagere="oui"]');
-    expect(dansLEtagere?.querySelectorAll('button')).toHaveLength(0);
+    const liste = dansLEtagere?.querySelector('ul');
+    expect(liste).not.toBeNull();
+    expect([...liste!.children].every((enfant) => enfant.tagName === 'LI')).toBe(true);
+    expect([...liste!.children].every((enfant) => !enfant.hasAttribute('role'))).toBe(true);
+    expect(liste?.querySelectorAll('button[data-case-etagere]')).toHaveLength(
+      liste?.children.length ?? 0
+    );
+  });
+
+  it('le bouton d’une case vide ouvre sa fiche : la prise n’est pas décorative', () => {
+    monter([]);
+    const vide = document.querySelector<HTMLButtonElement>('[data-obtenue="non"]');
+    expect(vide).not.toBeNull();
+    fireEvent.click(vide!);
+    expect(document.querySelector('[data-fiche-case]')).not.toBeNull();
   });
 
   it('reste un écran plein même sans aucune forme — jamais de page vide', () => {

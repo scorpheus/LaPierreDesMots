@@ -176,6 +176,12 @@ export function EcranNoeud(): ReactElement {
   const journalise = useEtatJeu((etat) => etat.journalise);
   const cascade = useEtatJeu((etat) => etat.cascade);
   const seuils = useEtatJeu((etat) => etat.seuils);
+  const sortie = useEtatJeu((etat) => etat.sortie);
+  const rangSortie =
+    sortie === null || paquet === null
+      ? -1
+      : sortie.etapes.findIndex((etape) => etape.noeud === paquet.noeud.id);
+  const etapeSortie = rangSortie < 0 ? null : sortie?.etapes[rangSortie] ?? null;
 
   const racine = useRef<HTMLElement | null>(null);
   const [pret, fixerPret] = useState(false);
@@ -408,6 +414,9 @@ export function EcranNoeud(): ReactElement {
       // constater ». Il vit maintenant dans le magasin ET sur le DOM, donc une recette peut
       // l'exiger au lieu de faire confiance.
       data-journalise={journalise ? 'oui' : 'non'}
+      data-sortie-rang={etapeSortie === null ? '' : String(rangSortie + 1)}
+      data-sortie-total={sortie === null ? '' : String(sortie.etapes.length)}
+      data-sortie-role={etapeSortie?.role ?? ''}
       // ⚠ `data-appui` — ADDITION au § 7, signalée au rapport de L2-A. Ce n'est pas qu'un
       // crochet de test : c'est l'IMPLANTATION de la règle des 100 ms de la v2 § 8. La marque
       // est posée dans le gestionnaire lui-même, donc avant tout traitement.
@@ -454,6 +463,11 @@ export function EcranNoeud(): ReactElement {
         </button>
 
         <div style={{ flex: '1 1 auto' }}>
+          {etapeSortie === null || sortie === null ? null : (
+            <p data-progression-sortie style={{ margin: '0 0 0.4rem', fontWeight: 700 }}>
+              Étape {String(rangSortie + 1)} sur {String(sortie.etapes.length)} de ta sortie
+            </p>
+          )}
           {etapes.map((etape, index) => {
             const etat =
               index < indexCourant ? 'faite' : index === indexCourant ? 'courante' : 'a-venir';

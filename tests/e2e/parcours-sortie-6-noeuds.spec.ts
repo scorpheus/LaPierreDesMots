@@ -209,70 +209,28 @@ test.describe('Les Galeries sont une région JOUABLE, pas seulement ouverte (D38
     expect(declares).toEqual(livres);
   });
 
-  test('le bouton de départ mène à un nœud différent après chaque réussite', async ({ page }) => {
+  test('le bouton de départ ouvre le premier nœud d’un plan réel de 4 à 6 étapes', async ({ page }) => {
     const declares = noeudsDeclares();
-    const exercices = exerciceParNoeud();
 
     await page.goto('/');
     await page.waitForFunction(() => (window as FenetreTest).__test !== undefined);
+    await entrerSurLaCarte(page, []);
+    const depart = page.locator(`[data-depart="${REGION}"]`);
+    await expect(
+      depart,
+      'Les Galeries n’offrent aucune prise alors que D38 les ouvre dès le départ',
+    ).toHaveCount(1);
+    await depart.click();
 
-    const atteints: string[] = [];
-
-    for (let tour = 0; tour < declares.length; tour += 1) {
-      await entrerSurLaCarte(page, atteints);
-
-      const depart = page.locator(`[data-depart="${REGION}"]`);
-      await expect(
-        depart,
-        `tour ${String(tour + 1)} — déjà terminés : [${atteints.join(', ')}] — Les Galeries ` +
-          'n’offrent aucune prise pour entrer, alors que D38 les ouvre dès le départ',
-      ).toHaveCount(1);
-
-      await expect(depart).toHaveAttribute(
-        'data-etape',
-        `${String(tour + 1)}/${String(declares.length)}`,
-      );
-
-      await depart.click();
-
-      await expect(page.locator('[data-ecran="noeud"]')).toBeVisible();
-      const noeud = await page.evaluate(() => (window as FenetreTest).__test.etat().noeud);
-      expect(noeud, `le tour ${String(tour + 1)} n’a ouvert aucun nœud`).not.toBeNull();
-      atteints.push(String(noeud));
-
-      await page.goto('/');
-      await page.waitForFunction(() => (window as FenetreTest).__test !== undefined);
-    }
-
-    // ── Région terminée : reste-t-il une prise ? (R14, aucun état sans issue)
-    await entrerSurLaCarte(page, atteints);
-    const departs = await page
-      .locator('[data-depart]')
-      .evaluateAll((noeuds) => noeuds.map((element) => element.getAttribute('data-depart') ?? ''));
-    console.log(`[sortie ${REGION}] région terminée — départs offerts : ${departs.join(', ')}`);
-    expect(
-      departs.length,
-      'région terminée et plus AUCUN départ sur la carte : état sans issue',
-    ).toBeGreaterThan(0);
-
-    // ── CONTRAT DE SORTIE : les deux comptes, et leur écart.
-    const distincts = new Set(atteints);
-    console.log(
-      `[sortie ${REGION}] ${String(distincts.size)} nœud(s) atteint(s) sur ` +
-        `${String(declares.length)} déclaré(s) — ` +
-        atteints.map((n) => `${n} → ${exercices.get(n) ?? '(exercice inconnu)'}`).join(' · '),
-    );
-
-    const jamaisAtteints = declares.filter((noeud) => !distincts.has(noeud));
-    expect(
-      jamaisAtteints.map((noeud) => `${noeud} (${exercices.get(noeud) ?? '?'})`),
-      'des nœuds des Galeries sont écrits, validés, et l’enfant ne peut PAS y arriver',
-    ).toEqual([]);
-
-    expect(
-      distincts.size,
-      `nœuds atteints dans l’ordre : ${atteints.join(', ')}`,
-    ).toBe(declares.length);
+    const noeud = page.locator('[data-ecran="noeud"]');
+    await expect(noeud).toBeVisible();
+    await expect(noeud).toHaveAttribute('data-sortie-rang', '1');
+    const total = Number(await noeud.getAttribute('data-sortie-total'));
+    expect(total, 'le sélecteur doit composer une sortie de 4 à 6 étapes').toBeGreaterThanOrEqual(4);
+    expect(total).toBeLessThanOrEqual(6);
+    const atteint = await page.evaluate(() => (window as FenetreTest).__test.etat().noeud);
+    expect(declares, `le composeur a ouvert le nœud inconnu ${String(atteint)}`).toContain(atteint);
+    await expect(page.locator('[data-progression-sortie]')).toContainText(`1 sur ${String(total)}`);
   });
 
   test('on entre dans Les Galeries SANS avoir terminé la Clairière (D38)', async ({ page }) => {

@@ -127,6 +127,27 @@ describe('les chiffres sont EN CLAIR, et c’est une décision, pas un oubli', (
       .toBe('0');
     expect(poses).toEqual([]);
   });
+
+  it('désactive le pavé une fois les quatre chiffres saisis, puis le réactive après Effacer', () => {
+    monter();
+    taper('1234');
+    expect(
+      [...document.querySelectorAll<HTMLButtonElement>('[data-touche]')].every(
+        (bouton) => bouton.disabled
+      )
+    ).toBe(true);
+
+    fireEvent.click(
+      [...document.querySelectorAll('button')].find(
+        (bouton) => bouton.textContent === 'Effacer'
+      )!
+    );
+    expect(
+      [...document.querySelectorAll<HTMLButtonElement>('[data-touche]')].every(
+        (bouton) => !bouton.disabled
+      )
+    ).toBe(true);
+  });
 });
 
 describe('le même contrat DOM que la porte — vu du dehors, c’est la même serrure', () => {

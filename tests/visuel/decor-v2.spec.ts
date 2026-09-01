@@ -90,7 +90,7 @@ test.describe('le décor v2 arrive entier jusqu’à l’enfant', () => {
     //    fichier : un habillage repointé sur la v2 mais servant l'ancien SVG donnerait le même
     //    nom de fichier dans la requête et un dessin d'avant à l'écran. La v2 est POLYGONALE :
     //    aucun de ses tracés ne contient de commande d'arc.
-    const arcs = await page.locator('[data-region-svg]').evaluateAll((noeuds) =>
+    const arcs = await page.locator('[data-region-source]').evaluateAll((noeuds) =>
       noeuds.filter((n) => /[Aa]\s*[\d.]/u.test(n.getAttribute('d') ?? '')).length
     );
     expect(arcs, 'des arcs subsistent : le décor servi n’est pas la v2').toBe(0);
@@ -114,7 +114,7 @@ test.describe('le décor v2 arrive entier jusqu’à l’enfant', () => {
     // appels passent la valeur qui casse tout n'a pas de raison d'exister.
     const hauteurDe = async (suffixe: string): Promise<number> => {
       const boites = await page
-        .locator(`[data-region-svg$="${suffixe}"]`)
+        .locator(`[data-region-source$="${suffixe}"]`)
         .evaluateAll((noeuds) =>
           noeuds.map((n) => {
             const b = (n as SVGGraphicsElement).getBoundingClientRect();
@@ -138,9 +138,9 @@ test.describe('le décor v2 arrive entier jusqu’à l’enfant', () => {
     // y=400 — le haut du crâne dans le mur de l'école, le bas dans l'herbe. Aucune assertion ne
     // regardait la POSITION, seulement la taille ; le décor pouvait donc être absurde et vert.
     const hautDe = async (region: string): Promise<number> =>
-      (await page.locator(`[data-region-svg="${region}"]`).boundingBox())?.y ?? Number.NaN;
+      (await page.locator(`[data-region-source="${region}"]`).boundingBox())?.y ?? Number.NaN;
     const basDe = async (region: string): Promise<number> => {
-      const boite = await page.locator(`[data-region-svg="${region}"]`).boundingBox();
+      const boite = await page.locator(`[data-region-source="${region}"]`).boundingBox();
       return boite === null ? Number.NaN : boite.y + boite.height;
     };
 

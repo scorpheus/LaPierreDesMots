@@ -26,7 +26,7 @@ import { Routeur } from './routeur.js';
  * serveur, lui, est joignable sur le réseau local. Sans ce réglage, l'application resterait
  * bloquée sur son écran de chargement chez l'enfant.
  */
-function creerFileDAttente(): QueryClient {
+export function creerFileDAttente(): QueryClient {
   return new QueryClient({
     defaultOptions: {
       queries: {

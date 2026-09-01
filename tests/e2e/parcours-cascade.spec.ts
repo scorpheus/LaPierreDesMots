@@ -38,6 +38,15 @@ const NOEUD = 'clairiere-01';
  */
 const NOEUDS_MAX = 20;
 
+/**
+ * Un instant distinct par tentative : l'idempotence doit absorber un DOUBLE ENVOI, pas vingt
+ * parties réellement rejouées. Les vingt valeurs restent déterministes et passent toutes par
+ * l'Horloge injectée ; aucune attente ni horloge système n'entre dans le scénario.
+ */
+function instantDuTour(tour: number): string {
+  return `2026-09-01T08:00:${String(tour).padStart(2, '0')}Z`;
+}
+
 interface CrochetsTest {
   chargerProfil(fixture: unknown): Promise<void>;
   allerAuNoeud(id: string): Promise<void>;
@@ -123,6 +132,9 @@ test.describe('la cascade de D25', () => {
     const paliersVus = new Set<string>();
 
     for (let noeudJoue = 0; noeudJoue < NOEUDS_MAX; noeudJoue += 1) {
+      await page.evaluate((instant) => {
+        (window as FenetreTest).__test.figerHorloge(instant);
+      }, instantDuTour(noeudJoue));
       if (noeudJoue > 0) {
         await page.evaluate(async (noeud) => {
           await (window as FenetreTest).__test.allerAuNoeud(noeud);

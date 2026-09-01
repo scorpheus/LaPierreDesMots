@@ -51,6 +51,43 @@ const TOLERANCE_CSS_PX = 32;
 const TRAIT = 'var(--trait, #1B2440)';
 const ENCRE = 'var(--encre, #2E5EAA)';
 
+interface MatriceEcranAffine {
+  readonly a: number;
+  readonly b: number;
+  readonly c: number;
+  readonly d: number;
+  readonly e: number;
+  readonly f: number;
+}
+
+/**
+ * Convertit un point client avec l'inverse de la matrice réellement utilisée par le SVG.
+ * La boîte englobante inclut les marges de `preserveAspectRatio`; la matrice, elle, décrit
+ * uniquement le dessin. C'est donc elle qui doit décider où le doigt a réellement touché.
+ */
+export function convertirPointClientParMatrice(
+  clientX: number,
+  clientY: number,
+  matrice: MatriceEcranAffine,
+): Point | null {
+  const determinant = matrice.a * matrice.d - matrice.b * matrice.c;
+  if (!Number.isFinite(determinant) || Math.abs(determinant) < Number.EPSILON) return null;
+  const x = clientX - matrice.e;
+  const y = clientY - matrice.f;
+  return [
+    (matrice.d * x - matrice.c * y) / determinant,
+    (-matrice.b * x + matrice.a * y) / determinant,
+  ];
+}
+
+/** Échelle CSS px / unité `viewBox`, rotation comprise. */
+export function echelleDeMatriceEcran(matrice: MatriceEcranAffine): number {
+  const axeX = Math.hypot(matrice.a, matrice.b);
+  const axeY = Math.hypot(matrice.c, matrice.d);
+  const echelle = Math.min(axeX, axeY);
+  return Number.isFinite(echelle) && echelle > 0 ? echelle : 0;
+}
+
 /**
  * Bornes du `viewBox`, sans aucun transtypage défensif : on DÉSTRUCTURE et on vérifie, plutôt
  * que d'affirmer au compilateur qu'un `number[]` est un quadruplet. C'est le défaut 2 du
@@ -140,7 +177,16 @@ export function MoteurTrace(
   // --- l'échelle de rendu, pour convertir la tolérance ----------------------
   useEffect(() => {
     const noeud = refSvg.current;
-    if (noeud === null || typeof noeud.getBoundingClientRect !== 'function') return;
+    if (noeud === null) return;
+    const matrice = noeud.getScreenCTM?.();
+    if (matrice !== null && matrice !== undefined) {
+      const mesuree = echelleDeMatriceEcran(matrice);
+      if (mesuree > 0) {
+        setEchelle(mesuree);
+        return;
+      }
+    }
+    if (typeof noeud.getBoundingClientRect !== 'function') return;
     const boite = noeud.getBoundingClientRect();
     if (boite.width > 0 && largeur > 0) setEchelle(boite.width / largeur);
   }, [largeur, viewBox]);
@@ -155,7 +201,19 @@ export function MoteurTrace(
   const enPoint = useCallback(
     (evenement: PointerEventReact<SVGSVGElement>): Point => {
       const noeud = refSvg.current;
-      if (noeud === null || typeof noeud.getBoundingClientRect !== 'function') {
+      if (noeud === null) {
+        return [evenement.clientX, evenement.clientY];
+      }
+      const matrice = noeud.getScreenCTM?.();
+      if (matrice !== null && matrice !== undefined) {
+        const converti = convertirPointClientParMatrice(
+          evenement.clientX,
+          evenement.clientY,
+          matrice,
+        );
+        if (converti !== null) return converti;
+      }
+      if (typeof noeud.getBoundingClientRect !== 'function') {
         return [evenement.clientX, evenement.clientY];
       }
       const boite = noeud.getBoundingClientRect();

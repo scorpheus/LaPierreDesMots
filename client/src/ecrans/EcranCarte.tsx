@@ -28,12 +28,18 @@
 // Le contrat DOM ne bouge pas : `data-ecran`, `data-region`, `data-region-etat`, `data-depart`,
 // `data-vers`, les libellés accessibles et la garde « une prise n'existe que si elle répond »
 // sont repris à l'identique — ce sont les prises de six suites de tests.
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import type { ReactElement } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import type { CodeRegion, EtatMonde, EtatRegion, IdNoeud } from '@pierre/partage';
 import { etatAfficheRegion, regionsOuvertes } from '@pierre/partage/monde';
-import { lireMonde, lireProgression, lirePaquetNoeud, urlAsset } from '../api/client.js';
+import {
+  composerSortie,
+  lireMonde,
+  lireProgression,
+  lirePaquetNoeud,
+  urlAsset
+} from '../api/client.js';
 import { useEtatJeu, useMagasin } from '../etat/services.js';
 import { CheminEncre } from '../monde/CheminEncre.js';
 import { Parchemin } from '../monde/Parchemin.js';
@@ -351,18 +357,40 @@ export function EcranCarte({
     [parCode]
   );
 
+  const [regionEnChargement, fixerRegionEnChargement] = useState<CodeRegion | null>(null);
   const entrer = useCallback(
-    (noeud: IdNoeud): void => {
-      void lirePaquetNoeud(noeud).then((paquet) => {
-        magasin.getState().demarrerNoeud(paquet);
-      });
+    (codeRegion: CodeRegion, noeudDeRepli: IdNoeud): void => {
+      if (profil === null || regionEnChargement !== null) return;
+      fixerRegionEnChargement(codeRegion);
+      void composerSortie(profil.id, { region: String(codeRegion), compagnon: null })
+        .then(async (plan) => {
+          const premiere = plan.etapes[0];
+          if (premiere === undefined) {
+            throw new Error('La sortie composée ne porte aucune étape.');
+          }
+          const paquet = await lirePaquetNoeud(premiere.noeud);
+          magasin.getState().demarrerSortie(plan);
+          magasin.getState().demarrerNoeud(paquet);
+        })
+        .catch(() => {
+          // Repli R14 : si le composeur est momentanément indisponible, la prise continue de
+          // mener au nœud que la carte annonçait. Le trajet pédagogique reste le chemin nominal.
+          magasin.getState().cloreSortie();
+          return lirePaquetNoeud(noeudDeRepli).then((paquet) => {
+            magasin.getState().demarrerNoeud(paquet);
+          });
+        })
+        .finally(() => {
+          fixerRegionEnChargement(null);
+        });
     },
-    [magasin]
+    [magasin, profil, regionEnChargement]
   );
 
   return (
     <main
       data-ecran="carte"
+      className="ecran-carte"
       // R20 — l'écran prend la hauteur du cadre, et c'est le parchemin qui s'adapte au reste.
       // Mesuré avant : 1276 px pour un cadre de 1200, parce que le parchemin se dimensionne par
       // sa largeur et laisse sa hauteur suivre le rapport d'aspect.
@@ -374,7 +402,7 @@ export function EcranCarte({
         blockSize: '100dvh'
       }}
     >
-      <header style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+      <header className="entete-carte" style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
         <h1 className="titre" style={{ fontSize: '2.25rem', margin: 0 }}>
           La carte du monde
         </h1>
@@ -419,6 +447,7 @@ export function EcranCarte({
         autre : `tests/unitaires/ton-sans-perte.test.ts` refuserait la première moitié seule.
         ══════════════════════════════════════════════════════════════════════════════════════
       */}
+      <div className="introduction-carte">
       {profil === null ? null : (
         <p style={{ margin: 0, fontSize: '1.125rem' }}>
           Bonjour {String(profil.prenom)}&nbsp;! Le monde t’attend en gris&nbsp;: tu peux lui
@@ -448,7 +477,9 @@ export function EcranCarte({
           L’histoire de la Pierre
         </button>
       )}
+      </div>
 
+      <div className="corps-carte">
       {/* R20 — la scène prend ce qui reste, et jamais plus. `data-scene-adaptative` porte la
           règle partagée de `global.css` : `flex: 1`, `min-block-size: 0`, et un SVG borné en
           hauteur ET en largeur. Sans `min-block-size: 0`, un enfant flex refuse de descendre
@@ -709,7 +740,7 @@ export function EcranCarte({
                 aria-label={`${libelle} — ${etat}`}
                 onClick={() => {
                   if (ouverte && premierNoeud !== null) {
-                    entrer(premierNoeud);
+                    entrer(code, premierNoeud);
                   }
                 }}
                 onKeyDown={(evenement) => {
@@ -718,7 +749,7 @@ export function EcranCarte({
                     ouverte &&
                     premierNoeud !== null
                   ) {
-                    entrer(premierNoeud);
+                    entrer(code, premierNoeud);
                   }
                 }}
               />
@@ -759,7 +790,7 @@ export function EcranCarte({
       </div>
 
       {/* Ce qu'on peut jouer maintenant. Deux régions en parallèle dès la troisième (v2 § 3.3). */}
-      <section aria-label="Où aller">
+      <section className="destinations-carte" aria-label="Où aller">
         <h2 className="titre" style={{ fontSize: '1.5rem', margin: '0 0 0.75rem' }}>
           Où veux-tu aller&nbsp;?
         </h2>
@@ -794,7 +825,7 @@ export function EcranCarte({
                 aria-label={`Partir vers ${libelle}`}
                 onClick={() => {
                   if (noeudDeReprise !== null) {
-                    entrer(noeudDeReprise);
+                    entrer(code, noeudDeReprise);
                   }
                 }}
                 style={{ flexDirection: 'column', gap: '0.5rem', padding: '1.25rem' }}
@@ -812,20 +843,22 @@ export function EcranCarte({
                   Il reste {Math.round((1 - (region?.pourcentageColorie ?? 0)) * 100)} % à
                   rallumer
                 </span>
-                {/* Dire COMBIEN il y en a, et où on en est. Le père a demandé « je n'ai eu
-                    qu'un exercice, est-ce normal ? » : une région qui annonce son étape répond
-                    à la question avant qu'elle ne se pose. Aucun chiffre n'est en dur — ils
-                    viennent tous des nœuds déclarés par `contenu/monde/regions.json`. */}
+                {/* Une sortie est composée par le sélecteur pédagogique : son premier nœud
+                    n'est donc pas nécessairement le premier nœud inachevé de la région. On ne
+                    présente plus `rang/total` comme la longueur de la sortie — ce serait vrai
+                    techniquement et faux pour l'enfant. Le compte précis apparaît dans le
+                    nœud dès que le plan réel est connu. */}
                 <span style={{ fontSize: '1rem' }}>
                   {noeudDeReprise === null
                     ? 'Le chemin se dessine encore…'
-                    : `Étape ${String(rang)} sur ${String(total)} — tape pour entrer`}
+                    : 'Plusieurs exercices t’attendent — tape pour partir'}
                 </span>
               </button>
             );
           })}
         </div>
       </section>
+      </div>
     </main>
   );
 }

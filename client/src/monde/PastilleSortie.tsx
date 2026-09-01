@@ -23,8 +23,9 @@ import { useCallback, useMemo } from 'react';
 import type { CSSProperties, ReactElement, ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import type { CodeRegion, EtatMonde, IdNoeud, Profil } from '@pierre/partage';
+import type { PlanSortie } from '@pierre/partage/pedagogie';
 import { regionsOuvertes } from '@pierre/partage/monde';
-import { lireMonde, lirePaquetNoeud, lireProgression } from '../api/client.js';
+import { composerSortie, lireMonde, lirePaquetNoeud, lireProgression } from '../api/client.js';
 import { useMagasin } from '../etat/services.js';
 
 /** Là où le prochain tap emmène : une région ouverte, et le nœud où l'on reprend. */
@@ -146,7 +147,7 @@ export function PastilleSortie({
     [requeteProgression.data]
   );
 
-  const sortie = useMemo(
+  const destination = useMemo(
     () =>
       sortieInjectee === undefined
         ? prochaineSortie(requeteMonde.data ?? null, noeudsFaits)
@@ -154,19 +155,43 @@ export function PastilleSortie({
     [sortieInjectee, requeteMonde.data, noeudsFaits]
   );
 
+  /** Le plan réel 4–6, composé par la même pédagogie en LAN et dans l'APK autonome. */
+  const requetePlan = useQuery({
+    queryKey: [
+      'pastille-sortie',
+      'plan',
+      String(profil.id),
+      destination === null ? null : String(destination.region)
+    ],
+    queryFn: () => {
+      if (destination === null) {
+        throw new Error('Plan demandé sans région ouverte.');
+      }
+      return composerSortie(profil.id, { region: String(destination.region), compagnon: null });
+    },
+    enabled: destination !== null,
+    staleTime: 30_000
+  });
+  const plan: PlanSortie | null = requetePlan.data ?? null;
+  const premiereEtape = plan?.etapes[0] ?? null;
+
   /**
    * Le paquet du premier nœud, chargé AVANT le tap. C'est lui qui fait la différence entre
    * « un tap et on y est » et « un tap, un écran de carte, puis on y est ».
    */
   const requetePaquet = useQuery({
-    queryKey: ['pastille-sortie', 'paquet', sortie === null ? null : String(sortie.noeud)],
+    queryKey: [
+      'pastille-sortie',
+      'paquet',
+      premiereEtape === null ? null : String(premiereEtape.noeud)
+    ],
     queryFn: () => {
-      if (sortie === null) {
-        throw new Error('Paquet demandé sans sortie résolue.');
+      if (premiereEtape === null) {
+        throw new Error('Paquet demandé sans plan résolu.');
       }
-      return lirePaquetNoeud(sortie.noeud);
+      return lirePaquetNoeud(premiereEtape.noeud);
     },
-    enabled: sortie !== null
+    enabled: premiereEtape !== null
   });
 
   const partir = useCallback((): void => {
@@ -174,37 +199,51 @@ export function PastilleSortie({
     // tentative. `choisirProfil` pose `ecran: 'carte'` — c'est le repli, pas la destination.
     magasin.getState().choisirProfil(profil);
 
-    if (sortie === null) {
+    if (destination === null) {
       surRepli?.(profil);
       return;
     }
 
-    const pret = requetePaquet.data;
-    if (pret !== undefined) {
-      // Même tour de boucle que `choisirProfil` : un seul rendu, aucune carte à l'écran.
-      magasin.getState().demarrerNoeud(pret);
-      return;
-    }
-
-    // Le paquet n'est pas encore là : on part quand même, et le nœud s'ouvre à son arrivée.
-    // La carte reste affichée dans l'intervalle — jamais un écran d'attente, jamais rien.
-    void lirePaquetNoeud(sortie.noeud)
-      .then((paquet) => {
+    const ouvrir = (sortie: PlanSortie): Promise<void> => {
+      const premiere = sortie.etapes[0];
+      if (premiere === undefined) {
+        return Promise.reject(new Error('La sortie composée ne porte aucune étape.'));
+      }
+      magasin.getState().demarrerSortie(sortie);
+      const pret = plan === sortie ? requetePaquet.data : undefined;
+      if (pret !== undefined) {
+        magasin.getState().demarrerNoeud(pret);
+        return Promise.resolve();
+      }
+      return lirePaquetNoeud(premiere.noeud).then((paquet) => {
         magasin.getState().demarrerNoeud(paquet);
-      })
+      });
+    };
+
+    const planPret = plan;
+    const demarrage =
+      planPret === null
+        ? composerSortie(profil.id, { region: String(destination.region), compagnon: null }).then(
+            ouvrir
+          )
+        : ouvrir(planPret);
+
+    // Le plan ou le paquet n'est pas encore là : la carte reste affichée dans l'intervalle —
+    // jamais un écran d'attente, jamais rien.
+    void demarrage
       .catch(() => {
-        // Le serveur n'a pas rendu le nœud : on reste sur la carte, qui reste jouable.
+        magasin.getState().cloreSortie();
         surRepli?.(profil);
       });
-  }, [magasin, profil, sortie, requetePaquet.data, surRepli]);
+  }, [magasin, profil, destination, plan, requetePaquet.data, surRepli]);
 
   return (
     <button
       type="button"
       className="cible cible-appel"
       data-pastille-sortie={String(profil.id)}
-      data-sortie-noeud={sortie === null ? '' : String(sortie.noeud)}
-      data-sortie-region={sortie === null ? '' : String(sortie.region)}
+      data-sortie-noeud={premiereEtape === null ? '' : String(premiereEtape.noeud)}
+      data-sortie-region={destination === null ? '' : String(destination.region)}
       data-sortie-prete={requetePaquet.data === undefined ? 'non' : 'oui'}
       data-pictogramme="sortie"
       aria-label={`Partir en sortie avec ${String(profil.prenom)}`}
@@ -227,10 +266,10 @@ export function PastilleSortie({
             On y va&nbsp;!
           </span>
           {/* Dire l'étape, jamais ce qui manque (C7) : « 2 sur 5 » est un état, pas une dette. */}
-          {sortie === null ? null : (
-            <span data-sortie-etape={`${String(sortie.rang)}/${String(sortie.total)}`}
+          {plan === null ? null : (
+            <span data-sortie-etape={`1/${String(plan.etapes.length)}`}
               style={{ fontSize: '1rem' }}>
-              Étape {sortie.rang} sur {sortie.total}
+              Étape 1 sur {plan.etapes.length}
             </span>
           )}
         </>

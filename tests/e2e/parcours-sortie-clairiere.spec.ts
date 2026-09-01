@@ -28,7 +28,7 @@
  * Deux règles de l'annexe T § 6 tenues ligne à ligne : on attend un ÉTAT, jamais une durée, et
  * on ne cible que des attributs `data-*`.
  */
-import { readFileSync, readdirSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { expect, test } from './invariants.js';
 
@@ -79,20 +79,6 @@ function noeudsDeclares(): readonly string[] {
   return region!.noeuds.map(String);
 }
 
-/** Les exercices que chaque nœud fait jouer — pour dire, à l'échec, CE QUI est resté invisible. */
-function exerciceParNoeud(): ReadonlyMap<string, string> {
-  const dossier = fileURLToPath(new URL('contenu/noeuds', RACINE));
-  const table = new Map<string, string>();
-  for (const fichier of readdirSync(dossier).filter((nom) => nom.endsWith('.json'))) {
-    const noeud = JSON.parse(readFileSync(`${dossier}/${fichier}`, 'utf8')) as {
-      id: string;
-      exercice: string;
-    };
-    table.set(String(noeud.id), String(noeud.exercice));
-  }
-  return table;
-}
-
 /**
  * Charge le profil AVEC la progression demandée, puis fait le geste de le choisir.
  *
@@ -120,84 +106,24 @@ async function entrerSurLaCarte(page: Page, termines: readonly string[]): Promis
 }
 
 test.describe('la Clairière enchaîne une SORTIE — ce que l’enfant atteint vraiment', () => {
-  test('le bouton de départ mène à un exercice différent après chaque réussite', async ({
-    page
-  }) => {
+  test('le bouton de départ ouvre le premier nœud d’un plan réel de 4 à 6 étapes', async ({ page }) => {
     const declares = noeudsDeclares();
-    const exercices = exerciceParNoeud();
 
     await page.goto('/');
     await page.waitForFunction(() => (window as FenetreTest).__test !== undefined);
+    await entrerSurLaCarte(page, []);
+    const depart = page.locator(`[data-depart="${REGION}"]`);
+    await expect(depart, 'la Clairière n’offre aucune prise pour entrer').toHaveCount(1);
+    await depart.click();
 
-    const atteints: string[] = [];
-
-    for (let tour = 0; tour < declares.length; tour += 1) {
-      await entrerSurLaCarte(page, atteints);
-
-      const depart = page.locator(`[data-depart="${REGION}"]`);
-      await expect(
-        depart,
-        `tour ${String(tour + 1)} — déjà terminés : [${atteints.join(', ')}] — la région ` +
-          'n’offre aucune prise pour entrer',
-      ).toHaveCount(1);
-
-      // La carte annonce l'étape, et elle l'annonce JUSTE : c'est la réponse directe à
-      // « je n'ai eu qu'un exercice, est-ce normal ? ».
-      await expect(depart).toHaveAttribute(
-        'data-etape',
-        `${String(tour + 1)}/${String(declares.length)}`,
-      );
-
-      await depart.click();
-
-      await expect(page.locator('[data-ecran="noeud"]')).toBeVisible();
-      const noeud = await page.evaluate(() => (window as FenetreTest).__test.etat().noeud);
-      expect(noeud, `le tour ${String(tour + 1)} n’a ouvert aucun nœud`).not.toBeNull();
-      atteints.push(String(noeud));
-
-      await page.goto('/');
-      await page.waitForFunction(() => (window as FenetreTest).__test !== undefined);
-    }
-
-    // ── Un tour de plus, région TERMINÉE : l'enfant a-t-il encore où aller ?
-    //
-    // MESURÉ, et le résultat n'est pas celui qu'on croit : la Clairière DISPARAÎT de « Où
-    // veux-tu aller ? » dès que son Éclat est obtenu — c'est `regionsOuvertes()` de
-    // `partage/src/monde/carte.ts`, qui ne garde que les régions `ouverte && eclatObtenuLe ===
-    // null`. La prise de la carte reste dessinée avec `role="button"` et `cursor: pointer`,
-    // mais son `onClick` est gardé par `ouverte` : elle ne répond plus.
-    //
-    // Ce n'est PAS un état sans issue — les Galeries sont ouvertes, et ce cas le prouve au lieu
-    // de le supposer. Mais c'est un contrôle inerte, et la question « peut-on rejouer une
-    // région finie ? » est une décision de conception, pas un défaut de ce lot : elle touche
-    // `regionsOuvertes`, partagé par toute la carte. Consignée dans `Docs/questions-en-attente.md`.
-    await entrerSurLaCarte(page, atteints);
-    const departs = await page.locator('[data-depart]').evaluateAll((noeuds) =>
-      noeuds.map((element) => element.getAttribute('data-depart') ?? ''),
-    );
-    console.log(`[sortie ${REGION}] région terminée — départs offerts : ${departs.join(', ')}`);
-    expect(
-      departs.length,
-      'région terminée et plus AUCUN départ sur la carte : état sans issue',
-    ).toBeGreaterThan(0);
-
-    // ── CONTRAT DE SORTIE : les deux comptes, et leur écart.
-    const distincts = new Set(atteints);
-    console.log(
-      `[sortie ${REGION}] ${String(distincts.size)} exercice(s) atteignable(s) sur ` +
-        `${String(declares.length)} nœud(s) déclaré(s) — ` +
-        atteints.map((n) => `${n} → ${exercices.get(n) ?? '(exercice inconnu)'}`).join(' · ')
-    );
-
-    const jamaisAtteints = declares.filter((noeud) => !distincts.has(noeud));
-    expect(
-      jamaisAtteints.map((noeud) => `${noeud} (${exercices.get(noeud) ?? '?'})`),
-      'des nœuds sont écrits, validés, et l’enfant ne peut PAS y arriver depuis la carte',
-    ).toEqual([]);
-
-    expect(
-      distincts.size,
-      `nœuds atteints dans l’ordre : ${atteints.join(', ')}`,
-    ).toBe(declares.length);
+    const noeud = page.locator('[data-ecran="noeud"]');
+    await expect(noeud).toBeVisible();
+    await expect(noeud).toHaveAttribute('data-sortie-rang', '1');
+    const total = Number(await noeud.getAttribute('data-sortie-total'));
+    expect(total, 'le sélecteur doit composer une sortie de 4 à 6 étapes').toBeGreaterThanOrEqual(4);
+    expect(total).toBeLessThanOrEqual(6);
+    const atteint = await page.evaluate(() => (window as FenetreTest).__test.etat().noeud);
+    expect(declares, `le composeur a ouvert le nœud inconnu ${String(atteint)}`).toContain(atteint);
+    await expect(page.locator('[data-progression-sortie]')).toContainText(`1 sur ${String(total)}`);
   });
 });

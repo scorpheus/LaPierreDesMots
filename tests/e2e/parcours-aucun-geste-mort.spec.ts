@@ -138,6 +138,16 @@ async function taper(page: Page, selecteur: string): Promise<boolean> {
     const cible = document.querySelector(ou);
     if (cible === null) return false;
     const element = cible as HTMLElement;
+    if (element.matches(':disabled, [aria-disabled="true"]')) return false;
+
+    // La liste des prises est capturée avant la passe. Une action peut ouvrir une modale ou
+    // désactiver un bouton entre-temps : un vrai doigt ne peut alors plus atteindre cette
+    // ancienne cible. La revérifier ici empêche le testeur de fabriquer des « gestes morts »
+    // que l'interface ne présente plus à l'enfant.
+    const modaleActive = [...document.querySelectorAll<HTMLElement>('[role="dialog"][aria-modal="true"]')]
+      .find((dialogue) => dialogue.getClientRects().length > 0);
+    if (modaleActive !== undefined && !modaleActive.contains(element)) return false;
+
     const boite = element.getBoundingClientRect();
     const commun = {
       bubbles: true,
@@ -177,8 +187,17 @@ async function prisesDe(page: Page): Promise<readonly Prise[]> {
   return page.evaluate((selecteur) => {
     const echapper = (valeur: string): string => valeur.replace(/["\\]/g, '\\$&');
     const trouvees: { selecteur: string; famille: string; nom: string }[] = [];
+    const modales = [...document.querySelectorAll<HTMLElement>('[role="dialog"][aria-modal="true"]')];
+    const modaleActive = modales.reverse().find((candidate) => {
+      const style = getComputedStyle(candidate);
+      const boite = candidate.getBoundingClientRect();
+      return style.display !== 'none' && style.visibility !== 'hidden' && boite.width > 0 && boite.height > 0;
+    });
     for (const noeud of document.querySelectorAll(selecteur)) {
       const element = noeud as HTMLElement;
+      // Une modale rend le reste de la page indisponible au doigt. Auditer les commandes
+      // qu'elle recouvre fabrique des « gestes morts » qui ne sont jamais proposés à l'enfant.
+      if (modaleActive !== undefined && !modaleActive.contains(element)) continue;
       const boite = element.getBoundingClientRect();
       if (boite.width === 0 || boite.height === 0) continue;
       const nom =
@@ -265,20 +284,22 @@ test.describe('Q5 — tout geste proposé aboutit ou s’explique', () => {
       document.body.append(mort, vivant);
     });
 
-    const avantMort = await cliche(page);
+    // Le témoin doit mesurer SON effet, pas les requêtes de fond de l'écran qui l'héberge.
+    // Comparer tout `document.body` rendait le bouton mort « vivant » dès qu'une requête de
+    // profil finissait entre les deux images. C'est un faux négatif du testeur lui-même.
+    const htmlDuTemoin = (selecteur: string): Promise<string | null> =>
+      page.locator(selecteur).evaluate((element) => element.outerHTML).catch(() => null);
+    const avantMort = await htmlDuTemoin('[data-qa-controle="sans-gestionnaire"]');
     await taper(page, '[data-qa-controle="sans-gestionnaire"]');
     await deuxImages(page);
-    const apresMort = await cliche(page);
-    const mortDetecte =
-      apresMort.dom === avantMort.dom &&
-      apresMort.etat === avantMort.etat &&
-      apresMort.dit === avantMort.dit;
+    const apresMort = await htmlDuTemoin('[data-qa-controle="sans-gestionnaire"]');
+    const mortDetecte = apresMort === avantMort;
 
-    const avantVivant = await cliche(page);
+    const avantVivant = await htmlDuTemoin('[data-qa-controle="pointerdown-seul"]');
     await taper(page, '[data-qa-controle="pointerdown-seul"]');
     await deuxImages(page);
-    const apresVivant = await cliche(page);
-    const vivantDetecte = apresVivant.dom !== avantVivant.dom;
+    const apresVivant = await htmlDuTemoin('[data-qa-controle="pointerdown-seul"]');
+    const vivantDetecte = apresVivant !== avantVivant;
 
     console.log(
       `[Q5] contrôle positif — témoin sans gestionnaire : ${mortDetecte ? 'MORT ✔' : 'manqué'} · ` +
@@ -293,6 +314,39 @@ test.describe('Q5 — tout geste proposé aboutit ou s’explique', () => {
       vivantDetecte,
       'Q5 déclare mort un bouton qui répond à `pointerdown`. Le harnais n’émet donc pas la ' +
         'séquence complète du doigt, et il fabriquerait des morts par dizaines.',
+    ).toBe(true);
+  });
+
+  test('CONTRÔLE MODAL — ignore ce qui est derrière, jamais ce qui reste dans le dialogue', async ({
+    page,
+  }) => {
+    await ECRANS[0]!.aller(page);
+    await page.evaluate(() => {
+      const derriere = document.createElement('button');
+      derriere.type = 'button';
+      derriere.setAttribute('data-qa-modal', 'derriere');
+      derriere.textContent = 'témoin recouvert';
+      const dialogue = document.createElement('div');
+      dialogue.setAttribute('role', 'dialog');
+      dialogue.setAttribute('aria-modal', 'true');
+      dialogue.style.position = 'fixed';
+      dialogue.style.inset = '0';
+      const dedans = document.createElement('button');
+      dedans.type = 'button';
+      dedans.setAttribute('data-qa-modal', 'dedans');
+      dedans.textContent = 'témoin dans la modale';
+      dialogue.append(dedans);
+      document.body.append(derriere, dialogue);
+    });
+
+    const prises = await prisesDe(page);
+    expect(
+      prises.some((prise) => prise.selecteur === '[data-qa-modal="derriere"]'),
+      'preuve positive : une commande recouverte ne doit pas entrer dans la population',
+    ).toBe(false);
+    expect(
+      prises.some((prise) => prise.selecteur === '[data-qa-modal="dedans"]'),
+      'contrôle négatif : le filtre modal ne doit pas vider les commandes du dialogue',
     ).toBe(true);
   });
 

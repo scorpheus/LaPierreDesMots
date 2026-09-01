@@ -54,6 +54,8 @@ export interface ProprietesChaudron {
   /** Ouvre le coloriage libre. Absent tant qu'aucun nœud `libre` n'est livré. */
   readonly surOuvrir?: () => void;
   readonly animationsDesactivees?: boolean;
+  /** Le référentiel local est encore en train d'arriver : le tap attend au lieu de mentir. */
+  readonly enChargement?: boolean;
 }
 
 const INVITE = 'Tu veux juste colorier ? Viens au chaudron, il n’y a rien à réussir.';
@@ -94,7 +96,11 @@ const ANIMATION_MIJOTE = `
 }
 `;
 
-export function Chaudron({ surOuvrir, animationsDesactivees = false }: ProprietesChaudron): ReactElement {
+export function Chaudron({
+  surOuvrir,
+  animationsDesactivees = false,
+  enChargement = false
+}: ProprietesChaudron): ReactElement {
   const services = useServices();
   const [message, fixerMessage] = useState<string>(INVITE);
 
@@ -120,6 +126,8 @@ export function Chaudron({ surOuvrir, animationsDesactivees = false }: Propriete
         data-chaudron-entree="oui"
         aria-label="Ouvrir le chaudron à couleurs"
         onClick={toucher}
+        disabled={enChargement}
+        aria-busy={enChargement ? 'true' : undefined}
         style={{
           flexDirection: 'column',
           gap: '0.5rem',

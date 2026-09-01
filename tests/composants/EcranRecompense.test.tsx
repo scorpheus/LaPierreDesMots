@@ -22,7 +22,7 @@
  * (§ 6.3) ; son `catch` est délibéré et documenté. On coupe l'enregistrement et on exige que
  * l'écran reste `data-fin="reussite"`, sans le moindre `data-etat="echec"`.
  */
-import { cleanup, render, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -97,6 +97,19 @@ function monter(etat: Partial<Record<string, unknown>> = {}): Magasin {
   );
   return magasin;
 }
+
+const PLAN_DE_SORTIE = {
+  profil: 'prf-1',
+  region: 'clairiere',
+  compagnon: null,
+  composeeLe: '2026-09-01T08:00:00.000Z',
+  etapes: [
+    { rang: 1, role: 'echauffement', noeud: 'clairiere-03', habillage: 'pont', competences: [], revisions: [] },
+    { rang: 2, role: 'competence-en-cours', noeud: 'clairiere-04', habillage: 'mare', competences: [], revisions: [] },
+    { rang: 3, role: 'revision', noeud: 'clairiere-05', habillage: 'cabane', competences: [], revisions: [] },
+    { rang: 4, role: 'synthese', noeud: 'clairiere-06', habillage: 'sentier', competences: [], revisions: [] }
+  ]
+} as const;
 
 /** Combien d'étoiles sont RENDUES pleines, lu sur le DOM et non sur l'état. */
 function etoilesAcquises(): number {
@@ -202,6 +215,52 @@ describe('la fin de partie est une réussite, quoi qu’il arrive (R14)', () => 
     expect(document.querySelectorAll('[data-etat="echec"]')).toHaveLength(0);
     expect(etoilesAcquises()).toBe(3);
     vi.mocked(console.warn).mockRestore();
+  });
+});
+
+describe('la récompense suit le plan pédagogique actif', () => {
+  it('propose l’étape suivante du plan, jamais le prochain nœud arbitraire de la région', () => {
+    const magasin = monter({
+      etoiles: 2,
+      sortie: PLAN_DE_SORTIE,
+      paquet: {
+        noeud: { id: 'clairiere-03', region: 'clairiere' },
+        habillage: { timings: {} }
+      }
+    });
+
+    const continuer = document.querySelector('[data-action="exercice-suivant"]');
+    expect(continuer?.getAttribute('data-noeud-suivant')).toBe('clairiere-04');
+    expect(magasin.getState().sortie?.etapes).toHaveLength(4);
+  });
+
+  it('clôt la sortie après la synthèse et rend la main au campement', () => {
+    let retoursCampement = 0;
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const jeu = services();
+    const magasin = creerMagasin(jeu);
+    magasin.setState({
+      ecran: 'recompense',
+      etoiles: 2,
+      sortie: PLAN_DE_SORTIE,
+      paquet: {
+        noeud: { id: 'clairiere-06', region: 'clairiere' },
+        habillage: { timings: {} }
+      }
+    } as never);
+    render(
+      <QueryClientProvider client={client}>
+        <FournisseurJeu valeur={{ services: jeu, magasin }}>
+          <EcranRecompense surFinSortie={() => { retoursCampement += 1; }} />
+        </FournisseurJeu>
+      </QueryClientProvider>
+    );
+
+    const finir = document.querySelector('[data-action="fin-sortie"]');
+    expect(finir?.textContent).toContain('campement');
+    fireEvent.click(finir!);
+    expect(retoursCampement).toBe(1);
+    expect(magasin.getState().sortie).toBeNull();
   });
 });
 

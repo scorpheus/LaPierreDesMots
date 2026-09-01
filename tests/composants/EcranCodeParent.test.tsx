@@ -119,9 +119,16 @@ describe('le pavé tape le code que le doigt a tapé', () => {
     expect(compteur()).toBe('2');
     taper('84');
     expect(compteur()).toBe('4');
-    // Un cinquième chiffre ne s'ajoute pas : `slice(0, 4)`.
+    const touchesCompletes = [...document.querySelectorAll<HTMLButtonElement>('[data-touche]')];
+    expect(touchesCompletes.every((touche) => touche.disabled)).toBe(true);
+    expect(document.querySelector('[data-code-complet="oui"]')?.textContent).toContain('Effacer');
+    // Un cinquième chiffre ne peut plus être proposé comme un geste mort.
     taper('7');
     expect(compteur()).toBe('4');
+    fireEvent.click(document.querySelector<HTMLButtonElement>('[data-effacer="code-parent"]')!);
+    expect(compteur()).toBe('0');
+    expect(touchesCompletes.every((touche) => !touche.disabled)).toBe(true);
+    expect(document.querySelector('[data-code-complet]')).toBeNull();
   });
 
   it('envoie EXACTEMENT le code tapé — jamais une constante, jamais un préfixe', async () => {

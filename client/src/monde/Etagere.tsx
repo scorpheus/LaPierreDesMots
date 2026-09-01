@@ -15,8 +15,8 @@
 // Trois règles portées ici :
 //   1. **Rien n'est caché, rien n'est cadenassé.** Une case vide est la MÊME case, en Grisaille.
 //      C'est le principe déjà posé par `EcranCoffre.tsx:52` ; on l'étend, on ne l'invente pas.
-//   2. **Rien ne se tape.** L'étagère est un album, pas un menu : aucun `<button>`, aucune
-//      action, donc rien à rater (R14).
+//   2. **Chaque case s'explore.** La liste garde ses vrais `<li>` et chaque vignette contient
+//      un bouton natif : R24 ouvre la même fiche, gagnée ou non, sans casser la sémantique.
 //   3. **Le compte se lit sans compter.** `data-cases-total`, `data-cases-obtenues` et
 //      `data-cases-vides` sont posés sur la racine, pour l'enfant comme pour la recette.
 import type { ReactElement } from 'react';
@@ -44,92 +44,89 @@ function Vignette({
   readonly surOuvrir: () => void;
 }): ReactElement {
   return (
-    <li
-      data-case-etagere={String(une.grapheme)}
-      data-rang={String(une.rang)}
-      data-obtenue={une.obtenue ? 'oui' : 'non'}
-      // R24 — CHAQUE CASE S'OUVRE, GAGNÉE OU NON.
-      //
-      // « même si on ne les a pas, tous les items à récupérer devraient être affichés en grand
-      // dans un popup avec une description de ce qu'on peut gagner, et on aura la couleur. »
-      //
-      // L'étagère montrait déjà les cases VIDES (D44, D25 point 3) — mais une case vide ne
-      // disait pas CE QU'ELLE ATTEND. Elle est maintenant une prise, et les deux états ouvrent
-      // la même fiche : un enfant ne doit pas apprendre que « les cases grises ne répondent
-      // pas », sinon il cesse de les toucher et le vide cesse de donner envie.
-      role="button"
-      tabIndex={0}
-      onClick={surOuvrir}
-      onKeyDown={(evenement) => {
-        if (evenement.key === 'Enter' || evenement.key === ' ') {
-          evenement.preventDefault();
-          surOuvrir();
+    <li>
+      <button
+        type="button"
+        data-case-etagere={String(une.grapheme)}
+        data-rang={String(une.rang)}
+        data-obtenue={une.obtenue ? 'oui' : 'non'}
+        // R24 — CHAQUE CASE S'OUVRE, GAGNÉE OU NON.
+        //
+        // « même si on ne les a pas, tous les items à récupérer devraient être affichés en grand
+        // dans un popup avec une description de ce qu'on peut gagner, et on aura la couleur. »
+        //
+        // L'étagère montrait déjà les cases VIDES (D44, D25 point 3) — mais une case vide ne
+        // disait pas CE QU'ELLE ATTEND. Elle est maintenant une prise, et les deux états ouvrent
+        // la même fiche : un enfant ne doit pas apprendre que « les cases grises ne répondent
+        // pas », sinon il cesse de les toucher et le vide cesse de donner envie.
+        onClick={surOuvrir}
+        aria-label={
+          une.obtenue
+            ? `${une.libelle}, gagnée — voir sa fiche`
+            : `${une.libelle}, case ${String(une.rang)} encore libre — voir ce qu’elle attend`
         }
-      }}
-      aria-label={
-        une.obtenue
-          ? `${une.libelle}, gagnée — voir sa fiche`
-          : `${une.libelle}, case ${String(une.rang)} encore libre — voir ce qu’elle attend`
-      }
-      style={{
-        cursor: 'pointer',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '0.35rem',
-        inlineSize: '7rem',
-        minBlockSize: '7.5rem',
-        padding: '0.5rem',
-        borderRadius: 'var(--rayon-carte, 12px)',
-        // La case vide garde le MÊME contour, en pointillé : l'emplacement se voit, il ne
-        // s'ouvre pas. Jamais de cadenas, jamais de rouge (R14).
-        border: une.obtenue
-          ? 'var(--epaisseur-trait) solid var(--trait)'
-          : 'var(--epaisseur-trait) dashed var(--trait)',
-        backgroundColor: une.obtenue ? 'var(--parchemin)' : 'transparent'
-        // `opacity` et `filter` ne sont PLUS ici — voir l'encadré sur le libellé, plus bas.
-      }}
-    >
-      {une.obtenue ? (
-        <img
-          src={urlAsset(String(une.cristal))}
-          alt=""
-          width={48}
-          height={48}
-          aria-hidden="true"
-        />
-      ) : (
-        <svg
-          width="48"
-          height="48"
-          viewBox="0 0 48 48"
-          aria-hidden="true"
-          focusable="false"
-          // ── LE CREUX EST SUR LE DESSIN, PLUS SUR TOUTE LA CASE ────────────────────────
-          // `opacity: 0.6` et `saturate(0)` portaient sur le `<li>` entier, donc AUSSI sur
-          // le libellé. Mesuré par axe-core, une fois que l'audit a11y a réellement atteint
-          // le campement : `#767c8c` sur `#fff6e3`, **ratio 3,88 pour 4,5 exigé**, sur les
-          // 25 cases vides de l'étagère et les 37 du coffre.
-          //
-          // Le nom de la forme est justement ce que l'enfant doit pouvoir LIRE pour savoir
-          // ce qu'il lui reste à trouver : c'est le texte le plus utile de l'écran, et
-          // c'était le moins lisible. D44 demande que la case vide se VOIE « en creux » —
-          // elle parle du dessin, pas de son étiquette.
-          style={{ opacity: 0.6, filter: 'saturate(0)' }}
-        >
-          {/* Le même cristal, en silhouette. La forme de ce qui viendra se remplir. */}
-          <path
-            d="M24,4 L44,24 L24,44 L4,24 Z"
-            fill="var(--grisaille)"
-            stroke="var(--trait)"
-            strokeWidth="3"
-            strokeLinejoin="round"
-            strokeDasharray="5 4"
+        style={{
+          cursor: 'pointer',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '0.35rem',
+          inlineSize: '7rem',
+          minBlockSize: '7.5rem',
+          padding: '0.5rem',
+          color: 'inherit',
+          font: 'inherit',
+          borderRadius: 'var(--rayon-carte, 12px)',
+          // La case vide garde le MÊME contour, en pointillé : l'emplacement se voit sans
+          // paraître verrouillé. Jamais de cadenas, jamais de rouge (R14).
+          border: une.obtenue
+            ? 'var(--epaisseur-trait) solid var(--trait)'
+            : 'var(--epaisseur-trait) dashed var(--trait)',
+          backgroundColor: une.obtenue ? 'var(--parchemin)' : 'transparent'
+          // `opacity` et `filter` ne sont PLUS ici — voir l'encadré sur le libellé, plus bas.
+        }}
+      >
+        {une.obtenue ? (
+          <img
+            src={urlAsset(String(une.cristal))}
+            alt=""
+            width={48}
+            height={48}
+            aria-hidden="true"
           />
-        </svg>
-      )}
-      <span style={{ fontSize: '0.9rem', textAlign: 'center' }}>{une.libelle}</span>
+        ) : (
+          <svg
+            width="48"
+            height="48"
+            viewBox="0 0 48 48"
+            aria-hidden="true"
+            focusable="false"
+            // ── LE CREUX EST SUR LE DESSIN, PLUS SUR TOUTE LA CASE ────────────────────────
+            // `opacity: 0.6` et `saturate(0)` portaient sur le `<li>` entier, donc AUSSI sur
+            // le libellé. Mesuré par axe-core, une fois que l'audit a11y a réellement atteint
+            // le campement : `#767c8c` sur `#fff6e3`, **ratio 3,88 pour 4,5 exigé**, sur les
+            // 25 cases vides de l'étagère et les 37 du coffre.
+            //
+            // Le nom de la forme est justement ce que l'enfant doit pouvoir LIRE pour savoir
+            // ce qu'il lui reste à trouver : c'est le texte le plus utile de l'écran, et
+            // c'était le moins lisible. D44 demande que la case vide se VOIE « en creux » —
+            // elle parle du dessin, pas de son étiquette.
+            style={{ opacity: 0.6, filter: 'saturate(0)' }}
+          >
+            {/* Le même cristal, en silhouette. La forme de ce qui viendra se remplir. */}
+            <path
+              d="M24,4 L44,24 L24,44 L4,24 Z"
+              fill="var(--grisaille)"
+              stroke="var(--trait)"
+              strokeWidth="3"
+              strokeLinejoin="round"
+              strokeDasharray="5 4"
+            />
+          </svg>
+        )}
+        <span style={{ fontSize: '0.9rem', textAlign: 'center' }}>{une.libelle}</span>
+      </button>
     </li>
   );
 }

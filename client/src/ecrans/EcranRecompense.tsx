@@ -36,7 +36,12 @@ const FELICITATIONS: Readonly<Record<number, string>> = {
   3: 'Sans une seule erreur. La Pierre brille.'
 };
 
-export function EcranRecompense(): ReactElement {
+export interface ProprietesEcranRecompense {
+  /** Destination de fin d'une vraie sortie. Le routeur la relie au campement. */
+  readonly surFinSortie?: () => void;
+}
+
+export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}): ReactElement {
   const magasin = useMagasin();
   const services = useServices();
   const fileDAttente = useQueryClient();
@@ -52,6 +57,7 @@ export function EcranRecompense(): ReactElement {
   const journalise = useEtatJeu((etat) => etat.journalise);
   const dernierGain = useEtatJeu((etat) => etat.dernierGain);
   const animationsDesactivees = useEtatJeu((etat) => etat.animationsDesactivees);
+  const sortie = useEtatJeu((etat) => etat.sortie);
 
   // Garde locale EN PLUS du drapeau du magasin : `StrictMode` monte deux fois en
   // développement, et le POST partirait deux fois avant que le premier n'ait répondu.
@@ -223,7 +229,20 @@ export function EcranRecompense(): ReactElement {
     enabled: profil !== null
   });
 
+  const rangDansSortie = useMemo(
+    () =>
+      sortie === null || paquet === null
+        ? -1
+        : sortie.etapes.findIndex((etape) => etape.noeud === paquet.noeud.id),
+    [sortie, paquet]
+  );
+  const finDeSortie =
+    sortie !== null && rangDansSortie >= 0 && rangDansSortie === sortie.etapes.length - 1;
+
   const suivant = useMemo((): IdNoeud | null => {
+    if (sortie !== null && rangDansSortie >= 0) {
+      return sortie.etapes[rangDansSortie + 1]?.noeud ?? null;
+    }
     if (paquet === null || region === null || requeteMonde.data === undefined) return null;
     const laRegion = requeteMonde.data.carte.regions.find((une) => une.region === region);
     if (laRegion === undefined) return null;
@@ -234,7 +253,7 @@ export function EcranRecompense(): ReactElement {
     );
     faits.add(String(paquet.noeud.id));
     return noeudSuivant(laRegion.noeuds, faits, paquet.noeud.id);
-  }, [paquet, region, requeteMonde.data, requeteProgression.data]);
+  }, [sortie, rangDansSortie, paquet, region, requeteMonde.data, requeteProgression.data]);
 
   /**
    * ══════════════════════════════════════════════════════════════════════════════════════════
@@ -286,6 +305,15 @@ export function EcranRecompense(): ReactElement {
         magasin.getState().naviguer('carte');
       });
   }, [suivant, magasin]);
+
+  const terminerSortie = useCallback((): void => {
+    magasin.getState().cloreSortie();
+    if (surFinSortie === undefined) {
+      magasin.getState().naviguer('carte');
+    } else {
+      surFinSortie();
+    }
+  }, [magasin, surFinSortie]);
 
   return (
     <>
@@ -421,9 +449,19 @@ export function EcranRecompense(): ReactElement {
             {chargementSuivant ? 'On y va…' : 'Exercice suivant'}
           </button>
         )}
+        {finDeSortie ? (
+          <button
+            type="button"
+            className="cible cible-appel"
+            data-action="fin-sortie"
+            onClick={terminerSortie}
+          >
+            Retour au campement
+          </button>
+        ) : null}
         <button
           type="button"
-          className={suivant === null ? 'cible cible-appel' : 'cible'}
+          className={suivant === null && !finDeSortie ? 'cible cible-appel' : 'cible'}
           onClick={rejouer}
         >
           Rejouer

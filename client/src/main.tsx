@@ -14,7 +14,7 @@ import { StrictMode } from 'react';
 import type { ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { initialiserRegistreMoteurs } from '@pierre/partage';
-import { Application } from './Application.js';
+import { Application, creerFileDAttente } from './Application.js';
 import { creerMagasin } from './etat/magasin.js';
 import { creerServicesParDefaut, resoudreGraineParDefaut } from './etat/services.js';
 import { appliquerVariablesPalette } from './habillages/chargeur.js';
@@ -33,10 +33,11 @@ if (variablesEcrites === 0) {
 const graine = resoudreGraineParDefaut();
 const services = creerServicesParDefaut(graine);
 const magasin = creerMagasin(services, graine);
+const fileDAttente = creerFileDAttente();
 
 if (import.meta.env.MODE === 'test') {
   const { monterCrochetsDeTest } = await import('./testabilite/crochets.js');
-  monterCrochetsDeTest({ magasin, services });
+  monterCrochetsDeTest({ magasin, services, fileDAttente });
 }
 
 const racine = document.getElementById('racine');
@@ -46,7 +47,9 @@ if (racine === null) {
 
 // `StrictMode` uniquement en développement : son double montage ferait partir deux fois les
 // effets pilotés par `window.__test` pendant les parcours Playwright.
-const arbre: ReactNode = <Application magasin={magasin} services={services} />;
+const arbre: ReactNode = (
+  <Application magasin={magasin} services={services} fileDAttente={fileDAttente} />
+);
 
 createRoot(racine).render(
   import.meta.env.MODE === 'development' ? <StrictMode>{arbre}</StrictMode> : arbre

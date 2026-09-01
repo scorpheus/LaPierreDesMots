@@ -191,26 +191,7 @@ const DEFILEMENT_TOLERE = new Map<string, DefilementTolere>([
  * opposable : si l'écran grandit d'un pixel, ce garde échoue. Elle ne peut que descendre, et
  * elle doit descendre à zéro. La ligne disparaît le jour où la cause est levée.
  */
-const DETTE_MESUREE = new Map([
-  /**
-   * `colorie` — LA DETTE QUE R16 IMPOSE, ET QUI EST LA BONNE DÉCISION
-   *
-   * Borner la scène de `colorie` la faisait tenir. Elle rétrécissait alors dans les DEUX
-   * dimensions, et 21 régions passaient sous les 64 px des specs — « le tronc du premier
-   * arbre » 31 × 91, « l'horloge de l'école » 47 × 47. Dix-huit recettes de la QA des
-   * invariants ont rougi ; vérifié en remisant le lot, elles passaient avant.
-   *
-   * Ramener un tronc de 31 px à 64 demanderait une scène 2,06 fois plus grande, soit près de
-   * 2 500 px de haut sur une tablette qui en offre 1 200. **Aucune mise en page ne peut
-   * satisfaire les deux.** « Cibles ≥ 64 px, aucune coordination fine exigée » est une règle
-   * non négociable des specs ; « rien ne défile » est un retour de jeu. La règle l'emporte.
-   *
-   * Ce qui éteindra cette dette n'est pas du CSS mais un ASSET dont les régions coloriables
-   * sont plus généreuses. Par nœud : clairière-01 560 · forêt-muette-08 668 · clairière-10 685
-   * · marais-jumeau-08 730 · cité-des-histoires-10 730 · volcan-08 730.
-   */
-  ['colorie', 730]
-]);
+const DETTE_MESUREE = new Map<string, number>();
 
 interface Debordement {
   /** Il faut faire défiler pour tout voir. Interdit dans le jeu, toléré sur deux écrans parent. */

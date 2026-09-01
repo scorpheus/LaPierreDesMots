@@ -163,6 +163,11 @@ html {
 body {
   margin: 0;
   background-color: var(--parchemin);
+  background-image:
+    radial-gradient(circle at 12% 18%, color-mix(in srgb, var(--soleil) 22%, transparent) 0 7rem, transparent 7.1rem),
+    radial-gradient(circle at 91% 82%, color-mix(in srgb, var(--lagon) 14%, transparent) 0 10rem, transparent 10.1rem),
+    linear-gradient(135deg, #fff9eb 0%, var(--parchemin) 54%, #fff0d2 100%);
+  background-attachment: fixed;
   color: var(--trait);
   font-family: var(--font-interface);
   /* 1.25rem = 20px à l'échelle 1 : la valeur historique, devenue proportionnelle. */
@@ -175,6 +180,123 @@ body {
 #racine {
   min-height: 100%;
   isolation: isolate;
+}
+
+/* ------------------------------------------------------------------ écrans d'entrée
+   Les deux écrans que l'enfant voit le plus ne doivent pas ressembler à un formulaire posé
+   dans le coin d'une grande page. Le contenu reste fluide, mais il occupe le cadre de la
+   tablette et organise ses choix autour d'un centre visuel clair. */
+.ecran-profils {
+  box-sizing: border-box;
+  inline-size: min(100%, 76rem);
+  min-block-size: 100dvh;
+  margin-inline: auto;
+}
+
+.ecran-profils > h1 {
+  text-align: center;
+}
+
+.liste-profils {
+  justify-content: center;
+}
+
+.ensemble-profil {
+  display: grid;
+  grid-template-columns: repeat(2, 13rem);
+  grid-template-rows: repeat(2, minmax(var(--cible-min), 1fr));
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border: 3px solid color-mix(in srgb, var(--trait) 18%, transparent);
+  border-radius: calc(var(--rayon-carte) + 8px);
+  background: color-mix(in srgb, var(--parchemin) 88%, white);
+}
+
+.ensemble-profil > .carte-profil {
+  grid-row: 1 / 3;
+}
+
+.pied-profils {
+  display: flex;
+  justify-content: center;
+}
+
+@media (max-width: 600px) {
+  .ensemble-profil {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+/* ------------------------------------------------------------------ carte du monde
+   En paysage, la carte est le héros de l'écran et les départs forment un carnet latéral.
+   L'ancienne colonne unique réduisait le dessin à environ 290 × 190 px sur 1280 × 720 tout
+   en laissant de larges zones inutilisées. */
+.ecran-carte {
+  box-sizing: border-box;
+  inline-size: min(100%, 96rem);
+  margin-inline: auto;
+}
+
+.entete-carte > h1 {
+  margin-inline-end: auto !important;
+}
+
+.introduction-carte {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-block-size: var(--cible-min);
+}
+
+.introduction-carte > p {
+  flex: 1 1 auto;
+}
+
+.corps-carte {
+  flex: 1 1 auto;
+  min-block-size: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(19rem, 25rem);
+  gap: 1.25rem;
+}
+
+.destinations-carte {
+  min-block-size: 0;
+  overflow: auto;
+  padding: 1rem;
+  border: var(--epaisseur-trait) solid var(--trait);
+  border-radius: var(--rayon-carte);
+  background: color-mix(in srgb, var(--parchemin) 94%, white);
+  box-shadow: var(--ombre-bd);
+}
+
+.destinations-carte > div {
+  flex-direction: column;
+}
+
+.destinations-carte [data-depart] {
+  inline-size: 100%;
+}
+
+@media (max-width: 900px), (orientation: portrait) {
+  .ecran-carte {
+    block-size: auto !important;
+    min-block-size: 100dvh;
+  }
+
+  .corps-carte {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(22rem, 58vh) auto;
+  }
+
+  .destinations-carte > div {
+    flex-direction: row;
+  }
+
+  .destinations-carte [data-depart] {
+    flex: 1 1 17rem;
+  }
 }
 
 /* ------------------------------------------------------------------ zone de lecture (L2-B)
@@ -780,42 +902,4 @@ body {
   block-size: auto;
   /* Centrée dans la place qu'on lui laisse, plutôt que collée en haut à gauche. */
   margin-inline: auto;
-}
-
-/* ══════════════════════════════════════════════════════════════════════════════════════════════
-   QUAND R16 ET R20 S'OPPOSENT, R16 GAGNE — ET IL A GAGNÉ UNE FOIS, MESURÉ
-
-   Borner la scène la rétrécit dans les DEUX dimensions (le rapport d'aspect est conservé). Sur
-   `colorie`, la QA des invariants a immédiatement rougi — 18 cas, 21 régions passées sous le
-   seuil, sortie citée :
-
-       path « le tronc du premier arbre »       31 × 91
-       path « l'horloge de l'école »            47 × 47
-       path « la porte de l'école »             45 × 86
-
-   Vérifié plutôt que supposé : la même recette passait avant ce lot et échoue après. C'est bien
-   cette borne qui l'a cassée.
-
-   Pour ramener un tronc de 31 px à 64, il faudrait une scène 2,06 fois plus grande, soit près de
-   2 500 px de haut sur une tablette qui en offre 1 200. **Aucune mise en page ne peut satisfaire
-   les deux** : le défaut n'est pas dans la disposition, il est dans l'ASSET — la scène `ecole`
-   porte des régions trop fines pour être jouée sur un écran de 1 200 px.
-
-   « Cibles ≥ 64 px, aucune coordination fine exigée » est une règle non négociable des specs
-   (R16) ; « rien ne défile » est un retour de jeu (R20). La règle l'emporte sur le confort, et
-   la scène garde sa taille. Le garde de R20 porte alors la dette, chiffrée, dans `DETTE_MESUREE`.
-
-   Ce qui l'éteindra n'est pas du CSS : c'est un asset dont les régions coloriables sont plus
-   généreuses. Consigné dans `Docs/retours-de-jeu.md` § R20.
-   ══════════════════════════════════════════════════════════════════════════════════════════════ */
-[data-ecran="noeud"] [data-moteur][data-scene-non-reductible] svg.pierre-scene,
-[data-ecran="noeud"] [data-moteur][data-scene-non-reductible] svg[data-scene] {
-  /* Les TROIS ensemble, et pas seulement la borne. Retirer `max-block-size` seul n'a rien
-     changé — mesuré, les mêmes 21 régions restaient sous le seuil au pixel près : c'est
-     `flex: 1 1 auto` conjugué à `min-block-size: 0` qui autorisait la scène à descendre sous
-     sa taille de contenu, et la borne n'était pas la limite qui mordait. Un correctif qui ne
-     déplace pas le chiffre n'a pas touché la cause. */
-  max-block-size: none;
-  min-block-size: auto;
-  flex: 0 0 auto;
 }

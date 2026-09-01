@@ -102,6 +102,7 @@ export function EcranCodeParent({
   });
 
   const verrouille = verrouilleJusqua !== null;
+  const codeComplet = saisie.length === LONGUEUR_CODE;
 
   const taper = useCallback(
     (chiffre: string): void => {
@@ -215,6 +216,12 @@ export function EcranCodeParent({
         ))}
       </output>
 
+      {codeComplet && !enCours && !verrouille ? (
+        <p data-code-complet="oui" role="status" style={{ margin: 0, textAlign: 'center' }}>
+          Code complet. Tu peux entrer ou Effacer.
+        </p>
+      ) : null}
+
       <div
         role="group"
         aria-label="Pavé numérique"
@@ -226,7 +233,7 @@ export function EcranCodeParent({
             type="button"
             className="cible"
             data-touche={chiffre}
-            disabled={verrouille || enCours}
+            disabled={verrouille || enCours || codeComplet}
             onClick={() => taper(chiffre)}
             style={{ fontSize: '1.75rem', minBlockSize: 'var(--cible-min)' }}
           >
@@ -239,6 +246,7 @@ export function EcranCodeParent({
         <button
           type="button"
           className="cible cible-secondaire"
+          data-effacer="code-parent"
           onClick={() => fixerSaisie('')}
           disabled={saisie === '' || enCours}
         >

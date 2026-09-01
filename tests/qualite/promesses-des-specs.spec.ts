@@ -381,6 +381,17 @@ test.describe('Q6 — chaque moteur rend ce que les specs lui promettent', () =>
     test(`« ${promesse.moteur} » rend ce que les specs lui promettent`, async ({ page }) => {
       await preparer(page);
       await entrerDansLeNoeud(page, noeud);
+
+      // Certaines scènes (notamment `eclair`) chargent leur SVG déclaratif après le premier
+      // commit React. Mesurer immédiatement transformait la vitesse relative des dix workers
+      // en verdict esthétique : rouge dans la campagne complète, vert seule. On attend ici
+      // l'état promis — un SVG habité — jamais une durée. Si l'asset manque réellement, le
+      // sondage expire et nomme précisément la scène absente.
+      await expect
+        .poll(async () => (await mesurerLeRendu(page)).svgHabites, {
+          message: `« ${promesse.moteur} » ne monte jamais la scène promise « ${promesse.habillages} ».`,
+        })
+        .toBeGreaterThanOrEqual(1);
       const rendu = await mesurerLeRendu(page);
       const manquants = gestesManquants(promesse);
 

@@ -533,6 +533,7 @@ export function EcranCampement({
 
       <Chaudron
         {...(noeudLibre === null ? {} : { surOuvrir: ouvrirLeChaudron })}
+        enChargement={campement === null}
         animationsDesactivees={animationsDesactivees}
       />
 

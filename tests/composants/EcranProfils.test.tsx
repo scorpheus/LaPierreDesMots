@@ -31,6 +31,7 @@ import { mondeDeTest, profilDeTest } from './donnees-ecrans.js';
 const PROFILS = [profilDeTest('prf-1', 'Alma'), profilDeTest('prf-2', 'Nino')];
 
 const creations: unknown[] = [];
+const demandesDeSortie: unknown[] = [];
 
 vi.mock('@client/api/client', async (importOriginal) => {
   const original = await importOriginal<Record<string, unknown>>();
@@ -45,9 +46,25 @@ vi.mock('@client/api/client', async (importOriginal) => {
     // la moitié de l'écran ne se rend jamais.
     lireMonde: () => Promise.resolve(mondeDeTest()),
     lireProgression: () => Promise.resolve([]),
-    lirePaquetNoeud: () =>
+    composerSortie: (_profil: string, demande: unknown) => {
+      demandesDeSortie.push(demande);
+      const region = (demande as { readonly region: string }).region;
+      return Promise.resolve({
+        profil: 'prf-1',
+        region,
+        compagnon: null,
+        composeeLe: '2026-09-01T08:00:00.000Z',
+        etapes: [
+          { rang: 1, role: 'echauffement', noeud: `${region}-03`, habillage: 'pont', competences: [], revisions: [] },
+          { rang: 2, role: 'competence-en-cours', noeud: `${region}-04`, habillage: 'mare', competences: [], revisions: [] },
+          { rang: 3, role: 'revision', noeud: `${region}-05`, habillage: 'cabane', competences: [], revisions: [] },
+          { rang: 4, role: 'synthese', noeud: `${region}-06`, habillage: 'sentier', competences: [], revisions: [] }
+        ]
+      });
+    },
+    lirePaquetNoeud: (noeud: string) =>
       Promise.resolve({
-        noeud: { id: 'clairiere-01' },
+        noeud: { id: noeud, region: 'clairiere' },
         exercice: { id: 'clairiere-ecole-01', jeu: { moteur: 'colorie', contenu: {} } },
         habillage: { id: 'ecole', timings: {} }
       })
@@ -114,6 +131,7 @@ async function monterEtAttendre(): Promise<Monte> {
 
 beforeEach(() => {
   creations.length = 0;
+  demandesDeSortie.length = 0;
   // Les réglages de lecture, atteints par « Comment je lis », appellent `fetch` en direct
   // (`EcranReglagesLecture` le déclare comme un écart, en tête de son fichier). Sans ce
   // bouchon, l'audit des sorties sème des `ECONNREFUSED` dans le rapport — un test propre ne
@@ -164,6 +182,31 @@ describe('la carte de profil RÉPOND au tap (M25)', () => {
     const second = await monterEtAttendre();
     fireEvent.click(document.querySelector('[data-profil="prf-2"]')!);
     expect(second.magasin.getState().profil?.prenom).toBe('Nino');
+  });
+
+  it('la pastille compose une vraie sortie et démarre sa première étape en un tap', async () => {
+    const { magasin } = await monterEtAttendre();
+    const demarrages: unknown[] = [];
+    magasin.setState({
+      demarrerNoeud: (paquet: unknown) => {
+        demarrages.push(paquet);
+      }
+    } as never);
+    const pastille = document.querySelector('[data-pastille-sortie="prf-1"]');
+    expect(pastille).not.toBeNull();
+    await waitFor(() => {
+      expect(pastille?.getAttribute('data-sortie-prete')).toBe('oui');
+      expect(pastille?.getAttribute('data-sortie-noeud')).toBe('galeries-03');
+    });
+
+    fireEvent.click(pastille!);
+
+    await waitFor(() => {
+      expect(demarrages).toHaveLength(1);
+    });
+    expect((demarrages[0] as { noeud: { id: string } }).noeud.id).toBe('galeries-03');
+    expect(demandesDeSortie).toContainEqual({ region: 'galeries', compagnon: null });
+    expect(magasin.getState().sortie?.etapes).toHaveLength(4);
   });
 
   it('aucun mot de passe, aucune confirmation : pas un champ de saisie avant le jeu', async () => {

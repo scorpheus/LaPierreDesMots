@@ -264,6 +264,17 @@ function HoteCampement(): ReactElement {
   );
 }
 
+function HoteRecompense(): ReactElement {
+  const naviguer = useNavigate();
+  return (
+    <EcranRecompense
+      surFinSortie={() => {
+        void naviguer({ to: CHEMINS.campement });
+      }}
+    />
+  );
+}
+
 function HoteCoffre(): ReactElement {
   const naviguer = useNavigate();
   return (
@@ -853,7 +864,7 @@ function construireRouteur() {
     createRoute({
       getParentRoute: () => routeRacine,
       path: '/recompense',
-      component: EcranRecompense
+      component: HoteRecompense
     }),
     // ── les cinq routes de la campagne v2 ───────────────────────────────────────────────
     createRoute({

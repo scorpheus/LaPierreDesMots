@@ -8,7 +8,7 @@
 //   3. le dossier de sortie choisi PAR MODE : `dist/` en production, `dist-test/` en mode test.
 //      Les deux ne se croisent jamais (§ 7.3) : `verifier-bundle.mjs` inspecte le premier,
 //      Playwright sert le second ;
-//   4. `publicDir` et le préchargement des deux fichiers d'Andika (v2 § 9.3, D19).
+//   4. `publicDir` et le préchargement de l'Andika régulière (v2 § 9.3, D19).
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
 import type { Plugin } from 'vite';
@@ -73,14 +73,13 @@ const PROXY_API = {
 };
 
 /**
- * Les deux fichiers préchargés : Andika en 400 et en 700.
+ * Le fichier préchargé : Andika en 400, nécessaire au premier texte de lecture.
  *
- * Pas les cinq polices — précharger quatre familles que ce profil n'a pas choisies coûterait
- * quelques centaines de kilo-octets au premier rendu, dont la cible est de 1,2 s sur Galaxy
- * Tab S10 FE. Andika est la police par défaut de TOUTE zone de lecture (v2 § 9.3) ; les autres
- * sont chargées à la demande par `prechargerPolice` quand le profil les réclame.
+ * Pas la graisse 700 ni les quatre autres familles : `prechargerPolice` charge les deux graisses
+ * dès qu'une `ZoneDeLecture` monte. Les imposer avant même le choix du profil consommerait le
+ * budget initial pour une ressource dont l'accueil ne se sert pas.
  */
-const POLICES_PRECHARGEES = ['andika-regular.woff2', 'andika-bold.woff2'];
+const POLICES_PRECHARGEES = ['andika-regular.woff2'];
 
 /**
  * Injecte les `<link rel="preload">` dans `index.html`.

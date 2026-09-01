@@ -67,6 +67,16 @@ const TRAIT = 'var(--trait, #1B2440)';
 /** Repli si l'habillage ne déclare aucun `viewBox` — jamais emprunté à un décor particulier. */
 const VIEWBOX_PAR_DEFAUT = '0 0 100 100';
 
+/**
+ * 80 unités gardent une prise d'au moins 64 px quand la scène de 960 unités est contenue dans
+ * les 800 px utiles de la tablette en portrait. Le dessin reste inchangé : seul le disque de
+ * frappe transparent grandit.
+ */
+// À corps de lecture maximal, la scène est réduite à environ 72,5 % sur la tablette de
+// référence. 88 unités n'y donneraient que 64 px tout juste ; 96 garde une marge réelle sans
+// modifier le dessin, puisque ce disque reste transparent.
+const DIAMETRE_PRISE_MINIMAL = 96;
+
 /** Rayon du disque de repli, de même aire que la région déclarée (mêmes maths que `colorie`). */
 function rayonEquivalent(surface: number): number {
   return Math.sqrt(Math.max(surface, 0) / Math.PI);
@@ -82,6 +92,8 @@ const STYLES_SCENE = `
 }
 .pierre-region-libre:active { transform: scale(.94); transition: transform 60ms ease-out; }
 .pierre-region-libre:focus-visible { outline: 3px solid var(--soleil, #FFC93C); outline-offset: 2px; }
+.pierre-prise-libre { cursor: pointer; fill: transparent; pointer-events: all; }
+.pierre-prise-libre:focus-visible { outline: 3px solid var(--soleil, #FFC93C); outline-offset: 2px; }
 .pierre-scene-libre--calme .pierre-region-libre { transition: none; }
 @media (prefers-reduced-motion: reduce) { .pierre-region-libre { transition: none; } }
 `;
@@ -177,42 +189,28 @@ export function SceneLibre({
     if (selecteur.length === 0) return undefined;
     const noeuds = Array.from(svg.querySelectorAll(selecteur));
 
-    const surTouche = (evenement: Event): void => {
-      const clavier = evenement as globalThis.KeyboardEvent;
-      if (!toucheDeValidation(clavier.key)) return;
-      const id = (evenement.currentTarget as Element).getAttribute('data-region-svg');
-      if (id === null || !offertes.has(id)) return;
-      evenement.preventDefault();
-      onColorier(id, { clientX: 0, clientY: 0 });
-    };
-
     for (const noeud of noeuds) {
       const id = noeud.getAttribute('id');
       if (id === null) continue;
       const tapable = offertes.has(id);
       const couleur = remplissages[id];
-      noeud.setAttribute('data-region-svg', id);
+      noeud.setAttribute('data-region-source', id);
       noeud.setAttribute('data-peinte', couleur === undefined ? 'non' : 'oui');
-      noeud.setAttribute('fill', couleur === undefined ? REMPLISSAGE_VIDE : hexDeCouleur(couleur as CouleurColoriage));
+      noeud.setAttribute(
+        'fill',
+        couleur === undefined ? REMPLISSAGE_VIDE : hexDeCouleur(couleur as CouleurColoriage),
+      );
       noeud.classList.add('pierre-region-libre');
       (noeud as SVGElement).style.pointerEvents = tapable ? 'auto' : 'none';
-      const libelle = libelles.get(id);
-      if (tapable) {
-        if (libelle !== undefined) noeud.setAttribute('aria-label', libelle);
-        noeud.setAttribute('role', 'button');
-        noeud.setAttribute('tabindex', '0');
-        noeud.addEventListener('keydown', surTouche);
-      } else {
-        noeud.removeAttribute('role');
-        noeud.removeAttribute('tabindex');
-        noeud.removeAttribute('aria-label');
-      }
+      // La forme peinte reste sensible au doigt sur toute sa surface, mais la commande
+      // accessible est le disque transparent de 96 unités rendu plus bas. Exposer le petit
+      // tracé lui-même recréait une cible de 35 px pour « la goutte de pluie ».
+      noeud.removeAttribute('role');
+      noeud.removeAttribute('tabindex');
+      noeud.removeAttribute('aria-label');
     }
-
-    return () => {
-      for (const noeud of noeuds) noeud.removeEventListener('keydown', surTouche);
-    };
-  }, [svgMarkup, habillage, remplissages, offertes, libelles, calquesColoriables, onColorier]);
+    return undefined;
+  }, [svgMarkup, habillage, remplissages, offertes, calquesColoriables]);
 
   /**
    * Un seul gestionnaire, à la racine — le DOM d'abord (`closest`), jamais de géométrie : ce
@@ -221,13 +219,15 @@ export function SceneLibre({
    * (attributs posés en JSX, plus bas) — c'est la même géométrie, une seule fois.
    */
   const surClic = (evenement: MouseEventReact<SVGSVGElement>): void => {
-    const cible = (evenement.target as Element | null)?.closest?.('[data-region-svg]') ?? null;
-    const id = cible?.getAttribute('data-region-svg');
+    const cible =
+      (evenement.target as Element | null)?.closest?.('[data-region-svg], [data-region-source]') ??
+      null;
+    const id = cible?.getAttribute('data-region-svg') ?? cible?.getAttribute('data-region-source');
     if (id === null || id === undefined || !offertes.has(id)) return;
     onColorier(id, { clientX: evenement.clientX, clientY: evenement.clientY });
   };
 
-  const surClavierRepli = (evenement: KeyboardEventReact<SVGCircleElement>): void => {
+  const surClavierPrise = (evenement: KeyboardEventReact<SVGCircleElement>): void => {
     if (!toucheDeValidation(evenement.key)) return;
     const id = evenement.currentTarget.getAttribute('data-region-svg');
     if (id === null || !offertes.has(id)) return;
@@ -273,16 +273,16 @@ export function SceneLibre({
                       cx={region.centroide[0]}
                       cy={region.centroide[1]}
                       r={rayonEquivalent(region.surface)}
-                      fill={couleur === undefined ? REMPLISSAGE_VIDE : hexDeCouleur(couleur as CouleurColoriage)}
+                      fill={
+                        couleur === undefined
+                          ? REMPLISSAGE_VIDE
+                          : hexDeCouleur(couleur as CouleurColoriage)
+                      }
                       stroke={TRAIT}
                       strokeWidth={4}
                       style={{ pointerEvents: tapable ? 'auto' : 'none' }}
-                      data-region-svg={region.id}
+                      data-region-source={region.id}
                       data-peinte={couleur === undefined ? 'non' : 'oui'}
-                      role={tapable ? 'button' : undefined}
-                      tabIndex={tapable ? 0 : undefined}
-                      aria-label={tapable ? region.libelle : undefined}
-                      onKeyDown={tapable ? surClavierRepli : undefined}
                     />
                   );
                 })
@@ -290,6 +290,27 @@ export function SceneLibre({
           </g>
         ))
       )}
+
+      <g data-calque="prises">
+        {regionsDeclarees
+          .filter((region) => offertes.has(region.id))
+          .map((region) => (
+            <circle
+              key={region.id}
+              className="pierre-prise-libre"
+              cx={region.centroide[0]}
+              cy={region.centroide[1]}
+              r={DIAMETRE_PRISE_MINIMAL / 2}
+              data-cible-frappe="oui"
+              data-region-svg={region.id}
+              data-peinte={remplissages[region.id] === undefined ? 'non' : 'oui'}
+              role="button"
+              tabIndex={0}
+              aria-label={libelles.get(region.id) ?? region.id}
+              onKeyDown={surClavierPrise}
+            />
+          ))}
+      </g>
     </svg>
   );
 }

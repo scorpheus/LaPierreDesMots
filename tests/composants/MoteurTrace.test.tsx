@@ -15,6 +15,10 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import { moteurTrace } from '@partage/moteurs/trace/moteur';
 import { renduTrace } from '@client/moteurs/trace/index';
+import {
+  convertirPointClientParMatrice,
+  echelleDeMatriceEcran,
+} from '@client/moteurs/trace/MoteurTrace';
 import { reechantillonner } from '@client/moteurs/trace/echantillonnage';
 
 import type {
@@ -45,6 +49,20 @@ const parLettre = new Map(
   lireJson<{ lettres: ModeleLettre[] }>(CHEMIN_LETTRES).lettres.map((l) => [l.lettre, l]),
 );
 
+describe('conversion écran → viewBox — ardoise letterboxée', () => {
+  it('retire les marges de preserveAspectRatio au lieu de les prendre pour du dessin', () => {
+    // viewBox 100×160 affiché à l'échelle 3 dans une boîte large de 600 px : le dessin réel
+    // fait 300 px et commence à x=150. Le point (70, 80) est donc peint en (360, 240).
+    const matrice = { a: 3, b: 0, c: 0, d: 3, e: 150, f: 0 };
+    expect(convertirPointClientParMatrice(360, 240, matrice)).toEqual([70, 80]);
+  });
+
+  it('la tolérance se convertit avec l’échelle du dessin, pas la largeur de sa boîte', () => {
+    const matrice = { a: 3, b: 0, c: 0, d: 3, e: 150, f: 0 };
+    expect(echelleDeMatriceEcran(matrice)).toBe(3);
+  });
+});
+
 /**
  * `getBoundingClientRect` de happy-dom rend des zéros : le composant retomberait alors sur
  * les coordonnées brutes du pointeur. On installe une boîte de 420 × 672 px — exactement le
@@ -54,8 +72,29 @@ const parLettre = new Map(
 function installerBoite(): void {
   const noeud = document.querySelector('[data-scene="trace"]');
   expect(noeud).not.toBeNull();
-  (noeud as unknown as { getBoundingClientRect: () => DOMRect }).getBoundingClientRect = () =>
+  const svg = noeud as unknown as {
+    getBoundingClientRect: () => DOMRect;
+    getScreenCTM: () => DOMMatrix;
+  };
+  svg.getBoundingClientRect = () =>
     ({ left: 0, top: 0, width: 420, height: 672, right: 420, bottom: 672, x: 0, y: 0 }) as DOMRect;
+  // happy-dom rend une matrice identité sans mise en page. La boîte est proportionnelle au
+  // viewBox : son équivalent navigateur est une échelle uniforme 4,2 sans marge.
+  svg.getScreenCTM = () =>
+    ({ a: 4.2, b: 0, c: 0, d: 4.2, e: 0, f: 0 }) as DOMMatrix;
+}
+
+function installerBoiteLetterboxee(): void {
+  const noeud = document.querySelector('[data-scene="trace"]');
+  expect(noeud).not.toBeNull();
+  const svg = noeud as unknown as {
+    getBoundingClientRect: () => DOMRect;
+    getScreenCTM: () => DOMMatrix;
+  };
+  svg.getBoundingClientRect = () =>
+    ({ left: 0, top: 0, width: 600, height: 480, right: 600, bottom: 480, x: 0, y: 0 }) as DOMRect;
+  svg.getScreenCTM = () =>
+    ({ a: 3, b: 0, c: 0, d: 3, e: 150, f: 0 }) as DOMMatrix;
 }
 
 function Harnais(proprietes: { readonly contenu: ContenuTrace }): ReturnType<
@@ -99,6 +138,18 @@ function tracerGeste(points: readonly (readonly [number, number])[], relacher = 
     fireEvent.pointerMove(scene, { pointerId: 1, ...enPixels(point) });
   }
   if (relacher) fireEvent.pointerUp(scene, { pointerId: 1 });
+}
+
+function tracerGesteLetterboxe(points: readonly (readonly [number, number])[]): void {
+  const scene = document.querySelector('[data-scene="trace"]')!;
+  const versEcran = ([x, y]: readonly [number, number]) => ({
+    clientX: 150 + x * 3,
+    clientY: y * 3,
+  });
+  const [premier, ...suite] = points;
+  fireEvent.pointerDown(scene, { pointerId: 1, ...versEcran(premier!) });
+  for (const point of suite) fireEvent.pointerMove(scene, { pointerId: 1, ...versEcran(point) });
+  fireEvent.pointerUp(scene, { pointerId: 1 });
 }
 
 afterEach(() => {
@@ -157,6 +208,16 @@ describe('MoteurTrace — bonne réponse, mauvaise, aide, geste interrompu', () 
     expect(document.querySelector('[data-etat="echec"]')).toBeNull();
     // Le message est un encouragement, jamais un reproche.
     expect(document.body.textContent).toContain('tranquillement');
+  });
+
+  it('le même miroir est reconnu dans une ardoise large avec marges latérales', () => {
+    render(<Harnais contenu={contenuBd} />);
+    installerBoiteLetterboxee();
+    const attendu = contenuBd.lettres[0]!.traits[0]!;
+    const jumeau = parLettre.get('d')!.traits.find((t) => t.libelle === attendu.libelle)!;
+    tracerGesteLetterboxe(jumeau.points);
+    expect(document.querySelector('[data-moteur="trace"]')?.getAttribute('data-axe-confondu'))
+      .toBe('gauche-droite');
   });
 
   it('l’exercice b/p ne journalise JAMAIS gauche-droite, même sur un geste raté', () => {

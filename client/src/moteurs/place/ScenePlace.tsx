@@ -43,6 +43,9 @@ const ZONE_VISEE = 'var(--zone-visee, rgba(27, 36, 64, 0.16))';
 /** Repli si l'habillage ne déclare aucun `viewBox` — neutre, jamais emprunté à un décor. */
 export const VIEWBOX_PAR_DEFAUT = '0 0 100 100';
 
+/** Marge de frappe R16 : 80 unités restent ≥ 64 px sur la largeur utile de la tablette. */
+const COTE_PRISE_MINIMAL = 80;
+
 export interface ProprietesScenePlace {
   readonly contenu: ContenuPlace;
   readonly habillage: Habillage;
@@ -81,13 +84,13 @@ function Zone(proprietes: {
   const { setNodeRef, isOver } = useDroppable({ id: zone.id });
 
   /**
-   * dnd-kit type sa `ref` sur `HTMLElement` ; une zone cible est un `<polygon>`, donc un
-   * `SVGPolygonElement`. On adapte par une `ref` de rappel plutôt que par un transtypage
-   * défensif : le `SVGPolygonElement` EST un `Element`, la bibliothèque n'en demande pas
+   * dnd-kit type sa `ref` sur `HTMLElement` ; une zone cible est un groupe SVG, donc un
+   * `SVGGElement`. On adapte par une `ref` de rappel plutôt que par un transtypage
+   * défensif : le `SVGGElement` EST un `Element`, la bibliothèque n'en demande pas
    * davantage à l'exécution, et le compilateur continue de protéger le reste du composant.
    */
   const brancher = useCallback(
-    (noeud: SVGPolygonElement | null) => {
+    (noeud: SVGGElement | null) => {
       setNodeRef(noeud as Element as HTMLElement | null);
     },
     [setNodeRef],
@@ -98,7 +101,7 @@ function Zone(proprietes: {
   }, [onTaper, zone]);
 
   const auClavier = useCallback(
-    (evenement: KeyboardEventReact<SVGPolygonElement>) => {
+    (evenement: KeyboardEventReact<SVGGElement>) => {
       if (evenement.key !== 'Enter' && evenement.key !== ' ') return;
       evenement.preventDefault();
       onTaper(zone.centroide);
@@ -107,7 +110,7 @@ function Zone(proprietes: {
   );
 
   return (
-    <polygon
+    <g
       ref={brancher}
       data-zone-cible={zone.id}
       data-zone-etat={occupee ? 'occupee' : 'libre'}
@@ -117,15 +120,33 @@ function Zone(proprietes: {
       role="button"
       tabIndex={0}
       aria-label={zone.libelle}
-      points={pointsSvg(zone)}
-      fill={isOver || enDemonstration ? ZONE_VISEE : ZONE_LIBRE}
-      stroke={TRAIT}
-      strokeWidth={enDemonstration && !animationsDesactivees ? 3 : 1.5}
-      strokeDasharray={occupee ? undefined : '6 5'}
       style={{ cursor: 'pointer' }}
       onClick={taper}
       onKeyDown={auClavier}
-    />
+    >
+      {/* Le rectangle ne peint rien : il agrandit seulement la boîte de frappe du groupe.
+          Le toit de l'école mesurait 60 px de haut dans le navigateur, malgré un polygone
+          parfaitement visible. */}
+      <rect
+        x={zone.centroide[0] - COTE_PRISE_MINIMAL / 2}
+        y={zone.centroide[1] - COTE_PRISE_MINIMAL / 2}
+        width={COTE_PRISE_MINIMAL}
+        height={COTE_PRISE_MINIMAL}
+        fill="transparent"
+        stroke="none"
+        pointerEvents="all"
+        data-cible-frappe="oui"
+        aria-hidden="true"
+      />
+      <polygon
+        points={pointsSvg(zone)}
+        fill={isOver || enDemonstration ? ZONE_VISEE : ZONE_LIBRE}
+        stroke={TRAIT}
+        strokeWidth={enDemonstration && !animationsDesactivees ? 3 : 1.5}
+        strokeDasharray={occupee ? undefined : '6 5'}
+        aria-hidden="true"
+      />
+    </g>
   );
 }
 

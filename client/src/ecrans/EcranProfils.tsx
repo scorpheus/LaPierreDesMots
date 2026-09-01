@@ -67,7 +67,7 @@ function CarteProfil({ profil, surChoix, surReglages }: ProprietesCarteProfil): 
   const prenom = String(profil.prenom);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+    <div className="ensemble-profil">
     <button
       type="button"
       className="cible carte-profil"
@@ -236,6 +236,7 @@ export function EcranProfils({ surAccesParent }: ProprietesEcranProfils = {}): R
   return (
     <main
       data-ecran="profils"
+      className="ecran-profils"
       style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '2rem' }}
     >
       <h1 className="titre" style={{ fontSize: '2.5rem', margin: 0 }}>
@@ -254,6 +255,7 @@ export function EcranProfils({ surAccesParent }: ProprietesEcranProfils = {}): R
       ) : null}
 
       <div
+        className="liste-profils"
         style={{
           display: 'flex',
           flexWrap: 'wrap',
@@ -352,7 +354,7 @@ export function EcranProfils({ surAccesParent }: ProprietesEcranProfils = {}): R
 
       {/* La porte de la zone parent. Discrète, en pied de page, et jamais présentée comme
           une interdiction : c'est un endroit pour l'adulte, pas un mur pour l'enfant. */}
-      <footer style={{ marginBlockStart: 'auto', paddingBlockStart: '1rem' }}>
+      <footer className="pied-profils" style={{ marginBlockStart: 'auto', paddingBlockStart: '1rem' }}>
         <button
           type="button"
           className="cible"

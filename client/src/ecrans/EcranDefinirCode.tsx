@@ -54,6 +54,7 @@ export function EcranDefinirCode({
   const [saisie, fixerSaisie] = useState('');
   const [message, fixerMessage] = useState<string | null>(null);
   const [enCours, fixerEnCours] = useState(false);
+  const codeComplet = saisie.length === LONGUEUR_CODE;
 
   const taper = useCallback((chiffre: string): void => {
     if (enCours) {
@@ -154,7 +155,7 @@ export function EcranDefinirCode({
             type="button"
             className="cible"
             data-touche={chiffre}
-            disabled={enCours}
+            disabled={enCours || codeComplet}
             onClick={() => taper(chiffre)}
             style={{ fontSize: '1.75rem', minBlockSize: 'var(--cible-min)' }}
           >

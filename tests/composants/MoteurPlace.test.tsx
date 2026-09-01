@@ -237,6 +237,20 @@ describe('MoteurPlace — bonne réponse, mauvaise, aide, double-tap', () => {
 });
 
 describe('MoteurPlace — R16, les cibles ne sont jamais minuscules', () => {
+  it('chaque zone porte une prise transparente d’au moins 80 unités', () => {
+    render(<Harnais />);
+    const zones = [...document.querySelectorAll<SVGGElement>('[data-zone-cible]')];
+    expect(zones).toHaveLength(contenu.zones.length);
+    for (const zone of zones) {
+      expect(zone.tagName.toLowerCase()).toBe('g');
+      expect(zone.getAttribute('role')).toBe('button');
+      const prise = zone.querySelector<SVGRectElement>('[data-cible-frappe="oui"]');
+      expect(prise).not.toBeNull();
+      expect(Number(prise!.getAttribute('width'))).toBeGreaterThanOrEqual(80);
+      expect(Number(prise!.getAttribute('height'))).toBeGreaterThanOrEqual(80);
+    }
+  });
+
   it('chaque jeton de la réserve déclare au moins 64 px dans les deux dimensions', () => {
     render(<Harnais />);
     for (const element of contenu.reserve) {
