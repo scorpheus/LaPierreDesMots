@@ -106,7 +106,7 @@ export const MUTATIONS = [
     id: 'M3',
     titre: '`journaliserEtapes` rend le bon compte et n’insère rien — la perte silencieuse',
     regle: 'annexe T § T2 — aucune tentative perdue',
-    fichier: 'serveur/src/depots/etapes.ts',
+    fichier: 'partage/src/base/depots/etapes.ts',
     ancrage: '  let inserees = 0;',
     remplacement: '  let inserees = etapes.length;\n  if (inserees >= 0) return inserees;',
     attendu: 'DETECTEE'
@@ -125,9 +125,9 @@ export const MUTATIONS = [
     id: 'M5',
     titre: 'Les étoiles s’écrasent au lieu de prendre le MAX — un acquis est repris',
     regle: 'R14 — un acquis n’est jamais repris',
-    fichier: 'serveur/src/depots/progression.ts',
-    ancrage: '         etoiles       = MAX(progression_noeud.etoiles, excluded.etoiles),',
-    remplacement: '         etoiles       = excluded.etoiles,',
+    fichier: 'partage/src/base/depots/progression.ts',
+    ancrage: '       etoiles       = MAX(progression_noeud.etoiles, excluded.etoiles),',
+    remplacement: '       etoiles       = excluded.etoiles,',
     attendu: 'DETECTEE'
   },
   {
@@ -135,14 +135,10 @@ export const MUTATIONS = [
     titre: '`data-etat="echec"` est émis sur un refus — l’écran d’échec interdit',
     regle: 'R14 — aucun écran d’échec, jamais',
     fichier: 'client/src/moteurs/attrape/MoteurAttrape.tsx',
-    ancrage: "            data-attrapee={etat.acquis[cible.id] === undefined ? 'non' : 'oui'}",
+    ancrage: "                  data-refusee={refusee ? 'oui' : 'non'}",
     remplacement:
-      "            data-attrapee={etat.acquis[cible.id] === undefined ? 'non' : 'oui'}\n" +
-      "            data-etat={\n" +
-      "              etat.dernierRefus !== null && etat.dernierRefus.cible === cible.id\n" +
-      "                ? 'echec'\n" +
-      "                : undefined\n" +
-      "            }",
+      "                  data-refusee={refusee ? 'oui' : 'non'}\n" +
+      "                  data-etat={refusee ? 'echec' : undefined}",
     attendu: 'DETECTEE'
   },
   {
@@ -150,8 +146,11 @@ export const MUTATIONS = [
     titre: 'Les cibles du moteur `attrape` passent de 64 à 40 px — le doigt de l’enfant rate',
     regle: 'R16 — toute cible ≥ 64 px',
     fichier: 'client/src/moteurs/attrape/MoteurAttrape.tsx',
-    ancrage: 'const CIBLE_PX = 64;',
-    remplacement: 'const CIBLE_PX = 40;',
+    ancrage:
+      /[ ]{10}const largeur = Math\.max\(CIBLE_MIN, cible\.taille\[0\] \* t\.echelle\);\r?\n[ ]{10}const hauteur = Math\.max\(CIBLE_MIN, cible\.taille\[1\] \* t\.echelle\);/,
+    remplacement:
+      '          const largeur = Math.max(40, cible.taille[0] * t.echelle);\n' +
+      '          const hauteur = Math.max(40, cible.taille[1] * t.echelle);',
     attendu: 'SURVIT',
     couvertPar: 'e2e',
     assertionE2E:
@@ -244,7 +243,7 @@ export const MUTATIONS = [
   {
     id: 'M12',
     titre: 'Le court-circuit d’idempotence est coupé — la ceinture, sans les bretelles',
-    fichier: 'serveur/src/depots/tentatives.ts',
+    fichier: 'partage/src/base/depots/tentatives.ts',
     ancrage: '    if (dejaLa !== null) {',
     remplacement: '    if (dejaLa !== null && false) {',
     attendu: 'SURVIT',
@@ -296,7 +295,7 @@ export const MUTATIONS = [
     id: 'M17',
     titre: 'Le client poste sur une route absente — l’enfant termine, rien n’est sauvé',
     regle: 'défaut n° 4 du père, côté CLIENT',
-    fichier: 'client/src/api/client.ts',
+    fichier: 'client/src/api/port-http.ts',
     ancrage:
       '  return demander<ReponseTentative>(CHEMINS_API.tentatives, corpsJson(tentative));',
     remplacement:
@@ -335,9 +334,9 @@ export const MUTATIONS = [
     id: 'M20',
     titre: 'La clé d’idempotence oublie le nœud — deux nœuds, une seule tentative gardée',
     regle: 'contrat § 6.3',
-    fichier: 'serveur/src/depots/tentatives.ts',
-    ancrage: '  const matiere = `${profilId}|${noeudId}|${demarreLe}|${String(graine)}`;',
-    remplacement: '  const matiere = `${profilId}|${demarreLe}|${String(graine)}`;',
+    fichier: 'partage/src/base/depots/tentatives.ts',
+    ancrage: '  return hacherSha256Hex(`${profilId}|${noeudId}|${demarreLe}|${String(graine)}`);',
+    remplacement: '  return hacherSha256Hex(`${profilId}|${demarreLe}|${String(graine)}`);',
     attendu: 'SURVIT',
     couvertPar: null,
     pourquoi:
@@ -479,11 +478,11 @@ export const CONTROLES_NEGATIFS = [
     id: 'N4',
     negatif: true,
     titre: 'Un commentaire ajouté dans `depots/tentatives.ts`',
-    fichier: 'serveur/src/depots/tentatives.ts',
-    ancrage: 'export function deriverCleIdempotence(',
+    fichier: 'partage/src/base/depots/tentatives.ts',
+    ancrage: 'export async function deriverCleIdempotence(',
     remplacement:
       '// controle negatif du banc de mutation — ne change rien\n' +
-      'export function deriverCleIdempotence(',
+      'export async function deriverCleIdempotence(',
     attendu: 'SURVIT',
     couvertPar: 'equivalent',
     pourquoi: 'Contrôle négatif.'

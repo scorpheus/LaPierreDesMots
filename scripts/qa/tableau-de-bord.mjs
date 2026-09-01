@@ -20,8 +20,8 @@
  *
  *   • les **écrans** depuis les valeurs de `data-ecran` trouvées dans `client/src/**` — pas
  *     depuis une liste écrite à la main, qui a déjà donné 8 entrées là où le code en portait 13 ;
- *   • les **moteurs** depuis les dossiers de `client/src/moteurs/` — pas depuis un registre,
- *     qui peut oublier ce qu'il n'a jamais su.
+ *   • les **moteurs** depuis les dossiers de `client/src/moteurs/`, en excluant `commun` qui
+ *     porte l'infrastructure partagée et n'est pas une valeur métier de `CodeMoteur`.
  *
  * C'est l'asymétrie que l'audit a trouvée, et c'est le chiffre à surveiller :
  * **14 moteurs sur 14 sont gardés au composant, 2 écrans sur 12 le sont.**
@@ -108,7 +108,7 @@ function moteursDeclares() {
   const dossier = join(RACINE, 'client', 'src', 'moteurs');
   if (!existsSync(dossier)) return [];
   return readdirSync(dossier, { withFileTypes: true })
-    .filter((e) => e.isDirectory())
+    .filter((e) => e.isDirectory() && e.name !== 'commun')
     .map((e) => e.name);
 }
 
@@ -194,10 +194,25 @@ const mutationsLues = lireRapport(join(DOSSIER_QA, 'mutations.json'));
  * `complet === false` : un banc partiel a écrit là où il ne devait pas.
  */
 function estOpposable(rapport) {
-  if (rapport === null) return null;
-  if (rapport.complet === false) return 'rapport PARTIEL — il ne décrit pas tout le jeu de recettes';
+  if (rapport === null) return 'rapport absent — lancer `npm run qa:mutations`';
+  if (rapport.complet !== true) return 'rapport PARTIEL — il ne décrit pas tout le jeu de recettes';
   if (rapport.baseVerteAvant !== true) return 'la base n’était pas verte AVANT le banc';
   if (rapport.baseVerteApres !== true) return 'la base n’était pas verte APRÈS le banc';
+  if ((rapport.echecs?.length ?? 0) > 0) {
+    return `le banc est ROUGE : ${rapport.echecs.join(' · ')}`;
+  }
+  if ((rapport.ancragesPerdus?.length ?? 0) > 0) {
+    return `${rapport.ancragesPerdus.length} recette(s) ont un ancrage perdu`;
+  }
+  if ((rapport.mutationsNonMesurees?.length ?? 0) > 0) {
+    return `${rapport.mutationsNonMesurees.length} mutation(s) n’ont pas été mesurées`;
+  }
+  if (rapport.controlesNegatifsExecutes !== rapport.controlesNegatifs) {
+    return (
+      `${rapport.controlesNegatifs - (rapport.controlesNegatifsExecutes ?? 0)} contrôle(s) ` +
+      'n’ont pas été exécutés'
+    );
+  }
   if (rapport.controlesNegatifsVerts !== rapport.controlesNegatifs) {
     return (
       `${rapport.controlesNegatifs - rapport.controlesNegatifsVerts} contrôle(s) négatif(s) ` +
@@ -304,7 +319,7 @@ l.push('## 2. Ce que la QA attrape quand on casse le code');
 l.push('');
 if (mutations === null) {
   if (motifNonOpposable === null) {
-    l.push('> **Non mesuré.** Lancer `npm run qa:mutations` (≈ 5 min). Sans cette mesure, la');
+    l.push('> **Non mesuré.** Lancer `npm run qa:mutations` (≈ 30–35 min). Sans cette mesure, la');
     l.push('> valeur de la suite de tests est une croyance.');
   } else {
     l.push(`> **MESURE NON OPPOSABLE — aucun chiffre n’est affiché.** ${motifNonOpposable}.`);
@@ -320,7 +335,9 @@ if (mutations === null) {
   l.push('');
   l.push('| Grandeur | Valeur |');
   l.push('|---|---:|');
-  l.push(`| Mutations injectées | ${mutations.mutationsJouees} |`);
+  l.push(`| Mutations cataloguées | ${mutations.mutationsCataloguees} |`);
+  l.push(`| Mutations réellement injectées | ${mutations.mutationsJouees} |`);
+  l.push(`| Mutations non mesurées | ${mutations.mutationsNonMesurees.length} |`);
   l.push(`| Mutants équivalents (hors dénominateur) | ${mutations.mutantsEquivalents} |`);
   l.push(`| **Mutations qui valent** | **${mutations.mutationsQuiValent}** |`);
   l.push(`| Détectées par la suite exécutée | ${mutations.detectees} |`);
@@ -328,6 +345,7 @@ if (mutations === null) {
   l.push(`| — dont couvertes par une assertion E2E nommée, non exécutée | ${mutations.survivantesCouvertesE2E} |`);
   l.push(`| **— dont TROUS RÉELS, vus par personne** | **${mutations.trousReels.length}** |`);
   l.push(`| Taux de survie | ${mutations.tauxSurviePourCent} % |`);
+  l.push(`| Contrôles négatifs exécutés | ${mutations.controlesNegatifsExecutes} / ${mutations.controlesNegatifs} |`);
   l.push(`| Contrôles négatifs verts | ${mutations.controlesNegatifsVerts} / ${mutations.controlesNegatifs} |`);
   l.push(`| Base verte avant **et** après | ${mutations.baseVerteAvant && mutations.baseVerteApres ? 'oui' : '**NON — mesure non opposable**'} |`);
   l.push('');
@@ -425,7 +443,7 @@ l.push('---');
 l.push('');
 l.push('| Commande | Ce qu’elle mesure | Durée |');
 l.push('|---|---|---|');
-l.push('| `npm run qa:mutations` | ce que la QA attrape quand on casse le code | ≈ 5 min |');
+l.push('| `npm run qa:mutations` | ce que la QA attrape quand on casse le code | ≈ 30–35 min |');
 l.push('| `npm run qa:trompeurs` | les tests qui n’assertent rien ou trop peu | ≈ 2 s |');
 l.push('| `npm run qa:tableau` | cette page | < 1 s |');
 l.push('| `npm run verifier` | la chaîne complète, un seul code de sortie | plusieurs min |');
@@ -449,6 +467,9 @@ const resume = {
   fichiersDeTest: fichiersDeTest.length,
   mutationsNonOpposable: motifNonOpposable,
   mutations: mutations === null ? null : {
+    cataloguees: mutations.mutationsCataloguees,
+    jouees: mutations.mutationsJouees,
+    nonMesurees: mutations.mutationsNonMesurees.length,
     quiValent: mutations.mutationsQuiValent,
     detectees: mutations.detectees,
     survivantes: mutations.survivantes,
@@ -497,6 +518,7 @@ if (moteurs.length === 0) echecs.push('population NULLE : aucun moteur énumér�
 if (dossierEcrans.length === 0) echecs.push('population NULLE : aucun écran énuméré dans `client/src/ecrans/`');
 if (ecrans.size === 0) echecs.push('population NULLE : aucun `data-ecran` trouvé dans `client/src/`');
 if (fichiersDeTest.length === 0) echecs.push('population NULLE : aucun fichier de test énuméré');
+if (motifNonOpposable !== null) echecs.push(`mesure de mutation NON OPPOSABLE : ${motifNonOpposable}`);
 
 if (echecs.length === 0) {
   console.log('✅ Les quatre populations sont non nulles — le tableau mesure quelque chose.');

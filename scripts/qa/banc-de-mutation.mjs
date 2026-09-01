@@ -77,7 +77,7 @@
  *
  * ── USAGE ───────────────────────────────────────────────────────────────────────────────
  *
- *   npm run qa:mutations                      # les 31 recettes, ~5 min
+ *   npm run qa:mutations                      # les 33 recettes, ~30–35 min sur la base actuelle
  *   npm run qa:mutations -- --liste           # ne rien exécuter, montrer le plan
  *   npm run qa:mutations -- --seulement=M18,M20,M26
  *   npm run qa:mutations -- --sans-controles  # à ne PAS utiliser : voir l'invariant 4
@@ -88,6 +88,7 @@ import { join, relative } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { empreinteArbre, empreinteCourte, fichiersQuiOntBouge } from './empreinte-arbre.mjs';
+import { agregerResultats } from './contrat-mutation.mjs';
 
 /**
  * `--recettes=<chemin>` charge un autre jeu de recettes.
@@ -643,29 +644,29 @@ restaurerRapports(sauvegardeRapports);
 
 // ─────────────────────────────────────────────────────────────────────── verdict
 
-const joues = resultats.filter((r) => !r.negatif);
-const negatifs = resultats.filter((r) => r.negatif);
+const agregat = agregerResultats(recettes, resultats);
+const joues = agregat.mutationsExecutees;
 /**
  * Les essais qui n'ont RIEN pu conclure — arbre bougé sous l'essai, rouge qui survit à la
  * restauration, collision d'écriture. Ils sortent du dénominateur : un taux de survie calculé
  * sur des essais indécis est un chiffre fabriqué par le bruit.
  */
 const indecis = resultats.filter((r) => r.verdict === 'INDECIS');
-const quiValent = joues.filter(
-  (r) => r.couvertPar !== 'equivalent' && r.verdict !== 'INDECIS'
-);
+const quiValent = agregat.mutationsQuiValent;
 
 const regressions = joues.filter((r) => r.attendu === 'DETECTEE' && r.verdict === 'SURVIT');
 const ameliorations = joues.filter((r) => r.attendu === 'SURVIT' && r.verdict === 'DETECTEE');
 const ancragesPerdus = resultats.filter((r) => r.verdict === 'ANCRAGE-PERDU');
-const negatifsRouges = negatifs.filter((r) => r.verdict === 'DETECTEE');
+const negatifsRouges = agregat.controlesRouges;
 
-const survivantsObserves = quiValent.filter((r) => r.verdict === 'SURVIT');
+const survivantsObserves = agregat.survivantes;
 const trousReels = survivantsObserves.filter((r) => r.couvertPar === null);
-const detectees = joues.filter((r) => r.verdict === 'DETECTEE');
+const detectees = agregat.detectees;
 
 const tauxSurvie =
-  quiValent.length === 0 ? null : (survivantsObserves.length / quiValent.length) * 100;
+  agregat.mutationsNonMesurees.length > 0 || quiValent.length === 0
+    ? null
+    : (survivantsObserves.length / quiValent.length) * 100;
 
 const echecs = [];
 if (baseAvant.code !== 0) echecs.push('la base n’était pas verte AVANT le banc');
@@ -674,6 +675,11 @@ if (negatifsRouges.length > 0)
   echecs.push(
     `${negatifsRouges.length} contrôle(s) négatif(s) ont rougi (${negatifsRouges.map((r) => r.id).join(', ')}) — ` +
       'la mesure n’est pas opposable'
+  );
+if (agregat.controlesNonMesures.length > 0)
+  echecs.push(
+    `${agregat.controlesNonMesures.length} contrôle(s) négatif(s) NON MESURÉ(S) ` +
+      `(${agregat.controlesNonMesures.map((r) => r.id).join(', ')}) — la mesure n’est pas opposable`
   );
 if (regressions.length > 0)
   echecs.push(
@@ -695,7 +701,12 @@ if (!MODE_LISTE && recettes.length > 0 && resultats.length === 0)
 
 console.log('');
 console.log('── Contrat de sortie ──────────────────────────────────────────────');
-console.log(`mutations jouées                 ${joues.length}`);
+console.log(`mutations cataloguées             ${agregat.mutationsCataloguees.length}`);
+console.log(`mutations réellement jouées       ${joues.length}`);
+console.log(
+  `mutations NON MESURÉES           ${agregat.mutationsNonMesurees.length}` +
+    `${agregat.mutationsNonMesurees.length > 0 ? ` (${agregat.mutationsNonMesurees.map((r) => r.id).join(', ')})` : ''}`
+);
 console.log(`essais INDÉCIS (hors compte)      ${indecis.length}${indecis.length > 0 ? ` (${indecis.map((r) => r.id).join(', ')})` : ''}`);
 console.log(`mutants équivalents (hors compte) ${joues.filter((r) => r.couvertPar === 'equivalent' && r.verdict !== 'INDECIS').length}`);
 console.log(`mutations qui valent              ${quiValent.length}`);
@@ -706,7 +717,12 @@ console.log(
 );
 console.log(`  dont TROUS RÉELS — vus par personne ${trousReels.length}${trousReels.length > 0 ? ` (${trousReels.map((r) => r.id).join(', ')})` : ''}`);
 console.log(`taux de survie                    ${tauxSurvie === null ? '—' : `${tauxSurvie.toFixed(0)} %`}`);
-console.log(`contrôles négatifs verts          ${negatifs.length - negatifsRouges.length} / ${negatifs.length}`);
+console.log(
+  `contrôles négatifs exécutés      ${agregat.controlesExecutes.length} / ${agregat.controlesCatalogues.length}`
+);
+console.log(
+  `contrôles négatifs verts         ${agregat.controlesVerts.length} / ${agregat.controlesCatalogues.length}`
+);
 console.log(`durée                             ${((Date.now() - debut) / 1000).toFixed(0)} s`);
 console.log('');
 
@@ -753,7 +769,9 @@ const rapport = {
   ecartsAuDepart: arbreAuDepart.ecarts.map((e) => e.chemin),
   nbTestsBase: baseAvant.nbTests,
   testsExclus: exclusInitiales,
+  mutationsCataloguees: agregat.mutationsCataloguees.length,
   mutationsJouees: joues.length,
+  mutationsNonMesurees: agregat.mutationsNonMesurees,
   essaisIndecis: indecis.map((r) => ({ id: r.id, detail: r.detail })),
   mutantsEquivalents: joues.filter(
     (r) => r.couvertPar === 'equivalent' && r.verdict !== 'INDECIS'
@@ -764,8 +782,10 @@ const rapport = {
   survivantesCouvertesE2E: survivantsObserves.filter((r) => r.couvertPar === 'e2e').length,
   trousReels: trousReels.map((r) => ({ id: r.id, titre: r.titre, fichier: r.fichier, regle: r.regle })),
   tauxSurviePourCent: tauxSurvie === null ? null : Number(tauxSurvie.toFixed(1)),
-  controlesNegatifs: negatifs.length,
-  controlesNegatifsVerts: negatifs.length - negatifsRouges.length,
+  controlesNegatifs: agregat.controlesCatalogues.length,
+  controlesNegatifsExecutes: agregat.controlesExecutes.length,
+  controlesNegatifsVerts: agregat.controlesVerts.length,
+  controlesNegatifsNonMesures: agregat.controlesNonMesures,
   regressions: regressions.map((r) => r.id),
   ameliorations: ameliorations.map((r) => r.id),
   ancragesPerdus: ancragesPerdus.map((r) => ({ id: r.id, detail: r.detail })),

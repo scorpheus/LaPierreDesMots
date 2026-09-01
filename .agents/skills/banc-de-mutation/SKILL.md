@@ -19,7 +19,7 @@ description: Mesurer ce que la QA du projet attrape réellement, et détecter le
 ## Les trois commandes
 
 ```
-npm run qa:mutations     # ≈ 5 min · casse le code 32 fois et regarde si la suite hurle
+npm run qa:mutations     # ≈ 30–35 min · casse le code 33 fois et regarde si la suite hurle
 npm run qa:trompeurs     # ≈ 2 s   · les tests qui n'assertent rien, ou pas ce qu'ils disent
 npm run qa:tableau       # < 1 s   · la page à lire en trente secondes
 ```
