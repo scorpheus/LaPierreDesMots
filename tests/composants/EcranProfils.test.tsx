@@ -148,6 +148,22 @@ afterEach(() => {
 });
 
 describe('la carte de profil RÉPOND au tap (M25)', () => {
+  it('présente chaque enfant comme le héros de sa propre aventure', async () => {
+    await monterEtAttendre();
+
+    expect(document.querySelector('[data-invitation-profils]')?.textContent).toContain(
+      'Retrouve ton aventure'
+    );
+    const portraits = document.querySelectorAll('[data-portrait-profil]');
+    expect(portraits, 'les cartes restent de simples boutons avec une initiale').toHaveLength(
+      PROFILS.length
+    );
+    expect(document.querySelectorAll('.carte-profil__paysage')).toHaveLength(PROFILS.length);
+    expect(document.querySelector('[data-profil="prf-1"] .carte-profil__appel')?.textContent).toBe(
+      'Continuer l’aventure'
+    );
+  });
+
   it('rend une carte par profil, avec sa prise stable `data-profil`', async () => {
     await monterEtAttendre();
     const cartes = document.querySelectorAll('[data-profil]');

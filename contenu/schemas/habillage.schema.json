@@ -21,10 +21,42 @@
       "type": "object",
       "additionalProperties": false,
       "required": ["fichier", "viewBox", "calques"],
+      "allOf": [
+        {
+          "if": { "required": ["rasterIndexe"] },
+          "then": {
+            "properties": {
+              "calques": {
+                "items": {
+                  "if": { "properties": { "role": { "const": "coloriable" } }, "required": ["role"] },
+                  "then": {
+                    "properties": {
+                      "regions": { "items": { "required": ["couleurMasque"] } }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
       "properties": {
         "fichier": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*(/[a-z0-9]+(-[a-z0-9]+)*)*/[a-z0-9]+(-[a-z0-9]+)*\\.svg$" },
         "viewBox": { "type": "string", "pattern": "^-?[0-9]+(\\.[0-9]+)? -?[0-9]+(\\.[0-9]+)? [0-9]+(\\.[0-9]+)? [0-9]+(\\.[0-9]+)?$" },
-        "calques": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/calque" } }
+        "calques": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/calque" } },
+        "rasterIndexe": {
+          "type": "object",
+          "description": "Option de migration : trois PNG strictement alignes. Le SVG `fichier` reste le repli tant que le raster n'est pas disponible.",
+          "additionalProperties": false,
+          "required": ["fond", "trait", "masque", "largeur", "hauteur"],
+          "properties": {
+            "fond": { "$ref": "#/$defs/cheminPng" },
+            "trait": { "$ref": "#/$defs/cheminPng" },
+            "masque": { "$ref": "#/$defs/cheminPng" },
+            "largeur": { "type": "integer", "minimum": 1, "maximum": 8192 },
+            "hauteur": { "type": "integer", "minimum": 1, "maximum": 8192 }
+          }
+        }
       }
     },
     "palette": {
@@ -72,6 +104,7 @@
                "rose","brun","noir","blanc","gris"]
     },
     "identifiantSvg": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+    "cheminPng": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*(/[a-z0-9]+(-[a-z0-9]+)*)*/[a-z0-9]+(-[a-z0-9]+)*\\.png$" },
     "calque": {
       "type": "object",
       "additionalProperties": false,
@@ -96,7 +129,12 @@
           "type": "array", "minItems": 2, "maxItems": 2,
           "items": { "type": "number" }
         },
-        "surface": { "type": "number", "exclusiveMinimum": 0 }
+        "surface": { "type": "number", "exclusiveMinimum": 0 },
+        "couleurMasque": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$",
+          "description": "Index RGB exact de la region dans le masque raster. Absent pour un SVG."
+        }
       }
     }
   }

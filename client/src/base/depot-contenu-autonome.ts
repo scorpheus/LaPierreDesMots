@@ -33,7 +33,7 @@ const HABILLAGES_BRUTS = import.meta.glob('../../../contenu/habillages/**/*.habi
 
 import competencesBrut from '../../../contenu/referentiel/competences.json' with { type: 'json' };
 
-// ── assets bruts : SVG, audio Opus, modèles de lettres — servis par leur URL bundlée
+// ── assets bruts : SVG et PNG, audio Opus, modèles de lettres — servis par leur URL bundlée
 const ASSETS_URL = {
   ...(import.meta.glob('../../../contenu/habillages/**/*.svg', {
     query: '?url',
@@ -41,6 +41,18 @@ const ASSETS_URL = {
     eager: true
   }) as Record<string, string>),
   ...(import.meta.glob('../../../contenu/assets/**/*.svg', {
+    query: '?url',
+    import: 'default',
+    eager: true
+  }) as Record<string, string>),
+  ...(import.meta.glob('../../../contenu/habillages/**/*.png', {
+    query: '?url',
+    import: 'default',
+    eager: true
+  }) as Record<string, string>),
+  // Les décors illustrés (campement, puis cinq tableaux d'ouverture) sont des PNG validés.
+  // Sans ce glob ils fonctionnent sur le serveur LAN, mais sont absents de l'APK autonome.
+  ...(import.meta.glob('../../../contenu/assets/**/*.png', {
     query: '?url',
     import: 'default',
     eager: true

@@ -156,12 +156,17 @@
   "palette": {
     "jetons": {},
     "nuancier": [
-      "vert",
+      "rouge",
+      "orange",
       "jaune",
+      "vert",
       "bleu",
-      "brun",
+      "violet",
       "rose",
-      "blanc"
+      "brun",
+      "noir",
+      "blanc",
+      "gris"
     ]
   },
   "timings": {

@@ -17,7 +17,7 @@
 //   3. **Le décor absent n'est jamais une erreur.** Tant que le SVG n'est pas chargé, le
 //      tableau montre sa phrase sur le parchemin nu. La phrase EST le tableau ; l'image
 //      l'accompagne.
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { ReactElement } from 'react';
 
 import type { TableauOuverture as ModeleTableau } from '@pierre/partage/ouverture';
@@ -43,14 +43,26 @@ export function TableauOuverture({
   decor: decorInjecte = null
 }: ProprietesTableauOuverture): ReactElement {
   const [decor, fixerDecor] = useState<string | null>(decorInjecte);
+  const [rastersIndisponibles, fixerRastersIndisponibles] = useState<ReadonlySet<string>>(
+    () => new Set()
+  );
+  const cheminRaster = `assets/ouverture/${tableau.code}.png`;
+  const rasterIndisponible = rastersIndisponibles.has(tableau.code);
+  const urlRaster = useMemo(() => urlAsset(cheminRaster), [cheminRaster]);
 
   useEffect(() => {
     if (decorInjecte !== null) {
       fixerDecor(decorInjecte);
       return;
     }
-    let vivant = true;
     fixerDecor(null);
+    // Le raster validé est la source préférée. Le SVG historique n'est chargé qu'après un
+    // vrai échec de l'image : ainsi, la publication d'un PNG suffit à embellir le tableau sans
+    // modifier le récit, et l'absence des quatre images restantes ne produit jamais un trou.
+    if (!rasterIndisponible) {
+      return;
+    }
+    let vivant = true;
     void fetch(urlAsset(tableau.asset), { headers: { Accept: 'image/svg+xml' } })
       .then(async (reponse) => (reponse.ok ? interieurDuSvg(await reponse.text()) : null))
       // Un décor manquant n'interrompt RIEN : la phrase reste lisible, la séquence continue.
@@ -64,50 +76,54 @@ export function TableauOuverture({
     return () => {
       vivant = false;
     };
-  }, [tableau.asset, decorInjecte]);
+  }, [tableau.asset, decorInjecte, rasterIndisponible]);
 
   return (
     <figure
       data-tableau={tableau.code}
       data-tableau-rang={String(rang)}
-      style={{ margin: 0, display: 'grid', gap: '1.5rem', justifyItems: 'center' }}
+      className="ouverture-tableau"
     >
-      <svg
-        viewBox="0 0 1200 800"
-        role="img"
-        aria-label={`Image ${String(rang)} sur ${String(total)}`}
+      <div
+        className="ouverture-tableau__decor"
         data-decor={tableau.code}
-        style={{
-          inlineSize: '100%',
-          maxInlineSize: '1100px',
-          blockSize: 'auto',
-          display: 'block',
-          borderRadius: '1rem',
-          // Le SEUL mouvement de ce composant, et il est hors du champ de lecture.
-          animation: animationsDesactivees ? 'none' : 'apparition-tableau 420ms ease-out both'
-        }}
+        style={{ animation: animationsDesactivees ? 'none' : undefined }}
       >
-        {decor === null ? null : (
-          /* Fichier de contenu DU DÉPÔT, servi par le serveur local : ni tiers, ni saisie. */
-          <g dangerouslySetInnerHTML={{ __html: decor }} />
+        {decorInjecte === null && !rasterIndisponible ? (
+          <img
+            src={urlRaster}
+            alt={`Image ${String(rang)} sur ${String(total)}`}
+            data-decor-raster={tableau.code}
+            data-format-decor="raster"
+            draggable={false}
+            onError={() => {
+              fixerRastersIndisponibles((precedents) => {
+                const suivants = new Set(precedents);
+                suivants.add(tableau.code);
+                return suivants;
+              });
+            }}
+          />
+        ) : (
+          <svg
+            viewBox="0 0 1200 800"
+            role="img"
+            aria-label={`Image ${String(rang)} sur ${String(total)}`}
+            data-decor-svg={tableau.code}
+            data-format-decor="svg-repli"
+          >
+            {decor === null ? null : (
+              /* Fichier de contenu DU DÉPÔT, servi par le serveur local : ni tiers, ni saisie. */
+              <g dangerouslySetInnerHTML={{ __html: decor }} />
+            )}
+          </svg>
         )}
-      </svg>
+      </div>
 
       {/* Le champ de lecture. Fond parchemin, Andika, aucune animation — v2 § 9.3. */}
       <figcaption
         data-texte-tableau={tableau.code}
-        className="parchemin"
-        style={{
-          background: 'var(--parchemin)',
-          color: 'var(--trait)',
-          padding: '1.25rem 1.75rem',
-          borderRadius: '0.75rem',
-          maxInlineSize: '46ch',
-          fontSize: '1.5rem',
-          lineHeight: 1.7,
-          textAlign: 'center',
-          animation: 'none'
-        }}
+        className="parchemin ouverture-tableau__texte"
       >
         {tableau.texte}
       </figcaption>

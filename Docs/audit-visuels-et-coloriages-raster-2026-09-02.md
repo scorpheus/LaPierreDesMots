@@ -7,8 +7,8 @@
 - Une prise transparente recevait le contour de focus générique de `.cible`, tandis qu'un second
   calque dessinait un cercle doré. Ces deux géométries techniques ne suivaient aucun objet peint.
   Elles sont remplacées par six étincelles ponctuelles et une découverte nommée.
-- Le chaudron du campement ouvre `galeries-12`, donc l'habillage `galeries.paroi-libre` et non
-  `campement.chaudron`. L'enfant reçoit actuellement une paroi géométrique sans rapport avec
+- Le chaudron du campement ouvrait `galeries-12`, donc l'habillage `galeries.paroi-libre` et non
+  `campement.chaudron`. L'enfant recevait une paroi géométrique sans rapport avec
   l'objet touché.
 - À 1 280 × 720, la toile libre pouvait tomber à environ 1 235 × 124 px. Son dessin utile ne
   mesurait alors qu'environ 198 × 124 px et son trait 4 unités environ 0,83 px. La correction
@@ -24,7 +24,7 @@ Les 76 nœuds du parcours référencent 55 SVG uniques. Cinquante-trois sont pro
 blockouts géométriques. Le remplacement doit se faire par vagues, en commençant par ce que
 l'enfant voit le plus tôt et par les six coloriages réellement atteignables :
 
-1. coloriage libre du chaudron, aujourd'hui `galeries/paroi-libre.svg` ;
+1. coloriage libre du chaudron, corrigé vers `campement.chaudron` le 2 septembre 2026 ;
 2. école de la Clairière, employée par `clairiere-01` et `clairiere-10` ;
 3. tapis de la Forêt Muette ;
 4. brume du Marais Jumeau ;

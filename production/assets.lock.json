@@ -2,6 +2,27 @@
   "$commentaire": "Premières entrées du verrou d’assets. Les champs indisponibles du générateur intégré sont explicitement nuls plutôt qu’inventés.",
   "assets": [
     {
+      "id": "ouverture.pierre.v1",
+      "fichier": "contenu/assets/ouverture/pierre.png",
+      "empreinte": "sha256:577BF1088DBCDF534785946E736C944FF30F579B02BCB1BC769E8937B614B69F",
+      "generation": {
+        "outil": "générateur d’images intégré à Codex",
+        "workflow": null,
+        "checkpoint": null,
+        "graine": null,
+        "resolution": [1536, 1024],
+        "prompt": "Illustration panoramique 3:2 pour le premier tableau d’ouverture d’un jeu éducatif destiné à un enfant de 7 ans. Reprendre fidèlement le style graphique du campement de référence : livre jeunesse éditorial, dessin organique précis, textures mates discrètes, lumière naturelle fraîche, profondeur lisible en trois plans, contours bleu nuit doux, couleurs franches mais non criardes, aucune dominante jaune, aucune peinture à l’huile, aucun aspect 3D ou plastique, aucun patch de couleur. Au centre, une grande Pierre des Mots ancienne et rassurante se fissure doucement en plusieurs éclats lumineux, comme une invitation à les rassembler, pas comme une catastrophe. Autour, une clairière et des collines perdent progressivement leurs couleurs vers les bords et deviennent gris bleuté. Quelques petits éclats colorés suivent une courbe vers six régions lointaines. Atmosphère merveilleuse, chaleureuse, claire, adaptée au CE1, composition immédiatement compréhensible. Aucun personnage, aucun texte, aucune lettre, aucun symbole écrit, aucun cadre, aucun filigrane. Laisser une zone de respiration en bas pour que l’interface ajoute sa phrase séparément. Format exact 3:2 paysage."
+      },
+      "qc": {
+        "technique": "ok — PNG 1536 × 1024, ratio 3:2",
+        "semantique": "validé — la carte du monde correspond mieux à l’histoire",
+        "integration": "prioritaire sur le SVG avec repli autonome",
+        "tentatives": 1
+      },
+      "valide_par": "parent",
+      "valide_le": "2026-09-02"
+    },
+    {
       "id": "campement.decor.v6",
       "fichier": "contenu/assets/campement/campement-v6.png",
       "empreinte": "sha256:0576BD91208F2080244116D4FCD44A20CAB0713597C880DEA54672946292CCBB",

@@ -44,5 +44,5 @@ capture candidate. Les références existantes ne sont pas mises à jour par cet
 L’audit des 55 décors servis mesure 55 dessins polygonaux sans courbe organique. L’ordre de reprise
 retenu est : école de la Clairière, tapis de la Forêt Muette, brume du Marais Jumeau, forge du
 Volcan, fresque de la Cité des Histoires. Le chaudron reste un pilote séparé : le bouton du
-campement ouvre actuellement une paroi des Galeries, incohérence de contenu à corriger avant toute
+campement ouvrait une paroi des Galeries ; cette incohérence a été corrigée avant toute
 promotion d’un nouveau coloriage.

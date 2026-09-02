@@ -19,7 +19,7 @@
  * fichier livré.
  * ═══════════════════════════════════════════════════════════════════════════════════════════
  */
-import { act, cleanup, fireEvent, render } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -112,6 +112,49 @@ describe('D35 — la séquence est passable au tap dès la première seconde', (
 });
 
 describe('la séquence se déroule, et se termine sur un geste de l’enfant', () => {
+  it('essaie d’abord chacun des cinq tableaux raster 3:2 correspondant au récit', () => {
+    monter({ sequence: SEQUENCE });
+
+    for (const [rang, tableau] of SEQUENCE.tableaux.entries()) {
+      const image = document.querySelector<HTMLImageElement>(
+        `[data-decor-raster="${tableau.code}"]`
+      );
+      expect(image, `${tableau.code} doit être prêt à recevoir sa belle illustration raster`)
+        .not.toBeNull();
+      expect(image?.getAttribute('src')).toBe(
+        `/api/contenu/assets/assets/ouverture/${tableau.code}.png`
+      );
+      expect(image?.getAttribute('alt')).toBe(`Image ${String(rang + 1)} sur 5`);
+      expect(image?.getAttribute('data-format-decor')).toBe('raster');
+      if (rang < SEQUENCE.tableaux.length - 1) {
+        fireEvent.click(document.querySelector('[data-suite="ouverture"]')!);
+      }
+    }
+  });
+
+  it('retombe sur le SVG déclaré si le raster validé n’est pas encore livré', async () => {
+    const fetchSimule = vi.mocked(fetch);
+    fetchSimule.mockResolvedValueOnce(
+      new Response('<svg viewBox="0 0 1200 800"><path data-repli="oui" /></svg>', {
+        status: 200,
+        headers: { 'Content-Type': 'image/svg+xml' }
+      })
+    );
+    monter({ sequence: SEQUENCE });
+
+    const image = document.querySelector<HTMLImageElement>('[data-decor-raster="pierre"]');
+    expect(image).not.toBeNull();
+    fireEvent.error(image!);
+
+    await waitFor(() => {
+      expect(document.querySelector('[data-decor-svg="pierre"] [data-repli="oui"]')).not.toBeNull();
+    });
+    expect(fetchSimule).toHaveBeenCalledWith(
+      '/api/contenu/assets/habillages/ouverture/pierre.svg',
+      { headers: { Accept: 'image/svg+xml' } }
+    );
+  });
+
   it('avance tableau par tableau, dans l’ordre du récit', () => {
     monter({ sequence: SEQUENCE });
     const ecran = (): Element => document.querySelector('[data-ecran="ouverture"]')!;

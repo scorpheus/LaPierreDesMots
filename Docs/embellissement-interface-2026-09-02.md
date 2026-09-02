@@ -36,8 +36,23 @@ Après validation visuelle des deux brouillons étalons :
 4. remplacer l’école, puis tapis, brume, forge et fresque ;
 5. finir les cartes de profils avec les personnages validés.
 
-Le chaudron nécessite un arbitrage sémantique avant sa promotion : le bouton du campement ouvre
-actuellement `galeries-12`, donc une paroi des Galeries, et non le coloriage du chaudron.
+Le chaudron conserve le nœud technique `galeries-12`, afin de ne pas fabriquer une progression
+parallèle, mais ce nœud sert désormais l'habillage `campement.chaudron`. Le contrat de coloriage
+raster indexé est implanté ; il conserve le SVG comme repli jusqu'à validation de ses trois PNG.
+
+## Support des tableaux d’ouverture raster
+
+Le composant de tableau cherche désormais en priorité les cinq illustrations raster explicites
+`contenu/assets/ouverture/{pierre,grisaille,noms,habitants,appel}.png`. Tant qu’une illustration
+n’est pas publiée, son erreur de chargement déclenche le SVG historique déclaré dans
+`contenu/monde/ouverture.json` : le récit reste donc complet pendant la production graphique.
+
+Le cadre est borné en 3:2 pour la tablette paysage, avec un recadrage central sans déformation et
+une hauteur qui laisse visibles la phrase et les commandes. Le texte reste sur son parchemin
+séparé, sans animation. Les tests montés vérifient les cinq chemins raster et le repli réel vers le
+SVG. Le dépôt autonome embarque maintenant les PNG de `contenu/assets/` ; un test s’appuie sur le
+campement V6 déjà validé pour prouver ce comportement sans publier prématurément un faux tableau
+d’ouverture. Les futurs tableaux fonctionneront donc à la fois sur le serveur LAN et dans l’APK.
 
 ## Fiabilisation du contrôle tactile
 

@@ -59,6 +59,7 @@ import { hexDeCouleur } from '@pierre/partage';
 
 import { chargerSceneHabillage } from '../../habillages/chargeur.js';
 import { corpsDuSvg } from '../../habillages/SceneDecor.js';
+import { SceneRasterIndexee } from './SceneRasterIndexee.js';
 
 /** Région non encore peinte. Même jeton que `colorie/SceneSvg.tsx`. */
 const REMPLISSAGE_VIDE = 'var(--region-vide, #D9DEE7)';
@@ -117,7 +118,7 @@ function toucheDeValidation(touche: string): boolean {
   return touche === 'Enter' || touche === ' ';
 }
 
-export function SceneLibre({
+function SceneLibreSvg({
   habillage,
   regionsOffertes,
   remplissages,
@@ -313,4 +314,12 @@ export function SceneLibre({
       </g>
     </svg>
   );
+}
+
+/** Choisit le moteur de rendu déclaré, sans connaître le moindre habillage particulier. */
+export function SceneLibre(proprietes: ProprietesSceneLibre): ReactElement {
+  if (proprietes.habillage.scene.rasterIndexe !== undefined) {
+    return <SceneRasterIndexee {...proprietes} repli={<SceneLibreSvg {...proprietes} />} />;
+  }
+  return <SceneLibreSvg {...proprietes} />;
 }

@@ -152,6 +152,11 @@ export interface RegionColoriable {
   readonly centroide: readonly [number, number];
   /** Aire en unités `viewBox`, contrôlée contre R16. */
   readonly surface: number;
+  /**
+   * Couleur RGB exacte portée par cette région dans le masque d'un décor raster indexé.
+   * Absente sur les SVG historiques. Le canal alpha nul reste réservé au fond non coloriable.
+   */
+  readonly couleurMasque?: string;
 }
 
 export interface CalqueHabillage {
@@ -165,6 +170,17 @@ export interface SceneHabillage {
   readonly fichier: CheminAsset;
   readonly viewBox: string;
   readonly calques: readonly CalqueHabillage[];
+  /**
+   * Migration raster sans casser les habillages SVG : `fichier` demeure leur repli autonome,
+   * tandis que ces trois PNG alignés portent le décor abouti, les traits et l'index des régions.
+   */
+  readonly rasterIndexe?: {
+    readonly fond: CheminAsset;
+    readonly trait: CheminAsset;
+    readonly masque: CheminAsset;
+    readonly largeur: number;
+    readonly hauteur: number;
+  };
 }
 
 export interface VariantePalette {

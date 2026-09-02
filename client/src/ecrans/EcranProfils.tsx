@@ -23,7 +23,7 @@
 // rien pour l'enfant — le code protège le dashboard, pas le jeu (R14).
 // ─────────────────────────────────────────────────────────────────────────────────────────
 import { useCallback, useState } from 'react';
-import type { FormEvent, ReactElement } from 'react';
+import type { CSSProperties, FormEvent, ReactElement } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { CreationProfil, Profil } from '@pierre/partage';
 import { creerProfil, listerProfils } from '../api/client.js';
@@ -57,6 +57,11 @@ function initiale(prenom: string): string {
   return prenom.trim().slice(0, 1).toLocaleUpperCase('fr-FR') || '?';
 }
 
+/** Une donnée d'avatar ancienne ou incomplète ne doit jamais casser le portrait d'entrée. */
+function couleurAvatar(valeur: string | undefined, repli: string): string {
+  return valeur !== undefined && /^#[0-9a-f]{6}$/iu.test(valeur) ? valeur : repli;
+}
+
 interface ProprietesCarteProfil {
   readonly profil: Profil;
   readonly surChoix: (profil: Profil) => void;
@@ -65,9 +70,15 @@ interface ProprietesCarteProfil {
 
 function CarteProfil({ profil, surChoix, surReglages }: ProprietesCarteProfil): ReactElement {
   const prenom = String(profil.prenom);
+  const variablesPortrait = {
+    '--profil-accent': teinteDuPrenom(prenom),
+    '--profil-peau': couleurAvatar(profil.avatar?.peau, '#efbd91'),
+    '--profil-cheveux': couleurAvatar(profil.avatar?.cheveux, '#7a5230'),
+    '--profil-yeux': couleurAvatar(profil.avatar?.yeux, '#315f8a')
+  } as CSSProperties;
 
   return (
-    <div className="ensemble-profil">
+    <div className="ensemble-profil" style={variablesPortrait}>
     <button
       type="button"
       className="cible carte-profil"
@@ -85,34 +96,27 @@ function CarteProfil({ profil, surChoix, surReglages }: ProprietesCarteProfil): 
       data-profil={String(profil.id)}
       onClick={() => surChoix(profil)}
       aria-label={`Jouer avec le profil de ${prenom}`}
-      style={{
-        flexDirection: 'column',
-        inlineSize: '13rem',
-        blockSize: '15rem',
-        gap: '1rem',
-        backgroundColor: 'var(--parchemin)'
-      }}
     >
-      <span
-        aria-hidden="true"
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          inlineSize: '7rem',
-          blockSize: '7rem',
-          borderRadius: '50%',
-          border: 'var(--epaisseur-trait) solid var(--trait)',
-          backgroundColor: teinteDuPrenom(prenom),
-          color: 'var(--parchemin)',
-          fontFamily: 'var(--font-titre)',
-          fontSize: '3rem'
-        }}
-      >
-        {initiale(prenom)}
+      <span className="carte-profil__paysage" aria-hidden="true">
+        <span className="carte-profil__soleil" />
+        <span className="carte-profil__colline carte-profil__colline--loin" />
+        <span className="carte-profil__colline carte-profil__colline--pres" />
+        <span className="portrait-profil" data-portrait-profil={String(profil.id)}>
+          <span className="portrait-profil__cou" />
+          <span className="portrait-profil__oreille portrait-profil__oreille--gauche" />
+          <span className="portrait-profil__oreille portrait-profil__oreille--droite" />
+          <span className="portrait-profil__visage">
+            <span className="portrait-profil__cheveux" />
+            <span className="portrait-profil__oeil portrait-profil__oeil--gauche" />
+            <span className="portrait-profil__oeil portrait-profil__oeil--droit" />
+            <span className="portrait-profil__sourire" />
+          </span>
+          <span className="portrait-profil__initiale">{initiale(prenom)}</span>
+        </span>
       </span>
-      <span className="titre" style={{ fontSize: '1.5rem' }}>
-        {prenom}
+      <span className="carte-profil__texte">
+        <span className="titre carte-profil__prenom">{prenom}</span>
+        <span className="carte-profil__appel">Continuer l’aventure</span>
       </span>
     </button>
 
@@ -127,21 +131,23 @@ function CarteProfil({ profil, surChoix, surReglages }: ProprietesCarteProfil): 
         garde donc sa destination, la pastille en ajoute une plus courte, et D46 est tenue :
         UN tap depuis l'ouverture suffit à être dans un exercice. Arbitrage consigné dans
         `Docs/questions-en-attente.md`. */}
-    <PastilleSortie profil={profil} style={{ inlineSize: '13rem' }} />
+    <PastilleSortie profil={profil} style={{ inlineSize: '100%' }}>
+      <span className="profil-action__pictogramme" aria-hidden="true">↗</span>
+      <span className="titre">Partir en sortie</span>
+    </PastilleSortie>
 
     {/* Les réglages de lecture sont PAR PROFIL (D19) : l'accès part donc de la carte de
         l'enfant, jamais d'un menu général. Un seul tap, aucun mot de passe — la zone parent
         et son code à 4 chiffres sont un autre écran (v2 § 11). */}
     <button
       type="button"
-      className="cible"
       data-reglages-lecture={String(profil.id)}
       onClick={() => surReglages(profil)}
       aria-label={`Régler la lecture de ${prenom}`}
-      style={{ inlineSize: '13rem' }}
+      className="cible profil-action profil-action--lecture"
     >
-      <span aria-hidden="true">👓</span>
-      <span>Comment je lis</span>
+      <span className="profil-action__pictogramme" aria-hidden="true">Aa</span>
+      <span>Ma lecture</span>
     </button>
     </div>
   );
@@ -239,9 +245,11 @@ export function EcranProfils({ surAccesParent }: ProprietesEcranProfils = {}): R
       className="ecran-profils"
       style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '2rem' }}
     >
-      <h1 className="titre" style={{ fontSize: '2.5rem', margin: 0 }}>
-        Qui joue&nbsp;?
-      </h1>
+      <header className="entete-profils">
+        <span className="entete-profils__surtitre">La Pierre des Mots</span>
+        <h1 className="titre">Qui joue&nbsp;?</h1>
+        <p data-invitation-profils>Retrouve ton aventure et rallume le monde.</p>
+      </header>
 
       {profils.isPending ? <p>On cherche les joueurs…</p> : null}
 
@@ -272,26 +280,20 @@ export function EcranProfils({ surAccesParent }: ProprietesEcranProfils = {}): R
           />
         ))}
 
-        <button
-          type="button"
-          className="cible carte-profil"
-          onClick={() => fixerCreationOuverte(true)}
-          aria-label="Créer un nouveau joueur"
-          style={{
-            flexDirection: 'column',
-            inlineSize: '13rem',
-            blockSize: '15rem',
-            gap: '1rem',
-            borderStyle: 'dashed'
-          }}
-        >
-          <span aria-hidden="true" style={{ fontSize: '4rem', lineHeight: 1 }}>
-            +
-          </span>
-          <span className="titre" style={{ fontSize: '1.25rem' }}>
-            Nouveau joueur
-          </span>
-        </button>
+        <div className="ensemble-profil ensemble-profil--nouveau">
+          <button
+            type="button"
+            className="cible carte-profil carte-profil--nouveau"
+            onClick={() => fixerCreationOuverte(true)}
+            aria-label="Créer un nouveau joueur"
+          >
+            <span className="nouveau-profil__ciel" aria-hidden="true">
+              <span className="nouveau-profil__plus">+</span>
+            </span>
+            <span className="titre carte-profil__prenom">Nouveau joueur</span>
+            <span className="carte-profil__appel">Commencer une aventure</span>
+          </button>
+        </div>
       </div>
 
       {creationOuverte ? (

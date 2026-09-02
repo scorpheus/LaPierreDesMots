@@ -34,6 +34,18 @@ import { choisirLeProfil, preparer } from "./qa-outils.js";
 const CAMPEMENT = JSON.parse(
   readFileSync(new URL("../../contenu/monde/campement.json", import.meta.url), "utf8"),
 ) as { readonly coloriageLibre?: string };
+const NOEUD_CHAUDRON = JSON.parse(
+  readFileSync(
+    new URL(`../../contenu/noeuds/${String(CAMPEMENT.coloriageLibre)}.json`, import.meta.url),
+    "utf8",
+  ),
+) as { readonly exercice: string };
+const EXERCICE_CHAUDRON = JSON.parse(
+  readFileSync(
+    new URL(`../../contenu/exercices/galeries/paroi-libre-01.json`, import.meta.url),
+    "utf8",
+  ),
+) as { readonly id: string; readonly jeu: { readonly habillage: string } };
 
 test.describe("R25 — le chaudron ouvre le coloriage libre", () => {
   test("LE CONTENU DÉCLARE UNE DESTINATION — sans quoi tout le reste est sans objet", () => {
@@ -44,6 +56,11 @@ test.describe("R25 — le chaudron ouvre le coloriage libre", () => {
       "`contenu/monde/campement.json` ne déclare plus `coloriageLibre` : le chaudron n’a " +
         "plus de destination et retombera sur « Le chaudron mijote encore »",
     ).toBeTruthy();
+    expect(NOEUD_CHAUDRON.exercice).toBe(EXERCICE_CHAUDRON.id);
+    expect(
+      EXERCICE_CHAUDRON.jeu.habillage,
+      "le chaudron du campement ne doit plus afficher la paroi géométrique des Galeries",
+    ).toBe("campement.chaudron");
   });
 
   test("LE DÉFAUT CORRIGÉ — taper le chaudron mène à un nœud, par le chemin de l’enfant", async ({
