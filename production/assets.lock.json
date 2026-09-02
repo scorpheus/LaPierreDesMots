@@ -23,6 +23,114 @@
       "valide_le": "2026-09-02"
     },
     {
+      "id": "ouverture.grisaille.v1",
+      "fichier": "contenu/assets/ouverture/grisaille.png",
+      "empreinte": "sha256:B921764C22DF82D131B64E084F110154127EF494B708B56995A9E86F19B91983",
+      "$empreinte": "Empreinte des pixels RGB décodés, conformément au skill generer-asset.",
+      "generation": {
+        "outil": "générateur d’images intégré à Codex",
+        "workflow": null,
+        "checkpoint": null,
+        "modele": null,
+        "graine": null,
+        "etapes": null,
+        "cfg": null,
+        "sampler": null,
+        "resolution": [1536, 1024],
+        "prompt": "Illustration jeunesse éditoriale française, dessin organique précis, aplats mats légèrement texturés, contours bleu nuit doux, lumière naturelle fraîche, paysage 3:2, aucun texte ni lettre, aucun cadre ni filigrane ; éviter filtre jaune, peinture à l’huile, aquarelle floue, 3D, patchs de couleur, halo et vignettage. Références : le campement V6 et la Pierre publiée. Paysage dont les couleurs se retirent doucement depuis les bords ; fragments de la Pierre encore colorés au centre, image pleine d’espoir.",
+        "source_prompt": "Socle et variante consignés après génération dans Docs/production-visuelle-vague-2026-09-02.md ; le verbatim de l’appel n’est pas embarqué dans le PNG."
+      },
+      "qc": {
+        "technique": "ok — PNG RGB 1536 × 1024, ratio 3:2",
+        "semantique": "validé — la perte de couleur reste douce et porte l’espoir de la rendre",
+        "integration": "prioritaire sur le SVG avec repli autonome",
+        "tentatives": 1
+      },
+      "valide_par": "parent",
+      "valide_le": "2026-09-02"
+    },
+    {
+      "id": "ouverture.noms.v1",
+      "fichier": "contenu/assets/ouverture/noms.png",
+      "empreinte": "sha256:60EB54CAB31AF2BBB561838A004CD0B750F947D2CED602BA3E3A2F7186A3CB2F",
+      "$empreinte": "Empreinte des pixels RGB décodés, conformément au skill generer-asset.",
+      "generation": {
+        "outil": "générateur d’images intégré à Codex",
+        "workflow": null,
+        "checkpoint": null,
+        "modele": null,
+        "graine": null,
+        "etapes": null,
+        "cfg": null,
+        "sampler": null,
+        "resolution": [1536, 1024],
+        "prompt": "Illustration jeunesse éditoriale française, dessin organique précis, aplats mats légèrement texturés, contours bleu nuit doux, lumière naturelle fraîche, paysage 3:2, aucun texte ni lettre, aucun cadre ni filigrane ; éviter filtre jaune, peinture à l’huile, aquarelle floue, 3D, patchs de couleur, halo et vignettage. Références : le campement V6 et la Pierre publiée. Enfant non genré vu de dos lisant un livre ; formes lumineuses abstraites, jamais des lettres, qui recolorent un pré, un arbre, un oiseau et une maison.",
+        "source_prompt": "Socle et variante consignés après génération dans Docs/production-visuelle-vague-2026-09-02.md ; le verbatim de l’appel n’est pas embarqué dans le PNG."
+      },
+      "qc": {
+        "technique": "ok — PNG RGB 1536 × 1024, ratio 3:2",
+        "semantique": "validé — la lecture rend directement les couleurs au monde",
+        "integration": "prioritaire sur le SVG avec repli autonome",
+        "tentatives": 1
+      },
+      "valide_par": "parent",
+      "valide_le": "2026-09-02"
+    },
+    {
+      "id": "ouverture.habitants.v1",
+      "fichier": "contenu/assets/ouverture/habitants.png",
+      "empreinte": "sha256:17D7569071154C874A6ABB4933D81BD4B1C83245245C325468244E6B4AE76B95",
+      "$empreinte": "Empreinte des pixels RGB décodés, conformément au skill generer-asset.",
+      "generation": {
+        "outil": "générateur d’images intégré à Codex",
+        "workflow": null,
+        "checkpoint": null,
+        "modele": null,
+        "graine": null,
+        "etapes": null,
+        "cfg": null,
+        "sampler": null,
+        "resolution": [1535, 1024],
+        "prompt": "Illustration jeunesse éditoriale française, dessin organique précis, aplats mats légèrement texturés, contours bleu nuit doux, lumière naturelle fraîche, paysage 3:2, aucun texte ni lettre, aucun cadre ni filigrane ; éviter filtre jaune, peinture à l’huile, aquarelle floue, 3D, patchs de couleur, halo et vignettage. Références : le campement V6 et la Pierre publiée. Exactement Gobi, Filou, Bulle, Roc et Plume au campement, silhouettes et attributs distincts, accueillant l’enfant.",
+        "source_prompt": "Socle et variante consignés après génération dans Docs/production-visuelle-vague-2026-09-02.md ; le verbatim de l’appel n’est pas embarqué dans le PNG."
+      },
+      "qc": {
+        "technique": "ok — PNG RGB 1535 × 1024, écart au ratio 3:2 de 0,07 %, absorbé sans déformation par le cadre",
+        "semantique": "validé — les cinq habitants accueillent l’enfant au campement",
+        "integration": "prioritaire sur le SVG avec repli autonome",
+        "tentatives": 1
+      },
+      "valide_par": "parent",
+      "valide_le": "2026-09-02"
+    },
+    {
+      "id": "ouverture.appel.v1",
+      "fichier": "contenu/assets/ouverture/appel.png",
+      "empreinte": "sha256:CB443EC65E38E5FC739F4A90596169498B1C807836F1B7CFE69638E84C742CE6",
+      "$empreinte": "Empreinte des pixels RGB décodés, conformément au skill generer-asset.",
+      "generation": {
+        "outil": "générateur d’images intégré à Codex",
+        "workflow": null,
+        "checkpoint": null,
+        "modele": null,
+        "graine": null,
+        "etapes": null,
+        "cfg": null,
+        "sampler": null,
+        "resolution": [1536, 1024],
+        "prompt": "Illustration jeunesse éditoriale française, dessin organique précis, aplats mats légèrement texturés, contours bleu nuit doux, lumière naturelle fraîche, paysage 3:2, aucun texte ni lettre, aucun cadre ni filigrane ; éviter filtre jaune, peinture à l’huile, aquarelle floue, 3D, patchs de couleur, halo et vignettage. Références : le campement V6 et la Pierre publiée. Gobi tend la main à l’enfant vu de dos ; un sentier mène à la Clairière qu’un éclat rallume en couleurs.",
+        "source_prompt": "Socle et variante consignés après génération dans Docs/production-visuelle-vague-2026-09-02.md ; le verbatim de l’appel n’est pas embarqué dans le PNG."
+      },
+      "qc": {
+        "technique": "ok — PNG RGB 1536 × 1024, ratio 3:2",
+        "semantique": "validé — le geste de Gobi et le chemin rendent l’appel immédiatement lisible",
+        "integration": "prioritaire sur le SVG avec repli autonome",
+        "tentatives": 1
+      },
+      "valide_par": "parent",
+      "valide_le": "2026-09-02"
+    },
+    {
       "id": "campement.decor.v6",
       "fichier": "contenu/assets/campement/campement-v6.png",
       "empreinte": "sha256:0576BD91208F2080244116D4FCD44A20CAB0713597C880DEA54672946292CCBB",
@@ -81,6 +189,256 @@
         "semantique": "validé",
         "integration": "opaque, sans mode de fusion, vol local sur la végétation V6",
         "tentatives": 1
+      },
+      "valide_par": "parent",
+      "valide_le": "2026-09-02"
+    },
+    {
+      "id": "compagnon.filou.v3",
+      "fichier": "contenu/assets/compagnons/filou.png",
+      "empreinte": "sha256:D3024E046D3CCEF452A80F45C0DB7762A01E7D41C4BB2C408AD8F6193FC7F731",
+      "generation": {
+        "outil": "générateur d’images intégré à Codex",
+        "workflow": null,
+        "checkpoint": null,
+        "graine": null,
+        "resolution": [1086, 1448],
+        "prompt": null,
+        "source_prompt": "Le verbatim original n’est pas embarqué ; le brief fidèle est consigné dans Docs/production-visuelle-vague-2026-09-02.md.",
+        "brief_documente": "Conserver presque à l’identique l’identité, la pose, les yeux simples, la loupe et le foulard turquoise de la V2 ; rendre seulement le pelage environ 15 % plus soutenu, plus orangé sable et un peu plus contrasté ; mêmes aplats mats et contours organiques ; personnage entier centré sur fond blanc pur, sans halo, ombre, décor, texte, peinture, 3D ni esthétique Disney/Pixar.",
+        "source": "contenu/brouillons/personnages/filou/filou-v3-entre-deux.png",
+        "transformation": "scripts/images/detourer-fond-blanc.mjs"
+      },
+      "qc": {
+        "technique": "ok — PNG RGBA 1086 × 1448, fond extérieur transparent",
+        "semantique": "validé — compromis entre les deux Filou, V2 jugée un peu pâle",
+        "integration": "ok — portrait déclaré par le référentiel, grisaille par filtre CSS",
+        "tentatives": 3
+      },
+      "valide_par": "parent",
+      "valide_le": "2026-09-02"
+    },
+    {
+      "id": "compagnon.bulle.v2",
+      "fichier": "contenu/assets/compagnons/bulle.png",
+      "empreinte": "sha256:4C3F051496FE1C9C40660FF36D9C33B1B61C7305725C72093A37276BE0F538EA",
+      "generation": {
+        "outil": "générateur d’images intégré à Codex",
+        "workflow": null,
+        "checkpoint": null,
+        "graine": null,
+        "resolution": [1086, 1448],
+        "prompt": null,
+        "source_prompt": "Le verbatim original n’est pas embarqué ; le brief fidèle est consigné dans Docs/production-visuelle-vague-2026-09-02.md.",
+        "brief_documente": "Bulle, ondine bleu lagon avec son livre, personnage entier sur fond blanc ; petits yeux noirs mats, bouche simple, aucune proportion chibi et trois valeurs maximum par couleur.",
+        "source": "contenu/brouillons/personnages/bulle/bulle-v2-editorial.png",
+        "transformation": "scripts/images/detourer-fond-blanc.mjs"
+      },
+      "qc": {
+        "technique": "ok — PNG RGBA 1086 × 1448, fond extérieur transparent",
+        "semantique": "validé",
+        "integration": "ok — portrait déclaré par le référentiel, grisaille par filtre CSS",
+        "tentatives": 2
+      },
+      "valide_par": "parent",
+      "valide_le": "2026-09-02"
+    },
+    {
+      "id": "compagnon.roc.v2",
+      "fichier": "contenu/assets/compagnons/roc.png",
+      "empreinte": "sha256:40D7BD92460C9F7F26354DD0755F7FA1B5F5BF372B1FB30E009044C364FDA601",
+      "generation": {
+        "outil": "générateur d’images intégré à Codex",
+        "workflow": null,
+        "checkpoint": null,
+        "graine": null,
+        "resolution": [1086, 1448],
+        "prompt": null,
+        "source_prompt": "Le verbatim original n’est pas embarqué ; le brief fidèle est consigné dans Docs/production-visuelle-vague-2026-09-02.md.",
+        "brief_documente": "Roc, golem gris chaud moussu avec burin et tablier bleu pétrole, personnage entier sur fond blanc ; petits yeux noirs mats, bouche simple, aucune proportion chibi et trois valeurs maximum par couleur.",
+        "source": "contenu/brouillons/personnages/roc/roc-v2-editorial.png",
+        "transformation": "scripts/images/detourer-fond-blanc.mjs"
+      },
+      "qc": {
+        "technique": "ok — PNG RGBA 1086 × 1448, fond extérieur transparent",
+        "semantique": "validé",
+        "integration": "ok — portrait déclaré par le référentiel, grisaille par filtre CSS",
+        "tentatives": 2
+      },
+      "valide_par": "parent",
+      "valide_le": "2026-09-02"
+    },
+    {
+      "id": "compagnon.plume.v2",
+      "fichier": "contenu/assets/compagnons/plume.png",
+      "empreinte": "sha256:86C63A2BE826A961D0B8B09A75723C2B45B09997E2FEED34BE09F22BCA289A58",
+      "generation": {
+        "outil": "générateur d’images intégré à Codex",
+        "workflow": null,
+        "checkpoint": null,
+        "graine": null,
+        "resolution": [1086, 1448],
+        "prompt": null,
+        "source_prompt": "Le verbatim original n’est pas embarqué ; le brief fidèle est consigné dans Docs/production-visuelle-vague-2026-09-02.md.",
+        "brief_documente": "Plume, oiseau bleu à poitrine crème avec sacoche, personnage entier sur fond blanc ; petits yeux noirs mats, bouche simple, aucune proportion chibi et trois valeurs maximum par couleur.",
+        "source": "contenu/brouillons/personnages/plume/plume-v2-editorial.png",
+        "transformation": "scripts/images/detourer-fond-blanc.mjs"
+      },
+      "qc": {
+        "technique": "ok — PNG RGBA 1086 × 1448, fond extérieur transparent",
+        "semantique": "validé",
+        "integration": "ok — portrait déclaré par le référentiel, grisaille par filtre CSS",
+        "tentatives": 2
+      },
+      "valide_par": "parent",
+      "valide_le": "2026-09-02"
+    },
+    {
+      "id": "decor.ecole.v3",
+      "fichier": "contenu/assets/decors/ecole.png",
+      "empreinte": "sha256:E53A98E3CA7F1335E5D40355BA0DDA10C553AAFBE9FCC7E50F02D4912F0400C7",
+      "generation": {
+        "outil": "générateur d’images intégré à Codex",
+        "workflow": null,
+        "checkpoint": null,
+        "graine": null,
+        "resolution": [1536, 1024],
+        "prompt": null,
+        "source_prompt": "Le verbatim original n’est pas embarqué ; le socle et la variante fidèles sont consignés dans Docs/production-visuelle-vague-2026-09-02.md.",
+        "source": "contenu/brouillons/decors/ecole-v3.png"
+      },
+      "qc": {
+        "technique": "ok — PNG RGB 1536 × 1024, ratio 3:2",
+        "semantique": "validé comme référence visuelle ; activation coloriage soumise à la porte mot/objet",
+        "integration": "publié comme canonique visuel, embarqué dans l’APK",
+        "tentatives": 3
+      },
+      "valide_par": "parent",
+      "valide_le": "2026-09-02"
+    },
+    {
+      "id": "decor.tapis.v2",
+      "fichier": "contenu/assets/decors/tapis.png",
+      "empreinte": "sha256:30DF99C0192FB2384489669E8FA57303FF4BA007716D57E3C22FAA1471A2CD2A",
+      "generation": {
+        "outil": "générateur d’images intégré à Codex",
+        "workflow": null,
+        "checkpoint": null,
+        "graine": null,
+        "resolution": [1536, 1024],
+        "prompt": null,
+        "source_prompt": "Le verbatim original n’est pas embarqué ; le socle et la variante fidèles sont consignés dans Docs/production-visuelle-vague-2026-09-02.md.",
+        "source": "contenu/brouillons/decors/tapis-v2.png"
+      },
+      "qc": {
+        "technique": "ok — PNG RGB 1536 × 1024, ratio 3:2",
+        "semantique": "validé comme référence visuelle ; activation coloriage soumise à la porte mot/objet",
+        "integration": "publié comme canonique visuel, embarqué dans l’APK",
+        "tentatives": 2
+      },
+      "valide_par": "parent",
+      "valide_le": "2026-09-02"
+    },
+    {
+      "id": "decor.brume.v2",
+      "fichier": "contenu/assets/decors/brume.png",
+      "empreinte": "sha256:5E8ACD2D99392B1D0A73FD0B3EE6C8D031BD0D7D7977BE2602D772275F72AD4F",
+      "generation": {
+        "outil": "générateur d’images intégré à Codex",
+        "workflow": null,
+        "checkpoint": null,
+        "graine": null,
+        "resolution": [1536, 1024],
+        "prompt": null,
+        "source_prompt": "Le verbatim original n’est pas embarqué ; le socle et la variante fidèles sont consignés dans Docs/production-visuelle-vague-2026-09-02.md.",
+        "source": "contenu/brouillons/decors/brume-v2.png"
+      },
+      "qc": {
+        "technique": "ok — PNG RGB 1536 × 1024, ratio 3:2",
+        "semantique": "validé comme référence visuelle ; activation coloriage soumise à la porte mot/objet",
+        "integration": "publié comme canonique visuel, embarqué dans l’APK",
+        "tentatives": 2
+      },
+      "valide_par": "parent",
+      "valide_le": "2026-09-02"
+    },
+    {
+      "id": "decor.forge.v2",
+      "fichier": "contenu/assets/decors/forge.png",
+      "empreinte": "sha256:68AA67670A3DA5BAC280271CA3469A73B247E6963E6130009474D7EE3FF773CC",
+      "generation": {
+        "outil": "générateur d’images intégré à Codex",
+        "workflow": null,
+        "checkpoint": null,
+        "graine": null,
+        "resolution": [1536, 1024],
+        "prompt": null,
+        "source_prompt": "Le verbatim original n’est pas embarqué ; le socle et la variante fidèles sont consignés dans Docs/production-visuelle-vague-2026-09-02.md.",
+        "source": "contenu/brouillons/decors/forge-v2.png"
+      },
+      "qc": {
+        "technique": "ok — PNG RGB 1536 × 1024, ratio 3:2",
+        "semantique": "validé comme référence visuelle ; activation coloriage soumise à la porte mot/objet",
+        "integration": "publié comme canonique visuel, embarqué dans l’APK",
+        "tentatives": 2
+      },
+      "valide_par": "parent",
+      "valide_le": "2026-09-02"
+    },
+    {
+      "id": "coloriage.chaudron.v3",
+      "fichier": "contenu/habillages/campement/chaudron-fond.png",
+      "empreinte": "sha256:E8AF9B72DA724561915AE3E119131CD1C98B484D4FF0CF1BCC241B3E4ECE11C0",
+      "generation": {
+        "outil": "générateur d’images intégré à Codex",
+        "workflow": "scripts/coloriages/publier-chaudron.mjs",
+        "checkpoint": null,
+        "graine": null,
+        "resolution": [1536, 1024],
+        "prompt": null,
+        "source_prompt": "Le verbatim original n’est pas embarqué ; le brouillon exact validé est verrouillé par ses empreintes.",
+        "source": "contenu/brouillons/campement/coloriage-chaudron-v3-organique.png",
+        "empreinte_source_fichier": "sha256:7F05618925D644E7914D2E0C69BEB7CF642B3C8F4E9A7A4C695AE102ABA9F1F5",
+        "empreinte_source_pixels": "sha256:559EE9461276CE5548ECF6FE797C3DD63C57A51BA67B2ED8E1A8D81DAA7AF0E9"
+      },
+      "derivees": {
+        "trait": {
+          "fichier": "contenu/habillages/campement/chaudron-trait.png",
+          "empreinte": "sha256:D6934E496854EC519A756648F534131ED1B1B39564AE22BF4791BE57AADBE248"
+        },
+        "masque": {
+          "fichier": "contenu/habillages/campement/chaudron-masque.png",
+          "empreinte": "sha256:0B1453AEF494F2F54758DE8C141F2087B262730B0F2B84C0ABA43B64FE38A796"
+        }
+      },
+      "qc": {
+        "technique": "ok — trois PNG alignés 1536 × 1024 ; 21 codes RGB uniques ; 364416 pixels indexés ; reproduction octet pour octet",
+        "semantique": "validé — illustration organique du chaudron retenue pour le coloriage",
+        "integration": "actif dans l’habillage campement.chaudron avec repli SVG",
+        "tentatives": 3
+      },
+      "valide_par": "parent",
+      "valide_le": "2026-09-02"
+    },
+    {
+      "id": "decor.fresque-murale.v2",
+      "fichier": "contenu/assets/decors/fresque-murale.png",
+      "empreinte": "sha256:E91DD727161061CCD079F02228B788070E6D8D810B25BD42F9CBECA05C3A8C16",
+      "generation": {
+        "outil": "générateur d’images intégré à Codex",
+        "workflow": null,
+        "checkpoint": null,
+        "graine": null,
+        "resolution": [1536, 1024],
+        "prompt": null,
+        "source_prompt": "Le verbatim original n’est pas embarqué ; le socle et la variante fidèles sont consignés dans Docs/production-visuelle-vague-2026-09-02.md.",
+        "source": "contenu/brouillons/decors/fresque-murale-v2.png"
+      },
+      "qc": {
+        "technique": "ok — PNG RGB 1536 × 1024, ratio 3:2",
+        "semantique": "validé comme référence visuelle ; activation coloriage soumise à la porte mot/objet",
+        "integration": "publié comme canonique visuel, embarqué dans l’APK",
+        "tentatives": 2
       },
       "valide_par": "parent",
       "valide_le": "2026-09-02"

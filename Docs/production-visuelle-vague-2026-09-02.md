@@ -3,14 +3,20 @@
 ## État de publication
 
 Le générateur d'images intégré à Codex a produit cette vague à partir du campement V6. Le parent a
-explicitement validé la nouvelle carte du monde : `contenu/assets/ouverture/pierre.png` est donc la
-seule image publiée. Les autres rendus restent dans `contenu/brouillons/` jusqu'à leur validation :
+explicitement validé la nouvelle carte du monde, puis demandé de réaliser toute la suite proposée.
+Les cinq tableaux sont donc publiés dans `contenu/assets/ouverture/` : `pierre.png`,
+`grisaille.png`, `noms.png`, `habitants.png` et `appel.png`. Chaque image conserve un repli SVG ;
+les cinq PNG sont également embarqués dans l’APK autonome. Le verrou consigne l’empreinte des
+pixels des quatre nouvelles publications et laisse intacte l’entrée Pierre déjà validée.
 
-- ouverture : `grisaille-v1.png`, `noms-v1.png`, `habitants-v1.png`, `appel-v1.png` ;
-- personnages : `filou-v3-entre-deux.png`, `bulle-v2-editorial.png`, `roc-v2-editorial.png`,
-  `plume-v2-editorial.png` ;
-- décors : `ecole-v3.png`, `tapis-v2.png`, `brume-v2.png`, `forge-v2.png`,
-  `fresque-murale-v2.png`.
+Le parent a ensuite validé Filou V3 — le compromis plus soutenu entre les deux propositions — et
+les V2 de Bulle, Roc et Plume. Ils sont publiés dans `contenu/assets/compagnons/`.
+
+Le parent a enfin validé les cinq décors. Ils sont publiés dans `contenu/assets/decors/` sous les
+noms `ecole.png`, `tapis.png`, `brume.png`, `forge.png` et `fresque-murale.png`. Ils deviennent les
+références visuelles canoniques de leurs scènes. Leur activation dans les coloriages reste soumise
+à la porte mot/objet décrite dans `Docs/publication-decors-valides-2026-09-02.md` : une belle image
+ne doit jamais rendre une consigne pédagogiquement fausse.
 
 Les premiers essais de Filou sur fond sombre sont rejetés : le fond transparent demandé n'a pas
 été produit et le contraste poussait le dessin vers un cartoon numérique. La V3 repart donc de la
@@ -57,4 +63,19 @@ Les trois autres compagnons reprennent le même contrat de personnage entier sur
 ondine bleu lagon avec son livre ; Roc, golem gris chaud moussu avec burin et tablier bleu pétrole ;
 Plume, oiseau bleu à poitrine crème avec sacoche. Leur V2 impose de petits yeux noirs mats, une
 bouche simple, aucune proportion chibi et trois valeurs maximum par couleur. Les V1 aux grands yeux
-restent rejetées ; les V2 sont des candidats de validation, pas encore des canoniques publiées.
+restent rejetées ; les V2 ont été validées et publiées le 2 septembre 2026.
+
+## Publication technique des compagnons
+
+Les sources validées avaient un fond blanc opaque. Elles ont été détourées mécaniquement avec
+`scripts/images/detourer-fond-blanc.mjs` : seul le fond clair connecté aux bords devient transparent,
+avec une transition alpha sur l’anticrénelage. Les quatre sorties restent à leur définition native
+de 1086 × 1448. Le test `assets-compagnons-raster.test.ts` bloque le retour d’un fond opaque, une
+sortie vide ou une modification de dimensions.
+
+Le référentiel `contenu/monde/compagnons.json` porte désormais les PNG. `Compagnon.tsx` lit ce
+chemin au lieu de redessiner une silhouette géométrique. Le même portrait est utilisé dans la tuile
+et dans sa fiche ; avant la rencontre, `saturate(0)` conserve la Grisaille prévue par la v2.
+
+Les portraits ne sont pas ajoutés à l’écran des profils : cet endroit représente l’enfant, pas le
+compagnon qu’il rencontrera plus tard. Les mélanger rendrait l’identité du joueur ambiguë.

@@ -1,0 +1,278 @@
+{
+  "version": 1,
+  "source": "contenu/brouillons/campement/coloriage-chaudron-v3-organique.png",
+  "empreinteSourceFichier": "sha256:7F05618925D644E7914D2E0C69BEB7CF642B3C8F4E9A7A4C695AE102ABA9F1F5",
+  "methode": "flood-fill-4-voisins puis sélection sémantique parent validée",
+  "seuilEncre": 200,
+  "dimensions": {
+    "largeur": 1536,
+    "hauteur": 1024
+  },
+  "nombreRegions": 21,
+  "pixelsMasque": 364416,
+  "regions": [
+    {
+      "id": "rebord-du-chaudron",
+      "libelle": "le rebord du chaudron",
+      "centroide": [
+        460.187,
+        302.525
+      ],
+      "surface": 6198,
+      "couleurMasque": "#000001",
+      "sourceFloodFill": 8,
+      "pixels": 15867
+    },
+    {
+      "id": "mousse-de-couleurs",
+      "libelle": "la mousse de couleurs",
+      "centroide": [
+        460.141,
+        354.912
+      ],
+      "surface": 19930.5,
+      "couleurMasque": "#000002",
+      "sourceFloodFill": 23,
+      "pixels": 51022
+    },
+    {
+      "id": "ventre-du-chaudron",
+      "libelle": "le ventre du chaudron",
+      "centroide": [
+        471.891,
+        443.111
+      ],
+      "surface": 51731.3,
+      "couleurMasque": "#000003",
+      "sourceFloodFill": 31,
+      "pixels": 132432
+    },
+    {
+      "id": "godet-gauche",
+      "libelle": "le godet de gauche",
+      "centroide": [
+        373.87,
+        278.437
+      ],
+      "surface": 1519.1,
+      "couleurMasque": "#000004",
+      "sourceFloodFill": 15,
+      "pixels": 3889
+    },
+    {
+      "id": "godet-du-milieu",
+      "libelle": "le godet du milieu",
+      "centroide": [
+        474.879,
+        274.702
+      ],
+      "surface": 1385.9,
+      "couleurMasque": "#000005",
+      "sourceFloodFill": 13,
+      "pixels": 3548
+    },
+    {
+      "id": "godet-droit",
+      "libelle": "le godet de droite",
+      "centroide": [
+        559.141,
+        289.29
+      ],
+      "surface": 1410.5,
+      "couleurMasque": "#000006",
+      "sourceFloodFill": 18,
+      "pixels": 3611
+    },
+    {
+      "id": "godet-devant",
+      "libelle": "le godet de devant",
+      "centroide": [
+        454.288,
+        307.826
+      ],
+      "surface": 1282,
+      "couleurMasque": "#000007",
+      "sourceFloodFill": 22,
+      "pixels": 3282
+    },
+    {
+      "id": "grenouille",
+      "libelle": "la grenouille",
+      "centroide": [
+        160.665,
+        424.546
+      ],
+      "surface": 11708.2,
+      "couleurMasque": "#000008",
+      "sourceFloodFill": 29,
+      "pixels": 29973
+    },
+    {
+      "id": "feuille-gauche",
+      "libelle": "la feuille de gauche",
+      "centroide": [
+        76.343,
+        258.469
+      ],
+      "surface": 2513.3,
+      "couleurMasque": "#000009",
+      "sourceFloodFill": 5,
+      "pixels": 6434
+    },
+    {
+      "id": "grande-feuille-droite",
+      "libelle": "la grande feuille de droite",
+      "centroide": [
+        751.859,
+        290.419
+      ],
+      "surface": 15014.5,
+      "couleurMasque": "#00000A",
+      "sourceFloodFill": 3,
+      "pixels": 38437
+    },
+    {
+      "id": "feuille-droite",
+      "libelle": "la feuille de droite",
+      "centroide": [
+        899.244,
+        353.654
+      ],
+      "surface": 1937.9,
+      "couleurMasque": "#00000B",
+      "sourceFloodFill": 26,
+      "pixels": 4961
+    },
+    {
+      "id": "chapeau-lanterne",
+      "libelle": "le chapeau de la lanterne",
+      "centroide": [
+        821.034,
+        358.265
+      ],
+      "surface": 2334.8,
+      "couleurMasque": "#00000C",
+      "sourceFloodFill": 30,
+      "pixels": 5977
+    },
+    {
+      "id": "verre-lanterne",
+      "libelle": "le verre de la lanterne",
+      "centroide": [
+        818.253,
+        456.57
+      ],
+      "surface": 7807.4,
+      "couleurMasque": "#00000D",
+      "sourceFloodFill": 43,
+      "pixels": 19987
+    },
+    {
+      "id": "socle-lanterne",
+      "libelle": "le socle de la lanterne",
+      "centroide": [
+        814.251,
+        544.477
+      ],
+      "surface": 1676.2,
+      "couleurMasque": "#00000E",
+      "sourceFloodFill": 64,
+      "pixels": 4291
+    },
+    {
+      "id": "chapeau-champignon-gauche",
+      "libelle": "le champignon de gauche",
+      "centroide": [
+        80.36,
+        532.991
+      ],
+      "surface": 2612.5,
+      "couleurMasque": "#00000F",
+      "sourceFloodFill": 56,
+      "pixels": 6688
+    },
+    {
+      "id": "pied-champignon-gauche",
+      "libelle": "le pied du champignon de gauche",
+      "centroide": [
+        78.59,
+        581.599
+      ],
+      "surface": 1029.7,
+      "couleurMasque": "#000010",
+      "sourceFloodFill": 71,
+      "pixels": 2636
+    },
+    {
+      "id": "chapeau-champignon-droit",
+      "libelle": "le champignon de droite",
+      "centroide": [
+        171.048,
+        554.536
+      ],
+      "surface": 1956.6,
+      "couleurMasque": "#000011",
+      "sourceFloodFill": 65,
+      "pixels": 5009
+    },
+    {
+      "id": "pied-champignon-droit",
+      "libelle": "le pied du champignon de droite",
+      "centroide": [
+        172.336,
+        591.924
+      ],
+      "surface": 484.4,
+      "couleurMasque": "#000012",
+      "sourceFloodFill": 74,
+      "pixels": 1240
+    },
+    {
+      "id": "feuille-tombee",
+      "libelle": "la feuille tombée",
+      "centroide": [
+        666.589,
+        566.798
+      ],
+      "surface": 8192.2,
+      "couleurMasque": "#000013",
+      "sourceFloodFill": 60,
+      "pixels": 20972
+    },
+    {
+      "id": "caillou-gauche",
+      "libelle": "le caillou de gauche",
+      "centroide": [
+        316.839,
+        502.613
+      ],
+      "surface": 730.9,
+      "couleurMasque": "#000014",
+      "sourceFloodFill": 53,
+      "pixels": 1871
+    },
+    {
+      "id": "caillou-droit",
+      "libelle": "le caillou de droite",
+      "centroide": [
+        566.9,
+        528.661
+      ],
+      "surface": 894.1,
+      "couleurMasque": "#000015",
+      "sourceFloodFill": 61,
+      "pixels": 2289
+    }
+  ],
+  "sorties": {
+    "fond": "contenu/habillages/campement/chaudron-fond.png",
+    "trait": "contenu/habillages/campement/chaudron-trait.png",
+    "masque": "contenu/habillages/campement/chaudron-masque.png",
+    "rapport": "production/coloriages/chaudron-raster.rapport.json"
+  },
+  "empreintesFichiers": {
+    "fond": "sha256:E8AF9B72DA724561915AE3E119131CD1C98B484D4FF0CF1BCC241B3E4ECE11C0",
+    "trait": "sha256:D6934E496854EC519A756648F534131ED1B1B39564AE22BF4791BE57AADBE248",
+    "masque": "sha256:0B1453AEF494F2F54758DE8C141F2087B262730B0F2B84C0ABA43B64FE38A796"
+  }
+}

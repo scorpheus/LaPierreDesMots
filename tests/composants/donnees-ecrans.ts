@@ -115,7 +115,7 @@ export function mondeDeTest(): EtatMonde {
         valeur: 'La malice',
         domaine: 'Mots outils',
         region: 'clairiere',
-        asset: 'assets/compagnons/filou.svg',
+        asset: 'assets/compagnons/filou.png',
         rallieLe: '2026-09-01T08:00:00.000Z'
       }
     ],

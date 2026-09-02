@@ -24,6 +24,7 @@
     "construire:autonome": "npm run construire -w @pierre/partage && npm run construire:autonome -w @pierre/client",
     "ingerer": "node scripts/ingerer.mjs",
     "campement:dessiner": "node scripts/recomposer-campement.mjs",
+    "coloriage:chaudron": "node scripts/coloriages/publier-chaudron.mjs",
     "profil:reinitialiser": "node scripts/reinitialiser-profil.mjs",
     "profil:recalculer": "node scripts/recalculer-projections.mjs",
     "voix:preparer": "node scripts/telecharger-tts.mjs",

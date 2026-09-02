@@ -16,7 +16,7 @@
 import type { ContenuLibre } from '@partage/moteurs/libre/types';
 
 export const contenuLibre: ContenuLibre = {
-  regions: ['chaudron-ventre', 'anse', 'flamme'],
+  regions: ['ventre-du-chaudron', 'grenouille', 'verre-lanterne'],
   nuancierAutorise: ['rouge', 'orange', 'jaune'],
   competence: 'libre.aucune',
 };

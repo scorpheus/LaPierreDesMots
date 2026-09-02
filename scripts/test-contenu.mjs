@@ -37,6 +37,7 @@ import { RACINE, ecrireEtape, genererRapport } from './rapport.mjs';
 import { cheminsRemplisNonFermes } from './svg-remplissage.mjs';
 import { croiserNoeudsEtRegions, resumerCroisement } from './verifier-noeuds-regions.mjs';
 import { croiserPrerequis, resumerPrerequis } from './verifier-prerequis.mjs';
+import { decoderPng } from './sprites/png.mjs';
 
 const ETAPE = 'test:contenu';
 const debut = Date.now();
@@ -381,6 +382,84 @@ for (const { chemin, donnees } of habillages.values()) {
   svgParChemin.set(join(DOSSIER_CONTENU, ...fichier.split('/')), { chemin, donnees });
 }
 
+// ── Contrat raster indexé : les trois PNG et le manifeste de régions doivent raconter
+// exactement la même géométrie. Ce contrôle remplace la correspondance `id` ↔ `<path>` du SVG
+// pour les habillages migrés ; le SVG demeure seulement leur repli hors ligne.
+for (const { chemin, donnees } of habillages.values()) {
+  const raster = donnees.scene?.rasterIndexe;
+  if (raster === undefined) continue;
+  nbControles += 1;
+  const images = new Map();
+  for (const nom of ['fond', 'trait', 'masque']) {
+    const relatifImage = raster[nom];
+    const absolu = typeof relatifImage === 'string'
+      ? join(DOSSIER_CONTENU, ...relatifImage.split('/'))
+      : '';
+    if (absolu === '' || !existsSync(absolu)) {
+      signaler(relatif(chemin), `couche raster « ${nom} » absente : ${String(relatifImage)}`, 'raster-indexe');
+      continue;
+    }
+    const image = decoderPng(readFileSync(absolu));
+    images.set(nom, image);
+    if (image.largeur !== raster.largeur || image.hauteur !== raster.hauteur) {
+      signaler(
+        relatif(chemin),
+        `${nom} mesure ${image.largeur} × ${image.hauteur}, attendu ${raster.largeur} × ${raster.hauteur}`,
+        'raster-indexe',
+      );
+    }
+  }
+
+  const regions = (donnees.scene?.calques ?? [])
+    .filter((calque) => calque.role === 'coloriable')
+    .flatMap((calque) => calque.regions ?? []);
+  const couleurs = new Map();
+  for (const region of regions) {
+    const couleur = String(region.couleurMasque ?? '').toUpperCase();
+    if (!/^#[0-9A-F]{6}$/u.test(couleur)) {
+      signaler(relatif(chemin), `région « ${region.id} » sans couleurMasque RGB`, 'raster-indexe');
+    } else if (couleurs.has(couleur)) {
+      signaler(relatif(chemin), `couleurMasque ${couleur} attribuée deux fois`, 'raster-indexe');
+    } else {
+      couleurs.set(couleur, region.id);
+    }
+  }
+
+  const masque = images.get('masque');
+  if (masque !== undefined) {
+    const vues = new Set();
+    let alphaIntermediaire = 0;
+    let bordOpaque = 0;
+    for (let pixel = 0; pixel < masque.pixels.length; pixel += 4) {
+      const alpha = masque.pixels[pixel + 3];
+      if (alpha !== 0 && alpha !== 255) alphaIntermediaire += 1;
+      if (alpha === 0) continue;
+      const couleur = `#${[0, 1, 2].map((canal) =>
+        masque.pixels[pixel + canal].toString(16).padStart(2, '0')).join('')}`.toUpperCase();
+      vues.add(couleur);
+      if (!couleurs.has(couleur)) {
+        signaler(relatif(chemin), `le masque contient la couleur parasite ${couleur}`, 'raster-indexe');
+        break;
+      }
+      const position = pixel / 4;
+      const x = position % masque.largeur;
+      const y = Math.floor(position / masque.largeur);
+      if (x === 0 || y === 0 || x === masque.largeur - 1 || y === masque.hauteur - 1) bordOpaque += 1;
+    }
+    if (alphaIntermediaire > 0) {
+      signaler(relatif(chemin), `${alphaIntermediaire} pixel(s) du masque ont un alpha intermédiaire`, 'raster-indexe');
+    }
+    if (bordOpaque > 0) {
+      signaler(relatif(chemin), `${bordOpaque} pixel(s) coloriable(s) touchent le bord`, 'raster-indexe');
+    }
+    for (const [couleur, id] of couleurs) {
+      if (!vues.has(couleur)) {
+        signaler(relatif(chemin), `région « ${id} » absente du masque (${couleur})`, 'raster-indexe');
+      }
+    }
+  }
+}
+
 /**
  * Les SVG déclarés par les documents de `contenu/monde/` : `scene.fichier` pour la carte et
  * le campement, `asset` pour les stades de Gobi et les compagnons. On parcourt le document en
@@ -494,6 +573,13 @@ for (const cheminSvg of tousLesSvg) {
 
   if (habillage) {
     nbSvgControles += 1;
+    if (habillage.donnees.scene?.rasterIndexe !== undefined) {
+      const fautifs = cheminsRemplisNonFermes(readFileSync(cheminSvg, 'utf8'), estCheminFerme);
+      for (const fautif of fautifs) {
+        signaler(ou, `${fautif} : tracé rempli non fermé dans le SVG de repli`, 'P3.2');
+      }
+      continue;
+    }
     const rapportSvg = validerSceneSvg(readFileSync(cheminSvg, 'utf8'), habillage.donnees);
     for (const probleme of rapportSvg.problemes) {
       signaler(ou, `${probleme.chemin} : ${probleme.message} [${probleme.regle}]`, 'P3.2');

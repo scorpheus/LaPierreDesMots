@@ -11,11 +11,10 @@
 //   2. **Aucun compagnon n'est un échec.** Le grisé n'est pas un verrou : la tuile dit où on le
 //      rencontrera, jamais qu'on a raté quelque chose (R14).
 //
-// PLACEHOLDER — les quatre dessins sont des SVG bouchons écrits à la main (D2). La forme
-// canonique des compagnons n'est pas plus validée que celle de Gobi (D7, D31 étape A).
 import { useState } from 'react';
 import type { ReactElement } from 'react';
 
+import { urlAsset } from '../api/client.js';
 import { FicheObjet } from '../monde/FicheObjet.js';
 import type { Compagnon as CompagnonDuMonde } from '@pierre/partage';
 
@@ -26,44 +25,30 @@ export interface ProprietesCompagnon {
   readonly surChoisir?: (compagnon: CompagnonDuMonde) => void;
 }
 
-/** Silhouettes bouchons : une forme d'un seul tenant par compagnon, reconnaissable en ombre. */
-const SILHOUETTES: Readonly<Record<string, { readonly d: string; readonly teinte: string }>> = {
-  filou: { d: 'M32,58 L14,34 L20,10 L32,22 L44,10 L50,34 Z', teinte: '#E8743B' },
-  bulle: { d: 'M32,6 C46,6 56,20 56,34 C56,50 46,60 32,60 C18,60 8,50 8,34 C8,20 18,6 32,6 Z', teinte: '#2FA8E0' },
-  roc: { d: 'M14,58 L10,22 L24,8 L44,8 L56,24 L52,58 Z', teinte: '#8E97A8' },
-  plume: { d: 'M32,4 L52,26 L40,32 L52,40 L32,60 L12,40 L24,32 L12,26 Z', teinte: '#3DDC97' }
-};
-
-const SILHOUETTE_DE_REPLI = { d: 'M32,8 L56,32 L32,56 L8,32 Z', teinte: '#FFC93C' };
-
 export function Compagnon({
   compagnon,
   libelleRegion,
   surChoisir
 }: ProprietesCompagnon): ReactElement {
   const rallie = compagnon.rallieLe !== null;
-  const silhouette = SILHOUETTES[String(compagnon.code)] ?? SILHOUETTE_DE_REPLI;
   const [ficheOuverte, fixerFicheOuverte] = useState(false);
+  const portrait = (
+    <img
+      src={urlAsset(String(compagnon.asset))}
+      alt=""
+      draggable={false}
+      data-portrait-compagnon={String(compagnon.code)}
+      // La Grisaille garde exactement le même portrait : aucune seconde image, aucune identité
+      // différente avant et après la rencontre.
+      style={{ filter: rallie ? 'none' : 'saturate(0)' }}
+    />
+  );
 
   const contenu = (
     <>
-      <svg
-        width="64"
-        height="64"
-        viewBox="0 0 64 64"
-        aria-hidden="true"
-        focusable="false"
-        // La Grisaille, en un seul filtre : le même dessin, deux états. Jamais un second asset.
-        style={{ filter: rallie ? 'none' : 'saturate(0)' }}
-      >
-        <path
-          d={silhouette.d}
-          fill={silhouette.teinte}
-          stroke="var(--trait)"
-          strokeWidth="4"
-          strokeLinejoin="round"
-        />
-      </svg>
+      <span className="compagnon-portrait compagnon-portrait--tuile" aria-hidden="true">
+        {portrait}
+      </span>
       <span className="titre" style={{ fontSize: '1.125rem' }}>
         {compagnon.libelle}
       </span>
@@ -144,17 +129,7 @@ export function Compagnon({
                   libelleRegion === undefined ? 'plus loin' : `à ${libelleRegion}`
                 }.`
           }
-          visuel={
-            <svg width="96" height="96" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
-              <path
-                d={silhouette.d}
-                fill={silhouette.teinte}
-                stroke="var(--trait)"
-                strokeWidth="4"
-                strokeLinejoin="round"
-              />
-            </svg>
-          }
+          visuel={<span className="compagnon-portrait compagnon-portrait--fiche">{portrait}</span>}
           surFermer={() => {
             fixerFicheOuverte(false);
           }}

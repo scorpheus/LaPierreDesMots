@@ -86,7 +86,7 @@ function monde(): EtatMonde {
         valeur: 'La malice',
         domaine: 'Mots outils',
         region: 'clairiere',
-        asset: 'assets/compagnons/filou.svg',
+        asset: 'assets/compagnons/filou.png',
         rallieLe: null
       }
     ],
@@ -287,6 +287,18 @@ describe('le campement montre le monde sans jamais le cacher', () => {
     const filou = document.querySelector('[data-compagnon="filou"]');
     expect(filou).not.toBeNull();
     expect(filou!.getAttribute('data-rallie')).toBe('non');
+  });
+
+  it('montre le portrait raster validé du compagnon, en grisaille tant qu’il attend', () => {
+    monter();
+
+    const portrait = document.querySelector<HTMLImageElement>(
+      '[data-compagnon="filou"] [data-portrait-compagnon="filou"]'
+    );
+    expect(portrait, 'Filou est encore remplacé par une silhouette géométrique').not.toBeNull();
+    expect(portrait?.getAttribute('src')).toContain('assets/compagnons/filou.png');
+    expect(portrait?.getAttribute('style')).toContain('saturate(0)');
+    expect(document.querySelector('[data-compagnon="filou"] svg')).toBeNull();
   });
 
   /**

@@ -7,8 +7,11 @@ blockout par de belles illustrations raster. La destination technique reste `gal
 ne pas ajouter un faux nœud à la progression, mais son exercice charge désormais l'habillage
 `campement.chaudron` : toucher le chaudron ne montre plus la paroi des Galeries.
 
-L'ancien SVG du chaudron reste un repli temporaire. Il sera remplacé visuellement seulement après
-validation des trois PNG alignés décrits ci-dessous.
+Un SVG de repli porte les mêmes 21 identifiants que le masque afin de rester jouable si un PNG ne
+charge pas. La recette globale a précisément détecté puis empêché le maintien de l'ancien SVG à 14
+régions : un repli qui montre d'autres objets n'est pas sûr. Après validation parentale du brouillon
+`contenu/brouillons/campement/coloriage-chaudron-v3-organique.png`, les trois PNG alignés décrits
+ci-dessous sont devenus le rendu principal.
 
 ## Contrat déclaratif
 
@@ -29,12 +32,26 @@ externe n'est ajoutée : le navigateur compose localement les aplats dans un can
 masque, puis conserve ce masque en mémoire pour les taps suivants. Si une des trois couches ne se
 charge pas, la scène revient au SVG déclaré par `scene.fichier` au lieu d'afficher une toile vide.
 
-## État de publication
+## Publication du chaudron validé
 
-Le contrat, son moteur de rendu et ses tests sont en production. Aucun nouveau raster n'est encore
-servi : l'ajout de `scene.rasterIndexe` à un habillage attend toujours la validation visuelle du
-fond, du trait et du masque par le parent. Cette séparation évite qu'un brouillon placé sous
-`contenu/brouillons/` atteigne l'enfant par erreur.
+La source validée mesure 1536 × 1024 pixels. Son empreinte de fichier est
+`sha256:7F05618925D644E7914D2E0C69BEB7CF642B3C8F4E9A7A4C695AE102ABA9F1F5` et son empreinte des
+pixels RGBA décodés est
+`sha256:559EE9461276CE5548ECF6FE797C3DD63C57A51BA67B2ED8E1A8D81DAA7AF0E9`.
 
-Contrôles ciblés du lot : 16 tests de composant verts et `npm run test:contenu` vert avec
-609 contrôles et 0 problème.
+Le script `npm run coloriage:chaudron` reconstruit sans dépendance externe les trois couches :
+
+- `chaudron-fond.png`, fond blanc opaque ;
+- `chaudron-trait.png`, encrage bleu nuit transparent ;
+- `chaudron-masque.png`, 21 couleurs RGB opaques et uniques.
+
+Il refuse toute autre empreinte source, applique un flood-fill à quatre voisins avec le seuil
+d'encre 200, puis ne publie que les 21 composantes fermées validées. Les centroïdes, surfaces,
+indices de composantes, nombres de pixels et empreintes de sortie sont consignés dans
+`production/coloriages/chaudron-raster.rapport.json`. Le masque contient 364 416 pixels
+coloriables ; aucune région ne touche le bord et aucun code RGB parasite n'est toléré.
+
+La recette ciblée comprend la reproduction octet pour octet des trois PNG, le décodage réel du
+masque, l'unicité et la présence de toutes ses couleurs, les dimensions communes, les bords
+transparents, l'interaction pointeur/clavier et le repli SVG. `npm run test:contenu` contrôle aussi
+ces propriétés pour tout habillage raster indexé.

@@ -37,8 +37,11 @@
  * n'est jamais repris » appliquée aux données.
  */
 import { describe, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
 
 import { elementsDessines, fichiersSous } from '../../scripts/verifier-regions-fermees.mjs';
+// @ts-expect-error module JavaScript volontairement autonome
+import { decoderPng } from '../../scripts/sprites/png.mjs';
 import { lireJson, lireTexte, RACINE_DEPOT } from '../configuration/preparation.js';
 
 // ─────────────────────────────────────────────────────────────────────── la référence gelée
@@ -75,6 +78,7 @@ interface RegionDeclaree {
   readonly libelle: string;
   readonly centroide: readonly [number, number];
   readonly surface: number;
+  readonly couleurMasque?: string;
 }
 interface Calque {
   readonly id: string;
@@ -83,7 +87,12 @@ interface Calque {
 }
 interface HabillageLu {
   readonly id: string;
-  readonly scene: { readonly fichier: string; readonly viewBox: string; readonly calques: readonly Calque[] };
+  readonly scene: {
+    readonly fichier: string;
+    readonly viewBox: string;
+    readonly calques: readonly Calque[];
+    readonly rasterIndexe?: { readonly masque: string };
+  };
 }
 
 function habillage(chemin: string): HabillageLu {
@@ -118,6 +127,25 @@ function declarees(h: HabillageLu): readonly string[] {
  * ───────────────────────────────────────────────────────────────────────────────────────────
  */
 function dessinees(cheminSvg: string, h: HabillageLu): readonly string[] {
+  if (h.scene.rasterIndexe !== undefined) {
+    const masque = decoderPng(
+      readFileSync(`${RACINE_DEPOT}contenu/${h.scene.rasterIndexe.masque}`),
+    ) as { pixels: Uint8Array };
+    const couleursVues = new Set<string>();
+    for (let index = 0; index < masque.pixels.length; index += 4) {
+      if (masque.pixels[index + 3] === 0) continue;
+      couleursVues.add(
+        `#${[0, 1, 2].map((canal) =>
+          (masque.pixels[index + canal] ?? 0).toString(16).padStart(2, '0')).join('')}`.toUpperCase(),
+      );
+    }
+    return h.scene.calques
+      .filter((calque) => calque.role === 'coloriable')
+      .flatMap((calque) => calque.regions)
+      .filter((region) => region.couleurMasque !== undefined
+        && couleursVues.has(region.couleurMasque.toUpperCase()))
+      .map((region) => region.id);
+  }
   const coloriables = new Set(h.scene.calques.filter((c) => c.role === 'coloriable').map((c) => c.id));
   return (elementsDessines(lireTexte(cheminSvg)) as ReadonlyArray<{ id: string | null; calque: string | null }>)
     .filter((e) => e.id !== null && e.calque !== null && coloriables.has(e.calque))

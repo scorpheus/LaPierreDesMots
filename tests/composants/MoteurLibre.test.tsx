@@ -188,7 +188,7 @@ describe('moteur libre', () => {
 
   it('bonne réponse : l’étape avance, aucune erreur, aucun écran d’échec', () => {
     const { container } = render(<Harnais />);
-    taper(container, ['[data-couleur="rouge"]', '[data-region-svg="flamme"]']);
+    taper(container, ['[data-couleur="rouge"]', '[data-region-svg="ventre-du-chaudron"]']);
     const h = harnais(container);
     expect(h.getAttribute('data-erreurs')).toBe('0');
     // Une région sur trois est peinte : l'avancement se voit, mais il ne clôt rien.
@@ -202,10 +202,10 @@ describe('moteur libre', () => {
     // On tape volontairement n'importe comment : une région sans couleur en main, puis une
     // couleur, puis la même région deux fois. Rien de tout cela ne doit rien coûter.
     taper(container, [
-      '[data-region-svg="anse"]',
+      '[data-region-svg="grenouille"]',
       '[data-couleur="rouge"]',
-      '[data-region-svg="flamme"]',
-      '[data-region-svg="flamme"]',
+      '[data-region-svg="ventre-du-chaudron"]',
+      '[data-region-svg="ventre-du-chaudron"]',
     ]);
     const h = harnais(container);
     expect(h.getAttribute('data-erreurs')).toBe('0');
@@ -225,7 +225,7 @@ describe('moteur libre', () => {
 
   it('« J’ai fini » clôt sur une réussite, sans erreur ni aide — donc trois étoiles', () => {
     const { container } = render(<Harnais />);
-    taper(container, ['[data-couleur="jaune"]', '[data-region-svg="anse"]', '[data-action="terminer"]']);
+    taper(container, ['[data-couleur="jaune"]', '[data-region-svg="grenouille"]', '[data-action="terminer"]']);
     const h = harnais(container);
     expect(h.getAttribute('data-reussi')).toBe('true');
     expect(h.getAttribute('data-erreurs')).toBe('0');
@@ -239,8 +239,8 @@ describe('moteur libre', () => {
     const { container } = render(<Harnais />);
     taper(container, [
       '[data-couleur="rouge"]',
-      '[data-region-svg="flamme"]',
-      '[data-region-svg="flamme"]',
+      '[data-region-svg="ventre-du-chaudron"]',
+      '[data-region-svg="ventre-du-chaudron"]',
     ]);
     expect(harnais(container).getAttribute('data-erreurs')).toBe('0');
   });

@@ -517,6 +517,33 @@ body {
   justify-content: center;
 }
 
+/* Portraits raster détourés des quatre compagnons. La boîte fixe empêche Bulle, plus ronde,
+   de pousser le texte plus bas que Filou ou Plume. Le dessin reste immobile : seul le décor
+   s'agite, jamais une information à reconnaître. */
+.compagnon-portrait {
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.compagnon-portrait > img {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: contain;
+  user-select: none;
+}
+
+.compagnon-portrait--tuile {
+  inline-size: 6.25rem;
+  block-size: 7.5rem;
+}
+
+.compagnon-portrait--fiche {
+  inline-size: min(12rem, 42vw);
+  block-size: min(15rem, 52vw);
+}
+
 @media (max-width: 600px) {
   .ecran-profils {
     padding: 1.1rem !important;

@@ -1,36 +1,35 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" width="960" height="600" role="img" aria-label="Le chaudron du campement">
-  <title>Le chaudron du campement</title>
-  <desc>Décor de COLORIAGE : trait noir sur blanc, régions fermées par construction, couleur appliquée par le code depuis les jetons de palette (annexe P § 2). Chaque région est un enfant DIRECT de #calque-zones — SceneSvg sélectionne « #calque-zones &gt; [id] » et un tracé niché dans un sous-groupe échapperait au tap sans qu’aucun message ne le dise. Les centroïdes et surfaces du .habillage.json sont recalculés par le générateur, jamais écrits à la main.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 640" width="960" height="640" role="img" aria-label="Le chaudron du campement">
+  <title>Le chaudron du campement — repli</title>
+  <desc>Repli SVG déterministe du coloriage raster. Les identifiants restent strictement identiques au masque ; le rendu principal emploie les trois calques PNG validés.</desc>
   <g id="calque-fond">
-    <path id="ciel-chaudron" d="M0,0 L960,0 L960,372 L0,372 Z" fill="#FFF6E3"/>
-    <path id="terre-chaudron" d="M0,372 L960,372 L960,600 L0,600 Z" fill="#FFF6E3"/>
+    <path d="M0,0 L960,0 L960,640 L0,640 Z" fill="#FFFDF8"/>
   </g>
-  <g id="calque-zones" stroke="#1B2440" stroke-width="4" stroke-linejoin="round">
-    <path id="sol-battu" d="M46,476 L180,452 L330,442 L480,438 L640,444 L790,454 L916,476 L900,532 L740,562 L480,572 L210,560 L56,530 Z" fill="#8E97A8"/>
-    <path id="trepied" d="M462,36 L500,36 L524,88 L742,468 L706,486 L500,132 L500,468 L462,468 L462,132 L256,486 L220,468 L438,88 Z" fill="#8E97A8"/>
-    <path id="buche-gauche" d="M168,462 L300,424 L326,456 L196,496 L160,490 Z" fill="#8E97A8"/>
-    <path id="buche-droite" d="M800,452 L666,410 L634,446 L772,500 L812,490 Z" fill="#8E97A8"/>
-    <path id="flamme" d="M480,372 L520,410 L502,424 L544,452 L524,472 L552,500 L480,524 L408,500 L436,472 L416,452 L458,424 L440,410 Z" fill="#8E97A8"/>
-    <path id="braise" d="M358,506 L420,490 L480,500 L548,488 L606,506 L576,542 L480,554 L386,542 Z" fill="#8E97A8"/>
-    <path id="chaudron-ventre" d="M276,234 L688,234 L712,292 L682,356 L594,402 L480,416 L366,402 L278,356 L248,292 Z" fill="#8E97A8"/>
-    <path id="anse" d="M254,244 L206,276 L190,330 L212,378 L244,368 L228,330 L240,292 L274,268 Z" fill="#8E97A8"/>
-    <path id="col-du-chaudron" d="M240,190 L724,190 L732,228 L702,242 L262,242 L232,228 Z" fill="#8E97A8"/>
-    <path id="mousse" d="M254,186 L300,160 L352,172 L402,152 L456,170 L510,150 L566,172 L620,156 L672,178 L706,194 L620,202 L480,208 L340,202 Z" fill="#8E97A8"/>
-    <path id="bulle" d="M396,82 L438,58 L484,70 L502,110 L482,148 L438,158 L400,134 L384,106 Z" fill="#8E97A8"/>
-    <path id="bulle-petite" d="M562,106 L590,90 L618,106 L624,134 L604,154 L572,150 L554,130 Z" fill="#8E97A8"/>
-    <path id="louche" d="M824,120 L878,138 L872,190 L830,214 L792,200 L812,246 L846,458 L810,464 L776,250 L780,196 L790,152 Z" fill="#8E97A8"/>
-    <path id="pot-de-couleur" d="M60,414 L138,414 L148,442 L140,508 L114,526 L82,526 L58,506 L50,442 Z" fill="#8E97A8"/>
+  <g id="calque-zones" stroke="#0A2B68" stroke-width="4" stroke-linejoin="round" fill="#D9DEE7">
+    <path id="rebord-du-chaudron" d="M340,295 C340,270 390,255 460,255 C530,255 585,270 585,300 C585,325 530,338 460,338 C390,338 340,322 340,295 Z"/>
+    <path id="mousse-de-couleurs" d="M350,325 C380,305 405,340 435,320 C465,300 490,340 520,320 C550,302 575,328 580,350 C570,380 535,390 460,390 C390,390 355,370 350,325 Z"/>
+    <path id="ventre-du-chaudron" d="M345,350 C350,470 390,525 470,530 C555,528 595,468 590,350 C535,385 395,385 345,350 Z"/>
+    <path id="godet-gauche" d="M350,255 C350,235 370,225 392,228 C415,230 425,245 418,265 C410,285 360,282 350,255 Z"/>
+    <path id="godet-du-milieu" d="M440,245 C442,225 462,215 482,220 C505,225 512,242 500,260 C488,278 447,270 440,245 Z"/>
+    <path id="godet-droit" d="M525,255 C528,235 548,225 570,232 C592,240 596,258 582,274 C565,290 528,280 525,255 Z"/>
+    <path id="godet-devant" d="M420,285 C425,265 445,258 467,265 C488,272 492,290 478,305 C460,320 424,308 420,285 Z"/>
+    <path id="grenouille" d="M95,400 C88,365 112,340 145,345 C180,325 215,355 205,390 C225,420 202,462 165,458 C125,475 92,440 95,400 Z"/>
+    <path id="feuille-gauche" d="M35,220 C70,170 125,172 165,190 C145,245 95,280 45,272 C30,260 25,240 35,220 Z"/>
+    <path id="grande-feuille-droite" d="M690,225 C720,165 790,150 840,185 C842,248 800,310 735,325 C700,305 680,268 690,225 Z"/>
+    <path id="feuille-droite" d="M850,300 C882,275 920,286 935,320 C925,352 900,375 866,370 C842,352 838,322 850,300 Z"/>
+    <path id="chapeau-lanterne" d="M760,345 C782,320 840,318 865,350 L850,378 L778,378 Z"/>
+    <path id="verre-lanterne" d="M775,375 L852,375 L868,500 L760,500 Z"/>
+    <path id="socle-lanterne" d="M748,498 C775,485 855,485 878,510 L862,545 L765,545 Z"/>
+    <path id="chapeau-champignon-gauche" d="M35,510 C48,475 102,468 125,510 C105,535 55,535 35,510 Z"/>
+    <path id="pied-champignon-gauche" d="M65,525 L98,525 L105,590 L58,590 Z"/>
+    <path id="chapeau-champignon-droit" d="M125,535 C138,505 185,500 207,535 C188,558 145,560 125,535 Z"/>
+    <path id="pied-champignon-droit" d="M150,550 L180,550 L185,605 L145,605 Z"/>
+    <path id="feuille-tombee" d="M585,535 C620,500 692,505 735,545 C700,595 628,605 585,570 C575,558 575,545 585,535 Z"/>
+    <path id="caillou-gauche" d="M280,485 C295,468 325,470 338,490 C330,510 295,516 280,500 Z"/>
+    <path id="caillou-droit" d="M535,505 C550,482 586,482 602,505 C592,528 552,532 535,515 Z"/>
   </g>
-  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M268,290 L696,290"/>
-    <path d="M300,350 L664,350"/>
-    <path d="M232,214 L732,214"/>
-    <path d="M196,452 L312,440"/>
-    <path d="M780,448 L656,434"/>
-    <path d="M58,442 L148,442"/>
-    <path d="M80,458 L116,458"/>
-    <path d="M418,110 L432,92"/>
-    <path d="M580,122 L590,108"/>
-    <path d="M798,168 L864,152"/>
+  <g id="calque-trait" fill="none" stroke="#0A2B68" stroke-width="4" stroke-linecap="round">
+    <path d="M380,420 C430,445 510,445 558,420"/>
+    <path d="M785,420 C810,405 838,420 845,452"/>
+    <path d="M118,392 C135,380 158,382 175,398"/>
   </g>
 </svg>

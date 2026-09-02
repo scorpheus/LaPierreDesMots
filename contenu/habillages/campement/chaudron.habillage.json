@@ -7,7 +7,14 @@
   "region": "clairiere",
   "scene": {
     "fichier": "habillages/campement/chaudron.svg",
-    "viewBox": "0 0 960 600",
+    "viewBox": "0 0 960 640",
+    "rasterIndexe": {
+      "fond": "habillages/campement/chaudron-fond.png",
+      "trait": "habillages/campement/chaudron-trait.png",
+      "masque": "habillages/campement/chaudron-masque.png",
+      "largeur": 1536,
+      "hauteur": 1024
+    },
     "calques": [
       {
         "id": "calque-fond",
@@ -19,130 +26,151 @@
         "role": "coloriable",
         "regions": [
           {
-            "id": "sol-battu",
-            "libelle": "le sol battu",
-            "centroide": [
-              481,
-              505
-            ],
-            "surface": 93058
+            "id": "rebord-du-chaudron",
+            "libelle": "le rebord du chaudron",
+            "centroide": [460.187, 302.525],
+            "surface": 6198,
+            "couleurMasque": "#000001"
           },
           {
-            "id": "trepied",
-            "libelle": "le trépied",
-            "centroide": [
-              481,
-              92.25
-            ],
-            "surface": 53884
-          },
-          {
-            "id": "buche-gauche",
-            "libelle": "la bûche de gauche",
-            "centroide": [
-              196.31,
-              474.63
-            ],
-            "surface": 5904
-          },
-          {
-            "id": "buche-droite",
-            "libelle": "la bûche de droite",
-            "centroide": [
-              773.06,
-              471.88
-            ],
-            "surface": 7972
-          },
-          {
-            "id": "flamme",
-            "libelle": "la flamme",
-            "centroide": [
-              480,
-              464.63
-            ],
-            "surface": 11932
-          },
-          {
-            "id": "braise",
-            "libelle": "la braise",
-            "centroide": [
-              540.13,
-              517.91
-            ],
-            "surface": 11518
-          },
-          {
-            "id": "chaudron-ventre",
-            "libelle": "le ventre du chaudron",
-            "centroide": [
-              480,
-              325
-            ],
-            "surface": 69312
-          },
-          {
-            "id": "anse",
-            "libelle": "l’anse",
-            "centroide": [
-              221.5,
-              287.97
-            ],
-            "surface": 4944
-          },
-          {
-            "id": "col-du-chaudron",
-            "libelle": "le col du chaudron",
-            "centroide": [
-              271.06,
-              216
-            ],
-            "surface": 25276
-          },
-          {
-            "id": "mousse",
+            "id": "mousse-de-couleurs",
             "libelle": "la mousse de couleurs",
-            "centroide": [
-              508.25,
-              179.91
-            ],
-            "surface": 16208
+            "centroide": [460.141, 354.912],
+            "surface": 19930.5,
+            "couleurMasque": "#000002"
           },
           {
-            "id": "bulle",
-            "libelle": "la grosse bulle",
-            "centroide": [
-              446.69,
-              108
-            ],
-            "surface": 8148
+            "id": "ventre-du-chaudron",
+            "libelle": "le ventre du chaudron",
+            "centroide": [471.891, 443.111],
+            "surface": 51731.3,
+            "couleurMasque": "#000003"
           },
           {
-            "id": "bulle-petite",
-            "libelle": "la petite bulle",
-            "centroide": [
-              590.09,
-              123
-            ],
-            "surface": 3112
+            "id": "godet-gauche",
+            "libelle": "le godet de gauche",
+            "centroide": [373.87, 278.437],
+            "surface": 1519.1,
+            "couleurMasque": "#000004"
           },
           {
-            "id": "louche",
-            "libelle": "la louche",
-            "centroide": [
-              830.19,
-              168.38
-            ],
-            "surface": 15418
+            "id": "godet-du-milieu",
+            "libelle": "le godet du milieu",
+            "centroide": [474.879, 274.702],
+            "surface": 1385.9,
+            "couleurMasque": "#000005"
           },
           {
-            "id": "pot-de-couleur",
-            "libelle": "le pot de couleur",
-            "centroide": [
-              99,
-              461.25
-            ],
-            "surface": 9398
+            "id": "godet-droit",
+            "libelle": "le godet de droite",
+            "centroide": [559.141, 289.29],
+            "surface": 1410.5,
+            "couleurMasque": "#000006"
+          },
+          {
+            "id": "godet-devant",
+            "libelle": "le godet de devant",
+            "centroide": [454.288, 307.826],
+            "surface": 1282,
+            "couleurMasque": "#000007"
+          },
+          {
+            "id": "grenouille",
+            "libelle": "la grenouille",
+            "centroide": [160.665, 424.546],
+            "surface": 11708.2,
+            "couleurMasque": "#000008"
+          },
+          {
+            "id": "feuille-gauche",
+            "libelle": "la feuille de gauche",
+            "centroide": [76.343, 258.469],
+            "surface": 2513.3,
+            "couleurMasque": "#000009"
+          },
+          {
+            "id": "grande-feuille-droite",
+            "libelle": "la grande feuille de droite",
+            "centroide": [751.859, 290.419],
+            "surface": 15014.5,
+            "couleurMasque": "#00000A"
+          },
+          {
+            "id": "feuille-droite",
+            "libelle": "la feuille de droite",
+            "centroide": [899.244, 353.654],
+            "surface": 1937.9,
+            "couleurMasque": "#00000B"
+          },
+          {
+            "id": "chapeau-lanterne",
+            "libelle": "le chapeau de la lanterne",
+            "centroide": [821.034, 358.265],
+            "surface": 2334.8,
+            "couleurMasque": "#00000C"
+          },
+          {
+            "id": "verre-lanterne",
+            "libelle": "le verre de la lanterne",
+            "centroide": [818.253, 456.57],
+            "surface": 7807.4,
+            "couleurMasque": "#00000D"
+          },
+          {
+            "id": "socle-lanterne",
+            "libelle": "le socle de la lanterne",
+            "centroide": [814.251, 544.477],
+            "surface": 1676.2,
+            "couleurMasque": "#00000E"
+          },
+          {
+            "id": "chapeau-champignon-gauche",
+            "libelle": "le champignon de gauche",
+            "centroide": [80.36, 532.991],
+            "surface": 2612.5,
+            "couleurMasque": "#00000F"
+          },
+          {
+            "id": "pied-champignon-gauche",
+            "libelle": "le pied du champignon de gauche",
+            "centroide": [78.59, 581.599],
+            "surface": 1029.7,
+            "couleurMasque": "#000010"
+          },
+          {
+            "id": "chapeau-champignon-droit",
+            "libelle": "le champignon de droite",
+            "centroide": [171.048, 554.536],
+            "surface": 1956.6,
+            "couleurMasque": "#000011"
+          },
+          {
+            "id": "pied-champignon-droit",
+            "libelle": "le pied du champignon de droite",
+            "centroide": [172.336, 591.924],
+            "surface": 484.4,
+            "couleurMasque": "#000012"
+          },
+          {
+            "id": "feuille-tombee",
+            "libelle": "la feuille tombée",
+            "centroide": [666.589, 566.798],
+            "surface": 8192.2,
+            "couleurMasque": "#000013"
+          },
+          {
+            "id": "caillou-gauche",
+            "libelle": "le caillou de gauche",
+            "centroide": [316.839, 502.613],
+            "surface": 730.9,
+            "couleurMasque": "#000014"
+          },
+          {
+            "id": "caillou-droit",
+            "libelle": "le caillou de droite",
+            "centroide": [566.9, 528.661],
+            "surface": 894.1,
+            "couleurMasque": "#000015"
           }
         ]
       },
