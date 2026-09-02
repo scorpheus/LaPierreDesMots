@@ -122,16 +122,15 @@ describe('R15 — toute consigne livrée est audible en un tap', () => {
 
   it('l’invitation du coloriage libre est UNE seule chaîne, lue là où elle s’affiche', () => {
     // Troisième contrôle de la mesure, lot A4. Le moteur `libre` n'a pas de consigne dans ses
-    // données — c'est son contrat (§ 4.8) — mais il AFFICHE un texte, et R15 ne fait pas
-    // d'exception. Le recenseur va le chercher dans `MoteurLibre.tsx` ; ce cas prouve qu'il y
-    // va vraiment, et qu'il n'a pas recopié la phrase de son côté. Le jour où quelqu'un
-    // change le mot dans le composant, le clip se repérime tout seul (l'empreinte du texte
-    // fait partie du nom de fichier) et ce cas reste vert. Le jour où quelqu'un supprime la
-    // constante, `inviteLibre` LÈVE au lieu de rendre une chaîne inventée.
+    // données — c'est son contrat (§ 4.8) — mais l'écran AFFICHE une invitation, et R15 ne fait
+    // pas d'exception. Le recenseur va chercher sa source dans `MoteurLibre.tsx`, tandis que
+    // `EcranNoeud` l'injecte dans l'unique barre de lecture. Les deux liens sont gardés : le
+    // texte reste une seule chaîne sans devoir être rendu deux fois.
     const source = lireTexte('client/src/moteurs/libre/MoteurLibre.tsx');
+    const sourceEcran = lireTexte('client/src/ecrans/EcranNoeud.tsx');
     const texte = (inviteLibre as (racine?: string) => string)();
     expect(source).toContain(`export const INVITE_LIBRE = '${texte}'`);
-    expect(source).toContain('texte={INVITE_LIBRE}');
+    expect(sourceEcran).toContain('texte: INVITE_LIBRE');
     expect(toutes.some((consigne) => consigne.texte === texte)).toBe(true);
   });
 

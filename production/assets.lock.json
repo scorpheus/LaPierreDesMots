@@ -21,48 +21,6 @@
       },
       "valide_par": "parent",
       "valide_le": "2026-09-02"
-    },
-    {
-      "id": "campement.animation.feu",
-      "fichier": "contenu/assets/campement/animations/feu.png",
-      "empreinte": "sha256:CF7BB1C83DD90029CF100F1B80EE0EB9FA7805860E85DC68DC6C1BF19FE6A90F",
-      "generation": {
-        "outil": "générateur d’images intégré à Codex",
-        "workflow": "imagegen puis scripts/sprites/normaliser-planche.mjs",
-        "checkpoint": null,
-        "graine": null,
-        "resolution": [1024, 512],
-        "prompt": "Huit phases régulières 4 × 2 d’une petite flamme de feu de camp, même style illustré jeunesse peint que le campement V5, ancre bas-centre stable, fond noir uni, sans bûches, décor, texte ni séparation."
-      },
-      "qc": {
-        "technique": "ok — 8/8 cellules, alpha, aucun débordement, ancre ≤ 0,5 px",
-        "semantique": "revue visuelle agent",
-        "integration": "capture tablette produite",
-        "tentatives": 2
-      },
-      "valide_par": "parent à confirmer sur capture",
-      "valide_le": null
-    },
-    {
-      "id": "campement.animation.papillon",
-      "fichier": "contenu/assets/campement/animations/papillon.png",
-      "empreinte": "sha256:301746AEF0F3F0DA08E0B8FA7BBD9B14D2DB56A2FA418C08078BF26C270C3AA1",
-      "generation": {
-        "outil": "générateur d’images intégré à Codex",
-        "workflow": "imagegen puis scripts/sprites/normaliser-planche.mjs",
-        "checkpoint": null,
-        "graine": null,
-        "resolution": [1024, 512],
-        "prompt": "Huit phases régulières 4 × 2 d’un seul papillon bleu et turquoise battant des ailes, même style illustré jeunesse que le campement V5, corps centré et échelle stable, fond noir uni, sans plante, décor, texte ni autre insecte."
-      },
-      "qc": {
-        "technique": "ok — 8/8 cellules, alpha, aucun débordement, ancre ≤ 0,5 px",
-        "semantique": "revue visuelle agent",
-        "integration": "capture tablette produite",
-        "tentatives": 1
-      },
-      "valide_par": "parent à confirmer sur capture",
-      "valide_le": null
     }
   ]
 }

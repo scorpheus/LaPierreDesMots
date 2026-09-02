@@ -22,7 +22,9 @@ jamais tenter de convertir à nouveau toute la scène en SVG pour la rendre inte
    exécuter `npm run campement:dessiner`.
 3. Pour ajouter un sprite, produire une ligne ou une grille sur fond uni, puis passer par le
    pipeline déterministe de `scripts/sprites/` : extraction, alpha, normalisation, contact sheet et
-   rapport QA. Le générateur ne décide jamais de la géométrie finale de la planche.
+   rapport QA. Le générateur ne décide jamais de la géométrie finale de la planche. Avant toute
+   intégration, vérifier que l'objet immobile a été retiré du fond : un sprite superposé à sa copie
+   peinte, même techniquement valide, est refusé.
 4. Exécuter les gardes ciblés :
 
    ```text
@@ -40,6 +42,8 @@ jamais tenter de convertir à nouveau toute la scène en SVG pour la rendre inte
 - Chaque zone reste entièrement comprise dans l’image et recouvre un objet reconnaissable.
 - Les sprites de production ont huit cellules régulières, un fond transparent et un rapport QA;
   ne jamais servir directement une planche brute issue du générateur.
+- Aucun objet animé ne double un objet encore peint dans le fond et aucun `mix-blend-mode` ou
+  réglage d'opacité ne sert à masquer ce défaut de séparation.
 - Les calques sont décoratifs (`aria-hidden`, `pointer-events: none`) et disparaissent quand les
   animations sont désactivées.
 - Les zones tactiles mesurent au moins 64 px au rendu tablette.

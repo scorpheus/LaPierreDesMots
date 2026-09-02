@@ -72,7 +72,10 @@ export function PointLibre({
   const toucher = useCallback((): void => {
     fixerReaction('reagit');
     surVisite?.(point);
-    if (!animationsDesactivees) surAnimerObjet?.(point, animation);
+    // La scène nomme toujours la découverte, même en mode calme. Elle seule décide ensuite
+    // si elle ajoute un effet animé : couper les animations ne doit jamais rendre le toucher
+    // à nouveau muet.
+    surAnimerObjet?.(point, animation);
     surActiver?.(point);
 
     // La réaction est GRATUITE et ne peut pas échouer : si le fournisseur est muet, il se tait,
@@ -140,12 +143,10 @@ export function PointLibre({
         background: 'transparent',
         border: 'none',
         borderRadius: 'var(--rayon-carte, 12px)',
-        // Aucun rouge, aucune alerte : la seule marque est un halo doux quand on touche.
-        // Il reste posé en ligne parce qu'il porte sur `box-shadow`, tandis que le mouvement
-        // nommé porte sur `transform` : deux propriétés disjointes, donc aucun arbitrage entre
-        // une règle en ligne et une animation qui court.
-        boxShadow: reaction === 'reagit' ? '0 0 0 6px var(--soleil)' : 'none',
-        transition: animationsDesactivees ? 'none' : 'box-shadow 160ms'
+        // La prise reste réellement invisible. Un contour sur cette boîte rectangulaire ne
+        // suivrait jamais la silhouette peinte et fabriquerait le carré doré dénoncé en test.
+        boxShadow: 'none',
+        transition: 'none'
       }}
     >
       {/* ── L'INVITATION AU REPOS — R18 ────────────────────────────────────────────────────

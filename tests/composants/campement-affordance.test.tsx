@@ -126,18 +126,20 @@ describe('R11 — le campement répond DIFFÉREMMENT selon ce qu’on touche', (
     }
   });
 
-  it('pose la classe du mouvement au toucher, et celle-là seulement', () => {
+  it('pose le mouvement sur les étincelles visibles, jamais sur un cadre vide', () => {
     monter();
     const tente = document.querySelector('[data-point="tente"]')!;
-    expect(tente.className).not.toContain('anim-campement-');
     fireEvent.click(tente);
-    expect(tente.className).toContain(`anim-campement-${animationDuPoint('tente')}`);
+    const effetTente = document.querySelector('[data-effet-campement="tente"]')!;
+    expect(effetTente.className).toContain(`anim-campement-${animationDuPoint('tente')}`);
+    expect(effetTente.querySelectorAll('[data-etincelle]')).toHaveLength(6);
 
     const feu = document.querySelector('[data-point="feu"]')!;
     fireEvent.click(feu);
-    // Deux objets touchés, deux classes différentes : c'est exactement ce que l'ancien
-    // `scale(1.06)` en dur rendait impossible.
-    expect(feu.className).not.toBe(tente.className);
+    const effetFeu = document.querySelector('[data-effet-campement="feu"]')!;
+    expect(effetFeu.className).toContain(`anim-campement-${animationDuPoint('feu')}`);
+    expect(tente.getAttribute('style')).not.toContain('box-shadow: 0 0 0');
+    expect(feu.getAttribute('style')).not.toContain('box-shadow: 0 0 0');
   });
 
   it('rend la prise au repos après son mouvement — on peut y revenir sans fin (R14)', () => {

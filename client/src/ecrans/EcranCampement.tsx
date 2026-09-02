@@ -115,6 +115,10 @@ export function EcranCampement({
     readonly id: string;
     readonly animation: AnimationCampement;
   } | null>(null);
+  const [decouverte, fixerDecouverte] = useState<{
+    readonly id: string;
+    readonly libelle: string;
+  } | null>(null);
 
   const requeteCampement = useQuery({
     queryKey: ["monde", "campement"],
@@ -447,47 +451,14 @@ export function EcranCampement({
             />
           )}
 
-          {/* Le décor est une illustration validée. Ces calques donnent de la vie au lieu sans
-              repeindre ses objets ni dégrader son style : deux sprites normalisés, des lueurs
-              légères et une réaction locale au toucher. Le texte reste hors de la scène. */}
-          <div
-            className={animationsDesactivees ? "campement-calques campement-calques--calmes" : "campement-calques"}
-            aria-hidden="true"
-          >
-            <span
-              className="campement-sprite campement-sprite--feu"
-              data-calque-campement="feu"
-              style={{ backgroundImage: `url(${urlAsset("assets/campement/animations/feu.png")})` }}
-            />
-            <span
-              className="campement-sprite campement-sprite--papillon"
-              data-calque-campement="papillon"
-              style={{ backgroundImage: `url(${urlAsset("assets/campement/animations/papillon.png")})` }}
-            />
-            {[12, 25, 39, 56, 68, 81, 93].map((phase, index) => (
-              <span
-                key={phase}
-                className="campement-luciole"
-                data-calque-campement="luciole"
-                style={{
-                  insetInlineStart: `${String(phase)}%`,
-                  insetBlockStart: `${String(18 + ((index * 17) % 57))}%`,
-                  animationDelay: `-${String(index * 0.73)}s`,
-                }}
-              />
-            ))}
-            <span className="campement-lueur campement-lueur--feu" />
-            <span className="campement-lueur campement-lueur--lanterne" />
-          </div>
-
           {objetAnime === null ? null : (() => {
             const point = points.find((candidat) => candidat.id === objetAnime.id);
             if (point === undefined) return null;
             const [x, y, largeur, hauteur] = point.zone;
             return (
               <div
-                className={`campement-reaction ${classeAnimation(objetAnime.animation)}`}
-                data-reaction-visuelle={objetAnime.id}
+                className={`campement-effet ${classeAnimation(objetAnime.animation)}`}
+                data-effet-campement={objetAnime.id}
                 aria-hidden="true"
                 onAnimationEnd={finirAnimationObjet}
                 style={{
@@ -497,10 +468,19 @@ export function EcranCampement({
                   blockSize: `${String((hauteur / hauteurScene) * 100)}%`,
                 }}
               >
-                <span />
+                {Array.from({ length: 6 }, (_, index) => (
+                  <span key={index} data-etincelle="oui" className="campement-etincelle">
+                    ✦
+                  </span>
+                ))}
               </div>
             );
           })()}
+          {decouverte === null ? null : (
+            <p className="campement-decouverte" data-decouverte={decouverte.id} aria-live="polite">
+              <span aria-hidden="true">✨</span> Tu as trouvé {decouverte.libelle} !
+            </p>
+          )}
           {points.map((point) => (
             <PointLibre
               key={point.id}
@@ -511,7 +491,8 @@ export function EcranCampement({
               surVisite={noterVisite}
               surActiver={activerObjetUtile}
               surAnimerObjet={(objet, animation) => {
-                fixerObjetAnime({ id: objet.id, animation });
+                fixerDecouverte({ id: objet.id, libelle: objet.libelle });
+                fixerObjetAnime(animationsDesactivees ? null : { id: objet.id, animation });
               }}
             />
           ))}

@@ -165,6 +165,16 @@ describe('moteur libre', () => {
     expect(habillage.moteurs).toContain('libre');
   });
 
+  it('réserve toute la hauteur restante à la toile sans dupliquer la consigne', () => {
+    const { container } = render(<Harnais />);
+    const toile = container.querySelector<HTMLElement>('[data-plateau="regions"]');
+    expect(toile).not.toBeNull();
+    expect(toile!.style.minBlockSize).toBe('0');
+    expect(toile!.style.overflow).toBe('hidden');
+    expect(container.querySelectorAll('.zone-lecture')).toHaveLength(0);
+    expect(container.querySelector('[data-plateau="nuancier"] [data-action="terminer"]')).not.toBeNull();
+  });
+
   it('chaque région offerte expose une prise transparente d’au moins 80 unités', () => {
     const { container } = render(<Harnais />);
     const prises = [...container.querySelectorAll<SVGCircleElement>('[data-cible-frappe="oui"]')];

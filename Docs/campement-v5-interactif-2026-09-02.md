@@ -17,12 +17,12 @@ La copie publiée `contenu/assets/campement/campement-v5.png` est identique à l
 - Les trente zones tactiles HTML sont calées en coordonnées natives dans
   `contenu/monde/campement.json`; aucune découpe de l'image n'est nécessaire pour cliquer.
 - Carte, coffre et chaudron s'ouvrent directement depuis leur objet peint.
-- Le feu, le papillon, sept lucioles et deux lueurs sont des calques indépendants, décoratifs,
-  non bloquants et supprimés visuellement en mode animations calmes.
-- Un toucher produit une réaction locale sans déplacer un rectangle découpé de l'image, ce qui
-  évite les raccords et les plaques de couleur visibles.
-- Les invitations au repos sont de petites étincelles ponctuelles, plus des cadres jaunes autour
-  des boîtes tactiles.
+- Les premiers calques de feu et de papillon ont été retirés après l'essai parent : ils
+  doublaient les objets déjà peints, étaient translucides et mal ancrés. Une animation d'objet
+  ne reviendra qu'avec un fond propre dont l'objet correspondant aura été retiré.
+- Un toucher ne souligne plus la boîte tactile invisible. Il produit six étincelles ponctuelles
+  et nomme la découverte dans une bulle stable, sans carré ni cercle autour de l'objet.
+- Les invitations au repos restent de petites étincelles ponctuelles et déphasées.
 
 `scripts/recomposer-campement.mjs` conserve son nom historique mais ne redessine plus rien : il
 copie l'image validée octet pour octet, puis vérifie ses dimensions et chacune des trente zones.
@@ -59,6 +59,8 @@ du jeu restent nécessaires.
 Captures locales :
 
 - `bac-a-sable/captures/campement-v5-raster-tablette-1920x1200-v2.png` ;
+- `bac-a-sable/captures/campement-reaction-corrigee.png` ;
+- `bac-a-sable/captures/coloriage-libre-responsive.png` ;
 - `bac-a-sable/campement-sprites/feu-contact.png` ;
 - `bac-a-sable/campement-sprites/papillon-contact.png`.
 
@@ -66,16 +68,18 @@ La procédure reproductible est décrite dans `.agents/skills/dessiner-campement
 
 ## État de validation
 
-Le décor V5 est validé par le parent. Le feu et le papillon sont intégrés comme première passe
-d'animation et passent leur QA technique ; leur appréciation esthétique finale se fait sur la
-capture de l'écran, avant toute mise à jour d'une référence visuelle Playwright.
+Le décor V5 est validé par le parent. La première passe d'animation feu/papillon a été rejetée
+pendant l'essai réel puis retirée du produit et du verrou d'assets. Le pipeline de sprites reste
+disponible, mais sa prochaine production devra partir d'un fond nettoyé et de calques opaques
+exactement ancrés, pas d'une superposition approximative.
 
 Le défaut de session parent du testeur, trouvé pendant la reprise précédente, reste corrigé : la
 surface `window.__test` referme la session mémoire entre recettes.
 
-La campagne complète exécutée après l'intégration raster donne :
+La campagne complète exécutée après le retrait des faux calques et la correction du coloriage
+libre donne :
 
-- 2 174/2 174 tests unitaires, composants et API ;
+- 2 180/2 180 tests unitaires, composants et API ;
 - 609/609 contrôles de contenu ;
 - 478/478 scénarios E2E ;
 - 247/247 contrôles de qualité et 6/6 budgets de bundle ;
@@ -84,4 +88,4 @@ La campagne complète exécutée après l'intégration raster donne :
 
 Ces neuf écarts T4 ne sont pas régénérés automatiquement : les règles du projet imposent une
 validation parent avant toute mise à jour d'une référence. Le détail fait foi dans
-`tests/rapports/RAPPORT.md`, campagne du 2 septembre 2026 à 10:33:10 UTC.
+`tests/rapports/RAPPORT.md`, campagne du 2 septembre 2026 à 12:26:44 UTC.

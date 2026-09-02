@@ -54,7 +54,6 @@ import { useCallback, useEffect, useRef } from 'react';
 import type { ReactElement } from 'react';
 import type { ActionLibre, ContenuLibre, CouleurColoriage, EtatLibre } from '@pierre/partage';
 import { hexDeCouleur } from '@pierre/partage';
-import { ZoneDeLecture } from '../../lecture/ZoneDeLecture.js';
 import type { ProprietesMoteur } from '../types.js';
 import { SceneLibre } from './SceneLibre.js';
 
@@ -181,9 +180,6 @@ export function MoteurLibre(
   );
 
   const etape = etat.etapes[etat.indexEtape];
-  // Aucune consigne : c'est la définition même de ce moteur (v2 § 5.4). La zone de lecture
-  // affiche donc une invitation, jamais une instruction — rien n'est attendu de l'enfant.
-  const consigne = null;
 
   return (
     <div
@@ -194,21 +190,16 @@ export function MoteurLibre(
       data-etape={etape === undefined ? '' : etape.identifiant}
       style={{
         display: 'grid',
-        // 4 lignes : l'invitation, le nuancier, LA TOILE (elle prend tout ce qui reste), le
-        // pied. `1fr` sur la seule ligne qui doit grandir — même principe que `MoteurPhrase`,
-        // où la zone de jeu est « tout le moteur, moins la bande de lecture ».
-        gridTemplateRows: 'auto auto 1fr auto',
+        // La consigne est déjà portée et lue par la barre de `EcranNoeud`. La répéter ici
+        // mangeait une ligne entière sans rien apprendre. Le nuancier accueille aussi le
+        // bouton de fin : toute la hauteur restante appartient ainsi à la toile.
+        gridTemplateRows: 'auto minmax(0, 1fr)',
         rowGap: '0.75rem',
         blockSize: '100%',
         minBlockSize: 0,
         paddingInline: '0.25rem',
       }}
     >
-      {/* La consigne passe par `ZoneDeLecture` : c'est le SEUL composant qui affiche du
-          texte à déchiffrer (§ 5.1). Sans quoi « le décor s'agite, le texte jamais » ne
-          tiendrait qu'à la discipline de onze fichiers. */}
-      <ZoneDeLecture texte={INVITE_LIBRE} motsCles={[]} />
-
       <div
         data-plateau="nuancier"
         style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0.25rem' }}
@@ -228,35 +219,7 @@ export function MoteurLibre(
             <span style={VISUELLEMENT_CACHE}>{couleur}</span>
           </button>
         ))}
-      </div>
 
-      {/* ── LA TOILE ────────────────────────────────────────────────────────────────────────
-          `libre` n'a rien à poser SUR le décor (aucun mot, contrairement à `phrase`) : le
-          décor EST le jeu, à pleine surface, et chaque région tapée prend la couleur choisie.
-          `data-plateau="regions"` est conservé — c'est le sélecteur que les tests visaient déjà
-          sur l'ancienne liste de boutons — mais il enveloppe maintenant une scène, pas une
-          liste. */}
-      <div data-plateau="regions" style={{ position: 'relative', minBlockSize: 0 }}>
-        <SceneLibre
-          habillage={habillage}
-          regionsOffertes={contenu.regions}
-          remplissages={etat.acquis}
-          animationsDesactivees={animationsDesactivees}
-          onColorier={(region, evenement) => {
-            jouer({ type: 'colorier', region }, evenement);
-          }}
-        />
-      </div>
-
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexWrap: 'wrap',
-          gap: '0.75rem',
-        }}
-      >
         <button
           type="button"
           data-action="terminer"
@@ -268,26 +231,32 @@ export function MoteurLibre(
         >
           J’ai fini
         </button>
+      </div>
 
-        {/* ── LES DEUX CONTRÔLES SONT PORTÉS PAR L'ÉCRAN, PAS PAR LE MOTEUR (R10) ────────────
-            Ce moteur rendait ici son propre « Écouter » et son propre « Gobi, aide-moi ». Les
-            deux étaient MUETS : leur `onClick` émettait une action et n'appelait jamais le
-            service de voix. Le père a tapé dessus et n'a rien eu — onze moteurs sur quatorze
-            faisaient pareil, alors que « tout est audible en un tap » n'est pas négociable.
-
-            `EcranNoeud` monte le vrai `BoutonEcouter` (qui joue le clip, et DISPARAÎT quand il
-            n'y en a pas — D42) et le vrai `<Gobi>`, qui porte la même prise `data-action="aide"`.
-            Un moteur ne peut pas héberger le vrai bouton d'écoute : il lui faudrait la clé
-            `<exercice>/<consigne>`, et `ProprietesMoteur` ne porte pas l'identifiant d'exercice.
-            Seul l'écran le connaît. */}
-        <p
-          role="status"
-          aria-live="polite"
-          data-animations={animationsDesactivees ? 'calmes' : 'vives'}
-          style={{ margin: 0, minInlineSize: '1px' }}
-        >
-          {etat.aide === null ? '' : (etat.aide.texte ?? '')}
-        </p>
+      {/* ── LA TOILE ────────────────────────────────────────────────────────────────────────
+          `libre` n'a rien à poser SUR le décor (aucun mot, contrairement à `phrase`) : le
+          décor EST le jeu, à pleine surface, et chaque région tapée prend la couleur choisie.
+          `data-plateau="regions"` est conservé — c'est le sélecteur que les tests visaient déjà
+          sur l'ancienne liste de boutons — mais il enveloppe maintenant une scène, pas une
+          liste. */}
+      <div
+        data-plateau="regions"
+        style={{
+          position: 'relative',
+          minBlockSize: 0,
+          minInlineSize: 0,
+          overflow: 'hidden',
+        }}
+      >
+        <SceneLibre
+          habillage={habillage}
+          regionsOffertes={contenu.regions}
+          remplissages={etat.acquis}
+          animationsDesactivees={animationsDesactivees}
+          onColorier={(region, evenement) => {
+            jouer({ type: 'colorier', region }, evenement);
+          }}
+        />
       </div>
     </div>
   );

@@ -144,14 +144,26 @@ describe('R11 comptée dans le DOM', () => {
     expect(ouvrirChaudron).toHaveBeenCalledWith(CAMPEMENT.coloriageLibre);
   });
 
-  it('rend l’illustration V5 et ses calques vivants au-dessus des prises', () => {
+  it('rend l’illustration V5 sans doubler le feu ni le papillon déjà peints', () => {
     monter();
 
     const decor = document.querySelector<HTMLImageElement>('[data-decor-campement="v5-raster"]');
     expect(decor?.getAttribute('src')).toContain('assets/campement/campement-v5.png');
-    expect(document.querySelector('[data-calque-campement="feu"]')).not.toBeNull();
-    expect(document.querySelector('[data-calque-campement="papillon"]')).not.toBeNull();
-    expect(document.querySelectorAll('[data-calque-campement="luciole"]')).toHaveLength(7);
+    expect(document.querySelectorAll('.campement-sprite')).toHaveLength(0);
+    expect(document.querySelectorAll('[data-calque-campement]')).toHaveLength(0);
+  });
+
+  it('répond au toucher par une découverte nommée et des étincelles, sans cadre géométrique', () => {
+    monter();
+
+    const tente = document.querySelector<HTMLElement>('[data-point="tente"]')!;
+    fireEvent.click(tente);
+
+    expect(document.querySelector('[data-decouverte="tente"]')?.textContent)
+      .toContain('Tu as trouvé la tente !');
+    expect(document.querySelectorAll('[data-effet-campement="tente"] [data-etincelle]'))
+      .toHaveLength(6);
+    expect(tente.style.boxShadow).toBe('none');
   });
 
   it('rend AU MOINS 25 points d’interaction libres', () => {
