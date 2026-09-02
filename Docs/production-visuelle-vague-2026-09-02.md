@@ -7,7 +7,8 @@ explicitement validé la nouvelle carte du monde : `contenu/assets/ouverture/pie
 seule image publiée. Les autres rendus restent dans `contenu/brouillons/` jusqu'à leur validation :
 
 - ouverture : `grisaille-v1.png`, `noms-v1.png`, `habitants-v1.png`, `appel-v1.png` ;
-- personnages : `filou-v3-entre-deux.png`, `bulle-v1.png`, `roc-v1.png`, `plume-v1.png` ;
+- personnages : `filou-v3-entre-deux.png`, `bulle-v2-editorial.png`, `roc-v2-editorial.png`,
+  `plume-v2-editorial.png` ;
 - décors : `ecole-v3.png`, `tapis-v2.png`, `brume-v2.png`, `forge-v2.png`,
   `fresque-murale-v2.png`.
 
@@ -54,6 +55,6 @@ centré sur fond blanc pur, sans halo, ombre, décor, texte, peinture, 3D ni est
 
 Les trois autres compagnons reprennent le même contrat de personnage entier sur fond blanc : Bulle,
 ondine bleu lagon avec son livre ; Roc, golem gris chaud moussu avec burin et tablier bleu pétrole ;
-Plume, oiseau bleu à poitrine crème avec sacoche. Leurs premiers rendus sont des brouillons de
-direction, pas des canoniques publiées.
-
+Plume, oiseau bleu à poitrine crème avec sacoche. Leur V2 impose de petits yeux noirs mats, une
+bouche simple, aucune proportion chibi et trois valeurs maximum par couleur. Les V1 aux grands yeux
+restent rejetées ; les V2 sont des candidats de validation, pas encore des canoniques publiées.
