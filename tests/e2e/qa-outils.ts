@@ -531,6 +531,14 @@ export interface CibleTropPetite {
  * ininterprétable.
  */
 export async function ciblesTropPetites(page: Page): Promise<readonly CibleTropPetite[]> {
+  // Au démarrage à froid, React peut monter l'écran une image avant la feuille globale.
+  // Attendre le jeton du contrat tactile évite de mesurer les dimensions HTML natives.
+  await page.waitForFunction(
+    () =>
+      getComputedStyle(document.documentElement).getPropertyValue('--cible-min').trim() === '64px',
+  );
+  await page.evaluate(async () => document.fonts.ready);
+
   return page.evaluate(
     ({ selecteur, minimum }) =>
       [...document.querySelectorAll(selecteur)]

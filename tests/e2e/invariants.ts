@@ -457,6 +457,15 @@ function sentinelleDansLaPage(config: ConfigurationSentinelle): void {
   const ecranCourant = (): string =>
     document.querySelector("[data-ecran]")?.getAttribute("data-ecran") ?? "aucun";
 
+  /**
+   * Le HTML peut être monté une image avant la feuille de style lors d'un démarrage à froid.
+   * Mesurer cette image transitoire produirait les dimensions natives du navigateur, puis les
+   * conserverait comme une vraie violation R16. Ce jeton appartient à la feuille globale : il
+   * constitue donc une attente d'état déterministe, sans temporisation arbitraire.
+   */
+  const stylesDuJeuPrets = (): boolean =>
+    getComputedStyle(document.documentElement).getPropertyValue("--cible-min").trim() === "64px";
+
   const etatDuJeu = (): EtatTest | null => {
     try {
       return fenetre.__test?.etat() ?? null;
@@ -626,6 +635,15 @@ function sentinelleDansLaPage(config: ConfigurationSentinelle): void {
   function auditer(): void {
     try {
       const ecran = ecranCourant();
+
+      // React peut précéder la feuille de style d'une image. Tant que le contrat CSS global
+      // n'est pas visible, l'état peint n'est pas encore un écran du jeu et ses dimensions ne
+      // doivent alimenter aucun verdict. On se réveille à l'image suivante jusqu'à cet état.
+      if (!stylesDuJeuPrets()) {
+        planifierAudit();
+        return;
+      }
+
       const interactifs = elementsInteractifs();
 
       // ── ARMEMENT. Tant que l'application n'a rien monté, il n'y a rien à auditer et un

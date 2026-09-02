@@ -38,3 +38,12 @@ Après validation visuelle des deux brouillons étalons :
 
 Le chaudron nécessite un arbitrage sémantique avant sa promotion : le bouton du campement ouvre
 actuellement `galeries-12`, donc une paroi des Galeries, et non le coloriage du chaudron.
+
+## Fiabilisation du contrôle tactile
+
+La recette complète a révélé un faux positif intermittent de R16 sur un démarrage à froid : React
+pouvait monter le HTML une image avant la feuille globale, et la sentinelle conservait alors les
+dimensions natives des boutons comme une violation. La sentinelle et l'outil de mesure attendent
+désormais le jeton CSS `--cible-min: 64px` ; la mesure directe attend aussi l'état
+`document.fonts.ready`. Ce sont des attentes d'état, sans temporisation arbitraire. Le cas témoin
+`cite-des-histoires-14` passe après correction.
