@@ -54,12 +54,16 @@ lisibles mais paraissent posés devant une ébauche. Ce chantier demande de repr
 - Le parent relève encore des plaques de couleur typiques d'une retouche générative dans la V3 du
   campement. La V4 repart d'une génération neuve : aplats continus, ombres en valeurs limitées,
   palette forestière fraîche et texture homogène, sans effet de peinture.
+- Le traitement « aventure 2D éditoriale » de la V4 est validé. Son contenu évoquait toutefois un
+  bivouac d'adolescents. La V5 conserve ce traitement et reconstruit le lieu comme un repaire de
+  7 ans : cabane-tente, dessins suspendus, coussins, objets de découverte et petits animaux.
 
 ## Arbitrages attendus
 
-Le parent doit encore valider le traitement graphique de la V4 du campement. Le tracé est autorisé
-à poursuivre. Éclair attend une proposition d'asset plus lisible. Les compositions d'exercice sont
-validées, mais aucune référence visuelle n'est mise à jour avant la fin de leurs reprises.
+Le parent doit encore valider la composition enfantine de la V5 du campement. Le style graphique
+est acquis. Le tracé est autorisé à poursuivre. Éclair attend une proposition d'asset plus lisible.
+Les compositions d'exercice sont validées, mais aucune référence visuelle n'est mise à jour avant
+la fin de leurs reprises.
 
 ## Mesure du testeur pendant la revue
 
