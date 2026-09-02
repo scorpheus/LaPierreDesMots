@@ -124,6 +124,7 @@ export interface CrochetsTest {
     etatMoteur: unknown;
     aide: unknown;
   };
+  fermerZoneParent(): void;
   sauterAnimations(): void;
   graine(n: number): void;
   figerHorloge(instant: string): void;
@@ -308,6 +309,9 @@ export async function preparerSansProfil(page: Page): Promise<void> {
   await page.evaluate(
     ({ graine, instant }) => {
       const crochets = (window as unknown as FenetreTest).__test;
+      // Le jeton parent vit dans un module, donc il survit aux `goto` de cette longue recette.
+      // Sans cette fermeture explicite, la recette suivante saute le pavé puis l'attend 270 s.
+      crochets.fermerZoneParent();
       crochets.sauterAnimations();
       crochets.graine(graine);
       crochets.figerHorloge(instant);

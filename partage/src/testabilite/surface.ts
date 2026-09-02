@@ -46,6 +46,8 @@ export interface SurfaceTest {
   /** L'action est celle du moteur monté. `ActionColorie` en v1. */
   repondre(action: unknown): Promise<void>;
   etat(): EtatTestSerialisable;
+  /** Referme la session parent en mémoire entre deux recettes jouées sur la même page. */
+  fermerZoneParent(): void;
   sauterAnimations(): void;
   graine(n: number): void;
   figerHorloge(instant: string): void;

@@ -29,6 +29,7 @@ import {
   lireProgression,
   listerProfils
 } from '../api/client.js';
+import { fermerZoneParent as fermerSessionParent } from '../api/commun.js';
 import type { MagasinJeu } from '../etat/magasin.js';
 import { figerHorloge, maintenantIso } from '../etat/services.js';
 import type { ServicesJeu } from '../moteurs/types.js';
@@ -254,6 +255,10 @@ export function monterCrochetsDeTest({
         animationsDesactivees: courant.animationsDesactivees,
         graine: courant.graine
       };
+    },
+
+    fermerZoneParent(): void {
+      fermerSessionParent();
     },
 
     sauterAnimations(): void {

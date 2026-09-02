@@ -687,6 +687,24 @@ body {
   margin-inline: auto;
 }
 
+.campement-svg,
+.campement-svg > svg {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.campement-svg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.campement-svg [id^="objet-"] {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
 .campement-gobi,
 [data-ecran="campement"] [data-mur-des-noms="oui"],
 [data-ecran="campement"] [data-chaudron="oui"] {

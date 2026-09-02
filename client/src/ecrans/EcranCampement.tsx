@@ -15,8 +15,8 @@
 //      « Un monde à moitié colorié appelle qu'on le termine » (v2 § 3.2).
 //   3. **Jamais d'écran vide.** Tant que le monde n'est pas arrivé, le campement affiche son
 //      décor et ses points ; c'est le monde qui est optionnel, pas le décor.
-import { useCallback, useMemo } from "react";
-import type { ReactElement } from "react";
+import { useCallback, useMemo, useState } from "react";
+import type { AnimationEvent as AnimationEventReact, ReactElement } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { EtatMonde, IdNoeud, PointInteraction } from "@pierre/partage";
 import { campementDuDocument, prochainStade, stadesDuDocument } from "@pierre/partage/monde";
@@ -32,6 +32,8 @@ import { MurDesNoms } from "../monde/MurDesNoms.js";
 import type { NomDuMur } from "../monde/MurDesNoms.js";
 import { PastilleSortie } from "../monde/PastilleSortie.js";
 import { PointLibre } from "../monde/PointLibre.js";
+import { classeAnimation } from "../monde/animations-campement.js";
+import type { AnimationCampement } from "../monde/animations-campement.js";
 // La table des noms de région vit dans `EcranCoffre.tsx` — l'autre écran de ce même lot. Elle
 // n'est pas hissée dans un module commun parce qu'aucun lot du contrat du monde v4 ne possède
 // `client/src/monde/` : un lot ne s'accorde pas un fichier qu'un autre pourrait écrire. Sa
@@ -97,6 +99,14 @@ async function chargerJson(chemin: string): Promise<unknown> {
   return (await reponse.json()) as unknown;
 }
 
+async function chargerSvgCampement(chemin: string): Promise<string> {
+  const reponse = await fetch(urlAsset(chemin), { headers: { Accept: "image/svg+xml" } });
+  if (!reponse.ok) {
+    throw new Error(`Décor introuvable : ${chemin} (réponse ${String(reponse.status)}).`);
+  }
+  return reponse.text();
+}
+
 export function EcranCampement({
   campement: campementInjecte = null,
   monde: mondeInjecte = null,
@@ -109,6 +119,10 @@ export function EcranCampement({
   const magasin = useMagasin();
   const profil = useEtatJeu((etat) => etat.profil);
   const animationsDesactivees = useEtatJeu((etat) => etat.animationsDesactivees);
+  const [objetAnime, fixerObjetAnime] = useState<{
+    readonly id: string;
+    readonly animation: AnimationCampement;
+  } | null>(null);
 
   const requeteCampement = useQuery({
     queryKey: ["monde", "campement"],
@@ -143,6 +157,31 @@ export function EcranCampement({
 
   const points: readonly PointInteraction[] = campement?.points ?? [];
   const [largeurScene, hauteurScene] = dimensions(campement?.scene.viewBox ?? "0 0 1200 800");
+
+  const requeteDecor = useQuery({
+    queryKey: ["monde", "campement", "decor", campement?.scene.fichier ?? null],
+    queryFn: () => chargerSvgCampement(String(campement!.scene.fichier)),
+    enabled: campement !== null,
+  });
+
+  const decorAnime = useMemo(() => {
+    const svg = requeteDecor.data;
+    if (svg === undefined || objetAnime === null) return svg ?? null;
+    const id = `objet-${objetAnime.id}`;
+    return svg.replace(
+      `id="${id}"`,
+      `id="${id}" data-objet-anime="oui" class="${classeAnimation(objetAnime.animation)}"`,
+    );
+  }, [objetAnime, requeteDecor.data]);
+
+  const finirAnimationObjet = useCallback(
+    (evenement: AnimationEventReact<HTMLDivElement>): void => {
+      const cible = evenement.target;
+      if (!(cible instanceof Element) || objetAnime === null) return;
+      if (cible.id === `objet-${objetAnime.id}`) fixerObjetAnime(null);
+    },
+    [objetAnime],
+  );
 
   /**
    * R31/R11 — journalise la visite d'un point libre. GRATUIT : aucune étoile, aucun acquis,
@@ -187,6 +226,24 @@ export function EcranCampement({
       magasin.getState().demarrerNoeud(paquet);
     });
   }, [magasin, noeudLibre, surOuvrirChaudron]);
+
+  const allerCarte = useCallback((): void => {
+    if (surAllerCarte === undefined) magasin.getState().naviguer("carte");
+    else surAllerCarte();
+  }, [magasin, surAllerCarte]);
+
+  const allerCoffre = useCallback((): void => {
+    surAllerCoffre?.();
+  }, [surAllerCoffre]);
+
+  const activerObjetUtile = useCallback(
+    (point: PointInteraction): void => {
+      if (point.id === "carte") allerCarte();
+      else if (point.id === "coffre") allerCoffre();
+      else if (point.id === "chaudron") ouvrirLeChaudron();
+    },
+    [allerCarte, allerCoffre, ouvrirLeChaudron],
+  );
 
   /** Le mur des noms est bâti sur les formes de Gobi — voir la note PLACEHOLDER de `MurDesNoms`. */
   const noms: readonly NomDuMur[] = useMemo(
@@ -240,13 +297,7 @@ export function EcranCampement({
           data-vers="carte"
           data-pictogramme="carte"
           aria-label="Ouvrir la carte du monde"
-          onClick={() => {
-            if (surAllerCarte === undefined) {
-              magasin.getState().naviguer("carte");
-            } else {
-              surAllerCarte();
-            }
-          }}
+          onClick={allerCarte}
           style={{ flexDirection: "column", gap: "0.35rem", inlineSize: "11rem" }}
         >
           <span aria-hidden="true" style={{ fontSize: "2.75rem", lineHeight: 1 }}>
@@ -261,7 +312,7 @@ export function EcranCampement({
           data-vers="coffre"
           data-pictogramme="coffre"
           aria-label="Ouvrir le coffre aux collections"
-          onClick={surAllerCoffre}
+          onClick={allerCoffre}
           style={{ flexDirection: "column", gap: "0.35rem", inlineSize: "11rem" }}
         >
           <span aria-hidden="true" style={{ fontSize: "2.75rem", lineHeight: 1 }}>
@@ -395,7 +446,9 @@ export function EcranCampement({
             maxInlineSize: "1200px",
             aspectRatio: `${String(largeurScene)} / ${String(hauteurScene)}`,
             backgroundImage:
-              campement === null ? "none" : `url(${urlAsset(String(campement.scene.fichier))})`,
+              campement === null || decorAnime !== null
+                ? "none"
+                : `url(${urlAsset(String(campement.scene.fichier))})`,
             backgroundSize: "contain",
             backgroundRepeat: "no-repeat",
             backgroundPosition: "center",
@@ -416,6 +469,15 @@ export function EcranCampement({
             gridColumn: "1 / -1",
           }}
         >
+          {decorAnime === null ? null : (
+            <div
+              className="campement-svg"
+              data-decor-campement="inline"
+              aria-hidden="true"
+              onAnimationEnd={finirAnimationObjet}
+              dangerouslySetInnerHTML={{ __html: decorAnime }}
+            />
+          )}
           {points.map((point) => (
             <PointLibre
               key={point.id}
@@ -424,6 +486,10 @@ export function EcranCampement({
               hauteurScene={hauteurScene}
               animationsDesactivees={animationsDesactivees}
               surVisite={noterVisite}
+              surActiver={activerObjetUtile}
+              surAnimerObjet={(objet, animation) => {
+                fixerObjetAnime({ id: objet.id, animation });
+              }}
             />
           ))}
         </div>

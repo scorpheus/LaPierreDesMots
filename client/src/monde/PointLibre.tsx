@@ -31,6 +31,7 @@ import type { PointInteraction } from '@pierre/partage';
 import { useServices } from '../etat/services.js';
 import { direTexte } from '../services/voix-navigateur.js';
 import { animationDuPoint, classeAnimation, phaseInvite } from './animations-campement.js';
+import type { AnimationCampement } from './animations-campement.js';
 
 export interface ProprietesPointLibre {
   readonly point: PointInteraction;
@@ -41,6 +42,10 @@ export interface ProprietesPointLibre {
   readonly animationsDesactivees?: boolean;
   /** Journalise la visite. N'a jamais d'effet sur la progression de l'enfant. */
   readonly surVisite?: (point: PointInteraction) => void;
+  /** Demande à la scène d'animer le groupe SVG visible qui porte cet objet. */
+  readonly surAnimerObjet?: (point: PointInteraction, animation: AnimationCampement) => void;
+  /** Ouvre la destination éventuelle d'un objet utile (carte, coffre, chaudron). */
+  readonly surActiver?: (point: PointInteraction) => void;
 }
 
 /** Ce que le point vient de faire, pour l'afficher sans rien coûter. */
@@ -51,7 +56,9 @@ export function PointLibre({
   largeurScene,
   hauteurScene,
   animationsDesactivees = false,
-  surVisite
+  surVisite,
+  surAnimerObjet,
+  surActiver
 }: ProprietesPointLibre): ReactElement {
   const services = useServices();
   const [reaction, fixerReaction] = useState<Reaction>('repos');
@@ -65,6 +72,8 @@ export function PointLibre({
   const toucher = useCallback((): void => {
     fixerReaction('reagit');
     surVisite?.(point);
+    if (!animationsDesactivees) surAnimerObjet?.(point, animation);
+    surActiver?.(point);
 
     // La réaction est GRATUITE et ne peut pas échouer : si le fournisseur est muet, il se tait,
     // et le point a quand même bougé à l'écran. Aucune branche ne mène à un message d'erreur.
@@ -73,7 +82,7 @@ export function PointLibre({
     } else if (point.reaction === 'son' || point.reaction === 'animation') {
       void services.audio.jouerEffet('depot-correct', { volume: 0.4 }).catch(() => undefined);
     }
-  }, [point, services, surVisite]);
+  }, [animation, animationsDesactivees, point, services, surActiver, surAnimerObjet, surVisite]);
 
   /**
    * Le retour au repos.

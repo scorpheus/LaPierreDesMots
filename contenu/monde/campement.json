@@ -1,5 +1,5 @@
 {
-  "$commentaire": "Le campement — v2 § 3.4, exigence R11 : au moins 25 points d'interaction gratuits, dont 10 animations uniques et 6 répliques vocales. Ces trois comptes sont MESURÉS par `auditerCampement` et non affirmés : `tests/unitaires/campement-audit.test.ts` lit CE fichier et échoue si l'un d'eux passe sous le seuil. « Un décor où le clic ne fait rien est un décor raté » (v2 § 2). Le champ `replique` porte une CLÉ DE MANIFESTE — `campement/<idPoint>`, forme gelée au contrat de finition v3 § 5.4 — et non un chemin de fichier : la résolution passe par `contenu/audio/manifeste.json` (lot N2), seule source de vérité sur l'existence d'un clip. Tant que le manifeste ne porte pas la clé, `aUnAudio` rend `false`, D42 masque le bouton, et `FournisseurVoix` retombe sur la lecture du libellé — jamais un écran d'erreur. D45 : les trente points sont CONSERVÉS tels quels ; `tests/unitaires/campement-25-gratuits.test.ts` les nomme un par un et échoue si l'un disparaît.",
+  "$commentaire": "Campement V5 : 30 points conservés, recomposés en îlots naturels par scripts/recomposer-campement.mjs. Les zones suivent les groupes SVG et les objets complets sont animés dans le DOM.",
   "scene": {
     "fichier": "habillages/campement/campement.svg",
     "viewBox": "0 0 1200 800"
@@ -13,10 +13,10 @@
       "animationUnique": true,
       "replique": "campement/tente",
       "zone": [
-        20,
-        30,
-        96,
-        96
+        430,
+        130,
+        250,
+        250
       ]
     },
     {
@@ -26,10 +26,10 @@
       "animationUnique": true,
       "replique": "campement/feu",
       "zone": [
-        140,
-        30,
-        96,
-        96
+        535,
+        410,
+        130,
+        130
       ]
     },
     {
@@ -39,10 +39,10 @@
       "animationUnique": true,
       "replique": "campement/carte",
       "zone": [
-        260,
-        30,
-        96,
-        96
+        85,
+        190,
+        145,
+        145
       ]
     },
     {
@@ -52,10 +52,10 @@
       "animationUnique": true,
       "replique": "campement/coffre",
       "zone": [
-        380,
-        30,
-        96,
-        96
+        145,
+        505,
+        125,
+        125
       ]
     },
     {
@@ -65,10 +65,10 @@
       "animationUnique": true,
       "replique": "campement/mur-des-noms",
       "zone": [
-        500,
-        30,
-        96,
-        96
+        15,
+        350,
+        120,
+        120
       ]
     },
     {
@@ -78,10 +78,10 @@
       "animationUnique": true,
       "replique": "campement/chaudron",
       "zone": [
-        620,
-        30,
-        96,
-        96
+        335,
+        390,
+        115,
+        115
       ]
     },
     {
@@ -91,10 +91,10 @@
       "animationUnique": true,
       "replique": "campement/lunette",
       "zone": [
-        740,
-        30,
-        96,
-        96
+        845,
+        245,
+        135,
+        135
       ]
     },
     {
@@ -104,10 +104,10 @@
       "animationUnique": true,
       "replique": null,
       "zone": [
-        860,
-        30,
-        96,
-        96
+        970,
+        170,
+        145,
+        145
       ]
     },
     {
@@ -117,10 +117,10 @@
       "animationUnique": true,
       "replique": null,
       "zone": [
-        980,
-        30,
-        96,
-        96
+        300,
+        35,
+        110,
+        110
       ]
     },
     {
@@ -130,10 +130,10 @@
       "animationUnique": true,
       "replique": null,
       "zone": [
-        1100,
-        30,
-        96,
-        96
+        720,
+        95,
+        95,
+        95
       ]
     },
     {
@@ -143,10 +143,10 @@
       "animationUnique": false,
       "replique": null,
       "zone": [
-        20,
-        250,
-        96,
-        96
+        735,
+        445,
+        82,
+        82
       ]
     },
     {
@@ -156,10 +156,10 @@
       "animationUnique": false,
       "replique": null,
       "zone": [
-        140,
-        250,
-        96,
-        96
+        865,
+        440,
+        95,
+        95
       ]
     },
     {
@@ -169,10 +169,10 @@
       "animationUnique": false,
       "replique": null,
       "zone": [
-        260,
-        250,
-        96,
-        96
+        785,
+        555,
+        76,
+        76
       ]
     },
     {
@@ -182,10 +182,10 @@
       "animationUnique": true,
       "replique": null,
       "zone": [
-        380,
-        250,
-        96,
-        96
+        685,
+        270,
+        76,
+        76
       ]
     },
     {
@@ -195,10 +195,10 @@
       "animationUnique": false,
       "replique": null,
       "zone": [
-        500,
-        250,
-        96,
-        96
+        135,
+        55,
+        150,
+        150
       ]
     },
     {
@@ -208,10 +208,10 @@
       "animationUnique": false,
       "replique": null,
       "zone": [
-        620,
-        250,
-        96,
-        96
+        455,
+        565,
+        80,
+        80
       ]
     },
     {
@@ -221,10 +221,10 @@
       "animationUnique": false,
       "replique": "campement/panier-de-pommes",
       "zone": [
-        740,
-        250,
-        96,
-        96
+        970,
+        510,
+        100,
+        100
       ]
     },
     {
@@ -234,10 +234,10 @@
       "animationUnique": false,
       "replique": null,
       "zone": [
-        860,
-        250,
-        96,
-        96
+        1080,
+        450,
+        80,
+        80
       ]
     },
     {
@@ -247,10 +247,10 @@
       "animationUnique": true,
       "replique": null,
       "zone": [
-        980,
-        250,
-        96,
-        96
+        700,
+        590,
+        78,
+        78
       ]
     },
     {
@@ -260,10 +260,10 @@
       "animationUnique": false,
       "replique": "campement/livre-ouvert",
       "zone": [
-        1100,
-        250,
-        96,
-        96
+        520,
+        600,
+        115,
+        115
       ]
     },
     {
@@ -273,10 +273,10 @@
       "animationUnique": false,
       "replique": null,
       "zone": [
-        20,
-        470,
-        96,
-        96
+        640,
+        675,
+        70,
+        70
       ]
     },
     {
@@ -286,10 +286,10 @@
       "animationUnique": false,
       "replique": null,
       "zone": [
-        140,
-        470,
-        96,
-        96
+        95,
+        650,
+        72,
+        72
       ]
     },
     {
@@ -299,10 +299,10 @@
       "animationUnique": false,
       "replique": null,
       "zone": [
-        260,
-        470,
-        96,
-        96
+        25,
+        695,
+        64,
+        64
       ]
     },
     {
@@ -312,10 +312,10 @@
       "animationUnique": false,
       "replique": null,
       "zone": [
-        380,
-        470,
-        96,
-        96
+        1080,
+        285,
+        100,
+        100
       ]
     },
     {
@@ -325,10 +325,10 @@
       "animationUnique": false,
       "replique": null,
       "zone": [
-        500,
-        470,
-        96,
-        96
+        1105,
+        610,
+        70,
+        70
       ]
     },
     {
@@ -338,10 +338,10 @@
       "animationUnique": true,
       "replique": null,
       "zone": [
-        620,
-        470,
-        96,
-        96
+        275,
+        255,
+        68,
+        68
       ]
     },
     {
@@ -351,10 +351,10 @@
       "animationUnique": false,
       "replique": null,
       "zone": [
-        740,
-        470,
-        96,
-        96
+        920,
+        690,
+        64,
+        64
       ]
     },
     {
@@ -364,10 +364,10 @@
       "animationUnique": false,
       "replique": "campement/grenouille",
       "zone": [
-        860,
-        470,
-        96,
-        96
+        1020,
+        665,
+        72,
+        72
       ]
     },
     {
@@ -377,10 +377,10 @@
       "animationUnique": false,
       "replique": "campement/pierre-gravee",
       "zone": [
-        980,
-        470,
-        96,
-        96
+        45,
+        520,
+        88,
+        88
       ]
     },
     {
@@ -390,10 +390,10 @@
       "animationUnique": true,
       "replique": null,
       "zone": [
-        1100,
-        470,
-        96,
-        96
+        1080,
+        55,
+        80,
+        80
       ]
     }
   ],

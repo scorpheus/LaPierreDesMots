@@ -95,8 +95,12 @@ test.describe('parcours campement — R11', () => {
     await preparer(page);
     await allerAuCampement(page);
 
-    const points = page.locator('[data-interaction="libre"]');
+    const tousLesPoints = page.locator('[data-interaction="libre"]');
+    const points = page.locator(
+      '[data-interaction="libre"]:not([data-point="carte"]):not([data-point="coffre"]):not([data-point="chaudron"])'
+    );
     const total = await points.count();
+    expect(total).toBe((await tousLesPoints.count()) - 3);
 
     for (let rang = 0; rang < total; rang += 1) {
       const point = points.nth(rang);
@@ -115,6 +119,23 @@ test.describe('parcours campement — R11', () => {
 
     // R14, la traduction mécanique : rien ne peut échouer au campement.
     expect(await page.locator('[data-etat="echec"]').count()).toBe(0);
+  });
+
+  test('les objets utiles du dessin ouvrent réellement leur destination', async ({ page }) => {
+    await preparer(page);
+    await allerAuCampement(page);
+
+    await page.locator('[data-point="carte"]').click();
+    await expect(page.locator('[data-ecran="carte"]')).toBeVisible();
+
+    await page.locator('[data-vers="campement"]').click();
+    await page.locator('[data-point="coffre"]').click();
+    await expect(page.locator('[data-ecran="coffre"]')).toBeVisible();
+
+    await page.locator('[data-vers="campement"]').click();
+    await page.locator('[data-point="chaudron"]').click();
+    await expect(page.locator('[data-ecran="noeud"]')).toBeVisible();
+    await expect(page.locator('[data-moteur="libre"]')).toBeVisible();
   });
 
   test('Gobi porte son stade au campement, et la jauge montre le vide restant', async ({

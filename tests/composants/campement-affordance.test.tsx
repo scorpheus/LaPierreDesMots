@@ -80,7 +80,12 @@ function monter(animationsDesactivees = false): void {
   render(
     <QueryClientProvider client={client}>
       <FournisseurJeu valeur={{ services: services(), magasin }}>
-        <EcranCampement campement={CAMPEMENT} monde={monde()} stades={STADES} />
+        <EcranCampement
+          campement={CAMPEMENT}
+          monde={monde()}
+          stades={STADES}
+          surOuvrirChaudron={() => undefined}
+        />
       </FournisseurJeu>
     </QueryClientProvider>
   );
