@@ -2,12 +2,16 @@
 
 ## Périmètre observé
 
-Captures réelles du client de test, en 1280 × 800, obtenues par le parcours visible depuis un
-profil enfant. Elles sont conservées dans `bac-a-sable/recette-2026-09-02/` :
+Les premières captures, en 1280 × 800, n'étaient pas la recette tablette de référence. Le parent
+l'a relevé le 2 septembre. La cible décidée est **le mode horizontal 16:10**, avec un viewport de
+recette à **1 920 × 1 200 pixels CSS** et une densité ×2, comme `playwright.config.ts`. Le format
+vertical reste un filet responsive, pas la présentation principale du jeu.
 
-- `exercice-trace.png` — moteur `trace`, graphèmes b/p ;
-- `exercice-colorie.png` — moteur `colorie`, région du Marais Jumeau ;
-- `exercice-eclair.png` — moteur `eclair`, choix entre « bille » et « ballon ».
+Les captures corrigées sont conservées dans `bac-a-sable/recette-2026-09-02/` :
+
+- `exercice-trace-cible-1920x1200.png` — moteur `trace`, graphèmes b/d ;
+- `exercice-colorie-corrige-1920x1200.png` — moteur `colorie`, cour de l'école ;
+- `exercice-eclair-cible-1920x1200.png` — moteur `eclair`, lucioles de couleur.
 
 Ces images servent à l'arbitrage du parent. Elles ne deviennent pas des références de test visuel
 sans validation explicite.
@@ -16,25 +20,26 @@ sans validation explicite.
 
 ### Tracé
 
-L'action principale est compréhensible et la zone de tracé est grande. L'écran reste cependant
+Direction de reprise validée par le parent. L'action principale est compréhensible et la zone de tracé est grande. L'écran reste cependant
 très vide et clinique : Gobi est minuscule, la récompense visuelle du geste est faible, et le décor
 n'aide pas l'enfant à sentir qu'il agit dans le monde. Priorité proposée : intégrer le tracé à un
 petit événement du décor et renforcer le retour visuel après chaque geste juste.
 
 ### Coloriage
 
-Le problème est bloquant sur une hauteur de 800 px : la liste complète des consignes et la palette
-occupent le premier écran, tandis que la scène à colorier est repoussée sous la ligne de flottaison.
-L'enfant voit donc une fiche de consignes avant de voir le jeu. Priorité proposée : ne montrer que
-la consigne courante, remplacer la liste par des repères compacts de progression, conserver le
-bouton d'écoute, et réserver la majorité de l'écran à la scène.
+Le parent confirme que le dessin est invisible et que les consignes futures sont trop petites. La
+mesure en 1 920 × 1 200 nuance la cause mais pas le verdict : le dessin existe, cependant il est
+réduit à une vignette centrale par les phrases futures. Correction implantée : seule la consigne
+courante reste en grand dans l'en-tête ; les autres phrases disparaissent au profit de repères
+circulaires compacts. La scène occupe désormais la majorité du cadre, sans défilement.
 
 ### Éclair
 
-C'est le plus lisible des trois : la scène reste visible et les deux réponses sont nettes. Les
-boutons paraissent toutefois posés devant l'illustration plutôt qu'intégrés à elle, et « Prêt ?
-Montre-moi le mot » ressemble visuellement à un contrôle sans que sa fonction soit évidente.
-Priorité proposée : faire de la scène le support du choix et clarifier l'état de départ.
+Le fond est techniquement rendu, mais la capture correcte confirme le grief du parent : de grandes
+masses uniformément grises et un cadrage trop proche rendent le décor abstrait. Les boutons sont
+lisibles mais paraissent posés devant une ébauche. Ce chantier demande de reprendre les trois SVG
+`clairiere.luciole`, `galeries.cristal` et `marais.orage`, pas de simplement augmenter une opacité.
+« Prêt ? Montre-moi le mot » doit également devenir une porte visuelle plus évidente.
 
 ## Décisions déjà rendues
 
@@ -42,11 +47,14 @@ Priorité proposée : faire de la scène le support du choix et clarifier l'éta
   formulation vocale sont identiques.
 - La direction chaleureuse du concept de campement généré le 2 septembre est validée : composition
   centrale, lumière douce, objets intégrés à un lieu habité plutôt qu'alignés comme un catalogue.
+- Le premier rendu était trop jaune et trop cartoon ; le deuxième trop pictural. La troisième
+  proposition cherche le milieu : décor 2D de jeu net, palette naturelle, textures discrètes.
 
 ## Arbitrages attendus
 
-Le parent doit encore confirmer l'ordre des trois chantiers proposé ci-dessus et dire, pour chaque
-capture, ce qu'il souhaite conserver. Aucune référence visuelle n'est mise à jour avant cet accord.
+Le parent doit encore valider la troisième direction du campement et la nouvelle composition du
+coloriage. Le tracé est autorisé à poursuivre. Éclair attend une proposition d'asset plus lisible.
+Aucune référence visuelle n'est mise à jour avant ces accords.
 
 ## Mesure du testeur pendant la revue
 

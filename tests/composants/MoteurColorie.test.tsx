@@ -179,6 +179,19 @@ describe('MoteurColorie — rendu', () => {
     }
   });
 
+  it('garde la scène dominante : aucune consigne future en petit, seulement une progression compacte', async () => {
+    render(<Harnais />);
+    await attendreLaScene();
+
+    for (const consigne of contenu.consignes.slice(1)) {
+      expect(screen.queryByText(consigne.texte)).toBeNull();
+    }
+    const progression = document.querySelector('[data-progression-consignes]');
+    expect(progression?.getAttribute('aria-label')).toBe(
+      `Consigne 1 sur ${String(contenu.consignes.length)}`
+    );
+  });
+
   it('rend une région par région coloriable de l’habillage, toutes non peintes', async () => {
     render(<Harnais />);
     await attendreLaScene();

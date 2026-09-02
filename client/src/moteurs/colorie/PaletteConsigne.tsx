@@ -11,7 +11,7 @@
  * plus rien.
  */
 
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 import type { ReactElement, ReactNode } from 'react';
 import type { CouleurColoriage, NiveauAide } from '@pierre/partage';
 import { hexDeCouleur } from '@pierre/partage';
@@ -21,34 +21,43 @@ import type { ConsigneColorie } from '@pierre/partage';
 const COTE_GODET_PX = 72;
 
 const STYLES_PALETTE = `
-.pierre-consigne {
+.pierre-indice-colorie {
   background: var(--parchemin, #FFF6E3);
   color: var(--trait, #1B2440);
   font-family: Andika, 'Atkinson Hyperlegible', system-ui, sans-serif;
-  font-size: 1.5rem;
-  line-height: 1.6;
+  font-size: 1.25rem;
+  line-height: 1.4;
   border-radius: 14px;
-  padding: 0.9rem 1.1rem;
+  padding: 0.55rem 0.8rem;
   /* Aucune animation dans le champ de lecture. Règle non négociable. */
   animation: none;
   transition: none;
 }
-.pierre-consigne mark {
+.pierre-indice-colorie mark {
   background: var(--soleil, #FFC93C);
   color: inherit;
   border-radius: 6px;
   padding: 0 0.15em;
 }
-/* Consignes déjà faites ou encore à venir : plus petites et estompées, pour que la consigne
-   ACTIVE soit la seule qui saute aux yeux.
-
-   L'opacité vaut .7 et non .55 — c'est une contrainte de lisibilité, pas un goût. À .55, le
-   texte encre (#1B2440) composé sur le parchemin (#FFF6E3) donne le gris #818692, mesuré par
-   axe-core à **3,39:1** là où le WCAG AA en exige 4,5:1 sur du texte de 16 px. Trois consignes
-   du seul exercice de la v1 tombaient dessus. À .7 le composé vaut #5F6371, soit 5,57:1 —
-   au-dessus du seuil avec de la marge, et toujours nettement plus pâle que la consigne active.
-   Toucher à cette valeur sans refaire le calcul rouvre le défaut. */
-.pierre-consigne--a-venir, .pierre-consigne--faite { font-size: 1rem; opacity: .7; }
+.pierre-progression-consignes {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-block-size: 1.25rem;
+}
+.pierre-progression-consignes > span {
+  inline-size: 0.85rem;
+  block-size: 0.85rem;
+  border: 2px solid var(--trait, #1B2440);
+  border-radius: 50%;
+  background: transparent;
+}
+.pierre-progression-consignes > span[data-etat="faite"] { background: var(--vert, #2FB344); }
+.pierre-progression-consignes > span[data-etat="courante"] {
+  background: var(--soleil, #FFC93C);
+  box-shadow: 0 0 0 3px var(--parchemin, #FFF6E3), 0 0 0 5px var(--trait, #1B2440);
+}
 .pierre-godet {
   inline-size: ${COTE_GODET_PX}px;
   block-size: ${COTE_GODET_PX}px;
@@ -126,14 +135,7 @@ export function PaletteConsigne(proprietes: ProprietesPaletteConsigne): ReactEle
     [onChoisir]
   );
 
-  const lignes = useMemo(
-    () =>
-      consignes.map((consigne, index) => {
-        const etat = index === indexConsigne ? 'courante' : index < indexConsigne ? 'faite' : 'a-venir';
-        return { consigne, etat } as const;
-      }),
-    [consignes, indexConsigne]
-  );
+  const consigneCourante = consignes[indexConsigne];
 
   return (
     <div
@@ -154,45 +156,39 @@ export function PaletteConsigne(proprietes: ProprietesPaletteConsigne): ReactEle
     >
       <style>{STYLES_PALETTE}</style>
 
-      <ol style={{ display: 'grid', gap: '0.5rem', listStyle: 'none', margin: 0, padding: 0 }}>
-        {lignes.map(({ consigne, etat }) => (
-          <li
+      {/* La phrase courante vit déjà, en grand, dans l'en-tête de `EcranNoeud`. Les phrases
+          futures occupaient jusqu'à la moitié de l'écran et réduisaient le dessin à une
+          vignette. On conserve ici leur PROGRESSION, jamais leur texte. */}
+      <div
+        className="pierre-progression-consignes"
+        data-progression-consignes
+        data-consigne={consigneCourante?.id}
+        data-consigne-etat={consigneCourante === undefined ? undefined : 'courante'}
+        data-forme={consigneCourante?.forme}
+        role="progressbar"
+        aria-label={`Consigne ${String(indexConsigne + 1)} sur ${String(consignes.length)}`}
+        aria-valuemin={1}
+        aria-valuemax={consignes.length}
+        aria-valuenow={indexConsigne + 1}
+      >
+        {consignes.map((consigne, index) => (
+          <span
             key={consigne.id}
-            className={`pierre-consigne pierre-consigne--${etat}`}
-            data-consigne={consigne.id}
-            data-consigne-etat={etat}
-            data-forme={consigne.forme}
-            aria-current={etat === 'courante' ? 'step' : undefined}
-            // ── LA CONSIGNE COURANTE N'EST PLUS RÉPÉTÉE ICI — arbitrage du père, R49 ──────────
-            //
-            // « la phrase est en haut et en bas, il y a doublon […] lire les phrases c'est
-            // normal ». `EcranNoeud` porte déjà `consigne.texte` dans sa barre d'en-tête (le
-            // seul endroit qui connaît `<idExercice>/<idConsigne>` et peut donc porter le
-            // bouton « Écouter » — l'arbitrage déjà rendu pour le bouton d'écoute, repris ici
-            // mot pour mot pour le texte). Ce composant ne le redit plus — ni même surlignée :
-            // une phrase reconstruite avec des `<mark>` reste la MÊME phrase pour un enfant qui
-            // déchiffre.
-            //
-            // Ce qui reste PROPRE à cette ligne, et qui n'existe nulle part ailleurs : la
-            // TRACE des consignes déjà faites et à venir (« faite »/« à-venir », en dessous),
-            // et — pour la consigne courante seulement, au palier `indice` — les MOTS-CLÉS
-            // SEULS (pas la phrase), qu'aucun autre endroit de l'écran ne montre.
-            aria-label={
-              etat === 'courante'
-                ? niveauAide === 'aucune'
-                  ? 'Consigne en cours — lue en haut de l’écran'
-                  : `Indice — mots-clés : ${consigne.motsCles.join(', ')}`
-                : undefined
-            }
-          >
-            {etat === 'courante'
-              ? niveauAide !== 'aucune' && consigne.motsCles.length > 0
-                ? motsClesEnIndice(consigne.motsCles)
-                : null
-              : consigne.texte}
-          </li>
+            data-etat={index === indexConsigne ? 'courante' : index < indexConsigne ? 'faite' : 'a-venir'}
+            aria-hidden="true"
+          />
         ))}
-      </ol>
+      </div>
+
+      {consigneCourante === undefined ? null : niveauAide !== 'aucune' &&
+        consigneCourante.motsCles.length > 0 ? (
+        <div
+          className="pierre-indice-colorie"
+          aria-label={`Indice — mots-clés : ${consigneCourante.motsCles.join(', ')}`}
+        >
+          {motsClesEnIndice(consigneCourante.motsCles)}
+        </div>
+      ) : null}
 
       <div
         role="group"
