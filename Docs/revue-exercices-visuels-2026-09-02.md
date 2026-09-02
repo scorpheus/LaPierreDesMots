@@ -49,12 +49,17 @@ lisibles mais paraissent posés devant une ébauche. Ce chantier demande de repr
   centrale, lumière douce, objets intégrés à un lieu habité plutôt qu'alignés comme un catalogue.
 - Le premier rendu était trop jaune et trop cartoon ; le deuxième trop pictural. La troisième
   proposition cherche le milieu : décor 2D de jeu net, palette naturelle, textures discrètes.
+- La composition corrigée des exercices est validée le 2 septembre : les dessins restent simples,
+  mais leur taille et leur fonctionnement conviennent à la recette tablette.
+- Le parent relève encore des plaques de couleur typiques d'une retouche générative dans la V3 du
+  campement. La V4 repart d'une génération neuve : aplats continus, ombres en valeurs limitées,
+  palette forestière fraîche et texture homogène, sans effet de peinture.
 
 ## Arbitrages attendus
 
-Le parent doit encore valider la troisième direction du campement et la nouvelle composition du
-coloriage. Le tracé est autorisé à poursuivre. Éclair attend une proposition d'asset plus lisible.
-Aucune référence visuelle n'est mise à jour avant ces accords.
+Le parent doit encore valider le traitement graphique de la V4 du campement. Le tracé est autorisé
+à poursuivre. Éclair attend une proposition d'asset plus lisible. Les compositions d'exercice sont
+validées, mais aucune référence visuelle n'est mise à jour avant la fin de leurs reprises.
 
 ## Mesure du testeur pendant la revue
 
