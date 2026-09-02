@@ -62,37 +62,67 @@
       "raison": "Même statut que `filou.svg` : choisi par le père le même jour, même graine par compagnon (g1001), colorisation et verrou encore à faire."
     },
     {
-      "fichier": "brouillons/assets/objets/soleil.svg",
+      "fichier": "assets/objets/soleil.svg",
       "consommateur": "contenu/exercices/clairiere/ecole-02-place.json",
       "symbole": "assets/objets/soleil.svg",
-      "raison": "L'exercice LIVRÉ `clairiere-ecole-02-place` (nœud `clairiere-04`) réclame ce dessin par son chemin final `assets/objets/soleil.svg` (`reserve[].asset`) — commit « Neuf assets manquants trouvés, cinq produits… », 2026-08-08, qui nomme les cinq objets un par un et la cause exacte de leur rejet initial par le critère `fuite` du QC (boîte englobante d'un objet creux, faussement pleine de fond). MESURÉ, aucune entrée à son nom dans `production/assets.lock.json` : la promotion vers `contenu/assets/objets/` — qui déplacerait ce fichier hors du périmètre de ce registre — n'a pas encore eu lieu. Tant qu'elle n'a pas eu lieu, l'exercice qui le réclame ne peut pas se jouer avec son propre décor ; ce n'est donc pas un fichier mort, c'est une promotion en attente, et elle appartient au père."
+      "raison": "L'exercice livré `clairiere-ecole-02-place` réclame ce dessin par `reserve[].asset`. Le parent a jugé les dessins d’exercice simples mais fonctionnels le 2 septembre 2026 ; la promotion rend enfin vrai le chemin déjà livré, en attendant les variantes raster illustrées."
     },
     {
-      "fichier": "brouillons/assets/objets/ballon.svg",
+      "fichier": "assets/objets/ballon.svg",
       "consommateur": "contenu/exercices/clairiere/ecole-02-place.json",
       "symbole": "assets/objets/ballon.svg",
-      "raison": "Même statut que `soleil.svg` : réclamé par la même `reserve[]`, même promotion en attente."
+      "raison": "Même statut que `soleil.svg` : asset simple validé comme fonctionnel et désormais servi par la même `reserve[]`."
     },
     {
-      "fichier": "brouillons/assets/objets/oiseau.svg",
+      "fichier": "assets/objets/oiseau.svg",
       "consommateur": "contenu/exercices/clairiere/ecole-02-place.json",
       "symbole": "assets/objets/oiseau.svg",
-      "raison": "Même statut que `soleil.svg` : réclamé par la même `reserve[]`, même promotion en attente."
+      "raison": "Même statut que `soleil.svg` : asset simple validé comme fonctionnel et désormais servi par la même `reserve[]`."
     },
     {
-      "fichier": "brouillons/assets/objets/poisson.svg",
+      "fichier": "assets/objets/poisson.svg",
       "consommateur": "contenu/exercices/clairiere/ecole-02-place.json",
       "symbole": "assets/objets/poisson.svg",
-      "raison": "Même statut que `soleil.svg` : réclamé par la même `reserve[]`, même promotion en attente."
+      "raison": "Même statut que `soleil.svg` : asset simple validé comme fonctionnel et désormais servi par la même `reserve[]`."
     },
     {
-      "fichier": "brouillons/assets/objets/parapluie.svg",
+      "fichier": "assets/objets/parapluie.svg",
       "consommateur": "contenu/exercices/clairiere/ecole-02-place.json",
       "symbole": "assets/objets/parapluie.svg",
-      "raison": "Même statut que `soleil.svg` — et c'est nommément l'objet dont le commit du 2026-08-08 décrit la forme creuse (un dôme et un manche fin) qui faisait échouer à tort le critère `fuite` du QC image, corrigé depuis. Réclamé par la même `reserve[]`, même promotion en attente."
+      "raison": "Même statut que `soleil.svg` ; sa forme creuse a déjà passé le contrôle de fuite corrigé et l’asset est désormais servi par la même `reserve[]`."
     }
   ],
   "archives": [
+    {
+      "fichier": "brouillons/assets/objets/soleil.svg",
+      "remplacePar": "assets/objets/soleil.svg",
+      "raison": "Source conservée après promotion octet pour octet vers le chemin réellement servi par l’exercice.",
+      "decision": "validation parent du dessin simple comme fonctionnel, 2026-09-02"
+    },
+    {
+      "fichier": "brouillons/assets/objets/ballon.svg",
+      "remplacePar": "assets/objets/ballon.svg",
+      "raison": "Source conservée après promotion octet pour octet vers le chemin réellement servi par l’exercice.",
+      "decision": "validation parent du dessin simple comme fonctionnel, 2026-09-02"
+    },
+    {
+      "fichier": "brouillons/assets/objets/oiseau.svg",
+      "remplacePar": "assets/objets/oiseau.svg",
+      "raison": "Source conservée après promotion octet pour octet vers le chemin réellement servi par l’exercice.",
+      "decision": "validation parent du dessin simple comme fonctionnel, 2026-09-02"
+    },
+    {
+      "fichier": "brouillons/assets/objets/poisson.svg",
+      "remplacePar": "assets/objets/poisson.svg",
+      "raison": "Source conservée après promotion octet pour octet vers le chemin réellement servi par l’exercice.",
+      "decision": "validation parent du dessin simple comme fonctionnel, 2026-09-02"
+    },
+    {
+      "fichier": "brouillons/assets/objets/parapluie.svg",
+      "remplacePar": "assets/objets/parapluie.svg",
+      "raison": "Source conservée après promotion octet pour octet vers le chemin réellement servi par l’exercice.",
+      "decision": "validation parent du dessin simple comme fonctionnel, 2026-09-02"
+    },
     {
       "fichier": "assets/gobi/stade-1-oeuf.svg",
       "remplacePar": "assets/gobi/stades/stade-1.svg",

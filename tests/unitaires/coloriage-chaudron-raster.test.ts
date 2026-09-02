@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -8,6 +9,7 @@ import { decoderPng } from '../../scripts/sprites/png.mjs';
 // @ts-expect-error script JavaScript de production appelé directement pour prouver la reproductibilité
 import { construireChaudronRaster } from '../../scripts/coloriages/publier-chaudron.mjs';
 import type { Habillage } from '@pierre/partage';
+import { urlAssetAutonome } from '@client/base/depot-contenu-autonome';
 
 const RACINE = resolve('.');
 const HABILLAGE = JSON.parse(
@@ -42,6 +44,9 @@ describe('coloriage raster du chaudron validé', () => {
     for (const image of [fond, trait, masque]) {
       expect([image.largeur, image.hauteur]).toEqual([1536, 1024]);
     }
+    for (const chemin of [raster!.fond, raster!.trait, raster!.masque]) {
+      expect(urlAssetAutonome(String(chemin)), `${String(chemin)} absent de l’APK`).not.toBeNull();
+    }
 
     const rapport = JSON.parse(
       readFileSync(resolve(RACINE, 'production/coloriages/chaudron-raster.rapport.json'), 'utf8'),
@@ -49,6 +54,36 @@ describe('coloriage raster du chaudron validé', () => {
     expect(rapport.empreinteSourceFichier).toBe(
       'sha256:7F05618925D644E7914D2E0C69BEB7CF642B3C8F4E9A7A4C695AE102ABA9F1F5',
     );
+  });
+
+  it('croise le verrou de validation avec les trois fichiers dérivés publiés', () => {
+    const verrou = JSON.parse(
+      readFileSync(resolve(RACINE, 'production/assets.lock.json'), 'utf8'),
+    ) as {
+      assets: readonly {
+        id: string;
+        fichier: string;
+        empreinte: string;
+        derivees?: Record<string, { fichier: string; empreinte: string }>;
+        valide_par: string;
+      }[];
+    };
+    const entrees = verrou.assets.filter((entree) => entree.id === 'coloriage.chaudron.v3');
+    expect(entrees, 'le chaudron est absent ou doublé dans le verrou').toHaveLength(1);
+    const entree = entrees[0]!;
+    const attendus = {
+      fond: { fichier: entree.fichier, empreinte: entree.empreinte },
+      trait: entree.derivees?.trait,
+      masque: entree.derivees?.masque,
+    };
+    expect(entree.valide_par).toBe('parent');
+    for (const [nom, derivee] of Object.entries(attendus)) {
+      expect(derivee, `couche ${nom} absente du verrou`).toBeDefined();
+      const octets = readFileSync(resolve(RACINE, derivee!.fichier));
+      expect(derivee!.empreinte).toBe(
+        `sha256:${createHash('sha256').update(octets).digest('hex').toUpperCase()}`,
+      );
+    }
   });
 
   it('donne à chaque région une couleur unique réellement présente dans le masque', () => {

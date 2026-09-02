@@ -179,6 +179,12 @@ export function mesurerDecor(decor) {
 
 function svgDe(decor, mesurees) {
   const [, , largeur, hauteur] = decor.viewBox.split(' ').map(Number);
+  const fondIllustre = decor.fondIllustre === undefined
+    ? ''
+    : `\n    <image data-fond-illustre="ecole" href="${decor.fondIllustre}" x="0" y="0" width="${largeur}" height="${hauteur}" preserveAspectRatio="xMidYMid slice"/>`;
+  const geometrieMasquee = decor.masquerGeometrie === true
+    ? ' opacity="0" aria-hidden="true"'
+    : '';
   const zones = mesurees
     .map((z) => {
       const trait = z.trait === null ? '' : ` ${z.trait}`;
@@ -208,12 +214,12 @@ function svgDe(decor, mesurees) {
     dans scripts/decors/decors.mjs, et l'émetteur refuse d'écrire si la mesure est mauvaise.
   -->
   <g id="calque-fond">
-    <path class="fond" fill="${PARCHEMIN}" stroke="none" d="M0,0 L${largeur},0 L${largeur},${hauteur} L0,${hauteur} Z"/>
+    <path class="fond" fill="${PARCHEMIN}" stroke="none" d="M0,0 L${largeur},0 L${largeur},${hauteur} L0,${hauteur} Z"/>${fondIllustre}
   </g>
-  <g id="calque-zones" fill="${GRISAILLE}" stroke="${TRAIT}" stroke-width="4" stroke-linejoin="round">
+  <g id="calque-zones" fill="${GRISAILLE}" stroke="${TRAIT}" stroke-width="4" stroke-linejoin="round"${geometrieMasquee}>
 ${zones}
   </g>
-  <g id="calque-trait" fill="none" stroke="${TRAIT}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+  <g id="calque-trait" fill="none" stroke="${TRAIT}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"${geometrieMasquee}>
 ${traits}
   </g>
 </svg>

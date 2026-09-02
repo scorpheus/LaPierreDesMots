@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 922 615" width="922" height="615" role="img" aria-label="La cour de l’école — à toi de placer">
   <title>La cour de l’école — à toi de placer</title>
-  <desc>La cour : le bâtiment avec son toit, sa porte et son mur, un arbre à tronc et houppier lobé, le banc, l’herbe — et les trois zones de dépôt en pointillé, inchangées.</desc>
+  <desc>La cour illustrée : l’école, sa maîtresse, le banc, les arbres et les trois zones où placer les dessins.</desc>
   <!--
     DÉCOR — lot M6, contrat du monde v4 § 2. Trait noir sur blanc, la COULEUR VIENT DU CODE
     (annexe P § 2) : les régions sortent d'ici en grisaille #8E97A8, qui est leur état
@@ -17,19 +17,20 @@
   -->
   <g id="calque-fond">
     <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L922,0 L922,615 L0,615 Z"/>
+    <image data-fond-illustre="ecole" href="/api/contenu/assets/assets/decors/ecole.png" x="0" y="0" width="922" height="615" preserveAspectRatio="xMidYMid slice"/>
   </g>
-  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round">
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round" opacity="0" aria-hidden="true">
     <path id="herbe-cour" class="zone" data-region-svg="herbe-cour" fill="#8E97A8" fill-rule="evenodd" d="M0,398 L25.6,404.9 L51.2,406.9 L76.8,402.5 L102.4,394.9 L128.1,389.5 L153.7,390.2 L179.3,396.4 L204.9,403.8 L230.5,407 L256.1,403.8 L281.7,396.4 L307.3,390.2 L332.9,389.5 L358.6,394.9 L384.2,402.5 L409.8,406.9 L435.4,404.9 L461,398 L486.6,391.1 L512.2,389.1 L537.8,393.5 L563.4,401.1 L589.1,406.5 L614.7,405.8 L640.3,399.6 L665.9,392.2 L691.5,389 L717.1,392.2 L742.7,399.6 L768.3,405.8 L793.9,406.5 L819.6,401.1 L845.2,393.5 L870.8,389.1 L896.4,391.1 L922,398 L922,615 L0,615 Z"/>
     <path id="mur-ecole" class="zone" data-region-svg="mur-ecole" fill="#8E97A8" fill-rule="evenodd" d="M190,258 L350,258 L350,400 L190,400 Z"/>
     <path id="porte-ecole" class="zone" data-region-svg="porte-ecole" fill="#8E97A8" fill-rule="evenodd" d="M239,400 L239,353 L239.8,346.1 L242.1,339.5 L245.8,333.7 L250.7,328.8 L256.5,325.1 L263.1,322.8 L270,322 L276.9,322.8 L283.5,325.1 L289.3,328.8 L294.2,333.7 L297.9,339.5 L300.2,346.1 L301,353 L301,400 Z"/>
     <path id="arbre-feuilles" class="zone" data-region-svg="arbre-feuilles" fill="#8E97A8" fill-rule="evenodd" d="M739.5,280.3 L727.4,287.9 L708.3,290.2 L691.5,290.4 L681.8,294.1 L676.8,304 L670.2,317 L658.3,326.1 L643,325.8 L629.4,316.7 L619.8,305.3 L611.4,298.7 L599,299 L581,301.9 L562.4,301.2 L551.4,293.6 L552.1,281.1 L560.5,268.6 L566.9,259.1 L563.8,251.6 L552.3,242.7 L541.3,231.3 L540.5,219.7 L552.6,212.1 L571.7,209.8 L588.5,209.6 L598.2,205.9 L603.2,196 L609.8,183 L621.7,173.9 L637,174.2 L650.6,183.3 L660.2,194.7 L668.6,201.3 L681,201 L699,198.1 L717.6,198.8 L728.6,206.4 L727.9,218.9 L719.5,231.4 L713.1,240.9 L716.2,248.4 L727.7,257.3 L738.7,268.7 Z"/>
     <path id="arbre-tronc" class="zone" data-region-svg="arbre-tronc" fill="#8E97A8" fill-rule="evenodd" d="M622,330 L658,330 L658,414 L622,414 Z"/>
     <path id="banc-assise" class="zone" data-region-svg="banc-assise" fill="#8E97A8" fill-rule="evenodd" d="M38,466 L152,466 L152,492 L38,492 Z"/>
-    <path id="ciel" class="zone" data-region-svg="ciel" fill="none" fill-rule="evenodd" stroke-width="2" stroke-dasharray="8 7" d="M600,40 L760,40 L760,160 L600,160 Z"/>
-    <path id="toit-ecole" class="zone" data-region-svg="toit-ecole" fill="none" fill-rule="evenodd" stroke-width="2" stroke-dasharray="8 7" d="M200,200 L340,200 L340,258 L200,258 Z"/>
-    <path id="a-cote-du-banc" class="zone" data-region-svg="a-cote-du-banc" fill="none" fill-rule="evenodd" stroke-width="2" stroke-dasharray="8 7" d="M170,430 L300,430 L300,560 L170,560 Z"/>
+    <path id="ciel" class="zone" data-region-svg="ciel" fill="none" fill-rule="evenodd" stroke-width="2" stroke-dasharray="8 7" d="M625,25 L755,25 L755,115 L625,115 Z"/>
+    <path id="toit-ecole" class="zone" data-region-svg="toit-ecole" fill="none" fill-rule="evenodd" stroke-width="2" stroke-dasharray="8 7" d="M245,65 L335,65 L335,145 L245,145 Z"/>
+    <path id="a-cote-du-banc" class="zone" data-region-svg="a-cote-du-banc" fill="none" fill-rule="evenodd" stroke-width="2" stroke-dasharray="8 7" d="M250,350 L350,350 L350,450 L250,450 Z"/>
   </g>
-  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0" aria-hidden="true">
     <path class="trait" d="M175,260 L270,196 L365,260"/>
     <path class="trait" d="M52,492 L52,542"/>
     <path class="trait" d="M138,492 L138,542"/>

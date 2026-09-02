@@ -174,12 +174,14 @@
   "palette": {
     "jetons": {},
     "nuancier": [
-      "rouge",
-      "orange",
-      "jaune",
+      "bleu",
       "noir",
-      "gris",
-      "brun"
+      "rouge",
+      "brun",
+      "violet",
+      "jaune",
+      "rose",
+      "orange"
     ]
   },
   "timings": {

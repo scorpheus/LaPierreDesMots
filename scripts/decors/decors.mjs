@@ -277,20 +277,21 @@ const CLAIRIERE = [
     traits: [ligne([[404, 496], [584, 480]]), ligne([[720, 460], [820, 460]])],
   }),
 
-  // ── ENRICHISSEMENT 1/3 : le décor `place` passe de 3 zones à 9 régions. Les TROIS zones
-  //    d'origine gardent leur géométrie AU PIXEL et leur trait pointillé : ce sont les cibles
-  //    de dépôt, et « ce qui est tapable est ce qui est visible » (le bouchon avait raison sur
-  //    ce point-là). Les six régions ajoutées sont la scène qui manquait autour.
+  // ── ENRICHISSEMENT 1/3 : le décor `place` passe de 3 zones à 9 régions. Les trois zones
+  //    de dépôt suivent désormais l’illustration validée : ciel dégagé, pan bleu du toit et
+  //    espace libre à droite du banc. « Ce qui est tapable est ce qui est visible. »
   scene({
     habillage: 'clairiere.ecole-place',
     fichier: 'clairiere/ecole-place.svg',
     viewBox: '0 0 922 615',
     libelle: 'La cour de l’école — à toi de placer',
     description:
-      'La cour : le bâtiment avec son toit, sa porte et son mur, un arbre à tronc et houppier ' +
-      'lobé, le banc, l’herbe — et les trois zones de dépôt en pointillé, inchangées.',
+      'La cour illustrée : l’école, sa maîtresse, le banc, les arbres et les trois zones où ' +
+      'placer les dessins.',
     region: 'clairiere',
     moteurs: ['place'],
+    fondIllustre: '/api/contenu/assets/assets/decors/ecole.png',
+    masquerGeometrie: true,
     zones: [
       z('herbe-cour', 'l’herbe de la cour', F.bandeau(0, 922, 398, 615, 9, 5)),
       z('mur-ecole', 'le mur de l’école', F.rect(190, 258, 160, 142)),
@@ -298,9 +299,9 @@ const CLAIRIERE = [
       z('arbre-feuilles', 'les feuilles de l’arbre', F.lobe(640, 250, 108, 6, 0.68, 44, 0.4, 0.72)),
       z('arbre-tronc', 'le tronc de l’arbre', F.rect(622, 330, 36, 84)),
       z('banc-assise', 'l’assise du banc', F.rect(38, 466, 114, 26)),
-      z('ciel', 'le ciel', F.rect(600, 40, 160, 120), { fill: 'none', trait: 'stroke-width="2" stroke-dasharray="8 7"' }),
-      z('toit-ecole', 'le toit de l’école', F.rect(200, 200, 140, 58), { fill: 'none', trait: 'stroke-width="2" stroke-dasharray="8 7"' }),
-      z('a-cote-du-banc', 'à côté du banc', F.rect(170, 430, 130, 130), { fill: 'none', trait: 'stroke-width="2" stroke-dasharray="8 7"' }),
+      z('ciel', 'le ciel', F.rect(625, 25, 130, 90), { fill: 'none', trait: 'stroke-width="2" stroke-dasharray="8 7"' }),
+      z('toit-ecole', 'le toit de l’école', F.rect(245, 65, 90, 80), { fill: 'none', trait: 'stroke-width="2" stroke-dasharray="8 7"' }),
+      z('a-cote-du-banc', 'à côté du banc', F.rect(250, 350, 100, 100), { fill: 'none', trait: 'stroke-width="2" stroke-dasharray="8 7"' }),
     ],
     traits: [
       ligne([[175, 260], [270, 196], [365, 260]]),
@@ -747,6 +748,7 @@ const MARAIS = [
       'tronc, une barque échouée et un nénuphar perdu. Quand on lit, la brume s’en va.',
     region: 'marais-jumeau',
     moteurs: ['colorie'],
+    nuancier: ['brun', 'noir', 'rose', 'jaune', 'rouge', 'orange', 'bleu', 'vert'],
     zones: [
       z('ciel-pale', 'le ciel pâle', ciel(72, 8, 2)),
       z('ciel', 'le ciel', F.bandeau(0, 960, 72, 200, 8, 2)),
@@ -944,6 +946,7 @@ const FORET = [
       'tailles plus un gland — le tapis qu’on recolorie feuille après feuille.',
     region: 'foret-muette',
     moteurs: ['colorie'],
+    nuancier: ['brun', 'noir', 'violet', 'vert', 'rouge', 'jaune', 'orange', 'rose'],
     zones: [
       z('ciel-entre-troncs', 'le ciel entre les troncs', ciel(64, 7, 4)),
       z('ciel', 'le ciel', F.bandeau(0, 960, 64, 180, 9, 3)),
@@ -1094,6 +1097,7 @@ const VOLCAN = [
       'plein de braises, un seau d’eau, une étincelle qui saute.',
     region: 'volcan',
     moteurs: ['colorie'],
+    nuancier: ['bleu', 'noir', 'rouge', 'brun', 'violet', 'jaune', 'rose', 'orange'],
     zones: [
       z('mur-de-la-forge', 'le mur de la forge', ciel(150, 9, 3)),
       z('sol-de-la-forge', 'le sol de la forge', sol(478, 8, 5)),
@@ -1386,6 +1390,7 @@ const CITE = [
       'recolorier, deux échafaudages, un pot de couleur et un pinceau posés dans la rue.',
     region: 'cite-des-histoires',
     moteurs: ['colorie'],
+    nuancier: ['rouge', 'vert', 'jaune', 'brun', 'rose', 'orange', 'violet', 'bleu'],
     zones: [
       z('mur-de-pierre', 'le mur de pierre', ciel(60, 6, 3)),
       z('pave-de-la-rue', 'le pavé de la rue', sol(500, 7, 6)),

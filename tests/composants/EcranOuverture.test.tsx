@@ -155,6 +155,27 @@ describe('la séquence se déroule, et se termine sur un geste de l’enfant', (
     );
   });
 
+  it('reste lisible, accessible et avançable si le raster ET son SVG de repli manquent', async () => {
+    monter({ sequence: SEQUENCE });
+
+    const image = document.querySelector<HTMLImageElement>('[data-decor-raster="pierre"]');
+    expect(image).not.toBeNull();
+    fireEvent.error(image!);
+
+    await waitFor(() => {
+      const repli = document.querySelector('[data-decor-svg="pierre"]');
+      expect(repli).not.toBeNull();
+      expect(repli?.getAttribute('role')).toBe('img');
+      expect(repli?.getAttribute('aria-label')).toBe('Image 1 sur 5');
+    });
+    expect(document.querySelector('[data-texte-tableau="pierre"]')?.textContent).toBe(
+      SEQUENCE.tableaux[0]?.texte,
+    );
+    fireEvent.click(document.querySelector('[data-suite="ouverture"]')!);
+    expect(document.querySelector('[data-ecran="ouverture"]')?.getAttribute('data-tableau-courant'))
+      .toBe('grisaille');
+  });
+
   it('avance tableau par tableau, dans l’ordre du récit', () => {
     monter({ sequence: SEQUENCE });
     const ecran = (): Element => document.querySelector('[data-ecran="ouverture"]')!;

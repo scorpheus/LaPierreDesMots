@@ -85,8 +85,17 @@ describe('décors raster validés', () => {
     for (const [nom, id] of Object.entries(DECORS)) {
       const relatif = `assets/decors/${nom}.png`;
       const image = pixelsRgbPng(readFileSync(join(process.cwd(), 'contenu', relatif)));
-      const entree = verrou.assets.find((candidate) => candidate.id === id);
+      const entrees = verrou.assets.filter((candidate) => candidate.id === id);
+      const entree = entrees[0];
+      const couleursEchantillonnees = new Set<string>();
+      for (let pixel = 0; pixel < image.pixels.length; pixel += 3 * 101) {
+        couleursEchantillonnees.add(image.pixels.subarray(pixel, pixel + 3).toString('hex'));
+        if (couleursEchantillonnees.size > 64) break;
+      }
       expect([image.largeur, image.hauteur]).toEqual([1536, 1024]);
+      expect(entrees, `${nom} absent ou doublé dans le verrou`).toHaveLength(1);
+      expect(couleursEchantillonnees.size, `${nom} est devenu une image vide ou uniforme`)
+        .toBeGreaterThan(64);
       expect(entree?.fichier).toBe(`contenu/${relatif}`);
       expect(entree?.empreinte).toBe(
         `sha256:${createHash('sha256').update(image.pixels).digest('hex').toUpperCase()}`

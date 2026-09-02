@@ -19,6 +19,7 @@ import { useCallback } from 'react';
 import type { ReactElement } from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import type { ElementPlacable } from '@pierre/partage';
+import { urlAsset } from '../../api/client.js';
 
 type IdElement = string;
 
@@ -78,9 +79,9 @@ function Jeton(proprietes: {
       aria-label={element.libelle}
       style={{
         minWidth: `${CIBLE_MINIMALE_PX}px`,
-        minHeight: `${CIBLE_MINIMALE_PX}px`,
-        padding: '0.5rem 0.75rem',
-        borderRadius: '0.75rem',
+        minHeight: '96px',
+        padding: '0.4rem 0.8rem 0.55rem',
+        borderRadius: '1rem',
         border: `${saisi ? 3 : 1.5}px solid ${TRAIT}`,
         // Un élément posé s'estompe ; il ne disparaît pas et ne devient jamais rouge (R14).
         opacity: place ? 0.45 : 1,
@@ -89,9 +90,22 @@ function Jeton(proprietes: {
         cursor: place ? 'default' : 'pointer',
         touchAction: 'none',
         transform: deplacement,
+        display: 'grid',
+        justifyItems: 'center',
+        alignContent: 'center',
+        gap: '0.15rem',
+        fontWeight: 700,
       }}
     >
-      {element.libelle}
+      <img
+        data-dessin-objet={element.id}
+        src={urlAsset(element.asset)}
+        alt=""
+        aria-hidden="true"
+        draggable={false}
+        style={{ width: '54px', height: '54px', objectFit: 'contain', pointerEvents: 'none' }}
+      />
+      <span>{element.libelle}</span>
     </button>
   );
 }
@@ -104,7 +118,7 @@ export function Reserve(proprietes: ProprietesReserve): ReactElement {
       data-reserve="place"
       role="group"
       aria-label="Les objets à placer"
-      style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}
+      style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0.75rem' }}
     >
       {elements.map((element) => (
         <Jeton

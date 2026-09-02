@@ -66,6 +66,7 @@ function decoderPngRgb(octets: Buffer): {
   for (let ligne = 0; ligne < hauteur; ligne += 1) {
     const filtre = compresse[position] ?? -1;
     position += 1;
+    expect([0, 1, 2, 3, 4], `filtre PNG inconnu à la ligne ${String(ligne)}`).toContain(filtre);
     for (let colonne = 0; colonne < pas; colonne += 1) {
       const brut = compresse[position + colonne] ?? 0;
       const gauche = colonne >= 3 ? (pixels[ligne * pas + colonne - 3] ?? 0) : 0;
@@ -105,10 +106,19 @@ describe('assets raster du mode autonome', () => {
       const cheminRelatif = `assets/ouverture/${code}.png`;
       const fichier = join(process.cwd(), 'contenu', cheminRelatif);
       const image = decoderPngRgb(readFileSync(fichier));
-      const entree = verrou.assets.find((candidate) => candidate.id === `ouverture.${code}.v1`);
+      const entrees = verrou.assets.filter((candidate) => candidate.id === `ouverture.${code}.v1`);
+      const entree = entrees[0];
+      const couleursEchantillonnees = new Set<string>();
+      for (let pixel = 0; pixel < image.pixels.length; pixel += 3 * 101) {
+        couleursEchantillonnees.add(image.pixels.subarray(pixel, pixel + 3).toString('hex'));
+        if (couleursEchantillonnees.size > 64) break;
+      }
 
       expect(urlAssetAutonome(cheminRelatif), `${code} absent de l'APK`).not.toBeNull();
+      expect(entrees, `${code} absent ou doublé dans le verrou`).toHaveLength(1);
       expect(image.largeur / image.hauteur, `${code} n'est plus cadré en 3:2`).toBeCloseTo(1.5, 2);
+      expect(couleursEchantillonnees.size, `${code} est devenu une image vide ou uniforme`)
+        .toBeGreaterThan(64);
       expect(entree?.fichier).toBe(`contenu/${cheminRelatif}`);
       expect(entree?.generation.resolution).toEqual([image.largeur, image.hauteur]);
       if (code === 'pierre') {

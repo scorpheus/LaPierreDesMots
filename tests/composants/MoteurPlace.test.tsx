@@ -12,7 +12,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { useCallback, useState } from 'react';
-import { cleanup, fireEvent, render } from '@testing-library/react';
+import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { moteurPlace } from '@partage/moteurs/place/moteur';
@@ -102,6 +102,18 @@ afterEach(() => {
 });
 
 describe('MoteurPlace — les prises du contrat § 7', () => {
+  it('affiche l’illustration d’école validée sous les trois zones de placement', async () => {
+    render(<Harnais />);
+
+    await waitFor(() => {
+      const fond = document.querySelector<SVGImageElement>('[data-fond-illustre="ecole"]');
+      expect(fond).not.toBeNull();
+      expect(fond?.getAttribute('href')).toBe('/api/contenu/assets/assets/decors/ecole.png');
+    });
+
+    expect(document.querySelectorAll('[data-zone-cible]')).toHaveLength(3);
+  });
+
   it('expose data-moteur, data-habillage, et une zone par zone du contenu', () => {
     render(<Harnais />);
     const racine = document.querySelector('[data-moteur="place"]');
@@ -129,6 +141,17 @@ describe('MoteurPlace — les prises du contrat § 7', () => {
       expect(noeud?.getAttribute('data-place')).toBe('non');
     }
   });
+
+  it('montre le dessin local de chaque objet dans la réserve', () => {
+    render(<Harnais />);
+    for (const element of contenu.reserve) {
+      const image = document.querySelector<HTMLImageElement>(
+        `[data-element="${element.id}"] img[data-dessin-objet="${element.id}"]`,
+      );
+      expect(image, `dessin de « ${element.id} » absent`).not.toBeNull();
+      expect(image?.getAttribute('src')).toBe(`/api/contenu/assets/${element.asset}`);
+    }
+  });
 });
 
 describe('MoteurPlace — bonne réponse, mauvaise, aide, double-tap', () => {
@@ -147,6 +170,11 @@ describe('MoteurPlace — bonne réponse, mauvaise, aide, double-tap', () => {
       'oui',
     );
     expect(document.querySelector('[data-pose="soleil"]')).not.toBeNull();
+    expect(
+      document
+        .querySelector('[data-pose="soleil"] image[data-dessin-pose="soleil"]')
+        ?.getAttribute('href'),
+    ).toBe('/api/contenu/assets/assets/objets/soleil.svg');
     // Passage automatique à la consigne suivante : il n'existe ni « valider » ni « suivant ».
     expect(racine().getAttribute('data-consigne')).toBe('c2');
   });
@@ -258,8 +286,8 @@ describe('MoteurPlace — R16, les cibles ne sont jamais minuscules', () => {
       expect(noeud).not.toBeNull();
       // happy-dom ne fait pas de mise en page : on lit le style déclaré, et la mesure réelle
       // reste celle de `tests/qualite/a11y.spec.ts` sur la boîte rendue.
-      expect(noeud!.style.minWidth).toBe('64px');
-      expect(noeud!.style.minHeight).toBe('64px');
+      expect(Number.parseFloat(noeud!.style.minWidth)).toBeGreaterThanOrEqual(64);
+      expect(Number.parseFloat(noeud!.style.minHeight)).toBeGreaterThanOrEqual(64);
     }
   });
 

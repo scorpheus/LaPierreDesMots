@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render } from '@testing-library/react';
+import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import Ajv2020 from 'ajv/dist/2020.js';
@@ -122,6 +122,10 @@ describe('contrat du coloriage raster indexé', () => {
     expect(container.querySelector('[data-raster-couche="fond"]')).not.toBeNull();
     expect(container.querySelector('[data-raster-couche="couleurs"]')).not.toBeNull();
     expect(container.querySelector('[data-raster-couche="trait"]')).not.toBeNull();
+    const scene = container.querySelector('[data-scene-libre="campement.chaudron-raster"]');
+    expect(scene?.getAttribute('role')).toBe('group');
+    expect(scene?.getAttribute('aria-label')).toBe('Le chaudron à couleurs');
+    expect(container.querySelector('[aria-label="Zones à colorier"]')).not.toBeNull();
     const prises = container.querySelectorAll('[data-cible-frappe="oui"]');
     expect(prises).toHaveLength(2);
     for (const prise of prises) {
@@ -133,6 +137,48 @@ describe('contrat du coloriage raster indexé', () => {
       'ventre-du-chaudron',
       expect.objectContaining({ clientX: expect.any(Number), clientY: expect.any(Number) }),
     );
+    colorier.mockClear();
+    fireEvent.keyDown(prises[1]!, { key: 'Enter' });
+    expect(colorier).toHaveBeenCalledWith('mousse-de-couleurs', { clientX: 0, clientY: 0 });
+    colorier.mockClear();
+    fireEvent.keyDown(prises[0]!, { key: 'Échap' });
+    expect(colorier).not.toHaveBeenCalled();
+    cleanup();
+  });
+
+  it('revient au décor SVG jouable dès qu’une des couches raster ne charge pas', async () => {
+    class ImageEnEchec {
+      onload: (() => void) | null = null;
+      onerror: (() => void) | null = null;
+
+      set src(_url: string) {
+        queueMicrotask(() => this.onerror?.());
+      }
+    }
+    vi.stubGlobal('Image', ImageEnEchec);
+    const colorier = vi.fn();
+    const { container } = render(
+      <SceneLibre
+        habillage={HABILLAGE_RASTER}
+        regionsOffertes={['ventre-du-chaudron', 'mousse-de-couleurs']}
+        remplissages={{}}
+        animationsDesactivees
+        onColorier={colorier}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(container.querySelector('[data-decor="raster-indexe"]')).toBeNull();
+      expect(container.querySelector('[data-decor="repli"]')).not.toBeNull();
+    });
+    const prise = container.querySelector('[data-region-svg="ventre-du-chaudron"]');
+    expect(prise?.getAttribute('role')).toBe('button');
+    fireEvent.click(prise!);
+    expect(colorier).toHaveBeenCalledWith(
+      'ventre-du-chaudron',
+      expect.objectContaining({ clientX: expect.any(Number), clientY: expect.any(Number) }),
+    );
+    vi.unstubAllGlobals();
     cleanup();
   });
 });

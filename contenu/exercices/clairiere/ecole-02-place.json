@@ -43,12 +43,12 @@
           "id": "ciel",
           "libelle": "le ciel",
           "polygone": [
-            [600, 40],
-            [760, 40],
-            [760, 160],
-            [600, 160]
+            [625, 25],
+            [755, 25],
+            [755, 115],
+            [625, 115]
           ],
-          "centroide": [680, 100],
+          "centroide": [690, 70],
           "relation": "dans",
           "ancre": null
         },
@@ -56,12 +56,12 @@
           "id": "toit-ecole",
           "libelle": "le toit de l’école",
           "polygone": [
-            [200, 200],
-            [340, 200],
-            [340, 258],
-            [200, 258]
+            [245, 65],
+            [335, 65],
+            [335, 145],
+            [245, 145]
           ],
-          "centroide": [270, 229],
+          "centroide": [290, 105],
           "relation": "sur",
           "ancre": "le toit de l’école"
         },
@@ -69,12 +69,12 @@
           "id": "a-cote-du-banc",
           "libelle": "à côté du banc",
           "polygone": [
-            [170, 430],
-            [300, 430],
-            [300, 560],
-            [170, 560]
+            [250, 350],
+            [350, 350],
+            [350, 450],
+            [250, 450]
           ],
-          "centroide": [235, 495],
+          "centroide": [300, 400],
           "relation": "a-cote-de",
           "ancre": "le banc"
         }

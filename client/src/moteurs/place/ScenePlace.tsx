@@ -26,6 +26,7 @@ import { useDroppable } from '@dnd-kit/core';
 // symboles y sont déclarés par L2-D au § 4.7 ; aucune valeur n'est importée d'ici, donc
 // aucun octet n'entre dans le bundle par cette ligne.
 import type { ContenuPlace, Habillage, Point, ZoneCible } from '@pierre/partage';
+import { urlAsset } from '../../api/client.js';
 
 /**
  * `IdElement` et `IdZoneCible` ne figurent pas dans les additions au barillet (§ 4.7) — ce
@@ -230,20 +231,20 @@ export function ScenePlace(proprietes: ProprietesScenePlace): ReactElement {
                 width={largeur}
                 height={hauteur}
                 rx={Math.min(largeur, hauteur) / 6}
-                fill="var(--jeton, #F2C14E)"
+                fill="rgba(255, 255, 255, 0.82)"
                 stroke={TRAIT}
-                strokeWidth={2}
+                strokeWidth={1.5}
               />
-              <text
-                x={zone.centroide[0]}
-                y={zone.centroide[1] + hauteur / 6}
-                textAnchor="middle"
-                fontSize={Math.min(largeur, hauteur) / 2}
-                fill={TRAIT}
+              <image
+                data-dessin-pose={element}
+                href={urlAsset(modele.asset)}
+                x={zone.centroide[0] - largeur / 2 + 4}
+                y={zone.centroide[1] - hauteur / 2 + 4}
+                width={largeur - 8}
+                height={hauteur - 8}
+                preserveAspectRatio="xMidYMid meet"
                 aria-hidden="true"
-              >
-                {modele.libelle.slice(0, 1)}
-              </text>
+              />
               <title>{modele.libelle}</title>
             </g>
           );

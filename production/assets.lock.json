@@ -442,6 +442,106 @@
       },
       "valide_par": "parent",
       "valide_le": "2026-09-02"
+    },
+    {
+      "id": "objet.place.soleil.v1",
+      "fichier": "contenu/assets/objets/soleil.svg",
+      "empreinte": "sha256:F4CD80014C74229440D4113E30AA969217902090808A4B00D60446DCF6022DFA",
+      "generation": {
+        "outil": "dessin vectoriel préexistant",
+        "workflow": null,
+        "graine": null,
+        "prompt": null,
+        "source": "contenu/brouillons/assets/objets/soleil.svg"
+      },
+      "qc": {
+        "technique": "ok — SVG autonome, présent et contrôlé par test:contenu",
+        "semantique": "validé comme dessin simple et fonctionnel",
+        "integration": "affiché dans la réserve et sur la scène du moteur place",
+        "tentatives": 1
+      },
+      "valide_par": "parent",
+      "valide_le": "2026-09-02"
+    },
+    {
+      "id": "objet.place.ballon.v1",
+      "fichier": "contenu/assets/objets/ballon.svg",
+      "empreinte": "sha256:B0F3E60EA3C91FCFD0DFF8146729BAA3208EE9BEDCCF5D627924F31962D6F790",
+      "generation": {
+        "outil": "dessin vectoriel préexistant",
+        "workflow": null,
+        "graine": null,
+        "prompt": null,
+        "source": "contenu/brouillons/assets/objets/ballon.svg"
+      },
+      "qc": {
+        "technique": "ok — SVG autonome, présent et contrôlé par test:contenu",
+        "semantique": "validé comme dessin simple et fonctionnel",
+        "integration": "affiché dans la réserve et sur la scène du moteur place",
+        "tentatives": 1
+      },
+      "valide_par": "parent",
+      "valide_le": "2026-09-02"
+    },
+    {
+      "id": "objet.place.oiseau.v1",
+      "fichier": "contenu/assets/objets/oiseau.svg",
+      "empreinte": "sha256:6EE4713409057A51284633FC5C07F46D7F99101239DC36FFF1B4639F0277240E",
+      "generation": {
+        "outil": "dessin vectoriel préexistant",
+        "workflow": null,
+        "graine": null,
+        "prompt": null,
+        "source": "contenu/brouillons/assets/objets/oiseau.svg"
+      },
+      "qc": {
+        "technique": "ok — SVG autonome, présent et contrôlé par test:contenu",
+        "semantique": "validé comme dessin simple et fonctionnel",
+        "integration": "affiché dans la réserve et sur la scène du moteur place",
+        "tentatives": 1
+      },
+      "valide_par": "parent",
+      "valide_le": "2026-09-02"
+    },
+    {
+      "id": "objet.place.poisson.v1",
+      "fichier": "contenu/assets/objets/poisson.svg",
+      "empreinte": "sha256:4268460F1BC92C3E7D61349F4C4E90799F7AB2F33F14719224B7EDCC2CDF43D6",
+      "generation": {
+        "outil": "dessin vectoriel préexistant",
+        "workflow": null,
+        "graine": null,
+        "prompt": null,
+        "source": "contenu/brouillons/assets/objets/poisson.svg"
+      },
+      "qc": {
+        "technique": "ok — SVG autonome, présent et contrôlé par test:contenu",
+        "semantique": "validé comme dessin simple et fonctionnel",
+        "integration": "affiché dans la réserve et sur la scène du moteur place",
+        "tentatives": 1
+      },
+      "valide_par": "parent",
+      "valide_le": "2026-09-02"
+    },
+    {
+      "id": "objet.place.parapluie.v1",
+      "fichier": "contenu/assets/objets/parapluie.svg",
+      "empreinte": "sha256:AF6C6B18D7B79271F5F366D4DB56363395D7600F675785D012824FA6B150C79C",
+      "generation": {
+        "outil": "dessin vectoriel préexistant",
+        "workflow": null,
+        "graine": null,
+        "prompt": null,
+        "source": "contenu/brouillons/assets/objets/parapluie.svg"
+      },
+      "qc": {
+        "technique": "ok — SVG autonome, présent et contrôlé par test:contenu",
+        "semantique": "validé comme dessin simple et fonctionnel",
+        "integration": "affiché dans la réserve et sur la scène du moteur place",
+        "tentatives": 1
+      },
+      "valide_par": "parent",
+      "valide_le": "2026-09-02"
     }
   ]
 }

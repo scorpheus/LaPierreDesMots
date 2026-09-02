@@ -338,6 +338,29 @@ for (const { chemin, donnees } of exercices) {
       }
     }
   }
+
+  // Les assets optionnels portés par un exercice doivent dire la vérité. Un chemin absent est
+  // pire que `null` : l’interface croit disposer d’un dessin, puis retombe silencieusement sur
+  // du texte. On parcourt en profondeur pour couvrir tous les moteurs présents et futurs.
+  const aVisiter = [donnees.jeu?.contenu];
+  while (aVisiter.length > 0) {
+    const valeur = aVisiter.pop();
+    if (Array.isArray(valeur)) {
+      aVisiter.push(...valeur);
+      continue;
+    }
+    if (valeur === null || typeof valeur !== 'object') continue;
+    for (const [cle, enfant] of Object.entries(valeur)) {
+      if (cle === 'asset' && typeof enfant === 'string' && /\.(?:png|svg|webp)$/u.test(enfant)) {
+        const surDisque = join(DOSSIER_CONTENU, ...enfant.split('/'));
+        if (!existsSync(surDisque)) {
+          signaler(ou, `asset d’exercice absent du disque : ${enfant}`, 3);
+        }
+      } else {
+        aVisiter.push(enfant);
+      }
+    }
+  }
 }
 
 // ────────────────────────────── contrôle P3.2 — régions fermées, sur TOUS les SVG de contenu/
