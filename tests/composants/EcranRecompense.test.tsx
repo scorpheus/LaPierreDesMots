@@ -179,6 +179,15 @@ describe('les étoiles SUIVENT la valeur, elles ne sont pas décoratives (M24)',
 });
 
 describe('la fin de partie est une réussite, quoi qu’il arrive (R14)', () => {
+  it('célèbre la réussite avec Gobi dans une scène dédiée, sans animer le texte', () => {
+    monter({ etoiles: 2 });
+    const scene = document.querySelector('[data-scene-recompense="gobi-joie"]');
+    const gobi = scene?.querySelector<HTMLImageElement>('img');
+    expect(scene).not.toBeNull();
+    expect(gobi?.getAttribute('src')).toContain('assets/gobi/animation/joie.svg');
+    expect(document.querySelector('h1')?.closest('[data-texte-recompense]')).not.toBeNull();
+  });
+
   it('porte `data-fin="reussite"` et aucun `data-etat="echec"`', () => {
     monter({ etoiles: 0 });
     expect(document.querySelector('[data-ecran="recompense"]')?.getAttribute('data-fin')).toBe(

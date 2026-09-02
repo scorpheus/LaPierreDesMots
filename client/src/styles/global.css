@@ -808,6 +808,95 @@ body {
   pointer-events: none;
 }
 
+/* La réussite est un moment du monde, pas une feuille de résultats. Le personnage et les éclats
+   peuvent vivre ; le panneau de lecture reste parfaitement immobile. */
+.ecran-recompense {
+  background:
+    radial-gradient(circle at 14% 18%, rgb(255 224 124 / 36%) 0 7rem, transparent 7.2rem),
+    radial-gradient(circle at 88% 82%, rgb(105 205 183 / 25%) 0 9rem, transparent 9.2rem),
+    linear-gradient(155deg, #d8eff0 0%, #f7f0db 54%, #e9d8b7 100%);
+}
+
+.recompense-scene {
+  inline-size: min(56rem, 100%);
+  display: grid;
+  grid-template-columns: minmax(12rem, 0.72fr) minmax(20rem, 1.28fr);
+  align-items: center;
+  gap: clamp(1rem, 3vw, 2.5rem);
+  padding: clamp(1rem, 2.4vw, 2rem);
+  border: var(--epaisseur-trait) solid var(--trait);
+  border-radius: 2.25rem;
+  background: color-mix(in srgb, var(--parchemin) 94%, white);
+  box-shadow: 0.65rem 0.75rem 0 rgb(27 36 64 / 18%);
+}
+
+.recompense-gobi {
+  position: relative;
+  min-block-size: 14rem;
+  display: grid;
+  place-items: end center;
+}
+
+.recompense-gobi::before {
+  content: '';
+  position: absolute;
+  inset: 14% 5% 2%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgb(255 216 91 / 52%), transparent 69%);
+}
+
+.recompense-gobi img {
+  position: relative;
+  z-index: 1;
+  inline-size: min(100%, 15rem);
+  block-size: auto;
+  filter: drop-shadow(0 0.45rem 0 rgb(27 36 64 / 16%));
+  animation: pierre-recompense-gobi 1.8s ease-in-out infinite alternate;
+}
+
+.recompense-texte {
+  display: grid;
+  justify-items: center;
+  gap: 0.9rem;
+}
+
+.recompense-eclat {
+  position: absolute;
+  z-index: 2;
+  color: #d08b12;
+  font-size: clamp(1.35rem, 2.6vw, 2.4rem);
+  filter: drop-shadow(0 2px 0 white);
+  animation: pierre-recompense-eclat 900ms ease-in-out infinite alternate;
+}
+
+.recompense-eclat--un { inset: 7% auto auto 5%; }
+.recompense-eclat--deux { inset: 18% 4% auto auto; animation-delay: 180ms; }
+.recompense-eclat--trois { inset: auto 8% 15% auto; animation-delay: 360ms; }
+
+@keyframes pierre-recompense-gobi {
+  from { transform: translateY(0) rotate(-1deg); }
+  to { transform: translateY(-0.45rem) rotate(1deg); }
+}
+
+@keyframes pierre-recompense-eclat {
+  from { opacity: 0.45; transform: scale(0.72) rotate(-8deg); }
+  to { opacity: 1; transform: scale(1.15) rotate(8deg); }
+}
+
+@media (max-width: 700px) {
+  .recompense-scene {
+    grid-template-columns: 1fr;
+  }
+
+  .recompense-gobi {
+    min-block-size: 8rem;
+  }
+
+  .recompense-gobi img {
+    inline-size: 9rem;
+  }
+}
+
 .campement-gobi,
 [data-ecran="campement"] [data-mur-des-noms="oui"],
 [data-ecran="campement"] [data-chaudron="oui"] {

@@ -337,32 +337,44 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
       )}
     <main
       data-ecran="recompense"
+      className="ecran-recompense"
       // Une seule valeur possible, aujourd'hui et toujours.
       data-fin="reussite"
       style={{
         padding: '2rem',
         display: 'flex',
         flexDirection: 'column',
-        gap: '2rem',
+        gap: '1.35rem',
         alignItems: 'center',
         justifyContent: 'center',
         minBlockSize: '100vh'
       }}
     >
-      <h1 className="titre" style={{ fontSize: '3rem', margin: 0, textAlign: 'center' }}>
-        Bravo&nbsp;!
-      </h1>
+      <section className="recompense-scene" data-scene-recompense="gobi-joie">
+        <div className="recompense-gobi" aria-hidden="true">
+          <span className="recompense-eclat recompense-eclat--un">✦</span>
+          <span className="recompense-eclat recompense-eclat--deux">✦</span>
+          <span className="recompense-eclat recompense-eclat--trois">✦</span>
+          <img src={urlAsset('assets/gobi/animation/joie.svg')} alt="" draggable={false} />
+        </div>
 
-      <Etoiles
-        acquises={nombreEtoiles}
-        taille={96}
-        animees
-        interEtoilesMs={paquet?.habillage.timings.interEtoilesMs ?? 180}
-      />
+        <div className="recompense-texte" data-texte-recompense="immobile">
+          <h1 className="titre" style={{ fontSize: '3rem', margin: 0, textAlign: 'center' }}>
+            Bravo&nbsp;!
+          </h1>
 
-      <p className="zone-lecture" style={{ fontSize: '1.5rem', padding: '1rem', margin: 0 }}>
-        {FELICITATIONS[nombreEtoiles] ?? FELICITATIONS[1]}
-      </p>
+          <Etoiles
+            acquises={nombreEtoiles}
+            taille={96}
+            animees
+            interEtoilesMs={paquet?.habillage.timings.interEtoilesMs ?? 180}
+          />
+
+          <p className="zone-lecture" style={{ fontSize: '1.5rem', padding: '1rem', margin: 0 }}>
+            {FELICITATIONS[nombreEtoiles] ?? FELICITATIONS[1]}
+          </p>
+        </div>
+      </section>
 
       {/*
         ══════════════════════════════════════════════════════════════════════════════════════
