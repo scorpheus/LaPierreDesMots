@@ -1,49 +1,87 @@
-# Campement V5 interactif — état au 2 septembre 2026
+# Campement V5 raster et interactif — état au 2 septembre 2026
 
 ## Décision appliquée
 
-Le parent a retenu le concept V5 : style vectoriel net, couleurs franches, ambiance enfantine,
-sans filtre jauni ni rendu peint. La scène de production conserve les 30 objets existants mais
-abandonne leur grille 10×3 au profit d'îlots naturels autour d'une grande tente, d'un feu et d'un
-tapis central.
+Le parent a retenu `concept-campement-v5-enfant.png`, puis a explicitement demandé d'abandonner
+la reconstruction vectorielle : le SVG était un blockout employé avant la disponibilité du
+générateur d'images. L'illustration V5 est donc le décor de production, sans filtre jaune ajouté,
+sans nouvelle peinture par-dessus et sans tentative de l'imiter en primitives.
 
-## Implantation
+La copie publiée `contenu/assets/campement/campement-v5.png` est identique à la source validée :
+1 586 × 992 px, SHA-256
+`CBA7CDBAF6CC7D66E625D4ED31CA8D22A8C681875EEF892B9B0DD9DDB76CDF4E`.
 
-- `scripts/recomposer-campement.mjs` génère ensemble le SVG et les 30 zones tactiles JSON depuis
-  la source archivée `production/archives/campement-grille-v4.svg`.
-- Chaque objet est placé par un groupe parent immobile `placement-<id>` ; son groupe visible
-  `objet-<id>` reste libre de recevoir une animation CSS sans perdre sa position.
-- Le SVG est chargé dans le DOM. Toucher une zone transparente anime désormais le dessin visible,
-  et plus seulement la zone de clic.
-- Les dessins de la carte, du coffre et du chaudron ouvrent directement leur destination. Toutes
-  les autres réactions restent gratuites, rejouables et sans état d'échec.
+## Architecture de l'écran
 
-## Gardes ajoutés
+- L'image V5 forme le calque de fond et conserve toute sa qualité graphique.
+- Les trente zones tactiles HTML sont calées en coordonnées natives dans
+  `contenu/monde/campement.json`; aucune découpe de l'image n'est nécessaire pour cliquer.
+- Carte, coffre et chaudron s'ouvrent directement depuis leur objet peint.
+- Le feu, le papillon, sept lucioles et deux lueurs sont des calques indépendants, décoratifs,
+  non bloquants et supprimés visuellement en mode animations calmes.
+- Un toucher produit une réaction locale sans déplacer un rectangle découpé de l'image, ce qui
+  évite les raccords et les plaques de couleur visibles.
+- Les invitations au repos sont de petites étincelles ponctuelles, plus des cadres jaunes autour
+  des boîtes tactiles.
 
-`tests/unitaires/campement-composition-v5.test.ts` impose l'identité exacte entre les points JSON
-et les groupes SVG, une dispersion minimale sur la scène et les marqueurs de composition V5.
-`tests/composants/EcranCampement.test.tsx` vérifie l'animation du groupe visible ainsi que les trois
-destinations utiles.
+`scripts/recomposer-campement.mjs` conserve son nom historique mais ne redessine plus rien : il
+copie l'image validée octet pour octet, puis vérifie ses dimensions et chacune des trente zones.
+L'ancien `contenu/habillages/campement/campement.svg` reste sur disque et est déclaré comme archive
+dans `contenu/registre-svg.json`.
+
+## Pipeline de sprites dérivé de hatch-pet
+
+Le générateur d'images ne fournit pas une géométrie de planche suffisamment exacte. Le pipeline
+auto-contenu `scripts/sprites/normaliser-planche.mjs` reprend les idées utiles de `hatch-pet` :
+
+1. récupération globale des huit composantes plutôt que découpe aveugle en cases ;
+2. détourage du fond uni et décontamination des bords ;
+3. échelle commune et ancre mesurée ;
+4. assemblage déterministe en 4 × 2, cellules 256 × 256 ;
+5. rapport JSON et planche de contact pour la revue humaine.
+
+Résultats sur le feu et le papillon : 8/8 cellules, zéro débordement, zéro pose touchant un bord,
+écart d'ancre raster maximal 0,5 px. Les rapports et contacts restent dans
+`bac-a-sable/campement-sprites/`. La QA mécanique ne juge ni le style ni la fluidité : les captures
+du jeu restent nécessaires.
 
 ## Recette mesurée
 
-- format contrôlé : 1920×1200 CSS, horizontal 16:10 ;
-- 30 groupes SVG pour 30 points JSON ;
-- carte et coffre ouverts depuis leur dessin dans le navigateur ;
-- capture locale :
-  `bac-a-sable/recette-2026-09-02/campement-v5-interactif-1920x1200.png`.
+- format : 1 920 × 1 200 CSS, paysage 16:10 de la tablette cible ;
+- scène : 1 200 × 750,56 px ;
+- image native réellement chargée : 1 586 × 992 ;
+- 30 prises rendues ; plus petite prise réelle : 82,33 px ;
+- débordement horizontal : 0 px ;
+- toucher de la tente : calque de réaction visible ;
+- toucher de la carte peinte : navigation vers `/carte` ;
+- erreurs ou avertissements navigateur : 0.
 
-La procédure de modification est conservée dans `.agents/skills/dessiner-campement/SKILL.md`.
+Captures locales :
 
-## Défaut du testeur découvert pendant la reprise
+- `bac-a-sable/captures/campement-v5-raster-tablette-1920x1200-v2.png` ;
+- `bac-a-sable/campement-sprites/feu-contact.png` ;
+- `bac-a-sable/campement-sprites/papillon-contact.png`.
 
-Le contrat E2E de couverture rejouait 88 recettes sur la même page. Après une première visite de
-la zone parent, le jeton parent conservé dans le module `api/commun.ts` survivait aux rechargements :
-la recette suivante sautait le pavé de code, puis l'attendait jusqu'au garde-fou de 270 secondes.
-Le commentaire ancien attribuait ce risque à une base partagée entre workers, alors que le harnais
-fournit bien un serveur isolé à chaque cas.
+La procédure reproductible est décrite dans `.agents/skills/dessiner-campement/SKILL.md`.
 
-La surface `window.__test` sait désormais refermer cette session en mémoire entre deux recettes.
-Mesure après correction, dans une campagne parallèle comprenant toutes les dépendances du projet
-`bilan` : **466/466 tests verts**, **14 écrans déclarés, 14 visités, écart zéro**, contrat de
-couverture terminé en 35,7 secondes.
+## État de validation
+
+Le décor V5 est validé par le parent. Le feu et le papillon sont intégrés comme première passe
+d'animation et passent leur QA technique ; leur appréciation esthétique finale se fait sur la
+capture de l'écran, avant toute mise à jour d'une référence visuelle Playwright.
+
+Le défaut de session parent du testeur, trouvé pendant la reprise précédente, reste corrigé : la
+surface `window.__test` referme la session mémoire entre recettes.
+
+La campagne complète exécutée après l'intégration raster donne :
+
+- 2 174/2 174 tests unitaires, composants et API ;
+- 609/609 contrôles de contenu ;
+- 478/478 scénarios E2E ;
+- 247/247 contrôles de qualité et 6/6 budgets de bundle ;
+- rejeu et garde-fous QA verts ;
+- 7 références visuelles historiques divergentes et 2 références absentes, hors campement.
+
+Ces neuf écarts T4 ne sont pas régénérés automatiquement : les règles du projet imposent une
+validation parent avant toute mise à jour d'une référence. Le détail fait foi dans
+`tests/rapports/RAPPORT.md`, campagne du 2 septembre 2026 à 10:33:10 UTC.

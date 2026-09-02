@@ -99,14 +99,6 @@ async function chargerJson(chemin: string): Promise<unknown> {
   return (await reponse.json()) as unknown;
 }
 
-async function chargerSvgCampement(chemin: string): Promise<string> {
-  const reponse = await fetch(urlAsset(chemin), { headers: { Accept: "image/svg+xml" } });
-  if (!reponse.ok) {
-    throw new Error(`Décor introuvable : ${chemin} (réponse ${String(reponse.status)}).`);
-  }
-  return reponse.text();
-}
-
 export function EcranCampement({
   campement: campementInjecte = null,
   monde: mondeInjecte = null,
@@ -158,29 +150,12 @@ export function EcranCampement({
   const points: readonly PointInteraction[] = campement?.points ?? [];
   const [largeurScene, hauteurScene] = dimensions(campement?.scene.viewBox ?? "0 0 1200 800");
 
-  const requeteDecor = useQuery({
-    queryKey: ["monde", "campement", "decor", campement?.scene.fichier ?? null],
-    queryFn: () => chargerSvgCampement(String(campement!.scene.fichier)),
-    enabled: campement !== null,
-  });
-
-  const decorAnime = useMemo(() => {
-    const svg = requeteDecor.data;
-    if (svg === undefined || objetAnime === null) return svg ?? null;
-    const id = `objet-${objetAnime.id}`;
-    return svg.replace(
-      `id="${id}"`,
-      `id="${id}" data-objet-anime="oui" class="${classeAnimation(objetAnime.animation)}"`,
-    );
-  }, [objetAnime, requeteDecor.data]);
-
   const finirAnimationObjet = useCallback(
     (evenement: AnimationEventReact<HTMLDivElement>): void => {
-      const cible = evenement.target;
-      if (!(cible instanceof Element) || objetAnime === null) return;
-      if (cible.id === `objet-${objetAnime.id}`) fixerObjetAnime(null);
+      if (evenement.target !== evenement.currentTarget) return;
+      fixerObjetAnime(null);
     },
-    [objetAnime],
+    [],
   );
 
   /**
@@ -445,13 +420,6 @@ export function EcranCampement({
             blockSize: "auto",
             maxInlineSize: "1200px",
             aspectRatio: `${String(largeurScene)} / ${String(hauteurScene)}`,
-            backgroundImage:
-              campement === null || decorAnime !== null
-                ? "none"
-                : `url(${urlAsset(String(campement.scene.fichier))})`,
-            backgroundSize: "contain",
-            backgroundRepeat: "no-repeat",
-            backgroundPosition: "center",
             backgroundColor: "var(--parchemin)",
             borderRadius: "var(--rayon-carte)",
             // ── LA CASE DE BD (M8) ────────────────────────────────────────────────────────
@@ -469,15 +437,70 @@ export function EcranCampement({
             gridColumn: "1 / -1",
           }}
         >
-          {decorAnime === null ? null : (
-            <div
-              className="campement-svg"
-              data-decor-campement="inline"
-              aria-hidden="true"
-              onAnimationEnd={finirAnimationObjet}
-              dangerouslySetInnerHTML={{ __html: decorAnime }}
+          {campement === null ? null : (
+            <img
+              className="campement-decor"
+              data-decor-campement="v5-raster"
+              src={urlAsset(String(campement.scene.fichier))}
+              alt=""
+              draggable={false}
             />
           )}
+
+          {/* Le décor est une illustration validée. Ces calques donnent de la vie au lieu sans
+              repeindre ses objets ni dégrader son style : deux sprites normalisés, des lueurs
+              légères et une réaction locale au toucher. Le texte reste hors de la scène. */}
+          <div
+            className={animationsDesactivees ? "campement-calques campement-calques--calmes" : "campement-calques"}
+            aria-hidden="true"
+          >
+            <span
+              className="campement-sprite campement-sprite--feu"
+              data-calque-campement="feu"
+              style={{ backgroundImage: `url(${urlAsset("assets/campement/animations/feu.png")})` }}
+            />
+            <span
+              className="campement-sprite campement-sprite--papillon"
+              data-calque-campement="papillon"
+              style={{ backgroundImage: `url(${urlAsset("assets/campement/animations/papillon.png")})` }}
+            />
+            {[12, 25, 39, 56, 68, 81, 93].map((phase, index) => (
+              <span
+                key={phase}
+                className="campement-luciole"
+                data-calque-campement="luciole"
+                style={{
+                  insetInlineStart: `${String(phase)}%`,
+                  insetBlockStart: `${String(18 + ((index * 17) % 57))}%`,
+                  animationDelay: `-${String(index * 0.73)}s`,
+                }}
+              />
+            ))}
+            <span className="campement-lueur campement-lueur--feu" />
+            <span className="campement-lueur campement-lueur--lanterne" />
+          </div>
+
+          {objetAnime === null ? null : (() => {
+            const point = points.find((candidat) => candidat.id === objetAnime.id);
+            if (point === undefined) return null;
+            const [x, y, largeur, hauteur] = point.zone;
+            return (
+              <div
+                className={`campement-reaction ${classeAnimation(objetAnime.animation)}`}
+                data-reaction-visuelle={objetAnime.id}
+                aria-hidden="true"
+                onAnimationEnd={finirAnimationObjet}
+                style={{
+                  insetInlineStart: `${String((x / largeurScene) * 100)}%`,
+                  insetBlockStart: `${String((y / hauteurScene) * 100)}%`,
+                  inlineSize: `${String((largeur / largeurScene) * 100)}%`,
+                  blockSize: `${String((hauteur / hauteurScene) * 100)}%`,
+                }}
+              >
+                <span />
+              </div>
+            );
+          })()}
           {points.map((point) => (
             <PointLibre
               key={point.id}

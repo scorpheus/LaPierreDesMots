@@ -27,6 +27,11 @@
       "type": "string",
       "pattern": "^[a-z0-9]+(-[a-z0-9]+)*(/[a-z0-9]+(-[a-z0-9]+)*)*\\.svg$"
     },
+    "cheminSuccesseur": {
+      "description": "Chemin du successeur déclaré. Un SVG de blockout peut être remplacé par une illustration raster validée.",
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*(/[a-z0-9]+(-[a-z0-9]+)*)*\\.(svg|png|webp)$"
+    },
     "cheminSource": {
       "description": "Chemin d'un fichier du depot, relatif a la racine, en separateurs POSIX.",
       "type": "string",
@@ -63,7 +68,7 @@
         "fichier": { "$ref": "#/$defs/cheminAsset" },
         "remplacePar": {
           "description": "Le successeur. Il doit exister sur disque ET etre declare par un habillage, par `contenu/monde/`, ou par `declaresParLeCode`. C'est la clause qui empeche d'archiver un orphelin : archiver, c'est nommer ce qui a pris la place.",
-          "$ref": "#/$defs/cheminAsset"
+          "$ref": "#/$defs/cheminSuccesseur"
         },
         "raison": { "$ref": "#/$defs/raison" },
         "decision": {

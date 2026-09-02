@@ -1,8 +1,8 @@
 {
-  "$commentaire": "Campement V5 : 30 points conservés, recomposés en îlots naturels par scripts/recomposer-campement.mjs. Les zones suivent les groupes SVG et les objets complets sont animés dans le DOM.",
+  "$commentaire": "Campement V5 validé : illustration raster 1586 × 992, trente zones tactiles calées sur les objets peints et animations rendues par des calques DOM indépendants.",
   "scene": {
-    "fichier": "habillages/campement/campement.svg",
-    "viewBox": "0 0 1200 800"
+    "fichier": "assets/campement/campement-v5.png",
+    "viewBox": "0 0 1586 992"
   },
   "coloriageLibre": "galeries-12",
   "points": [
@@ -13,10 +13,10 @@
       "animationUnique": true,
       "replique": "campement/tente",
       "zone": [
-        430,
-        130,
-        250,
-        250
+        600,
+        40,
+        620,
+        500
       ]
     },
     {
@@ -26,10 +26,10 @@
       "animationUnique": true,
       "replique": "campement/feu",
       "zone": [
-        535,
-        410,
-        130,
-        130
+        670,
+        500,
+        250,
+        255
       ]
     },
     {
@@ -39,10 +39,10 @@
       "animationUnique": true,
       "replique": "campement/carte",
       "zone": [
-        85,
-        190,
-        145,
-        145
+        75,
+        295,
+        355,
+        235
       ]
     },
     {
@@ -52,10 +52,10 @@
       "animationUnique": true,
       "replique": "campement/coffre",
       "zone": [
-        145,
-        505,
         125,
-        125
+        475,
+        275,
+        190
       ]
     },
     {
@@ -65,10 +65,10 @@
       "animationUnique": true,
       "replique": "campement/mur-des-noms",
       "zone": [
-        15,
-        350,
-        120,
-        120
+        0,
+        520,
+        170,
+        320
       ]
     },
     {
@@ -78,10 +78,10 @@
       "animationUnique": true,
       "replique": "campement/chaudron",
       "zone": [
-        335,
-        390,
-        115,
-        115
+        380,
+        420,
+        190,
+        190
       ]
     },
     {
@@ -91,10 +91,10 @@
       "animationUnique": true,
       "replique": "campement/lunette",
       "zone": [
-        845,
-        245,
-        135,
-        135
+        1110,
+        215,
+        255,
+        310
       ]
     },
     {
@@ -104,10 +104,10 @@
       "animationUnique": true,
       "replique": null,
       "zone": [
-        970,
+        1250,
         170,
-        145,
-        145
+        330,
+        300
       ]
     },
     {
@@ -117,10 +117,10 @@
       "animationUnique": true,
       "replique": null,
       "zone": [
-        300,
-        35,
-        110,
-        110
+        650,
+        60,
+        320,
+        130
       ]
     },
     {
@@ -130,10 +130,10 @@
       "animationUnique": true,
       "replique": null,
       "zone": [
-        720,
-        95,
-        95,
-        95
+        980,
+        100,
+        140,
+        290
       ]
     },
     {
@@ -143,10 +143,10 @@
       "animationUnique": false,
       "replique": null,
       "zone": [
-        735,
-        445,
-        82,
-        82
+        1260,
+        455,
+        170,
+        170
       ]
     },
     {
@@ -156,10 +156,10 @@
       "animationUnique": false,
       "replique": null,
       "zone": [
-        865,
-        440,
-        95,
-        95
+        1070,
+        430,
+        220,
+        150
       ]
     },
     {
@@ -169,10 +169,10 @@
       "animationUnique": false,
       "replique": null,
       "zone": [
-        785,
-        555,
-        76,
-        76
+        570,
+        410,
+        135,
+        165
       ]
     },
     {
@@ -182,10 +182,10 @@
       "animationUnique": true,
       "replique": null,
       "zone": [
-        685,
-        270,
-        76,
-        76
+        1335,
+        650,
+        170,
+        300
       ]
     },
     {
@@ -195,10 +195,10 @@
       "animationUnique": false,
       "replique": null,
       "zone": [
-        135,
-        55,
-        150,
-        150
+        130,
+        130,
+        540,
+        250
       ]
     },
     {
@@ -208,10 +208,10 @@
       "animationUnique": false,
       "replique": null,
       "zone": [
-        455,
-        565,
-        80,
-        80
+        430,
+        550,
+        190,
+        190
       ]
     },
     {
@@ -221,10 +221,10 @@
       "animationUnique": false,
       "replique": "campement/panier-de-pommes",
       "zone": [
-        970,
-        510,
-        100,
-        100
+        1060,
+        630,
+        275,
+        220
       ]
     },
     {
@@ -234,10 +234,10 @@
       "animationUnique": false,
       "replique": null,
       "zone": [
-        1080,
-        450,
-        80,
-        80
+        910,
+        340,
+        170,
+        160
       ]
     },
     {
@@ -247,10 +247,10 @@
       "animationUnique": true,
       "replique": null,
       "zone": [
+        1440,
         700,
-        590,
-        78,
-        78
+        140,
+        285
       ]
     },
     {
@@ -260,10 +260,10 @@
       "animationUnique": false,
       "replique": "campement/livre-ouvert",
       "zone": [
-        520,
-        600,
-        115,
-        115
+        500,
+        680,
+        330,
+        210
       ]
     },
     {
@@ -273,10 +273,10 @@
       "animationUnique": false,
       "replique": null,
       "zone": [
-        640,
-        675,
-        70,
-        70
+        760,
+        660,
+        190,
+        220
       ]
     },
     {
@@ -286,10 +286,10 @@
       "animationUnique": false,
       "replique": null,
       "zone": [
-        95,
-        650,
-        72,
-        72
+        830,
+        805,
+        150,
+        175
       ]
     },
     {
@@ -299,10 +299,10 @@
       "animationUnique": false,
       "replique": null,
       "zone": [
-        25,
-        695,
-        64,
-        64
+        250,
+        690,
+        160,
+        230
       ]
     },
     {
@@ -312,10 +312,10 @@
       "animationUnique": false,
       "replique": null,
       "zone": [
-        1080,
-        285,
-        100,
-        100
+        0,
+        730,
+        270,
+        260
       ]
     },
     {
@@ -325,10 +325,10 @@
       "animationUnique": false,
       "replique": null,
       "zone": [
-        1105,
-        610,
-        70,
-        70
+        1320,
+        560,
+        180,
+        220
       ]
     },
     {
@@ -338,10 +338,10 @@
       "animationUnique": true,
       "replique": null,
       "zone": [
-        275,
-        255,
-        68,
-        68
+        170,
+        835,
+        150,
+        130
       ]
     },
     {
@@ -351,10 +351,10 @@
       "animationUnique": false,
       "replique": null,
       "zone": [
-        920,
-        690,
-        64,
-        64
+        1010,
+        830,
+        160,
+        140
       ]
     },
     {
@@ -364,10 +364,10 @@
       "animationUnique": false,
       "replique": "campement/grenouille",
       "zone": [
-        1020,
-        665,
-        72,
-        72
+        1200,
+        730,
+        120,
+        120
       ]
     },
     {
@@ -377,23 +377,23 @@
       "animationUnique": false,
       "replique": "campement/pierre-gravee",
       "zone": [
-        45,
-        520,
-        88,
-        88
+        390,
+        820,
+        260,
+        170
       ]
     },
     {
       "id": "etoile-filante",
-      "libelle": "l’étoile filante",
+      "libelle": "l’étoile du coffre",
       "reaction": "animation",
       "animationUnique": true,
       "replique": null,
       "zone": [
-        1080,
-        55,
-        80,
-        80
+        275,
+        520,
+        120,
+        110
       ]
     }
   ],
@@ -401,37 +401,37 @@
     {
       "code": "fanion-clairiere",
       "libelle": "le fanion de la Clairière",
-      "asset": "habillages/campement/campement.svg",
+      "asset": "assets/campement/campement-v5.png",
       "region": "clairiere"
     },
     {
       "code": "geode-galeries",
       "libelle": "la géode des Galeries",
-      "asset": "habillages/campement/campement.svg",
+      "asset": "assets/campement/campement-v5.png",
       "region": "galeries"
     },
     {
       "code": "nenuphar-marais",
       "libelle": "le nénuphar du Marais Jumeau",
-      "asset": "habillages/campement/campement.svg",
+      "asset": "assets/campement/campement-v5.png",
       "region": "marais-jumeau"
     },
     {
       "code": "feuille-foret",
       "libelle": "la feuille de la Forêt Muette",
-      "asset": "habillages/campement/campement.svg",
+      "asset": "assets/campement/campement-v5.png",
       "region": "foret-muette"
     },
     {
       "code": "braise-volcan",
       "libelle": "la braise du Volcan",
-      "asset": "habillages/campement/campement.svg",
+      "asset": "assets/campement/campement-v5.png",
       "region": "volcan"
     },
     {
       "code": "livre-cite",
       "libelle": "le livre de la Cité des Histoires",
-      "asset": "habillages/campement/campement.svg",
+      "asset": "assets/campement/campement-v5.png",
       "region": "cite-des-histoires"
     }
   ]

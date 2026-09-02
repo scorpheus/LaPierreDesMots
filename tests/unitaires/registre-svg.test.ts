@@ -123,7 +123,7 @@ function svgDesHabillages(): Set<string> {
  * nommer les clés : une clé nouvelle rendrait sinon un fichier invisible, en silence — et
  * c'est le mode de défaillance qui a produit les quatorze anomalies.
  */
-function svgDuMonde(): Set<string> {
+function assetsDuMonde(): Set<string> {
   const declares = new Set<string>();
   for (const chemin of fichiers(join(DOSSIER_CONTENU, 'monde'), '.json')) {
     const pile: unknown[] = [JSON.parse(readFileSync(chemin, 'utf8'))];
@@ -132,7 +132,7 @@ function svgDuMonde(): Set<string> {
       if (Array.isArray(noeud)) pile.push(...noeud);
       else if (noeud !== null && typeof noeud === 'object') {
         pile.push(...Object.values(noeud as Record<string, unknown>));
-      } else if (typeof noeud === 'string' && noeud.endsWith('.svg')) {
+      } else if (typeof noeud === 'string' && /\.(?:png|svg|webp)$/u.test(noeud)) {
         declares.add(sousContenu(noeud));
       }
     }
@@ -141,7 +141,7 @@ function svgDuMonde(): Set<string> {
 }
 
 const DES_HABILLAGES = svgDesHabillages();
-const DU_MONDE = svgDuMonde();
+const DU_MONDE = assetsDuMonde();
 const DECLARES = new Set(registre.declaresParLeCode.map((e) => sousContenu(e.fichier)));
 const ARCHIVES = new Set(registre.archives.map((e) => sousContenu(e.fichier)));
 

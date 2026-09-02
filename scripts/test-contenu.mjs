@@ -387,7 +387,7 @@ for (const { chemin, donnees } of habillages.values()) {
  * profondeur plutôt que de nommer les clés une à une : une clé nouvelle serait sinon un
  * fichier redevenu invisible, en silence.
  */
-const svgDuMonde = new Map();
+const assetsDuMonde = new Map();
 for (const cheminDoc of fichiersJson(join(DOSSIER_CONTENU, 'monde'))) {
   const donnees = lireJson(cheminDoc);
   const pile = [donnees];
@@ -397,8 +397,8 @@ for (const cheminDoc of fichiersJson(join(DOSSIER_CONTENU, 'monde'))) {
       pile.push(...noeud);
     } else if (noeud && typeof noeud === 'object') {
       pile.push(...Object.values(noeud));
-    } else if (typeof noeud === 'string' && noeud.endsWith('.svg')) {
-      svgDuMonde.set(join(DOSSIER_CONTENU, ...noeud.split('/')), cheminDoc);
+    } else if (typeof noeud === 'string' && /\.(?:png|svg|webp)$/u.test(noeud)) {
+      assetsDuMonde.set(join(DOSSIER_CONTENU, ...noeud.split('/')), cheminDoc);
     }
   }
 }
@@ -501,7 +501,7 @@ for (const cheminSvg of tousLesSvg) {
     continue;
   }
 
-  const declarePar = svgDuMonde.get(cheminSvg);
+  const declarePar = assetsDuMonde.get(cheminSvg);
   const auRegistre = svgDuRegistre.get(cheminSvg);
 
   if (declarePar === undefined && auRegistre === undefined) {
@@ -552,7 +552,7 @@ for (const cheminSvg of tousLesSvg) {
 /** Un chemin d'asset est-il porté par une déclaration de contenu, ou par un asset vivant ? */
 function estDeclareVivant(cheminRelatifContenu) {
   const absolu = join(DOSSIER_CONTENU, ...String(cheminRelatifContenu).split('/'));
-  if (svgParChemin.has(absolu) || svgDuMonde.has(absolu)) return true;
+  if (svgParChemin.has(absolu) || assetsDuMonde.has(absolu)) return true;
   return svgDuRegistre.get(absolu)?.liste === 'declaresParLeCode';
 }
 

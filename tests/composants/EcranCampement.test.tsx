@@ -9,7 +9,7 @@
  * Les données viennent du disque, jamais d'une maquette : `contenu/monde/campement.json` réel.
  * Le monde du profil est injecté — la route est celle de L2-H, et ce test n'a pas à en dépendre.
  */
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -23,7 +23,7 @@ import { creerRetourSensoriel } from '@client/gamefeel/retour';
 
 import { R11_ANIMATIONS_UNIQUES_MIN, R11_POINTS_MIN, R11_REPLIQUES_MIN }
   from '@partage/monde/campement.js';
-import { lireJson, lireTexte, servicesDeTest } from '../configuration/preparation.js';
+import { lireJson, servicesDeTest } from '../configuration/preparation.js';
 
 const CAMPEMENT = campementDuDocument(lireJson('contenu/monde/campement.json'));
 const STADES = stadesDuDocument(lireJson('contenu/monde/gobi-stades.json'));
@@ -144,22 +144,14 @@ describe('R11 comptée dans le DOM', () => {
     expect(ouvrirChaudron).toHaveBeenCalledWith(CAMPEMENT.coloriageLibre);
   });
 
-  it('anime le groupe vectoriel visible, pas seulement sa zone transparente', async () => {
-    const svg = lireTexte('contenu/habillages/campement/campement.svg');
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(async () => new Response(svg, { status: 200, headers: { 'Content-Type': 'image/svg+xml' } }))
-    );
+  it('rend l’illustration V5 et ses calques vivants au-dessus des prises', () => {
     monter();
 
-    await waitFor(() => {
-      expect(document.querySelector('[data-scene="campement"] #objet-tente')).not.toBeNull();
-    });
-    const prise = document.querySelector('[data-point="tente"]')!;
-    fireEvent.click(prise);
-    expect(document.querySelector('#objet-tente')?.getAttribute('class')).toContain(
-      'anim-campement-gonflement'
-    );
+    const decor = document.querySelector<HTMLImageElement>('[data-decor-campement="v5-raster"]');
+    expect(decor?.getAttribute('src')).toContain('assets/campement/campement-v5.png');
+    expect(document.querySelector('[data-calque-campement="feu"]')).not.toBeNull();
+    expect(document.querySelector('[data-calque-campement="papillon"]')).not.toBeNull();
+    expect(document.querySelectorAll('[data-calque-campement="luciole"]')).toHaveLength(7);
   });
 
   it('rend AU MOINS 25 points d’interaction libres', () => {
