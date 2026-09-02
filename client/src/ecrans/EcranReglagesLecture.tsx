@@ -200,7 +200,7 @@ export function EcranReglagesLecture({
     <main data-ecran="reglages-lecture" className="ecran-reglages-lecture">
       <header className="reglages-entete">
         <h1 className="titre" style={{ fontSize: "2.5rem", margin: 0 }}>
-          Comment tu lis le mieux&nbsp;?
+          Comment préfères-tu lire&nbsp;?
         </h1>
         <button
           type="button"
@@ -208,7 +208,7 @@ export function EcranReglagesLecture({
           data-ecouter="titre"
           data-ecoutes={String(ecoutes["titre"] ?? 0)}
           onClick={() => {
-            dire("Comment tu lis le mieux ? Essaie, et regarde en dessous.", "titre");
+            dire("Comment préfères-tu lire ? Essaie, et regarde en dessous.", "titre");
           }}
           aria-label="Écouter la question"
         >

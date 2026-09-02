@@ -165,6 +165,11 @@ afterEach(() => {
 });
 
 describe("les réglages SE PROPAGENT — les trois maillons de la chaîne", () => {
+  it("pose une question naturelle à l’enfant", async () => {
+    await monterEtAttendre();
+    expect(document.querySelector("h1")?.textContent).toBe("Comment préfères-tu lire\u00a0?");
+  });
+
   it("maillon 0 : l’écran repart des réglages ENREGISTRÉS, jamais des défauts", async () => {
     await monterEtAttendre();
     // Un écran qui ignorerait la réponse serait invisible : il montrerait des réglages

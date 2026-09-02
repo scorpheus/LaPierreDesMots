@@ -1,6 +1,7 @@
 # Plan visuel et animation — reprise du 2 septembre 2026
 
-**Statut :** plan de travail proposé. Aucun design nouveau n'est validé par ce document.
+**Statut :** direction du campement validée par le parent le 2 septembre 2026. Le découpage et
+l'intégration restent à produire et à valider.
 
 ## Constat mesuré
 
@@ -15,15 +16,15 @@
   dans `contenu/brouillons/` jusqu'au choix du parent.
 - Un premier concept 1 536 × 1 024 a été généré dans
   `contenu/brouillons/campement/concept-campement-v1.png`. Son prompt, son empreinte et son statut
-  sont consignés dans le `LISEZ-MOI.md` voisin ; il attend une validation parent.
+  sont consignés dans le `LISEZ-MOI.md` voisin. Le parent valide sa direction, jugée plus
+  chaleureuse et mieux adaptée à un enfant que la scène actuelle.
 
 ## Ordre recommandé
 
 ### V1 — un vrai campement
 
-1. Faire valider ou corriger la direction du premier concept produit avec le générateur intégré.
-   Ne produire des variantes qu'à partir d'un retour précis, afin d'éviter trois images presque
-   identiques sans décision de composition.
+1. Direction validée : conserver la clairière chaleureuse, le foyer central, la profondeur et les
+   objets intégrés au lieu plutôt qu'alignés en catalogue.
 2. Composer un refuge lisible en un coup d'œil : tente et feu au centre, carte et coffre dans les
    deux ailes, chaudron près de Gobi, chemin d'entrée au premier plan, forêt en cadre.
 3. Montrer une planche de trois vignettes au parent. Une seule proposition peut être retenue.
