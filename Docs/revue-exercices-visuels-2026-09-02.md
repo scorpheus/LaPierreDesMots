@@ -57,16 +57,17 @@ lisibles mais paraissent posés devant une ébauche. Ce chantier demande de repr
 - Le traitement « aventure 2D éditoriale » de la V4 est validé. Son contenu évoquait toutefois un
   bivouac d'adolescents. La V5 conserve ce traitement et reconstruit le lieu comme un repaire de
   7 ans : cabane-tente, dessins suspendus, coussins, objets de découverte et petits animaux.
-- La V5 est refusée comme référence stylistique : son contenu est juste, mais son dessin est devenu
-  plus rond et pictural. La V6 est une nouvelle composition utilisant la V4 uniquement comme
-  référence de style : trait sec, formes anguleuses, ombres découpées et profondeur bleu-vert.
+- Après comparaison avec la V6, le parent retient finalement la V5. Son dessin plus rond et plus
+  chaleureux sert mieux les enfants de 7 ans. La V6 reste un essai de contraste, pas la direction
+  de production.
 
 ## Arbitrages attendus
 
-Le parent doit encore valider la V6 du campement, qui combine les éléments enfantins de la V5 et le
-trait de la V4. Le style graphique est acquis. Le tracé est autorisé à poursuivre. Éclair attend une proposition d'asset plus lisible.
-Les compositions d'exercice sont validées, mais aucune référence visuelle n'est mise à jour avant
-la fin de leurs reprises.
+Le concept V5 du campement est validé comme direction de production. Il reste à le traduire en
+éléments séparés et interactifs, puis à vérifier leur assemblage à la résolution tablette. Le tracé
+est autorisé à poursuivre. Éclair attend une proposition d'asset plus lisible. Les compositions
+d'exercice sont validées, mais aucune référence visuelle n'est mise à jour avant la fin de leurs
+reprises.
 
 ## Mesure du testeur pendant la revue
 
