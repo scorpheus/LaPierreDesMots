@@ -49,11 +49,11 @@
  *    n'émettrait qu'un `click` synthétique le déclarerait mort — c'est l'erreur mesurée de la
  *    campagne précédente, qui relevait 33 régions « mortes » répondant toutes au doigt.
  */
-import { expect, test } from '../harnais-serveur.js';
+import { expect, test } from "./invariants.js";
 
-import { deuxImages, etatDuJeu, recettesDEcrans, SELECTEUR_INTERACTIF } from './qa-outils.js';
+import { deuxImages, etatDuJeu, recettesDEcrans, SELECTEUR_INTERACTIF } from "./qa-outils.js";
 
-import type { Page } from '@playwright/test';
+import type { Page } from "@playwright/test";
 
 /** Borne de coût, jamais une attente : au-delà, un écran est de toute façon à regarder. */
 const PAIRES_MAX = 90;
@@ -75,17 +75,17 @@ async function annonce(page: Page): Promise<{ readonly dit: string; readonly mar
   return page.evaluate(() => {
     const morceaux: string[] = [];
     for (const noeud of document.querySelectorAll('[aria-live], [role="status"]')) {
-      morceaux.push((noeud.textContent ?? '').trim());
+      morceaux.push((noeud.textContent ?? "").trim());
     }
     let marqueur = false;
-    for (const noeud of document.querySelectorAll('*')) {
+    for (const noeud of document.querySelectorAll("*")) {
       for (const attribut of noeud.attributes) {
-        if (!attribut.name.startsWith('data-refus')) continue;
+        if (!attribut.name.startsWith("data-refus")) continue;
         morceaux.push(`${attribut.name}=${attribut.value}`);
-        if (attribut.value !== '' && attribut.value !== 'non') marqueur = true;
+        if (attribut.value !== "" && attribut.value !== "non") marqueur = true;
       }
     }
-    return { dit: morceaux.join('|'), marqueur };
+    return { dit: morceaux.join("|"), marqueur };
   });
 }
 
@@ -93,9 +93,9 @@ async function annonce(page: Page): Promise<{ readonly dit: string; readonly mar
 function refusCourant(etat: unknown): string | null {
   let trouve: string | null = null;
   const visiter = (valeur: unknown): void => {
-    if (valeur === null || typeof valeur !== 'object') return;
+    if (valeur === null || typeof valeur !== "object") return;
     for (const [cle, sous] of Object.entries(valeur as Record<string, unknown>)) {
-      if (cle === 'dernierRefus' && sous !== null && typeof sous === 'object') {
+      if (cle === "dernierRefus" && sous !== null && typeof sous === "object") {
         trouve = JSON.stringify(sous);
       }
       visiter(sous);
@@ -144,8 +144,9 @@ async function taper(page: Page, selecteur: string): Promise<boolean> {
     // désactiver un bouton entre-temps : un vrai doigt ne peut alors plus atteindre cette
     // ancienne cible. La revérifier ici empêche le testeur de fabriquer des « gestes morts »
     // que l'interface ne présente plus à l'enfant.
-    const modaleActive = [...document.querySelectorAll<HTMLElement>('[role="dialog"][aria-modal="true"]')]
-      .find((dialogue) => dialogue.getClientRects().length > 0);
+    const modaleActive = [
+      ...document.querySelectorAll<HTMLElement>('[role="dialog"][aria-modal="true"]'),
+    ].find((dialogue) => dialogue.getClientRects().length > 0);
     if (modaleActive !== undefined && !modaleActive.contains(element)) return false;
 
     const boite = element.getBoundingClientRect();
@@ -157,12 +158,12 @@ async function taper(page: Page, selecteur: string): Promise<boolean> {
       clientY: boite.top + boite.height / 2,
     };
     element.dispatchEvent(
-      new PointerEvent('pointerdown', { ...commun, pointerId: 1, pointerType: 'touch' }),
+      new PointerEvent("pointerdown", { ...commun, pointerId: 1, pointerType: "touch" }),
     );
     element.dispatchEvent(
-      new PointerEvent('pointerup', { ...commun, pointerId: 1, pointerType: 'touch' }),
+      new PointerEvent("pointerup", { ...commun, pointerId: 1, pointerType: "touch" }),
     );
-    element.dispatchEvent(new MouseEvent('click', commun));
+    element.dispatchEvent(new MouseEvent("click", commun));
     return true;
   }, selecteur);
 }
@@ -185,13 +186,20 @@ interface Prise {
  */
 async function prisesDe(page: Page): Promise<readonly Prise[]> {
   return page.evaluate((selecteur) => {
-    const echapper = (valeur: string): string => valeur.replace(/["\\]/g, '\\$&');
+    const echapper = (valeur: string): string => valeur.replace(/["\\]/g, "\\$&");
     const trouvees: { selecteur: string; famille: string; nom: string }[] = [];
-    const modales = [...document.querySelectorAll<HTMLElement>('[role="dialog"][aria-modal="true"]')];
+    const modales = [
+      ...document.querySelectorAll<HTMLElement>('[role="dialog"][aria-modal="true"]'),
+    ];
     const modaleActive = modales.reverse().find((candidate) => {
       const style = getComputedStyle(candidate);
       const boite = candidate.getBoundingClientRect();
-      return style.display !== 'none' && style.visibility !== 'hidden' && boite.width > 0 && boite.height > 0;
+      return (
+        style.display !== "none" &&
+        style.visibility !== "hidden" &&
+        boite.width > 0 &&
+        boite.height > 0
+      );
     });
     for (const noeud of document.querySelectorAll(selecteur)) {
       const element = noeud as HTMLElement;
@@ -201,12 +209,12 @@ async function prisesDe(page: Page): Promise<readonly Prise[]> {
       const boite = element.getBoundingClientRect();
       if (boite.width === 0 || boite.height === 0) continue;
       const nom =
-        element.getAttribute('aria-label') ?? (element.textContent ?? '').trim().slice(0, 30);
-      let famille = '—';
+        element.getAttribute("aria-label") ?? (element.textContent ?? "").trim().slice(0, 30);
+      let famille = "—";
       let propre: string | null = null;
       for (const attribut of element.attributes) {
-        if (!attribut.name.startsWith('data-')) continue;
-        if (attribut.value === '' || attribut.value === 'oui' || attribut.value === 'non') continue;
+        if (!attribut.name.startsWith("data-")) continue;
+        if (attribut.value === "" || attribut.value === "oui" || attribut.value === "non") continue;
         // Une famille est un attribut porté par PLUSIEURS prises, avec des valeurs distinctes.
         const freres = document.querySelectorAll(`[${attribut.name}]`).length;
         if (freres < 2) continue;
@@ -246,40 +254,42 @@ function famillesDe(prises: readonly Prise[]): readonly (readonly Prise[])[] {
 
 interface Grief {
   readonly geste: string;
-  readonly genre: 'refus muet' | 'geste mort';
+  readonly genre: "refus muet" | "geste mort";
 }
 
-test.describe('Q5 — tout geste proposé aboutit ou s’explique', () => {
-  test('la population est DÉRIVÉE des recettes d’écrans', () => {
+test.describe("Q5 — tout geste proposé aboutit ou s’explique", () => {
+  test("la population est DÉRIVÉE des recettes d’écrans", () => {
     expect(
       ECRANS.length,
-      'aucune recette d’écran : la population serait vide et le garde vrai par vacuité',
+      "aucune recette d’écran : la population serait vide et le garde vrai par vacuité",
     ).toBeGreaterThanOrEqual(20);
     console.log(
       `[Q5] population : ${String(ECRANS.length)} pages atteignables en tapant ` +
-        '(recettesDEcrans = écrans déclarés + un nœud par exercice livré).',
+        "(recettesDEcrans = écrans déclarés + un nœud par exercice livré).",
     );
   });
 
-  test('CONTRÔLE POSITIF — un bouton fabriqué sans gestionnaire est trouvé mort, et un bouton qui n’écoute que `pointerdown` ne l’est pas', async ({
+  test("CONTRÔLE POSITIF — un bouton fabriqué sans gestionnaire est trouvé mort, et un bouton qui n’écoute que `pointerdown` ne l’est pas", async ({
     page,
   }) => {
     await ECRANS[0]!.aller(page);
 
     await page.evaluate(() => {
-      const mort = document.createElement('button');
-      mort.type = 'button';
-      mort.setAttribute('data-qa-controle', 'sans-gestionnaire');
-      mort.textContent = 'témoin sans gestionnaire';
-      const vivant = document.createElement('button');
-      vivant.type = 'button';
-      vivant.setAttribute('data-qa-controle', 'pointerdown-seul');
-      vivant.textContent = 'témoin pointerdown';
+      const mort = document.createElement("button");
+      mort.type = "button";
+      mort.setAttribute("data-qa-controle", "sans-gestionnaire");
+      mort.textContent = "témoin sans gestionnaire";
+      mort.style.minHeight = "64px";
+      const vivant = document.createElement("button");
+      vivant.type = "button";
+      vivant.setAttribute("data-qa-controle", "pointerdown-seul");
+      vivant.textContent = "témoin pointerdown";
+      vivant.style.minHeight = "64px";
       // Il n'écoute QUE `pointerdown` : un harnais qui n'émettrait qu'un `click` synthétique
       // le déclarerait mort. C'est le défaut mesuré qui faisait passer 33 régions vivantes
       // pour mortes.
-      vivant.addEventListener('pointerdown', () => {
-        vivant.setAttribute('data-touche', 'oui');
+      vivant.addEventListener("pointerdown", () => {
+        vivant.setAttribute("data-touche", "oui");
       });
       document.body.append(mort, vivant);
     });
@@ -288,7 +298,10 @@ test.describe('Q5 — tout geste proposé aboutit ou s’explique', () => {
     // Comparer tout `document.body` rendait le bouton mort « vivant » dès qu'une requête de
     // profil finissait entre les deux images. C'est un faux négatif du testeur lui-même.
     const htmlDuTemoin = (selecteur: string): Promise<string | null> =>
-      page.locator(selecteur).evaluate((element) => element.outerHTML).catch(() => null);
+      page
+        .locator(selecteur)
+        .evaluate((element) => element.outerHTML)
+        .catch(() => null);
     const avantMort = await htmlDuTemoin('[data-qa-controle="sans-gestionnaire"]');
     await taper(page, '[data-qa-controle="sans-gestionnaire"]');
     await deuxImages(page);
@@ -302,39 +315,41 @@ test.describe('Q5 — tout geste proposé aboutit ou s’explique', () => {
     const vivantDetecte = apresVivant !== avantVivant;
 
     console.log(
-      `[Q5] contrôle positif — témoin sans gestionnaire : ${mortDetecte ? 'MORT ✔' : 'manqué'} · ` +
-        `témoin pointerdown : ${vivantDetecte ? 'vivant ✔' : 'DÉCLARÉ MORT À TORT'}`,
+      `[Q5] contrôle positif — témoin sans gestionnaire : ${mortDetecte ? "MORT ✔" : "manqué"} · ` +
+        `témoin pointerdown : ${vivantDetecte ? "vivant ✔" : "DÉCLARÉ MORT À TORT"}`,
     );
     expect(
       mortDetecte,
-      'Q5 ne voit pas un bouton qui ne fait rien. L’instrument est aveugle : tout verdict vert ' +
-        'de ce fichier serait sans valeur.',
+      "Q5 ne voit pas un bouton qui ne fait rien. L’instrument est aveugle : tout verdict vert " +
+        "de ce fichier serait sans valeur.",
     ).toBe(true);
     expect(
       vivantDetecte,
-      'Q5 déclare mort un bouton qui répond à `pointerdown`. Le harnais n’émet donc pas la ' +
-        'séquence complète du doigt, et il fabriquerait des morts par dizaines.',
+      "Q5 déclare mort un bouton qui répond à `pointerdown`. Le harnais n’émet donc pas la " +
+        "séquence complète du doigt, et il fabriquerait des morts par dizaines.",
     ).toBe(true);
   });
 
-  test('CONTRÔLE MODAL — ignore ce qui est derrière, jamais ce qui reste dans le dialogue', async ({
+  test("CONTRÔLE MODAL — ignore ce qui est derrière, jamais ce qui reste dans le dialogue", async ({
     page,
   }) => {
     await ECRANS[0]!.aller(page);
     await page.evaluate(() => {
-      const derriere = document.createElement('button');
-      derriere.type = 'button';
-      derriere.setAttribute('data-qa-modal', 'derriere');
-      derriere.textContent = 'témoin recouvert';
-      const dialogue = document.createElement('div');
-      dialogue.setAttribute('role', 'dialog');
-      dialogue.setAttribute('aria-modal', 'true');
-      dialogue.style.position = 'fixed';
-      dialogue.style.inset = '0';
-      const dedans = document.createElement('button');
-      dedans.type = 'button';
-      dedans.setAttribute('data-qa-modal', 'dedans');
-      dedans.textContent = 'témoin dans la modale';
+      const derriere = document.createElement("button");
+      derriere.type = "button";
+      derriere.setAttribute("data-qa-modal", "derriere");
+      derriere.textContent = "témoin recouvert";
+      derriere.style.minHeight = "64px";
+      const dialogue = document.createElement("div");
+      dialogue.setAttribute("role", "dialog");
+      dialogue.setAttribute("aria-modal", "true");
+      dialogue.style.position = "fixed";
+      dialogue.style.inset = "0";
+      const dedans = document.createElement("button");
+      dedans.type = "button";
+      dedans.setAttribute("data-qa-modal", "dedans");
+      dedans.textContent = "témoin dans la modale";
+      dedans.style.minHeight = "64px";
       dialogue.append(dedans);
       document.body.append(derriere, dialogue);
     });
@@ -342,11 +357,11 @@ test.describe('Q5 — tout geste proposé aboutit ou s’explique', () => {
     const prises = await prisesDe(page);
     expect(
       prises.some((prise) => prise.selecteur === '[data-qa-modal="derriere"]'),
-      'preuve positive : une commande recouverte ne doit pas entrer dans la population',
+      "preuve positive : une commande recouverte ne doit pas entrer dans la population",
     ).toBe(false);
     expect(
       prises.some((prise) => prise.selecteur === '[data-qa-modal="dedans"]'),
-      'contrôle négatif : le filtre modal ne doit pas vider les commandes du dialogue',
+      "contrôle négatif : le filtre modal ne doit pas vider les commandes du dialogue",
     ).toBe(true);
   });
 
@@ -371,13 +386,9 @@ test.describe('Q5 — tout geste proposé aboutit ou s’explique', () => {
           const refusNeuf = apres.refus !== null && apres.refus !== avant.refus;
           const ditQuelqueChose = apres.dit !== avant.dit || apres.marqueur;
           if (refusNeuf && !ditQuelqueChose) {
-            griefs.push({ geste: prise.nom, genre: 'refus muet' });
-          } else if (
-            apres.dom === avant.dom &&
-            apres.etat === avant.etat &&
-            !ditQuelqueChose
-          ) {
-            griefs.push({ geste: prise.nom, genre: 'geste mort' });
+            griefs.push({ geste: prise.nom, genre: "refus muet" });
+          } else if (apres.dom === avant.dom && apres.etat === avant.etat && !ditQuelqueChose) {
+            griefs.push({ geste: prise.nom, genre: "geste mort" });
           }
         }
       } else {
@@ -417,8 +428,7 @@ test.describe('Q5 — tout geste proposé aboutit ou s’explique', () => {
               const apresDepot = await cliche(page);
               faites += 1;
               gestes += 1;
-              const refusNeuf =
-                apresDepot.refus !== null && apresDepot.refus !== apresPrise.refus;
+              const refusNeuf = apresDepot.refus !== null && apresDepot.refus !== apresPrise.refus;
               if (refusNeuf) {
                 refuses.push({
                   geste: `${a.nom} → ${b.nom}`,
@@ -435,7 +445,7 @@ test.describe('Q5 — tout geste proposé aboutit ou s’explique', () => {
         }
         for (const refus of refuses) {
           const distingue = refus.marqueur || !annoncesApresSucces.has(refus.dit);
-          if (!distingue) griefs.push({ geste: refus.geste, genre: 'refus muet' });
+          if (!distingue) griefs.push({ geste: refus.geste, genre: "refus muet" });
         }
         console.log(
           `[Q5] ${ecran.nom} : ${String(refuses.length)} dépôt(s) refusé(s), ` +
@@ -443,10 +453,10 @@ test.describe('Q5 — tout geste proposé aboutit ou s’explique', () => {
         );
       }
 
-      const muets = griefs.filter((g) => g.genre === 'refus muet');
-      const morts = griefs.filter((g) => g.genre === 'geste mort');
+      const muets = griefs.filter((g) => g.genre === "refus muet");
+      const morts = griefs.filter((g) => g.genre === "geste mort");
       console.log(
-        `[Q5] ${griefs.length === 0 ? ' ' : '⚠'} ${ecran.nom.padEnd(46)} ` +
+        `[Q5] ${griefs.length === 0 ? " " : "⚠"} ${ecran.nom.padEnd(46)} ` +
           `${String(gestes)} geste(s) · ${String(muets.length)} refus muet(s) · ` +
           `${String(morts.length)} geste(s) mort(s)`,
       );
@@ -454,8 +464,8 @@ test.describe('Q5 — tout geste proposé aboutit ou s’explique', () => {
       expect(
         griefs.map((g) => `${g.genre} : ${g.geste}`),
         `« ${ecran.nom} » — ces gestes n’aboutissent pas et ne s’expliquent pas. Un refus MUET ` +
-          'devant un enfant de sept ans est indiscernable d’un jeu cassé : c’est exactement ce ' +
-          'que le père a vécu avec les mots de couleur (R33), et avec le glisser avant lui (R16).',
+          "devant un enfant de sept ans est indiscernable d’un jeu cassé : c’est exactement ce " +
+          "que le père a vécu avec les mots de couleur (R33), et avec le glisser avant lui (R16).",
       ).toEqual([]);
     });
   }

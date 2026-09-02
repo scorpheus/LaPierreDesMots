@@ -15,30 +15,28 @@
 //      « Un monde à moitié colorié appelle qu'on le termine » (v2 § 3.2).
 //   3. **Jamais d'écran vide.** Tant que le monde n'est pas arrivé, le campement affiche son
 //      décor et ses points ; c'est le monde qui est optionnel, pas le décor.
-import { useCallback, useMemo } from 'react';
-import type { ReactElement } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import type { EtatMonde, IdNoeud, PointInteraction } from '@pierre/partage';
-import {
-  campementDuDocument, prochainStade, stadesDuDocument
-} from '@pierre/partage/monde';
+import { useCallback, useMemo } from "react";
+import type { ReactElement } from "react";
+import { useQuery } from "@tanstack/react-query";
+import type { EtatMonde, IdNoeud, PointInteraction } from "@pierre/partage";
+import { campementDuDocument, prochainStade, stadesDuDocument } from "@pierre/partage/monde";
 // `DocumentCampement` et `StadeGobi` viennent du SOUS-CHEMIN : le barillet racine ne réexporte
 // que les seize types du § 4.5 (convention C1), et `DocumentCampement` n'en fait pas partie.
-import type { DocumentCampement, StadeGobi } from '@pierre/partage/monde';
-import { lireMonde, lirePaquetNoeud, noterVisitePointCampement, urlAsset } from '../api/client.js';
-import { Compagnon } from '../composants/Compagnon.js';
-import { Gobi } from '../composants/Gobi.js';
-import { useEtatJeu, useMagasin } from '../etat/services.js';
-import { Chaudron } from '../monde/Chaudron.js';
-import { MurDesNoms } from '../monde/MurDesNoms.js';
-import type { NomDuMur } from '../monde/MurDesNoms.js';
-import { PastilleSortie } from '../monde/PastilleSortie.js';
-import { PointLibre } from '../monde/PointLibre.js';
+import type { DocumentCampement, StadeGobi } from "@pierre/partage/monde";
+import { lireMonde, lirePaquetNoeud, noterVisitePointCampement, urlAsset } from "../api/client.js";
+import { Compagnon } from "../composants/Compagnon.js";
+import { Gobi } from "../composants/Gobi.js";
+import { useEtatJeu, useMagasin } from "../etat/services.js";
+import { Chaudron } from "../monde/Chaudron.js";
+import { MurDesNoms } from "../monde/MurDesNoms.js";
+import type { NomDuMur } from "../monde/MurDesNoms.js";
+import { PastilleSortie } from "../monde/PastilleSortie.js";
+import { PointLibre } from "../monde/PointLibre.js";
 // La table des noms de région vit dans `EcranCoffre.tsx` — l'autre écran de ce même lot. Elle
 // n'est pas hissée dans un module commun parce qu'aucun lot du contrat du monde v4 ne possède
 // `client/src/monde/` : un lot ne s'accorde pas un fichier qu'un autre pourrait écrire. Sa
 // place définitive est le référentiel des régions (M2), et c'est consigné en question ouverte.
-import { NOM_DE_REGION } from './EcranCoffre.js';
+import { NOM_DE_REGION } from "./EcranCoffre.js";
 
 export interface ProprietesEcranCampement {
   /** Le référentiel du campement. Injecté par les tests ; chargé sinon. */
@@ -92,7 +90,7 @@ function dimensions(viewBox: string): readonly [number, number] {
 }
 
 async function chargerJson(chemin: string): Promise<unknown> {
-  const reponse = await fetch(urlAsset(chemin), { headers: { Accept: 'application/json' } });
+  const reponse = await fetch(urlAsset(chemin), { headers: { Accept: "application/json" } });
   if (!reponse.ok) {
     throw new Error(`Contenu introuvable : ${chemin} (réponse ${String(reponse.status)}).`);
   }
@@ -106,33 +104,33 @@ export function EcranCampement({
   surAllerCarte,
   surAllerCoffre,
   surOuvrirChaudron,
-  surRejouerOuverture
+  surRejouerOuverture,
 }: ProprietesEcranCampement = {}): ReactElement {
   const magasin = useMagasin();
   const profil = useEtatJeu((etat) => etat.profil);
   const animationsDesactivees = useEtatJeu((etat) => etat.animationsDesactivees);
 
   const requeteCampement = useQuery({
-    queryKey: ['monde', 'campement'],
-    queryFn: async () => campementDuDocument(await chargerJson('monde/campement.json')),
-    enabled: campementInjecte === null
+    queryKey: ["monde", "campement"],
+    queryFn: async () => campementDuDocument(await chargerJson("monde/campement.json")),
+    enabled: campementInjecte === null,
   });
 
   const requeteStades = useQuery({
-    queryKey: ['monde', 'stades'],
-    queryFn: async () => stadesDuDocument(await chargerJson('monde/gobi-stades.json')),
-    enabled: stadesInjectes === null
+    queryKey: ["monde", "stades"],
+    queryFn: async () => stadesDuDocument(await chargerJson("monde/gobi-stades.json")),
+    enabled: stadesInjectes === null,
   });
 
   const requeteMonde = useQuery({
-    queryKey: ['monde', profil === null ? null : String(profil.id)],
+    queryKey: ["monde", profil === null ? null : String(profil.id)],
     queryFn: () => {
       if (profil === null) {
-        throw new Error('Monde demandé sans profil choisi.');
+        throw new Error("Monde demandé sans profil choisi.");
       }
       return lireMonde(profil.id);
     },
-    enabled: mondeInjecte === null && profil !== null
+    enabled: mondeInjecte === null && profil !== null,
   });
 
   const campement = campementInjecte ?? requeteCampement.data ?? null;
@@ -144,7 +142,7 @@ export function EcranCampement({
   // mort qui porte un nom, exactement ce que le recensement des rappels vient de traquer.
 
   const points: readonly PointInteraction[] = campement?.points ?? [];
-  const [largeurScene, hauteurScene] = dimensions(campement?.scene.viewBox ?? '0 0 1200 800');
+  const [largeurScene, hauteurScene] = dimensions(campement?.scene.viewBox ?? "0 0 1200 800");
 
   /**
    * R31/R11 — journalise la visite d'un point libre. GRATUIT : aucune étoile, aucun acquis,
@@ -159,7 +157,7 @@ export function EcranCampement({
       }
       void noterVisitePointCampement(profil.id, point.id).catch(() => undefined);
     },
-    [profil]
+    [profil],
   );
 
   /**
@@ -196,19 +194,16 @@ export function EcranCampement({
       (monde?.gobi.formes ?? []).map((forme) => ({
         texte: String(forme.grapheme),
         libelle: forme.libelle,
-        obtenuLe: forme.obtenueLe
+        obtenuLe: forme.obtenueLe,
       })),
-    [monde]
+    [monde],
   );
 
-  const stade = monde?.gobi.stade ?? 'oeuf';
-  const formeActive = monde?.gobi.formes.find(
-    (forme) => forme.grapheme === monde.gobi.formeActive
-  );
+  const stade = monde?.gobi.stade ?? "oeuf";
+  const formeActive = monde?.gobi.formes.find((forme) => forme.grapheme === monde.gobi.formeActive);
   const suivant = useMemo(
-    () =>
-      monde === null || stades.length === 0 ? null : prochainStade(monde.gobi, stades),
-    [monde, stades]
+    () => (monde === null || stades.length === 0 ? null : prochainStade(monde.gobi, stades)),
+    [monde, stades],
   );
 
   // « On le rencontre à clairiere. » — c'est ce que cet écran écrivait, en rendant le CODE de
@@ -219,14 +214,11 @@ export function EcranCampement({
       monde?.carte.regions.find((region) => String(region.region) === code) === undefined
         ? undefined
         : (NOM_DE_REGION[code] ?? code),
-    [monde]
+    [monde],
   );
 
   return (
-    <main
-      data-ecran="campement"
-      style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}
-    >
+    <main data-ecran="campement" className="campement-page">
       {/* ── LES SORTIES DU CAMPEMENT — R18 : ça se comprend sans lire ────────────────────────
           Le père n'a pas compris le campement. Le défaut mesuré n'était pas le décor, c'était
           la barre du haut : trois mots posés côte à côte, sans image, dans la police de lecture.
@@ -234,16 +226,13 @@ export function EcranCampement({
           `data-pictogramme` le rend comptable, et `parcours-campement-sans-texte.spec.ts`
           échoue si une seule destination en manque. Le mot reste, pour l'adulte et pour le
           lecteur d'écran ; il n'est plus la seule prise. */}
-      <header
-        data-campement-sorties="oui"
-        style={{ display: 'flex', alignItems: 'flex-end', gap: '1rem', flexWrap: 'wrap' }}
-      >
-        <h1 className="titre" style={{ fontSize: '2.25rem', margin: 0 }}>
-          Le campement
-        </h1>
+      <header data-campement-sorties="oui" className="campement-entete">
+        <h1 className="titre campement-titre">Le campement</h1>
 
         {/* D46 : le campement n'est JAMAIS sur le chemin obligatoire. On en repart en un tap. */}
-        {profil === null ? null : <PastilleSortie profil={profil} style={{ inlineSize: '11rem' }} />}
+        {profil === null ? null : (
+          <PastilleSortie profil={profil} style={{ inlineSize: "11rem" }} />
+        )}
 
         <button
           type="button"
@@ -253,14 +242,14 @@ export function EcranCampement({
           aria-label="Ouvrir la carte du monde"
           onClick={() => {
             if (surAllerCarte === undefined) {
-              magasin.getState().naviguer('carte');
+              magasin.getState().naviguer("carte");
             } else {
               surAllerCarte();
             }
           }}
-          style={{ flexDirection: 'column', gap: '0.35rem', inlineSize: '11rem' }}
+          style={{ flexDirection: "column", gap: "0.35rem", inlineSize: "11rem" }}
         >
-          <span aria-hidden="true" style={{ fontSize: '2.75rem', lineHeight: 1 }}>
+          <span aria-hidden="true" style={{ fontSize: "2.75rem", lineHeight: 1 }}>
             🗺️
           </span>
           <span>La carte</span>
@@ -273,9 +262,9 @@ export function EcranCampement({
           data-pictogramme="coffre"
           aria-label="Ouvrir le coffre aux collections"
           onClick={surAllerCoffre}
-          style={{ flexDirection: 'column', gap: '0.35rem', inlineSize: '11rem' }}
+          style={{ flexDirection: "column", gap: "0.35rem", inlineSize: "11rem" }}
         >
-          <span aria-hidden="true" style={{ fontSize: '2.75rem', lineHeight: 1 }}>
+          <span aria-hidden="true" style={{ fontSize: "2.75rem", lineHeight: 1 }}>
             🧰
           </span>
           <span>Le coffre</span>
@@ -291,9 +280,9 @@ export function EcranCampement({
             data-pictogramme="ouverture"
             aria-label="Revoir l’histoire du début"
             onClick={surRejouerOuverture}
-            style={{ flexDirection: 'column', gap: '0.35rem', inlineSize: '11rem' }}
+            style={{ flexDirection: "column", gap: "0.35rem", inlineSize: "11rem" }}
           >
-            <span aria-hidden="true" style={{ fontSize: '2.75rem', lineHeight: 1 }}>
+            <span aria-hidden="true" style={{ fontSize: "2.75rem", lineHeight: 1 }}>
               📖
             </span>
             <span>Revoir l’histoire</span>
@@ -321,12 +310,9 @@ export function EcranCampement({
           possible quand la place manque, et rien n'est jamais coupé. */}
       <div
         data-campement-grille="oui"
+        className="campement-grille"
         style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(30rem, 1fr))',
-          gap: '1.5rem',
-          alignContent: 'start',
-          alignItems: 'start'
+          gridTemplateColumns: "repeat(auto-fit, minmax(30rem, 1fr))",
         }}
       >
         {/* ── le décor et ses points d'interaction : la prise de R11 ───────────────────────
@@ -400,49 +386,49 @@ export function EcranCampement({
             `campement.json`) : la pleine largeur (1 152-1 200 px) le dépasse largement, quelle
             que soit la hauteur — ce grief-là ne demandait que la largeur, jamais la hauteur. */}
         <div
-        data-scene="campement"
-        data-points={String(points.length)}
-        style={{
-          position: 'relative',
-          inlineSize: 'auto',
-          blockSize: 'auto',
-          maxInlineSize: '1200px',
-          aspectRatio: `${String(largeurScene)} / ${String(hauteurScene)}`,
-          backgroundImage:
-            campement === null ? 'none' : `url(${urlAsset(String(campement.scene.fichier))})`,
-          backgroundSize: 'contain',
-          backgroundRepeat: 'no-repeat',
-          backgroundPosition: 'center',
-          backgroundColor: 'var(--parchemin)',
-          borderRadius: 'var(--rayon-carte)',
-          // ── LA CASE DE BD (M8) ────────────────────────────────────────────────────────
-          // Le décor était servi sans cadre : il se fondait dans le fond parchemin de la
-          // page, et le campement ressemblait à une image posée sur un document. Cerné du
-          // trait et posé sur son ombre en aplat, c'est une CASE — le registre que l'enfant
-          // lit déjà dans ses BD (v2 § 9.1). `overflow: hidden` fait suivre le décor au
-          // rayon du cadre plutôt que de laisser ses angles dépasser.
-          border: 'var(--epaisseur-trait) solid var(--trait)',
-          boxShadow: 'var(--ombre-bd)',
-          overflow: 'hidden',
-          // ── PLEINE LARGEUR — R40, voir le commentaire au-dessus du décor. Même mécanisme
-          // que la section « La bande » plus bas : une seule façon de sortir un enfant de
-          // `data-campement-grille`, pas deux.
-          gridColumn: '1 / -1'
-        }}
-      >
-        {points.map((point) => (
-          <PointLibre
-            key={point.id}
-            point={point}
-            largeurScene={largeurScene}
-            hauteurScene={hauteurScene}
-            animationsDesactivees={animationsDesactivees}
-            surVisite={noterVisite}
-          />
-        ))}
-      </div>
+          data-scene="campement"
+          data-points={String(points.length)}
+          style={{
+            position: "relative",
+            inlineSize: "auto",
+            blockSize: "auto",
+            maxInlineSize: "1200px",
+            aspectRatio: `${String(largeurScene)} / ${String(hauteurScene)}`,
+            backgroundImage:
+              campement === null ? "none" : `url(${urlAsset(String(campement.scene.fichier))})`,
+            backgroundSize: "contain",
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center",
+            backgroundColor: "var(--parchemin)",
+            borderRadius: "var(--rayon-carte)",
+            // ── LA CASE DE BD (M8) ────────────────────────────────────────────────────────
+            // Le décor était servi sans cadre : il se fondait dans le fond parchemin de la
+            // page, et le campement ressemblait à une image posée sur un document. Cerné du
+            // trait et posé sur son ombre en aplat, c'est une CASE — le registre que l'enfant
+            // lit déjà dans ses BD (v2 § 9.1). `overflow: hidden` fait suivre le décor au
+            // rayon du cadre plutôt que de laisser ses angles dépasser.
+            border: "var(--epaisseur-trait) solid var(--trait)",
+            boxShadow: "var(--ombre-bd)",
+            overflow: "hidden",
+            // ── PLEINE LARGEUR — R40, voir le commentaire au-dessus du décor. Même mécanisme
+            // que la section « La bande » plus bas : une seule façon de sortir un enfant de
+            // `data-campement-grille`, pas deux.
+            gridColumn: "1 / -1",
+          }}
+        >
+          {points.map((point) => (
+            <PointLibre
+              key={point.id}
+              point={point}
+              largeurScene={largeurScene}
+              hauteurScene={hauteurScene}
+              animationsDesactivees={animationsDesactivees}
+              surVisite={noterVisite}
+            />
+          ))}
+        </div>
 
-      {/* ── Gobi, au campement : le stade se VOIT, c'est tout l'intérêt de D28 ───────────
+        {/* ── Gobi, au campement : le stade se VOIT, c'est tout l'intérêt de D28 ───────────
 
           ── R41 — LE BOUTON « ? GOBI » NE S'AFFICHE PLUS ICI, ET C'EST UNE DÉCISION ────────
 
@@ -472,34 +458,35 @@ export function EcranCampement({
           le bouton est toujours là, jamais grisé, jamais compté (R15), et où R46 vient de la
           rendre lisible ET audible. Gobi reste au campement comme COMPAGNON — c'est son stade
           qu'on y vient voir (D28), pas son aide. */}
-      <section className="panneau" aria-label="Gobi">
-        <Gobi
-          aide={null}
-          niveau="aucune"
-          surDemande={null}
-          stade={stade}
-          cristal={formeActive?.cristal ?? null}
-          libelleForme={formeActive?.libelle ?? null}
-          animation="repos"
-          taille={96}
-        />
-        {suivant === null ? null : (
-          // La jauge montre le VIDE restant, jamais seulement l'acquis (D25, point 3).
-          <p
-            className="zone-lecture"
-            data-prochain-stade={suivant.stade.code}
-            data-formes-restantes={String(suivant.formesRestantes)}
-            style={{ padding: '0.5rem 0.75rem', maxInlineSize: '32rem' }}
-          >
-            Encore {suivant.formesRestantes} forme(s) et Gobi deviendra « {suivant.stade.libelle} ».
-          </p>
-        )}
-      </section>
+        <section className="panneau campement-gobi" aria-label="Gobi">
+          <Gobi
+            aide={null}
+            niveau="aucune"
+            surDemande={null}
+            stade={stade}
+            cristal={formeActive?.cristal ?? null}
+            libelleForme={formeActive?.libelle ?? null}
+            animation="repos"
+            taille={96}
+          />
+          {suivant === null ? null : (
+            // La jauge montre le VIDE restant, jamais seulement l'acquis (D25, point 3).
+            <p
+              className="zone-lecture"
+              data-prochain-stade={suivant.stade.code}
+              data-formes-restantes={String(suivant.formesRestantes)}
+              style={{ padding: "0.5rem 0.75rem", maxInlineSize: "32rem" }}
+            >
+              Encore {suivant.formesRestantes} forme(s) et Gobi deviendra « {suivant.stade.libelle}{" "}
+              ».
+            </p>
+          )}
+        </section>
 
-      {/* L'étagère : l'album des formes, cases vides comprises (D44). Elle est posée AVANT le
+        {/* L'étagère : l'album des formes, cases vides comprises (D44). Elle est posée AVANT le
           mur des noms parce qu'elle répond à la question que le mur ne répond pas — « combien
           y en a-t-il en tout ? ». Le mur grave l'acquis, l'étagère montre le reste. */}
-      {/* ── R27 — L'ÉTAGÈRE DE GOBI A QUITTÉ LE CAMPEMENT ────────────────────────────────
+        {/* ── R27 — L'ÉTAGÈRE DE GOBI A QUITTÉ LE CAMPEMENT ────────────────────────────────
           « Dans le coffre, il y a aussi les Gobi. Je pense qu'il faut les laisser dans le
           coffre, ça sert à rien de les mettre dans le campement. Dans le coffre, c'est bien. »
 
@@ -511,7 +498,7 @@ export function EcranCampement({
           les 1 578 du campement, gaps compris. Son retrait n'est pas une correction de mise en
           page — c'en est le résultat, pas la cause. */}
 
-      {/* ── R40 — LE BUTIN A QUITTÉ LE CAMPEMENT, MÊME ARBITRAGE QUE L'ÉTAGÈRE (R27) ──────────
+        {/* ── R40 — LE BUTIN A QUITTÉ LE CAMPEMENT, MÊME ARBITRAGE QUE L'ÉTAGÈRE (R27) ──────────
           « Ce que tu as rapporté » vivait ici depuis le lot S5 (six objets, un par région,
           servis par le serveur, dessinés par `DessinButin`). Il vit AUSSI au coffre depuis M8
           (`EcranCoffre.tsx:301`, section « Les objets du campement », même source
@@ -529,28 +516,32 @@ export function EcranCampement({
 
           Rien n'est perdu : le père a tranché lui-même, « déplace le butin dans le coffre » —
           il y est déjà, à l'identique, depuis M8. */}
-      <MurDesNoms noms={noms} />
+        <MurDesNoms noms={noms} />
 
-      <Chaudron
-        {...(noeudLibre === null ? {} : { surOuvrir: ouvrirLeChaudron })}
-        enChargement={campement === null}
-        animationsDesactivees={animationsDesactivees}
-      />
+        <Chaudron
+          {...(noeudLibre === null ? {} : { surOuvrir: ouvrirLeChaudron })}
+          enChargement={campement === null}
+          animationsDesactivees={animationsDesactivees}
+        />
 
-      <section className="panneau" aria-label="Les compagnons" style={{ gridColumn: '1 / -1' }}>
-        <h2 className="panneau-titre" style={{ fontSize: '1.5rem' }}>
-          La bande
-        </h2>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
-          {(monde?.compagnons ?? []).map((compagnon) => (
-            <Compagnon
-              key={compagnon.code}
-              compagnon={compagnon}
-              libelleRegion={libelleRegion(String(compagnon.region))}
-            />
-          ))}
-        </div>
-      </section>
+        <section
+          className="panneau campement-compagnons"
+          aria-label="Les compagnons"
+          style={{ gridColumn: "1 / -1" }}
+        >
+          <h2 className="panneau-titre" style={{ fontSize: "1.5rem" }}>
+            La bande
+          </h2>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem" }}>
+            {(monde?.compagnons ?? []).map((compagnon) => (
+              <Compagnon
+                key={compagnon.code}
+                compagnon={compagnon}
+                libelleRegion={libelleRegion(String(compagnon.region))}
+              />
+            ))}
+          </div>
+        </section>
       </div>
     </main>
   );

@@ -31,12 +31,12 @@
  * vraie sur toute machine, et la seule qui a réellement échoué.
  * ══════════════════════════════════════════════════════════════════════════════════════════════
  */
-import { describe, expect, test } from 'vitest';
+import { describe, expect, test } from "vitest";
 
-import { lireTexte } from '../configuration/preparation.js';
+import { lireTexte } from "../configuration/preparation.js";
 
-const FEUILLES = ['client/src/styles/global.css', 'client/src/styles/polices.css'] as const;
-const TELECHARGEUR = 'scripts/telecharger-polices.mjs';
+const FEUILLES = ["client/src/styles/global.css", "client/src/styles/polices.css"] as const;
+const TELECHARGEUR = "scripts/telecharger-polices.mjs";
 
 /** Tous les `url("/polices/…")` d'une feuille de style, dans l'ordre de lecture. */
 function reclamees(): readonly { readonly fichier: string; readonly ou: string }[] {
@@ -53,65 +53,74 @@ function reclamees(): readonly { readonly fichier: string; readonly ou: string }
 /** Les `fichier:` déclarés dans la table du téléchargeur. */
 function connues(): readonly string[] {
   const texte = lireTexte(TELECHARGEUR);
-  return [...texte.matchAll(/fichier: '([^']+)'/gu)].map((occurrence) => occurrence[1] as string);
+  return [...texte.matchAll(/fichier:\s*["']([^"']+)["']/gu)].map(
+    (occurrence) => occurrence[1] as string,
+  );
 }
 
-describe('les polices déclarées et les polices téléchargées sont la même liste', () => {
-  test('CONTRÔLE POSITIF — les deux listes ne sont pas vides', () => {
+/** Les blocs de la table, indépendamment du choix de guillemets de Prettier. */
+function blocsDePolices(): readonly string[] {
+  return lireTexte(TELECHARGEUR)
+    .split(/\{\s*\n\s*fichier:\s*["']/u)
+    .slice(1);
+}
+
+describe("les polices déclarées et les polices téléchargées sont la même liste", () => {
+  test("CONTRÔLE POSITIF — les deux listes ne sont pas vides", () => {
     // Sans ce cas, une expression régulière cassée rendrait deux ensembles vides, leur
     // intersection serait parfaite, et le test serait vert en ne comparant rien. C'est
     // exactement le mode de défaillance qu'on corrige ailleurs cette semaine.
     expect(reclamees().length, 'aucun `url("/polices/…")` trouvé').toBeGreaterThanOrEqual(5);
-    expect(connues().length, 'aucun `fichier:` trouvé dans le téléchargeur').toBeGreaterThanOrEqual(5);
+    expect(connues().length, "aucun `fichier:` trouvé dans le téléchargeur").toBeGreaterThanOrEqual(
+      5,
+    );
   });
 
-  test('LE DÉFAUT — aucune police déclarée en `@font-face` n’est inconnue du téléchargeur', () => {
+  test("LE DÉFAUT — aucune police déclarée en `@font-face` n’est inconnue du téléchargeur", () => {
     const table = new Set(connues());
     const orphelines = reclamees().filter((police) => !table.has(police.fichier));
     expect(
       orphelines.map((police) => `${police.fichier} (déclarée dans ${police.ou})`),
-      'ces polices seront demandées au serveur, qui répondra la page HTML — et le navigateur ' +
-        'rendra « OTS parsing error: invalid sfntVersion: 1008821359 », soit « <!DO »'
+      "ces polices seront demandées au serveur, qui répondra la page HTML — et le navigateur " +
+        "rendra « OTS parsing error: invalid sfntVersion: 1008821359 », soit « <!DO »",
     ).toEqual([]);
   });
 
-  test('et réciproquement : le téléchargeur ne va chercher aucune police que personne n’utilise', () => {
+  test("et réciproquement : le téléchargeur ne va chercher aucune police que personne n’utilise", () => {
     // L'autre sens compte aussi : une police téléchargée que rien ne déclare est du poids
     // installé pour rien, et surtout le signe qu'un `@font-face` a été supprimé sans que la
     // table suive. Les deux listes doivent rester le même ensemble.
     const declarees = new Set(reclamees().map((police) => police.fichier));
     const inutilisees = connues().filter((fichier) => !declarees.has(fichier));
-    expect(inutilisees, 'téléchargées mais déclarées nulle part').toEqual([]);
+    expect(inutilisees, "téléchargées mais déclarées nulle part").toEqual([]);
   });
 
-  test('chaque police porte sa licence et son auteur — aucune n’arrive sans provenance', () => {
+  test("chaque police porte sa licence et son auteur — aucune n’arrive sans provenance", () => {
     // D9 et la note de `LICENCES.md` : on n'installe rien dont on ne sache pas d'où ça vient.
-    const texte = lireTexte(TELECHARGEUR);
-    const blocs = texte.split(/\{\s*\n\s*fichier: '/u).slice(1);
+    const blocs = blocsDePolices();
     expect(blocs.length).toBe(connues().length);
     for (const [rang, bloc] of blocs.entries()) {
-      const entete = bloc.slice(0, bloc.indexOf('note:'));
-      expect(entete, `police n°${String(rang + 1)} sans licence`).toMatch(/licence:\s*'/u);
-      expect(entete, `police n°${String(rang + 1)} sans auteur`).toMatch(/auteur:\s*'/u);
+      const entete = bloc.slice(0, bloc.indexOf("note:"));
+      expect(entete, `police n°${String(rang + 1)} sans licence`).toMatch(/licence:\s*["']/u);
+      expect(entete, `police n°${String(rang + 1)} sans auteur`).toMatch(/auteur:\s*["']/u);
     }
   });
 
-  test('une police à URL établie a son empreinte ÉPINGLÉE, sinon elle ne s’écrira jamais', () => {
+  test("une police à URL établie a son empreinte ÉPINGLÉE, sinon elle ne s’écrira jamais", () => {
     // Le script refuse d'écrire un fichier dont l'empreinte n'est pas épinglée — c'est ce qui
     // a protégé le dépôt le jour où les cinq premières ont été récupérées. Mais une URL posée
     // sans empreinte donne un script qui télécharge à chaque fois pour ne rien écrire : le
     // symptôme est identique à celui d'une police absente, et rien ne le distingue.
-    const texte = lireTexte(TELECHARGEUR);
-    const blocs = texte.split(/\{\s*\n\s*fichier: '/u).slice(1);
+    const blocs = blocsDePolices();
     const boiteuses: string[] = [];
     for (const bloc of blocs) {
-      const nom = bloc.slice(0, bloc.indexOf("'"));
-      const aUneUrl = /url:\s*'https/u.test(bloc);
-      const aUneEmpreinte = /sha256:\s*'[0-9a-f]{64}'/u.test(bloc);
+      const nom = bloc.match(/^([^"']+)["']/u)?.[1] ?? "(nom illisible)";
+      const aUneUrl = /url:\s*["']https/u.test(bloc);
+      const aUneEmpreinte = /sha256:\s*["'][0-9a-f]{64}["']/u.test(bloc);
       if (aUneUrl && !aUneEmpreinte) boiteuses.push(nom);
     }
-    expect(boiteuses, 'URL posée mais empreinte non épinglée : téléchargée, jamais écrite').toEqual(
-      []
+    expect(boiteuses, "URL posée mais empreinte non épinglée : téléchargée, jamais écrite").toEqual(
+      [],
     );
   });
 });

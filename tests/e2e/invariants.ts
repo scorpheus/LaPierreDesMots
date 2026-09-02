@@ -62,26 +62,26 @@
  * Aucune attente de durée. Les deux seules attentes de ce fichier attendent un ÉTAT : une
  * image peinte (`requestAnimationFrame`) et une réponse du serveur.
  */
-import { appendFileSync, existsSync, mkdirSync, readFileSync, readdirSync } from 'node:fs';
-import { basename, dirname, join } from 'node:path';
+import { appendFileSync, existsSync, mkdirSync, readFileSync, readdirSync } from "node:fs";
+import { basename, dirname, join } from "node:path";
 
-import { expect } from '@playwright/test';
+import { expect } from "@playwright/test";
 
 // LE HARNAIS D'ISOLATION (lot P1) — un serveur neuf par cas, donc une base et un `Alea` neufs.
 // C'est LUI qui rend le parallélisme légitime : sans lui, deux recettes qui tournent en même
 // temps se partagent un profil. La sentinelle ci-dessous s'ajoute par-dessus, elle ne le
 // remplace pas.
-import { test as base } from '../harnais-serveur.js';
+import { test as base } from "../harnais-serveur.js";
 
-import { CIBLE_MINIMALE_PX, SELECTEUR_INTERACTIF, cheminDepot } from './qa-outils.js';
+import { CIBLE_MINIMALE_PX, SELECTEUR_INTERACTIF, cheminDepot } from "./qa-outils.js";
 
-import type { Page, TestInfo } from '@playwright/test';
+import type { Page, TestInfo } from "@playwright/test";
 
 export { expect };
 
 // ═══════════════════════════════════════════════════════════════════════ 1. LES SIX INVARIANTS
 
-export type CodeInvariant = 'issue' | 'echec' | 'acquis' | 'sante' | 'cible' | 'serveur';
+export type CodeInvariant = "issue" | "echec" | "acquis" | "sante" | "cible" | "serveur";
 
 export interface DescripteurInvariant {
   readonly code: CodeInvariant;
@@ -102,54 +102,54 @@ export interface DescripteurInvariant {
  */
 export const INVARIANTS: readonly DescripteurInvariant[] = [
   {
-    code: 'issue',
-    titre: 'Il existe toujours une issue',
+    code: "issue",
+    titre: "Il existe toujours une issue",
     regle:
-      'annexe T § T3 — « aucun état sans issue ». D48 : compter les éléments interactifs ' +
-      'n’est pas compter les sorties ; « mène ailleurs » est la propriété.',
-    defautGarde:
-      'Défaut n° 1 du père : dans Les Galeries, deux boutons, aucun ne menait ailleurs.',
+      "annexe T § T3 — « aucun état sans issue ». D48 : compter les éléments interactifs " +
+      "n’est pas compter les sorties ; « mène ailleurs » est la propriété.",
+    defautGarde: "Défaut n° 1 du père : dans Les Galeries, deux boutons, aucun ne menait ailleurs.",
   },
   {
-    code: 'echec',
-    titre: 'Aucun marqueur d’échec, jamais',
+    code: "echec",
+    titre: "Aucun marqueur d’échec, jamais",
     regle:
-      'R14 / CLAUDE.md — « aucun écran d’échec, jamais. Pas de vies, pas de défaite, ' +
-      'pas de score négatif. »',
+      "R14 / CLAUDE.md — « aucun écran d’échec, jamais. Pas de vies, pas de défaite, " +
+      "pas de score négatif. »",
     defautGarde:
       'Mutation M6 de l’audit : `data-etat="echec"` émis sur un refus du moteur `attrape`.',
   },
   {
-    code: 'acquis',
-    titre: 'Aucune étoile acquise n’a décru',
-    regle: 'R14 — « un acquis n’est jamais repris ». Contrat § 6.2 : le journal fait foi.',
+    code: "acquis",
+    titre: "Aucune étoile acquise n’a décru",
+    regle: "R14 — « un acquis n’est jamais repris ». Contrat § 6.2 : le journal fait foi.",
     defautGarde:
-      'Mutation M5 : `etoiles = excluded.etoiles` au lieu de `MAX` — un acquis repris en base.',
+      "Mutation M5 : `etoiles = excluded.etoiles` au lieu de `MAX` — un acquis repris en base.",
   },
   {
-    code: 'sante',
-    titre: 'Aucune exception, aucune erreur console, aucun écran blanc',
-    regle: 'annexe T § T3 — le bot singe exige « aucune exception non capturée, aucun écran blanc ».',
-    defautGarde:
-      'Un écran blanc ne se décrit pas : l’enfant arrête simplement de jouer (annexe T § T3).',
-  },
-  {
-    code: 'cible',
-    titre: 'Toute cible interactive fait ≥ 64 px',
-    regle: 'R16 — « cibles ≥ 64 px, tolérance 24 px, aucune coordination fine exigée ».',
-    defautGarde:
-      'Mutations M7a, M7b, M23 : trois façons de descendre sous 64 px, aucune vue par la suite ' +
-      'unitaire — les trois tombaient dans les dix écrans sans test de composant.',
-  },
-  {
-    code: 'serveur',
-    titre: 'L’état serveur est cohérent avec ce qui est affiché',
+    code: "sante",
+    titre: "Aucune exception, aucune erreur console, aucun écran blanc",
     regle:
-      'Contrat § 6.2 — « toute progression se recalcule depuis le journal ». ' +
-      'L’écran ne calcule rien : ce qu’il montre, le serveur doit le porter.',
+      "annexe T § T3 — le bot singe exige « aucune exception non capturée, aucun écran blanc ».",
     defautGarde:
-      'Défaut n° 4 du père : le moteur `phrase` rendait 500 à l’enregistrement. L’enfant ' +
-      'terminait, voyait sa récompense, et rien n’était sauvé. M17 est la même chose côté client.',
+      "Un écran blanc ne se décrit pas : l’enfant arrête simplement de jouer (annexe T § T3).",
+  },
+  {
+    code: "cible",
+    titre: "Toute cible interactive fait ≥ 64 px",
+    regle: "R16 — « cibles ≥ 64 px, tolérance 24 px, aucune coordination fine exigée ».",
+    defautGarde:
+      "Mutations M7a, M7b, M23 : trois façons de descendre sous 64 px, aucune vue par la suite " +
+      "unitaire — les trois tombaient dans les dix écrans sans test de composant.",
+  },
+  {
+    code: "serveur",
+    titre: "L’état serveur est cohérent avec ce qui est affiché",
+    regle:
+      "Contrat § 6.2 — « toute progression se recalcule depuis le journal ». " +
+      "L’écran ne calcule rien : ce qu’il montre, le serveur doit le porter.",
+    defautGarde:
+      "Défaut n° 4 du père : le moteur `phrase` rendait 500 à l’enregistrement. L’enfant " +
+      "terminait, voyait sa récompense, et rien n’était sauvé. M17 est la même chose côté client.",
   },
 ];
 
@@ -162,7 +162,7 @@ export const INVARIANTS: readonly DescripteurInvariant[] = [
  * autre nom fait rougir la QA au lieu de passer sous son nez — c'est l'audit par OBJETS,
  * appliqué au vocabulaire lui-même (D48).
  */
-export const SELECTEURS_ECHEC = ['[data-etat="echec"]', '[data-fin="echec"]', '[data-echec]'];
+export const SELECTEURS_ECHEC = ['[data-etat="echec"]', '[data-fin="echec"]', "[data-echec]"];
 
 /**
  * UNE ÉTOILE ACQUISE — et rien d'autre.
@@ -327,21 +327,18 @@ export const CAMPAGNE_COURANTE = process.ppid;
  * n'écrase donc pas le journal de celui qu'il remplace. Ni horloge ni tirage : la règle non
  * négociable de CLAUDE.md n'est pas contournée.
  */
-const TRAVAILLEUR = process.env['TEST_WORKER_INDEX'] ?? '0';
+const TRAVAILLEUR = process.env["TEST_WORKER_INDEX"] ?? "0";
 
 /** Le préfixe commun à tous les journaux de CETTE campagne — la clé de relecture. */
 const PREFIXE_JOURNAL = `invariants-e2e.${String(CAMPAGNE_COURANTE)}.w`;
 
-const DOSSIER_JOURNAUX = cheminDepot('tests/rapports');
+const DOSSIER_JOURNAUX = cheminDepot("tests/rapports");
 
-export const JOURNAL_INVARIANTS = join(
-  DOSSIER_JOURNAUX,
-  `${PREFIXE_JOURNAL}${TRAVAILLEUR}.ndjson`,
-);
+export const JOURNAL_INVARIANTS = join(DOSSIER_JOURNAUX, `${PREFIXE_JOURNAL}${TRAVAILLEUR}.ndjson`);
 
 function ecrireAuJournal(bilan: BilanDInvariants): void {
   mkdirSync(dirname(JOURNAL_INVARIANTS), { recursive: true });
-  appendFileSync(JOURNAL_INVARIANTS, `${JSON.stringify(bilan)}\n`, 'utf8');
+  appendFileSync(JOURNAL_INVARIANTS, `${JSON.stringify(bilan)}\n`, "utf8");
 }
 
 /**
@@ -360,8 +357,8 @@ export function lireLeJournalDesInvariants(): readonly BilanDInvariants[] {
   if (!existsSync(DOSSIER_JOURNAUX)) return [];
   const bilans: BilanDInvariants[] = [];
   for (const fichier of readdirSync(DOSSIER_JOURNAUX)) {
-    if (!basename(fichier).startsWith(PREFIXE_JOURNAL) || !fichier.endsWith('.ndjson')) continue;
-    for (const ligne of readFileSync(join(DOSSIER_JOURNAUX, fichier), 'utf8').split('\n')) {
+    if (!basename(fichier).startsWith(PREFIXE_JOURNAL) || !fichier.endsWith(".ndjson")) continue;
+    for (const ligne of readFileSync(join(DOSSIER_JOURNAUX, fichier), "utf8").split("\n")) {
       if (ligne.trim().length === 0) continue;
       bilans.push(JSON.parse(ligne) as BilanDInvariants);
     }
@@ -423,9 +420,9 @@ function sentinelleDansLaPage(config: ConfigurationSentinelle): void {
   /** Le numéro du relevé. Un COMPTEUR, jamais un horodatage (aucun `Date.now` ici). */
   let nReleve = 0;
   let arme = false;
-  let ecranPrecedent = 'aucun';
+  let ecranPrecedent = "aucun";
   let gesteEnAttente: string | null = null;
-  let ecranAuMomentDuGeste = 'aucun';
+  let ecranAuMomentDuGeste = "aucun";
   let auditPlanifie = false;
   let nbInteractifsPrecedent = -1;
   /**
@@ -440,6 +437,8 @@ function sentinelleDansLaPage(config: ConfigurationSentinelle): void {
   const maximaServeur = new Map<string, number>();
   /** L'invariant `serveur` : ce que l'écran de récompense a promis et que le serveur doit porter. */
   const promessesDeRecompense = new Map<string, number>();
+  /** Les nœuds joués en visite parent : leur récompense est une prévisualisation, pas un acquis. */
+  const noeudsNonJournalises = new Set<string>();
   let interrogationEnCours = false;
 
   const violations: { code: string; detail: string }[] = [];
@@ -449,14 +448,14 @@ function sentinelleDansLaPage(config: ConfigurationSentinelle): void {
 
   const decrire = (element: Element): string => {
     const nom =
-      element.getAttribute('aria-label') ??
-      element.getAttribute('data-region-svg') ??
-      (element.textContent ?? '').trim().slice(0, 40);
+      element.getAttribute("aria-label") ??
+      element.getAttribute("data-region-svg") ??
+      (element.textContent ?? "").trim().slice(0, 40);
     return `${element.tagName.toLowerCase()} « ${nom} »`;
   };
 
   const ecranCourant = (): string =>
-    document.querySelector('[data-ecran]')?.getAttribute('data-ecran') ?? 'aucun';
+    document.querySelector("[data-ecran]")?.getAttribute("data-ecran") ?? "aucun";
 
   const etatDuJeu = (): EtatTest | null => {
     try {
@@ -473,16 +472,16 @@ function sentinelleDansLaPage(config: ConfigurationSentinelle): void {
   // message. L'original est toujours appelé — la sentinelle observe, elle n'avale rien.
   const erreurOriginale = console.error.bind(console) as (...a: unknown[]) => void;
   console.error = (...arguments_: unknown[]): void => {
-    signaler('sante', `console.error : ${arguments_.map((a) => String(a)).join(' ')}`);
+    signaler("sante", `console.error : ${arguments_.map((a) => String(a)).join(" ")}`);
     erreurOriginale(...arguments_);
     planifierAudit();
   };
-  window.addEventListener('error', (evenement) => {
-    signaler('sante', `exception non capturée : ${String(evenement.message)}`);
+  window.addEventListener("error", (evenement) => {
+    signaler("sante", `exception non capturée : ${String(evenement.message)}`);
     planifierAudit();
   });
-  window.addEventListener('unhandledrejection', (evenement) => {
-    signaler('sante', `promesse rejetée sans capture : ${String(evenement.reason)}`);
+  window.addEventListener("unhandledrejection", (evenement) => {
+    signaler("sante", `promesse rejetée sans capture : ${String(evenement.reason)}`);
     planifierAudit();
   });
 
@@ -505,7 +504,7 @@ function sentinelleDansLaPage(config: ConfigurationSentinelle): void {
     gesteEnAttente = interactif === null ? decrire(cible) : decrire(interactif);
     planifierAudit();
   };
-  for (const type of ['pointerdown', 'click', 'keydown'] as const) {
+  for (const type of ["pointerdown", "click", "keydown"] as const) {
     document.addEventListener(type, noterGeste, { capture: true, passive: true });
   }
 
@@ -524,7 +523,7 @@ function sentinelleDansLaPage(config: ConfigurationSentinelle): void {
       if (largeur <= 0 || hauteur <= 0) continue;
       if (largeur < config.cibleMinimalePx || hauteur < config.cibleMinimalePx) {
         signaler(
-          'cible',
+          "cible",
           `${decrire(element)} mesure ${String(largeur)}×${String(hauteur)} px, ` +
             `minimum ${String(config.cibleMinimalePx)} px (R16)`,
         );
@@ -534,13 +533,13 @@ function sentinelleDansLaPage(config: ConfigurationSentinelle): void {
 
   /** I3 — côté DOM. Voir le commentaire de `auditer()` pour le choix des écrans exclus. */
   function auditerLesAcquis(ecran: string, etat: EtatTest | null): void {
-    if (ecran === 'recompense' || ecran === 'noeud') return;
+    if (ecran === "recompense" || ecran === "noeud") return;
     const acquises = document.querySelectorAll(config.selecteurEtoileAcquise).length;
-    const cle = `${etat?.profil ?? 'sans-profil'}|${ecran}`;
+    const cle = `${etat?.profil ?? "sans-profil"}|${ecran}`;
     const maximum = maximaAffiches.get(cle) ?? 0;
     if (acquises < maximum) {
       signaler(
-        'acquis',
+        "acquis",
         `« ${ecran} » affichait ${String(maximum)} acquis, il n’en affiche plus que ` +
           `${String(acquises)} pour le même profil. Un acquis n’est jamais repris (R14).`,
       );
@@ -563,9 +562,16 @@ function sentinelleDansLaPage(config: ConfigurationSentinelle): void {
    * qu'elle était tenue.
    */
   function releverLaPromesse(ecran: string): void {
-    if (ecran !== 'recompense') return;
     const etat = etatDuJeu();
     if (etat === null || etat.noeud === null) return;
+    if (
+      ecran === "noeud" &&
+      document.querySelector('[data-ecran="noeud"][data-journalise="non"]') !== null
+    ) {
+      noeudsNonJournalises.add(etat.noeud);
+      return;
+    }
+    if (ecran !== "recompense" || noeudsNonJournalises.has(etat.noeud)) return;
     const affichees = document.querySelectorAll(config.selecteurEtoileAcquise).length;
     if (affichees === 0) return;
     const dejaPromis = promessesDeRecompense.get(etat.noeud) ?? 0;
@@ -589,7 +595,7 @@ function sentinelleDansLaPage(config: ConfigurationSentinelle): void {
       .then(async (reponse) => {
         if (!reponse.ok) {
           signaler(
-            'serveur',
+            "serveur",
             `le profil « ${profil} » est affiché mais le serveur répond ` +
               `${String(reponse.status)} sur sa progression`,
           );
@@ -600,7 +606,7 @@ function sentinelleDansLaPage(config: ConfigurationSentinelle): void {
           const maximum = maximaServeur.get(ligne.noeud) ?? 0;
           if (ligne.etoiles < maximum) {
             signaler(
-              'acquis',
+              "acquis",
               `le serveur servait ${String(maximum)} étoile(s) sur « ${ligne.noeud} » et n’en ` +
                 `sert plus que ${String(ligne.etoiles)}. Un acquis n’est jamais repris (R14).`,
             );
@@ -609,7 +615,7 @@ function sentinelleDansLaPage(config: ConfigurationSentinelle): void {
         }
       })
       .catch((cause: unknown) => {
-        signaler('serveur', `la progression du profil affiché est illisible : ${String(cause)}`);
+        signaler("serveur", `la progression du profil affiché est illisible : ${String(cause)}`);
       })
       .finally(() => {
         interrogationEnCours = false;
@@ -625,7 +631,7 @@ function sentinelleDansLaPage(config: ConfigurationSentinelle): void {
       // ── ARMEMENT. Tant que l'application n'a rien monté, il n'y a rien à auditer et un
       // « écran blanc » n'en serait pas un : c'est le document vide d'avant React.
       if (!arme) {
-        if (ecran === 'aucun') return;
+        if (ecran === "aucun") return;
         arme = true;
         ecranPrecedent = ecran;
       }
@@ -636,15 +642,14 @@ function sentinelleDansLaPage(config: ConfigurationSentinelle): void {
       if (geste !== null) dernierGesteSurLEcran = geste;
       // Le geste imputable : celui de cette image, ou le dernier reçu sur l'écran de départ
       // quand la sortie a dû attendre le réseau. Voir `Releve.gesteResponsable`.
-      const gesteResponsable =
-        geste ?? (ecran !== ecranAvant ? dernierGesteSurLEcran : null);
+      const gesteResponsable = geste ?? (ecran !== ecranAvant ? dernierGesteSurLEcran : null);
 
       // ── I4 · écran blanc ────────────────────────────────────────────────────────────────
-      if (ecran === 'aucun') {
+      if (ecran === "aucun") {
         signaler(
-          'sante',
-          'plus aucun `data-ecran` dans le document : écran blanc. ' +
-            'L’enfant ne saura pas le décrire, il arrêtera simplement de jouer.',
+          "sante",
+          "plus aucun `data-ecran` dans le document : écran blanc. " +
+            "L’enfant ne saura pas le décrire, il arrêtera simplement de jouer.",
         );
       }
 
@@ -653,9 +658,9 @@ function sentinelleDansLaPage(config: ConfigurationSentinelle): void {
         const marqueurs = document.querySelectorAll(selecteur);
         if (marqueurs.length > 0) {
           signaler(
-            'echec',
+            "echec",
             `${String(marqueurs.length)} marqueur(s) « ${selecteur} » sur l’écran « ${ecran} ». ` +
-              'R14 : aucun écran d’échec, jamais.',
+              "R14 : aucun écran d’échec, jamais.",
           );
         }
       }
@@ -672,9 +677,9 @@ function sentinelleDansLaPage(config: ConfigurationSentinelle): void {
       // est justement qu'aucun geste ne l'atteint jamais.
       if (geste !== null && ecran === ecranAvant && interactifs.length === 0) {
         signaler(
-          'issue',
+          "issue",
           `après « ${geste} », l’écran « ${ecran} » n’offre plus aucun élément interactif. ` +
-            'C’est une impasse — le défaut n° 1 du père.',
+            "C’est une impasse — le défaut n° 1 du père.",
         );
       }
 
@@ -727,15 +732,15 @@ function sentinelleDansLaPage(config: ConfigurationSentinelle): void {
       // Une sentinelle qui lève en silence rend du vert sans avoir rien vu. On le DIT.
       remonter({
         n: nReleve,
-        ecran: 'aucun',
-        ecranAvant: 'aucun',
+        ecran: "aucun",
+        ecranAvant: "aucun",
         geste: null,
         gesteResponsable: null,
         interactifs: 0,
         violations: [
           {
-            code: 'sante',
-            ecran: 'aucun',
+            code: "sante",
+            ecran: "aucun",
             geste: null,
             detail: `la sentinelle a levé, elle n’a donc rien audité : ${String(cause)}`,
             releve: nReleve,
@@ -774,7 +779,7 @@ function sentinelleDansLaPage(config: ConfigurationSentinelle): void {
    * réinterroge donc jusqu'à ce que la promesse soit tenue, image après image, avec une borne
    * qui n'est PAS une temporisation mais un refus de boucler à l'infini.
    */
-  (fenetre as Record<string, unknown>)['__sentinelleCloturer'] = async (): Promise<unknown[]> => {
+  (fenetre as Record<string, unknown>)["__sentinelleCloturer"] = async (): Promise<unknown[]> => {
     const manquantes: unknown[] = [];
     const etat = etatDuJeu();
     if (etat === null || etat.profil === null || promessesDeRecompense.size === 0) {
@@ -808,13 +813,13 @@ function sentinelleDansLaPage(config: ConfigurationSentinelle): void {
       }
       if (servies < promises) {
         manquantes.push({
-          code: 'serveur',
-          ecran: 'recompense',
+          code: "serveur",
+          ecran: "recompense",
           geste: null,
           detail:
             `l’écran de récompense a montré ${String(promises)} étoile(s) sur « ${noeud} » ; ` +
             `le serveur en journalise ${String(servies)}. L’enfant a terminé, il a vu sa ` +
-            'récompense, et rien n’a été sauvé — c’est le défaut n° 4 du père.',
+            "récompense, et rien n’a été sauvé — c’est le défaut n° 4 du père.",
           releve: nReleve,
         });
       }
@@ -825,13 +830,13 @@ function sentinelleDansLaPage(config: ConfigurationSentinelle): void {
 
 // ═══════════════════════════════════════════════════════════════════ 4. LE CÔTÉ PLAYWRIGHT
 
-const NOM_DU_PONT = '__sentinelleReleve';
+const NOM_DU_PONT = "__sentinelleReleve";
 
 export interface Sentinelle {
   /** Tous les relevés remontés depuis le début du cas. */
   readonly releves: readonly Releve[];
   /** Le bilan courant, recalculé à la demande. */
-  bilan(): Omit<BilanDInvariants, 'campagne' | 'cas' | 'fichier'>;
+  bilan(): Omit<BilanDInvariants, "campagne" | "cas" | "fichier">;
   /**
    * Solde les promesses en vol (l'écriture du journal par `EcranRecompense`) et fige le bilan.
    *
@@ -844,7 +849,9 @@ export interface Sentinelle {
   cloturer(): Promise<void>;
 }
 
-function agregerLeBilan(releves: readonly Releve[]): Omit<BilanDInvariants, 'campagne' | 'cas' | 'fichier'> {
+function agregerLeBilan(
+  releves: readonly Releve[],
+): Omit<BilanDInvariants, "campagne" | "cas" | "fichier"> {
   const violations: Violation[] = [];
   const ecransHabites: Record<string, number> = {};
   const sorties: Record<string, Set<string>> = {};
@@ -857,7 +864,7 @@ function agregerLeBilan(releves: readonly Releve[]): Omit<BilanDInvariants, 'cam
       gestes += 1;
       ecransHabites[releve.ecranAvant] = (ecransHabites[releve.ecranAvant] ?? 0) + 1;
     }
-    if (releve.ecran !== releve.ecranAvant && releve.ecranAvant !== 'aucun') {
+    if (releve.ecran !== releve.ecranAvant && releve.ecranAvant !== "aucun") {
       // `gesteResponsable` et non `geste` : une sortie qui passe par le réseau change d'écran
       // plusieurs images après le tap. Voir `Releve.gesteResponsable` pour la mesure.
       const responsable = releve.gesteResponsable ?? null;
@@ -866,7 +873,7 @@ function agregerLeBilan(releves: readonly Releve[]): Omit<BilanDInvariants, 'cam
       (table[cle] ??= new Set<string>()).add(
         responsable === null
           ? `→ ${releve.ecran} (sans geste)`
-          : `${responsable} → ${releve.ecran}${releve.geste === null ? ' (après réponse)' : ''}`,
+          : `${responsable} → ${releve.ecran}${releve.geste === null ? " (après réponse)" : ""}`,
       );
     }
   }
@@ -916,15 +923,15 @@ export async function armerLaSentinelle(page: Page): Promise<Sentinelle> {
       try {
         const manquantes = await page.evaluate(async () => {
           const cloturer = (window as unknown as Record<string, unknown>)[
-            '__sentinelleCloturer'
+            "__sentinelleCloturer"
           ] as (() => Promise<unknown[]>) | undefined;
           return cloturer === undefined ? [] : await cloturer();
         });
         if (manquantes.length > 0) {
           releves.push({
             n: releves.length + 1,
-            ecran: 'recompense',
-            ecranAvant: 'recompense',
+            ecran: "recompense",
+            ecranAvant: "recompense",
             geste: null,
             gesteResponsable: null,
             interactifs: 0,
@@ -943,7 +950,7 @@ export function decrireLesViolations(violations: readonly Violation[]): readonly
   return violations.map(
     (v) =>
       `[${v.code}] relevé n° ${String(v.releve)} · écran « ${v.ecran} » · ` +
-      `geste ${v.geste ?? '(aucun — effet, magasin ou réseau)'} : ${v.detail}`,
+      `geste ${v.geste ?? "(aucun — effet, magasin ou réseau)"} : ${v.detail}`,
   );
 }
 
@@ -967,8 +974,8 @@ export const test = base.extend<{ sentinelle: Sentinelle }>({
       const bilan = sentinelle.bilan();
       ecrireAuJournal({
         campagne: CAMPAGNE_COURANTE,
-        cas: testInfo.titlePath.join(' › '),
-        fichier: testInfo.file.replace(/\\/gu, '/').split('/tests/').at(-1) ?? testInfo.file,
+        cas: testInfo.titlePath.join(" › "),
+        fichier: testInfo.file.replace(/\\/gu, "/").split("/tests/").at(-1) ?? testInfo.file,
         ...bilan,
       });
 
@@ -977,8 +984,8 @@ export const test = base.extend<{ sentinelle: Sentinelle }>({
         decrireLesViolations(bilan.violations),
         `INVARIANTS GLOBAUX — ${String(bilan.violations.length)} violation(s) sur ` +
           `${String(bilan.releves)} relevé(s) et ${String(bilan.gestes)} geste(s). ` +
-          'Un invariant se casse AU MILIEU du parcours : le relevé nommé ci-dessous est la ' +
-          'première image peinte où la propriété a cessé d’être vraie.',
+          "Un invariant se casse AU MILIEU du parcours : le relevé nommé ci-dessous est la " +
+          "première image peinte où la propriété a cessé d’être vraie.",
       ).toEqual([]);
     },
     { auto: true },

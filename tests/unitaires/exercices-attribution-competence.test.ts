@@ -25,12 +25,12 @@
  * la position 0, mais elle nourrit réellement une seconde compétence. Le cas 3 la garde.
  * ══════════════════════════════════════════════════════════════════════════════════════════
  */
-import { readdirSync } from 'node:fs';
-import { join } from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { readdirSync } from "node:fs";
+import { join } from "node:path";
+import { describe, expect, it } from "vitest";
 
-import { creerAlea } from '@pierre/partage';
-import { composerSortie } from '@pierre/partage/pedagogie';
+import { creerAlea } from "@pierre/partage";
+import { composerSortie } from "@pierre/partage/pedagogie";
 import type {
   Competence,
   EtatMaitrise,
@@ -38,21 +38,21 @@ import type {
   Noeud,
   NoeudCandidat,
   ParametresPedagogie,
-} from '@pierre/partage';
+} from "@pierre/partage";
 
-import { CHEMIN_COMPETENCES, RACINE_DEPOT, lireJson } from '../configuration/preparation.js';
+import { CHEMIN_COMPETENCES, RACINE_DEPOT, lireJson } from "../configuration/preparation.js";
 
 interface ExerciceLu extends Exercice {
-  readonly jeu: Exercice['jeu'] & { readonly contenu: { readonly competence?: string } };
+  readonly jeu: Exercice["jeu"] & { readonly contenu: { readonly competence?: string } };
 }
 
 function cheminsExercices(): readonly string[] {
-  const racine = join(RACINE_DEPOT, 'contenu', 'exercices');
+  const racine = join(RACINE_DEPOT, "contenu", "exercices");
   return readdirSync(racine, { withFileTypes: true })
     .filter((entree) => entree.isDirectory())
     .flatMap((dossier) =>
       readdirSync(join(racine, dossier.name))
-        .filter((fichier) => fichier.endsWith('.json'))
+        .filter((fichier) => fichier.endsWith(".json"))
         .map((fichier) => `contenu/exercices/${dossier.name}/${fichier}`),
     )
     .sort();
@@ -74,7 +74,7 @@ const enPremierePosition = new Set(
 const parConfusion = new Set(
   exercices
     .map((exercice) => exercice.jeu.contenu.competence)
-    .filter((code): code is string => typeof code === 'string'),
+    .filter((code): code is string => typeof code === "string"),
 );
 
 /**
@@ -93,14 +93,10 @@ const parConfusion = new Set(
  * Les nommer ici, c'est refuser de les corriger par un geste qui rendrait le test vert sans
  * rendre le contenu juste.
  */
-const MUETTES_CONNUES: readonly string[] = [
-  'comp.consigne.multiple',
-  'gph.rare.gn',
-  'gph.rare.ph',
-];
+const MUETTES_CONNUES: readonly string[] = ["comp.consigne.multiple", "gph.rare.gn", "gph.rare.ph"];
 
-describe('attribution des compétences — ce que le journal recevra', () => {
-  it('contrôle de la mesure : le recensement porte sur des objets, et il n’est pas vide', () => {
+describe("attribution des compétences — ce que le journal recevra", () => {
+  it("contrôle de la mesure : le recensement porte sur des objets, et il n’est pas vide", () => {
     // Sans ce cas, un extracteur cassé rendrait tous les suivants verts en ne trouvant rien.
     expect(exercices.length).toBeGreaterThan(0);
     expect(cheminsExercices().length).toBe(exercices.length);
@@ -111,35 +107,35 @@ describe('attribution des compétences — ce que le journal recevra', () => {
     }
   });
 
-  it('toute compétence déclarée par le contenu existe au référentiel', () => {
+  it("toute compétence déclarée par le contenu existe au référentiel", () => {
     // `competenceEligible` (partage/src/pedagogie/selecteur.ts) traite une compétence absente
     // du référentiel comme NON éligible : une faute de frappe ferme le nœud sans rien dire.
     const inconnues = [...declarees].filter((code) => !codesDuReferentiel.has(code)).sort();
-    expect(inconnues, 'compétences citées par un exercice et absentes du référentiel').toEqual([]);
+    expect(inconnues, "compétences citées par un exercice et absentes du référentiel").toEqual([]);
   });
 
-  it('toute compétence déclarée reçoit un canal de journalisation, hors inventaire nommé', () => {
+  it("toute compétence déclarée reçoit un canal de journalisation, hors inventaire nommé", () => {
     const muettes = [...declarees]
       .filter((code) => !enPremierePosition.has(code) && !parConfusion.has(code))
       .sort();
     expect(
       muettes,
-      'compétences déclarées par le contenu dont le journal restera vide pour toujours',
+      "compétences déclarées par le contenu dont le journal restera vide pour toujours",
     ).toEqual([...MUETTES_CONNUES].sort());
   });
 
-  it('`jeu.contenu.competence` est toujours une compétence déclarée par le même exercice', () => {
+  it("`jeu.contenu.competence` est toujours une compétence déclarée par le même exercice", () => {
     // Le moteur inscrit cette valeur telle quelle sur une confusion. Si elle n'est pas déclarée
     // par l'exercice, le journal porte une compétence que ni R12 ni le sélecteur ne connaissent
     // pour ce nœud — et la maîtrise monte sur un code que rien n'a annoncé.
     const orphelines = exercices
       .filter((exercice) => {
         const code = exercice.jeu.contenu.competence;
-        return typeof code === 'string' && !exercice.competences.includes(code);
+        return typeof code === "string" && !exercice.competences.includes(code);
       })
       .map((exercice) => `${exercice.id} → ${String(exercice.jeu.contenu.competence)}`)
       .sort();
-    expect(orphelines, '`contenu.competence` non déclarée par son propre exercice').toEqual([]);
+    expect(orphelines, "`contenu.competence` non déclarée par son propre exercice").toEqual([]);
   });
 });
 
@@ -170,7 +166,10 @@ describe('attribution des compétences — ce que le journal recevra', () => {
  * **10 sur 76**. Les 66 autres sont fermés à « partir en sortie », dans quatre régions sur six
  * (Cité des Histoires, Forêt Muette, Marais Jumeau, Volcan : zéro nœud atteignable).
  */
-const NOEUDS_ATTEIGNABLES_MESURES = 10;
+// Mesure du 2026-09-02 : la correction de l'étiquette pédagogique d'`ecole-02-place`
+// libère ce nœud, puis cinq nœuds au point fixe optimiste. La hausse de 10 à 15 est donc
+// expliquée et conservée comme nouveau témoin, pas absorbée par une borne plus lâche.
+const NOEUDS_ATTEIGNABLES_MESURES = 15;
 
 /**
  * Graines fixes : la mesure ne doit pas dépendre du tirage. `composerSortie` départage les
@@ -181,8 +180,8 @@ const NOEUDS_ATTEIGNABLES_MESURES = 10;
 const GRAINES: readonly number[] = [1, 7920, 15839, 23758, 31677];
 
 function candidats(): readonly NoeudCandidat[] {
-  const noeuds = readdirSync(join(RACINE_DEPOT, 'contenu', 'noeuds'))
-    .filter((fichier) => fichier.endsWith('.json'))
+  const noeuds = readdirSync(join(RACINE_DEPOT, "contenu", "noeuds"))
+    .filter((fichier) => fichier.endsWith(".json"))
     .map((fichier) => lireJson<Noeud>(`contenu/noeuds/${fichier}`));
   const parId = new Map(exercices.map((exercice) => [exercice.id, exercice]));
   const sortie: NoeudCandidat[] = [];
@@ -208,7 +207,7 @@ function candidats(): readonly NoeudCandidat[] {
  */
 function porteeDuSelecteur(): ReadonlySet<string> {
   const vivier = candidats();
-  const parametres = lireJson<ParametresPedagogie>('contenu/referentiel/parametres-pedagogie.json');
+  const parametres = lireJson<ParametresPedagogie>("contenu/referentiel/parametres-pedagogie.json");
   const regions = [...new Set(vivier.map((candidat) => candidat.region))].sort();
   const premiereDuNoeud = new Map(vivier.map((c) => [String(c.noeud), c.competences[0]]));
   const maitrisees = new Set<string>();
@@ -222,7 +221,7 @@ function porteeDuSelecteur(): ReadonlySet<string> {
           competence: code,
           p: 1,
           nbTentatives: 9,
-          joursDistincts: ['2026-08-01', '2026-08-02', '2026-08-03'],
+          joursDistincts: ["2026-08-01", "2026-08-02", "2026-08-03"],
           nbTentativesFaibleDevinette: 9,
           acquiseLe: null,
         })) as EtatMaitrise[];
@@ -230,14 +229,14 @@ function porteeDuSelecteur(): ReadonlySet<string> {
         try {
           plan = composerSortie(
             {
-              profil: 'profil-mesure',
+              profil: "profil-mesure",
               region,
               compagnon: null,
               maitrises,
               revisionsDues: [],
               noeudsDisponibles: vivier,
               competences: referentiel,
-              maintenant: '2026-08-03T09:00:00.000Z',
+              maintenant: "2026-08-03T09:00:00.000Z",
             } as never,
             parametres,
             creerAlea(graine),
@@ -264,21 +263,21 @@ function porteeDuSelecteur(): ReadonlySet<string> {
   return atteints;
 }
 
-describe('portée du sélecteur sur le contenu livré (constat mesuré, D13 + v2 § 12.1)', () => {
-  it('le vivier est complet : un candidat par nœud livré', () => {
+describe("portée du sélecteur sur le contenu livré (constat mesuré, D13 + v2 § 12.1)", () => {
+  it("le vivier est complet : un candidat par nœud livré", () => {
     // Contrôle de la mesure : si le vivier se vidait, le cas suivant mesurerait un dépôt vide.
     expect(candidats().length).toBeGreaterThan(0);
     expect(candidats().length).toBe(exercices.length);
   });
 
-  it('« partir en sortie » n’atteint que le nombre de nœuds mesuré — ni plus, ni moins', () => {
+  it("« partir en sortie » n’atteint que le nombre de nœuds mesuré — ni plus, ni moins", () => {
     const atteints = porteeDuSelecteur();
     expect(
       atteints.size,
       `${String(atteints.size)} nœud(s) atteignables sur ${String(candidats().length)} livrés. ` +
-        'Une VARIATION est le signal attendu : à la hausse, un blocage a été levé et il faut ' +
-        'remonter ce nombre ; à la baisse, une compétence secondaire vient de fermer un nœud. ' +
-        'Voir Docs/questions-en-attente.md, section « Lot S3 ».',
+        "Une VARIATION est le signal attendu : à la hausse, un blocage a été levé et il faut " +
+        "remonter ce nombre ; à la baisse, une compétence secondaire vient de fermer un nœud. " +
+        "Voir Docs/questions-en-attente.md, section « Lot S3 ».",
     ).toBe(NOEUDS_ATTEIGNABLES_MESURES);
   });
 });

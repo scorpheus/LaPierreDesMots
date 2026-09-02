@@ -41,7 +41,7 @@
  * passerait au vert en ne mesurant rien — « ce qui est exactement ce qui est arrivé à R30 ».
  * On exige donc les deux faces : l'enfant écrit, le parent n'écrit pas.
  */
-import { expect, test } from '../harnais-serveur.js';
+import { expect, test } from "./invariants.js";
 
 import {
   choisirLeProfil,
@@ -53,22 +53,22 @@ import {
   noeudsLivres,
   ouvrirLaZoneParent,
   preparer,
-} from './qa-outils.js';
+} from "./qa-outils.js";
 
-import type { Page } from '@playwright/test';
+import type { Page } from "@playwright/test";
 
 // ═══════════════════════════════════════════ la population, DÉRIVÉE de `NatureRecompense`
 
 /** Les natures déclarées, lues dans l'union. `recompenses/types.ts` fait foi. */
 function naturesDeclarees(): readonly string[] {
   const bloc = /export type NatureRecompense\s*=([\s\S]*?);/.exec(
-    lireTexte('partage/src/recompenses/types.ts'),
+    lireTexte("partage/src/recompenses/types.ts"),
   );
   if (bloc === null) {
-    throw new Error('Q3 : l’union `NatureRecompense` est introuvable — la population serait vide.');
+    throw new Error("Q3 : l’union `NatureRecompense` est introuvable — la population serait vide.");
   }
   const natures = [...bloc[1]!.matchAll(/'([a-z-]+)'/g)].map((m) => m[1]!);
-  if (natures.length === 0) throw new Error('Q3 : `NatureRecompense` trouvée, aucun membre lu.');
+  if (natures.length === 0) throw new Error("Q3 : `NatureRecompense` trouvée, aucun membre lu.");
   return natures;
 }
 
@@ -86,14 +86,20 @@ interface EtatMonde {
  * l'union. Une nature ajoutée sans contrepartie fait rougir Q3 au lieu de glisser.
  */
 const CONTREPARTIE: Readonly<
-  Record<string, (monde: EtatMonde, etoiles: number) => { readonly trouve: boolean; readonly vu: string }>
+  Record<
+    string,
+    (monde: EtatMonde, etoiles: number) => { readonly trouve: boolean; readonly vu: string }
+  >
 > = {
-  etoile: (_monde, etoiles) => ({ trouve: etoiles > 0, vu: `${String(etoiles)} étoile(s) au nœud` }),
-  'forme-gobi': (monde) => ({
+  etoile: (_monde, etoiles) => ({
+    trouve: etoiles > 0,
+    vu: `${String(etoiles)} étoile(s) au nœud`,
+  }),
+  "forme-gobi": (monde) => ({
     trouve: monde.gobi.formes.length > 0,
     vu: `${String(monde.gobi.formes.length)} forme(s) de Gobi`,
   }),
-  'zone-recoloriee': (monde) => {
+  "zone-recoloriee": (monde) => {
     const colorie = monde.carte.regions.filter((r) => r.pourcentageColorie > 0).length;
     return { trouve: colorie > 0, vu: `${String(colorie)} région(s) recoloriée(s)` };
   },
@@ -102,47 +108,54 @@ const CONTREPARTIE: Readonly<
 /** Le palier d'une récompense affichée → sa nature, LUE dans les seuils livrés. */
 function natureDuPalier(palier: string): string {
   const seuils = lireJson<{ natureIntermediaire: string; natureRare: string }>(
-    'contenu/referentiel/parametres-recompenses.json',
+    "contenu/referentiel/parametres-recompenses.json",
   );
-  if (palier === 'intermediaire') return seuils.natureIntermediaire;
-  if (palier === 'rare') return seuils.natureRare;
-  return 'etoile';
+  if (palier === "intermediaire") return seuils.natureIntermediaire;
+  if (palier === "rare") return seuils.natureRare;
+  return "etoile";
 }
 
 const NOEUDS = noeudsLivres();
 /** Le premier nœud `colorie` : c'est celui que `jouerJusquALaRecompense` sait terminer. */
-const NOEUD_JOUABLE = NOEUDS.find((n) => n.moteur === 'colorie')?.id ?? NOEUDS[0]!.id;
+const NOEUD_JOUABLE = NOEUDS.find((n) => n.moteur === "colorie")?.id ?? NOEUDS[0]!.id;
 
 async function lireLeMonde(page: Page, profil: string): Promise<EtatMonde> {
   const reponse = await page.request.get(`/api/profils/${profil}/monde`);
-  expect(reponse.ok(), 'le serveur ne rend pas le monde du profil').toBe(true);
+  expect(reponse.ok(), "le serveur ne rend pas le monde du profil").toBe(true);
   return (await reponse.json()) as EtatMonde;
 }
 
 async function profilCourant(page: Page): Promise<string> {
   const etat = await etatDuJeu(page);
-  expect(etat.profil, 'aucun profil courant : la partie n’a pas été jouée par le chemin de l’enfant')
-    .not.toBeNull();
+  expect(
+    etat.profil,
+    "aucun profil courant : la partie n’a pas été jouée par le chemin de l’enfant",
+  ).not.toBeNull();
   return etat.profil!;
 }
 
-test.describe('Q3 — ce que l’écran annonce comme gagné existe en base', () => {
-  test('la population est DÉRIVÉE de `NatureRecompense`, et chaque nature a sa contrepartie', () => {
+test.describe("Q3 — ce que l’écran annonce comme gagné existe en base", () => {
+  test("la population est DÉRIVÉE de `NatureRecompense`, et chaque nature a sa contrepartie", () => {
     const natures = naturesDeclarees();
     const sansContrepartie = natures.filter((n) => CONTREPARTIE[n] === undefined);
     console.log(
-      `[Q3] population : ${String(natures.length)} nature(s) de récompense — ${natures.join(' · ')}`,
+      `[Q3] population : ${String(natures.length)} nature(s) de récompense — ${natures.join(" · ")}`,
     );
-    expect(natures.length, 'l’union `NatureRecompense` ne rend plus aucun membre').toBeGreaterThanOrEqual(2);
+    expect(
+      natures.length,
+      "l’union `NatureRecompense` ne rend plus aucun membre",
+    ).toBeGreaterThanOrEqual(2);
     expect(
       sansContrepartie,
-      'Ces natures sont déclarées et Q3 ne sait pas où vérifier qu’elles ont laissé une trace. ' +
-        'Une nature sans contrepartie interrogeable est un palier qu’on annoncera sans jamais ' +
-        'pouvoir prouver qu’il a été donné — c’est R31 en préparation.',
+      "Ces natures sont déclarées et Q3 ne sait pas où vérifier qu’elles ont laissé une trace. " +
+        "Une nature sans contrepartie interrogeable est un palier qu’on annoncera sans jamais " +
+        "pouvoir prouver qu’il a été donné — c’est R31 en préparation.",
     ).toEqual([]);
   });
 
-  test('LE DÉFAUT — chaque palier annoncé à l’écran a sa contrepartie en base', async ({ page }) => {
+  test("LE DÉFAUT — chaque palier annoncé à l’écran a sa contrepartie en base", async ({
+    page,
+  }) => {
     // ── ON JOUE ASSEZ POUR FRANCHIR PLUS QUE L'ÉTOILE ──────────────────────────────────────
     //
     // Un seul nœud n'annonce que le palier `etoile` : les contreparties `forme-gobi` et
@@ -150,24 +163,24 @@ test.describe('Q3 — ce que l’écran annonce comme gagné existe en base', ()
     // vérifié qu'un tiers de sa population. Le nombre de nœuds à jouer se DÉRIVE des seuils
     // livrés : `etoilesParIntermediaire` étoiles, à 3 étoiles par nœud parfait.
     const seuils = lireJson<{ etoilesParIntermediaire: number }>(
-      'contenu/referentiel/parametres-recompenses.json',
+      "contenu/referentiel/parametres-recompenses.json",
     );
-    const jouables = NOEUDS.filter((n) => n.moteur === 'colorie').map((n) => n.id);
+    const jouables = NOEUDS.filter((n) => n.moteur === "colorie").map((n) => n.id);
     const aJouer = Math.min(jouables.length, Math.ceil(seuils.etoilesParIntermediaire / 3) + 1);
     expect(
       aJouer,
-      'pas assez de nœuds `colorie` livrés pour franchir le palier intermédiaire : Q3 ne ' +
-        'pourrait vérifier que la contrepartie des étoiles.',
+      "pas assez de nœuds `colorie` livrés pour franchir le palier intermédiaire : Q3 ne " +
+        "pourrait vérifier que la contrepartie des étoiles.",
     ).toBeGreaterThanOrEqual(2);
 
     const paliers: string[] = [];
     for (const noeud of jouables.slice(0, aJouer)) {
-      await preparer(page, 'Q3 enfant');
-      await jouerJusquALaRecompense(page, noeud, 'Q3 enfant');
+      await preparer(page, "Q3 enfant");
+      await jouerJusquALaRecompense(page, noeud, "Q3 enfant");
       await expect(page.locator('[data-ecran="recompense"]')).toBeVisible();
-      const vus = await page.locator('[data-recompense]').evaluateAll((noeuds) =>
-        noeuds.map((n) => n.getAttribute('data-recompense') ?? ''),
-      );
+      const vus = await page
+        .locator("[data-recompense]")
+        .evaluateAll((noeuds) => noeuds.map((n) => n.getAttribute("data-recompense") ?? ""));
       paliers.push(...vus);
     }
 
@@ -175,20 +188,23 @@ test.describe('Q3 — ce que l’écran annonce comme gagné existe en base', ()
     const monde = await lireLeMonde(page, profil);
     const progression = await page.request.get(`/api/profils/${profil}/progression`);
     const lignes = progression.ok()
-      ? ((await progression.json()) as readonly { readonly noeud: string; readonly etoiles: number }[])
+      ? ((await progression.json()) as readonly {
+          readonly noeud: string;
+          readonly etoiles: number;
+        }[])
       : [];
     const etoiles = lignes.reduce((total, l) => total + l.etoiles, 0);
 
     console.log(
       `[Q3] paliers annoncés sur ${String(aJouer)} nœud(s) : ` +
-        `${paliers.length === 0 ? 'aucun' : paliers.join(', ')} · profil ${profil}`,
+        `${paliers.length === 0 ? "aucun" : paliers.join(", ")} · profil ${profil}`,
     );
 
     // Un écran de récompense qui n'annonce RIEN rendrait ce cas vrai par vacuité : c'est le
     // « zéro comparé à zéro » que le § 4 Q3 interdit.
     expect(
       paliers.length,
-      'l’écran de récompense n’annonce aucun palier : la comparaison porterait sur rien.',
+      "l’écran de récompense n’annonce aucun palier : la comparaison porterait sur rien.",
     ).toBeGreaterThanOrEqual(1);
 
     console.log(
@@ -210,9 +226,9 @@ test.describe('Q3 — ce que l’écran annonce comme gagné existe en base', ()
     }
     expect(
       manquants,
-      'L’écran a annoncé ces paliers et le serveur n’en garde aucune trace. C’est R31 : « il y a ' +
-        'écrit qu’on gagne une évolution mais en fait il n’y a rien du tout ». Le gain doit être ' +
-        'appliqué dans la transaction du POST, pas calculé dans le client.',
+      "L’écran a annoncé ces paliers et le serveur n’en garde aucune trace. C’est R31 : « il y a " +
+        "écrit qu’on gagne une évolution mais en fait il n’y a rien du tout ». Le gain doit être " +
+        "appliqué dans la transaction du POST, pas calculé dans le client.",
     ).toEqual([]);
 
     // ══════════════════════════════════════════════════════════════════════════════════════
@@ -232,48 +248,48 @@ test.describe('Q3 — ce que l’écran annonce comme gagné existe en base', ()
     // On n'éprouve ce sens QUE sur la nature du palier intermédiaire : `zone-recoloriee` est
     // aussi écrite par le coloriage ordinaire, donc sa présence en base ne prouve aucun palier.
     // `forme-gobi` n'a qu'un seul émetteur — le palier — donc elle, elle prouve.
-    const natureIntermediaire = natureDuPalier('intermediaire');
+    const natureIntermediaire = natureDuPalier("intermediaire");
     const contrepartieIntermediaire = CONTREPARTIE[natureIntermediaire];
-    expect(contrepartieIntermediaire, 'nature intermédiaire sans contrepartie').toBeDefined();
+    expect(contrepartieIntermediaire, "nature intermédiaire sans contrepartie").toBeDefined();
     const acquis = contrepartieIntermediaire!(monde, etoiles);
-    const annonce = paliers.includes('intermediaire');
+    const annonce = paliers.includes("intermediaire");
     console.log(
       `[Q3] palier intermédiaire — en base : ${acquis.vu} · annoncé à l’écran : ` +
-        `${annonce ? 'oui' : 'NON'}`,
+        `${annonce ? "oui" : "NON"}`,
     );
     expect(
       acquis.trouve && !annonce ? [`${natureIntermediaire} : ${acquis.vu}, jamais annoncé`] : [],
-      'Le serveur a attribué ce palier et l’écran de récompense ne l’a jamais dit à l’enfant. ' +
-        'C’est R31 à l’envers : la base garde, l’écran se tait. Une récompense qu’on ne voit ' +
-        'pas n’en est pas une (D25, point 3).',
+      "Le serveur a attribué ce palier et l’écran de récompense ne l’a jamais dit à l’enfant. " +
+        "C’est R31 à l’envers : la base garde, l’écran se tait. Une récompense qu’on ne voit " +
+        "pas n’en est pas une (D25, point 3).",
     ).toEqual([]);
   });
 
-  test('CONTRÔLE POSITIF — une partie lancée par le PARENT n’écrit rien', async ({ page }) => {
+  test("CONTRÔLE POSITIF — une partie lancée par le PARENT n’écrit rien", async ({ page }) => {
     // Exigé nommément par le § 4 Q3. Sans lui, une mesure qui comparerait « zéro annoncé » à
     // « zéro persisté » passerait au vert sans rien mesurer — c'est ce qui est arrivé à R30.
     // Le chemin du parent (`LANCEMENT_PARENT`) est celui de la galerie : il ouvre le MÊME
     // écran de nœud, avec le MÊME contenu, et ne doit RIEN journaliser.
-    await preparer(page, 'Q3 parent');
-    await choisirLeProfil(page, 'Q3 parent');
+    await preparer(page, "Q3 parent");
+    await choisirLeProfil(page, "Q3 parent");
     const profil = await profilCourant(page);
 
     const avant = await page.request.get(`/api/profils/${profil}/progression`);
     const lignesAvant = avant.ok() ? ((await avant.json()) as readonly unknown[]).length : 0;
     const mondeAvant = await lireLeMonde(page, profil);
 
-    await preparer(page, 'Q3 parent');
+    await preparer(page, "Q3 parent");
     await ouvrirLaZoneParent(page);
     await expect(page.locator('[data-ecran="dashboard"]')).toBeVisible();
     await page.locator('[data-onglet-parent="galerie"]').click();
-    await page.locator('[data-galerie-lancer]').first().click();
+    await page.locator("[data-galerie-lancer]").first().click();
     await expect(page.locator('[data-ecran="noeud"]')).toBeVisible();
 
     // La marque que R30 a posée : cet écran ne journalise pas.
-    const journalise = await page
-      .locator('[data-ecran="noeud"]')
-      .getAttribute('data-journalise');
-    console.log(`[Q3] contrôle positif — lancement parent : data-journalise=${journalise ?? 'absent'}`);
+    const journalise = await page.locator('[data-ecran="noeud"]').getAttribute("data-journalise");
+    console.log(
+      `[Q3] contrôle positif — lancement parent : data-journalise=${journalise ?? "absent"}`,
+    );
 
     const apres = await page.request.get(`/api/profils/${profil}/progression`);
     const lignesApres = apres.ok() ? ((await apres.json()) as readonly unknown[]).length : 0;
@@ -281,36 +297,36 @@ test.describe('Q3 — ce que l’écran annonce comme gagné existe en base', ()
 
     expect(
       journalise,
-      'l’écran de nœud ouvert depuis la galerie parent ne se déclare pas non journalisé : ' +
-        'la marque de R30 a disparu, et rien ne distingue plus une visite du parent d’une ' +
-        'partie de l’enfant.',
-    ).toBe('non');
+      "l’écran de nœud ouvert depuis la galerie parent ne se déclare pas non journalisé : " +
+        "la marque de R30 a disparu, et rien ne distingue plus une visite du parent d’une " +
+        "partie de l’enfant.",
+    ).toBe("non");
     expect(
       lignesApres,
-      'une visite du parent a ajouté une ligne de progression : elle nourrit le BKT de l’enfant.',
+      "une visite du parent a ajouté une ligne de progression : elle nourrit le BKT de l’enfant.",
     ).toBe(lignesAvant);
     expect(
       mondeApres.gobi.formes.length,
-      'une visite du parent a fait évoluer Gobi : le monde de l’enfant a bougé sans lui.',
+      "une visite du parent a fait évoluer Gobi : le monde de l’enfant a bougé sans lui.",
     ).toBe(mondeAvant.gobi.formes.length);
   });
 
-  test('CONTRÔLE NÉGATIF — l’enfant, lui, écrit bien : les deux cas se distinguent', async ({
+  test("CONTRÔLE NÉGATIF — l’enfant, lui, écrit bien : les deux cas se distinguent", async ({
     page,
   }) => {
     // Le pendant du contrôle ci-dessus, et il est indispensable : si l'enfant n'écrivait pas
     // non plus, « le parent n'écrit rien » serait vrai sans rien prouver. Les deux faces
     // ensemble sont la seule preuve que la mesure DISTINGUE.
-    await preparer(page, 'Q3 témoin');
-    await choisirLeProfil(page, 'Q3 témoin');
+    await preparer(page, "Q3 témoin");
+    await choisirLeProfil(page, "Q3 témoin");
     const profil = await profilCourant(page);
     const avant = await page.request.get(`/api/profils/${profil}/progression`);
     const lignesAvant = avant.ok() ? ((await avant.json()) as readonly unknown[]).length : 0;
 
-    await preparer(page, 'Q3 témoin');
-    await entrerDansLeNoeud(page, NOEUD_JOUABLE, 'Q3 témoin');
-    await preparer(page, 'Q3 témoin');
-    await jouerJusquALaRecompense(page, NOEUD_JOUABLE, 'Q3 témoin');
+    await preparer(page, "Q3 témoin");
+    await entrerDansLeNoeud(page, NOEUD_JOUABLE, "Q3 témoin");
+    await preparer(page, "Q3 témoin");
+    await jouerJusquALaRecompense(page, NOEUD_JOUABLE, "Q3 témoin");
     await expect(page.locator('[data-ecran="recompense"]')).toBeVisible();
 
     const apres = await page.request.get(`/api/profils/${profil}/progression`);
@@ -320,9 +336,9 @@ test.describe('Q3 — ce que l’écran annonce comme gagné existe en base', ()
     );
     expect(
       lignesApres,
-      'une partie jouée par le chemin de l’ENFANT n’écrit rien non plus : le contrôle positif ' +
-        'ci-dessus comparerait alors zéro à zéro et passerait au vert sans rien mesurer. C’est ' +
-        'exactement le piège que le § 4 Q3 nomme, et que R30 a subi.',
+      "une partie jouée par le chemin de l’ENFANT n’écrit rien non plus : le contrôle positif " +
+        "ci-dessus comparerait alors zéro à zéro et passerait au vert sans rien mesurer. C’est " +
+        "exactement le piège que le § 4 Q3 nomme, et que R30 a subi.",
     ).toBeGreaterThan(lignesAvant);
   });
 });

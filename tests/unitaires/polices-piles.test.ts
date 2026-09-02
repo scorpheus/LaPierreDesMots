@@ -20,14 +20,19 @@
  *       … ces trois-là vérifient le CODE `'andika'`, jamais ce qu'il DÉSIGNE.
  *
  * C'est l'audit par OCCURRENCES au lieu d'objets (D48), transposé d'un cran : on cherchait le
- * mot, pas la propriété. Ce fichier énumère les OBJETS — les cinq polices déclarées par D19 —
+ * mot, pas la propriété. Ce fichier énumère les choix réellement disponibles —
  * et exige de chacune la propriété qui compte.
  */
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from "vitest";
 
-import { POLICES } from '@pierre/partage/lecture';
+import { POLICES } from "@pierre/partage/lecture";
 
-import { FICHIERS_EMBARQUES, REPLI_SYSTEME, familleDe } from '@client/lecture/polices.js';
+import {
+  FICHIERS_EMBARQUES,
+  REPLI_SYSTEME,
+  familleDe,
+  policeDisponible,
+} from "@client/lecture/polices.js";
 
 /**
  * Les polices SYSTÈME : déclarées par D19, servies par la machine, donc absentes de
@@ -40,25 +45,22 @@ import { FICHIERS_EMBARQUES, REPLI_SYSTEME, familleDe } from '@client/lecture/po
  * ensuite : c'est le repli annoncé au contrat, écart n° 5 »). Le test accusait un innocent.
  * La table ci-dessous est donc une DONNÉE, écrite et justifiée, pas une exemption tacite.
  */
-const POLICES_SYSTEME: Readonly<Record<string, string>> = { verdana: 'Verdana' };
+const POLICES_SYSTEME: Readonly<Record<string, string>> = { verdana: "Verdana" };
 
 /**
  * Le nom de famille CSS attendu dans la pile de chaque code de police.
  *
  * Il n'est PAS recalculé depuis le code : `FICHIERS_EMBARQUES` le porte déjà, police par
- * police, et c'est la source qui fait foi. Recalculer « andika » → « Andika » marcherait ici
- * et casserait sur `belle-allure` → « Belle Allure GS ».
+ * police, et c'est la source qui fait foi.
  */
 function familleAttendue(police: string): string | null {
   return (
-    FICHIERS_EMBARQUES.find((f) => f.police === police)?.famille ??
-    POLICES_SYSTEME[police] ??
-    null
+    FICHIERS_EMBARQUES.find((f) => f.police === police)?.famille ?? POLICES_SYSTEME[police] ?? null
   );
 }
 
-describe('les piles de polices — chaque police nomme sa propre famille', () => {
-  it('CONTRAT DE SORTIE — les cinq polices de D19 sont auditées, écart nul', () => {
+describe("les piles de polices — chaque police nomme sa propre famille", () => {
+  it("CONTRAT DE SORTIE — tous les choix de police sont audités, écart nul", () => {
     const auditees = POLICES.filter((p) => familleAttendue(p) !== null);
     const sansFamille = POLICES.filter((p) => familleAttendue(p) === null);
 
@@ -68,15 +70,17 @@ describe('les piles de polices — chaque police nomme sa propre famille', () =>
     expect(
       auditees.length,
       `polices auditées ${String(auditees.length)} sur ${String(POLICES.length)} déclarées ; ` +
-        `sans famille connue : ${sansFamille.join(', ') || 'aucune'} — ajouter son WOFF2 à ` +
-        'FICHIERS_EMBARQUES, ou son nom à POLICES_SYSTEME avec la raison',
+        `sans famille connue : ${sansFamille.join(", ") || "aucune"} — ajouter son WOFF2 à ` +
+        "FICHIERS_EMBARQUES, ou son nom à POLICES_SYSTEME avec la raison",
     ).toBe(POLICES.length);
     // Plancher : « écart nul » resterait vrai sur une liste vide.
-    expect(POLICES.length, 'la liste des polices est anormalement pauvre').toBeGreaterThanOrEqual(5);
+    expect(POLICES.length, "la liste des polices est anormalement pauvre").toBeGreaterThanOrEqual(
+      3,
+    );
   });
 
   for (const police of POLICES) {
-    it(`« ${police} » : sa pile CSS nomme « ${familleAttendue(police) ?? '?'} »`, () => {
+    it(`« ${police} » : sa pile CSS nomme « ${familleAttendue(police) ?? "?"} »`, () => {
       const famille = familleAttendue(police);
       expect(famille, `aucun fichier embarqué déclaré pour « ${police} »`).not.toBeNull();
 
@@ -84,27 +88,27 @@ describe('les piles de polices — chaque police nomme sa propre famille', () =>
       expect(
         pile,
         `la pile de « ${police} » ne contient pas sa propre famille « ${String(famille)} ». ` +
-          'L’enfant croit lire cette police et en lit une autre — CLAUDE.md, règle non ' +
-          'négociable : « fond parchemin, police Andika ».',
+          "L’enfant croit lire cette police et en lit une autre — CLAUDE.md, règle non " +
+          "négociable : « fond parchemin, police Andika ».",
       ).toContain(String(famille));
     });
   }
 
-  it('« andika » est la police de repli, et sa pile la contient VRAIMENT', () => {
+  it("« andika » est la police de repli, et sa pile la contient VRAIMENT", () => {
     // Le cas qui manquait, et le seul qui attrape la mutation X3. `familleDe` promet en
     // commentaire : « un code inconnu rend Andika ». Encore faut-il qu’« Andika » soit dedans.
-    const repli = familleDe('andika');
-    expect(repli, 'la pile par défaut de toute zone de lecture a perdu Andika').toContain('Andika');
+    const repli = familleDe("andika");
+    expect(repli, "la pile par défaut de toute zone de lecture a perdu Andika").toContain("Andika");
     expect(
-      familleDe('police-qui-nexiste-pas' as never),
-      'un code inconnu doit rendre exactement la pile d’Andika',
+      familleDe("police-qui-nexiste-pas" as never),
+      "un code inconnu doit rendre exactement la pile d’Andika",
     ).toBe(repli);
   });
 
-  it('chaque pile se termine par un repli système, jamais sur un fichier absent', () => {
+  it("chaque pile se termine par un repli système, jamais sur un fichier absent", () => {
     // Une pile qui ne finit pas par une famille générique rend un texte illisible le jour où
-    // le WOFF2 manque. `belle-allure` finit par `cursive`, c’est écrit et voulu.
-    const generiques = [REPLI_SYSTEME, 'cursive', 'sans-serif', 'serif'];
+    // le WOFF2 manque.
+    const generiques = [REPLI_SYSTEME, "cursive", "sans-serif", "serif"];
     for (const police of POLICES) {
       const pile = familleDe(police);
       expect(
@@ -112,5 +116,14 @@ describe('les piles de polices — chaque police nomme sa propre famille', () =>
         `la pile de « ${police} » (${pile}) ne se termine par aucune famille générique`,
       ).toBe(true);
     }
+  });
+
+  it("une police embarquée est disponible avant même le premier chargement du navigateur", () => {
+    const documentAvecInventaireVide = {
+      fonts: { check: () => false },
+    } as unknown as Document;
+    expect(policeDisponible("andika", documentAvecInventaireVide)).toBe(true);
+    expect(policeDisponible("opendyslexic", documentAvecInventaireVide)).toBe(true);
+    expect(policeDisponible("verdana", documentAvecInventaireVide)).toBe(false);
   });
 });

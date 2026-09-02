@@ -18,49 +18,47 @@
 // ces deux chemins normatifs. Les deux appels ci-dessous les emploient tels quels et sont les
 // SEULS de ce lot à toucher au réseau pour les réglages : le jour où L2-H publie un lecteur
 // typé, c'est ce fichier et lui seul qui est repris.
-import { useCallback, useEffect, useState } from 'react';
-import type { ReactElement } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useCallback, useEffect, useState } from "react";
+import type { ReactElement } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
   BORNES_REGLAGES,
   POLICES,
   REGLAGES_PAR_DEFAUT,
   normaliserReglages,
-} from '@pierre/partage/lecture';
-import type { BorneReglage, CodePolice, ReglagesLecture } from '@pierre/partage/lecture';
-import type { Profil } from '@pierre/partage';
+} from "@pierre/partage/lecture";
+import type { BorneReglage, CodePolice, ReglagesLecture } from "@pierre/partage/lecture";
+import type { Profil } from "@pierre/partage";
 
-import { ApercuReglages } from '../lecture/ApercuReglages.js';
-import { policeDisponible } from '../lecture/polices.js';
-import { cleReglages } from '../lecture/reglages-du-profil.js';
-import { useEtatJeu, useServices } from '../etat/services.js';
+import { ApercuReglages } from "../lecture/ApercuReglages.js";
+import { policeDisponible } from "../lecture/polices.js";
+import { cleReglages } from "../lecture/reglages-du-profil.js";
+import { useEtatJeu, useServices } from "../etat/services.js";
 
 /** Libellé lisible et prononçable de chaque police. Jamais le code technique à l'écran. */
 const NOM_DE_POLICE: Readonly<Record<CodePolice, string>> = {
-  andika: 'Andika',
-  opendyslexic: 'OpenDyslexic',
-  luciole: 'Luciole',
-  'belle-allure': 'Belle Allure',
-  verdana: 'Verdana',
+  andika: "Andika",
+  opendyslexic: "OpenDyslexic",
+  verdana: "Verdana",
 };
 
 const CHAMPS_MESURES = [
-  { cle: 'corpsPx', intitule: 'Taille des lettres' },
-  { cle: 'interlettrageEm', intitule: 'Espace entre les lettres' },
-  { cle: 'espacementMotsEm', intitule: 'Espace entre les mots' },
-  { cle: 'interligne', intitule: 'Espace entre les lignes' },
+  { cle: "corpsPx", intitule: "Taille des lettres" },
+  { cle: "interlettrageEm", intitule: "Espace entre les lettres" },
+  { cle: "espacementMotsEm", intitule: "Espace entre les mots" },
+  { cle: "interligne", intitule: "Espace entre les lignes" },
 ] as const;
 
-type ChampMesure = (typeof CHAMPS_MESURES)[number]['cle'];
+type ChampMesure = (typeof CHAMPS_MESURES)[number]["cle"];
 
 const INTERRUPTEURS = [
-  { cle: 'colorationSyllabique', intitule: 'Couleurs sur les syllabes' },
-  { cle: 'surlignageLigneCourante', intitule: 'Surligner la ligne que je lis' },
-  { cle: 'regleDeLecture', intitule: 'Montrer la règle de lecture' },
+  { cle: "colorationSyllabique", intitule: "Couleurs sur les syllabes" },
+  { cle: "surlignageLigneCourante", intitule: "Surligner la ligne que je lis" },
+  { cle: "regleDeLecture", intitule: "Montrer la règle de lecture" },
 ] as const;
 
-type Interrupteur = (typeof INTERRUPTEURS)[number]['cle'];
+type Interrupteur = (typeof INTERRUPTEURS)[number]["cle"];
 
 /**
  * Arrondit au pas du réglage.
@@ -102,12 +100,12 @@ export function EcranReglagesLecture({
   const [reglages, fixerReglages] = useState<ReglagesLecture>(REGLAGES_PAR_DEFAUT);
 
   const enregistres = useQuery({
-    queryKey: ['reglages-lecture', idProfil],
+    queryKey: ["reglages-lecture", idProfil],
     enabled: idProfil !== null,
     staleTime: 0,
     queryFn: async (): Promise<ReglagesLecture> => {
-      const reponse = await fetch(CHEMIN_REGLAGES(idProfil ?? ''), {
-        headers: { Accept: 'application/json' },
+      const reponse = await fetch(CHEMIN_REGLAGES(idProfil ?? ""), {
+        headers: { Accept: "application/json" },
       });
       if (!reponse.ok) {
         // Aucun écran d'erreur : le profil neuf n'a pas encore de ligne, et c'est normal.
@@ -129,8 +127,8 @@ export function EcranReglagesLecture({
         return voulus;
       }
       const reponse = await fetch(CHEMIN_REGLAGES(idProfil), {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        method: "PUT",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify(voulus),
       });
       if (!reponse.ok) {
@@ -184,7 +182,7 @@ export function EcranReglagesLecture({
   const dire = useCallback(
     (texte: string, cle = texte): void => {
       fixerEcoutes((precedent) => ({ ...precedent, [cle]: (precedent[cle] ?? 0) + 1 }));
-      void services.voix.dire({ texte, locuteur: 'narrateur' });
+      void services.voix.dire({ texte, locuteur: "narrateur" });
     },
     [services],
   );
@@ -199,22 +197,18 @@ export function EcranReglagesLecture({
   );
 
   return (
-    <main
-      data-ecran="reglages-lecture"
-      className="ecran-reglages-lecture"
-      style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '2rem' }}
-    >
-      <header style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-        <h1 className="titre" style={{ fontSize: '2.5rem', margin: 0 }}>
+    <main data-ecran="reglages-lecture" className="ecran-reglages-lecture">
+      <header className="reglages-entete">
+        <h1 className="titre" style={{ fontSize: "2.5rem", margin: 0 }}>
           Comment tu lis le mieux&nbsp;?
         </h1>
         <button
           type="button"
           className="cible"
           data-ecouter="titre"
-          data-ecoutes={String(ecoutes['titre'] ?? 0)}
+          data-ecoutes={String(ecoutes["titre"] ?? 0)}
           onClick={() => {
-            dire('Comment tu lis le mieux ? Essaie, et regarde en dessous.', 'titre');
+            dire("Comment tu lis le mieux ? Essaie, et regarde en dessous.", "titre");
           }}
           aria-label="Écouter la question"
         >
@@ -229,159 +223,161 @@ export function EcranReglagesLecture({
 
       <ApercuReglages reglages={reglages} />
 
-      {/* ------------------------------------------------------------------ la police */}
-      <section aria-labelledby="titre-police" data-groupe-reglage="police">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <h2 id="titre-police" className="titre" style={{ fontSize: '1.5rem' }}>
-            La forme des lettres
-          </h2>
-          <button
-            type="button"
-            className="cible"
-            data-ecouter="police"
-            data-ecoutes={String(ecoutes['police'] ?? 0)}
-            onClick={() => {
-              dire('La forme des lettres. Choisis celle que tu préfères.', 'police');
-            }}
-            aria-label="Écouter : la forme des lettres"
-          >
-            <span aria-hidden="true">🔊</span>
-          </button>
-        </div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
-          {POLICES.map((police) => {
-            const disponible =
-              typeof document === 'undefined' ? true : policeDisponible(police, document);
-            return (
-              <button
-                key={police}
-                type="button"
-                className={reglages.police === police ? 'cible cible-appel' : 'cible'}
-                data-choix-police={police}
-                data-choisi={reglages.police === police ? 'oui' : 'non'}
-                aria-pressed={reglages.police === police}
-                onClick={() => {
-                  appliquer({ police });
-                }}
-              >
-                {NOM_DE_POLICE[police]}
-                {/* Verdana n'est pas embarquée (écart n° 5) : on le DIT, au lieu de laisser
-                    l'enfant choisir un réglage qui ne change rien sur sa tablette. */}
-                {disponible ? null : <span aria-hidden="true"> ·</span>}
-              </button>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* ------------------------------------------------------------------ les mesures */}
-      {CHAMPS_MESURES.map(({ cle, intitule }) => {
-        const borne = BORNES_REGLAGES[cle];
-        const valeur = reglages[cle];
-        return (
-          <section key={cle} data-groupe-reglage={cle} aria-labelledby={`titre-${cle}`}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <h2 id={`titre-${cle}`} className="titre" style={{ fontSize: '1.5rem' }}>
-                {intitule}
-              </h2>
-              <button
-                type="button"
-                className="cible"
-                data-ecouter={cle}
-                data-ecoutes={String(ecoutes[cle] ?? 0)}
-                onClick={() => {
-                  dire(intitule, cle);
-                }}
-                aria-label={`Écouter : ${intitule}`}
-              >
-                <span aria-hidden="true">🔊</span>
-              </button>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <button
-                type="button"
-                className="cible"
-                data-reglage={cle}
-                data-sens="moins"
-                disabled={valeur <= borne.min}
-                onClick={() => {
-                  deplacer(cle, -1);
-                }}
-                aria-label={`Diminuer : ${intitule}`}
-              >
-                <span aria-hidden="true">−</span>
-              </button>
-              <p
-                data-valeur={cle}
-                data-valeur-brute={String(valeur)}
-                aria-live="polite"
-                style={{ minInlineSize: '8rem', margin: 0, textAlign: 'center' }}
-              >
-                {positionLisible(valeur, borne)}
-              </p>
-              <button
-                type="button"
-                className="cible"
-                data-reglage={cle}
-                data-sens="plus"
-                disabled={valeur >= borne.max}
-                onClick={() => {
-                  deplacer(cle, 1);
-                }}
-                aria-label={`Augmenter : ${intitule}`}
-              >
-                <span aria-hidden="true">+</span>
-              </button>
-            </div>
-          </section>
-        );
-      })}
-
-      {/* ------------------------------------------------------------------ les bascules */}
-      <section data-groupe-reglage="options" aria-label="Aides à la lecture">
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
-          {INTERRUPTEURS.map(({ cle, intitule }) => (
+      <div className="reglages-grille">
+        {/* ------------------------------------------------------------------ la police */}
+        <section aria-labelledby="titre-police" data-groupe-reglage="police">
+          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+            <h2 id="titre-police" className="titre" style={{ fontSize: "1.5rem" }}>
+              La forme des lettres
+            </h2>
             <button
-              key={cle}
               type="button"
-              className={reglages[cle] ? 'cible cible-appel' : 'cible'}
-              data-bascule={cle}
-              data-actif={reglages[cle] ? 'oui' : 'non'}
-              aria-pressed={reglages[cle]}
+              className="cible"
+              data-ecouter="police"
+              data-ecoutes={String(ecoutes["police"] ?? 0)}
               onClick={() => {
-                appliquer({ [cle]: !reglages[cle] } as Partial<ReglagesLecture>);
+                dire("La forme des lettres. Choisis celle que tu préfères.", "police");
+              }}
+              aria-label="Écouter : la forme des lettres"
+            >
+              <span aria-hidden="true">🔊</span>
+            </button>
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem" }}>
+            {POLICES.map((police) => {
+              const disponible =
+                typeof document === "undefined" ? true : policeDisponible(police, document);
+              return (
+                <button
+                  key={police}
+                  type="button"
+                  className={reglages.police === police ? "cible cible-appel" : "cible"}
+                  data-choix-police={police}
+                  data-choisi={reglages.police === police ? "oui" : "non"}
+                  aria-pressed={reglages.police === police}
+                  onClick={() => {
+                    appliquer({ police });
+                  }}
+                >
+                  {NOM_DE_POLICE[police]}
+                  {/* Verdana n'est pas embarquée (écart n° 5) : on le DIT, au lieu de laisser
+                    l'enfant choisir un réglage qui ne change rien sur sa tablette. */}
+                  {disponible ? null : <span aria-hidden="true"> ·</span>}
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* ------------------------------------------------------------------ les mesures */}
+        {CHAMPS_MESURES.map(({ cle, intitule }) => {
+          const borne = BORNES_REGLAGES[cle];
+          const valeur = reglages[cle];
+          return (
+            <section key={cle} data-groupe-reglage={cle} aria-labelledby={`titre-${cle}`}>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                <h2 id={`titre-${cle}`} className="titre" style={{ fontSize: "1.5rem" }}>
+                  {intitule}
+                </h2>
+                <button
+                  type="button"
+                  className="cible"
+                  data-ecouter={cle}
+                  data-ecoutes={String(ecoutes[cle] ?? 0)}
+                  onClick={() => {
+                    dire(intitule, cle);
+                  }}
+                  aria-label={`Écouter : ${intitule}`}
+                >
+                  <span aria-hidden="true">🔊</span>
+                </button>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+                <button
+                  type="button"
+                  className="cible"
+                  data-reglage={cle}
+                  data-sens="moins"
+                  disabled={valeur <= borne.min}
+                  onClick={() => {
+                    deplacer(cle, -1);
+                  }}
+                  aria-label={`Diminuer : ${intitule}`}
+                >
+                  <span aria-hidden="true">−</span>
+                </button>
+                <p
+                  data-valeur={cle}
+                  data-valeur-brute={String(valeur)}
+                  aria-live="polite"
+                  style={{ minInlineSize: "8rem", margin: 0, textAlign: "center" }}
+                >
+                  {positionLisible(valeur, borne)}
+                </p>
+                <button
+                  type="button"
+                  className="cible"
+                  data-reglage={cle}
+                  data-sens="plus"
+                  disabled={valeur >= borne.max}
+                  onClick={() => {
+                    deplacer(cle, 1);
+                  }}
+                  aria-label={`Augmenter : ${intitule}`}
+                >
+                  <span aria-hidden="true">+</span>
+                </button>
+              </div>
+            </section>
+          );
+        })}
+
+        {/* ------------------------------------------------------------------ les bascules */}
+        <section data-groupe-reglage="options" aria-label="Aides à la lecture">
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem" }}>
+            {INTERRUPTEURS.map(({ cle, intitule }) => (
+              <button
+                key={cle}
+                type="button"
+                className={reglages[cle] ? "cible cible-appel" : "cible"}
+                data-bascule={cle}
+                data-actif={reglages[cle] ? "oui" : "non"}
+                aria-pressed={reglages[cle]}
+                onClick={() => {
+                  appliquer({ [cle]: !reglages[cle] } as Partial<ReglagesLecture>);
+                }}
+              >
+                {intitule}
+              </button>
+            ))}
+            <button
+              type="button"
+              className={reglages.fond === "sombre" ? "cible cible-appel" : "cible"}
+              data-bascule="fond"
+              data-actif={reglages.fond === "sombre" ? "oui" : "non"}
+              aria-pressed={reglages.fond === "sombre"}
+              onClick={() => {
+                appliquer({ fond: reglages.fond === "sombre" ? "parchemin" : "sombre" });
               }}
             >
-              {intitule}
+              Fond sombre
             </button>
-          ))}
-          <button
-            type="button"
-            className={reglages.fond === 'sombre' ? 'cible cible-appel' : 'cible'}
-            data-bascule="fond"
-            data-actif={reglages.fond === 'sombre' ? 'oui' : 'non'}
-            aria-pressed={reglages.fond === 'sombre'}
-            onClick={() => {
-              appliquer({ fond: reglages.fond === 'sombre' ? 'parchemin' : 'sombre' });
-            }}
-          >
-            Fond sombre
-          </button>
-        </div>
-      </section>
+          </div>
+        </section>
+      </div>
 
       {/* Aucun bouton « valider » : chaque geste est déjà enregistré. Aucun message d'erreur
           non plus — un enregistrement qui échoue laisse le réglage appliqué à l'écran, et il
           repartira au prochain geste. Rien de ce qui se passe ici ne peut être raté (R14). */}
       <p
         data-etat-enregistrement={
-          idProfil === null ? 'local' : enregistrement.isPending ? 'en-cours' : 'enregistre'
+          idProfil === null ? "local" : enregistrement.isPending ? "en-cours" : "enregistre"
         }
         className="lecture-accessible"
       >
         {idProfil === null
-          ? 'Ces réglages ne sont pas encore rattachés à un joueur.'
-          : 'Tes réglages sont gardés.'}
+          ? "Ces réglages ne sont pas encore rattachés à un joueur."
+          : "Tes réglages sont gardés."}
       </p>
     </main>
   );

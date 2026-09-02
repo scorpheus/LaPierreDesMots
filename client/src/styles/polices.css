@@ -1,9 +1,9 @@
 /* ------------------------------------------------------------------------------------------
-   Les cinq polices de lecture — lot L2-B, v2 § 9.3 et D19.
+   Les polices de lecture réellement disponibles hors ligne — lot L2-B, v2 § 9.3 et D19.
 
    « Aucun appel à Google Fonts : tout est servi en WOFF2 depuis le PC. » Aucune règle de ce
    fichier ne désigne un domaine tiers ; `tests/visuel/polices.spec.ts` le MESURE en comptant
-   les requêtes sortantes pendant le rendu des cinq polices — le seuil est zéro.
+   les requêtes sortantes pendant leur rendu — le seuil est zéro.
 
    `font-display: block` et non `swap`, et c'est un écart délibéré au socle v1 :
    `swap` affiche d'abord la police système puis LA REMPLACE quand le fichier arrive. Sur un
@@ -27,14 +27,18 @@
    cibles d'une consigne, jamais à insister. */
 @font-face {
   font-family: "Andika";
-  src: local("Andika"), url("/polices/andika-regular.woff2") format("woff2");
+  src:
+    local("Andika"),
+    url("/polices/andika-regular.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
   font-display: block;
 }
 @font-face {
   font-family: "Andika";
-  src: local("Andika Bold"), url("/polices/andika-bold.woff2") format("woff2");
+  src:
+    local("Andika Bold"),
+    url("/polices/andika-bold.woff2") format("woff2");
   font-weight: 700;
   font-style: normal;
   font-display: block;
@@ -47,30 +51,9 @@
    que ça ne coûte rien — pas parce qu'elle soignerait quoi que ce soit. */
 @font-face {
   font-family: "OpenDyslexic";
-  src: local("OpenDyslexic"), url("/polices/opendyslexic-regular.woff2") format("woff2");
-  font-weight: 400;
-  font-style: normal;
-  font-display: block;
-}
-
-/* ------------------------------------------------------------------------------------ Luciole
-   Conçue avec des personnes déficientes visuelles ; formes très différenciées, ce qui en fait
-   une candidate sérieuse pour un enfant qui confond des lettres miroir (D23). */
-@font-face {
-  font-family: "Luciole";
-  src: local("Luciole"), url("/polices/luciole-regular.woff2") format("woff2");
-  font-weight: 400;
-  font-style: normal;
-  font-display: block;
-}
-
-/* ------------------------------------------------------------------------- Belle Allure GS
-   Cursive scolaire française, graduée « GS ». Elle sert à reconnaître ce qu'il voit sur son
-   cahier, pas à lui faire déchiffrer de la cursive : la coloration syllabique et les réglages
-   d'espacement s'y appliquent exactement comme aux autres. */
-@font-face {
-  font-family: "Belle Allure GS";
-  src: local("Belle Allure GS"), url("/polices/belle-allure-gs.woff2") format("woff2");
+  src:
+    local("OpenDyslexic"),
+    url("/polices/opendyslexic-regular.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
   font-display: block;
@@ -114,5 +97,5 @@
      Le commentaire d'origine de `global.css:210` disait déjà « PLACEHOLDER : la teinte
      alternée est à valider avec l'enfant ». Elle l'est toujours : ce choix corrige un défaut
      mesuré, il ne clôt pas la question. Consigné en Q-I16 de questions-en-attente.md. */
-  --lecture-syllabe-alternee: #1B6F97;
+  --lecture-syllabe-alternee: #1b6f97;
 }

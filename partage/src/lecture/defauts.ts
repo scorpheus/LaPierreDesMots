@@ -20,18 +20,18 @@
  * Le protocole A/B de D19 déplace la valeur **en base**, jamais dans ce fichier.
  * ─────────────────────────────────────────────────────────────────────────────────────────
  */
-import type { BorneReglage, BornesReglages, CodePolice, FondLecture, ReglagesLecture } from './types.js';
+import type {
+  BorneReglage,
+  BornesReglages,
+  CodePolice,
+  FondLecture,
+  ReglagesLecture,
+} from "./types.js";
 
-/** Les cinq codes de police, dans l'ordre où l'écran de réglages les propose. */
-export const POLICES: readonly CodePolice[] = [
-  'andika',
-  'opendyslexic',
-  'luciole',
-  'belle-allure',
-  'verdana',
-];
+/** Les trois choix réellement rendus, dans l'ordre où l'écran de réglages les propose. */
+export const POLICES: readonly CodePolice[] = ["andika", "opendyslexic", "verdana"];
 
-const FONDS: readonly FondLecture[] = ['parchemin', 'sombre'];
+const FONDS: readonly FondLecture[] = ["parchemin", "sombre"];
 
 /**
  * Bornes de l'interface.
@@ -52,7 +52,7 @@ export const BORNES_REGLAGES: BornesReglages = {
 };
 
 export const REGLAGES_PAR_DEFAUT: ReglagesLecture = {
-  police: 'andika',
+  police: "andika",
   corpsPx: BORNES_REGLAGES.corpsPx.defaut,
   interlettrageEm: BORNES_REGLAGES.interlettrageEm.defaut,
   espacementMotsEm: BORNES_REGLAGES.espacementMotsEm.defaut,
@@ -62,7 +62,7 @@ export const REGLAGES_PAR_DEFAUT: ReglagesLecture = {
   colorationSyllabique: true,
   surlignageLigneCourante: false,
   regleDeLecture: false,
-  fond: 'parchemin',
+  fond: "parchemin",
 };
 
 /**
@@ -73,7 +73,7 @@ export const REGLAGES_PAR_DEFAUT: ReglagesLecture = {
  * curseur, et un enregistrement corrompu ne doit pas rendre un profil injouable.
  */
 export function ramenerDansBorne(valeur: unknown, borne: BorneReglage): number {
-  if (typeof valeur !== 'number' || !Number.isFinite(valeur)) {
+  if (typeof valeur !== "number" || !Number.isFinite(valeur)) {
     return borne.defaut;
   }
   if (valeur < borne.min) {
@@ -86,7 +86,7 @@ export function ramenerDansBorne(valeur: unknown, borne: BorneReglage): number {
 }
 
 function booleenOuDefaut(valeur: unknown, defaut: boolean): boolean {
-  return typeof valeur === 'boolean' ? valeur : defaut;
+  return typeof valeur === "boolean" ? valeur : defaut;
 }
 
 /** Ramène chaque champ dans ses bornes. Ne rejette jamais : l'enfant ne doit pas être bloqué. */
@@ -131,19 +131,19 @@ function nombreCss(valeur: number): string {
  * Les variables CSS à poser sur la zone de lecture. Un seul endroit les nomme.
  *
  * La famille de police n'est PAS ici : elle vit dans `client/src/lecture/polices.ts`, le seul
- * fichier qui connaisse les cinq `@font-face` et le repli système. Ce module reste pur et
+ * fichier qui connaisse les `@font-face` et le repli système. Ce module reste pur et
  * testable sans DOM ; il ne sait rien des fichiers WOFF2.
  */
 export function variablesCss(reglages: ReglagesLecture): Readonly<Record<string, string>> {
-  const sombre = reglages.fond === 'sombre';
+  const sombre = reglages.fond === "sombre";
   return {
-    '--lecture-corps': `${nombreCss(reglages.corpsPx)}px`,
-    '--lecture-interlettrage': `${nombreCss(reglages.interlettrageEm)}em`,
-    '--lecture-espacement-mots': `${nombreCss(reglages.espacementMotsEm)}em`,
-    '--lecture-interligne': nombreCss(reglages.interligne),
+    "--lecture-corps": `${nombreCss(reglages.corpsPx)}px`,
+    "--lecture-interlettrage": `${nombreCss(reglages.interlettrageEm)}em`,
+    "--lecture-espacement-mots": `${nombreCss(reglages.espacementMotsEm)}em`,
+    "--lecture-interligne": nombreCss(reglages.interligne),
     // Le fond sombre reste un fond de LECTURE : encre claire sur fond profond, jamais du noir
     // pur — le contraste maximal fatigue davantage qu'il n'aide (v2 § 9.3, « au calme »).
-    '--lecture-fond': sombre ? 'var(--trait)' : 'var(--parchemin)',
-    '--lecture-encre': sombre ? 'var(--parchemin)' : 'var(--trait)',
+    "--lecture-fond": sombre ? "var(--trait)" : "var(--parchemin)",
+    "--lecture-encre": sombre ? "var(--parchemin)" : "var(--trait)",
   };
 }

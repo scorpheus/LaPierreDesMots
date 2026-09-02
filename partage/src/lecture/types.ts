@@ -8,18 +8,18 @@
  * PAR LE CLIENT (contrat § 4.7), et tout ce qui n'est pas effacé à la compilation pèse sur le
  * budget de 250 Ko gzip.
  */
-import type { CodeCompetence, Horodatage, IdProfil } from '../identifiants.js';
+import type { CodeCompetence, Horodatage, IdProfil } from "../identifiants.js";
 
 /**
- * Les 5 polices de la v2 § 9.3, embarquées localement. **Aucun appel réseau à l'exécution.**
+ * Les polices réellement disponibles hors ligne. **Aucun appel réseau à l'exécution.**
  *
  * `verdana` n'est PAS embarquée : c'est une police système propriétaire, qui ne peut pas être
  * redistribuée dans le dépôt. Elle est proposée et rendue par la pile système ; si elle est
  * absente, `polices.ts` retombe sur `andika`. C'est un écart assumé, § 8, n° 5.
  */
-export type CodePolice = 'andika' | 'opendyslexic' | 'luciole' | 'belle-allure' | 'verdana';
+export type CodePolice = "andika" | "opendyslexic" | "verdana";
 
-export type FondLecture = 'parchemin' | 'sombre';
+export type FondLecture = "parchemin" | "sombre";
 
 /**
  * Les réglages de lecture, **par profil** (D19, v2 § 9.3).

@@ -3,7 +3,7 @@
   "version": 1,
   "titre": "Place les objets dans la cour",
   "origine": { "source": "fiches-origine/NIVEAU 1.pdf", "niveau": 1, "fiche": 1 },
-  "competences": ["comp.consigne.simple", "comp.consigne.multiple"],
+  "competences": ["comp.consigne.simple"],
   "difficulte": 1,
   "jeu": {
     "moteur": "place",
@@ -42,7 +42,12 @@
         {
           "id": "ciel",
           "libelle": "le ciel",
-          "polygone": [[600, 40], [760, 40], [760, 160], [600, 160]],
+          "polygone": [
+            [600, 40],
+            [760, 40],
+            [760, 160],
+            [600, 160]
+          ],
           "centroide": [680, 100],
           "relation": "dans",
           "ancre": null
@@ -50,7 +55,12 @@
         {
           "id": "toit-ecole",
           "libelle": "le toit de l’école",
-          "polygone": [[200, 200], [340, 200], [340, 258], [200, 258]],
+          "polygone": [
+            [200, 200],
+            [340, 200],
+            [340, 258],
+            [200, 258]
+          ],
           "centroide": [270, 229],
           "relation": "sur",
           "ancre": "le toit de l’école"
@@ -58,18 +68,48 @@
         {
           "id": "a-cote-du-banc",
           "libelle": "à côté du banc",
-          "polygone": [[170, 430], [300, 430], [300, 560], [170, 560]],
+          "polygone": [
+            [170, 430],
+            [300, 430],
+            [300, 560],
+            [170, 560]
+          ],
           "centroide": [235, 495],
           "relation": "a-cote-de",
           "ancre": "le banc"
         }
       ],
       "reserve": [
-        { "id": "soleil", "libelle": "un soleil", "asset": "assets/objets/soleil.svg", "taille": [90, 90] },
-        { "id": "ballon", "libelle": "un ballon", "asset": "assets/objets/ballon.svg", "taille": [80, 80] },
-        { "id": "oiseau", "libelle": "un oiseau", "asset": "assets/objets/oiseau.svg", "taille": [80, 70] },
-        { "id": "poisson", "libelle": "un poisson", "asset": "assets/objets/poisson.svg", "taille": [80, 60] },
-        { "id": "parapluie", "libelle": "un parapluie", "asset": "assets/objets/parapluie.svg", "taille": [80, 90] }
+        {
+          "id": "soleil",
+          "libelle": "un soleil",
+          "asset": "assets/objets/soleil.svg",
+          "taille": [90, 90]
+        },
+        {
+          "id": "ballon",
+          "libelle": "un ballon",
+          "asset": "assets/objets/ballon.svg",
+          "taille": [80, 80]
+        },
+        {
+          "id": "oiseau",
+          "libelle": "un oiseau",
+          "asset": "assets/objets/oiseau.svg",
+          "taille": [80, 70]
+        },
+        {
+          "id": "poisson",
+          "libelle": "un poisson",
+          "asset": "assets/objets/poisson.svg",
+          "taille": [80, 60]
+        },
+        {
+          "id": "parapluie",
+          "libelle": "un parapluie",
+          "asset": "assets/objets/parapluie.svg",
+          "taille": [80, 90]
+        }
       ]
     }
   }

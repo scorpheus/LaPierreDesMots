@@ -11,9 +11,9 @@
  * la construction qui embarque `window.__test`. `scripts/verifier-bundle.mjs`, lui, n'inspecte
  * que `client/dist/`. Les deux dossiers ne se croisent jamais.
  */
-import { cpus } from 'node:os';
+import { cpus } from "node:os";
 
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig, devices } from "@playwright/test";
 
 /**
  * Adresse de REPLI, et rien d'autre — lot P1.
@@ -24,7 +24,7 @@ import { defineConfig, devices } from '@playwright/test';
  * illégale dans un cas écrit à la va-vite hors harnais, et parce qu'elle documente le port du
  * contrat § 0.
  */
-const PORT = Number(process.env['PIERRE_PORT'] ?? 8080);
+const PORT = Number(process.env["PIERRE_PORT"] ?? 8080);
 const URL_BASE = `http://127.0.0.1:${PORT}`;
 
 /**
@@ -70,8 +70,8 @@ const URL_BASE = `http://127.0.0.1:${PORT}`;
 const PLAFOND_TRAVAILLEURS = 10;
 
 function travailleurs(): number | string {
-  const demande = process.env['PIERRE_TRAVAILLEURS'];
-  if (demande !== undefined && demande.trim() !== '') {
+  const demande = process.env["PIERRE_TRAVAILLEURS"];
+  if (demande !== undefined && demande.trim() !== "") {
     const nettoye = demande.trim();
     return /^\d+$/u.test(nettoye) ? Number(nettoye) : nettoye;
   }
@@ -94,19 +94,19 @@ function travailleurs(): number | string {
  * couvre le CSS, le second couvre les animations pilotées en JavaScript.
  */
 const tabletteGalaxyTabS10FE = {
-  ...devices['Desktop Chrome'],
+  ...devices["Desktop Chrome"],
   viewport: { width: 1920, height: 1200 },
   deviceScaleFactor: 2,
   hasTouch: true,
   isMobile: false,
-  reducedMotion: 'reduce' as const,
-  locale: 'fr-FR',
-  timezoneId: 'Europe/Paris',
-  colorScheme: 'light' as const
+  reducedMotion: "reduce" as const,
+  locale: "fr-FR",
+  timezoneId: "Europe/Paris",
+  colorScheme: "light" as const,
 };
 
 export default defineConfig({
-  testDir: 'tests',
+  testDir: "tests",
   // Aucune attente arbitraire n'est tolérée dans les tests (annexe T § 6) : on attend un
   // état. Ces délais ne sont donc que des garde-fous contre un blocage réel.
   timeout: 90_000,
@@ -115,10 +115,10 @@ export default defineConfig({
     // Tolérance visuelle de 0,2 % de pixels — annexe T § 4.
     toHaveScreenshot: {
       maxDiffPixelRatio: 0.002,
-      animations: 'disabled',
-      caret: 'hide',
-      scale: 'css'
-    }
+      animations: "disabled",
+      caret: "hide",
+      scale: "css",
+    },
   },
   /**
    * ── LE PARALLÉLISME, ET CE QUI LE REND LÉGITIME (lot P1) ─────────────────────────────────
@@ -175,11 +175,11 @@ export default defineConfig({
    * Pour produire les références, quand le père aura validé le graphisme, la porte reste
    * ouverte et explicite : `npm run test:visuel -- --update-snapshots`.
    */
-  updateSnapshots: 'none',
+  updateSnapshots: "none",
   retries: 0,
-  outputDir: 'tests/rapports/artefacts/playwright',
+  outputDir: "tests/rapports/artefacts/playwright",
   reporter: [
-    ['list'],
+    ["list"],
     // Chemin du rapport machine, PAR ÉTAPE.
     //
     // `PLAYWRIGHT_JSON_OUTPUT_NAME` n'existe plus dans Playwright 1.62 — mesuré :
@@ -190,38 +190,38 @@ export default defineConfig({
     // « 1 échec sur 0 cas », sans jamais nommer le scénario fautif.
     // `PIERRE_RAPPORT_JSON` est à nous, et elle, elle est lue.
     [
-      'json',
-      { outputFile: process.env['PIERRE_RAPPORT_JSON'] ?? 'tests/rapports/brut/playwright.json' }
+      "json",
+      { outputFile: process.env["PIERRE_RAPPORT_JSON"] ?? "tests/rapports/brut/playwright.json" },
     ],
-    ['html', { outputFolder: 'tests/rapports/artefacts/playwright-html', open: 'never' }]
+    ["html", { outputFolder: "tests/rapports/artefacts/playwright-html", open: "never" }],
   ],
   use: {
     baseURL: URL_BASE,
     ...tabletteGalaxyTabS10FE,
-    trace: 'retain-on-failure',
-    video: 'retain-on-failure',
-    screenshot: 'only-on-failure',
+    trace: "retain-on-failure",
+    video: "retain-on-failure",
+    screenshot: "only-on-failure",
     // R10 et R4 : aucun appel sortant. Toute requête hors du serveur local est coupée, et
     // le test qui en dépendrait échouera au lieu de réussir grâce au réseau.
-    serviceWorkers: 'block'
+    serviceWorkers: "block",
   },
   projects: [
     {
-      name: 'parcours',
-      testDir: 'tests/e2e',
+      name: "parcours",
+      testDir: "tests/e2e",
       testMatch: /parcours-.*\.spec\.ts$/,
       // `parcours-zz-invariants.spec.ts` appartient au projet `bilan` : il LIT le journal que
       // les autres recettes écrivent, donc il ne peut pas tourner en même temps qu'elles.
-      testIgnore: /parcours-zz-invariants\.spec\.ts$/
+      testIgnore: /parcours-zz-invariants\.spec\.ts$/,
     },
     {
-      name: 'robustesse',
-      testDir: 'tests/e2e',
-      testMatch: /(cassecou|singe)\.spec\.ts$/
+      name: "robustesse",
+      testDir: "tests/e2e",
+      testMatch: /(cassecou|singe)\.spec\.ts$/,
     },
     {
-      name: 'visuel',
-      testDir: 'tests/visuel',
+      name: "visuel",
+      testDir: "tests/visuel",
       testMatch: /.*\.spec\.ts$/,
       // ── LA MATRICE DES 5 POLICES (lot L2-B, contrat des features v2 § 3.2) ──────────────
       //
@@ -240,13 +240,13 @@ export default defineConfig({
       // La liste est ici, et pas dans le spec, pour qu'elle reste une donnée de configuration
       // opposable : un ajout de police se voit dans le diff de ce fichier.
       metadata: {
-        polices: ['andika', 'opendyslexic', 'luciole', 'belle-allure', 'verdana']
-      }
+        polices: ["andika", "opendyslexic", "verdana"],
+      },
     },
     {
-      name: 'qualite',
-      testDir: 'tests/qualite',
-      testMatch: /.*\.spec\.ts$/
+      name: "qualite",
+      testDir: "tests/qualite",
+      testMatch: /.*\.spec\.ts$/,
     },
 
     /**
@@ -272,13 +272,13 @@ export default defineConfig({
      * `*.spec.ts` recensée par `recettesSurDisque()`, et il porte toujours le harnais.
      */
     {
-      name: 'bilan',
-      testDir: 'tests/e2e',
+      name: "bilan",
+      testDir: "tests/e2e",
       testMatch: /parcours-zz-invariants\.spec\.ts$/,
       fullyParallel: false,
-      dependencies: ['parcours', 'robustesse']
-    }
-  ]
+      dependencies: ["parcours", "robustesse"],
+    },
+  ],
 
   /**
    * ── IL N'Y A PLUS DE `webServer`, ET C'EST LE CŒUR DU LOT P1 ─────────────────────────────

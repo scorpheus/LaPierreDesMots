@@ -12,8 +12,8 @@
  * personne ne le verrait — c'est exactement le mode d'échec « détecteur qui déclare un poids
  * qu'il n'applique jamais ».
  */
-import { describe, expect, it } from 'vitest';
-import fc from 'fast-check';
+import { describe, expect, it } from "vitest";
+import fc from "fast-check";
 
 import {
   BORNES_REGLAGES,
@@ -21,18 +21,18 @@ import {
   REGLAGES_PAR_DEFAUT,
   normaliserReglages,
   variablesCss,
-} from '@pierre/partage/lecture';
-import type { BorneReglage, ReglagesLecture } from '@pierre/partage/lecture';
+} from "@pierre/partage/lecture";
+import type { BorneReglage, ReglagesLecture } from "@pierre/partage/lecture";
 
-const CHAMPS_NUMERIQUES = ['corpsPx', 'interlettrageEm', 'espacementMotsEm', 'interligne'] as const;
+const CHAMPS_NUMERIQUES = ["corpsPx", "interlettrageEm", "espacementMotsEm", "interligne"] as const;
 type ChampNumerique = (typeof CHAMPS_NUMERIQUES)[number];
 
 function borne(champ: ChampNumerique): BorneReglage {
   return BORNES_REGLAGES[champ];
 }
 
-describe('les bornes elles-mêmes', () => {
-  it('encadrent le corps entre 16 et 40 px — v2 § 9.3, cité à la lettre', () => {
+describe("les bornes elles-mêmes", () => {
+  it("encadrent le corps entre 16 et 40 px — v2 § 9.3, cité à la lettre", () => {
     expect(BORNES_REGLAGES.corpsPx.min).toBe(16);
     expect(BORNES_REGLAGES.corpsPx.max).toBe(40);
   });
@@ -48,32 +48,24 @@ describe('les bornes elles-mêmes', () => {
     });
   }
 
-  it('part sur Andika, la police par défaut de toute zone de lecture (v2 § 9.3)', () => {
-    expect(REGLAGES_PAR_DEFAUT.police).toBe('andika');
+  it("part sur Andika, la police par défaut de toute zone de lecture (v2 § 9.3)", () => {
+    expect(REGLAGES_PAR_DEFAUT.police).toBe("andika");
   });
 
-  it('propose exactement les cinq polices de D19, Andika en tête', () => {
-    expect([...POLICES]).toEqual([
-      'andika',
-      'opendyslexic',
-      'luciole',
-      'belle-allure',
-      'verdana',
-    ]);
+  it("propose exactement les polices disponibles hors ligne, Andika en tête", () => {
+    expect([...POLICES]).toEqual(["andika", "opendyslexic", "verdana"]);
   });
 
-  it('part sur un interlettrage strictement au-dessus de zéro — Q1, PLACEHOLDER', () => {
+  it("part sur un interlettrage strictement au-dessus de zéro — Q1, PLACEHOLDER", () => {
     // D19 : l'espacement est « probablement le vrai levier ». Partir à 0 reviendrait à ne pas
     // le tester du tout. Partir au maximum contredirait la nuance Frontiers 2020.
     expect(REGLAGES_PAR_DEFAUT.interlettrageEm).toBeGreaterThan(0);
-    expect(REGLAGES_PAR_DEFAUT.interlettrageEm).toBeLessThan(
-      BORNES_REGLAGES.interlettrageEm.max,
-    );
+    expect(REGLAGES_PAR_DEFAUT.interlettrageEm).toBeLessThan(BORNES_REGLAGES.interlettrageEm.max);
   });
 });
 
-describe('normaliserReglages — ramène, ne rejette jamais', () => {
-  it('rend les défauts sur un objet vide', () => {
+describe("normaliserReglages — ramène, ne rejette jamais", () => {
+  it("rend les défauts sur un objet vide", () => {
     expect(normaliserReglages({})).toEqual(REGLAGES_PAR_DEFAUT);
   });
 
@@ -97,28 +89,28 @@ describe('normaliserReglages — ramène, ne rejette jamais', () => {
         borne(champ).defaut,
       );
       expect(
-        normaliserReglages({ [champ]: 'grand' } as unknown as Partial<ReglagesLecture>)[champ],
+        normaliserReglages({ [champ]: "grand" } as unknown as Partial<ReglagesLecture>)[champ],
       ).toBe(borne(champ).defaut);
     });
   }
 
-  it('rend Andika sur une police inconnue, au lieu de lever', () => {
+  it("rend Andika sur une police inconnue, au lieu de lever", () => {
     const resultat = normaliserReglages({
-      police: 'comic-sans',
+      police: "comic-sans",
     } as unknown as Partial<ReglagesLecture>);
-    expect(resultat.police).toBe('andika');
+    expect(resultat.police).toBe("andika");
   });
 
-  it('rend « parchemin » sur un fond inconnu', () => {
+  it("rend « parchemin » sur un fond inconnu", () => {
     const resultat = normaliserReglages({
-      fond: 'arc-en-ciel',
+      fond: "arc-en-ciel",
     } as unknown as Partial<ReglagesLecture>);
-    expect(resultat.fond).toBe('parchemin');
+    expect(resultat.fond).toBe("parchemin");
   });
 
-  it('conserve une valeur déjà dans les bornes, au bit près', () => {
+  it("conserve une valeur déjà dans les bornes, au bit près", () => {
     const voulu: ReglagesLecture = {
-      police: 'luciole',
+      police: "opendyslexic",
       corpsPx: 32,
       interlettrageEm: 0.11,
       espacementMotsEm: 0.24,
@@ -126,12 +118,12 @@ describe('normaliserReglages — ramène, ne rejette jamais', () => {
       colorationSyllabique: false,
       surlignageLigneCourante: true,
       regleDeLecture: true,
-      fond: 'sombre',
+      fond: "sombre",
     };
     expect(normaliserReglages(voulu)).toEqual(voulu);
   });
 
-  it('ne lève JAMAIS et rend toujours des valeurs dans les bornes, quelle que soit l’entrée', () => {
+  it("ne lève JAMAIS et rend toujours des valeurs dans les bornes, quelle que soit l’entrée", () => {
     const valeurQuelconque = fc.oneof(
       fc.double({ noDefaultInfinity: false, noNaN: false }),
       fc.string(),
@@ -160,7 +152,7 @@ describe('normaliserReglages — ramène, ne rejette jamais', () => {
           if (!POLICES.includes(resultat.police)) {
             return false;
           }
-          if (resultat.fond !== 'parchemin' && resultat.fond !== 'sombre') {
+          if (resultat.fond !== "parchemin" && resultat.fond !== "sombre") {
             return false;
           }
           return CHAMPS_NUMERIQUES.every((champ) => {
@@ -174,7 +166,7 @@ describe('normaliserReglages — ramène, ne rejette jamais', () => {
     );
   });
 
-  it('est idempotente : normaliser deux fois ne change plus rien', () => {
+  it("est idempotente : normaliser deux fois ne change plus rien", () => {
     fc.assert(
       fc.property(
         fc.record(
@@ -197,42 +189,42 @@ describe('normaliserReglages — ramène, ne rejette jamais', () => {
   });
 });
 
-describe('variablesCss — le seul endroit qui nomme les variables de lecture', () => {
+describe("variablesCss — le seul endroit qui nomme les variables de lecture", () => {
   const variables = variablesCss(REGLAGES_PAR_DEFAUT);
 
-  it('rend les cinq mesures et les deux couleurs, et rien d’autre', () => {
+  it("rend les cinq mesures et les deux couleurs, et rien d’autre", () => {
     expect(Object.keys(variables).sort()).toEqual([
-      '--lecture-corps',
-      '--lecture-encre',
-      '--lecture-espacement-mots',
-      '--lecture-fond',
-      '--lecture-interlettrage',
-      '--lecture-interligne',
+      "--lecture-corps",
+      "--lecture-encre",
+      "--lecture-espacement-mots",
+      "--lecture-fond",
+      "--lecture-interlettrage",
+      "--lecture-interligne",
     ]);
   });
 
-  it('porte les unités que le CSS attend', () => {
-    expect(variables['--lecture-corps']).toBe('24px');
-    expect(variables['--lecture-interlettrage']).toBe('0.06em');
-    expect(variables['--lecture-espacement-mots']).toBe('0.08em');
+  it("porte les unités que le CSS attend", () => {
+    expect(variables["--lecture-corps"]).toBe("24px");
+    expect(variables["--lecture-interlettrage"]).toBe("0.06em");
+    expect(variables["--lecture-espacement-mots"]).toBe("0.08em");
     // L'interligne est un multiple, donc SANS unité : `line-height: 1.6`, jamais `1.6px`.
-    expect(variables['--lecture-interligne']).toBe('1.6');
+    expect(variables["--lecture-interligne"]).toBe("1.6");
   });
 
-  it('inverse encre et fond en mode sombre, sans jamais employer le noir pur', () => {
-    const sombre = variablesCss({ ...REGLAGES_PAR_DEFAUT, fond: 'sombre' });
-    expect(sombre['--lecture-fond']).toBe('var(--trait)');
-    expect(sombre['--lecture-encre']).toBe('var(--parchemin)');
-    expect(sombre['--lecture-fond']).not.toContain('#000');
+  it("inverse encre et fond en mode sombre, sans jamais employer le noir pur", () => {
+    const sombre = variablesCss({ ...REGLAGES_PAR_DEFAUT, fond: "sombre" });
+    expect(sombre["--lecture-fond"]).toBe("var(--trait)");
+    expect(sombre["--lecture-encre"]).toBe("var(--parchemin)");
+    expect(sombre["--lecture-fond"]).not.toContain("#000");
   });
 
-  it('n’écrit jamais de traîne de virgule flottante dans une variable CSS', () => {
+  it("n’écrit jamais de traîne de virgule flottante dans une variable CSS", () => {
     // `0.06 * 3` vaut `0.18000000000000002` en binaire : illisible dans une capture T4.
     const bavard = variablesCss({ ...REGLAGES_PAR_DEFAUT, interlettrageEm: 0.06 * 3 });
-    expect(bavard['--lecture-interlettrage']).toBe('0.18em');
+    expect(bavard["--lecture-interlettrage"]).toBe("0.18em");
   });
 
-  it('rend une valeur CSS finie pour tout réglage normalisé', () => {
+  it("rend une valeur CSS finie pour tout réglage normalisé", () => {
     fc.assert(
       fc.property(
         fc.record({
@@ -244,16 +236,18 @@ describe('variablesCss — le seul endroit qui nomme les variables de lecture', 
         (bruts) => {
           const rendus = variablesCss(normaliserReglages(bruts));
           const mesures = [
-            rendus['--lecture-corps'],
-            rendus['--lecture-interlettrage'],
-            rendus['--lecture-espacement-mots'],
-            rendus['--lecture-interligne'],
+            rendus["--lecture-corps"],
+            rendus["--lecture-interlettrage"],
+            rendus["--lecture-espacement-mots"],
+            rendus["--lecture-interligne"],
           ];
           // Ni chaîne vide, ni `NaN`, ni notation exponentielle : `1e-7px` est une valeur CSS
           // valide que personne ne saurait relire dans une capture de référence.
           return mesures.every(
             (valeur) =>
-              valeur !== undefined && valeur !== '' && !valeur.includes('NaN') &&
+              valeur !== undefined &&
+              valeur !== "" &&
+              !valeur.includes("NaN") &&
               !/\d[eE][+-]?\d/u.test(valeur),
           );
         },
