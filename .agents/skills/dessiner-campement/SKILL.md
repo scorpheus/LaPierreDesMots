@@ -6,9 +6,9 @@ description: Publier ou animer le campement illustré sans désaligner ses zones
 # Dessiner le campement
 
 Le SVG de `production/archives/` est un blockout historique, pas une source graphique. La source
-validée est `contenu/brouillons/campement/concept-campement-v5-enfant.png` et sa copie exacte de
-production est `contenu/assets/campement/campement-v5.png`. La commande
-`npm run campement:dessiner` republie cette image octet pour octet et contrôle le référentiel.
+validée est désormais le V6 sans objets mobiles, publié dans
+`contenu/assets/campement/campement-v6.png`. La commande `npm run campement:dessiner` contrôle
+ses dimensions et le référentiel ; la provenance reproductible vit dans `production/assets.lock.json`.
 
 Les objets peints restent dans l’image. L’interactivité vient de boutons HTML transparents décrits
 par `contenu/monde/campement.json`; la vie ambiante vient de calques raster/DOM indépendants. Ne
@@ -18,7 +18,7 @@ jamais tenter de convertir à nouveau toute la scène en SVG pour la rendre inte
 
 1. Pour déplacer une prise, mesurer la boîte de l’objet dans l’image native 1586 × 992 et modifier
    uniquement sa `zone` dans `contenu/monde/campement.json`.
-2. Pour changer le décor, faire valider le brouillon par le parent, remplacer la source V5 puis
+2. Pour changer le décor, faire valider le brouillon par le parent, remplacer l’asset V6 puis
    exécuter `npm run campement:dessiner`.
 3. Pour ajouter un sprite, produire une ligne ou une grille sur fond uni, puis passer par le
    pipeline déterministe de `scripts/sprites/` : extraction, alpha, normalisation, contact sheet et
@@ -28,7 +28,7 @@ jamais tenter de convertir à nouveau toute la scène en SVG pour la rendre inte
 4. Exécuter les gardes ciblés :
 
    ```text
-   npm run test -- --run tests/unitaires/campement-composition-v5.test.ts tests/composants/EcranCampement.test.tsx
+   npm run test -- --run tests/unitaires/campement-composition-v6.test.ts tests/composants/EcranCampement.test.tsx
    npm run test:contenu
    ```
 

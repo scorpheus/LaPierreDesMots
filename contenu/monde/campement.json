@@ -1,7 +1,7 @@
 {
-  "$commentaire": "Campement V5 validé : illustration raster 1586 × 992, trente zones tactiles calées sur les objets peints et animations rendues par des calques DOM indépendants.",
+  "$commentaire": "Campement V6 validé : fond raster 1586 × 992 sans feu ni papillon immobiles, trente zones tactiles calées et deux sprites séparés.",
   "scene": {
-    "fichier": "assets/campement/campement-v5.png",
+    "fichier": "assets/campement/campement-v6.png",
     "viewBox": "0 0 1586 992"
   },
   "coloriageLibre": "galeries-12",
@@ -401,37 +401,37 @@
     {
       "code": "fanion-clairiere",
       "libelle": "le fanion de la Clairière",
-      "asset": "assets/campement/campement-v5.png",
+      "asset": "assets/campement/campement-v6.png",
       "region": "clairiere"
     },
     {
       "code": "geode-galeries",
       "libelle": "la géode des Galeries",
-      "asset": "assets/campement/campement-v5.png",
+      "asset": "assets/campement/campement-v6.png",
       "region": "galeries"
     },
     {
       "code": "nenuphar-marais",
       "libelle": "le nénuphar du Marais Jumeau",
-      "asset": "assets/campement/campement-v5.png",
+      "asset": "assets/campement/campement-v6.png",
       "region": "marais-jumeau"
     },
     {
       "code": "feuille-foret",
       "libelle": "la feuille de la Forêt Muette",
-      "asset": "assets/campement/campement-v5.png",
+      "asset": "assets/campement/campement-v6.png",
       "region": "foret-muette"
     },
     {
       "code": "braise-volcan",
       "libelle": "la braise du Volcan",
-      "asset": "assets/campement/campement-v5.png",
+      "asset": "assets/campement/campement-v6.png",
       "region": "volcan"
     },
     {
       "code": "livre-cite",
       "libelle": "le livre de la Cité des Histoires",
-      "asset": "assets/campement/campement-v5.png",
+      "asset": "assets/campement/campement-v6.png",
       "region": "cite-des-histoires"
     }
   ]

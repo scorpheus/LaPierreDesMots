@@ -698,6 +698,64 @@ body {
   pointer-events: none;
 }
 
+.campement-ambiant {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.campement-sprite {
+  position: absolute;
+  display: block;
+  background-repeat: no-repeat;
+  background-size: 400% 200%;
+  pointer-events: none;
+}
+
+@keyframes pierre-campement-sprite-8 {
+  0%, 12.49% { background-position: 0 0; }
+  12.5%, 24.99% { background-position: 33.333% 0; }
+  25%, 37.49% { background-position: 66.667% 0; }
+  37.5%, 49.99% { background-position: 100% 0; }
+  50%, 62.49% { background-position: 0 100%; }
+  62.5%, 74.99% { background-position: 33.333% 100%; }
+  75%, 87.49% { background-position: 66.667% 100%; }
+  87.5%, 100% { background-position: 100% 100%; }
+}
+
+@keyframes pierre-campement-papillon-vol {
+  0%, 100% { transform: translate(0, 0) rotate(-4deg); }
+  28% { transform: translate(58%, -20%) rotate(5deg); }
+  56% { transform: translate(92%, 8%) rotate(-3deg); }
+  78% { transform: translate(34%, 22%) rotate(4deg); }
+}
+
+.campement-sprite--feu {
+  inset-inline-start: 47%;
+  inset-block-start: 54.1%;
+  inline-size: 9.45%;
+  aspect-ratio: 1;
+  animation: pierre-campement-sprite-8 880ms steps(1) infinite alternate;
+  filter: drop-shadow(0 0 9px rgb(255 151 40 / 55%));
+}
+
+.campement-sprite--papillon {
+  inset-inline-start: 15.9%;
+  inset-block-start: 80.5%;
+  inline-size: 6.8%;
+  aspect-ratio: 1;
+  animation:
+    pierre-campement-sprite-8 720ms steps(1) infinite alternate,
+    pierre-campement-papillon-vol 8s ease-in-out infinite;
+  filter: drop-shadow(0 3px 2px rgb(16 32 46 / 25%));
+}
+
+.campement-ambiant--calme .campement-sprite {
+  display: none;
+}
+
 .campement-effet {
   position: absolute;
   z-index: 3;

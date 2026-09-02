@@ -144,13 +144,14 @@ describe('R11 comptée dans le DOM', () => {
     expect(ouvrirChaudron).toHaveBeenCalledWith(CAMPEMENT.coloriageLibre);
   });
 
-  it('rend l’illustration V5 sans doubler le feu ni le papillon déjà peints', () => {
+  it('rend le fond V6 nettoyé et ses deux objets animés séparés', () => {
     monter();
 
-    const decor = document.querySelector<HTMLImageElement>('[data-decor-campement="v5-raster"]');
-    expect(decor?.getAttribute('src')).toContain('assets/campement/campement-v5.png');
-    expect(document.querySelectorAll('.campement-sprite')).toHaveLength(0);
-    expect(document.querySelectorAll('[data-calque-campement]')).toHaveLength(0);
+    const decor = document.querySelector<HTMLImageElement>('[data-decor-campement="v6-raster"]');
+    expect(decor?.getAttribute('src')).toContain('assets/campement/campement-v6.png');
+    expect(document.querySelector('[data-sprite-campement="feu"]')).not.toBeNull();
+    expect(document.querySelector('[data-sprite-campement="papillon"]')).not.toBeNull();
+    expect(document.querySelectorAll('[data-sprite-campement]')).toHaveLength(2);
   });
 
   it('répond au toucher par une découverte nommée et des étincelles, sans cadre géométrique', () => {

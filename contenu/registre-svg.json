@@ -180,7 +180,7 @@
     },
     {
       "fichier": "habillages/campement/campement.svg",
-      "remplacePar": "assets/campement/campement-v5.png",
+      "remplacePar": "assets/campement/campement-v6.png",
       "raison": "Blockout vectoriel du campement, remplacé par l’illustration raster V5 explicitement retenue par le parent. Le SVG avait servi quand aucun générateur d’image n’était disponible ; il reste sur disque comme trace des trente objets et de leurs identifiants historiques, mais l’écran sert désormais l’image validée et superpose ses zones tactiles et ses calques animés dans le DOM.",
       "decision": "validation parent du campement V5 et abandon explicite du blockout vectoriel, 2026-09-02",
       "encoreLuPar": [

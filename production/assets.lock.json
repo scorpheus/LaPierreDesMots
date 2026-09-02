@@ -2,22 +2,64 @@
   "$commentaire": "Premières entrées du verrou d’assets. Les champs indisponibles du générateur intégré sont explicitement nuls plutôt qu’inventés.",
   "assets": [
     {
-      "id": "campement.decor.v5",
-      "fichier": "contenu/assets/campement/campement-v5.png",
-      "empreinte": "sha256:CBA7CDBAF6CC7D66E625D4ED31CA8D22A8C681875EEF892B9B0DD9DDB76CDF4E",
+      "id": "campement.decor.v6",
+      "fichier": "contenu/assets/campement/campement-v6.png",
+      "empreinte": "sha256:0576BD91208F2080244116D4FCD44A20CAB0713597C880DEA54672946292CCBB",
       "generation": {
         "outil": "générateur d’images intégré à Codex",
         "workflow": null,
         "checkpoint": null,
         "graine": null,
         "resolution": [1586, 992],
-        "prompt": "Illustration de décor 2D pour un jeu éducatif destiné à un enfant de 7 ans : campement chaleureux dans une clairière, grande tente et feu au centre, carte, coffre, pierres gravées, chaudron coloré, longue-vue, hamac, fanions, lanterne, pommes, lucioles, livre, champignons et petits animaux ; illustration jeunesse lisible, lumineuse et aventureuse, sans texte, sans humain, sans grille d’icônes."
+        "prompt": "Édition précise du V5 : retirer seulement les flammes, étincelles et leur lueur du foyer central en conservant pierres, bûches et support ; retirer seulement le papillon bleu-vert en bas à gauche et reconstruire fleurs, herbe et feuilles ; préserver cadrage, objets, textures, couleurs et style jeunesse, sans dominante jaune, ajout, texte ni filigrane."
       },
       "qc": {
         "technique": "ok — PNG 1586 × 992",
         "semantique": "validé",
-        "integration": "ok — capture 1920 × 1200",
-        "tentatives": 5
+        "integration": "ok — aperçu animé 1233 × 771 et géométrie native conservée",
+        "tentatives": 1
+      },
+      "valide_par": "parent",
+      "valide_le": "2026-09-02"
+    },
+    {
+      "id": "campement.animation.feu",
+      "fichier": "contenu/assets/campement/animations/feu.png",
+      "empreinte": "sha256:CF7BB1C83DD90029CF100F1B80EE0EB9FA7805860E85DC68DC6C1BF19FE6A90F",
+      "generation": {
+        "outil": "générateur d’images intégré à Codex",
+        "workflow": "imagegen puis scripts/sprites/normaliser-planche.mjs",
+        "checkpoint": null,
+        "graine": null,
+        "resolution": [1024, 512],
+        "prompt": "Huit phases régulières 4 × 2 d’une petite flamme de feu de camp, même style illustré jeunesse peint que le campement V5, ancre bas-centre stable, fond noir uni, sans bûches, décor, texte ni séparation."
+      },
+      "qc": {
+        "technique": "ok — 8/8 cellules, alpha, aucun débordement, ancre ≤ 0,5 px",
+        "semantique": "validé",
+        "integration": "opaque, sans mode de fusion, ancré dans le foyer V6",
+        "tentatives": 2
+      },
+      "valide_par": "parent",
+      "valide_le": "2026-09-02"
+    },
+    {
+      "id": "campement.animation.papillon",
+      "fichier": "contenu/assets/campement/animations/papillon.png",
+      "empreinte": "sha256:301746AEF0F3F0DA08E0B8FA7BBD9B14D2DB56A2FA418C08078BF26C270C3AA1",
+      "generation": {
+        "outil": "générateur d’images intégré à Codex",
+        "workflow": "imagegen puis scripts/sprites/normaliser-planche.mjs",
+        "checkpoint": null,
+        "graine": null,
+        "resolution": [1024, 512],
+        "prompt": "Huit phases régulières 4 × 2 d’un seul papillon bleu et turquoise battant des ailes, même style illustré jeunesse que le campement V5, corps centré et échelle stable, fond noir uni, sans plante, décor, texte ni autre insecte."
+      },
+      "qc": {
+        "technique": "ok — 8/8 cellules, alpha, aucun débordement, ancre ≤ 0,5 px",
+        "semantique": "validé",
+        "integration": "opaque, sans mode de fusion, vol local sur la végétation V6",
+        "tentatives": 1
       },
       "valide_par": "parent",
       "valide_le": "2026-09-02"

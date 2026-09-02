@@ -444,12 +444,28 @@ export function EcranCampement({
           {campement === null ? null : (
             <img
               className="campement-decor"
-              data-decor-campement="v5-raster"
+              data-decor-campement="v6-raster"
               src={urlAsset(String(campement.scene.fichier))}
               alt=""
               draggable={false}
             />
           )}
+
+          <div
+            className={animationsDesactivees ? "campement-ambiant campement-ambiant--calme" : "campement-ambiant"}
+            aria-hidden="true"
+          >
+            <span
+              className="campement-sprite campement-sprite--feu"
+              data-sprite-campement="feu"
+              style={{ backgroundImage: `url(${urlAsset("assets/campement/animations/feu.png")})` }}
+            />
+            <span
+              className="campement-sprite campement-sprite--papillon"
+              data-sprite-campement="papillon"
+              style={{ backgroundImage: `url(${urlAsset("assets/campement/animations/papillon.png")})` }}
+            />
+          </div>
 
           {objetAnime === null ? null : (() => {
             const point = points.find((candidat) => candidat.id === objetAnime.id);
