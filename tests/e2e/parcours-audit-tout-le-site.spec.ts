@@ -418,9 +418,9 @@ test('CONTRAT DE SORTIE QA : écrans déclarés = écrans visités, écart nul',
   // Le renvoi vers un test de composant reste l'EXCEPTION. S'il en fallait plus d'un, c'est
   // que la QA aurait cessé de parcourir le site et se contenterait de monter des fragments.
   expect(
-    jamaisVisites,
+    jamaisVisites.length,
     'trop d’écrans échappent aux parcours — la QA cesserait de mesurer le site réel',
-  ).toHaveLength(jamaisVisites.length > 1 ? 0 : jamaisVisites.length);
+  ).toBeLessThanOrEqual(1);
   console.log(
     `[qa] écrans défensifs, couverts par un test de composant : ` +
       `${jamaisVisites.length === 0 ? '(aucun)' : jamaisVisites.join(', ')}`,

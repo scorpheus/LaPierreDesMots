@@ -213,6 +213,11 @@ export default defineConfig({
       // `parcours-zz-invariants.spec.ts` appartient au projet `bilan` : il LIT le journal que
       // les autres recettes écrivent, donc il ne peut pas tourner en même temps qu'elles.
       testIgnore: /parcours-zz-invariants\.spec\.ts$/,
+      // Le contrat exhaustif rejoue 88 recettes dans UN cas. En série il prend 30,2 s ;
+      // mêlé aux dix navigateurs de la campagne, il a déjà épuisé son garde-fou de 270 s.
+      // Il appartient au projet `couverture`, exécuté après les parcours : mêmes assertions,
+      // même serveur isolé, mais une mesure qui ne dépend plus de la contention de la machine.
+      grepInvert: /CONTRAT DE SORTIE QA : écrans déclarés = écrans visités, écart nul/u,
     },
     {
       name: "robustesse",
@@ -249,6 +254,15 @@ export default defineConfig({
       testMatch: /.*\.spec\.ts$/,
     },
 
+    {
+      name: "couverture",
+      testDir: "tests/e2e",
+      testMatch: /parcours-audit-tout-le-site\.spec\.ts$/,
+      grep: /CONTRAT DE SORTIE QA : écrans déclarés = écrans visités, écart nul/u,
+      fullyParallel: false,
+      dependencies: ["parcours", "robustesse"],
+    },
+
     /**
      * ── LA CLÔTURE DE CAMPAGNE — UN PROJET À ELLE SEULE (lot P1) ──────────────────────────
      *
@@ -263,10 +277,10 @@ export default defineConfig({
      * travailleurs se partagent la file, le dernier fichier n'est plus le dernier exécuté.
      *
      * `dependencies` le dit en clair au lieu de l'espérer d'un tri : le projet `bilan` ne
-     * démarre que lorsque `parcours` ET `robustesse` sont terminés, tous travailleurs
-     * confondus. Et `fullyParallel: false` lui rend l'ordre de déclaration à l'intérieur du
-     * fichier — ses contrôles positifs arment la sentinelle et doivent avoir écrit leurs
-     * bilans avant que le § 5 ne les compte.
+     * démarre qu'après `couverture`, elle-même postérieure à `parcours` ET `robustesse`, tous
+     * travailleurs confondus. Et `fullyParallel: false` lui rend l'ordre de déclaration à
+     * l'intérieur du fichier — ses contrôles positifs arment la sentinelle et doivent avoir
+     * écrit leurs bilans avant que le § 5 ne les compte.
      *
      * Le fichier n'a pas bougé d'un octet : il reste dans `tests/e2e/`, il reste une
      * `*.spec.ts` recensée par `recettesSurDisque()`, et il porte toujours le harnais.
@@ -276,7 +290,7 @@ export default defineConfig({
       testDir: "tests/e2e",
       testMatch: /parcours-zz-invariants\.spec\.ts$/,
       fullyParallel: false,
-      dependencies: ["parcours", "robustesse"],
+      dependencies: ["couverture"],
     },
   ],
 

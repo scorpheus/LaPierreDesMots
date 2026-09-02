@@ -85,12 +85,13 @@ const CHEMIN_JSON = join(DOSSIER_QA, 'tests-trompeurs.json');
  * fin de son fichier, et tout ce qui suivait échappait à l'analyse. Le plafond montait donc
  * moins vite que la dette, ce qui est le pire des deux mondes : un cliquet qui rassure.
  *
- * Aucun test existant ne s'est dégradé. Ce que 98 décrit reste du travail à faire :
- * 64 `CHIFFRE-JAMAIS-ASSERTE`, 22 `FRACTION-NON-ASSERTEE`, 9 `MESSAGE-QUI-SURPROMET`,
- * 3 `ASSERTION-TAUTOLOGIQUE`. Justification écrite : `Docs/questions-en-attente.md`, entrée
+ * Aucun test existant ne s'est dégradé. Mesuré le 2026-09-02, ce travail restant est descendu à
+ * 93 avertissements — 61 `CHIFFRE-JAMAIS-ASSERTE`,
+ * 23 `FRACTION-NON-ASSERTEE`, 7 `MESSAGE-QUI-SURPROMET` et
+ * 2 `ASSERTION-TAUTOLOGIQUE`. Justification historique : `Docs/questions-en-attente.md`, entrée
  * « Le plafond des tests trompeurs ».
  */
-export const PLAFOND_AVERTISSEMENTS = 98;
+export const PLAFOND_AVERTISSEMENTS = 93;
 
 // ────────────────────────────────────────────────────────── lecture et masquage du code
 
