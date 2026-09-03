@@ -149,8 +149,14 @@ test.describe('le décor v2 arrive entier jusqu’à l’enfant', () => {
     const pieds = await basDe('jupe-maitresse');
     const solBas = await basDe('herbe');
 
-    expect(crane, 'le sommet du crâne passe au-dessus de l’horizon').toBeGreaterThan(horizon);
-    expect(pieds, 'les pieds dépassent du sol').toBeLessThanOrEqual(solBas);
+    // En coordonnées écran, « au-dessus » signifie une ordonnée PLUS PETITE. L'ancienne
+    // assertion exigeait l'inverse et ne pouvait donc passer qu'avec la maîtresse enfouie sous
+    // l'horizon du blockout. Le raster courant la place entièrement dans la cour, devant l'école.
+    expect(crane, 'le sommet du crâne reste au-dessus de l’horizon').toBeLessThan(horizon);
+    expect(pieds, 'les pieds dépassent du bas du décor').toBeLessThanOrEqual(solBas);
+    expect(pieds, 'les pieds doivent rester au-dessus de l’horizon de la cour').toBeLessThanOrEqual(
+      horizon,
+    );
     expect(
       pieds,
       'la maîtresse ne tient pas debout sur son propre sol'

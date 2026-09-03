@@ -442,6 +442,26 @@ describe('MoteurColorie — le décor réel', () => {
     await attendreDecorReel();
   });
 
+  it('désature réellement le fond illustré avant la première couleur', async () => {
+    render(<Harnais />);
+    await attendreLaScene();
+    await attendreDecorReel();
+
+    await waitFor(() => {
+      const fond = document.querySelector('[data-fond-illustre]') as SVGGraphicsElement | null;
+      expect(fond, 'le test doit traverser un vrai fond raster illustré').not.toBeNull();
+      expect(fond?.getAttribute('class')).toContain('pierre-fond-illustre--gris');
+      expect(fond?.getAttribute('data-etat-couleur')).toBe('gris');
+    });
+
+    // Une prise transparente ne constitue pas une grisaille : le fond visible lui-même doit
+    // être désaturé. Les régions hors de la consigne restent invisibles par-dessus ce fond.
+    const horsConsigne = document.querySelector(
+      '[data-region-source="feuilles-arbre-1"]'
+    ) as SVGGraphicsElement | null;
+    expect(horsConsigne?.style.opacity).toBe('0');
+  });
+
   it('l’erreur fait osciller la région SUR LE DÉCOR RÉEL — D16, contrat § 5.6', async () => {
     const utilisateur = userEvent.setup();
     render(<Harnais />);

@@ -144,6 +144,34 @@ describe('la cour d’école v2 se lit sans qu’un adulte l’explique (R18)', 
     expect(silhouette([cheveux])).not.toBe(silhouette([pull]));
   });
 
+  it('les masques réellement joués restent sur les objets du raster courant', () => {
+    // Enveloppes mesurées sur `contenu/assets/decors/ecole.png`, ramenées dans le viewBox
+    // 922 × 615. Elles sont volontairement plus larges que les silhouettes : ce garde détecte
+    // un retour aux coordonnées du blockout sans prétendre remplacer la recette visuelle.
+    const enveloppes: Readonly<Record<string, readonly [number, number, number, number]>> = {
+      'toit-ecole': [220, 20, 610, 180],
+      'porte-ecole': [375, 150, 475, 290],
+      'fenetre-ecole-1': [270, 160, 340, 240],
+      'fenetre-ecole-2': [500, 160, 585, 245],
+      'feuilles-arbre-1': [0, 0, 390, 150],
+      'feuilles-arbre-2': [750, 0, 922, 150],
+      'pull-maitresse': [340, 185, 440, 270],
+      'jupe-maitresse': [340, 235, 430, 360],
+      tableau: [95, 160, 285, 315],
+      banc: [45, 315, 250, 460],
+    };
+
+    for (const [id, [xmin, ymin, xmax, ymax]] of Object.entries(enveloppes)) {
+      const trace = traces.get(id);
+      expect(trace, `région jouée absente : ${id}`).toBeDefined();
+      const [x0, y0, x1, y1] = boite(sommets(trace!));
+      expect(x0, `${id} déborde à gauche`).toBeGreaterThanOrEqual(xmin);
+      expect(y0, `${id} déborde en haut`).toBeGreaterThanOrEqual(ymin);
+      expect(x1, `${id} déborde à droite`).toBeLessThanOrEqual(xmax);
+      expect(y1, `${id} déborde en bas`).toBeLessThanOrEqual(ymax);
+    }
+  });
+
   it('un objet de classe est dessiné, et c’est un vrai tableau, pas un jeton', () => {
     const tableau = traces.get('tableau');
     expect(tableau, 'aucune région `tableau` dans le décor').toBeDefined();
@@ -156,12 +184,16 @@ describe('la cour d’école v2 se lit sans qu’un adulte l’explique (R18)', 
   it('le tableau est À CÔTÉ de la maîtresse, pas à l’autre bout de la cour', () => {
     // Un objet de classe posé loin d'elle ne la désigne pas. On mesure l'écart horizontal
     // entre les deux, rapporté à la largeur du décor.
-    const [, , xTableau] = boite(sommets(traces.get('tableau')!));
-    const [xMaitresse] = boite(sommets(traces.get('jupe-maitresse')!));
+    const [x0Tableau, , x1Tableau] = boite(sommets(traces.get('tableau')!));
+    const [x0Maitresse, , x1Maitresse] = boite(sommets(traces.get('jupe-maitresse')!));
     const [xPremierEleve] = boite(sommets(traces.get('cheveux-garcon-1')!));
-    // Le tableau est entre elle et le premier élève : il lui appartient visuellement.
-    expect(xTableau).toBeLessThan(xPremierEleve);
-    expect(xTableau).toBeGreaterThan(xMaitresse);
+    // Sur l'illustration raster validée, le tableau est immédiatement À GAUCHE de la maîtresse,
+    // et le premier élève à sa droite. L'ancien test imposait l'ordre inverse, hérité du
+    // blockout, et aurait forcé le masque à quitter l'objet qu'il est censé suivre.
+    expect(x1Tableau).toBeLessThan(x0Maitresse);
+    expect(x1Maitresse).toBeLessThan(xPremierEleve);
+    expect(x0Maitresse - x1Tableau).toBeLessThan(922 * 0.15);
+    expect(x0Tableau).toBeGreaterThanOrEqual(0);
   });
 
   it('chaque arbre a un tronc ET un houppier, le houppier au-dessus et plus large', () => {

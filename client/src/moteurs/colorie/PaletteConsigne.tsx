@@ -249,6 +249,7 @@ export function PaletteConsigne(proprietes: ProprietesPaletteConsigne): ReactEle
         style={{
           display: 'flex',
           flexWrap: 'wrap',
+          justifyContent: 'center',
           gap: '0.75rem',
           marginBlockStart: '1rem'
         }}

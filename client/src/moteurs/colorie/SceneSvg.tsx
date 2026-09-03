@@ -87,6 +87,7 @@ const STYLES_SCENE = `
 .pierre-region:focus-visible { outline: 3px solid var(--soleil, #FFC93C); outline-offset: 2px; }
 .pierre-region--refus { animation: pierre-oscille 180ms ease-in-out 1; }
 .pierre-region--demonstration { animation: pierre-halo 900ms ease-in-out infinite; }
+.pierre-fond-illustre--gris { filter: grayscale(1) saturate(0); }
 .pierre-prise-colorie { cursor: pointer; fill: transparent; pointer-events: all; }
 .pierre-prise-colorie:focus { outline: none; }
 .pierre-prise-colorie:focus-visible { stroke: var(--soleil, #FFC93C); stroke-width: 4; }
@@ -365,6 +366,19 @@ export function SceneSvg(proprietes: ProprietesSceneSvg): ReactElement {
   useEffect(() => {
     const svg = refSvg.current;
     if (svg === null || svgMarkup === null) return undefined;
+
+    // Un décor illustré est une image couleur : laisser les zones non actives transparentes
+    // ne suffit donc absolument pas à montrer le « monde gris ». La grisaille appartient au
+    // calque de base ; les chemins coloriables, posés au-dessus en mode `color`, révèlent ensuite
+    // la teinte choisie sans effacer les ombres ni la texture du raster.
+    for (const fondIllustre of svg.querySelectorAll('[data-fond-illustre]')) {
+      const classes = fondIllustre.getAttribute('class') ?? '';
+      fondIllustre.setAttribute(
+        'class',
+        `${classes} pierre-fond-illustre--gris`.trim()
+      );
+      fondIllustre.setAttribute('data-etat-couleur', 'gris');
+    }
 
     // Même vocabulaire que le repli : chaque calque déclaré porte son rôle, et seul le rôle
     // `coloriable` reçoit le doigt.
