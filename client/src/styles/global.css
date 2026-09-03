@@ -781,6 +781,59 @@ body {
   outline-offset: 3px;
 }
 
+/* Habillage luciole : le mot est l'information, pas une description de l'image. Une taille
+   volontairement forte et une encre sombre sur parchemin clair facilitent le décodage CE1. */
+.cible-luciole {
+  position: relative;
+  isolation: isolate;
+  min-inline-size: 8rem;
+  min-block-size: 5.5rem;
+  padding: 0.85rem 1.4rem;
+  color: var(--trait);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 50% 42%, #fffdf0 0 28%, #ffe995 58%, #ffc83d 100%);
+  box-shadow:
+    0 0 0 4px var(--trait),
+    0 0 1.5rem rgb(255 204 61 / 68%),
+    0 0.35rem 0 var(--trait);
+  font-size: clamp(1.5rem, 3vw, 2.4rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: 0.02em;
+}
+
+.cible-luciole::before,
+.cible-luciole::after {
+  position: absolute;
+  z-index: -1;
+  inset-block-start: 50%;
+  inline-size: 2.4rem;
+  block-size: 3.3rem;
+  border: 3px solid var(--trait);
+  border-radius: 70% 30% 70% 30%;
+  background: rgb(218 239 255 / 82%);
+  content: '';
+}
+
+.cible-luciole::before {
+  inset-inline-start: -1.55rem;
+  transform: translateY(-58%) rotate(-28deg);
+}
+
+.cible-luciole::after {
+  inset-inline-end: -1.55rem;
+  transform: translateY(-58%) scaleX(-1) rotate(-28deg);
+}
+
+.cible-luciole:hover,
+.cible-luciole:focus-visible {
+  box-shadow:
+    0 0 0 5px var(--trait),
+    0 0 2rem rgb(255 204 61 / 90%),
+    0 0.35rem 0 var(--trait);
+}
+
 .cible[disabled] {
   opacity: 0.5;
   cursor: default;
@@ -819,11 +872,27 @@ body {
    espace neutre, et ses assets (SVG ou raster) ne peuvent pas déborder sur le titre. */
 [data-fiche-visuel-cadre='rectangle'] > :is(svg, img) {
   display: block;
-  inline-size: auto;
-  block-size: auto;
+  inline-size: min(9rem, 100%);
+  block-size: min(9rem, 100%);
   max-inline-size: 100%;
   max-block-size: 100%;
   object-fit: contain;
+}
+
+.fiche-objet-fenetre { align-content: start; }
+.fiche-objet-visuel { border: 0; border-radius: 0; background: transparent; }
+.collection-progression {
+  margin: -0.35rem 0 0.9rem;
+  color: var(--trait);
+  font-size: 1.05rem;
+  text-align: center;
+}
+.case-collection-nom {
+  max-inline-size: 100%;
+  font-size: 1.05rem;
+  line-height: 1.2;
+  text-align: center;
+  overflow-wrap: anywhere;
 }
 
 /* Le bandeau de titre d'un panneau : un aplat franc, cerné, qui ne se lit jamais comme du
@@ -1877,13 +1946,15 @@ body {
   align-items: center;
   justify-content: center;
   gap: 0.35rem;
-  inline-size: 8rem;
-  min-block-size: 8.5rem;
+  inline-size: 10rem;
+  min-block-size: 11rem;
   padding: 0.5rem;
   border-radius: var(--rayon-carte);
   border: var(--epaisseur-trait) dashed var(--trait);
   background-color: transparent;
 }
+
+.case-butin .dessin-butin { inline-size: 88px; block-size: 88px; }
 
 .case-butin[data-rapporte="oui"] {
   border-style: solid;

@@ -24,7 +24,7 @@
       "consignes": [
         {
           "id": "c1",
-          "texte": "Grave la lettre pour écrire ce mot.",
+          "texte": "Trace la lettre pour écrire ce mot.",
           "forme": "imperative",
           "audio": null,
           "mot": "chat",
@@ -43,7 +43,7 @@
         },
         {
           "id": "c2",
-          "texte": "Grave la lettre pour écrire ce mot.",
+          "texte": "Trace la lettre pour écrire ce mot.",
           "forme": "imperative",
           "audio": null,
           "mot": "grand",
@@ -62,7 +62,7 @@
         },
         {
           "id": "c3",
-          "texte": "Grave la lettre pour écrire ce mot.",
+          "texte": "Trace la lettre pour écrire ce mot.",
           "forme": "imperative",
           "audio": null,
           "mot": "tapis",
@@ -81,7 +81,7 @@
         },
         {
           "id": "c4",
-          "texte": "Grave la lettre pour écrire ce mot.",
+          "texte": "Trace la lettre pour écrire ce mot.",
           "forme": "imperative",
           "audio": null,
           "mot": "noix",
@@ -100,7 +100,7 @@
         },
         {
           "id": "c5",
-          "texte": "Grave la lettre pour écrire ce mot.",
+          "texte": "Trace la lettre pour écrire ce mot.",
           "forme": "imperative",
           "audio": null,
           "mot": "toit",
@@ -119,7 +119,7 @@
         },
         {
           "id": "c6",
-          "texte": "Grave la lettre pour écrire ce mot.",
+          "texte": "Trace la lettre pour écrire ce mot.",
           "forme": "imperative",
           "audio": null,
           "mot": "pied",

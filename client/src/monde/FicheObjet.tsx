@@ -61,6 +61,8 @@ export function FicheObjet({
   surFermer
 }: ProprietesFicheObjet): ReactElement {
   const refFermer = useRef<HTMLButtonElement | null>(null);
+  const surFermerRef = useRef(surFermer);
+  surFermerRef.current = surFermer;
 
   // Le focus va sur la sortie : un panneau qui s'ouvre sans donner sa porte est un panneau dont
   // on ne sait pas sortir au clavier, et la QA d'accessibilité le compte comme un piège.
@@ -70,13 +72,13 @@ export function FicheObjet({
 
   useEffect(() => {
     const surTouche = (evenement: KeyboardEvent): void => {
-      if (evenement.key === 'Escape') surFermer();
+      if (evenement.key === 'Escape') surFermerRef.current();
     };
     globalThis.addEventListener?.('keydown', surTouche);
     return () => {
       globalThis.removeEventListener?.('keydown', surTouche);
     };
-  }, [surFermer]);
+  }, []);
 
   /** Une silhouette, pas un objet terni : on cache la couleur sans cacher la forme. */
   const filtreSilhouette = couleurRevelee || obtenu ? 'none' : 'saturate(0) brightness(0.55)';
@@ -87,6 +89,7 @@ export function FicheObjet({
       data-fiche-objet="oui"
       data-fiche-modal="oui"
       data-obtenue={obtenu ? 'oui' : 'non'}
+      className="fiche-objet"
       role="dialog"
       aria-modal="true"
       aria-label={libelleAria}
@@ -108,6 +111,7 @@ export function FicheObjet({
         onClick={(evenement) => {
           evenement.stopPropagation();
         }}
+        className="fiche-objet-fenetre"
         style={{
           background: 'var(--parchemin, #FFF6E3)',
           border: '4px solid var(--trait, #1B2440)',
@@ -138,6 +142,7 @@ export function FicheObjet({
           data-fiche-visuel="oui"
           data-fiche-visuel-cadre="rectangle"
           data-couleur-revelee={couleurRevelee || obtenu ? 'oui' : 'non'}
+          className="fiche-objet-visuel"
           style={{
             inlineSize: 'min(14rem, 58vw)',
             blockSize: 'min(14rem, 28vh)',

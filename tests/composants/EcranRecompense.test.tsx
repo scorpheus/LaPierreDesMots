@@ -26,11 +26,12 @@ import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { NombreEtoiles, ResumeTentative } from '@pierre/partage';
+import type { EtatMonde, NombreEtoiles, ResumeTentative } from '@pierre/partage';
 import { enonceUnePerte } from '@partage/ton/index.js';
 
 const enregistrements: unknown[] = [];
 let enregistrementEchoue = false;
+const { effacementsParticules } = vi.hoisted(() => ({ effacementsParticules: vi.fn() }));
 
 vi.mock('@client/api/client', async (importOriginal) => {
   const original = await importOriginal<Record<string, unknown>>();
@@ -46,7 +47,16 @@ vi.mock('@client/api/client', async (importOriginal) => {
   };
 });
 
-const { EcranRecompense } = await import('@client/ecrans/EcranRecompense');
+vi.mock('@client/gamefeel/particules', async (importOriginal) => ({
+  ...(await importOriginal<Record<string, unknown>>()),
+  effacerParticules: effacementsParticules
+}));
+
+const {
+  EcranRecompense,
+  regionsNouvellementOuvertes,
+  texteProgressionRegionale
+} = await import('@client/ecrans/EcranRecompense');
 const { CascadeRecompense } = await import('@client/composants/CascadeRecompense');
 const { creerMagasin } = await import('@client/etat/magasin');
 const { FournisseurJeu } = await import('@client/etat/services');
@@ -120,6 +130,7 @@ function etoilesAcquises(): number {
 beforeEach(() => {
   enregistrements.length = 0;
   enregistrementEchoue = false;
+  effacementsParticules.mockClear();
 });
 
 afterEach(() => {
@@ -180,6 +191,19 @@ describe('les étoiles SUIVENT la valeur, elles ne sont pas décoratives (M24)',
 });
 
 describe('la fin de partie est une réussite, quoi qu’il arrive (R14)', () => {
+  it('efface la couche visuelle à la sortie de la récompense', () => {
+    const jeu = services();
+    const vue = render(
+      <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+        <FournisseurJeu valeur={{ services: jeu, magasin: creerMagasin(jeu) }}>
+          <EcranRecompense />
+        </FournisseurJeu>
+      </QueryClientProvider>
+    );
+    vue.unmount();
+    expect(effacementsParticules).toHaveBeenCalledTimes(1);
+  });
+
   it('célèbre la réussite avec Gobi dans une scène dédiée, sans animer le texte', () => {
     monter({ etoiles: 2 });
     const scene = document.querySelector('[data-scene-recompense="gobi-joie"]');
@@ -229,7 +253,7 @@ describe('la fin de partie est une réussite, quoi qu’il arrive (R14)', () => 
 });
 
 describe('les annonces correspondent à ce qui est réellement remis', () => {
-  it('ne promet ni cadeau invisible ni nouvelle zone sans déblocage réel', () => {
+  it('ne promet aucun cadeau quand le serveur n’en rend aucun de concret', () => {
     render(
       <CascadeRecompense
         gain={{
@@ -251,8 +275,44 @@ describe('les annonces correspondent à ce qui est réellement remis', () => {
       />,
     );
     const annonce = document.querySelector('.cascade-recompense')?.textContent ?? '';
-    expect(annonce).toContain('nouvelle forme pour Gobi');
-    expect(annonce).not.toMatch(/cadeau spécial|zone du monde/iu);
+    expect(annonce).toBe('');
+  });
+
+  it('montre la forme réellement remise, avec son visuel', () => {
+    render(
+      <CascadeRecompense
+        gain={{
+          etat: { etoilesTotal: 5, etoilesDepuisIntermediaire: 0, intermediairesTotal: 1, intermediairesDepuisRare: 0, raresTotal: 0, dernierPalierLe: null },
+          paliersFranchis: ['intermediaire'],
+          recompenses: [{ palier: 'intermediaire', nature: 'forme-gobi', reference: 'ou', asset: 'assets/gobi/cristal-ou.svg', region: null }],
+          jauges: [],
+        }}
+      />,
+    );
+    expect(document.querySelector('[data-cadeau-concret="ou"]')).not.toBeNull();
+    expect(document.querySelector('.cascade-recompense')?.textContent).toContain('forme « ou »');
+  });
+});
+
+describe('une région n’est annoncée qu’au vrai déblocage', () => {
+  const monde = (galeriesOuvertes: boolean): EtatMonde => ({
+    carte: {
+      ouvertesEnParallele: 2,
+      regions: [
+        { region: 'clairiere', ordre: 1, ouverte: true, pourcentageColorie: 1, eclatObtenuLe: '2026-09-01T00:00:00.000Z', compagnon: null, noeuds: [] },
+        { region: 'galeries', ordre: 2, ouverte: galeriesOuvertes, pourcentageColorie: 0, eclatObtenuLe: null, compagnon: null, noeuds: [] },
+      ]
+    },
+    gobi: { stade: 'oeuf', formes: [], formeActive: null }, compagnons: [], campement: []
+  } as EtatMonde);
+
+  it('nomme seulement la région passée de verrouillée à ouverte', () => {
+    expect(regionsNouvellementOuvertes(monde(false), monde(true))).toEqual(['galeries']);
+  });
+
+  it('n’annonce ni une région déjà ouverte, ni une région simplement terminée', () => {
+    expect(regionsNouvellementOuvertes(monde(true), monde(true))).toEqual([]);
+    expect(regionsNouvellementOuvertes(null, monde(true))).toEqual([]);
   });
 });
 
@@ -300,6 +360,15 @@ describe('la récompense suit le plan pédagogique actif', () => {
     fireEvent.click(finir!);
     expect(retoursCampement).toBe(1);
     expect(magasin.getState().sortie).toBeNull();
+  });
+
+  it('dit clairement qu’une sortie de 6/13 ne termine pas la région', () => {
+    expect(texteProgressionRegionale(true, 6, 13)).toBe(
+      'Ta sortie est terminée. Cette région continue : '
+    );
+    expect(texteProgressionRegionale(true, 13, 13)).toBe(
+      'Ta sortie est terminée, et cette région aussi. '
+    );
   });
 });
 

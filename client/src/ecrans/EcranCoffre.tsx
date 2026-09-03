@@ -138,7 +138,8 @@ function Case({
       style={{
         flexDirection: 'column',
         gap: '0.35rem',
-        inlineSize: '9rem'
+        inlineSize: '10rem',
+        minBlockSize: '11rem'
         // `opacity` / `filter` ne sont plus ici : voir l'encadré sur le dessin, ci-dessous.
       }}
     >
@@ -149,8 +150,8 @@ function Case({
         <DessinButin code={cle} />
       ) : asset === null ? (
         <svg
-          width="48"
-          height="48"
+          width="88"
+          height="88"
           viewBox="0 0 48 48"
           aria-hidden="true"
           focusable="false"
@@ -199,8 +200,8 @@ function Case({
         <img
           src={urlAsset(asset)}
           alt=""
-          width={48}
-          height={48}
+          width={88}
+          height={88}
           aria-hidden="true"
           style={obtenu ? undefined : { opacity: 0.55, filter: 'saturate(0)' }}
         />
@@ -282,10 +283,15 @@ export function EcranCoffre({
         <Etagere etagere={etagere} titre="Les formes de Gobi" />
       </section>
 
-      <section className="panneau" aria-label="Les Éclats de Pierre" data-collection-titre="eclats">
+      <section className="panneau" aria-label="Les Éclats de Pierre" data-collection-titre="eclats" data-progression-restante={String(regions.length - nbEclats)}>
         <h2 className="panneau-titre" style={{ fontSize: '1.5rem' }}>
           Les Éclats de Pierre — {nbEclats} sur {regions.length}
         </h2>
+        <p className="collection-progression" data-progression-reste="oui">
+          {nbEclats === regions.length
+            ? 'Tous les Éclats sont découverts.'
+            : `Il reste ${String(regions.length - nbEclats)} Éclat${regions.length - nbEclats > 1 ? 's' : ''} à découvrir.`}
+        </p>
         <ul style={STYLE_LISTE}>
           {regions.map((region) => (
             <Case
@@ -310,7 +316,7 @@ export function EcranCoffre({
         </ul>
       </section>
 
-      <section className="panneau" aria-label="Les objets du campement" data-collection-titre="objets">
+      <section className="panneau" aria-label="Les objets du campement" data-collection-titre="objets" data-progression-restante={String(objets.filter((objet) => objet.placeLe === null).length)}>
         {/* ── R40 — LE PICTOGRAMME SUIT L'OBJET, LA MIGRATION EST FINIE ──────────────────────
             Même principe que l'étagère (R27, `Etagere.tsx:150`) : le butin a quitté le
             campement pour vivre ici, et son pictogramme (`Butin.tsx:200`, 🎒) le suit — REPRIS
@@ -324,6 +330,11 @@ export function EcranCoffre({
           Ce que tu as rapporté —{' '}
           {objets.filter((objet) => objet.placeLe !== null).length} sur {objets.length}
         </h2>
+        <p className="collection-progression" data-progression-reste="oui">
+          {objets.filter((objet) => objet.placeLe === null).length === 0
+            ? 'Tout le butin est rapporté.'
+            : `Il reste ${String(objets.filter((objet) => objet.placeLe === null).length)} objet${objets.filter((objet) => objet.placeLe === null).length > 1 ? 's' : ''} à rapporter.`}
+        </p>
         <ul style={STYLE_LISTE}>
           {objets.map((objet) => (
             <Case
@@ -372,9 +383,9 @@ export function EcranCoffre({
           }
           visuel={
             ouverte.categorie === 'objet' ? (
-              <DessinButin code={ouverte.cle} taille={96} />
+              <DessinButin code={ouverte.cle} taille={144} />
             ) : (
-              <svg width="96" height="96" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+              <svg width="144" height="144" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
                 <path
                   d={SILHOUETTE_ECLAT}
                   fill={ouverte.obtenu ? 'var(--soleil)' : 'var(--grisaille)'}

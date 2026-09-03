@@ -37,16 +37,17 @@ La recette Chromium prouve à 1920 × 1080 que le pull seul reçoit le bleu et q
 porte aucun filtre. Une migration vers un masque RGB pixel-précis reste possible pour des dessins
 plus complexes, mais elle n'est plus un prérequis pour rendre cet exercice jouable.
 
-## Coffre — état mesuré et suite
+## Coffre — état mesuré après reprise
 
-Le coffre fonctionne techniquement, mais reste un album de chantier : vignettes de 48 px dans de
-grandes cases, butins SVG inline, silhouettes abstraites et fiche dont le contenu paraît petit et
-décalé. Le prochain lot doit agrandir les objets à 96–128 px, stabiliser la fiche et afficher une
-progression lisible telle que « 6 trouvailles sur 13 ».
+Les cases font maintenant 80–88 px, leurs noms restent sous le dessin, et la fiche emploie un
+visuel central de 144 px sans cercle parasite. Les trois collections affichent leur total réel et
+ce qu'il reste à découvrir. Le focus de la modale est stable et Échap conserve toujours la bonne
+action de fermeture.
 
-Une seule nouvelle image raster est prioritaire : un coffre ouvert servant d'ancrage décoratif.
-Les six objets ne seront générés qu'après validation de ce principe, afin de ne pas produire des
-images redondantes avec les dessins existants.
+La dette restante est artistique : les formes, Éclats et objets sont encore des dessins techniques.
+Leur remplacement par des assets raster validés est suivi dans
+`Docs/suivi-retours-parent-2026-09-03.md` ; il ne bloque plus l'utilisation du coffre, mais bloque
+encore son verdict esthétique final.
 
 ## Gardes de régression
 

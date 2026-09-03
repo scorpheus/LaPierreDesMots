@@ -26,7 +26,7 @@
       "consignes": [
         {
           "id": "c1",
-          "texte": "Marche sur les mots où tu entends le son de main.",
+          "texte": "Marche sur les mots où tu entends le même son que dans « main ».",
           "forme": "imperative",
           "audio": null,
           "depart": "case-lapin",
@@ -44,7 +44,7 @@
         },
         {
           "id": "c2",
-          "texte": "Marche sur les mots où tu entends le son de pont.",
+          "texte": "Marche sur les mots où tu entends le même son que dans « pont ».",
           "forme": "imperative",
           "audio": null,
           "depart": "case-ballon",
@@ -62,7 +62,7 @@
         },
         {
           "id": "c3",
-          "texte": "Marche aussi sur les mots où tu entends le son de main.",
+          "texte": "Marche sur les autres mots où tu entends le même son que dans « main ».",
           "forme": "imperative",
           "audio": null,
           "depart": "case-pain",

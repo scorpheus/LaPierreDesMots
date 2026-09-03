@@ -47,6 +47,13 @@ import {
 } from '../configuration/preparation.js';
 import { HORS_ECRAN, exigerCibles64, exigerUneSortieQuiRepond } from './exigences-ecrans.js';
 
+const { effacementsParticules } = vi.hoisted(() => ({ effacementsParticules: vi.fn() }));
+
+vi.mock('@client/gamefeel/particules', async (importOriginal) => ({
+  ...(await importOriginal<Record<string, unknown>>()),
+  effacerParticules: effacementsParticules
+}));
+
 const PAQUET = {
   noeud: lireJson<Noeud>(CHEMIN_NOEUD_CLAIRIERE),
   exercice: lireJson<Exercice>(CHEMIN_EXERCICE_ECOLE),
@@ -109,8 +116,24 @@ function monter(): { readonly magasin: MagasinJeu; readonly racine: ParentNode }
   return { magasin, racine: document.body };
 }
 
+function monterSansPaquet(): MagasinJeu {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const jeu = services();
+  const magasin = creerMagasin(jeu);
+  magasin.setState({ ecran: 'noeud' } as never);
+  render(
+    <QueryClientProvider client={client}>
+      <FournisseurJeu valeur={{ services: jeu, magasin }}>
+        <EcranNoeud />
+      </FournisseurJeu>
+    </QueryClientProvider>
+  );
+  return magasin;
+}
+
 beforeEach(() => {
   installerFetchLocal();
+  effacementsParticules.mockClear();
 });
 
 afterEach(() => {
@@ -119,6 +142,12 @@ afterEach(() => {
 });
 
 describe('l’écran du nœud a une sortie, et elle mène ailleurs (M2)', () => {
+  it('efface l’onde en quittant le nœud pour la carte', () => {
+    monter();
+    fireEvent.click(document.querySelector('[data-vers="carte"]')!);
+    expect(effacementsParticules).toHaveBeenCalledTimes(1);
+  });
+
   it('donne une stratégie visible différente de la consigne, sans recycler son clip audio', () => {
     monter();
     const consigne = document.querySelector('[data-consigne="c1"]')?.textContent?.trim();
@@ -137,6 +166,14 @@ describe('l’écran du nœud a une sortie, et elle mène ailleurs (M2)', () => 
     monter();
     expect(document.querySelector('[data-ecran="noeud"]')).not.toBeNull();
     expect(document.querySelector('[data-ecran="chargement"]')).toBeNull();
+  });
+
+  it('garde /noeud lisible et quittable si son paquet a disparu après un rafraîchissement', () => {
+    const magasin = monterSansPaquet();
+    expect(document.querySelector('[data-ecran="noeud"]')?.getAttribute('data-noeud')).toBe('indisponible');
+    expect(document.body.textContent).toContain('Choisis un chemin sur la carte pour jouer.');
+    fireEvent.click(document.querySelector('[data-vers="carte"]')!);
+    expect(magasin.getState().ecran).toBe('carte');
   });
 
   /**

@@ -159,6 +159,21 @@ describe('rien ne sort jamais du coffre, et le vide se montre (R14, D25)', () =>
     expect(titres).toEqual(['formes', 'eclats', 'objets']);
   });
 
+  it('publie le reste réel à découvrir pour chaque collection', async () => {
+    await monterEtAttendre();
+    const restes = [...document.querySelectorAll('[data-progression-reste="oui"]')];
+    expect(restes).toHaveLength(3);
+    expect(document.querySelector('[data-etagere="oui"]')?.getAttribute('data-progression-restante')).toBe(
+      String(document.querySelector('[data-etagere="oui"]')?.getAttribute('data-cases-vides'))
+    );
+    expect(document.querySelector('[data-collection-titre="eclats"]')?.getAttribute('data-progression-restante')).toBe(
+      String(MONDE.carte.regions.length - nbEclatsAttendus())
+    );
+    expect(document.querySelector('[data-collection-titre="objets"]')?.getAttribute('data-progression-restante')).toBe(
+      String(MONDE.campement.filter((objet) => objet.placeLe === null).length)
+    );
+  });
+
   /**
    * ══════════════════════════════════════════════════════════════════════════════════════════
    * L'EXIGENCE QUI A SUIVI SES OBJETS — R27, puis l'arbitrage du 2026-08-07

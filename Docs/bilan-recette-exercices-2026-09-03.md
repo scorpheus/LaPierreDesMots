@@ -44,10 +44,12 @@ Capture : `bac-a-sable/captures/exercice-place-final-1280x720.png`.
 
 ## Ce qui n'est pas encore propre visuellement
 
-La mécanique est largement présente, mais la bibliothèque d'illustrations ne l'est pas. Les
-chronologies, paires et plusieurs scènes déclarent encore des images `null`; 54 des 55 scènes SVG
-auditées restent des blockouts géométriques. Les produire une par une dans le style validé est le
-chemin critique restant. La production détaillée est chiffrée dans
+La mécanique est largement présente et la vague raster a changé l'inventaire : sur 69 SVG
+d'habillage, 54 embarquent désormais un fond raster illustré. Les 15 restants comprennent surtout
+des écrans archivés, la carte et l'ouverture ; le coloriage libre `galeries/paroi-libre.svg` reste
+le blockout actif le plus visible. Les chronologies, paires et certains éléments interactifs
+déclarent encore des images `null` ou des pictogrammes techniques. Leur remplacement dans le style
+validé est le chemin critique restant. La production détaillée est chiffrée dans
 `Docs/plan-production-assets-exercices-2026-09-02.md`.
 
 La recette tablette esthétique de chaque ligne `BLOQUÉ-ASSET` devra être rejouée après promotion

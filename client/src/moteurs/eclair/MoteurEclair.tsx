@@ -279,7 +279,7 @@ export function MoteurEclair(
                 type="button"
                 data-option={emplacement.cle}
                 data-option-couleur={option.couleur ?? undefined}
-                className={classes.join(' ')}
+                className={`${classes.join(' ')}${option.id.startsWith('luciole-') ? ' cible-luciole' : ''}`}
                 style={{ ...styleLecture, pointerEvents: 'auto', whiteSpace: 'nowrap' } as CSSProperties}
                 onClick={(evenement) => {
                   jouer({ type: 'repondre', option: emplacement.cle }, evenement);

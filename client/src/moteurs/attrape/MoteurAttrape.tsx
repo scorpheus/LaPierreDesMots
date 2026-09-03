@@ -275,7 +275,10 @@ export function MoteurAttrape(
           );
           const attrapee = etat.acquis[cible.id] !== undefined;
           const refusee = etiquetteRefusee === cible.id;
+          // Les lucioles portent directement le mot utile : la classe dédiée renforce sa
+          // hiérarchie de lecture sans imposer une règle au moteur pour les autres habillages.
           const classes = ['cible'];
+          if (cible.id.startsWith('luciole-')) classes.push('cible-luciole');
           if (!animationsDesactivees && refusee) classes.push('oscillation');
 
           const h = hacher(cible.id);

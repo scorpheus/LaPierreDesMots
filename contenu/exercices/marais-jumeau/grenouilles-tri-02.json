@@ -27,7 +27,7 @@
       "consignes": [
         {
           "id": "c1",
-          "texte": "Range les mots où tu entends le son de trou.",
+          "texte": "Range les mots où tu entends le même son que dans « trou ».",
           "forme": "imperative",
           "audio": null,
           "aRanger": [
@@ -43,7 +43,7 @@
         },
         {
           "id": "c2",
-          "texte": "Range aussi les mots où tu entends le son de trou.",
+          "texte": "Range les autres mots où tu entends le même son que dans « trou ».",
           "forme": "imperative",
           "audio": null,
           "aRanger": [
@@ -59,7 +59,7 @@
         },
         {
           "id": "c3",
-          "texte": "Range les mots où tu entends le son de noir.",
+          "texte": "Range les mots où tu entends le même son que dans « noir ».",
           "forme": "imperative",
           "audio": null,
           "aRanger": [
@@ -75,7 +75,7 @@
         },
         {
           "id": "c4",
-          "texte": "Range aussi les mots où tu entends le son de noir.",
+          "texte": "Range les autres mots où tu entends le même son que dans « noir ».",
           "forme": "imperative",
           "audio": null,
           "aRanger": [

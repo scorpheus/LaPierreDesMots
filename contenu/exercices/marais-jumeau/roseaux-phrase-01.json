@@ -25,7 +25,7 @@
       "consignes": [
         {
           "id": "c1",
-          "texte": "Touche les mots dans l’ordre.",
+          "texte": "Touche les mots dans l’ordre pour construire la phrase.",
           "forme": "imperative",
           "audio": null,
           "phrase": "Le grand enfant danse.",
@@ -44,7 +44,7 @@
         },
         {
           "id": "c2",
-          "texte": "Touche les mots dans l’ordre.",
+          "texte": "Touche les mots dans l’ordre pour construire la phrase.",
           "forme": "imperative",
           "audio": null,
           "phrase": "Maman range les gants.",

@@ -72,8 +72,8 @@ function Vignette({
           alignItems: 'center',
           justifyContent: 'center',
           gap: '0.35rem',
-          inlineSize: '7rem',
-          minBlockSize: '7.5rem',
+          inlineSize: '9.5rem',
+          minBlockSize: '10rem',
           padding: '0.5rem',
           color: 'inherit',
           font: 'inherit',
@@ -91,14 +91,14 @@ function Vignette({
           <img
             src={urlAsset(String(une.cristal))}
             alt=""
-            width={48}
-            height={48}
+            width={80}
+            height={80}
             aria-hidden="true"
           />
         ) : (
           <svg
-            width="48"
-            height="48"
+            width="80"
+            height="80"
             viewBox="0 0 48 48"
             aria-hidden="true"
             focusable="false"
@@ -141,6 +141,7 @@ export function Etagere({ etagere, titre = 'L’étagère de Gobi' }: Proprietes
       data-cases-total={String(etagere.nbTotal)}
       data-cases-obtenues={String(etagere.nbObtenues)}
       data-cases-vides={String(vides)}
+      data-progression-restante={String(vides)}
       aria-label={titre}
     >
       <h2 className="titre" style={{ fontSize: '1.5rem', margin: '0 0 0.75rem' }}>
@@ -149,6 +150,11 @@ export function Etagere({ etagere, titre = 'L’étagère de Gobi' }: Proprietes
         </span>
         {titre} — {etagere.nbObtenues} sur {etagere.nbTotal}
       </h2>
+      <p className="collection-progression" data-progression-reste="oui">
+        {etagere.nbObtenues === etagere.nbTotal
+          ? 'Tout est découvert.'
+          : `Il reste ${String(vides)} forme${vides > 1 ? 's' : ''} à découvrir.`}
+      </p>
       <ul
         style={{
           listStyle: 'none',

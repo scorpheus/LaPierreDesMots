@@ -58,8 +58,8 @@ export function FicheCase({ une, commentLObtenir, surFermer }: ProprietesFicheCa
         <img
           src={urlAsset(String(une.cristal))}
           alt=""
-          width={96}
-          height={96}
+          width={144}
+          height={144}
           aria-hidden="true"
           style={{ opacity: 1 }}
         />

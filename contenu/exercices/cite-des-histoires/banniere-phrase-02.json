@@ -29,7 +29,7 @@
       "consignes": [
         {
           "id": "c1",
-          "texte": "Touche les mots dans l’ordre.",
+          "texte": "Touche les mots dans l’ordre pour construire la phrase.",
           "forme": "imperative",
           "audio": null,
           "phrase": "Mon ami a un ballon.",
@@ -49,7 +49,7 @@
         },
         {
           "id": "c2",
-          "texte": "Touche les mots dans l’ordre.",
+          "texte": "Touche les mots dans l’ordre pour construire la phrase.",
           "forme": "imperative",
           "audio": null,
           "phrase": "La cour est grande.",

@@ -28,6 +28,7 @@ import { INVITE_LIBRE } from '../moteurs/libre/MoteurLibre.js';
 import { obtenirRendu } from '../moteurs/registre-rendu.js';
 import type { ComposantMoteur } from '../moteurs/types.js';
 import { reveillerAudio } from '../services/audio-tone.js';
+import { effacerParticules } from '../gamefeel/particules.js';
 
 /**
  * Trois actions que TOUT moteur doit accepter pour que la coquille reste générique.
@@ -234,8 +235,12 @@ export function EcranNoeud(): ReactElement {
    * ════════════════════════════════════════════════════════════════════════════════════════
    */
   const retourCarte = useCallback((): void => {
+    effacerParticules();
     magasin.getState().naviguer('carte');
   }, [magasin]);
+
+  // La couche de particules est globale : sa durée ne doit jamais dépasser celle du nœud.
+  useEffect(() => effacerParticules, []);
 
   /**
    * ════════════════════════════════════════════════════════════════════════════════════════
@@ -365,10 +370,15 @@ export function EcranNoeud(): ReactElement {
   );
 
   if (paquet === null || codeMoteur === null) {
-    // Écran de chargement plutôt qu'un écran vide : l'enfant ne doit jamais voir « rien ».
+    // L'URL /noeud peut être rafraîchie sans paquet en mémoire. Elle reste alors un écran de
+    // nœud lisible, avec une unique issue réelle, plutôt qu'un faux chargement sans fin.
     return (
-      <main data-ecran="chargement" style={{ padding: '2rem' }}>
-        <p>On rallume le décor…</p>
+      <main data-ecran="noeud" data-noeud="indisponible" style={{ padding: '2rem' }}>
+        <h1 className="titre">Préparons ton exercice</h1>
+        <p className="zone-lecture">Choisis un chemin sur la carte pour jouer.</p>
+        <button type="button" className="cible" data-vers="carte" onClick={retourCarte}>
+          La carte
+        </button>
       </main>
     );
   }

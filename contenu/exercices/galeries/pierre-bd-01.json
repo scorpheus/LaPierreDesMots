@@ -15,7 +15,7 @@
       "consignes": [
         {
           "id": "c1",
-          "texte": "Grave la lettre pour écrire ce mot.",
+          "texte": "Trace la lettre pour écrire ce mot.",
           "forme": "imperative",
           "audio": null,
           "mot": "bol",
@@ -24,7 +24,7 @@
         },
         {
           "id": "c2",
-          "texte": "Grave la lettre pour écrire ce mot.",
+          "texte": "Trace la lettre pour écrire ce mot.",
           "forme": "imperative",
           "audio": null,
           "mot": "dos",
@@ -33,7 +33,7 @@
         },
         {
           "id": "c3",
-          "texte": "Grave la lettre pour écrire ce mot.",
+          "texte": "Trace la lettre pour écrire ce mot.",
           "forme": "imperative",
           "audio": null,
           "mot": "bus",
@@ -42,7 +42,7 @@
         },
         {
           "id": "c4",
-          "texte": "Grave la lettre pour écrire ce mot.",
+          "texte": "Trace la lettre pour écrire ce mot.",
           "forme": "imperative",
           "audio": null,
           "mot": "dame",
@@ -51,7 +51,7 @@
         },
         {
           "id": "c5",
-          "texte": "Grave la lettre pour écrire ce mot.",
+          "texte": "Trace la lettre pour écrire ce mot.",
           "forme": "imperative",
           "audio": null,
           "mot": "cabane",
@@ -60,7 +60,7 @@
         },
         {
           "id": "c6",
-          "texte": "Grave la lettre pour écrire ce mot.",
+          "texte": "Trace la lettre pour écrire ce mot.",
           "forme": "imperative",
           "audio": null,
           "mot": "radis",

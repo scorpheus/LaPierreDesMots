@@ -27,7 +27,7 @@
       "consignes": [
         {
           "id": "c1",
-          "texte": "Range les mots où tu entends le son de chat.",
+          "texte": "Range les mots où tu entends le même son que dans « chat ».",
           "forme": "imperative",
           "audio": null,
           "aRanger": [
@@ -43,7 +43,7 @@
         },
         {
           "id": "c2",
-          "texte": "Range aussi les mots où tu entends le son de chat.",
+          "texte": "Range les autres mots où tu entends le même son que dans « chat ».",
           "forme": "imperative",
           "audio": null,
           "aRanger": [
@@ -59,7 +59,7 @@
         },
         {
           "id": "c3",
-          "texte": "Range les mots où tu entends le son de coq.",
+          "texte": "Range les mots où tu entends le même son que dans « coq ».",
           "forme": "imperative",
           "audio": null,
           "aRanger": [
@@ -75,7 +75,7 @@
         },
         {
           "id": "c4",
-          "texte": "Range aussi les mots où tu entends le son de coq.",
+          "texte": "Range les autres mots où tu entends le même son que dans « coq ».",
           "forme": "imperative",
           "audio": null,
           "aRanger": [
@@ -91,7 +91,7 @@
         },
         {
           "id": "c5",
-          "texte": "Range les mots où tu entends le son de photo.",
+          "texte": "Range les mots où tu entends le même son que dans « photo ».",
           "forme": "imperative",
           "audio": null,
           "aRanger": [
@@ -107,7 +107,7 @@
         },
         {
           "id": "c6",
-          "texte": "Range aussi les mots où tu entends le son de photo.",
+          "texte": "Range les autres mots où tu entends le même son que dans « photo ».",
           "forme": "imperative",
           "audio": null,
           "aRanger": [

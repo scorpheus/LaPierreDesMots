@@ -15,7 +15,7 @@
       "consignes": [
         {
           "id": "c1",
-          "texte": "Attrape les lucioles où tu lis le mot bleu.",
+          "texte": "Attrape les lucioles avec le mot « bleu ».",
           "forme": "imperative",
           "audio": null,
           "aAttraper": ["luciole-bleu-un", "luciole-bleu-deux"],
@@ -23,7 +23,7 @@
         },
         {
           "id": "c2",
-          "texte": "Attrape les lucioles où tu lis le mot vert.",
+          "texte": "Attrape les lucioles avec le mot « vert ».",
           "forme": "imperative",
           "audio": null,
           "aAttraper": ["luciole-vert-un", "luciole-vert-deux"],
@@ -31,7 +31,7 @@
         },
         {
           "id": "c3",
-          "texte": "Attrape la luciole où tu lis le mot rouge.",
+          "texte": "Attrape la luciole avec le mot « rouge ».",
           "forme": "imperative",
           "audio": null,
           "aAttraper": ["luciole-rouge"],
@@ -39,7 +39,7 @@
         },
         {
           "id": "c4",
-          "texte": "Attrape la luciole où tu lis le mot jaune.",
+          "texte": "Attrape la luciole avec le mot « jaune ».",
           "forme": "imperative",
           "audio": null,
           "aAttraper": ["luciole-jaune"],
@@ -49,7 +49,7 @@
       "cibles": [
         {
           "id": "luciole-bleu-un",
-          "libelle": "la luciole qui porte le mot bleu",
+          "libelle": "bleu",
           "bonne": true,
           "asset": null,
           "depart": [120, 120],
@@ -58,7 +58,7 @@
         },
         {
           "id": "luciole-bleu-deux",
-          "libelle": "la deuxième luciole qui porte le mot bleu",
+          "libelle": "bleu",
           "bonne": true,
           "asset": null,
           "depart": [320, 380],
@@ -67,7 +67,7 @@
         },
         {
           "id": "luciole-vert-un",
-          "libelle": "la luciole qui porte le mot vert",
+          "libelle": "vert",
           "bonne": true,
           "asset": null,
           "depart": [520, 120],
@@ -76,7 +76,7 @@
         },
         {
           "id": "luciole-vert-deux",
-          "libelle": "la deuxième luciole qui porte le mot vert",
+          "libelle": "vert",
           "bonne": true,
           "asset": null,
           "depart": [720, 380],
@@ -85,7 +85,7 @@
         },
         {
           "id": "luciole-rouge",
-          "libelle": "la luciole qui porte le mot rouge",
+          "libelle": "rouge",
           "bonne": true,
           "asset": null,
           "depart": [120, 380],
@@ -94,7 +94,7 @@
         },
         {
           "id": "luciole-jaune",
-          "libelle": "la luciole qui porte le mot jaune",
+          "libelle": "jaune",
           "bonne": true,
           "asset": null,
           "depart": [720, 120],
@@ -103,7 +103,7 @@
         },
         {
           "id": "luciole-rose",
-          "libelle": "la luciole qui porte le mot rose",
+          "libelle": "rose",
           "bonne": false,
           "asset": null,
           "depart": [320, 120],
@@ -112,7 +112,7 @@
         },
         {
           "id": "luciole-brun",
-          "libelle": "la luciole qui porte le mot brun",
+          "libelle": "brun",
           "bonne": false,
           "asset": null,
           "depart": [520, 380],

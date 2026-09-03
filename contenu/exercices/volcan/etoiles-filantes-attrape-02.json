@@ -25,7 +25,7 @@
       "consignes": [
         {
           "id": "c1",
-          "texte": "Attrape les mots où tu entends le son de chat.",
+          "texte": "Attrape les mots où tu entends le même son que dans « chat ».",
           "forme": "imperative",
           "audio": null,
           "aAttraper": [
@@ -41,7 +41,7 @@
         },
         {
           "id": "c2",
-          "texte": "Attrape aussi les mots où tu entends le son de chat.",
+          "texte": "Attrape les autres mots où tu entends le même son que dans « chat ».",
           "forme": "imperative",
           "audio": null,
           "aAttraper": [
@@ -57,7 +57,7 @@
         },
         {
           "id": "c3",
-          "texte": "Attrape les mots où tu entends le son de coq.",
+          "texte": "Attrape les mots où tu entends le même son que dans « coq ».",
           "forme": "imperative",
           "audio": null,
           "aAttraper": [
@@ -73,7 +73,7 @@
         },
         {
           "id": "c4",
-          "texte": "Attrape aussi les mots où tu entends le son de coq.",
+          "texte": "Attrape les autres mots où tu entends le même son que dans « coq ».",
           "forme": "imperative",
           "audio": null,
           "aAttraper": [
@@ -89,7 +89,7 @@
         },
         {
           "id": "c5",
-          "texte": "Attrape les mots où tu entends le son de photo.",
+          "texte": "Attrape les mots où tu entends le même son que dans « photo ».",
           "forme": "imperative",
           "audio": null,
           "aAttraper": [
@@ -105,7 +105,7 @@
         },
         {
           "id": "c6",
-          "texte": "Attrape aussi les mots où tu entends le son de photo.",
+          "texte": "Attrape les autres mots où tu entends le même son que dans « photo ».",
           "forme": "imperative",
           "audio": null,
           "aAttraper": [

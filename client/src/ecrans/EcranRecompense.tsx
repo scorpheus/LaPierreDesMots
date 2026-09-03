@@ -10,7 +10,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import type { IdNoeud, IdProfil, TentativeAEnregistrer } from '@pierre/partage';
+import type { EtatMonde, IdNoeud, IdProfil, TentativeAEnregistrer } from '@pierre/partage';
 import {
   calculerCleIdempotence,
   enregistrerTentative,
@@ -19,7 +19,7 @@ import {
   lireProgression,
   urlAsset
 } from '../api/client.js';
-import { stadesDuDocument } from '@pierre/partage/monde';
+import { regionsDuDocument, stadesDuDocument } from '@pierre/partage/monde';
 import { CascadeRecompense } from '../composants/CascadeRecompense.js';
 import { detailDesEtoiles } from '../composants/detail-etoiles.js';
 import { Etoiles } from '../composants/Etoiles.js';
@@ -27,6 +27,7 @@ import { EvolutionGobi } from '../composants/EvolutionGobi.js';
 import { useEtatJeu, useMagasin, useServices } from '../etat/services.js';
 import { noeudSuivant } from '../monde/reprise.js';
 import { jouerEffet } from '../services/audio-tone.js';
+import { effacerParticules } from '../gamefeel/particules.js';
 
 /** Une phrase par nombre d'étoiles. Aucune ne compare, aucune ne juge, aucune ne regrette. */
 const FELICITATIONS: Readonly<Record<number, string>> = {
@@ -39,6 +40,34 @@ const FELICITATIONS: Readonly<Record<number, string>> = {
 export interface ProprietesEcranRecompense {
   /** Destination de fin d'une vraie sortie. Le routeur la relie au campement. */
   readonly surFinSortie?: () => void;
+}
+
+/** Les seules ouvertures dignes d'une annonce : une région vraiment passée de fermée à ouverte. */
+export function regionsNouvellementOuvertes(
+  avant: EtatMonde | null,
+  apres: EtatMonde | null
+): readonly string[] {
+  if (avant === null || apres === null) return [];
+  const ouvertesAvant = new Set(
+    avant.carte.regions.filter((region) => region.ouverte).map((region) => String(region.region))
+  );
+  return apres.carte.regions
+    .filter((region) => region.ouverte && !ouvertesAvant.has(String(region.region)))
+    .map((region) => String(region.region));
+}
+
+/** Le total régional reste distinct du plan de sortie, même quand les deux se terminent. */
+export function texteProgressionRegionale(
+  finDeSortie: boolean,
+  termines: number,
+  total: number
+): string {
+  if (finDeSortie) {
+    return termines === total
+      ? 'Ta sortie est terminée, et cette région aussi. '
+      : 'Ta sortie est terminée. Cette région continue : ';
+  }
+  return termines === total ? 'Cette région est terminée. ' : 'Exercice terminé. ';
 }
 
 export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}): ReactElement {
@@ -58,6 +87,10 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
   const dernierGain = useEtatJeu((etat) => etat.dernierGain);
   const animationsDesactivees = useEtatJeu((etat) => etat.animationsDesactivees);
   const sortie = useEtatJeu((etat) => etat.sortie);
+
+  // La couche vit à la racine et survit à un changement de route. Sans ce nettoyage, une onde
+  // partie dans l'exercice pouvait traverser l'écran de récompense puis le campement.
+  useEffect(() => effacerParticules, []);
 
   // Garde locale EN PLUS du drapeau du magasin : `StrictMode` monte deux fois en
   // développement, et le POST partirait deux fois avant que le premier n'ait répondu.
@@ -229,6 +262,32 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
     enabled: profil !== null
   });
 
+  const requeteRegions = useQuery({
+    queryKey: ['monde', 'regions'],
+    queryFn: async () => {
+      const reponse = await fetch(urlAsset('monde/regions.json'), {
+        headers: { Accept: 'application/json' }
+      });
+      if (!reponse.ok) throw new Error('Référentiel des régions introuvable.');
+      return regionsDuDocument((await reponse.json()) as unknown);
+    },
+    enabled: requeteMonde.data !== undefined
+  });
+
+  // La référence est prise AVANT l'invalidation du POST. Sans monde antérieur en cache, il n'y
+  // a rien à comparer : mieux vaut ne rien annoncer que raconter une ouverture supposée.
+  const refMondeAvant = useRef<EtatMonde | null>(null);
+  if (refMondeAvant.current === null && requeteMonde.data !== undefined) {
+    refMondeAvant.current = requeteMonde.data;
+  }
+  const regionsOuvertesMaintenant = regionsNouvellementOuvertes(
+    refMondeAvant.current,
+    requeteMonde.data ?? null
+  );
+  const nomsRegionsOuvertes = regionsOuvertesMaintenant
+    .map((code) => requeteRegions.data?.find((region) => String(region.region) === code)?.libelle)
+    .filter((libelle): libelle is string => libelle !== undefined);
+
   const rangDansSortie = useMemo(
     () =>
       sortie === null || paquet === null
@@ -305,6 +364,7 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
   const [chargementSuivant, fixerChargementSuivant] = useState(false);
   const allerAuSuivant = useCallback((): void => {
     if (suivant === null) return;
+    effacerParticules();
     fixerChargementSuivant(true);
     void lirePaquetNoeud(suivant)
       .then((paquetSuivant) => {
@@ -319,6 +379,7 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
   }, [suivant, magasin]);
 
   const terminerSortie = useCallback((): void => {
+    effacerParticules();
     magasin.getState().cloreSortie();
     if (surFinSortie === undefined) {
       magasin.getState().naviguer('carte');
@@ -449,13 +510,29 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
           nombre en dur (convention C2). */}
       <CascadeRecompense gain={dernierGain} />
 
+      {nomsRegionsOuvertes.length === 0 ? null : (
+        <p
+          className="zone-lecture"
+          data-nouvelle-region={nomsRegionsOuvertes.join('|')}
+          style={{ fontSize: '1.35rem', padding: '0.75rem 1rem', margin: 0, textAlign: 'center' }}
+        >
+          {nomsRegionsOuvertes.length === 1
+            ? `Une nouvelle région s’ouvre : ${nomsRegionsOuvertes[0]} !`
+            : `De nouvelles régions s’ouvrent : ${nomsRegionsOuvertes.join(', ')} !`}
+        </p>
+      )}
+
       {progressionRegionale === null ? null : (
         <p
           className="zone-lecture"
           data-progression-regionale="oui"
           style={{ fontSize: '1.35rem', padding: '0.75rem 1rem', margin: 0, textAlign: 'center' }}
         >
-          {finDeSortie ? 'Sortie terminée. ' : 'Exercice terminé. '}
+          {texteProgressionRegionale(
+            finDeSortie,
+            progressionRegionale.termines,
+            progressionRegionale.total
+          )}
           {String(progressionRegionale.termines)}{' '}
           {progressionRegionale.termines === 1 ? 'exercice terminé' : 'exercices terminés'} sur{' '}
           {String(progressionRegionale.total)} dans cette région.

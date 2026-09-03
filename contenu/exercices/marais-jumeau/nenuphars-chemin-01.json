@@ -25,7 +25,7 @@
       "consignes": [
         {
           "id": "c1",
-          "texte": "Marche sur les mots où tu entends le son de trou.",
+          "texte": "Marche sur les mots où tu entends le même son que dans « trou ».",
           "forme": "imperative",
           "audio": null,
           "depart": "case-boule",
@@ -43,7 +43,7 @@
         },
         {
           "id": "c2",
-          "texte": "Marche sur les mots où tu entends le son de noir.",
+          "texte": "Marche sur les mots où tu entends le même son que dans « noir ».",
           "forme": "imperative",
           "audio": null,
           "depart": "case-roi",
@@ -61,7 +61,7 @@
         },
         {
           "id": "c3",
-          "texte": "Marche aussi sur les mots où tu entends le son de trou.",
+          "texte": "Marche sur les autres mots où tu entends le même son que dans « trou ».",
           "forme": "imperative",
           "audio": null,
           "depart": "case-four",

@@ -60,10 +60,10 @@ describe('l’écran d’attente existe, et il PARLE', () => {
     expect(bloc![0]).toMatch(/La Pierre s’allume/u);
   });
 
-  it('`EcranNoeud` déclare la même branche plutôt que de rendre du vide', () => {
+  it('`EcranNoeud` déclare une branche lisible plutôt que de rendre du vide', () => {
     const source = lire('client/src/ecrans/EcranNoeud.tsx');
-    expect(source).toContain('data-ecran="chargement"');
-    expect(source, 'l’attente du paquet doit dire quelque chose').toMatch(/On rallume le décor/u);
+    expect(source).toContain('data-noeud="indisponible"');
+    expect(source, 'l’absence du paquet doit dire quoi faire').toMatch(/Choisis un chemin sur la carte/u);
   });
 
   it('rendu tel quel, l’écran d’attente porte son code ET son texte', () => {

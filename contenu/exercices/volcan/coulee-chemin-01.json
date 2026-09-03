@@ -26,7 +26,7 @@
       "consignes": [
         {
           "id": "c1",
-          "texte": "Marche sur les mots où tu entends le son de fille.",
+          "texte": "Marche sur les mots où tu entends le même son que dans « fille ».",
           "forme": "imperative",
           "audio": null,
           "depart": "case-fille",
@@ -44,7 +44,7 @@
         },
         {
           "id": "c2",
-          "texte": "Marche sur les mots où tu n'entends pas le son de fille.",
+          "texte": "Marche sur les mots où tu n'entends pas le même son que dans « fille ».",
           "forme": "imperative",
           "audio": null,
           "depart": "case-balle",
@@ -62,7 +62,7 @@
         },
         {
           "id": "c3",
-          "texte": "Marche sur les mots où tu entends le son de montagne.",
+          "texte": "Marche sur les mots où tu entends le même son que dans « montagne ».",
           "forme": "imperative",
           "audio": null,
           "depart": "case-montagne",

@@ -8,32 +8,15 @@
 // Le mapping avec le système de l'école est direct et délibéré (D25) : étoile → tampon
 // spécial → image. Les libellés le disent en français d'enfant, jamais en vocabulaire de jeu.
 import type { ReactElement } from 'react';
-import type { CodePalier, GainCascade, NatureRecompense } from '@pierre/partage';
+import type { CodePalier, GainCascade, RecompenseObtenue } from '@pierre/partage';
 
 import { JaugePalier } from './JaugePalier.js';
+import { urlAsset } from '../api/client.js';
 
 /**
  * Une phrase par palier. Aucune ne compare, aucune ne juge, aucune ne regrette (R14).
  * PLACEHOLDER — à valider : les formulations sont à relire avec le parent.
  */
-const ANNONCE: Readonly<Record<CodePalier, string>> = {
-  etoile: 'Une étoile de plus !',
-  intermediaire: 'Gobi peut prendre une nouvelle forme !',
-  rare: 'Bravo, ta collection d’étoiles grandit !'
-};
-
-/**
- * Ce que le palier remet, dit à l'enfant.
- *
- * `'objet-campement'` retiré par le lot A1 (R31) : `NatureRecompense` n'en a plus que trois —
- * voir `partage/src/recompenses/types.ts`, aucun palier ne pouvait le produire.
- */
-const NATURE_DITE: Readonly<Record<NatureRecompense, string>> = {
-  etoile: 'une étoile',
-  'forme-gobi': 'une nouvelle forme pour Gobi',
-  'zone-recoloriee': 'un grand palier de ta collection'
-};
-
 /**
  * Le signe de chaque palier. Il accompagne le texte sans fabriquer un faux visuel SVG : la
  * récompense garde le vrai Gobi raster de la scène, et la cascade reste un petit carnet lisible.
@@ -57,6 +40,22 @@ function SignePalier({ palier }: { readonly palier: CodePalier }): ReactElement 
   );
 }
 
+/**
+ * Une promesse de cadeau sans objet à montrer est retirée du rendu.
+ *
+ * Le serveur rend les paliers de cascade avant de savoir nécessairement quelle forme concrète
+ * offrir (ou quand le stock est épuisé). Dire alors « Gobi peut prendre une nouvelle forme »
+ * faisait attendre un cadeau qui n'existait pas. Une forme de Gobi ne paraît donc que si sa
+ * référence ET son asset sont réellement rendus par la réponse append-only du serveur.
+ */
+function estCadeauConcret(recompense: RecompenseObtenue): boolean {
+  return (
+    recompense.nature === 'forme-gobi' &&
+    recompense.reference !== null &&
+    recompense.asset !== null
+  );
+}
+
 export interface ProprietesCascadeRecompense {
   /** `null` tant que la cascade n'a pas été appliquée — l'écran reste alors sans jauge. */
   readonly gain: GainCascade | null;
@@ -73,9 +72,9 @@ export function CascadeRecompense({ gain }: ProprietesCascadeRecompense): ReactE
       aria-label="Ce que tu viens de gagner"
     >
       {/* ── ce qui vient d'être gagné, dans l'ordre de franchissement */}
-      {gain.recompenses.length === 0 ? null : (
+      {gain.recompenses.filter(estCadeauConcret).length === 0 ? null : (
         <ul className="cascade-recompense-liste">
-          {gain.recompenses.map((recompense, rang) => (
+          {gain.recompenses.filter(estCadeauConcret).map((recompense, rang) => (
             <li
               key={`${recompense.palier}-${String(rang)}`}
               // ⚠ `data-recompense` — ADDITION au § 7 du contrat des features v2, signalée au
@@ -85,13 +84,15 @@ export function CascadeRecompense({ gain }: ProprietesCascadeRecompense): ReactE
               className="cascade-recompense-gain"
             >
               <SignePalier palier={recompense.palier} />
-              <span>
-                {ANNONCE[recompense.palier]}{' '}
-                {/* `opacity: 0.8` a disparu : sur `--lecture-fond`, elle faisait tomber
-                    l'encre sous le ratio de 4,5 exigé, et c'est justement la parenthèse qui
-                    dit CE QU'ON A GAGNÉ. La hiérarchie passe par la taille, pas par le voile. */}
-                <span className="cascade-recompense-detail">({NATURE_DITE[recompense.nature]})</span>
-              </span>
+              <img
+                src={urlAsset(recompense.asset!)}
+                alt=""
+                aria-hidden="true"
+                width={56}
+                height={56}
+                data-cadeau-concret={recompense.reference!}
+              />
+              <span>Gobi reçoit la forme «&nbsp;{recompense.reference}&nbsp;».</span>
             </li>
           ))}
         </ul>

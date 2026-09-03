@@ -141,7 +141,7 @@ export function dessinDuButin(code: string): DessinDeclare {
 /** Le dessin seul — le coffre le monte aussi, pour que les deux écrans montrent la même chose. */
 export function DessinButin({
   code,
-  taille = 48
+  taille = 88
 }: {
   readonly code: string;
   readonly taille?: number;
@@ -241,7 +241,7 @@ export function Butin({ objets, titre = 'Ce que tu as rapporté' }: ProprietesBu
                 }}
               >
                 <DessinButin code={code} />
-                <span style={{ fontSize: '0.9rem', textAlign: 'center' }}>{objet.libelle}</span>
+                <span className="case-collection-nom">{objet.libelle}</span>
               </button>
             </li>
           );

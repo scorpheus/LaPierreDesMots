@@ -26,7 +26,7 @@
       "consignes": [
         {
           "id": "c1",
-          "texte": "Range les mots où tu entends le son de pont.",
+          "texte": "Range les mots où tu entends le même son que dans « pont ».",
           "forme": "imperative",
           "audio": null,
           "aRanger": [
@@ -42,7 +42,7 @@
         },
         {
           "id": "c2",
-          "texte": "Range aussi les mots où tu entends le son de pont.",
+          "texte": "Range les autres mots où tu entends le même son que dans « pont ».",
           "forme": "imperative",
           "audio": null,
           "aRanger": [

@@ -16,7 +16,7 @@
         {
           "id": "c1",
           "mot": "bol",
-          "texte": "Touche le mot que tu as lu.",
+          "texte": "Touche le mot que tu viens de lire.",
           "forme": "imperative",
           "audio": null,
           "expositionMs": 1800,
