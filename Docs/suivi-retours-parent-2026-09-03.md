@@ -80,9 +80,10 @@ CSS tout en gardant une preuve observable sur le défaut corrigé.
 
 ## État de la vérification globale après ce lot
 
-La qualité Chromium repasse entièrement au vert : 249/249 recettes, dont les 89 écrans à la
+La vérification globale finale a duré 431 secondes. La qualité Chromium repasse entièrement au vert : 249/249 recettes, dont les 89 écrans à la
 résolution tablette, le chaudron, le coffre, les 75 nœuds et les corps de lecture jusqu'à 40 px.
-La cascade montre de nouveau ses trois paliers. Les références de la carte déjà validée par le
+Les 519 parcours E2E, le lint, TypeScript, les 620 contrôles de contenu, le rejeu, la construction
+et le budget du bundle sont également verts. La cascade montre de nouveau ses trois paliers. Les références de la carte déjà validée par le
 parent ont été actualisées. Quatre références visuelles restent volontairement divergentes : les
 trois états du nouveau coloriage de l'école et la récompense remaniée. Elles ne seront remplacées
 qu'après validation humaine. La vérification globale conserve par ailleurs les cinq échecs audio
