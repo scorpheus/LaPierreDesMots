@@ -186,14 +186,32 @@ export const moteurEclair: Moteur<ContenuEclair, EtatEclair, ActionEclair> = {
 
   creerEtat(entree: EntreeMoteur<ContenuEclair>): EtatEclair {
     const instant = entree.horloge.maintenantMs();
+    let positionReponsePrecedente = -1;
     const etapes = entree.contenu.consignes.map(
-      (etape, index): EtatEtapeEclair => ({
+      (etape, index): EtatEtapeEclair => {
+        const ordreOptions = entree.alea.melanger(etape.options);
+        let positionReponse = ordreOptions.indexOf(etape.reponse);
+
+        // Un mélange honnête peut remettre deux fois de suite la réponse au même endroit.
+        // Sur six étapes, l'enfant transforme vite cette coïncidence en stratégie. On garde
+        // le départ aléatoire, puis on interdit seulement la répétition consécutive.
+        if (positionReponse === positionReponsePrecedente && ordreOptions.length > 1) {
+          const nouvellePosition =
+            (positionReponse + entree.alea.entier(1, ordreOptions.length)) % ordreOptions.length;
+          const autre = ordreOptions[nouvellePosition];
+          ordreOptions[nouvellePosition] = ordreOptions[positionReponse] as string;
+          ordreOptions[positionReponse] = autre as string;
+          positionReponse = nouvellePosition;
+        }
+        positionReponsePrecedente = positionReponse;
+
+        return {
         // R15 bis — L'ORDRE EST TIRÉ, PAS RECOPIÉ. Mesuré sur les 76 exercices livrés : la
         // bonne réponse était en première position sur 34 consignes sur 34. Un enfant qui
         // tapait toujours le premier bouton gagnait sans lire, et l'exercice ne mesurait plus
         // rien. Le tirage passe par `Alea` — donc reproductible à la graine près, et le rejeu
         // (annexe T § T2) reste exact.
-        ordreOptions: entree.alea.melanger(etape.options),
+        ordreOptions,
         identifiant: etape.id,
         restantes: [etape.reponse],
         nbErreurs: 0,
@@ -209,7 +227,8 @@ export const moteurEclair: Moteur<ContenuEclair, EtatEclair, ActionEclair> = {
         // Mode à `p_devinette` tabulée : aucun nombre d'éléments à transmettre (D13).
         nbElements: null,
         confusion: null,
-      }),
+        };
+      },
     );
 
     return {

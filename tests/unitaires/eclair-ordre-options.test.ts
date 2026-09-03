@@ -125,6 +125,31 @@ describe('R15 bis — taper toujours le premier bouton ne suffit plus', () => {
     }
   });
 
+  test('DANS UN MÊME EXERCICE — la bonne réponse change de place entre les étapes', () => {
+    for (const exercice of exercicesEclair()) {
+      const releve = positions(exercice, 20260801);
+      if (releve.length < 2) continue;
+      expect(
+        new Set(releve).size,
+        `${exercice.id} place toujours la bonne réponse à l’index ${String(releve[0])}`,
+      ).toBeGreaterThan(1);
+    }
+  });
+
+  test('aucune graine ne remet la bonne réponse au même endroit deux fois de suite', () => {
+    for (const exercice of exercicesEclair()) {
+      for (let graine = 1; graine <= 32; graine += 1) {
+        const releve = positions(exercice, graine);
+        for (let index = 1; index < releve.length; index += 1) {
+          expect(
+            releve[index],
+            `${exercice.id}, graine ${String(graine)}, étapes ${String(index)}/${String(index + 1)}`,
+          ).not.toBe(releve[index - 1]);
+        }
+      }
+    }
+  });
+
   test('DÉTERMINISME — la même graine rend le même ordre, sinon le rejeu ment', () => {
     // `Alea` est la seule source de hasard du projet, et le rejeu des journaux (annexe T § T2)
     // suppose que la même graine reproduit la même partie. Un mélange non reproductible ferait

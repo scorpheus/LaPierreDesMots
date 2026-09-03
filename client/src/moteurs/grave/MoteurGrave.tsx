@@ -132,10 +132,18 @@ export function MoteurGrave(
   // --- la typographie de lecture ---------------------------------------------
   const reglages = useReglagesLecture();
   const styleLecture = useMemo(() => styleDeLecture(reglages), [reglages]);
+  const reglagesMot = useMemo(
+    () => ({ ...reglages, corpsPx: Math.max(reglages.corpsPx, 48) }),
+    [reglages],
+  );
 
   // --- la mesure du cadre ------------------------------------------------------
   const { racine, bande, cadre, hauteurBande } = useMesureCadre();
   const { cadreJeu, bornes } = useMemo(() => cadreJeuEtBornes(cadre, hauteurBande), [cadre, hauteurBande]);
+  const bornesClavier = useMemo(
+    () => ({ ...bornes, yMin: Math.max(bornes.yMin, 140) }),
+    [bornes],
+  );
 
   const regions = useMemo(() => regionsColoriables(habillage), [habillage]);
   const centroideParRegion = useMemo(
@@ -156,10 +164,10 @@ export function MoteurGrave(
         listesParEtape: [contenu.clavier],
         regions,
         cadre: cadreJeu,
-        bornes,
+        bornes: bornesClavier,
         mesurer: mesurerLettre,
       }),
-    [habillage, contenu.clavier, regions, cadreJeu, bornes, mesurerLettre],
+    [habillage, contenu.clavier, regions, cadreJeu, bornesClavier, mesurerLettre],
   );
   const emplacementsClavier = plansClavier[0]?.resultat.emplacements ?? [];
 
@@ -260,6 +268,32 @@ export function MoteurGrave(
         })}
       </div>
 
+      <div
+        data-mot-central="oui"
+        data-corps-minimal="48"
+        style={{
+          position: 'absolute',
+          insetBlockStart: '1rem',
+          insetInlineStart: '50%',
+          transform: 'translateX(-50%)',
+          zIndex: 2,
+          minInlineSize: '12rem',
+          padding: '0.5rem 1rem',
+          border: '4px solid var(--trait)',
+          borderRadius: 'var(--rayon-carte)',
+          background: 'var(--parchemin)',
+          boxShadow: 'var(--ombre-bd)',
+          textAlign: 'center',
+        }}
+      >
+        <ZoneDeLecture
+          texte={motAffiche}
+          motsCles={consigne === null ? [] : consigne.motsCles}
+          reglages={reglagesMot}
+          etiquette={consigne === null ? 'Le mot à compléter.' : `Le mot à compléter : ${consigne.mot}`}
+        />
+      </div>
+
       {/* ------------------------------------------------------------ la bande de lecture
           Le mot à trous : c'est ce qu'il y a de plus précis à déchiffrer, il reste donc
           immobile, sur fond parchemin, jamais sur le décor qui s'agite. */}
@@ -274,12 +308,6 @@ export function MoteurGrave(
           zIndex: 2,
         }}
       >
-        <ZoneDeLecture
-          texte={motAffiche}
-          motsCles={consigne === null ? [] : consigne.motsCles}
-          etiquette={consigne === null ? 'Le mot à compléter.' : `Le mot à compléter : ${consigne.mot}`}
-        />
-
         <p
           role="status"
           aria-live="polite"

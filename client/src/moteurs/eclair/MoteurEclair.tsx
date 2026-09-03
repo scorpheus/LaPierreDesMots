@@ -150,7 +150,7 @@ export function MoteurEclair(
     (cle: string) => {
       if (cle.startsWith(PREFIXE_ECLAIR)) {
         const mot = motParEtape.get(cle.slice(PREFIXE_ECLAIR.length)) ?? '';
-        return mesurerTexte(mot, reglages);
+        return mesurerTexte(mot.length > 'Montre-moi le mot'.length ? mot : 'Montre-moi le mot', reglages);
       }
       return mesurerTexte(optionParId.get(cle)?.libelle ?? '', reglages);
     },
@@ -317,24 +317,59 @@ export function MoteurEclair(
         <div
           data-plateau="eclair"
           data-visible={eclairVisible ? 'oui' : 'non'}
-          style={
-            eclairVisible
-              ? {
-                  borderRadius: 'var(--rayon-carte)',
-                  boxShadow:
-                    '0 0 0 6px color-mix(in srgb, var(--soleil) 70%, transparent), var(--ombre-bd)',
-                  pointerEvents: 'none',
-                }
-              : undefined
-          }
+          style={{
+            display: 'grid',
+            placeItems: 'center',
+            minBlockSize: '5rem',
+            minInlineSize: '12rem',
+            borderRadius: 'var(--rayon-carte)',
+            boxShadow: eclairVisible
+              ? '0 0 0 6px color-mix(in srgb, var(--soleil) 70%, transparent), var(--ombre-bd)'
+              : 'none',
+            pointerEvents: eclairVisible ? 'none' : 'auto',
+          }}
         >
           {eclairVisible && consigne !== null ? (
-            <ZoneDeLecture
-              texte={consigne.mot}
-              motsCles={[consigne.mot]}
-              etiquette={`Le mot : ${consigne.mot}`}
-            />
-          ) : null}
+            <div style={{ display: 'grid', gap: '0.25rem', justifyItems: 'center' }}>
+              <ZoneDeLecture
+                texte={consigne.mot}
+                motsCles={[consigne.mot]}
+                etiquette={`Le mot : ${consigne.mot}`}
+              />
+              <button
+                type="button"
+                data-action="revoir"
+                className="cible"
+                style={{ ...styleLecture, pointerEvents: 'auto' } as CSSProperties}
+                onClick={() => {
+                  emettre({ type: 'revoirEclair' } as ActionEclair);
+                  ouvrirLaPorte();
+                }}
+              >
+                Revoir le mot
+              </button>
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gap: '0.25rem', justifyItems: 'center' }}>
+              <button
+                type="button"
+                data-action={tours === 0 ? 'pret' : 'revoir'}
+                className={tours === 0 ? 'cible cible-appel' : 'cible'}
+                style={styleLecture as CSSProperties}
+                onClick={() => {
+                  if (tours > 0) emettre({ type: 'revoirEclair' } as ActionEclair);
+                  ouvrirLaPorte();
+                }}
+              >
+                {tours === 0 ? 'Montre-moi le mot' : 'Revoir le mot'}
+              </button>
+              {tours === 0 ? null : (
+                <small data-note="revoir-gratuit" style={{ opacity: 0.85 }}>
+                  Tu peux le revoir autant que tu veux.
+                </small>
+              )}
+            </div>
+          )}
         </div>
       </PorteurPose>
 
@@ -354,36 +389,6 @@ export function MoteurEclair(
           padding: '0.75rem',
         }}
       >
-        {tours === 0 ? (
-          <button
-            type="button"
-            data-action="pret"
-            className="cible cible-appel"
-            style={{ ...styleLecture, justifySelf: 'start' } as CSSProperties}
-            onClick={ouvrirLaPorte}
-          >
-            Prêt&nbsp;? Montre-moi le mot
-          </button>
-        ) : (
-          <div style={{ display: 'grid', gap: '0.25rem', justifyItems: 'start' }}>
-            <button
-              type="button"
-              data-action="revoir"
-              className="cible"
-              style={styleLecture as CSSProperties}
-              onClick={() => {
-                emettre({ type: 'revoirEclair' } as ActionEclair);
-                ouvrirLaPorte();
-              }}
-            >
-              Revoir le mot
-            </button>
-            <small data-note="revoir-gratuit" style={{ opacity: 0.8 }}>
-              Tu peux le revoir autant de fois que tu veux, ça ne coûte rien.
-            </small>
-          </div>
-        )}
-
         <p
           role="status"
           aria-live="polite"

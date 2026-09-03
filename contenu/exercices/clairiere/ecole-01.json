@@ -28,22 +28,17 @@
           "audio": null,
           "cibles": [
             { "region": "feuilles-arbre-1", "couleur": "vert" },
-            { "region": "feuilles-arbre-2", "couleur": "vert" },
-            { "region": "feuilles-arbre-3", "couleur": "vert" },
-            { "region": "feuilles-arbre-4", "couleur": "vert" }
+            { "region": "feuilles-arbre-2", "couleur": "vert" }
           ],
           "motsCles": ["feuilles", "arbres", "vert"]
         },
         {
           "id": "c3",
-          "texte": "Les garçons ont les cheveux bruns.",
-          "forme": "affirmative",
+          "texte": "Colorie le banc en brun.",
+          "forme": "imperative",
           "audio": null,
-          "cibles": [
-            { "region": "cheveux-garcon-1", "couleur": "brun" },
-            { "region": "cheveux-garcon-2", "couleur": "brun" }
-          ],
-          "motsCles": ["garçons", "cheveux", "bruns"]
+          "cibles": [{ "region": "banc", "couleur": "brun" }],
+          "motsCles": ["banc", "brun"]
         },
         {
           "id": "c4",

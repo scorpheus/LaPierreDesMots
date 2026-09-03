@@ -175,6 +175,15 @@ describe('moteur grave', () => {
     expect(container.querySelector('[data-etat="echec"]')).toBeNull();
   });
 
+  it('le mot incomplet est un grand repère central, pas une petite ligne en bas', () => {
+    const { container } = render(<Harnais />);
+    const repere = container.querySelector<HTMLElement>('[data-mot-central="oui"]');
+    expect(repere).not.toBeNull();
+    expect(repere?.textContent).toContain('_al');
+    expect(Number(repere?.getAttribute('data-corps-minimal'))).toBeGreaterThanOrEqual(48);
+    expect(container.querySelector('[data-plateau="mot"] [data-lecture="oui"]')).toBeNull();
+  });
+
   it('mauvaise réponse : une erreur comptée, rien de rouge, la tentative reste réussie', () => {
     const { container } = render(<Harnais />);
     taper(container, ['[data-lettre="d"]']);

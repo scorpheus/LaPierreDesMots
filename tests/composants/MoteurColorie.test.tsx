@@ -271,12 +271,15 @@ describe('MoteurColorie — mauvaise réponse', () => {
   });
 
   it('toucher sans avoir choisi de couleur ne compte pas d’erreur', async () => {
-    const utilisateur = userEvent.setup();
     let dernier: EtatColorie | null = null;
     render(<Harnais surEtat={(etat) => (dernier = etat)} />);
     await attendreLaScene();
 
-    await utilisateur.click(region(premiereCible.region));
+    // Le moteur écoute le début du geste afin de répondre en moins de 100 ms. Émettre
+    // directement l'événement réellement consommé évite que `userEvent.click` dépende du
+    // support partiel des pointeurs SVG de happy-dom.
+    fireEvent.pointerDown(region(premiereCible.region));
+    await waitFor(() => expect(dernier).not.toBeNull());
 
     const etat = dernier as unknown as EtatColorie;
     expect(etat.consignes[etat.indexConsigne]!.nbErreurs).toBe(0);

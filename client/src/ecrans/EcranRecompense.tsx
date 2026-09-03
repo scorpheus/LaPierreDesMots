@@ -255,6 +255,18 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
     return noeudSuivant(laRegion.noeuds, faits, paquet.noeud.id);
   }, [sortie, rangDansSortie, paquet, region, requeteMonde.data, requeteProgression.data]);
 
+  const progressionRegionale = useMemo(() => {
+    if (paquet === null || region === null || requeteMonde.data === undefined) return null;
+    const laRegion = requeteMonde.data.carte.regions.find((une) => une.region === region);
+    if (laRegion === undefined) return null;
+    const faits = new Set((requeteProgression.data ?? []).map((ligne) => String(ligne.noeud)));
+    faits.add(String(paquet.noeud.id));
+    return {
+      termines: laRegion.noeuds.filter((noeud) => faits.has(String(noeud))).length,
+      total: laRegion.noeuds.length,
+    };
+  }, [paquet, region, requeteMonde.data, requeteProgression.data]);
+
   /**
    * ══════════════════════════════════════════════════════════════════════════════════════════
    * R6 — « quand on gagne assez de point et que tu dis goby a évolué, montre la goby, fait une
@@ -436,6 +448,19 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
           `null` tant que les seuils ne sont pas chargés : aucune jauge inventée, aucun
           nombre en dur (convention C2). */}
       <CascadeRecompense gain={dernierGain} />
+
+      {progressionRegionale === null ? null : (
+        <p
+          className="zone-lecture"
+          data-progression-regionale="oui"
+          style={{ fontSize: '1.35rem', padding: '0.75rem 1rem', margin: 0, textAlign: 'center' }}
+        >
+          {finDeSortie ? 'Sortie terminée. ' : 'Exercice terminé. '}
+          {String(progressionRegionale.termines)}{' '}
+          {progressionRegionale.termines === 1 ? 'exercice terminé' : 'exercices terminés'} sur{' '}
+          {String(progressionRegionale.total)} dans cette région.
+        </p>
+      )}
 
       <div className="actions-recompense" data-actions-recompense="oui">
         {/* L'APPEL PRINCIPAL, quand il reste quelque chose à faire. « Rejouer » perd sa classe

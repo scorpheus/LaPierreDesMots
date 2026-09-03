@@ -18,8 +18,8 @@ import { JaugePalier } from './JaugePalier.js';
  */
 const ANNONCE: Readonly<Record<CodePalier, string>> = {
   etoile: 'Une étoile de plus !',
-  intermediaire: 'Un cadeau spécial !',
-  rare: 'Une zone du monde se rallume !'
+  intermediaire: 'Gobi peut prendre une nouvelle forme !',
+  rare: 'Bravo, ta collection d’étoiles grandit !'
 };
 
 /**
@@ -31,7 +31,7 @@ const ANNONCE: Readonly<Record<CodePalier, string>> = {
 const NATURE_DITE: Readonly<Record<NatureRecompense, string>> = {
   etoile: 'une étoile',
   'forme-gobi': 'une nouvelle forme pour Gobi',
-  'zone-recoloriee': 'une zone qui reprend ses couleurs'
+  'zone-recoloriee': 'un grand palier de ta collection'
 };
 
 /**

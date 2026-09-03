@@ -88,6 +88,8 @@ const STYLES_SCENE = `
 .pierre-region--refus { animation: pierre-oscille 180ms ease-in-out 1; }
 .pierre-region--demonstration { animation: pierre-halo 900ms ease-in-out infinite; }
 .pierre-prise-colorie { cursor: pointer; fill: transparent; pointer-events: all; }
+.pierre-prise-colorie:focus { outline: none; }
+.pierre-prise-colorie:focus-visible { stroke: var(--soleil, #FFC93C); stroke-width: 4; }
 @keyframes pierre-oscille {
   0%   { transform: translateX(0); }
   25%  { transform: translateX(-6px); }
@@ -167,7 +169,6 @@ export function SceneSvg(proprietes: ProprietesSceneSvg): ReactElement {
     regionEnRefus,
     marqueRefus,
     animationsDesactivees,
-    nombreRegionsAttendues = 0,
     regionsActives,
     svgMarkup,
     onPeindre
@@ -182,10 +183,6 @@ export function SceneSvg(proprietes: ProprietesSceneSvg): ReactElement {
   const dimensionsViewBox = viewBox.trim().split(/[\s,]+/u).map(Number);
   const rapportViewBox = (dimensionsViewBox[2] ?? 1) / Math.max(1, dimensionsViewBox[3] ?? 1);
   const [rayonPrise, fixerRayonPrise] = useState(64);
-  const grisailleRaster = nombreRegionsAttendues <= 0
-    ? 0
-    : Math.max(0, 1 - Object.keys(remplissages).length / nombreRegionsAttendues);
-
   // Une longueur SVG est mise à l'échelle avec tout le dessin : 80 unités donnaient 80 px sur
   // la tablette de référence, mais seulement 40 px dans le viewport E2E plus bas. Le rayon est
   // donc dérivé de la boîte RÉELLEMENT rendue pour garantir un diamètre de 64 px CSS partout.
@@ -221,6 +218,11 @@ export function SceneSvg(proprietes: ProprietesSceneSvg): ReactElement {
   const regionsDeclarees = useMemo<readonly RegionColoriable[]>(
     () => calquesColoriables.flatMap((calque) => calque.regions),
     [calquesColoriables]
+  );
+
+  const identifiantsActifs = useMemo(
+    () => (regionsActives === undefined ? null : new Set(regionsActives.map(String))),
+    [regionsActives]
   );
 
   /**
@@ -263,10 +265,19 @@ export function SceneSvg(proprietes: ProprietesSceneSvg): ReactElement {
         ? cible.closest('[data-region-svg]')
         : null;
       const direct = noeud?.getAttribute('data-region-svg');
-      if (typeof direct === 'string' && direct.length > 0) return direct;
-      return regionSousLeDoigt(habillage, point);
+      if (
+        typeof direct === 'string' &&
+        direct.length > 0 &&
+        (identifiantsActifs === null || identifiantsActifs.has(direct))
+      ) return direct;
+      const approchee = regionSousLeDoigt(habillage, point);
+      if (
+        approchee === null ||
+        (identifiantsActifs !== null && !identifiantsActifs.has(String(approchee)))
+      ) return null;
+      return approchee;
     },
-    [habillage]
+    [habillage, identifiantsActifs]
   );
 
   const surPointerDown = useCallback(
@@ -383,6 +394,12 @@ export function SceneSvg(proprietes: ProprietesSceneSvg): ReactElement {
       noeud.setAttribute('data-region-source', identifiant);
       noeud.setAttribute('data-peinte', couleur === undefined ? 'non' : 'oui');
       noeud.setAttribute('fill', couleur === undefined ? REMPLISSAGE_VIDE : hexDeCouleur(couleur));
+      const active = identifiantsActifs === null || identifiantsActifs.has(identifiant);
+      // Sur les décors illustrés, seule la consigne courante reçoit un aplat. Le mélange
+      // `color` conserve les ombres et le trait de l'image, tout en rendant la teinte locale
+      // immédiatement visible. Les anciennes zones de blockout restent ainsi invisibles.
+      (noeud as SVGGraphicsElement).style.opacity = active || couleur !== undefined ? '0.92' : '0';
+      (noeud as SVGGraphicsElement).style.mixBlendMode = 'color';
       noeud.classList.add('pierre-region');
       if (couleur === undefined) noeud.removeAttribute('data-couleur');
       else noeud.setAttribute('data-couleur', couleur);
@@ -396,7 +413,8 @@ export function SceneSvg(proprietes: ProprietesSceneSvg): ReactElement {
     remplissages,
     regionEnDemonstration,
     calquesColoriables,
-    peindreAuClavier
+    peindreAuClavier,
+    identifiantsActifs
   ]);
 
   /**
@@ -448,8 +466,6 @@ export function SceneSvg(proprietes: ProprietesSceneSvg): ReactElement {
         maxHeight: 'calc(100dvh - 19rem)',
         alignSelf: 'center',
         flex: '0 1 auto',
-        filter: `grayscale(${String(grisailleRaster)})`,
-        transition: `filter ${String(animationsDesactivees ? 0 : dureeRecolorationMs)}ms ease-in-out`,
         touchAction: 'manipulation'
       }}
     >
@@ -490,6 +506,12 @@ export function SceneSvg(proprietes: ProprietesSceneSvg): ReactElement {
                   role="button"
                   tabIndex={active ? 0 : -1}
                   style={{ pointerEvents: active ? 'all' : 'none' }}
+                  onPointerDown={(evenement) => {
+                    evenement.stopPropagation();
+                    evenement.currentTarget.blur();
+                    refDernierPoint.current = region.centroide;
+                    onPeindre(region.id);
+                  }}
                   onKeyDown={surClavier}
                 />
               );
@@ -532,6 +554,12 @@ export function SceneSvg(proprietes: ProprietesSceneSvg): ReactElement {
                       data-couleur={couleur}
                       role="button"
                       tabIndex={0}
+                      onPointerDown={(evenement) => {
+                        evenement.stopPropagation();
+                        evenement.currentTarget.blur();
+                        refDernierPoint.current = region.centroide;
+                        onPeindre(region.id);
+                      }}
                       aria-label={region.libelle}
                       onKeyDown={surClavier}
                     />

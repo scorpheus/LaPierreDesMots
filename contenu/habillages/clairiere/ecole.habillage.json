@@ -40,10 +40,10 @@
             "id": "toit-ecole",
             "libelle": "le toit de l’école",
             "centroide": [
-              450,
-              155
+              421,
+              50
             ],
-            "surface": 45000
+            "surface": 12264.5
           },
           {
             "id": "horloge-ecole",
@@ -67,8 +67,8 @@
             "id": "porte-ecole",
             "libelle": "la porte de l’école",
             "centroide": [
-              477.5,
-              255
+              429,
+              226.5
             ],
             "surface": 12350
           },
@@ -76,28 +76,28 @@
             "id": "fenetre-ecole-1",
             "libelle": "la première fenêtre de l’école",
             "centroide": [
-              315,
-              220
+              311.5,
+              202
             ],
-            "surface": 4900
+            "surface": 2752
           },
           {
             "id": "fenetre-ecole-2",
             "libelle": "la deuxième fenêtre de l’école",
             "centroide": [
-              555,
-              225
+              541,
+              201
             ],
-            "surface": 4900
+            "surface": 3348
           },
           {
             "id": "feuilles-arbre-1",
             "libelle": "les feuilles du premier arbre",
             "centroide": [
-              500,
-              258
+              180.4,
+              46.94
             ],
-            "surface": 7155.3
+            "surface": 33969.5
           },
           {
             "id": "tronc-arbre-1",
@@ -112,10 +112,10 @@
             "id": "feuilles-arbre-2",
             "libelle": "les feuilles du deuxième arbre",
             "centroide": [
-              615,
-              258
+              860.81,
+              32.05
             ],
-            "surface": 7155.3
+            "surface": 8495.5
           },
           {
             "id": "tronc-arbre-2",
@@ -166,19 +166,19 @@
             "id": "cheveux-maitresse",
             "libelle": "les cheveux de la maîtresse",
             "centroide": [
-              377.5,
-              190
+              386.64,
+              176.24
             ],
-            "surface": 2750
+            "surface": 1052.5
           },
           {
             "id": "pull-maitresse",
             "libelle": "le pull de la maîtresse",
             "centroide": [
-              380,
-              270
+              386.53,
+              232.2
             ],
-            "surface": 7700
+            "surface": 2869.5
           },
           {
             "id": "jupe-maitresse",
@@ -193,10 +193,10 @@
             "id": "tableau",
             "libelle": "le tableau de la maîtresse",
             "centroide": [
-              180,
-              255
+              188.5,
+              236
             ],
-            "surface": 28500
+            "surface": 19140
           },
           {
             "id": "cheveux-garcon-1",
@@ -274,10 +274,10 @@
             "id": "banc",
             "libelle": "le banc",
             "centroide": [
-              140,
-              395
+              147.34,
+              371.12
             ],
-            "surface": 26400
+            "surface": 13429
           },
           {
             "id": "corde",

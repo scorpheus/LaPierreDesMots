@@ -1,5 +1,5 @@
 {
-  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Le nœud rejoue licitement `clairiere.ecole`, neuf nœuds après son premier emploi. Les six consignes visent huit régions toutes visibles dans le fond illustré : toit, porte, deux fenêtres, pull et cheveux de la maîtresse, banc et tableau. Les anciennes cibles ballon et filles ont été retirées parce qu'elles n'existent pas dans l'image finale. Les prises tactiles ont été recalées sur cette image ; seule la consigne courante prend le doigt, ce qui empêche deux zones proches de se masquer.",
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Le nœud rejoue licitement `clairiere.ecole`, neuf nœuds après son premier emploi. Les cinq consignes visent sept régions toutes visibles dans le fond illustré : toit, porte, deux fenêtres, pull, banc et tableau. Les anciennes cibles ballon, enfants et cheveux trop petits ont été retirées parce qu'elles ne permettent pas une cible tactile fiable sur l'image finale. Les prises tactiles ont été recalées sur cette image ; seule la consigne courante prend le doigt, ce qui empêche deux zones proches de se masquer.",
   "id": "clairiere-ecole-03-mots-outils",
   "version": 1,
   "titre": "L’école des petits mots",
@@ -58,16 +58,6 @@
             { "region": "tableau", "couleur": "noir" }
           ],
           "motsCles": ["banc", "brun", "tableau", "noir"]
-        },
-        {
-          "id": "c6",
-          "texte": "Colorie les cheveux de la maîtresse en noir.",
-          "forme": "imperative",
-          "audio": null,
-          "cibles": [
-            { "region": "cheveux-maitresse", "couleur": "noir" }
-          ],
-          "motsCles": ["cheveux", "maîtresse", "noir"]
         }
       ],
       "nuancierAutorise": ["rouge", "orange", "jaune", "vert", "bleu", "brun", "noir"]

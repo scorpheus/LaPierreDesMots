@@ -16,6 +16,7 @@ import { expect, test } from './invariants.js';
 import { entrerDansLeNoeud, etatDuJeu, preparer } from './qa-outils.js';
 
 const NOEUD_ECOLE_MOTS_OUTILS = 'clairiere-10';
+const NOEUD_ECOLE_CONSIGNES = 'clairiere-01';
 const DOSSIER_CAPTURES = resolve(process.cwd(), 'bac-a-sable', 'captures-cadrage-exercices');
 const FORMATS = [
   { nom: 'tablette 16:10', largeur: 1920, hauteur: 1200 },
@@ -105,6 +106,32 @@ test.describe('régression Clairière — décor, cadrage et vrai geste de color
     const etat = await etatDuJeu(page);
     expect(etat.etatMoteur).toMatchObject({
       remplissages: { 'toit-ecole': 'rouge' },
+    });
+  });
+
+  test('le pull devient bleu localement sans recolorer toute l’image', async ({ page }) => {
+    await preparer(page);
+    await entrerDansLeNoeud(page, NOEUD_ECOLE_CONSIGNES);
+
+    const scene = page.locator('[data-moteur="colorie"] svg[data-habillage="clairiere.ecole"]');
+    await expect(scene).toHaveAttribute('data-decor', 'habillage');
+    expect(await scene.evaluate((element) => getComputedStyle(element).filter)).toBe('none');
+
+    const prisePull = scene.locator('[data-calque="prises"] [data-region-svg="pull-maitresse"]');
+    const formePull = scene.locator('[data-region-source="pull-maitresse"]');
+    await expect(formePull).toHaveCSS('opacity', '0.92');
+
+    await page.getByRole('button', { name: 'bleu' }).click();
+    await prisePull.click();
+
+    await expect(prisePull).toHaveAttribute('data-peinte', 'oui');
+    await expect(formePull).toHaveAttribute('fill', '#2FA8E0');
+    await expect(scene.locator('[data-region-source="banc"]')).toHaveCSS('opacity', '0');
+
+    mkdirSync(DOSSIER_CAPTURES, { recursive: true });
+    await page.screenshot({
+      path: resolve(DOSSIER_CAPTURES, 'ecole-pull-bleu-1920x1080.png'),
+      scale: 'css',
     });
   });
 });

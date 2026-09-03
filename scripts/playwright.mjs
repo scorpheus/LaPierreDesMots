@@ -26,7 +26,7 @@
  * explicitement (contrat § 8.2, « l'installation est réservée à l'orchestrateur »).
  */
 import { spawnSync } from 'node:child_process';
-import { existsSync } from 'node:fs';
+import { existsSync, readdirSync, statSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -46,6 +46,48 @@ export const DOSSIER_NAVIGATEURS = join(RACINE, 'outils', 'navigateurs');
 
 /** La CLI Playwright, résolue dans `node_modules/` — jamais par `npx`, qui pourrait aller la chercher au loin. */
 export const CLI_PLAYWRIGHT = join(RACINE, 'node_modules', '@playwright', 'test', 'cli.js');
+export const INDEX_CONSTRUCTION_TEST = join(RACINE, 'client', 'dist-test', 'index.html');
+
+const SOURCES_CONSTRUCTION_TEST = [
+  join(RACINE, 'client', 'src'),
+  join(RACINE, 'partage', 'src'),
+  join(RACINE, 'contenu'),
+  join(RACINE, 'client', 'vite.config.ts'),
+];
+
+function modificationLaPlusRecente(chemin) {
+  if (!existsSync(chemin)) return 0;
+  const statut = statSync(chemin);
+  if (!statut.isDirectory()) return statut.mtimeMs;
+  let derniere = statut.mtimeMs;
+  for (const entree of readdirSync(chemin, { withFileTypes: true })) {
+    derniere = Math.max(derniere, modificationLaPlusRecente(join(chemin, entree.name)));
+  }
+  return derniere;
+}
+
+/** Vrai si Playwright servirait une ancienne application depuis `client/dist-test`. */
+export function constructionTestPerimee() {
+  if (!existsSync(INDEX_CONSTRUCTION_TEST)) return true;
+  const dateConstruction = statSync(INDEX_CONSTRUCTION_TEST).mtimeMs;
+  return SOURCES_CONSTRUCTION_TEST.some(
+    (chemin) => modificationLaPlusRecente(chemin) > dateConstruction
+  );
+}
+
+/** Ne reconstruit que lorsqu'une source servie par Playwright a réellement changé. */
+export function assurerConstructionTest() {
+  if (!constructionTestPerimee()) return { status: 0 };
+  console.log('Playwright : sources modifiées, reconstruction rapide de client/dist-test…');
+  const npmCli = join(dirname(process.execPath), 'node_modules', 'npm', 'bin', 'npm-cli.js');
+  return spawnSync(process.execPath, [npmCli, 'run', 'construire:test'], {
+    cwd: RACINE,
+    env: process.env,
+    encoding: 'utf8',
+    stdio: 'inherit',
+    maxBuffer: 64 * 1024 * 1024
+  });
+}
 
 /**
  * L'environnement à donner à tout processus qui lance Playwright.
@@ -103,6 +145,10 @@ if (estAppeleDirectement) {
         'à la racine — c’est un prérequis d’environnement, à la charge de l’orchestrateur.'
     );
     process.exit(1);
+  }
+  if (arguments_[0] === 'test') {
+    const construction = assurerConstructionTest();
+    if (construction.status !== 0) process.exit(construction.status ?? 1);
   }
   const resultat = lancerPlaywright(arguments_);
   process.exit(resultat.status ?? 1);

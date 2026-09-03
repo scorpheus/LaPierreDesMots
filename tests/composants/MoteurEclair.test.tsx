@@ -311,6 +311,29 @@ describe('moteur eclair', () => {
     }
   });
 
+  it('le bouton pour voir le mot occupe la place du mot et ne redimensionne pas le décor', () => {
+    vi.useFakeTimers();
+    try {
+      const { container } = render(<Harnais />);
+      const plateau = container.querySelector('[data-plateau="eclair"]');
+      const controles = container.querySelector('[data-plateau="controles"]');
+
+      expect(plateau?.querySelector('[data-action="pret"]')).not.toBeNull();
+      expect(controles?.querySelector('[data-action="pret"]')).toBeNull();
+
+      taper(container, ['[data-action="pret"]']);
+      expect(plateau?.getAttribute('data-visible')).toBe('oui');
+
+      act(() => {
+        vi.advanceTimersByTime(5000);
+      });
+      expect(plateau?.querySelector('[data-action="revoir"]')).not.toBeNull();
+      expect(controles?.querySelector('[data-action="revoir"]')).toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   /**
    * ════════════════════════════════════════════════════════════════════════════════════════
    * LE DÉFAUT QUE J'AI MOI-MÊME INTRODUIT AVEC R11, ET QUE MON TEST N'A PAS VU.

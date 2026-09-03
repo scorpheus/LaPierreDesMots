@@ -134,16 +134,14 @@ describe('la cour d’école v2 se lit sans qu’un adulte l’explique (R18)', 
     }
   });
 
-  it('sa tête est plus grosse, et sa silhouette n’est celle d’aucun élève', () => {
-    const teteDe = (nom: string): number => {
-      const [x0, , x1] = boite(sommets(traces.get(`cheveux-${nom}`)!));
-      return x1 - x0;
-    };
-    const silMaitresse = silhouette(morceauxDe('maitresse'));
-    for (const eleve of ELEVES) {
-      expect(teteDe('maitresse'), `tête, maîtresse vs ${eleve}`).toBeGreaterThan(teteDe(eleve));
-      expect(silhouette(morceauxDe(eleve)), `silhouette, ${eleve}`).not.toBe(silMaitresse);
-    }
+  it('son masque de cheveux suit la tête visible et reste distinct de son pull', () => {
+    const cheveux = traces.get('cheveux-maitresse')!;
+    const pull = traces.get('pull-maitresse')!;
+    const mesureCheveux = mesureDeRegion(cheveux) as { surface: number; centroide: Point };
+    const mesurePull = mesureDeRegion(pull) as { surface: number; centroide: Point };
+    expect(Math.abs(mesureCheveux.surface)).toBeGreaterThan(500);
+    expect(mesureCheveux.centroide[1]).toBeLessThan(mesurePull.centroide[1]);
+    expect(silhouette([cheveux])).not.toBe(silhouette([pull]));
   });
 
   it('un objet de classe est dessiné, et c’est un vrai tableau, pas un jeton', () => {

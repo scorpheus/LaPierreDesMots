@@ -47,6 +47,7 @@ vi.mock('@client/api/client', async (importOriginal) => {
 });
 
 const { EcranRecompense } = await import('@client/ecrans/EcranRecompense');
+const { CascadeRecompense } = await import('@client/composants/CascadeRecompense');
 const { creerMagasin } = await import('@client/etat/magasin');
 const { FournisseurJeu } = await import('@client/etat/services');
 const { creerHaptiqueMuette } = await import('@client/gamefeel/haptique-navigateur');
@@ -224,6 +225,34 @@ describe('la fin de partie est une réussite, quoi qu’il arrive (R14)', () => 
     expect(document.querySelectorAll('[data-etat="echec"]')).toHaveLength(0);
     expect(etoilesAcquises()).toBe(3);
     vi.mocked(console.warn).mockRestore();
+  });
+});
+
+describe('les annonces correspondent à ce qui est réellement remis', () => {
+  it('ne promet ni cadeau invisible ni nouvelle zone sans déblocage réel', () => {
+    render(
+      <CascadeRecompense
+        gain={{
+          etat: {
+            etoilesTotal: 50,
+            etoilesDepuisIntermediaire: 0,
+            intermediairesTotal: 10,
+            intermediairesDepuisRare: 0,
+            raresTotal: 1,
+            dernierPalierLe: '2026-09-03T09:00:00.000Z',
+          },
+          paliersFranchis: ['intermediaire', 'rare'],
+          recompenses: [
+            { palier: 'intermediaire', nature: 'forme-gobi', reference: null, asset: null, region: null },
+            { palier: 'rare', nature: 'zone-recoloriee', reference: null, asset: null, region: null },
+          ],
+          jauges: [],
+        }}
+      />,
+    );
+    const annonce = document.querySelector('.cascade-recompense')?.textContent ?? '';
+    expect(annonce).toContain('nouvelle forme pour Gobi');
+    expect(annonce).not.toMatch(/cadeau spécial|zone du monde/iu);
   });
 });
 
