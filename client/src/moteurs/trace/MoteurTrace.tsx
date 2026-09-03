@@ -324,6 +324,36 @@ export function MoteurTrace(
         paddingInline: '0.25rem',
       }}
     >
+      {/* Cible courante : la consigne détaillée reste dans la barre de `EcranNoeud`, mais le
+          graphème travaillé doit rester visible au voisinage immédiat de l'ardoise. Cette
+          carte est en superposition : elle ne crée aucune rangée supplémentaire et ne
+          rétrécit donc pas la surface de tracé. Elle dérive toujours de `indexLettre`, sans
+          changement implicite de cible. */}
+      <div
+        data-plateau="cible-trace"
+        data-cible-lettre={lettre?.lettre ?? ''}
+        aria-label={lettre === null ? 'Aucune lettre' : `Lettre à tracer : ${lettre.lettre}`}
+        style={{
+          position: 'absolute',
+          insetBlockStart: '0.5rem',
+          insetInlineStart: '50%',
+          transform: 'translateX(-50%)',
+          zIndex: 1,
+          padding: '0.35rem 0.85rem',
+          backgroundColor: 'var(--parchemin, #FBF6EA)',
+          border: 'var(--epaisseur-trait, 2px) solid var(--trait, #1B2440)',
+          borderRadius: 'var(--rayon-carte, 1rem)',
+          boxShadow: '0 3px 12px rgba(27, 36, 64, 0.14)',
+          pointerEvents: 'none',
+          ...styleLecture,
+          fontWeight: 700,
+          textAlign: 'center',
+          whiteSpace: 'nowrap',
+        } as CSSProperties}
+      >
+        {lettre === null ? 'Aucune lettre' : `Lettre : ${lettre.lettre}`}
+      </div>
+
       {/* ── L'ARDOISE ───────────────────────────────────────────────────────────────────────
           Avant ce lot : `width: min(100%, 420px)`, un plafond fixe quel que soit l'écran. Sur
           la tablette du père, en portrait, ce plafond laissait le vrai geste — le tracé — dans

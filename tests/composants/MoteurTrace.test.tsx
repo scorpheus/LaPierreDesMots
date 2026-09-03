@@ -157,6 +157,13 @@ afterEach(() => {
 });
 
 describe('MoteurTrace — data-axe porte UN axe, jamais deux (D23)', () => {
+  it('garde la lettre courante visible et centrée près de l’ardoise', () => {
+    render(<Harnais contenu={contenuBd} />);
+    const cible = document.querySelector('[data-plateau="cible-trace"]');
+    expect(cible?.getAttribute('data-cible-lettre')).toBe(contenuBd.lettres[0]!.lettre);
+    expect(cible?.textContent).toContain(`Lettre : ${contenuBd.lettres[0]!.lettre}`);
+  });
+
   it('l’exercice b/d annonce gauche-droite, et rien d’autre', () => {
     render(<Harnais contenu={contenuBd} />);
     const racine = document.querySelector('[data-moteur="trace"]')!;

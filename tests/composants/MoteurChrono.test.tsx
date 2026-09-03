@@ -20,7 +20,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import Ajv2020 from 'ajv/dist/2020.js';
 
 import { moteurChrono } from '@partage/moteurs/chrono/moteur';
-import { MoteurChrono } from '@client/moteurs/chrono/MoteurChrono';
+import { alignerEmplacementsChrono, MoteurChrono } from '@client/moteurs/chrono/MoteurChrono';
 import type {
   ActionChrono,
   EtatChrono,
@@ -153,6 +153,24 @@ afterEach(() => {
 });
 
 describe('moteur chrono', () => {
+  it('centre les cartes avec le même haut et la même hauteur', () => {
+    const emplacements = [
+      { cle: 'a', x: 100, y: 80, boite: { largeur: 120, hauteur: 120 } },
+      { cle: 'b', x: 300, y: 40, boite: { largeur: 120, hauteur: 160 } },
+      { cle: 'c', x: 500, y: 100, boite: { largeur: 120, hauteur: 140 } },
+    ] as const;
+    const alignes = alignerEmplacementsChrono(emplacements, {
+      xMin: 0,
+      yMin: 0,
+      xMax: 900,
+      yMax: 400,
+    });
+    expect(alignes.map((e) => e.y - e.boite.hauteur / 2)).toEqual([0, 0, 0]);
+    expect(alignes.map((e) => e.boite.hauteur)).toEqual([160, 160, 160]);
+    expect(alignes.map((e) => e.x)).toEqual([306, 450, 594]);
+    expect(alignes[1]?.x).toBe(450);
+  });
+
   it("affiche l'image et la légende d'une vignette narrative", () => {
     const { container } = render(<Harnais />);
     const vignette = container.querySelector<HTMLElement>('[data-vignette="vig-reveil"]');
@@ -162,6 +180,14 @@ describe('moteur chrono', () => {
     expect(image?.getAttribute('src')).toContain('assets/vignettes/reveil.png');
     expect(vignette?.textContent).toContain('il se réveille');
     expect(vignette?.style.flexDirection).toBe('column');
+  });
+
+  it('affiche une règle locale et la progression de la séquence', () => {
+    const { container } = render(<Harnais />);
+    const cartouche = container.querySelector('[data-cartouche-chrono="etape"]');
+    expect(cartouche?.textContent).toContain('Remets les images dans l’ordre.');
+    expect(cartouche?.textContent).toContain('Étape 1 / 1');
+    expect(cartouche?.textContent).toContain('0 / 3 rangées');
   });
   it('le contenu de ce test est conforme au schéma que le moteur publie', () => {
     const ajv = new (Ajv2020 as unknown as {

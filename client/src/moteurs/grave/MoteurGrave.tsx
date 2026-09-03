@@ -128,12 +128,17 @@ export function MoteurGrave(
 
   const etape = etat.etapes[etat.indexEtape];
   const consigne = contenu.consignes[etat.indexEtape] ?? null;
+  const trouCourant = consigne === null || etape === undefined
+    ? null
+    : consigne.trous.find((trou) => etape.restantes.includes(trou.id)) ?? null;
 
   // --- la typographie de lecture ---------------------------------------------
   const reglages = useReglagesLecture();
   const styleLecture = useMemo(() => styleDeLecture(reglages), [reglages]);
   const reglagesMot = useMemo(
-    () => ({ ...reglages, corpsPx: Math.max(reglages.corpsPx, 48) }),
+    // Le mot reste nettement plus grand que les touches, tout en suivant réellement le
+    // réglage de lecture du parent. Un plafond fixe à 48 px rendait le réglage inopérant.
+    () => ({ ...reglages, corpsPx: Math.max(reglages.corpsPx + 32, 48) }),
     [reglages],
   );
 
@@ -229,6 +234,38 @@ export function MoteurGrave(
         borderRadius: 'var(--rayon-carte)',
       }}
     >
+      {/* La barre haute porte la règle générale. Ici, le repère concret change avec chaque
+          mot et chaque case, sans révéler la lettre attendue. */}
+      <div
+        data-plateau="etape-grave"
+        aria-live="polite"
+        style={{
+          position: 'absolute',
+          insetBlockStart: '0.75rem',
+          insetInlineStart: '0.75rem',
+          zIndex: 3,
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '0.65rem',
+          padding: '0.45rem 0.8rem',
+          border: '3px solid var(--trait)',
+          borderRadius: '1rem',
+          background: 'var(--parchemin)',
+          boxShadow: 'var(--ombre-bd)',
+          ...styleLecture,
+        } as CSSProperties}
+      >
+        <span style={{ fontWeight: 700 }}>{`Étape ${String(etat.indexEtape + 1)} / ${String(etat.etapes.length)}`}</span>
+        <span aria-hidden="true" style={{ color: 'var(--soleil)', fontSize: '1.25em' }}>✦</span>
+        <span style={{ fontWeight: 800 }}>
+          {consigne === null
+            ? 'Mot à compléter'
+            : trouCourant === null
+              ? `Mot « ${consigne.mot} » complet`
+              : `Mot « ${consigne.mot} » · case ${String(trouCourant.position + 1)}`}
+        </span>
+      </div>
+
       {/* ------------------------------------------------------------- le décor, en fond */}
       <div style={styleZoneDeJeu(hauteurBande)}>
         <SceneDecor
@@ -273,7 +310,7 @@ export function MoteurGrave(
         data-corps-minimal="48"
         style={{
           position: 'absolute',
-          insetBlockStart: '1rem',
+          insetBlockStart: '4.5rem',
           insetInlineStart: '50%',
           transform: 'translateX(-50%)',
           zIndex: 2,

@@ -165,6 +165,17 @@ describe('moteur histoire', () => {
     expect(habillage.moteurs).toContain('histoire');
   });
 
+  it('affiche la question variable près des réponses avec son repère d’étape', () => {
+    const { container } = render(<Harnais />);
+    const carte = container.querySelector('[data-plateau="etape-histoire"]');
+    expect(carte?.textContent).toContain('Étape 1 sur 1');
+    expect(container.querySelector('[data-cible-histoire="oui"]')?.textContent).toBe(
+      'Le loup sort la nuit.',
+    );
+    expect(carte?.getAttribute('data-etape-courante')).toBe('1');
+    expect(container.querySelectorAll('[data-consigne="c1"]').length).toBe(0);
+  });
+
   it('bonne réponse : l’étape avance, aucune erreur, aucun écran d’échec', () => {
     const { container } = render(<Harnais />);
     taper(container, ['[data-option="opt-vrai"]']);

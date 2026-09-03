@@ -107,6 +107,24 @@ export function MoteurColorie(
     return cible === undefined ? null : cible.couleur;
   }, [regionEnDemonstration, etatConsigne]);
 
+  /**
+   * La barre haute de `EcranNoeud` porte la règle générale. Ici, juste au-dessus du
+   * nuancier, on montre la cible concrète de l'étape : le libellé de l'habillage est
+   * compréhensible par l'enfant (« le toit de l'école »), contrairement à son identifiant.
+   */
+  const cibleCourante = useMemo(() => {
+    const cible = etatConsigne?.ciblesRestantes[0];
+    if (cible === undefined) return null;
+    const region = habillage.scene.calques
+      .filter((calque) => calque.role === 'coloriable')
+      .flatMap((calque) => calque.regions)
+      .find((entree) => entree.id === cible.region);
+    return {
+      libelle: region?.libelle ?? cible.region,
+      couleur: cible.couleur
+    };
+  }, [etatConsigne, habillage.scene.calques]);
+
   const peindre = useCallback(
     (region: IdRegionSvg) => {
       emettre({ type: 'peindre', region });
@@ -173,6 +191,7 @@ export function MoteurColorie(
         couleurChoisie={etat.couleurChoisie}
         niveauAide={etatConsigne === undefined ? 'aucune' : etatConsigne.niveauAide}
         couleurEnDemonstration={couleurEnDemonstration}
+        cibleCourante={cibleCourante}
         animationsDesactivees={animationsDesactivees}
         onChoisir={choisir}
       />

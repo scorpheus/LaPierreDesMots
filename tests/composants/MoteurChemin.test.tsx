@@ -228,7 +228,8 @@ describe('moteur chemin', () => {
   it('le message utile est placé sur le plateau, pas dans la bande basse', () => {
     const { container } = render(<Harnais />);
     const message = container.querySelector('[data-message-chemin="oui"]');
-    expect(message?.textContent).toContain('chemin jaune');
+    expect(message?.textContent).toContain('Suis les cases où tu entends [u].');
+    expect(message?.textContent).toContain('Étape 1 sur 1');
     expect(message?.closest('[data-plateau="controles"]')).toBeNull();
   });
 

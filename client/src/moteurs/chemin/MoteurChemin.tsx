@@ -136,6 +136,7 @@ export function MoteurChemin(
   );
 
   const etape = etat.etapes[etat.indexEtape];
+  const consigneCourante = contenu.consignes[etat.indexEtape] ?? null;
 
   // --- la typographie de lecture ---------------------------------------------
   const reglages = useReglagesLecture();
@@ -246,11 +247,11 @@ export function MoteurChemin(
       : (MESSAGES_DE_REFUS[etat.dernierRefus.motif] ?? '');
 
   const transitionPion = animationsDesactivees ? undefined : 'inset-inline-start 320ms ease-out, inset-block-start 320ms ease-out';
-  const messageChemin =
+  const retourChemin =
     messageDeRefus !== ''
       ? messageDeRefus
       : cibleAide === null
-        ? 'Pars de l’épingle. Choisis un chemin jaune.'
+        ? ''
         : 'Gobi te montre la prochaine case en bleu.';
 
   return (
@@ -410,7 +411,7 @@ export function MoteurChemin(
         )}
       </div>
 
-      <p
+      <div
         data-message-chemin="oui"
         data-refus-texte={messageDeRefus === '' ? 'non' : 'oui'}
         style={{
@@ -427,12 +428,23 @@ export function MoteurChemin(
           borderRadius: '999px',
           background: 'color-mix(in srgb, var(--parchemin) 94%, transparent)',
           boxShadow: 'var(--ombre-bd)',
+          display: 'grid',
+          justifyItems: 'center',
+          gap: '0.15rem',
           textAlign: 'center',
           pointerEvents: 'none',
         } as CSSProperties}
       >
-        {messageChemin}
-      </p>
+        <span style={{ fontSize: '0.78em', fontWeight: 700, opacity: 0.75 }}>
+          Étape {String(etat.indexEtape + 1)} sur {String(etat.etapes.length)}
+        </span>
+        <strong>{consigneCourante?.texte ?? 'Suis le bon chemin.'}</strong>
+        {retourChemin === '' ? null : (
+          <span data-retour-chemin="oui" style={{ fontSize: '0.82em' }}>
+            {retourChemin}
+          </span>
+        )}
+      </div>
 
       {/* ------------------------------------------------------------ la bande statique */}
       <div
@@ -458,7 +470,7 @@ export function MoteurChemin(
           data-animations={animationsDesactivees ? 'calmes' : 'vives'}
           style={{ ...styleLecture, margin: 0, minBlockSize: '1.5em' } as CSSProperties}
         >
-          {messageChemin}
+          {retourChemin}
         </p>
 
         <p

@@ -92,6 +92,31 @@ export function MoteurPlace(
 
   const etatConsigne = etat.consignes[etat.indexConsigne];
 
+  // Le cartouche local ne répète pas la règle générale de l'écran : il montre la cible
+  // concrète de l'étape, avec le dessin et sa relation spatiale. La dérivation vient de l'état
+  // (dépôts restants), donc elle suit l'avancée sans changer silencieusement de cible.
+  const depotCourant = etatConsigne?.depotsRestants[0];
+  const elementCible = depotCourant === undefined
+    ? undefined
+    : contenu.reserve.find((element) => element.id === depotCourant.element);
+  const zoneCible = depotCourant === undefined
+    ? undefined
+    : contenu.zones.find((zone) => zone.id === depotCourant.zone);
+  const relationCourte: Record<string, string> = {
+    dans: 'dans',
+    sur: 'sur',
+    sous: 'sous',
+    'a-cote-de': 'à côté de',
+    devant: 'devant',
+    derriere: 'derrière',
+    entre: 'entre',
+    'au-dessus': 'au-dessus de',
+    'en-dessous': 'en dessous de',
+  };
+  const cibleCourante = elementCible === undefined || zoneCible === undefined
+    ? 'Étape terminée'
+    : `À placer : ${elementCible.libelle} · ${relationCourte[zoneCible.relation] ?? zoneCible.relation} ${zoneCible.libelle}`;
+
   // La réserve peut contenir des dessins supplémentaires pour inviter à lire chaque carte,
   // mais seuls les éléments cités par une consigne sont attendus. Cette distinction doit être
   // visible avant le premier geste : cinq cartes ne signifient pas cinq tâches.
@@ -202,6 +227,35 @@ export function MoteurPlace(
         // bat la feuille — c'est précisément ce qui rendait la première correction inerte.
         style={{ blockSize: '100%', minBlockSize: 0 }}
       >
+        <div
+          data-plateau="etape-place"
+          aria-live="polite"
+          style={{
+            position: 'absolute',
+            insetBlockStart: '0.75rem',
+            // Centré dans le moteur pour rester lisible en paysage comme en portrait ; le
+            // cartouche n'entre pas dans la grille et ne réduit donc jamais l'illustration.
+            insetInlineStart: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 4,
+            display: 'grid',
+            justifyItems: 'center',
+            gap: '0.15rem',
+            maxInlineSize: 'min(88%, 34rem)',
+            padding: '0.45rem 0.8rem',
+            border: '3px solid var(--trait)',
+            borderRadius: '1rem',
+            background: 'var(--parchemin)',
+            boxShadow: 'var(--ombre-bd)',
+            textAlign: 'center',
+            fontWeight: 800,
+          }}
+        >
+          <span style={{ fontWeight: 700 }}>
+            {`Étape ${String(etat.indexConsigne + 1)} / ${String(etat.consignes.length)}`}
+          </span>
+          <span data-cible-place="oui">{cibleCourante}</span>
+        </div>
         {/* R49 (le père, 2026-08-07 : « la phrase est en haut et en bas, il y a doublon ») —
             la consigne était redite ici ET dans l'en-tête d'`EcranNoeud`, seul propriétaire du
             `BoutonEcouter`. La ligne qui la portait (`data-consigne-texte`) est retirée : ce

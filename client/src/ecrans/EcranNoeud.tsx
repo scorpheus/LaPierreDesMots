@@ -67,7 +67,22 @@ interface EtapeAffichable {
  * `eclair` est le premier moteur migré vers ce contrat après la recette parent des lucioles.
  */
 function texteCadreDeConsigne(moteur: string, exercice: string, texteDetaille: string): string {
-  if (moteur === 'tri') return 'Range chaque mot dans le bon panier.';
+  const cadres: Readonly<Record<string, string>> = {
+    assemble: 'Assemble les syllabes pour écrire le mot.',
+    attrape: 'Attrape les éléments demandés.',
+    chemin: 'Pars de l’épingle. Suis le bon chemin.',
+    chrono: 'Range les images dans le bon ordre.',
+    colorie: 'Choisis une couleur, puis touche la bonne partie du dessin.',
+    grave: 'Trace la lettre qui manque pour écrire le mot.',
+    histoire: 'Lis l’histoire, puis réponds à la question.',
+    paires: 'Trouve les paires.',
+    phrase: 'Touche les mots dans l’ordre pour construire la phrase.',
+    place: 'Place chaque dessin au bon endroit dans l’image.',
+    trace: 'Trace la lettre demandée sur l’ardoise.',
+    tri: 'Range chaque mot dans le bon panier.',
+  };
+  const cadre = cadres[moteur];
+  if (cadre !== undefined) return cadre;
   if (moteur !== 'eclair') return texteDetaille;
   if (exercice === 'clairiere-luciole-couleurs-01') {
     return 'Lis le mot. Retrouve ensuite la luciole qui porte ce mot.';

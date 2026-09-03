@@ -162,6 +162,11 @@ export function MoteurAttrape(
   );
 
   const etape = etat.etapes[etat.indexEtape];
+  const ciblesDeLEtape = useMemo(() => {
+    if (etape === undefined) return [];
+    const ids = new Set(etape.restantes);
+    return contenu.cibles.filter((cible) => ids.has(cible.id));
+  }, [contenu.cibles, etape]);
 
   // --- la typographie de lecture ---------------------------------------------
   const reglages = useReglagesLecture();
@@ -228,6 +233,36 @@ export function MoteurAttrape(
       }}
     >
       <style>{FEUILLE_DE_DERIVE}</style>
+
+      {/* Le geste générique est porté par la barre haute de l'écran. Ce cartouche garde
+          seulement la cible concrète de l'étape sous les yeux de l'enfant. */}
+      <div
+        data-plateau="etape-attrape"
+        aria-live="polite"
+        style={{
+          position: 'absolute',
+          insetBlockStart: '0.75rem',
+          insetInlineStart: '0.75rem',
+          zIndex: 3,
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '0.65rem',
+          padding: '0.45rem 0.8rem',
+          border: '3px solid var(--trait)',
+          borderRadius: '1rem',
+          background: 'var(--parchemin)',
+          boxShadow: 'var(--ombre-bd)',
+          ...styleLecture,
+        } as CSSProperties}
+      >
+        <span style={{ fontWeight: 700 }}>{`Étape ${String(etat.indexEtape + 1)} / ${String(etat.etapes.length)}`}</span>
+        <span aria-hidden="true" style={{ color: 'var(--soleil)', fontSize: '1.25em' }}>✦</span>
+        <span style={{ fontWeight: 800 }}>
+          {ciblesDeLEtape.length === 0
+            ? 'Cible suivante'
+            : `À attraper maintenant : ${ciblesDeLEtape.map((cible) => cible.libelle).join(' · ')}`}
+        </span>
+      </div>
 
       {/* ------------------------------------------------------------- le décor, en fond */}
       <div style={styleZoneDeJeu(hauteurBande)}>

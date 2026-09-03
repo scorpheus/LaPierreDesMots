@@ -184,6 +184,15 @@ describe('moteur grave', () => {
     expect(container.querySelector('[data-plateau="mot"] [data-lecture="oui"]')).toBeNull();
   });
 
+  it('cartouche : le mot et la case courante sont identifiés avec l’étape', () => {
+    const { container } = render(<Harnais />);
+    const cartouche = container.querySelector<HTMLElement>('[data-plateau="etape-grave"]');
+    expect(cartouche?.textContent).toContain('Étape 1 / 1');
+    expect(cartouche?.textContent).toContain('bal');
+    expect(cartouche?.textContent).toContain('case 1');
+    expect(cartouche?.querySelector('[data-attendu]')).toBeNull();
+  });
+
   it('mauvaise réponse : une erreur comptée, rien de rouge, la tentative reste réussie', () => {
     const { container } = render(<Harnais />);
     taper(container, ['[data-lettre="d"]']);

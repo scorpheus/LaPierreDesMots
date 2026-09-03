@@ -175,6 +175,18 @@ describe('moteur attrape', () => {
     expect(container.querySelector('[data-etat="echec"]')).toBeNull();
   });
 
+  it('cartouche : la cible concrète et l’étape courante restent visibles et évoluent', () => {
+    const { container } = render(<Harnais />);
+    const cartouche = () => container.querySelector<HTMLElement>('[data-plateau="etape-attrape"]');
+    expect(cartouche()?.textContent).toContain('Étape 1 / 2');
+    expect(cartouche()?.textContent).toContain('b');
+    taper(container, ['[data-cible="lettre-b"]']);
+    expect(cartouche()?.textContent).toContain('Étape 2 / 2');
+    expect(cartouche()?.textContent).toContain('p');
+    expect(cartouche()?.textContent).not.toContain('aussi');
+    expect(cartouche()?.textContent).not.toContain('derniers');
+  });
+
   it('mauvaise réponse : une erreur comptée, rien de rouge, la tentative reste réussie', () => {
     const { container } = render(<Harnais />);
     taper(container, ['[data-cible="lettre-d"]']);

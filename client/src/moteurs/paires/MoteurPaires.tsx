@@ -420,6 +420,10 @@ export function MoteurPaires(
   }, [empreinteAllumees, allumees]);
 
   const etape = etat.etapes[etat.indexEtape];
+  // `ordreAffichage` est la projection complète et stable des paires de l'étape ; il permet
+  // d'afficher la progression sans relire le contenu ni révéler une paire précise.
+  const pairesAttendues = etape?.ordreAffichage ?? [];
+  const pairesTrouvees = pairesAttendues.filter((paire) => etat.acquis[paire] !== undefined).length;
 
   const carteRefusee = etat.dernierRefus === null ? null : etat.dernierRefus.carte;
   const marqueRefusCourante = etat.dernierRefus === null ? 0 : etat.dernierRefus.instantMs;
@@ -477,10 +481,36 @@ export function MoteurPaires(
           borderRadius: 'var(--rayon-carte)',
         }}
       >
-        {/* R49 — plus de bandeau du haut : `EcranNoeud` porte déjà la consigne (« la phrase
-            est en haut et en bas, il y a doublon », le père) avec le vrai `BoutonEcouter`.
-            `paires` n'a rien d'autre à y dire — pas de geste dépendant de l'état, contrairement
-            à `tri` — donc le bandeau disparaît plutôt que de rester vide. */}
+        {/* Repère local stable : la barre haute porte la consigne parlée ; ce cartouche garde la
+            règle du plateau et le nombre de paires trouvées, sans nommer la réponse attendue. */}
+        {etape === undefined ? null : (
+          <div
+            data-cartouche-paires="etape"
+            aria-live="polite"
+            style={{
+              position: 'absolute',
+              insetBlockStart: '0.75rem',
+              insetInlineEnd: '0.75rem',
+              zIndex: 3,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.65rem',
+              padding: '0.45rem 0.8rem',
+              border: '2px solid var(--trait)',
+              borderRadius: '999px',
+              background: 'color-mix(in srgb, var(--soleil, #ffc93c) 28%, var(--parchemin) 72%)',
+              color: 'var(--trait)',
+              boxShadow: 'var(--ombre-bd)',
+              pointerEvents: 'none',
+              ...styleLecture,
+            } as CSSProperties}
+          >
+            <span style={{ fontWeight: 800 }}>Trouve les paires.</span>
+            <span aria-hidden="true" style={{ opacity: 0.72 }}>·</span>
+            <span>{`Étape ${String(etat.indexEtape + 1)} / ${String(etat.etapes.length)}`}</span>
+            <span>{`${String(pairesTrouvees)} / ${String(pairesAttendues.length)} paires`}</span>
+          </div>
+        )}
 
         {/* ── le décor, en fond : couvre la zone de jeu, se recolorie à mesure ────────────── */}
         <div style={{ position: 'absolute', ...ZONE_DE_JEU(hauteurPied), zIndex: 0 }}>

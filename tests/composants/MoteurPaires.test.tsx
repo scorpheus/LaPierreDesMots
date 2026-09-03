@@ -163,6 +163,14 @@ describe('moteur paires', () => {
     expect(carte?.textContent).not.toContain('un loup');
     expect(carte?.getAttribute('aria-label')).toBe('un loup');
   });
+  it('affiche une règle stable et la progression des paires sans révéler la réponse', () => {
+    const { container } = render(<Harnais />);
+    const cartouche = container.querySelector('[data-cartouche-paires="etape"]');
+    expect(cartouche?.textContent).toContain('Trouve les paires.');
+    expect(cartouche?.textContent).toContain('Étape 1 / 10');
+    expect(cartouche?.textContent).toMatch(/0 \/ \d+ paires/);
+    expect(cartouche?.textContent).not.toContain('loup');
+  });
   it('le contenu de ce test est conforme au schéma que le moteur publie', () => {
     const ajv = new (Ajv2020 as unknown as {
       new (options?: Record<string, unknown>): { compile(s: unknown): (d: unknown) => boolean };

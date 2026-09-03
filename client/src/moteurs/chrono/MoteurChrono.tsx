@@ -60,7 +60,7 @@ import {
   centreDuReceptacle,
   decalageEntre,
 } from '../phrase/receptacles.js';
-import { ZoneDeGlisser, useCibleDeDepot, useJetonGlissable } from '../commun/glisser.js';
+import { ZoneDeGlisser, useJetonGlissable } from '../commun/glisser.js';
 import type { VolDuJeton } from '../phrase/receptacles.js';
 
 /** Cadence du `battementHorloge`. Le moteur ne connaît aucun `setTimeout` : c'est ici. */
@@ -99,6 +99,36 @@ const LARGEUR_GLYPHE = 0.66;
  * bouts : la boîte que `mesurer` déclare et celle que le CSS rend concordent.
  */
 const LARGEUR_MAX_PASTILLE = 288; // 18rem à 16 px racine — même valeur que `maxInlineSize` du bouton.
+
+/** Centre les cartes en une rangée, avec le même haut et la même hauteur. */
+export function alignerEmplacementsChrono(
+  emplacements: readonly Emplacement[],
+  bornes: Bornes,
+): readonly Emplacement[] {
+  if (emplacements.length < 2) return emplacements;
+  const hauteurCommune = Math.max(...emplacements.map((e) => e.boite.hauteur));
+  const hautSouhaite = Math.min(...emplacements.map((e) => e.y - e.boite.hauteur / 2));
+  const hautCommun = Math.max(
+    bornes.yMin,
+    Math.min(hautSouhaite, bornes.yMax - hauteurCommune),
+  );
+  const espace = 24;
+  const largeurGroupe =
+    emplacements.reduce((somme, e) => somme + e.boite.largeur, 0) +
+    espace * (emplacements.length - 1);
+  const largeurDisponible = bornes.xMax - bornes.xMin;
+  let curseur = bornes.xMin + Math.max(0, (largeurDisponible - largeurGroupe) / 2);
+  return emplacements.map((e) => {
+    const x = curseur + e.boite.largeur / 2;
+    curseur += e.boite.largeur + espace;
+    return {
+      ...e,
+      x,
+      y: hautCommun + hauteurCommune / 2,
+      boite: { ...e.boite, hauteur: hauteurCommune },
+    };
+  });
+}
 
 /**
  * Le rectangle occupé par le décor ET par les vignettes : tout, sauf la bande de lecture. Sans
@@ -192,6 +222,7 @@ function VignetteSaisissable({
   region,
   placee,
   largeurMax,
+  hauteur,
   styleTexte,
   surTap,
 }: {
@@ -203,6 +234,7 @@ function VignetteSaisissable({
   readonly region: string;
   readonly placee: boolean;
   readonly largeurMax: number;
+  readonly hauteur: number;
   readonly styleTexte: CSSProperties;
   readonly surTap: (evenement: { clientX: number; clientY: number }) => void;
 }): ReactElement {
@@ -235,6 +267,7 @@ function VignetteSaisissable({
           alignItems: 'center',
           justifyContent: 'center',
           inlineSize: asset === null ? undefined : '240px',
+          blockSize: `${String(hauteur)}px`,
           boxSizing: 'border-box',
         } as CSSProperties
       }
@@ -444,6 +477,10 @@ export function MoteurChrono(
   );
 
   const planCourant = plans[etat.indexEtape] ?? plans[plans.length - 1] ?? null;
+  const emplacementsAlignes = useMemo(
+    () => alignerEmplacementsChrono(planCourant?.resultat.emplacements ?? [], bornes),
+    [planCourant, bornes],
+  );
 
   const centroideParRegion = useMemo(
     () => new Map(regions.map((r) => [r.id, r.centroide] as const)),
@@ -495,6 +532,7 @@ export function MoteurChrono(
   const consigne = contenu.consignes[etat.indexEtape] ?? null;
   const ordre = consigne === null ? [] : consigne.ordre;
   const restants = ordre.filter((id) => etat.acquis[id] === undefined);
+  const imagesRangees = ordre.length - restants.length;
 
   const messageDeRefus =
     etat.dernierRefus === null ? '' : (MESSAGES_DE_REFUS[etat.dernierRefus.motif] ?? '');
@@ -523,7 +561,6 @@ export function MoteurChrono(
    * aucun choix de destination : c'est l'ORDRE qui fait la règle, et `moteurChrono` seul dit si
    * la vignette lâchée était la suivante.
    */
-  const accueilFrise = useCibleDeDepot('fentes-de-la-frise');
 
   const deposerLaVignette = useCallback(
     (cle: string) => {
@@ -559,6 +596,40 @@ export function MoteurChrono(
     >
       <style>{FEUILLE_DU_VOL}</style>
 
+      {/* Repère local stable : la barre haute porte la consigne parlée ; ce cartouche rappelle
+          le geste et la progression concrète, sans révéler l'image suivante ni déplacer le
+          plateau. */}
+      {consigne === null ? null : (
+        <div
+          data-cartouche-chrono="etape"
+          aria-live="polite"
+          style={{
+            position: 'absolute',
+            insetBlockStart: '0.75rem',
+            insetInlineStart: '0.75rem',
+            zIndex: 3,
+            display: 'inline-flex',
+            flexWrap: 'wrap',
+            alignItems: 'center',
+            gap: '0.65rem',
+            padding: '0.45rem 0.8rem',
+            border: '2px solid var(--trait)',
+            borderRadius: '999px',
+            background: 'color-mix(in srgb, var(--soleil, #ffc93c) 28%, var(--parchemin) 72%)',
+            color: 'var(--trait)',
+            boxShadow: 'var(--ombre-bd)',
+            pointerEvents: 'none',
+            maxInlineSize: 'min(28rem, 30vw)',
+            ...styleLecture,
+          } as CSSProperties}
+        >
+          <span style={{ fontWeight: 800 }}>Remets les images dans l’ordre.</span>
+          <span aria-hidden="true" style={{ opacity: 0.72 }}>·</span>
+          <span>{`Étape ${String(etat.indexEtape + 1)} / ${String(etat.etapes.length)}`}</span>
+          <span>{`${String(imagesRangees)} / ${String(ordre.length)} rangées`}</span>
+        </div>
+      )}
+
       {/* ---------------------------------------------------------------- le décor, en fond */}
       <div style={{ position: 'absolute', ...ZONE_DE_JEU(hauteurBande), zIndex: 0 }}>
         <SceneDecor
@@ -583,7 +654,7 @@ export function MoteurChrono(
       >
         {planCourant === null
           ? null
-          : planCourant.resultat.emplacements.map((emplacement) => {
+          : emplacementsAlignes.map((emplacement) => {
               const vignette = vignetteParId.get(emplacement.cle);
               if (vignette === undefined) return null;
               const placee = etat.acquis[emplacement.cle] !== undefined;
@@ -624,6 +695,7 @@ export function MoteurChrono(
                     region={emplacement.region ?? ''}
                     placee={placee}
                     largeurMax={LARGEUR_MAX_PASTILLE}
+                    hauteur={emplacement.boite.hauteur}
                     styleTexte={styleLecture as CSSProperties}
                     surTap={(evenement) => {
                       fixerVol(null);
@@ -667,6 +739,7 @@ export function MoteurChrono(
           style={{
             display: 'flex',
             flexWrap: 'wrap',
+            justifyContent: 'center',
             alignItems: 'center',
             gap: '0.5rem',
             marginBlockEnd: '0.6rem',

@@ -715,8 +715,34 @@ export function MoteurPhrase(
           insetInlineEnd: 0,
           insetBlockStart: 0,
           zIndex: 2,
+          display: 'grid',
+          justifyItems: 'center',
+          justifyContent: 'center',
+          gap: '0.25rem',
         }}
       >
+        <div
+          data-plateau="etape-phrase"
+          aria-live="polite"
+          style={{
+            display: 'grid',
+            justifyItems: 'center',
+            gap: '0.1rem',
+            padding: '0.25rem 0.75rem',
+            border: '3px solid var(--trait)',
+            borderRadius: '1rem',
+            background: 'var(--parchemin)',
+            boxShadow: 'var(--ombre-bd)',
+            textAlign: 'center',
+            fontWeight: 800,
+            ...styleLecture,
+          } as CSSProperties}
+        >
+          <span style={{ fontWeight: 700 }}>
+            {`Étape ${String(etat.indexEtape + 1)} / ${String(etat.etapes.length)}`}
+          </span>
+          <span data-cible-phrase="oui">Phrase à construire</span>
+        </div>
         <ZoneDeLecture
           texte={consigne === null ? '' : consigne.phrase}
           motsCles={consigne === null ? [] : consigne.motsCles}

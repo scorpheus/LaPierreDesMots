@@ -25,7 +25,9 @@ test.describe('retours parent — chemin de la Clairière', () => {
     // Deux choix restent réellement ouverts depuis « chat » : « papa » et le leurre « lit ».
     // Le retour vers « l’arbre », lui, ne doit plus être présenté comme une possibilité.
     await expect(page.locator('[data-trait-actif="oui"]')).toHaveCount(2);
-    await expect(page.locator('[data-message-chemin="oui"]')).toContainText('chemin jaune');
+    await expect(page.locator('[data-message-chemin="oui"]')).toContainText(
+      'Suis le chemin des mots avec la lettre a.'
+    );
 
     await page.locator('[data-action="aide"]').click();
     await expect(page.locator('[data-case="case-papa"]')).toHaveAttribute('data-aide-cible', 'oui');

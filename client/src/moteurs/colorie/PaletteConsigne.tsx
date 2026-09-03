@@ -39,14 +39,46 @@ const STYLES_PALETTE = `
   border-radius: 6px;
   padding: 0 0.15em;
 }
+.pierre-cible-colorie {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  background: var(--parchemin, #FFF6E3);
+  color: var(--trait, #1B2440);
+  font-family: Andika, 'Atkinson Hyperlegible', system-ui, sans-serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  line-height: 1.35;
+  text-align: center;
+  border: 3px solid var(--soleil, #FFC93C);
+  border-radius: 14px;
+  padding: 0.55rem 0.8rem;
+  min-block-size: 3.25rem;
+  /* Cible de lecture stable : aucune animation du texte. */
+  animation: none;
+  transition: none;
+}
+.pierre-cible-colorie__couleur {
+  display: inline-block;
+  inline-size: 1.2em;
+  block-size: 1.2em;
+  border: 2px solid var(--trait, #1B2440);
+  border-radius: 50%;
+  flex: 0 0 auto;
+}
 .pierre-progression-consignes {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
   min-block-size: 1.25rem;
+  font-family: Andika, 'Atkinson Hyperlegible', system-ui, sans-serif;
+  font-weight: 700;
+  color: var(--trait, #1B2440);
 }
-.pierre-progression-consignes > span {
+.pierre-progression-consignes__texte { margin-inline-start: 0.25rem; }
+.pierre-progression-consignes > span[data-etat] {
   inline-size: 0.85rem;
   block-size: 0.85rem;
   border: 2px solid var(--trait, #1B2440);
@@ -112,6 +144,8 @@ export interface ProprietesPaletteConsigne {
   readonly niveauAide: NiveauAide;
   /** Godet que la démonstration fait pulser, ou `null`. */
   readonly couleurEnDemonstration: CouleurColoriage | null;
+  /** Cible concrète à réaliser maintenant, annoncée juste au-dessus du nuancier. */
+  readonly cibleCourante: { readonly libelle: string; readonly couleur: CouleurColoriage } | null;
   readonly animationsDesactivees: boolean;
   onChoisir(couleur: CouleurColoriage): void;
 }
@@ -124,6 +158,7 @@ export function PaletteConsigne(proprietes: ProprietesPaletteConsigne): ReactEle
     couleurChoisie,
     niveauAide,
     couleurEnDemonstration,
+    cibleCourante,
     animationsDesactivees,
     onChoisir
   } = proprietes;
@@ -178,6 +213,9 @@ export function PaletteConsigne(proprietes: ProprietesPaletteConsigne): ReactEle
             aria-hidden="true"
           />
         ))}
+        <span className="pierre-progression-consignes__texte">
+          Étape {indexConsigne + 1} sur {consignes.length}
+        </span>
       </div>
 
       {consigneCourante === undefined ? null : niveauAide !== 'aucune' &&
@@ -189,6 +227,21 @@ export function PaletteConsigne(proprietes: ProprietesPaletteConsigne): ReactEle
           {motsClesEnIndice(consigneCourante.motsCles)}
         </div>
       ) : null}
+
+      {cibleCourante === null ? null : (
+        <div
+          className="pierre-cible-colorie"
+          data-cible-colorie
+          aria-label={`Cible : ${cibleCourante.libelle}, en ${cibleCourante.couleur}`}
+        >
+          <span>Colorie {cibleCourante.libelle} en {cibleCourante.couleur}</span>
+          <span
+            className="pierre-cible-colorie__couleur"
+            aria-hidden="true"
+            style={{ background: hexDeCouleur(cibleCourante.couleur) }}
+          />
+        </div>
+      )}
 
       <div
         role="group"

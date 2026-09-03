@@ -192,6 +192,26 @@ describe('MoteurColorie — rendu', () => {
     );
   });
 
+  it('annonce visiblement l’étape et la cible concrète au-dessus du nuancier', async () => {
+    render(<Harnais />);
+    await attendreLaScene();
+
+    const progression = document.querySelector('[data-progression-consignes]');
+    expect(progression?.textContent).toContain(`Étape 1 sur ${String(contenu.consignes.length)}`);
+
+    const regionAttendue = habillage.scene.calques
+      .filter((calque) => calque.role === 'coloriable')
+      .flatMap((calque) => calque.regions)
+      .find((region) => region.id === premiereCible.region);
+    const cible = document.querySelector('[data-cible-colorie]');
+    expect(cible).not.toBeNull();
+    expect(cible?.textContent).toContain(regionAttendue?.libelle ?? premiereCible.region);
+    expect(cible?.textContent).toContain(premiereCible.couleur);
+    expect(cible?.getAttribute('aria-label')).toBe(
+      `Cible : ${regionAttendue?.libelle ?? premiereCible.region}, en ${premiereCible.couleur}`
+    );
+  });
+
   it('rend une région par région coloriable de l’habillage, toutes non peintes', async () => {
     render(<Harnais />);
     await attendreLaScene();

@@ -38,6 +38,10 @@ jusqu'au lot des lucioles. L'audio reste volontairement hors périmètre.
 | Retour dans une région qui repropose des exercices déjà finis | le serveur et le mode autonome transmettent le journal au sélecteur ; une sortie privilégie les inédits et garantit même le dernier restant | `selecteur.test.ts` |
 | Déblocage suivant invisible sur la carte | la carte annonce que la prochaine région s'ouvre à la fin de la région courante et compte les exercices restants | `EcranCarte.test.tsx` |
 | Coffre encore entièrement technique | une illustration raster du coffre accueille désormais l'enfant ; les six fiches d'Éclats gardent enfin leur silhouette régionale | `EcranCoffre.test.tsx`, `production/assets.lock.json` |
+| Changement de règle presque invisible entre deux étapes | les 14 moteurs suivent désormais la même hiérarchie : règle générale stable dans la barre haute, étape ou cible courante dans un cartouche proche du geste | 130 tests composants ciblés et campagne Chromium des 75 nœuds |
+| Images d'histoire alignées à gauche et de hauteurs différentes | les cartes sont regroupées au centre, partagent le même bord supérieur et la même hauteur ; leur cartouche est placé dans la marge pour ne plus masquer la troisième carte | `MoteurChrono.test.tsx`, captures 1920×1080 et 1920×1200 |
+| QA longue relancée pour chaque retouche | boucle courte par moteur conservée ; une campagne visuelle dédiée ouvre les 75 nœuds en 27 secondes et produit 150 captures hors références | `parcours-audit-75-noeuds.spec.ts`, `bac-a-sable/audit-75-noeuds/mesures.json` |
+| Un moteur testé ne prouvait pas ses variantes de contenu | une seconde campagne ouvre chacun des 75 nœuds, dérive un refus et une action correcte depuis son état réel, puis exige une progression et l'absence d'écran d'échec | `parcours-campagne-gestes-75.spec.ts`, 75/75 verts en 18 secondes |
 
 ## Encore à faire — dette visuelle réelle
 
@@ -56,11 +60,12 @@ jusqu'au lot des lucioles. L'audio reste volontairement hors périmètre.
 - Les animations avancées du campement demandent des calques détourés et des sprites partageant les
   ancres du fond V5. Le feu et le papillon actuels sont conservés, mais le reste du décor ne possède
   pas encore les micro-interactions illustrées prévues.
-- Le changement discret de cible est une dette transversale. L'audit du 3 septembre classe en P0
-  `eclair`, `chemin`, `colorie` et `tri`, puis en P1 `attrape`, `assemble`, `grave`, `chrono` et
-  `paires`. `eclair` est le premier moteur migré ; les autres doivent recevoir le même contrat :
-  consigne-cadre stable, numéro d'étape et cible courante séparée. L'inventaire détaillé est conservé
-  dans `bac-a-sable/audit-consignes-etapes-2026-09-03.md`.
+- La hiérarchie règle stable / cible courante est implantée dans les 14 moteurs. La campagne
+  visuelle initiale couvre les 75 nœuds pédagogiques aux deux résolutions sans débordement ni
+  cartouche absent. La campagne gestuelle couvre désormais elle aussi 75/75 nœuds : chaque
+  exercice accepte une action correcte, produit une progression observable et reste sans écran
+  d'échec après un refus dérivable. Cela prouve la jouabilité initiale de chaque contenu, pas
+  encore sa finition artistique humaine ni toutes ses étapes successives.
 - La géographie de la carte reste à arbitrer. L'ordre pédagogique des six régions est bon, mais la
   première région occupe visuellement le centre. La recommandation consignée dans
   `bac-a-sable/audit-carte-narrative-2026-09-03.md` est de placer la Clairière en périphérie et de
@@ -72,6 +77,16 @@ La boucle courte devient la boucle normale : garde de contenu, tests du moteur t
 Chromium à la résolution concernée, puis `qa:rapide`. La campagne complète ne tourne qu'à la fin
 d'un lot transversal ou avant livraison. Cela évite de payer plusieurs minutes pour chaque retouche
 CSS tout en gardant une preuve observable sur le défaut corrigé.
+
+## État de la vérification globale après ce lot
+
+La campagne complète du 3 septembre a duré 428 secondes. Lint, TypeScript, contenu, construction,
+rejeu et contrôles QA sont verts. Les cinq échecs unitaires sont exclusivement la dette audio mise
+hors périmètre par le parent. Le réglage de lecture du mot central de `grave`, détecté par la qualité,
+a été corrigé et sa recette ciblée repasse au vert. Restent hors de ce lot : le débordement tablette
+du chaudron et du coffre, une recette de cascade qui n'observe plus que le palier intermédiaire, et
+sept références visuelles divergentes. Les références ne sont pas mises à jour automatiquement :
+les écarts doivent d'abord être validés visuellement par le parent.
 
 ## Asset raster ajouté pendant cette passe
 

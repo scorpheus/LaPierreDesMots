@@ -14,13 +14,13 @@ test.describe('retours parent — lucioles et coffre', () => {
   });
 
   test('les lucioles montrent le mot utile, grand et sans phrase parasite', async ({ page }) => {
-    await entrerDansLeNoeud(page, 'clairiere-06');
+    await entrerDansLeNoeud(page, 'clairiere-02');
 
     const lucioles = page.locator('.cible-luciole');
-    await expect(lucioles).toHaveCount(8);
+    await expect(lucioles).toHaveCount(3);
     const libelles = await lucioles.allTextContents();
     expect(libelles.map((texte) => texte.trim())).toEqual(
-      expect.arrayContaining(['bleu', 'vert', 'rouge', 'jaune', 'rose', 'brun'])
+      expect.arrayContaining(['rouge', 'gris', 'bleu'])
     );
     expect(libelles.join(' ')).not.toMatch(/luciole qui porte|deuxième luciole/iu);
     await expect(page.locator('[data-consigne="c1"]')).toHaveText(

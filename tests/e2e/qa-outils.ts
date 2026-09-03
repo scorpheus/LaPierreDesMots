@@ -471,6 +471,7 @@ export interface NoeudLivre {
   readonly region: string;
   readonly exercice: string;
   readonly moteur: string;
+  readonly progression: boolean;
 }
 
 /**
@@ -497,7 +498,7 @@ export function noeudsLivres(): readonly NoeudLivre[] {
 
   for (const fichier of readdirSync(cheminDepot('contenu/noeuds'))) {
     if (!fichier.endsWith('.json')) continue;
-    const noeud = lireJson<{ id: string; region: string; exercice: string }>(
+    const noeud = lireJson<{ id: string; region: string; exercice: string; progression?: boolean }>(
       `contenu/noeuds/${fichier}`,
     );
     const moteur = exercices.get(noeud.exercice);
@@ -507,7 +508,13 @@ export function noeudsLivres(): readonly NoeudLivre[] {
           `pas dans contenu/exercices/. Donnée cassée — la couverture des moteurs serait fausse.`,
       );
     }
-    noeuds.push({ id: noeud.id, region: noeud.region, exercice: noeud.exercice, moteur });
+    noeuds.push({
+      id: noeud.id,
+      region: noeud.region,
+      exercice: noeud.exercice,
+      moteur,
+      progression: noeud.progression !== false,
+    });
   }
   if (noeuds.length === 0) {
     throw new Error('QA : aucun nœud livré. La couverture des moteurs serait vraie par vacuité.');

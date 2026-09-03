@@ -119,6 +119,7 @@ export function MoteurHistoire(
   );
 
   const etape = etat.etapes[etat.indexEtape];
+  const questionCourante = contenu.questions[etat.indexEtape];
 
   // --- la typographie de lecture ---------------------------------------------
   const reglages = useReglagesLecture();
@@ -264,6 +265,40 @@ export function MoteurHistoire(
         // basculement, exactement comme `[data-plateau="eclair"]` le fait pour `eclair`.
         <div data-plateau="recit" data-visible="non" hidden />
       )}
+
+      {/* La règle générale reste dans la barre de `EcranNoeud`. La question, qui change à
+          chaque étape, reste ici au voisinage des réponses. La carte est superposée et
+          descend sous le récit lorsqu'il est ouvert : ni doublon, ni décor rétréci. */}
+      <div
+        data-plateau="etape-histoire"
+        data-etape-courante={String(Math.min(etat.indexEtape + 1, etat.etapes.length))}
+        data-etapes-total={String(etat.etapes.length)}
+        aria-label={`Étape ${String(Math.min(etat.indexEtape + 1, etat.etapes.length))} sur ${String(etat.etapes.length)}`}
+        style={{
+          position: 'absolute',
+          insetBlockStart: `${String(hauteurRecit + 12)}px`,
+          insetInlineStart: '50%',
+          transform: 'translateX(-50%)',
+          zIndex: 4,
+          padding: '0.5rem 0.75rem',
+          backgroundColor: 'var(--parchemin, #FBF6EA)',
+          border: 'var(--epaisseur-trait, 2px) solid var(--trait, #1B2440)',
+          borderRadius: 'var(--rayon-carte, 1rem)',
+          boxShadow: '0 3px 12px rgba(27, 36, 64, 0.16)',
+          pointerEvents: 'none',
+          ...styleLecture,
+          fontWeight: 700,
+          textAlign: 'center',
+          maxInlineSize: 'min(88%, 42rem)',
+        } as CSSProperties}
+      >
+        <span style={{ display: 'block', fontSize: '0.85em', opacity: 0.72 }}>
+          Étape {String(Math.min(etat.indexEtape + 1, etat.etapes.length))} sur {String(etat.etapes.length)}
+        </span>
+        <span data-cible-histoire="oui">
+          {questionCourante?.texte ?? 'Réponds à la question.'}
+        </span>
+      </div>
 
       {/* ------------------------------------------------------------- le décor, en fond */}
       <div style={styleZoneJeu}>
