@@ -134,7 +134,7 @@ function Case({
       data-collection={categorie}
       data-piece={cle}
       data-obtenue={obtenu ? 'oui' : 'non'}
-      className="cible"
+      className={`cible case-coffre case-coffre--${categorie}`}
       aria-label={obtenu ? `${libelle}, gagné` : `${libelle}, pas encore gagné`}
       onClick={surOuvrir}
       style={{
@@ -255,7 +255,7 @@ export function EcranCoffre({
 
   return (
     <main data-ecran="coffre" className="ecran-coffre">
-      <header style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+      <header className="coffre-en-tete" style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
         <h1 className="titre" style={{ fontSize: '2.25rem', margin: 0 }}>
           Le coffre
         </h1>
@@ -269,6 +269,7 @@ export function EcranCoffre({
           Retour au campement
         </button>
         <div
+          className="coffre-en-tete-illustration"
           data-coffre-illustration="raster"
           aria-hidden="true"
           style={{
@@ -283,6 +284,7 @@ export function EcranCoffre({
             Tes trouvailles t’attendent ici.
           </p>
           <img
+            className="coffre-en-tete-image"
             src={urlAsset('assets/coffre/coffre-ouvert-v1.png')}
             alt=""
             width={156}

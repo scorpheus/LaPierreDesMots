@@ -130,6 +130,18 @@ describe('rien ne sort jamais du coffre, et le vide se montre (R14, D25)', () =>
     );
     expect(illustration).not.toBeNull();
     expect(illustration?.src).toContain('assets/coffre/coffre-ouvert-v1.png');
+    expect(illustration?.classList.contains('coffre-en-tete-image')).toBe(true);
+    expect(document.querySelector('.coffre-en-tete-illustration')).not.toBeNull();
+  });
+
+  it('donne une carte lumineuse aux acquis sans modifier le creux des cases restantes', async () => {
+    await monterEtAttendre();
+    const obtenue = document.querySelector('[data-piece][data-obtenue="oui"]');
+    const enCreux = document.querySelector('[data-piece][data-obtenue="non"]');
+    expect(obtenue?.classList.contains('case-coffre')).toBe(true);
+    expect(obtenue?.classList.contains('case-coffre--eclat') || obtenue?.classList.contains('case-coffre--objet')).toBe(true);
+    expect(enCreux?.classList.contains('case-coffre')).toBe(true);
+    expect(enCreux?.getAttribute('data-obtenue')).toBe('non');
   });
 
   it('rend une case d’Éclat par région — les obtenues ET les autres', async () => {

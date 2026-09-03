@@ -2158,6 +2158,22 @@ body {
   min-block-size: 0;
 }
 
+/* Le coffre raster est une vraie invitation, pas une simple vignette technique. Le halo reste
+   décoratif (`aria-hidden` sur son conteneur) et ne change aucune zone tactile. */
+.coffre-en-tete-illustration {
+  padding: 0.35rem 0.65rem 0.35rem 1rem;
+  border: var(--epaisseur-trait) solid var(--trait);
+  border-radius: var(--rayon-carte);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--parchemin) 86%, var(--soleil)), var(--parchemin));
+  box-shadow: var(--ombre-bd);
+}
+
+.coffre-en-tete-image {
+  display: block;
+  object-fit: contain;
+  filter: drop-shadow(0 0.35rem 0.35rem rgb(27 36 64 / 22%));
+}
+
 .collections-coffre {
   flex: 1 1 0;
   min-block-size: 0;
@@ -2188,6 +2204,32 @@ body {
 
 .collection-coffre ul {
   justify-content: center;
+}
+
+/* Une carte gagnée prend la lumière de la collection ; une carte en creux reste pilotée par
+   le dessin (opacity/filter dans le composant), afin que son libellé demeure lisible. */
+.case-coffre {
+  color: inherit;
+  border: var(--epaisseur-trait) solid transparent;
+  border-radius: var(--rayon-carte);
+  background: color-mix(in srgb, var(--parchemin) 88%, var(--grisaille));
+  box-shadow: 0 0.15rem 0 rgb(27 36 64 / 12%);
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+.case-coffre[data-obtenue="oui"] {
+  border-color: var(--trait);
+  background: linear-gradient(145deg, var(--parchemin), color-mix(in srgb, var(--soleil) 26%, var(--parchemin)));
+}
+
+.case-coffre:hover,
+.case-coffre:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: var(--ombre-bd);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .case-coffre { transition: none; }
 }
 
 /* Les 25 formes restent de grandes cartes explorables. La grille emploie l'espace du panneau
