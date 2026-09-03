@@ -7,7 +7,11 @@ Habillage : `galeries.echos`
 ## Parcours joué
 
 Deux consignes demandent quatre paires b/p : `bain/pain`, `bas/pas`, `boule/poule` et `bol/pot`.
-Les textes sont courts et adaptés au CE1 : « Relie le mot bain à son écho, puis le mot bas. »
+La métaphore « son écho » a été retirée de la consigne : elle habille l'univers mais ne dit
+pas l'action attendue. Le texte nomme maintenant chaque geste et chaque paire : « Touche bain,
+puis pain. Touche ensuite bas, puis pas. » La seconde étape fait de même avec `boule/poule` et
+`bol/pot`. La réponse n'est volontairement plus cachée : cet exercice entraîne le repérage et
+l'association b/p, pas la compréhension d'une devinette.
 L'aide Gobi relit, souffle, surligne ou montre la cible gratuitement.
 
 Les huit cartes sont toutes rendues et réellement retournables au tap (`data-carte`,
@@ -34,5 +38,5 @@ Les huit cartes sont des cibles tactiles espacées, avec état retourné visible
 fine. Les faces sont des mots textuels, pas des images : le contenu déclare `asset: null` pour les
 huit cartes.
 
-**BLOQUÉ-ASSET** — aucune face image réelle n'est fournie ; l'asset final de `galeries.echos`
-reste à valider. Aucun asset n'a été généré.
+**FONCTIONNEL — CONSIGNE CORRIGÉE.** Les cartes restent textuelles par conception ; le fond
+`galeries-echos.png` est intégré. Validation parent de la nouvelle formulation en attente.

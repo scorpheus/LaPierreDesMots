@@ -1,6 +1,6 @@
 # Recette — clairiere-03 / clairiere-paniers-couleurs-01
 
-Date : 2026-09-02
+Date : 2026-09-03
 
 ## Périmètre
 
@@ -22,8 +22,8 @@ Date : 2026-09-02
    aucun déplacement dnd-kit n'est en cours. Le même test passe et le mot est visiblement
    « en main » ; le dépôt dans le panier reste disponible.
 4. **Non-régression ciblée** —
-   `npm test -- --run tests/composants/MoteurTri-affordance.test.tsx tests/composants/MoteurTri.test.tsx`
-   : **PASS**, 2 fichiers, 14 tests.
+   `parcours-tri-tactile.spec.ts` utilise de vrais clics sur les 11 nœuds `tri` et rejoue
+   explicitement `rouge → rose → vert` dans le panier gauche : **12/12 PASS**.
 
 ## Risque à surveiller
 
@@ -35,7 +35,6 @@ par dnd-kit.
 
 ## Verdict
 
-**FONCTIONNEL CORRIGÉ — BLOQUÉ-ASSET si le SVG des paniers reste un blockout.** Le geste
-tap-puis-tap est couvert et corrigé côté moteur ; la recette de livraison reste bloquée tant
-que `contenu/habillages/clairiere/paniers.svg` n'est pas validé comme décor de production
-(et verrouillé dans la chaîne d'assets), plutôt que comme simple blockout.
+**FONCTIONNEL ET ASSET INTÉGRÉ.** Le fond `clairiere-paniers.png` est chargé, l'image entière
+reste visible et les paniers sont compacts. La logique de contenu comporte désormais deux
+catégories complètes : les sept couleurs, puis les cinq autres mots.

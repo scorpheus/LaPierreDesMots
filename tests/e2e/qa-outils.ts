@@ -861,6 +861,17 @@ export function recettesDEcrans(): readonly EcranQA[] {
     },
   },
   {
+    nom: 'chaudron (coloriage libre)',
+    attendu: 'chaudron',
+    aller: async (page) => {
+      await preparer(page);
+      await choisirLeProfil(page);
+      await page.locator('[data-vers="campement"]').click();
+      await expect(page.locator('[data-ecran="campement"]')).toBeVisible();
+      await page.locator('[data-chaudron] button').click();
+    },
+  },
+  {
     nom: 'coffre',
     attendu: 'coffre',
     aller: async (page) => {

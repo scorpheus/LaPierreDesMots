@@ -489,6 +489,7 @@ export function MoteurPaires(
             allumees={allumees}
             derniere={derniere}
             animationsDesactivees={animationsDesactivees}
+            ajustement="contenir"
           />
         </div>
 

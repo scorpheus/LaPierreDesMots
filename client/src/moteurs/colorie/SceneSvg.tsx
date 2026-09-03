@@ -121,6 +121,10 @@ export interface ProprietesSceneSvg {
   /** Instant du dernier refus : change à chaque refus, même sur la même région. */
   readonly marqueRefus: number;
   readonly animationsDesactivees: boolean;
+  /** Nombre de régions demandées par cet exercice, pour recolorer le raster jusqu'à 100 %. */
+  readonly nombreRegionsAttendues?: number;
+  /** Seules les cibles de la consigne courante doivent prendre le doigt. */
+  readonly regionsActives?: readonly IdRegionSvg[];
   /** Le SVG déclaratif de l'habillage. `null` → décor de repli dérivé. */
   readonly svgMarkup: string | null;
   onPeindre(region: IdRegionSvg): void;
@@ -141,9 +145,12 @@ function pointViewBox(
   if (boite === null || boite.width === 0 || boite.height === 0) {
     return [minX + largeur / 2, minY + hauteur / 2];
   }
+  const echelle = Math.min(boite.width / largeur, boite.height / hauteur);
+  const margeX = (boite.width - largeur * echelle) / 2;
+  const margeY = (boite.height - hauteur * echelle) / 2;
   return [
-    minX + ((clientX - boite.left) / boite.width) * largeur,
-    minY + ((clientY - boite.top) / boite.height) * hauteur
+    minX + (clientX - boite.left - margeX) / echelle,
+    minY + (clientY - boite.top - margeY) / echelle
   ];
 }
 
@@ -160,6 +167,8 @@ export function SceneSvg(proprietes: ProprietesSceneSvg): ReactElement {
     regionEnRefus,
     marqueRefus,
     animationsDesactivees,
+    nombreRegionsAttendues = 0,
+    regionsActives,
     svgMarkup,
     onPeindre
   } = proprietes;
@@ -170,7 +179,12 @@ export function SceneSvg(proprietes: ProprietesSceneSvg): ReactElement {
 
   const viewBox = habillage.scene.viewBox || VIEWBOX_PAR_DEFAUT;
   const dureeRecolorationMs = habillage.timings.recolorationMs;
+  const dimensionsViewBox = viewBox.trim().split(/[\s,]+/u).map(Number);
+  const rapportViewBox = (dimensionsViewBox[2] ?? 1) / Math.max(1, dimensionsViewBox[3] ?? 1);
   const [rayonPrise, fixerRayonPrise] = useState(64);
+  const grisailleRaster = nombreRegionsAttendues <= 0
+    ? 0
+    : Math.max(0, 1 - Object.keys(remplissages).length / nombreRegionsAttendues);
 
   // Une longueur SVG est mise à l'échelle avec tout le dessin : 80 unités donnaient 80 px sur
   // la tablette de référence, mais seulement 40 px dans le viewport E2E plus bas. Le rayon est
@@ -420,13 +434,24 @@ export function SceneSvg(proprietes: ProprietesSceneSvg): ReactElement {
       ref={refSvg}
       className={`pierre-scene${animationsDesactivees ? ' pierre-scene--calme' : ''}`}
       viewBox={viewBox}
+      preserveAspectRatio="xMidYMid meet"
       xmlns="http://www.w3.org/2000/svg"
       role="group"
       aria-label={habillage.libelle}
       data-habillage={habillage.id}
       data-decor={svgMarkup === null ? 'repli' : 'habillage'}
       onPointerDown={surPointerDown}
-      style={{ width: '100%', height: 'auto', touchAction: 'manipulation' }}
+      style={{
+        width: '100%',
+        height: 'auto',
+        maxWidth: `min(100%, calc((100dvh - 19rem) * ${String(rapportViewBox)}))`,
+        maxHeight: 'calc(100dvh - 19rem)',
+        alignSelf: 'center',
+        flex: '0 1 auto',
+        filter: `grayscale(${String(grisailleRaster)})`,
+        transition: `filter ${String(animationsDesactivees ? 0 : dureeRecolorationMs)}ms ease-in-out`,
+        touchAction: 'manipulation'
+      }}
     >
       <style>{STYLES_SCENE}</style>
 
@@ -443,6 +468,7 @@ export function SceneSvg(proprietes: ProprietesSceneSvg): ReactElement {
           <g data-calque="prises" aria-label="Zones à colorier">
             {regionsDeclarees.map((region) => {
               const couleur = remplissages[region.id];
+              const active = regionsActives === undefined || regionsActives.includes(region.id);
               return (
                 <circle
                   key={`prise-${region.id}`}
@@ -458,10 +484,12 @@ export function SceneSvg(proprietes: ProprietesSceneSvg): ReactElement {
                   r={rayonPrise}
                   data-region-svg={region.id}
                   data-peinte={couleur === undefined ? 'non' : 'oui'}
+                  aria-disabled={!active}
                   {...(couleur === undefined ? {} : { 'data-couleur': couleur })}
                   aria-label={region.libelle}
                   role="button"
-                  tabIndex={0}
+                  tabIndex={active ? 0 : -1}
+                  style={{ pointerEvents: active ? 'all' : 'none' }}
                   onKeyDown={surClavier}
                 />
               );

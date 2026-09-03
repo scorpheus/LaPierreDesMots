@@ -566,6 +566,7 @@ export function MoteurChrono(
           allumees={allumees}
           derniere={derniere}
           animationsDesactivees={animationsDesactivees}
+          ajustement="contenir"
         />
       </div>
 

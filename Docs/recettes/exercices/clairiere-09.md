@@ -14,6 +14,9 @@ avec deux choix mélangés par question. Les textes de questions, le récit et l
 audibles via les contrôles de l'écran ; l'aide Gobi est déclarée (`relire-consigne`,
 `souffle-syllabe`, `montre-cible`).
 
+Le 3 septembre, le texte et la question ont été alignés sur le croissant visible dans
+l'illustration : « La lune est petite et belle », puis « La lune est ronde ou petite ? ».
+
 ## Quatre preuves
 
 1. **Contenu et texte** — `contenu/exercices/clairiere/veillee-histoire-01.json` déclare
@@ -35,7 +38,5 @@ parcours Playwright, snapshot ou asset n'a été lancé.
 
 ## Verdict
 
-**FONCTIONNEL — À CONFIRMER TABLETTE / BLOQUÉ-ASSET si le SVG de la veillée reste un
-blockout.** Le récit, les cinq questions, les taps, le mélange injecté, l'aide, l'absence
-d'échec et la fin réussie sont couverts au niveau composant ; la livraison attend la validation
-du décor de production et du rendu sur tablette.
+**FONCTIONNEL — ASSET INTÉGRÉ, validation parent du texte en attente.** Le fond
+`clairiere-veillee.png` est chargé et le cadrage ne le rogne plus.

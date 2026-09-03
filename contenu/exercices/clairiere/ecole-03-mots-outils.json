@@ -1,5 +1,5 @@
 {
-  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Lot M1, nœud clairiere-10, temps `retournement` du second cycle. IL REJOUE L'HABILLAGE `clairiere.ecole` DÉJÀ EMPLOYÉ AU NŒUD 1, et c'est licite : R13 interdit deux fois le même habillage DANS UNE MÊME SORTIE, soit une fenêtre de six nœuds consécutifs ; entre le nœud 1 et le nœud 10 il y a huit nœuds. C'est aussi le seul décor de la Clairière assez riche pour porter six consignes — 31 régions nommées, la seule à dépasser le bouchon à six rectangles. TROIS FAITS MESURÉS. (1) `region-deja-peinte` ne compte pas d'erreur mais ne libère rien : les neuf régions visées sont deux à deux distinctes, et distinctes de celles de `ecole-01` par courtoisie de relecture, pas par obligation (l'état des deux exercices est séparé). (2) Toutes ont une surface supérieure à 1 681 unités `viewBox`, seuil calculé par `scripts/test-contenu.mjs` pour un carré de 64 px à l'échelle de rendu de ce `viewBox` 922 × 615 (R16) — la plus petite employée ici est `ballon`, 2 264. (3) LE MÉLANGE IMPÉRATIF / AFFIRMATIF EST DÉLIBÉRÉ : sur les 79 consignes du niveau 1 des fiches d'origine, `le` (23), `la` (19) et `les` (9) dominent `dessine` (7) et `colorie` (1) — observation F3. Trois consignes sur six ont donc la forme d'un constat qui vaut consigne, et ce sont elles qui travaillent réellement `mot.outil.frequent` : c'est le déterminant, et lui seul, qui dit combien de régions colorier.",
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Le nœud rejoue licitement `clairiere.ecole`, neuf nœuds après son premier emploi. Les six consignes visent huit régions toutes visibles dans le fond illustré : toit, porte, deux fenêtres, pull et cheveux de la maîtresse, banc et tableau. Les anciennes cibles ballon et filles ont été retirées parce qu'elles n'existent pas dans l'image finale. Les prises tactiles ont été recalées sur cette image ; seule la consigne courante prend le doigt, ce qui empêche deux zones proches de se masquer.",
   "id": "clairiere-ecole-03-mots-outils",
   "version": 1,
   "titre": "L’école des petits mots",
@@ -50,25 +50,24 @@
         },
         {
           "id": "c5",
-          "texte": "Le ballon est orange et le banc est brun.",
+          "texte": "Le banc est brun et le tableau est noir.",
           "forme": "affirmative",
           "audio": null,
           "cibles": [
-            { "region": "ballon", "couleur": "orange" },
-            { "region": "banc", "couleur": "brun" }
+            { "region": "banc", "couleur": "brun" },
+            { "region": "tableau", "couleur": "noir" }
           ],
-          "motsCles": ["ballon", "orange", "banc", "brun"]
+          "motsCles": ["banc", "brun", "tableau", "noir"]
         },
         {
           "id": "c6",
-          "texte": "Colorie les cheveux des filles en noir.",
+          "texte": "Colorie les cheveux de la maîtresse en noir.",
           "forme": "imperative",
           "audio": null,
           "cibles": [
-            { "region": "cheveux-fille-1", "couleur": "noir" },
-            { "region": "cheveux-fille-2", "couleur": "noir" }
+            { "region": "cheveux-maitresse", "couleur": "noir" }
           ],
-          "motsCles": ["cheveux", "filles", "noir"]
+          "motsCles": ["cheveux", "maîtresse", "noir"]
         }
       ],
       "nuancierAutorise": ["rouge", "orange", "jaune", "vert", "bleu", "brun", "noir"]

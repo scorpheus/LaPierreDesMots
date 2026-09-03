@@ -74,8 +74,8 @@ const NUANCIER = {
  * Les décors maîtres validés sont servis comme fond illustré pour les moteurs de
  * placement, tri, phrase, etc. Le SVG généré reste présent (et ses régions restent
  * tapables) mais sa géométrie est masquée pour éviter le blockout par-dessus l'image.
- * Les quatre scènes `colorie` sont volontairement exclues : elles utilisent les
- * scènes raster indexées et leurs masques dédiés.
+ * Les scènes `colorie` ne prennent un raster que lorsqu'il est explicitement déclaré dans
+ * leur fiche : leurs zones transparentes restent alors le masque tactile du moteur.
  */
 function fondRasterExercice(spec) {
   // Les moteurs colorie/libre ont leur propre contrat de calques (fond/trait/masques).
@@ -777,6 +777,8 @@ const MARAIS = [
       'tronc, une barque échouée et un nénuphar perdu. Quand on lit, la brume s’en va.',
     region: 'marais-jumeau',
     moteurs: ['colorie'],
+    fondIllustre: '/api/contenu/assets/assets/decors/brume.png',
+    masquerGeometrie: true,
     nuancier: ['brun', 'noir', 'rose', 'jaune', 'rouge', 'orange', 'bleu', 'vert'],
     zones: [
       z('ciel-pale', 'le ciel pâle', ciel(72, 8, 2)),
@@ -975,6 +977,8 @@ const FORET = [
       'tailles plus un gland — le tapis qu’on recolorie feuille après feuille.',
     region: 'foret-muette',
     moteurs: ['colorie'],
+    fondIllustre: '/api/contenu/assets/assets/decors/tapis.png',
+    masquerGeometrie: true,
     nuancier: ['brun', 'noir', 'violet', 'vert', 'rouge', 'jaune', 'orange', 'rose'],
     zones: [
       z('ciel-entre-troncs', 'le ciel entre les troncs', ciel(64, 7, 4)),
@@ -1126,6 +1130,8 @@ const VOLCAN = [
       'plein de braises, un seau d’eau, une étincelle qui saute.',
     region: 'volcan',
     moteurs: ['colorie'],
+    fondIllustre: '/api/contenu/assets/assets/decors/forge.png',
+    masquerGeometrie: true,
     nuancier: ['bleu', 'noir', 'rouge', 'brun', 'violet', 'jaune', 'rose', 'orange'],
     zones: [
       z('mur-de-la-forge', 'le mur de la forge', ciel(150, 9, 3)),
@@ -1419,6 +1425,8 @@ const CITE = [
       'recolorier, deux échafaudages, un pot de couleur et un pinceau posés dans la rue.',
     region: 'cite-des-histoires',
     moteurs: ['colorie'],
+    fondIllustre: '/api/contenu/assets/assets/decors/fresque-murale.png',
+    masquerGeometrie: true,
     nuancier: ['rouge', 'vert', 'jaune', 'brun', 'rose', 'orange', 'violet', 'bleu'],
     zones: [
       z('mur-de-pierre', 'le mur de pierre', ciel(60, 6, 3)),

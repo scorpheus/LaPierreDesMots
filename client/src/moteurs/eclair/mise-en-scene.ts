@@ -54,10 +54,10 @@ import type {
   TransformeDecor,
   ViewBox,
 } from '../../habillages/emplacements.js';
-import { lireViewBox, transformeSlice, versPixels } from '../../habillages/emplacements.js';
+import { lireViewBox, transformeMeet, transformeSlice, versPixels } from '../../habillages/emplacements.js';
 
 export type { Boite, Bornes, Cadre, RegionDHabillage, ResultatDerivation, TransformeDecor, ViewBox };
-export { lireViewBox, regionsColoriables, transformeSlice, versPixels };
+export { lireViewBox, regionsColoriables, transformeMeet, transformeSlice, versPixels };
 
 /** Cadre servi tant que rien n'est mesuré — voir `MoteurPhrase.CADRE_DE_REPLI`, même raison. */
 export const CADRE_DE_REPLI: Cadre = { largeur: 900, hauteur: 1000 };

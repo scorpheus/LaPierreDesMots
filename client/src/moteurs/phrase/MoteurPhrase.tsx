@@ -737,6 +737,7 @@ export function MoteurPhrase(
           allumees={allumees}
           derniere={derniere}
           animationsDesactivees={animationsDesactivees}
+          ajustement="contenir"
         />
       </div>
 

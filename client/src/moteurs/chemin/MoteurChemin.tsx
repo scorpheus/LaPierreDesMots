@@ -245,6 +245,7 @@ export function MoteurChemin(
           allumees={allumees}
           derniere={derniere}
           animationsDesactivees={animationsDesactivees}
+          ajustement="contenir"
         />
       </div>
 

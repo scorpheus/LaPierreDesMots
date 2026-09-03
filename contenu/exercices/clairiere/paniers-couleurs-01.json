@@ -1,5 +1,5 @@
 {
-  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Lot S3 : la marque de bouchon que ce commentaire portait encore ne décrivait plus le fichier — elle nommait son ÉTAT ANTÉRIEUR. Un recensement par mot (`grep -rl` sur le dossier des exercices) comptait donc neuf bouchons livrés là où il n'y en avait plus un seul, et c'est la leçon D48 prise par l'autre bout : on avait compté les OCCURRENCES du mot au lieu des OBJETS qui portent l'état. La marque est un état, pas un souvenir : elle est retirée des neuf textes, l'histoire est gardée dans chacun. Lot M1 — réécriture du contenu bouchon de l'intégration v2. LE CRITÈRE DE TRI A CHANGÉ, ET C'EST LE FOND DE LA RÉÉCRITURE : « couleurs chaudes / couleurs froides » est une abstraction d'adulte, que l'enfant ne peut pas LIRE — il devait la deviner ou l'apprendre par cœur, et l'exercice mesurait alors autre chose que `lex.couleur`. Le critère est maintenant celui du code même du référentiel : « Reconnaître le nom écrit d'une couleur ». Un mot est un nom de couleur, ou il ne l'est pas ; la réponse est dans le mot, pas dans une convention. Les cinq mots non-couleurs sont pris dans le décor du panier lui-même (pomme, poire, table, nappe sont quatre des six régions de `clairiere.paniers`) : l'enfant qui hésite peut regarder le dessin. Trois contraintes mesurées. (1) `partage/src/moteurs/tri/validation.ts` : `acquis[element]` n'est jamais remis à zéro — les douze éléments sont donc répartis en quatre lots disjoints, un par consigne. (2) `element-hors-consigne` ne compte PAS d'erreur : un enfant qui range en avance un mot de la consigne suivante ne paie rien, ce qui autorise les quatre consignes sans piège. (3) `client/src/moteurs/tri/MoteurTri.tsx` rend `contenu.elements` EN ENTIER, pas seulement les éléments de la consigne courante : douze tuiles à l'écran est le plafond retenu pour un enfant de 7 ans, aligné sur les neuf boutons de `guirlande-phrase-01`. c3 et c4 ne nomment plus le panier : c'est le retournement, l'enfant décide seul.",
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Le critère est concret : reconnaître les noms écrits de couleurs, sans la convention adulte couleurs chaudes/froides. Les douze tuiles restent visibles, donc le contenu suit exactement ce que la consigne annonce : la première étape accepte les sept couleurs dans le panier gauche, dans n'importe quel ordre ; la seconde accepte les cinq autres mots à droite. Un mot visible qui satisfait la phrase ne peut plus être refusé sous prétexte qu'il appartenait à une étape future. `acquis[element]` reste monotone et `element-hors-consigne` ne compte pas d'erreur.",
   "id": "clairiere-paniers-couleurs-01",
   "version": 2,
   "titre": "Les paniers de couleurs",
@@ -18,7 +18,7 @@
           "texte": "Range les mots de couleur dans le panier de gauche.",
           "forme": "imperative",
           "audio": null,
-          "aRanger": ["mot-rouge", "mot-bleu", "mot-jaune"],
+          "aRanger": ["mot-rouge", "mot-bleu", "mot-jaune", "mot-vert", "mot-rose", "mot-violet", "mot-orange"],
           "motsCles": ["range", "couleur", "panier", "gauche"]
         },
         {
@@ -26,24 +26,8 @@
           "texte": "Range les autres mots dans le panier de droite.",
           "forme": "imperative",
           "audio": null,
-          "aRanger": ["mot-pomme", "mot-poire", "mot-banane"],
+          "aRanger": ["mot-pomme", "mot-poire", "mot-banane", "mot-table", "mot-nappe"],
           "motsCles": ["range", "autres", "panier", "droite"]
-        },
-        {
-          "id": "c3",
-          "texte": "Range ces mots dans le bon panier.",
-          "forme": "imperative",
-          "audio": null,
-          "aRanger": ["mot-vert", "mot-rose", "mot-table"],
-          "motsCles": ["range", "mots", "bon", "panier"]
-        },
-        {
-          "id": "c4",
-          "texte": "Range les derniers mots dans le bon panier.",
-          "forme": "imperative",
-          "audio": null,
-          "aRanger": ["mot-violet", "mot-orange", "mot-nappe"],
-          "motsCles": ["range", "derniers", "bon", "panier"]
         }
       ],
       "receptacles": [

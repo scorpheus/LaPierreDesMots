@@ -9,9 +9,9 @@ Date : 2026-09-02
 - Moteur : `colorie`
 - Habillage : `clairiere.ecole`
 
-Six consignes sont déclarées, alternant affirmations et impératifs. Elles portent sur 9 cibles :
-toit rouge (1), porte bleue (1), fenêtres jaunes (2), pull vert (1), ballon orange et banc brun
-(2), cheveux des filles noirs (2). Le nuancier contient 7 couleurs.
+Six consignes sont déclarées, alternant affirmations et impératifs. Elles portent sur huit
+cibles visibles dans l'image finale : toit, porte, deux fenêtres, pull et cheveux de la
+maîtresse, banc et tableau. Le nuancier contient sept couleurs.
 
 ## Vérifications exécutées
 
@@ -22,7 +22,6 @@ toit rouge (1), porte bleue (1), fenêtres jaunes (2), pull vert (1), ballon ora
 
 ## Verdict
 
-**RECETTE LOGIQUE PASS — PARCOURS VISUEL RÉEL NON EXÉCUTÉ**. Les contrôles ciblés valident les
-gestes, cibles, aide et fin moteur, mais pas le rendu tablette ni l’écran de récompense dans
-l’application complète. Aucun défaut reproduit ; aucun test rouge ni correction de code.
-Aucun asset, snapshot, compilation globale ou commit.
+**FOND RASTER ET VRAI GESTE VALIDÉS.** Le test `parcours-regression-decor-clairiere.spec.ts`
+vérifie le fond `ecole.png`, le cadrage entier en 1920×1080 et 1920×1200, puis un vrai choix de
+couleur et un vrai tap sur le toit. Les zones hors consigne ne prennent plus le doigt.

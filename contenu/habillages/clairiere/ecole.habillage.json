@@ -40,10 +40,10 @@
             "id": "toit-ecole",
             "libelle": "le toit de l’école",
             "centroide": [
-              151.4,
-              237.9
+              450,
+              155
             ],
-            "surface": 21055.8
+            "surface": 45000
           },
           {
             "id": "horloge-ecole",
@@ -67,28 +67,28 @@
             "id": "porte-ecole",
             "libelle": "la porte de l’école",
             "centroide": [
-              215,
-              352.5
+              477.5,
+              255
             ],
-            "surface": 4750
+            "surface": 12350
           },
           {
             "id": "fenetre-ecole-1",
             "libelle": "la première fenêtre de l’école",
             "centroide": [
-              120,
-              330
+              315,
+              220
             ],
-            "surface": 3000
+            "surface": 4900
           },
           {
             "id": "fenetre-ecole-2",
             "libelle": "la deuxième fenêtre de l’école",
             "centroide": [
-              310,
-              330
+              555,
+              225
             ],
-            "surface": 3000
+            "surface": 4900
           },
           {
             "id": "feuilles-arbre-1",
@@ -166,19 +166,19 @@
             "id": "cheveux-maitresse",
             "libelle": "les cheveux de la maîtresse",
             "centroide": [
-              175,
-              445.5
+              377.5,
+              190
             ],
-            "surface": 2875.4
+            "surface": 2750
           },
           {
             "id": "pull-maitresse",
             "libelle": "le pull de la maîtresse",
             "centroide": [
-              175,
-              510.9
+              380,
+              270
             ],
-            "surface": 4824
+            "surface": 7700
           },
           {
             "id": "jupe-maitresse",
@@ -193,10 +193,10 @@
             "id": "tableau",
             "libelle": "le tableau de la maîtresse",
             "centroide": [
-              325,
-              480
+              180,
+              255
             ],
-            "surface": 18000
+            "surface": 28500
           },
           {
             "id": "cheveux-garcon-1",
@@ -274,10 +274,10 @@
             "id": "banc",
             "libelle": "le banc",
             "centroide": [
-              25.9,
-              481.3
+              140,
+              395
             ],
-            "surface": 3264
+            "surface": 26400
           },
           {
             "id": "corde",

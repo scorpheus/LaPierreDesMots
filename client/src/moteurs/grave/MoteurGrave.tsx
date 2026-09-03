@@ -228,6 +228,7 @@ export function MoteurGrave(
           allumees={allumees}
           derniere={derniere}
           animationsDesactivees={animationsDesactivees}
+          ajustement="contenir"
         />
       </div>
 

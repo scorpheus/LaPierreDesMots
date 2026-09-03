@@ -110,4 +110,19 @@ test.describe('tri — le doigt atteint les mots et les paniers restent compacts
       scale: 'css',
     });
   });
+
+  test('clairiere-03 : tous les mots de couleur annoncés sont acceptés dans le panier gauche', async ({ page }) => {
+    await preparer(page);
+    await entrerDansLeNoeud(page, 'clairiere-03');
+
+    for (const libelle of ['rouge', 'rose', 'vert']) {
+      const mot = page.getByRole('button', { name: libelle, exact: true });
+      await mot.click({ timeout: 3_000 });
+      await page.locator('[data-receptacle="panier-des-couleurs"]').click({ timeout: 3_000 });
+      await expect(mot, `« ${libelle} » est un mot de couleur, quel que soit son ordre`).toHaveAttribute(
+        'data-range',
+        'oui',
+      );
+    }
+  });
 });

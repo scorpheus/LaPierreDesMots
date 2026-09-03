@@ -13,7 +13,7 @@
     "aideGobi": ["relire-consigne", "souffle-syllabe", "montre-cible"],
     "contenu": {
       "titre": "La veillée dans la cabane",
-      "recit": "Le soir, la nuit est noire. Gobi est dans la cabane. Il a froid. Le feu est rouge et chaud. Gobi écoute une histoire. Un lapin est sur le tapis. Il joue avec une pomme. La lune est ronde et belle.",
+      "recit": "Le soir, la nuit est noire. Gobi est dans la cabane. Il a froid. Le feu est rouge et chaud. Gobi écoute une histoire. Un lapin est sur le tapis. Il joue avec une pomme. La lune est petite et belle.",
       "audioRecit": null,
       "questions": [
         {
@@ -45,8 +45,8 @@
           "texte": "La lune est ronde ou petite ?",
           "audio": null,
           "options": ["opt-ronde", "opt-petite"],
-          "reponse": "opt-ronde",
-          "motsCles": ["lune", "ronde"]
+          "reponse": "opt-petite",
+          "motsCles": ["lune", "ronde", "petite"]
         },
         {
           "id": "c5",

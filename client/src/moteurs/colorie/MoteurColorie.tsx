@@ -128,6 +128,11 @@ export function MoteurColorie(
       ? 'Choisis d’abord une couleur.'
       : '';
 
+  const nombreRegionsAttendues = useMemo(
+    () => new Set(contenu.consignes.flatMap((consigne) => consigne.cibles.map((cible) => cible.region))).size,
+    [contenu.consignes]
+  );
+
   return (
     <div
       data-moteur="colorie"
@@ -155,6 +160,8 @@ export function MoteurColorie(
         regionEnRefus={etat.dernierRefus === null ? null : etat.dernierRefus.region}
         marqueRefus={etat.dernierRefus === null ? 0 : etat.dernierRefus.instantMs}
         animationsDesactivees={animationsDesactivees}
+        nombreRegionsAttendues={nombreRegionsAttendues}
+        regionsActives={etatConsigne?.ciblesRestantes.map((cible) => cible.region) ?? []}
         svgMarkup={svgMarkup}
         onPeindre={peindre}
       />

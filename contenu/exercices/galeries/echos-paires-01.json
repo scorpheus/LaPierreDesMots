@@ -1,5 +1,5 @@
 {
-  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Lot S3 : la marque de bouchon est retirée de ce texte — elle nommait l'état antérieur du fichier, et un recensement par mot comptait ce contenu-ci parmi les bouchons livrés. Lot M1 — réécriture du contenu bouchon du lot A4. C'EST LE TROISIÈME MOTEUR DE `gph.miroir.haut-bas`, ET C'EST SA RAISON D'ÊTRE : avec `trace` (`miroir-bp-01`) et `grave` (`pierre-bp-01`), il rend R12 tenable sur l'axe que le père a rapporté. A4 appariait un mot et sa paraphrase — « bol » avec « le bol » — et notait lui-même la limite : « l'appariement reste une tâche de LECTURE, mais ce n'est pas encore un memory ». La limite tenait au contenu, pas au moteur : apparier un mot avec son propre article n'oppose rien. Chaque paire oppose maintenant un mot en `b` à son jumeau en `p` — les quatre paires minimales validées de `contenu/brouillons/phonologie/galeries/miroir-haut-bas.json` : boule/poule, bas/pas, bain/pain, bol/pot. AXE HAUT-BAS UNIQUEMENT (D23, conséquence 1) : aucun des huit mots ne porte de `d` ni de `q`, vérifié lettre à lettre. TROIS CONTRAINTES MESURÉES. (1) Chaque valeur de `paire` porte EXACTEMENT deux cartes — le schéma ne sait pas compter et une paire orpheline rendrait l'exercice interminable, un état sans issue (test `singe`). (2) `acquis` est indexé par `IdPaire` et n'est jamais remis à zéro : les DEUX consignes portent quatre paires disjointes, deux chacune. **CORRIGÉ PAR LE LOT D'INTÉGRATION : c'étaient quatre consignes d'une paire chacune, et c'était un défaut mesuré.** `partage/src/moteurs/paires/moteur.ts:203` rend `nbElements = etape.aApparier.length`, et `journaliserEtapes` borne par `Math.max(2, n)` : une étape à une seule paire faisait donc inscrire `2` au journal là où le contenu en comptait `1`. Ce n'est pas un plantage, c'est pire — un `p_devinette` juste en apparence sur un item qui ne mesure rien (D13). `tests/api/tentatives-nbelements.test.ts` le nommait, et cet exercice était le SEUL des 76 sous le plancher. L'argument d'origine — « les huit cartes sont visibles en permanence, donc trouver l'écho de `bain` parmi `pas`, `poule` et `pot` est un vrai choix entre trois `p` » — reste vrai et n'est pas perdu : les huit cartes sont toujours toutes visibles, seule la découpe en consignes change. (3) Retourner la PREMIÈRE carte ne juge rien et ne coûte rien : la validation n'a lieu qu'au second tap, et une paire fausse ne fait qu'un refus sans rouge (R14). La consigne nomme l'écho parce que le décor le nomme : `galeries.echos` est la voûte où les mots se répondent.",
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Les quatre paires minimales opposent b et p sans introduire d ni q : bain/pain, bas/pas, boule/poule et bol/pot. Chaque étape contient deux paires disjointes afin que le journal compte réellement deux éléments. Le premier retournement ne juge rien et une fausse paire se referme sans écran d'échec. La métaphore de l'écho reste dans le décor et le titre, mais elle a été retirée de la consigne : pour un enfant de 7 ans, le texte doit nommer directement l'action et le changement de lettre attendus.",
   "id": "galeries-echos-paires-01",
   "version": 2,
   "titre": "Les cristaux qui se répondent",
@@ -15,19 +15,19 @@
       "consignes": [
         {
           "id": "c1",
-          "texte": "Relie le mot bain à son écho, puis le mot bas.",
+          "texte": "Touche bain, puis pain. Touche ensuite bas, puis pas.",
           "forme": "imperative",
           "audio": null,
           "aApparier": ["paire-bain", "paire-bas"],
-          "motsCles": ["relie", "mot", "écho"]
+          "motsCles": ["touche", "bain", "pain", "bas", "pas"]
         },
         {
           "id": "c2",
-          "texte": "Relie le mot boule à son écho, puis le mot bol.",
+          "texte": "Touche boule, puis poule. Touche ensuite bol, puis pot.",
           "forme": "imperative",
           "audio": null,
           "aApparier": ["paire-boule", "paire-bol"],
-          "motsCles": ["relie", "mot", "écho"]
+          "motsCles": ["touche", "boule", "poule", "bol", "pot"]
         }
       ],
       "cartes": [

@@ -257,6 +257,7 @@ export function MoteurEclair(
           allumees={allumees}
           derniere={derniere}
           animationsDesactivees={animationsDesactivees}
+          ajustement="contenir"
         />
       </div>
 

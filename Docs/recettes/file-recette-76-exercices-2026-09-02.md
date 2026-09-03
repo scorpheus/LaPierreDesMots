@@ -8,14 +8,14 @@ Les agents ne génèrent aucune image pendant la recette fonctionnelle. Si le re
 |---:|---|---|---|---|---|
 | 1 | `clairiere-01` | `clairiere-ecole-01` | La cour de l’école | `colorie` | BLOQUÉ-OUTIL navigateur · composant 26/26 |
 | 2 | `clairiere-02` | `clairiere-luciole-couleurs-01` | Les lucioles de couleur | `eclair` | BLOQUÉ-ASSET · fonctionnel 15/15 |
-| 3 | `clairiere-03` | `clairiere-paniers-couleurs-01` | Les paniers de couleurs | `tri` | CORRIGÉ FONCTIONNEL · BLOQUÉ-ASSET |
+| 3 | `clairiere-03` | `clairiere-paniers-couleurs-01` | Les paniers de couleurs | `tri` | VALIDÉ CLIC + LOGIQUE + ASSET |
 | 4 | `clairiere-04` | `clairiere-ecole-02-place` | Place 3 dessins dans la cour | `place` | LOGIQUE 34/34 · TABLETTE À CONFIRMER |
 | 5 | `clairiere-05` | `clairiere-guirlande-phrase-01` | La guirlande de mots | `phrase` | TEXTE CORRIGÉ · BLOQUÉ-ASSET |
 | 6 | `clairiere-06` | `clairiere-lucioles-attrape-01` | Les lucioles à attraper | `attrape` | BLOQUÉ-ASSET · TABLETTE À CONFIRMER |
 | 7 | `clairiere-07` | `clairiere-collier-syllabes-01` | Le collier de syllabes | `assemble` | LOGIQUE 22/22 · TABLETTE À CONFIRMER |
 | 8 | `clairiere-08` | `clairiere-lianes-voyelles-01` | Les lianes des voyelles | `chemin` | TEXTE CORRIGÉ · BLOQUÉ-ASSET |
-| 9 | `clairiere-09` | `clairiere-veillee-histoire-01` | La veillée dans la cabane | `histoire` | BLOQUÉ-ASSET · TABLETTE À CONFIRMER |
-| 10 | `clairiere-10` | `clairiere-ecole-03-mots-outils` | L’école des petits mots | `colorie` | LOGIQUE 26/26 · TABLETTE À CONFIRMER |
+| 9 | `clairiere-09` | `clairiere-veillee-histoire-01` | La veillée dans la cabane | `histoire` | ASSET INTÉGRÉ · TEXTE LUNE CORRIGÉ |
+| 10 | `clairiere-10` | `clairiere-ecole-03-mots-outils` | L’école des petits mots | `colorie` | VALIDÉ 1920×1080 + TABLETTE + CLIC RÉEL |
 | 11 | `clairiere-11` | `clairiere-luciole-voyelles-01` | Les lucioles des voyelles | `eclair` | BLOQUÉ-ASSET · FONCTIONNEL 114/114 |
 | 12 | `clairiere-12` | `clairiere-paniers-voyelles-01` | Les paniers du a et du i | `tri` | CORRIGÉ FONCTIONNEL · BLOQUÉ-ASSET |
 | 13 | `foret-muette-01` | `foret-muette-feuilles-attrape-01` | Les feuilles à dernière lettre | `attrape` | LOGIQUE 11/11 · TABLETTE À CONFIRMER |
@@ -40,7 +40,7 @@ Les agents ne génèrent aucune image pendant la recette fonctionnelle. Si le re
 | 32 | `galeries-08` | `galeries-passage-chemin-01` | Le passage aux pierres plates | `chemin` | BLOQUÉ-ASSET · FONCTIONNEL 106/106 |
 | 33 | `galeries-09` | `galeries-frise-chrono-01` | La frise gravée | `chrono` | BLOQUÉ-ASSET/VIGNETTES · TABLETTE À CONFIRMER |
 | 34 | `galeries-10` | `galeries-echo-conte-histoire-01` | Le conte de l’écho | `histoire` | BLOQUÉ-ASSET · TABLETTE À CONFIRMER |
-| 35 | `galeries-11` | `galeries-echos-paires-01` | Les cristaux qui se répondent | `paires` | BLOQUÉ-ASSET · IMAGES ABSENTES |
+| 35 | `galeries-11` | `galeries-echos-paires-01` | Les cristaux qui se répondent | `paires` | CONSIGNE CONCRÈTE CORRIGÉE · ASSET INTÉGRÉ |
 | 36 | `galeries-12` | `galeries-paroi-libre-01` | Le chaudron qu’on peint comme on veut | `libre` | HORS PROGRESSION · COMPATIBILITÉ NON JOURNALISABLE |
 | 37 | `galeries-13` | `galeries-grottes-fv-01` | Les grottes du f et du v | `tri` | BLOQUÉ-ASSET · FONCTIONNEL 14/14 |
 | 38 | `galeries-14` | `galeries-cristal-fv-01` | Les cristaux qui se ressemblent | `eclair` | BLOQUÉ-ASSET · FONCTIONNEL 114/114 |

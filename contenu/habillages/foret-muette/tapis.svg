@@ -17,8 +17,9 @@
   -->
   <g id="calque-fond">
     <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
+    <image data-fond-illustre="ecole" href="/api/contenu/assets/assets/decors/tapis.png" x="0" y="0" width="960" height="600" preserveAspectRatio="xMidYMid slice"/>
   </g>
-  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round">
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round" opacity="0" aria-hidden="true">
     <path id="ciel-entre-troncs" class="zone" data-region-svg="ciel-entre-troncs" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L960,0 L960,64 L933.3,68.5 L906.7,70.9 L880,70.1 L853.3,66.4 L826.7,61.6 L800,57.9 L773.3,57.1 L746.7,59.5 L720,64 L693.3,68.5 L666.7,70.9 L640,70.1 L613.3,66.4 L586.7,61.6 L560,57.9 L533.3,57.1 L506.7,59.5 L480,64 L453.3,68.5 L426.7,70.9 L400,70.1 L373.3,66.4 L346.7,61.6 L320,57.9 L293.3,57.1 L266.7,59.5 L240,64 L213.3,68.5 L186.7,70.9 L160,70.1 L133.3,66.4 L106.7,61.6 L80,57.9 L53.3,57.1 L26.7,59.5 L0,64 Z"/>
     <path id="ciel" class="zone" data-region-svg="ciel" fill="#8E97A8" fill-rule="evenodd" d="M0,64 L26.7,68.5 L53.3,71.8 L80,73 L106.7,71.8 L133.3,68.5 L160,64 L186.7,59.5 L213.3,56.2 L240,55 L266.7,56.2 L293.3,59.5 L320,64 L346.7,68.5 L373.3,71.8 L400,73 L426.7,71.8 L453.3,68.5 L480,64 L506.7,59.5 L533.3,56.2 L560,55 L586.7,56.2 L613.3,59.5 L640,64 L666.7,68.5 L693.3,71.8 L720,73 L746.7,71.8 L773.3,68.5 L800,64 L826.7,59.5 L853.3,56.2 L880,55 L906.7,56.2 L933.3,59.5 L960,64 L960,180 L0,180 Z"/>
     <path id="sol-nu" class="zone" data-region-svg="sol-nu" fill="#8E97A8" fill-rule="evenodd" d="M0,500 L26.7,506.1 L53.3,507.9 L80,504 L106.7,497.3 L133.3,492.5 L160,493.1 L186.7,498.6 L213.3,505.1 L240,508 L266.7,505.1 L293.3,498.6 L320,493.1 L346.7,492.5 L373.3,497.3 L400,504 L426.7,507.9 L453.3,506.1 L480,500 L506.7,493.9 L533.3,492.1 L560,496 L586.7,502.7 L613.3,507.5 L640,506.9 L666.7,501.4 L693.3,494.9 L720,492 L746.7,494.9 L773.3,501.4 L800,506.9 L826.7,507.5 L853.3,502.7 L880,496 L906.7,492.1 L933.3,493.9 L960,500 L960,600 L0,600 Z"/>
@@ -37,7 +38,7 @@
     <path id="feuille-basse" class="zone" data-region-svg="feuille-basse" fill="#8E97A8" fill-rule="evenodd" d="M92,500 L102.4,505.4 L112.8,514.4 L121.1,518 L127.4,527 L133.6,532.4 L131.5,541.4 L135.7,550.4 L129.4,557.6 L127.4,568.4 L117,573.8 L106.6,581 L96.2,584.6 L96.2,590 L87.8,590 L87.8,584.6 L77.4,581 L67,573.8 L56.6,568.4 L54.6,557.6 L48.3,550.4 L52.5,541.4 L50.4,532.4 L56.6,527 L62.9,518 L71.2,514.4 L81.6,505.4 Z"/>
     <path id="feuille-haute" class="zone" data-region-svg="feuille-haute" fill="#8E97A8" fill-rule="evenodd" d="M905,440 L914,444.7 L923,452.5 L930.2,455.6 L935.6,463.4 L941,468.1 L939.2,475.9 L942.8,483.7 L937.4,489.9 L935.6,499.3 L926.6,504 L917.6,510.2 L908.6,513.3 L908.6,518 L901.4,518 L901.4,513.3 L892.4,510.2 L883.4,504 L874.4,499.3 L872.6,489.9 L867.2,483.7 L870.8,475.9 L869,468.1 L874.4,463.4 L879.8,455.6 L887,452.5 L896,444.7 Z"/>
   </g>
-  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0" aria-hidden="true">
     <path class="trait" d="M0,502 L960,494"/>
   </g>
 </svg>

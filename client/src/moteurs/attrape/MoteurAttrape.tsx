@@ -15,7 +15,7 @@
  * coordonnées viewBox. Le mouvement appartient au rendu. ») — contrairement aux mots de
  * `phrase`, une cible a déjà sa place, choisie par le contenu. La bonne dérivation n'est donc
  * pas `deriverEmplacements` (qui invente une place) mais la MÊME transformation que le décor
- * applique déjà à son `viewBox` (`transformeSlice` / `versPixels`, `mise-en-scene.ts`) : décor
+ * applique déjà à son `viewBox` (`transformeMeet` / `versPixels`, `mise-en-scene.ts`) : décor
  * et cibles partagent alors un seul référentiel — la leçon de R40, déjà appliquée à `phrase`.
  *
  * ── LE MOUVEMENT, ET POURQUOI IL N'EST PAS UNE TROISIÈME `transform` SUR LE BOUTON ────────────
@@ -64,7 +64,7 @@ import {
   regionsAllumeesDepuisAcquis,
   regionsColoriables,
   styleZoneDeJeu,
-  transformeSlice,
+  transformeMeet,
   useDerniereAllumee,
   useMesureCadre,
   versPixels,
@@ -179,7 +179,7 @@ export function MoteurAttrape(
 
   // --- la transformation « couvrir », partagée avec le décor --------------------
   const vb = useMemo(() => lireViewBox(habillage.scene.viewBox), [habillage]);
-  const t = useMemo(() => transformeSlice(vb, cadreJeu), [vb, cadreJeu]);
+  const t = useMemo(() => transformeMeet(vb, cadreJeu), [vb, cadreJeu]);
 
   // --- la recoloration : cascade des cibles BONNES, par étape --------------------
   const listesParEtape = useMemo(
@@ -236,6 +236,7 @@ export function MoteurAttrape(
           allumees={allumees}
           derniere={derniere}
           animationsDesactivees={animationsDesactivees}
+          ajustement="contenir"
         />
       </div>
 

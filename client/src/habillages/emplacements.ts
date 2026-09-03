@@ -563,7 +563,10 @@ export function deriverEmplacements(parametres: ParametresDerivation): ResultatD
     parametres;
 
   const vb = lireViewBox(habillage.scene.viewBox);
-  const t = transformeSlice(vb, cadre);
+  // Les moteurs montrent désormais l'illustration entière (`xMidYMid meet`). Les zones
+  // tactiles doivent employer la même projection, sinon elles glissent hors des objets dès
+  // que le rapport largeur/hauteur du navigateur diffère de celui du décor.
+  const t = transformeMeet(vb, cadre);
 
   // 1. Les candidates : d'abord les régions ÉTEINTES et dessinées, par surface décroissante ;
   //    puis les régions déjà allumées, pour ne jamais manquer d'ancrage. Un mot posé sur une
