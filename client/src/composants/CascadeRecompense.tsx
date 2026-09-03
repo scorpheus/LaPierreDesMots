@@ -40,20 +40,29 @@ function SignePalier({ palier }: { readonly palier: CodePalier }): ReactElement 
   );
 }
 
-/**
- * Une promesse de cadeau sans objet à montrer est retirée du rendu.
- *
- * Le serveur rend les paliers de cascade avant de savoir nécessairement quelle forme concrète
- * offrir (ou quand le stock est épuisé). Dire alors « Gobi peut prendre une nouvelle forme »
- * faisait attendre un cadeau qui n'existait pas. Une forme de Gobi ne paraît donc que si sa
- * référence ET son asset sont réellement rendus par la réponse append-only du serveur.
- */
 function estCadeauConcret(recompense: RecompenseObtenue): boolean {
   return (
     recompense.nature === 'forme-gobi' &&
     recompense.reference !== null &&
     recompense.asset !== null
   );
+}
+
+/**
+ * Dit uniquement ce qui s'est réellement produit.
+ *
+ * Un palier sans contrepartie nommée reste une vraie étape de la cascade : le masquer faisait
+ * disparaître l'étoile fréquente et le grand palier de l'écran, donc de la recette E2E. On le
+ * célèbre sans annoncer une forme ou une région que le serveur n'a pas effectivement attribuée.
+ */
+function texteDuPalier(recompense: RecompenseObtenue): string {
+  if (recompense.palier === 'etoile') {
+    return 'Une étoile de plus !';
+  }
+  if (recompense.palier === 'rare') {
+    return 'Tu as atteint un grand palier !';
+  }
+  return 'Tu as franchi un palier !';
 }
 
 export interface ProprietesCascadeRecompense {
@@ -72,9 +81,9 @@ export function CascadeRecompense({ gain }: ProprietesCascadeRecompense): ReactE
       aria-label="Ce que tu viens de gagner"
     >
       {/* ── ce qui vient d'être gagné, dans l'ordre de franchissement */}
-      {gain.recompenses.filter(estCadeauConcret).length === 0 ? null : (
+      {gain.recompenses.length === 0 ? null : (
         <ul className="cascade-recompense-liste">
-          {gain.recompenses.filter(estCadeauConcret).map((recompense, rang) => (
+          {gain.recompenses.map((recompense, rang) => (
             <li
               key={`${recompense.palier}-${String(rang)}`}
               // ⚠ `data-recompense` — ADDITION au § 7 du contrat des features v2, signalée au
@@ -84,15 +93,21 @@ export function CascadeRecompense({ gain }: ProprietesCascadeRecompense): ReactE
               className="cascade-recompense-gain"
             >
               <SignePalier palier={recompense.palier} />
-              <img
-                src={urlAsset(recompense.asset!)}
-                alt=""
-                aria-hidden="true"
-                width={56}
-                height={56}
-                data-cadeau-concret={recompense.reference!}
-              />
-              <span>Gobi reçoit la forme «&nbsp;{recompense.reference}&nbsp;».</span>
+              {estCadeauConcret(recompense) ? (
+                <>
+                  <img
+                    src={urlAsset(recompense.asset!)}
+                    alt=""
+                    aria-hidden="true"
+                    width={56}
+                    height={56}
+                    data-cadeau-concret={recompense.reference!}
+                  />
+                  <span>Gobi reçoit la forme «&nbsp;{recompense.reference}&nbsp;».</span>
+                </>
+              ) : (
+                <span>{texteDuPalier(recompense)}</span>
+              )}
             </li>
           ))}
         </ul>

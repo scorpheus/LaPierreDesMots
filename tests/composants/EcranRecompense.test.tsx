@@ -261,7 +261,29 @@ describe('la fin de partie est une réussite, quoi qu’il arrive (R14)', () => 
 });
 
 describe('les annonces correspondent à ce qui est réellement remis', () => {
-  it('ne promet aucun cadeau quand le serveur n’en rend aucun de concret', () => {
+  it('rend observables les trois paliers quand une réussite les franchit ensemble', () => {
+    render(
+      <CascadeRecompense
+        gain={{
+          etat: { etoilesTotal: 50, etoilesDepuisIntermediaire: 0, intermediairesTotal: 10, intermediairesDepuisRare: 0, raresTotal: 1, dernierPalierLe: '2026-09-03T09:00:00.000Z' },
+          paliersFranchis: ['etoile', 'intermediaire', 'rare'],
+          recompenses: [
+            { palier: 'etoile', nature: 'etoile', reference: null, asset: null, region: null },
+            { palier: 'intermediaire', nature: 'forme-gobi', reference: null, asset: null, region: null },
+            { palier: 'rare', nature: 'zone-recoloriee', reference: null, asset: null, region: null },
+          ],
+          jauges: [],
+        }}
+      />,
+    );
+    expect(
+      [...document.querySelectorAll('[data-recompense]')].map((element) =>
+        element.getAttribute('data-recompense')
+      )
+    ).toEqual(['etoile', 'intermediaire', 'rare']);
+  });
+
+  it('célèbre les paliers sans promettre un cadeau que le serveur n’a pas remis', () => {
     render(
       <CascadeRecompense
         gain={{
@@ -283,7 +305,11 @@ describe('les annonces correspondent à ce qui est réellement remis', () => {
       />,
     );
     const annonce = document.querySelector('.cascade-recompense')?.textContent ?? '';
-    expect(annonce).toBe('');
+    expect(annonce).toContain('Tu as franchi un palier !');
+    expect(annonce).toContain('Tu as atteint un grand palier !');
+    expect(annonce).not.toMatch(/nouvelle forme|nouvelle région|cadeau/iu);
+    expect(document.querySelector('[data-recompense="intermediaire"]')).not.toBeNull();
+    expect(document.querySelector('[data-recompense="rare"]')).not.toBeNull();
   });
 
   it('montre la forme réellement remise, avec son visuel', () => {
