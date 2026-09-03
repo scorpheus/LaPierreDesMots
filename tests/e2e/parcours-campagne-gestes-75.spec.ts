@@ -2,9 +2,9 @@
  * Campagne de jouabilité exhaustive des nœuds pédagogiques.
  *
  * L'audit visuel ouvre les 75 écrans ; il ne prouve pas que l'on peut jouer. Cette recette
- * complète ce manque : pour chaque nœud de progression, elle dérive le prochain geste juste
- * de l'état que le moteur expose, joue une réponse correcte, tente aussi un refus quand un
- * voisin incorrect est identifiable, puis mesure la transition réellement produite.
+ * complète ce manque : pour chaque nœud de progression, elle dérive chaque prochain geste juste
+ * de l'état que le moteur expose et poursuit jusqu'à la récompense. Elle tente aussi un refus au
+ * départ quand un voisin incorrect est identifiable, puis mesure chaque transition produite.
  *
  * La campagne ne connaît ni les mots ni les réponses du corpus. Ajouter un exercice le fait
  * entrer automatiquement dans le dénominateur ; changer un moteur sans adapter sa stratégie
@@ -27,6 +27,8 @@ import { choisirLeProfil, deuxImages, etatDuJeu, noeudsLivres, preparer } from '
 const NOEUDS = noeudsLivres().filter((noeud) => noeud.progression);
 const DOSSIER_RAPPORT = resolve(process.cwd(), 'bac-a-sable', 'audit-75-noeuds');
 const FICHIER_RAPPORT = resolve(DOSSIER_RAPPORT, 'campagne-gestes.json');
+/** Borne de gestes logiques, pas une attente : un contenu qui boucle doit échouer franchement. */
+const MAX_ETAPES_PAR_NOEUD = 256;
 
 type Action = Readonly<Record<string, unknown>>;
 
@@ -75,13 +77,14 @@ interface Lettre {
 /** Projection minimale et stable des états des quatorze moteurs. */
 interface EtatMoteur {
   readonly indexEtape?: number;
+  readonly indexConsigne?: number;
   readonly etapes?: readonly Etape[];
   readonly consignes?: readonly {
     readonly ciblesRestantes?: readonly CibleColorie[];
     readonly depotsRestants?: readonly Depot[];
   }[];
   readonly blocs?: readonly { readonly id: string }[];
-  readonly cibles?: readonly { readonly id: string }[];
+  readonly cibles?: readonly { readonly id: string; readonly bonne?: boolean }[];
   readonly cases?: readonly { readonly id: string; readonly voisines: readonly string[] }[];
   readonly vignettes?: readonly { readonly id: string }[];
   readonly options?: readonly { readonly id: string }[];
@@ -96,6 +99,7 @@ interface EtatMoteur {
   readonly indexLettre?: number;
   readonly indexTrait?: number;
   readonly position?: string | null;
+  readonly acquis?: Readonly<Record<string, string>>;
   readonly dernierRefus?: unknown;
   readonly termineMs?: number | null;
 }
@@ -107,7 +111,10 @@ interface ReleveNoeud {
   readonly strategie: string;
   readonly actionRefusee: readonly Action[];
   readonly refusObserve: boolean;
-  readonly actionCorrecte: readonly Action[];
+  readonly nbEtapesJouees: number;
+  readonly nbActionsCorrectes: number;
+  readonly nbActionsRefusees: number;
+  readonly nbActionsTotal: number;
   readonly ecranAvant: string;
   readonly ecranApres: string;
   readonly etatAChange: boolean;
@@ -120,6 +127,10 @@ function etapeCourante(etat: EtatMoteur): Etape | undefined {
   return etat.etapes?.[etat.indexEtape ?? 0];
 }
 
+function indexCourant(etat: EtatMoteur): number {
+  return etat.indexConsigne ?? etat.indexEtape ?? 0;
+}
+
 function premiereRestante(etat: EtatMoteur): string | undefined {
   return etapeCourante(etat)?.restantes?.[0];
 }
@@ -129,9 +140,9 @@ function resumeEtat(etat: EtatMoteur): string {
 }
 
 function jalonPedagogique(etat: EtatMoteur): string {
-  const consigne = etat.consignes?.[etat.indexEtape ?? 0];
+  const consigne = etat.consignes?.[indexCourant(etat)];
   return JSON.stringify({
-    etape: etat.indexEtape ?? -1,
+    etape: indexCourant(etat),
     restantes: etapeCourante(etat)?.restantes ?? [],
     cibles: consigne?.ciblesRestantes ?? [],
     depots: consigne?.depotsRestants ?? [],
@@ -149,7 +160,16 @@ function actionRefusee(moteur: string, etat: EtatMoteur): readonly Action[] {
       return intrus === undefined ? [] : [{ type: 'poser', bloc: intrus.id }];
     }
     case 'attrape': {
-      const intrus = etat.cibles?.find((cible) => cible.id !== attendue);
+      // Une consigne `attrape` peut accepter plusieurs cibles dans n'importe quel ordre.
+      // Choisir simplement une autre cible que la première ferait alors progresser le jeu et
+      // transformerait notre contrôle négatif en faux échec. Une vraie cible refusée est soit
+      // explicitement intruse, soit absente des restantes de l'étape courante.
+      const restantes = new Set(etapeCourante(etat)?.restantes ?? []);
+      const intrus = etat.cibles?.find(
+        (cible) =>
+          etat.acquis?.[cible.id] === undefined &&
+          (cible.bonne === false || !restantes.has(cible.id)),
+      );
       return intrus === undefined ? [] : [{ type: 'toucher', cible: intrus.id }];
     }
     case 'chemin': {
@@ -162,7 +182,7 @@ function actionRefusee(moteur: string, etat: EtatMoteur): readonly Action[] {
       return intrus === undefined ? [] : [{ type: 'numeroter', vignette: intrus.id }];
     }
     case 'colorie': {
-      const cible = etat.consignes?.[etat.indexEtape ?? 0]?.ciblesRestantes?.[0];
+      const cible = etat.consignes?.[indexCourant(etat)]?.ciblesRestantes?.[0];
       if (cible === undefined) return [];
       return [
         { type: 'choisirCouleur', couleur: cible.couleur === 'bleu' ? 'rouge' : 'bleu' },
@@ -194,7 +214,7 @@ function actionRefusee(moteur: string, etat: EtatMoteur): readonly Action[] {
       return intrus === undefined ? [] : [{ type: 'placer', etiquette: intrus.id }];
     }
     case 'place': {
-      const depot = etat.consignes?.[etat.indexEtape ?? 0]?.depotsRestants?.[0];
+      const depot = etat.consignes?.[indexCourant(etat)]?.depotsRestants?.[0];
       const intrus = etat.zones?.find((zone) => zone.id !== depot?.zone);
       return depot === undefined || intrus === undefined
         ? []
@@ -247,7 +267,7 @@ function actionCorrecte(moteur: string, etat: EtatMoteur): readonly Action[] {
     case 'chrono':
       return attendue === undefined ? [] : [{ type: 'numeroter', vignette: attendue }];
     case 'colorie': {
-      const cible = etat.consignes?.[etat.indexEtape ?? 0]?.ciblesRestantes?.[0];
+      const cible = etat.consignes?.[indexCourant(etat)]?.ciblesRestantes?.[0];
       return cible === undefined
         ? []
         : [
@@ -277,7 +297,7 @@ function actionCorrecte(moteur: string, etat: EtatMoteur): readonly Action[] {
     case 'phrase':
       return attendue === undefined ? [] : [{ type: 'placer', etiquette: attendue }];
     case 'place': {
-      const depot = etat.consignes?.[etat.indexEtape ?? 0]?.depotsRestants?.[0];
+      const depot = etat.consignes?.[indexCourant(etat)]?.depotsRestants?.[0];
       const zone = etat.zones?.find((candidat) => candidat.id === depot?.zone);
       return depot === undefined || zone === undefined
         ? []
@@ -306,14 +326,12 @@ function actionCorrecte(moteur: string, etat: EtatMoteur): readonly Action[] {
 }
 
 async function jouerActions(page: Page, actions: readonly Action[]): Promise<void> {
-  for (const action of actions) {
-    await page.evaluate(async (actionReelle) => {
-      const crochets = (window as Window & { __test?: { repondre(action: unknown): Promise<void> } }).__test;
-      if (crochets === undefined) throw new Error('crochets __test absents pendant le geste');
-      await crochets.repondre(actionReelle);
-    }, action);
-    await deuxImages(page);
-  }
+  await page.evaluate(async (actionsReelles) => {
+    const crochets = (window as Window & { __test?: { repondre(action: unknown): Promise<void> } }).__test;
+    if (crochets === undefined) throw new Error('crochets __test absents pendant le geste');
+    for (const actionReelle of actionsReelles) await crochets.repondre(actionReelle);
+  }, actions);
+  await deuxImages(page);
 }
 
 async function ecran(page: Page): Promise<string> {
@@ -340,32 +358,82 @@ async function jouerNoeud(
   const actionsRefusees = actionRefusee(noeud.moteur, etat);
   let refusObserve = false;
   if (actionsRefusees.length > 0) {
+    const jalonAvantRefus = jalonPedagogique(etat);
     await jouerActions(page, actionsRefusees);
     etat = ((await etatDuJeu(page)).etatMoteur as EtatMoteur | null) ?? {};
     refusObserve = etat.dernierRefus !== undefined && etat.dernierRefus !== null;
+    if (!refusObserve) erreurs.push('Le refus initial dérivable n’est pas observable dans l’état.');
+    if (jalonPedagogique(etat) !== jalonAvantRefus) {
+      erreurs.push('Le refus initial a fait avancer le jalon pédagogique.');
+    }
+    if (await page.locator('[data-etat="echec"]').count() > 0) {
+      erreurs.push('Un écran d’échec est apparu après le refus initial.');
+    }
   }
 
-  const avant = ((await etatDuJeu(page)).etatMoteur as EtatMoteur | null) ?? {};
-  const resumeAvant = resumeEtat(avant);
-  const jalonAvant = jalonPedagogique(avant);
-  const actionsCorrectes = actionCorrecte(noeud.moteur, avant);
-  if (actionsCorrectes.length === 0) {
-    erreurs.push(`Aucune action correcte dérivable pour le moteur « ${noeud.moteur} ».`);
-  } else {
+  const resumeInitial = resumeEtat(etat);
+  const jalonInitial = jalonPedagogique(etat);
+  let resumePrecedent = resumeInitial;
+  let jalonPrecedent = jalonInitial;
+  let nbEtapesJouees = 0;
+  let nbActionsCorrectes = 0;
+  let etatAChange = false;
+  let etapeAAvance = false;
+
+  for (let tour = 0; tour < MAX_ETAPES_PAR_NOEUD; tour += 1) {
+    if ((await ecran(page)) === 'recompense') break;
+
+    const avant = ((await etatDuJeu(page)).etatMoteur as EtatMoteur | null) ?? {};
+    const actionsCorrectes = actionCorrecte(noeud.moteur, avant);
+    if (actionsCorrectes.length === 0) {
+      erreurs.push(
+        `Aucune action correcte dérivable pour le moteur « ${noeud.moteur} » au tour ${String(tour + 1)}.`,
+      );
+      break;
+    }
+
     await jouerActions(page, actionsCorrectes);
+    nbEtapesJouees += 1;
+    nbActionsCorrectes += actionsCorrectes.length;
+
+    const apresTour = ((await etatDuJeu(page)).etatMoteur as EtatMoteur | null) ?? {};
+    const ecranApresTour = await ecran(page);
+    const nouveauResume = resumeEtat(apresTour);
+    const nouveauJalon = jalonPedagogique(apresTour);
+    const aChange = nouveauResume !== resumePrecedent || ecranApresTour === 'recompense';
+    const aAvance = nouveauJalon !== jalonPrecedent || ecranApresTour === 'recompense';
+    etatAChange ||= aChange;
+    etapeAAvance ||= aAvance;
+
+    if (!aChange) {
+      erreurs.push(`Le geste correct du tour ${String(tour + 1)} ne produit aucun état observable.`);
+      break;
+    }
+    if (!aAvance) {
+      erreurs.push(`Le geste correct du tour ${String(tour + 1)} ne fait pas avancer le jalon pédagogique.`);
+      break;
+    }
+    if (await page.locator('[data-etat="echec"]').count() > 0) {
+      erreurs.push(`Un écran d’échec est apparu au tour ${String(tour + 1)}.`);
+      break;
+    }
+
+    resumePrecedent = nouveauResume;
+    jalonPrecedent = nouveauJalon;
   }
+
   const apres = ((await etatDuJeu(page)).etatMoteur as EtatMoteur | null) ?? {};
   const ecranApres = await ecran(page);
-  const etatAChange = resumeEtat(apres) !== resumeAvant || ecranApres !== ecranAvant;
-  const termine = (apres.termineMs !== undefined && apres.termineMs !== null) || ecranApres === 'recompense';
-  const etapeAAvance = jalonPedagogique(apres) !== jalonAvant;
+  etatAChange ||= resumeEtat(apres) !== resumeInitial || ecranApres !== ecranAvant;
+  etapeAAvance ||= jalonPedagogique(apres) !== jalonInitial;
+  const termine = ecranApres === 'recompense';
 
-  if (!etatAChange) erreurs.push('La réponse correcte ne produit aucun état observable.');
-  if (!etapeAAvance && !termine) {
-    erreurs.push('La réponse correcte ne fait avancer ni l’étape ni la fin de l’exercice.');
-  }
-  if (await page.locator('[data-etat="echec"]').count() > 0) {
-    erreurs.push('Un écran d’échec est apparu après un geste.');
+  if (!termine) {
+    erreurs.push(
+      nbEtapesJouees >= MAX_ETAPES_PAR_NOEUD
+        ? `La borne de sécurité de ${String(MAX_ETAPES_PAR_NOEUD)} étapes est atteinte sans récompense.`
+        : 'Le nœud s’est arrêté avant l’écran de récompense.',
+    );
   }
   erreurs.push(...erreursPage.slice(erreurInitiale).map((message) => `Exception navigateur : ${message}`));
 
@@ -376,7 +444,10 @@ async function jouerNoeud(
     strategie: `état-réel/${noeud.moteur}`,
     actionRefusee: actionsRefusees,
     refusObserve,
-    actionCorrecte: actionsCorrectes,
+    nbEtapesJouees,
+    nbActionsCorrectes,
+    nbActionsRefusees: actionsRefusees.length,
+    nbActionsTotal: nbActionsCorrectes + actionsRefusees.length,
     ecranAvant,
     ecranApres,
     etatAChange,
@@ -386,8 +457,8 @@ async function jouerNoeud(
   };
 }
 
-test.describe('campagne de gestes — 75 nœuds pédagogiques', () => {
-  test('chaque nœud admet une action correcte, refuse sans échec et reste jouable', async ({ page }) => {
+test.describe('campagne complète — 75 nœuds pédagogiques', () => {
+  test('chaque nœud refuse sans échec puis se joue jusqu’à la récompense', async ({ page }) => {
     test.slow();
     mkdirSync(DOSSIER_RAPPORT, { recursive: true });
     const erreursPage: string[] = [];
@@ -409,7 +480,10 @@ test.describe('campagne de gestes — 75 nœuds pédagogiques', () => {
             strategie: `état-réel/${noeud.moteur}`,
             actionRefusee: [],
             refusObserve: false,
-            actionCorrecte: [],
+            nbEtapesJouees: 0,
+            nbActionsCorrectes: 0,
+            nbActionsRefusees: 0,
+            nbActionsTotal: 0,
             ecranAvant: await ecran(page),
             ecranApres: await ecran(page),
             etatAChange: false,
@@ -421,13 +495,22 @@ test.describe('campagne de gestes — 75 nœuds pédagogiques', () => {
       }
     } finally {
       const echecs = releves.filter((releve) => releve.erreurs.length > 0);
+      const nbEtapesJouees = releves.reduce((total, releve) => total + releve.nbEtapesJouees, 0);
+      const nbActionsCorrectes = releves.reduce((total, releve) => total + releve.nbActionsCorrectes, 0);
+      const nbActionsRefusees = releves.reduce((total, releve) => total + releve.nbActionsRefusees, 0);
       writeFileSync(
         FICHIER_RAPPORT,
         JSON.stringify(
           {
             total: releves.length,
+            termines: releves.filter((releve) => releve.termine).length,
             moteurs: [...new Set(releves.map((releve) => releve.moteur))].sort(),
             avecRefusDerivable: releves.filter((releve) => releve.actionRefusee.length > 0).length,
+            borneEtapesParNoeud: MAX_ETAPES_PAR_NOEUD,
+            nbEtapesJouees,
+            nbActionsCorrectes,
+            nbActionsRefusees,
+            nbActionsTotal: nbActionsCorrectes + nbActionsRefusees,
             echecs: echecs.map((releve) => ({ id: releve.id, moteur: releve.moteur, erreurs: releve.erreurs })),
             releves,
           },
