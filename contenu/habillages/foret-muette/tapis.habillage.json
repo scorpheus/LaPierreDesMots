@@ -110,66 +110,66 @@
           },
           {
             "id": "gland-du-tapis",
-            "libelle": "le gland du tapis",
+            "libelle": "le gland du centre",
             "centroide": [
-              441,
-              426.2
+              490,
+              377.4
             ],
-            "surface": 3376.4
+            "surface": 1681.7
           },
           {
             "id": "feuille-du-tapis-un",
-            "libelle": "la première feuille du tapis",
+            "libelle": "la feuille de gauche",
             "centroide": [
-              211,
-              491
+              187,
+              346.9
             ],
-            "surface": 9412.8
+            "surface": 5254.7
           },
           {
             "id": "feuille-du-tapis-deux",
-            "libelle": "la deuxième feuille du tapis",
+            "libelle": "la petite feuille du centre",
             "centroide": [
-              376,
-              529
+              409,
+              393.9
             ],
-            "surface": 5963.7
+            "surface": 2801.8
           },
           {
             "id": "feuille-du-tapis-trois",
-            "libelle": "la troisième feuille du tapis",
+            "libelle": "la grande feuille verte",
             "centroide": [
-              641,
-              501
+              504,
+              440.9
             ],
-            "surface": 12145.9
+            "surface": 6164.9
           },
           {
             "id": "feuille-du-tapis-quatre",
-            "libelle": "la quatrième feuille du tapis",
+            "libelle": "la feuille de droite",
             "centroide": [
-              798,
-              534
+              772,
+              453.9
             ],
-            "surface": 4381
+            "surface": 4622.5
           },
           {
             "id": "feuille-basse",
-            "libelle": "la feuille basse",
+            "libelle": "la feuille du bas",
             "centroide": [
-              92,
-              545
+              671,
+              544.9
             ],
-            "surface": 5086.1
+            "surface": 5435.8
           },
           {
             "id": "feuille-haute",
-            "libelle": "la feuille haute",
+            "libelle": "la feuille du haut",
             "centroide": [
-              905,
-              479
+              600,
+              327.9
             ],
-            "surface": 3813.1
+            "surface": 4069
           }
         ]
       },

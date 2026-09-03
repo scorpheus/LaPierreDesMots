@@ -1,5 +1,5 @@
 {
-  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. ORIGINE : NIVEAU 3, fiche 3, « Comment pousse une graine ? ». CORRIGÉ PRODUIT : la fiche demande « De quoi une graine a-t-elle besoin pour pousser ? » sans donner la réponse ; le texte source dit « Une graine a besoin de terre, d’eau, d’air et de soleil ». La fresque porte ces éléments — la fleur, la feuille, le soleil, le pot — et l’enfant les DÉSIGNE en les coloriant : choisir l’image qui correspond à une phrase écrite est exactement `comp.image`, avec le geste en plus. `graine`, `racine`, `tige` et `terre` ne sont pas au lexique CE1 ; `fleur`, `feuille`, `soleil`, `pot`, `mur`, `arbre`, `porte` et `ciel` y sont, et ce sont eux que les huit consignes font lire. M6 a AJOUTÉ ces régions à son décor après avoir mesuré que « dans un exercice de coloriage, le nom de la région EST le mot à lire » : les identifiants employés ici sont ceux du `.habillage.json` livré, relus sur disque, jamais devinés. Aucune région existante n'a été renommée ni supprimée. Aucune n'est peinte deux fois : `partage/src/moteurs/colorie/validation.ts:167` refuse en `region-deja-peinte`. AUCUNE CIBLE N'EST GRISE, et ce n'est pas un hasard de palette : le gris est l'état du monde éteint, et `partage/src/ton` refuse « en gris » dans tout texte destiné à l'enfant (C7) — colorier EN gris demanderait à l'enfant d'éteindre ce qu'il vient d'allumer.",
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. ORIGINE : NIVEAU 3, fiche 3, « Comment pousse une graine ? ». Les huit cibles suivent le raster publié : fleur, feuille, médaillon, pot, mur, arbre, porte et ciel. Le médaillon remplace le soleil absent de cette image ; aucune consigne ne dépend d'un objet invisible.",
   "id": "cite-des-histoires-fresque-murale-colorie-01",
   "version": 1,
   "titre": "La fresque de la graine",
@@ -65,7 +65,7 @@
         },
         {
           "id": "c3",
-          "texte": "Colorie le soleil en jaune.",
+          "texte": "Colorie le médaillon en jaune.",
           "forme": "imperative",
           "audio": null,
           "cibles": [
@@ -76,7 +76,7 @@
           ],
           "motsCles": [
             "colorie",
-            "soleil",
+            "médaillon",
             "jaune"
           ]
         },

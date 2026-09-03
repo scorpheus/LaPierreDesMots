@@ -31,10 +31,10 @@
             "id": "ciel",
             "libelle": "le ciel",
             "centroide": [
-              360,
-              132.1
+              547.5,
+              58
             ],
-            "surface": 122880
+            "surface": 29680
           },
           {
             "id": "brume-haute",
@@ -76,19 +76,19 @@
             "id": "saule-de-la-berge",
             "libelle": "le saule de la berge",
             "centroide": [
-              220,
-              288
+              188.2,
+              134.7
             ],
-            "surface": 25511.3
+            "surface": 79672
           },
           {
             "id": "tronc-du-saule",
             "libelle": "le tronc du saule",
             "centroide": [
-              234,
-              411
+              231.4,
+              86
             ],
-            "surface": 2467.6
+            "surface": 21048
           },
           {
             "id": "poule",
@@ -121,46 +121,46 @@
             "id": "barque-echouee",
             "libelle": "la barque échouée",
             "centroide": [
-              650.5,
-              452.5
+              198.8,
+              358
             ],
-            "surface": 8543.8
+            "surface": 27938
           },
           {
             "id": "nenuphar-perdu",
-            "libelle": "le nénuphar perdu",
+            "libelle": "le nénuphar blanc",
             "centroide": [
-              851.5,
-              481.8
+              750,
+              472
             ],
-            "surface": 7612.6
+            "surface": 3183.7
           },
           {
             "id": "route",
-            "libelle": "la route",
+            "libelle": "le ponton",
             "centroide": [
-              509.8,
-              524.4
+              796.3,
+              335.9
             ],
-            "surface": 55764.2
+            "surface": 14340
           },
           {
             "id": "roue",
-            "libelle": "la roue",
+            "libelle": "l’escargot",
             "centroide": [
-              141.4,
-              554.6
+              248,
+              536
             ],
-            "surface": 5015.9
+            "surface": 6376.5
           },
           {
             "id": "caillou",
             "libelle": "le caillou",
             "centroide": [
-              852.9,
-              551.2
+              520.2,
+              521.2
             ],
-            "surface": 3509.7
+            "surface": 4115.8
           }
         ]
       },

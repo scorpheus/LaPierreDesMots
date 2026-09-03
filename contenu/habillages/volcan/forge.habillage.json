@@ -38,30 +38,30 @@
           },
           {
             "id": "rideau",
-            "libelle": "le rideau",
+            "libelle": "le grand cristal violet",
             "centroide": [
-              60,
-              116.8
+              874,
+              520.3
             ],
-            "surface": 49240
+            "surface": 13429.8
           },
           {
             "id": "tableau",
-            "libelle": "le tableau",
+            "libelle": "la lanterne",
             "centroide": [
-              260,
-              185
+              109,
+              163
             ],
-            "surface": 26000
+            "surface": 7260
           },
           {
             "id": "drapeau",
-            "libelle": "le drapeau",
+            "libelle": "le cristal rose",
             "centroide": [
-              473.1,
-              165.3
+              112,
+              143.6
             ],
-            "surface": 7859.9
+            "surface": 7125
           },
           {
             "id": "oiseau",
@@ -85,28 +85,28 @@
             "id": "enclume",
             "libelle": "l’enclume",
             "centroide": [
-              261,
-              360.1
+              413.1,
+              277
             ],
-            "surface": 16836.4
+            "surface": 26662
           },
           {
             "id": "billot",
             "libelle": "le billot",
             "centroide": [
-              209.8,
-              495
+              389.5,
+              371
             ],
-            "surface": 16598
+            "surface": 18210
           },
           {
             "id": "marteau-de-forge",
             "libelle": "le marteau de forge",
             "centroide": [
-              456,
-              311
+              532.6,
+              390
             ],
-            "surface": 7049.5
+            "surface": 7936
           },
           {
             "id": "etincelle",
@@ -137,21 +137,21 @@
           },
           {
             "id": "feu",
-            "libelle": "le feu",
+            "libelle": "le feu du foyer",
             "centroide": [
-              680,
-              462.9
+              647.7,
+              482.8
             ],
-            "surface": 8121.4
+            "surface": 17030.4
           },
           {
             "id": "seau",
             "libelle": "le seau",
             "centroide": [
-              900,
-              438
+              876,
+              399.8
             ],
-            "surface": 4624
+            "surface": 9296
           },
           {
             "id": "seau-d-eau",

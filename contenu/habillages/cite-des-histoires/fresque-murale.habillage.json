@@ -49,37 +49,37 @@
             "id": "ciel",
             "libelle": "le ciel",
             "centroide": [
-              480,
-              156
+              632.4,
+              47
             ],
-            "surface": 69920
+            "surface": 25840
           },
           {
             "id": "soleil",
-            "libelle": "le soleil",
+            "libelle": "le médaillon",
             "centroide": [
-              790,
-              152
+              480,
+              80
             ],
-            "surface": 3430.6
+            "surface": 6563.9
           },
           {
             "id": "arbre",
             "libelle": "l’arbre",
             "centroide": [
-              168,
-              220.7
+              471.7,
+              220.8
             ],
-            "surface": 13159.9
+            "surface": 20536
           },
           {
             "id": "feuille",
-            "libelle": "la feuille",
+            "libelle": "la grande feuille",
             "centroide": [
-              335,
-              177.4
+              87.8,
+              511.2
             ],
-            "surface": 3726.9
+            "surface": 10978
           },
           {
             "id": "scene-du-haut",
@@ -112,28 +112,28 @@
             "id": "mur",
             "libelle": "le mur",
             "centroide": [
-              641,
-              360
+              644.8,
+              378.4
             ],
-            "surface": 33880
+            "surface": 15844
           },
           {
             "id": "porte",
-            "libelle": "la porte",
+            "libelle": "la porte de droite",
             "centroide": [
-              600,
-              373.3
+              932,
+              277.5
             ],
-            "surface": 6969
+            "surface": 6479.5
           },
           {
             "id": "fleur",
-            "libelle": "la fleur",
+            "libelle": "la grande fleur blanche",
             "centroide": [
-              430,
-              400
+              55.7,
+              500.1
             ],
-            "surface": 3048.8
+            "surface": 4705.8
           },
           {
             "id": "echafaudage",
@@ -155,12 +155,12 @@
           },
           {
             "id": "pot",
-            "libelle": "le pot",
+            "libelle": "le pot de peinture brun",
             "centroide": [
-              432,
-              545.1
+              824,
+              550.6
             ],
-            "surface": 3596
+            "surface": 4130
           },
           {
             "id": "pinceau",

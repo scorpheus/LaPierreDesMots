@@ -1,5 +1,5 @@
 {
-  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. SIX des sept cibles portent le son de `trou` — caillou, mouche, souris, poule, roue, route : c’est le mot À COLORIER qui travaille le digramme, pas la consigne, ce qui laisse la consigne aussi brève que possible et met toute la charge de lecture sur la cible. M6 a AJOUTÉ ces régions à son décor après avoir mesuré que « dans un exercice de coloriage, le nom de la région EST le mot à lire » : les identifiants employés ici sont ceux du `.habillage.json` livré, relus sur disque, jamais devinés. Aucune région existante n'a été renommée ni supprimée. Aucune n'est peinte deux fois : `partage/src/moteurs/colorie/validation.ts:167` refuse en `region-deja-peinte`. AUCUNE CIBLE N'EST GRISE, et ce n'est pas un hasard de palette : le gris est l'état du monde éteint, et `partage/src/ton` refuse « en gris » dans tout texte destiné à l'enfant (C7) — colorier EN gris demanderait à l'enfant d'éteindre ce qu'il vient d'allumer.",
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Les sept cibles suivent désormais le raster publié : caillou, saule, escargot, nénuphar, ponton, barque et ciel. Le digramme ou reste travaillé par caillou ; aucune consigne ne nomme plus un animal ou un objet absent de l'image.",
   "id": "marais-jumeau-brume-colorie-01",
   "version": 1,
   "titre": "La berge que la brume quitte",
@@ -43,86 +43,86 @@
         },
         {
           "id": "c2",
-          "texte": "Colorie la mouche en noir.",
+          "texte": "Colorie le saule en noir.",
           "forme": "imperative",
           "audio": null,
           "cibles": [
             {
-              "region": "mouche",
+              "region": "saule-de-la-berge",
               "couleur": "noir"
             }
           ],
           "motsCles": [
             "colorie",
-            "mouche",
+            "saule",
             "noir"
           ]
         },
         {
           "id": "c3",
-          "texte": "Colorie la souris en rose.",
-          "forme": "imperative",
-          "audio": null,
-          "cibles": [
-            {
-              "region": "souris",
-              "couleur": "rose"
-            }
-          ],
-          "motsCles": [
-            "colorie",
-            "souris",
-            "rose"
-          ]
-        },
-        {
-          "id": "c4",
-          "texte": "Colorie la poule en jaune.",
-          "forme": "imperative",
-          "audio": null,
-          "cibles": [
-            {
-              "region": "poule",
-              "couleur": "jaune"
-            }
-          ],
-          "motsCles": [
-            "colorie",
-            "poule",
-            "jaune"
-          ]
-        },
-        {
-          "id": "c5",
-          "texte": "Colorie la roue en rouge.",
+          "texte": "Colorie l'escargot en rose.",
           "forme": "imperative",
           "audio": null,
           "cibles": [
             {
               "region": "roue",
-              "couleur": "rouge"
+              "couleur": "rose"
             }
           ],
           "motsCles": [
             "colorie",
-            "roue",
-            "rouge"
+            "escargot",
+            "rose"
           ]
         },
         {
-          "id": "c6",
-          "texte": "Colorie la route en orange.",
+          "id": "c4",
+          "texte": "Colorie le nénuphar en jaune.",
+          "forme": "imperative",
+          "audio": null,
+          "cibles": [
+            {
+              "region": "nenuphar-perdu",
+              "couleur": "jaune"
+            }
+          ],
+          "motsCles": [
+            "colorie",
+            "nénuphar",
+            "jaune"
+          ]
+        },
+        {
+          "id": "c5",
+          "texte": "Colorie le ponton en rouge.",
           "forme": "imperative",
           "audio": null,
           "cibles": [
             {
               "region": "route",
+              "couleur": "rouge"
+            }
+          ],
+          "motsCles": [
+            "colorie",
+            "ponton",
+            "rouge"
+          ]
+        },
+        {
+          "id": "c6",
+          "texte": "Colorie la barque en orange.",
+          "forme": "imperative",
+          "audio": null,
+          "cibles": [
+            {
+              "region": "barque-echouee",
               "couleur": "orange"
             }
           ],
           "motsCles": [
             "colorie",
-            "route",
+            "barque",
             "orange"
           ]
         },

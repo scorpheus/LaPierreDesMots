@@ -1,5 +1,5 @@
 {
-  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. TROIS cibles portent une lettre finale muette — nid, chat, rat — et quatre mots de plus la portent dans les consignes : haut, bas, vert, violet. C’est le mot à colorier qui travaille la loi, jamais la consigne, ce qui garde la consigne à six mots. M6 a AJOUTÉ ces régions à son décor après avoir mesuré que « dans un exercice de coloriage, le nom de la région EST le mot à lire » : les identifiants employés ici sont ceux du `.habillage.json` livré, relus sur disque, jamais devinés. Aucune région existante n'a été renommée ni supprimée. Aucune n'est peinte deux fois : `partage/src/moteurs/colorie/validation.ts:167` refuse en `region-deja-peinte`. AUCUNE CIBLE N'EST GRISE, et ce n'est pas un hasard de palette : le gris est l'état du monde éteint, et `partage/src/ton` refuse « en gris » dans tout texte destiné à l'enfant (C7) — colorier EN gris demanderait à l'enfant d'éteindre ce qu'il vient d'allumer.",
+  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Les sept cibles suivent désormais le raster publié : un gland et six feuilles distinctes. Le mot gland porte la consonne finale muette travaillée ; les repères spatiaux évitent toute cible inventée. Aucune région n'est peinte deux fois et aucune cible n'est grise.",
   "id": "foret-muette-tapis-colorie-01",
   "version": 1,
   "titre": "Le tapis de feuilles",
@@ -26,69 +26,73 @@
       "consignes": [
         {
           "id": "c1",
-          "texte": "Colorie le nid en brun.",
+          "texte": "Colorie le gland du centre en brun.",
           "forme": "imperative",
           "audio": null,
           "cibles": [
             {
-              "region": "nid",
+              "region": "gland-du-tapis",
               "couleur": "brun"
             }
           ],
           "motsCles": [
             "colorie",
-            "nid",
+            "gland",
+            "centre",
             "brun"
           ]
         },
         {
           "id": "c2",
-          "texte": "Colorie le chat en noir.",
+          "texte": "Colorie la feuille de gauche en noir.",
           "forme": "imperative",
           "audio": null,
           "cibles": [
             {
-              "region": "chat",
+              "region": "feuille-du-tapis-un",
               "couleur": "noir"
             }
           ],
           "motsCles": [
             "colorie",
-            "chat",
+            "feuille",
+            "gauche",
             "noir"
           ]
         },
         {
           "id": "c3",
-          "texte": "Colorie le rat en violet.",
+          "texte": "Colorie la petite feuille en violet.",
           "forme": "imperative",
           "audio": null,
           "cibles": [
             {
-              "region": "rat",
+              "region": "feuille-du-tapis-deux",
               "couleur": "violet"
             }
           ],
           "motsCles": [
             "colorie",
-            "rat",
+            "petite",
+            "feuille",
             "violet"
           ]
         },
         {
           "id": "c4",
-          "texte": "Colorie l'arbre en vert.",
+          "texte": "Colorie la grande feuille en vert.",
           "forme": "imperative",
           "audio": null,
           "cibles": [
             {
-              "region": "arbre",
+              "region": "feuille-du-tapis-trois",
               "couleur": "vert"
             }
           ],
           "motsCles": [
             "colorie",
-            "arbre",
+            "grande",
+            "feuille",
             "vert"
           ]
         },
@@ -130,18 +134,19 @@
         },
         {
           "id": "c7",
-          "texte": "Le ciel du soir est orange.",
-          "forme": "affirmative",
+          "texte": "Colorie la feuille de droite en orange.",
+          "forme": "imperative",
           "audio": null,
           "cibles": [
             {
-              "region": "ciel",
+              "region": "feuille-du-tapis-quatre",
               "couleur": "orange"
             }
           ],
           "motsCles": [
-            "ciel",
-            "soir",
+            "colorie",
+            "feuille",
+            "droite",
             "orange"
           ]
         }
