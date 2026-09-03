@@ -50,7 +50,7 @@
           "texte": "Range aussi les images dans l'ordre de l'histoire.",
           "forme": "imperative",
           "audio": null,
-          "recit": "Le cahier est sur la table. Gobi compte. Puis papa montre le dessin.",
+          "recit": "Le cahier est sur la table. Gobi compte les dessins. Puis papa montre un dessin.",
           "ordre": [
             "vignette-table",
             "vignette-compte",
@@ -68,7 +68,7 @@
           "texte": "Range les dernières images dans l'ordre.",
           "forme": "imperative",
           "audio": null,
-          "recit": "Gobi range le cahier dans le sac. Puis Gobi joue dans le jardin. Le soir, Gobi est dans son lit.",
+          "recit": "Gobi range le cahier dans le sac. Puis il joue dans le jardin. Le soir, Gobi dort dans son lit.",
           "ordre": [
             "vignette-sac",
             "vignette-jardin",

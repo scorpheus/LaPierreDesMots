@@ -625,8 +625,11 @@ export function MoteurChrono(
         >
           <span style={{ fontWeight: 800 }}>Remets les images dans l’ordre.</span>
           <span aria-hidden="true" style={{ opacity: 0.72 }}>·</span>
-          <span>{`Étape ${String(etat.indexEtape + 1)} / ${String(etat.etapes.length)}`}</span>
-          <span>{`${String(imagesRangees)} / ${String(ordre.length)} rangées`}</span>
+          <span>{
+            restants.length === 0
+              ? 'Histoire terminée !'
+              : `${String(restants.length)} ${restants.length === 1 ? 'image' : 'images'} à ranger.`
+          }</span>
         </div>
       )}
 

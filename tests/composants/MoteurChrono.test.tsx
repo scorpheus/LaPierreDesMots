@@ -186,8 +186,28 @@ describe('moteur chrono', () => {
     const { container } = render(<Harnais />);
     const cartouche = container.querySelector('[data-cartouche-chrono="etape"]');
     expect(cartouche?.textContent).toContain('Remets les images dans l’ordre.');
-    expect(cartouche?.textContent).toContain('Étape 1 / 1');
-    expect(cartouche?.textContent).toContain('0 / 3 rangées');
+    expect(cartouche?.textContent).not.toMatch(/Étape|rangée|\d+\s*\/\s*\d+/i);
+    expect(cartouche?.textContent).toContain('3 images');
+  });
+
+  it('donne une consigne courte et compréhensible sans compteur technique', () => {
+    const { container } = render(<Harnais />);
+    const cartouche = container.querySelector('[data-cartouche-chrono="etape"]');
+    expect(cartouche?.textContent).toContain('Remets les images dans l’ordre.');
+    expect(cartouche?.textContent).toContain('3 images');
+    expect(cartouche?.textContent).not.toContain('0 / 3');
+  });
+
+  it('raconte la suite tas-dos-dame dans un ordre causal', () => {
+    const exercice = lireJson<{
+      jeu: { contenu: { consignes: Array<{ id: string; recit: string; ordre: string[] }> } };
+    }>('contenu/exercices/galeries/frise-chrono-01.json');
+    const consigne = exercice.jeu.contenu.consignes.find((c) => c.id === 'c2');
+    expect(consigne).toBeDefined();
+    expect(consigne?.recit).toBe(
+      'Gobi voit un tas. Une dame lui montre ce qui bouge derrière. C’est le dos d’un chien.',
+    );
+    expect(consigne?.ordre).toEqual(['vignette-tas', 'vignette-dame', 'vignette-dos']);
   });
   it('le contenu de ce test est conforme au schéma que le moteur publie', () => {
     const ajv = new (Ajv2020 as unknown as {

@@ -27,8 +27,8 @@
           "texte": "Range les images dans l’ordre de l’histoire.",
           "forme": "imperative",
           "audio": null,
-          "recit": "Gobi montre le tas. Puis il montre le dos du chien. Alors il montre la dame.",
-          "ordre": ["vignette-tas", "vignette-dos", "vignette-dame"],
+          "recit": "Gobi voit un tas. Une dame lui montre ce qui bouge derrière. C’est le dos d’un chien.",
+          "ordre": ["vignette-tas", "vignette-dame", "vignette-dos"],
           "motsCles": ["range", "images", "ordre", "histoire"]
         },
         {
@@ -36,7 +36,7 @@
           "texte": "Range les images dans l’ordre de l’histoire.",
           "forme": "imperative",
           "audio": null,
-          "recit": "Gobi trouve un four. Puis il trouve un verre.",
+          "recit": "Gobi a chaud près du four. Il s’éloigne et boit un verre d’eau.",
           "ordre": ["vignette-four", "vignette-verre"],
           "motsCles": ["range", "images", "ordre", "histoire"]
         },
@@ -45,7 +45,7 @@
           "texte": "Range les images dans l’ordre de l’histoire.",
           "forme": "imperative",
           "audio": null,
-          "recit": "Gobi range le sac. Puis il montre le zèbre.",
+          "recit": "Gobi prépare son sac. Il part au zoo et découvre un zèbre.",
           "ordre": ["vignette-sac", "vignette-zebre"],
           "motsCles": ["range", "images", "ordre", "histoire"]
         }

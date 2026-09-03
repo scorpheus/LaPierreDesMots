@@ -16,6 +16,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { campementDuDocument, stadesDuDocument } from '@pierre/partage/monde';
 import type { EtatMonde } from '@pierre/partage';
 import { EcranCampement } from '@client/ecrans/EcranCampement';
+import { lieuDeRencontre } from '@client/composants/Compagnon';
 import { creerMagasin } from '@client/etat/magasin';
 import { FournisseurJeu } from '@client/etat/services';
 import { creerHaptiqueMuette } from '@client/gamefeel/haptique-navigateur';
@@ -27,6 +28,14 @@ import { lireJson, servicesDeTest } from '../configuration/preparation.js';
 
 const CAMPEMENT = campementDuDocument(lireJson('contenu/monde/campement.json'));
 const STADES = stadesDuDocument(lireJson('contenu/monde/gobi-stades.json'));
+
+describe('le lieu où rencontrer un compagnon', () => {
+  it('emploie une préposition française devant le nom affiché de la région', () => {
+    expect(lieuDeRencontre('Les Galeries')).toBe('dans les Galeries');
+    expect(lieuDeRencontre('La Forêt Muette')).toBe('dans la Forêt Muette');
+    expect(lieuDeRencontre()).toBe('plus loin');
+  });
+});
 
 /** Les services de test, complétés des deux membres que L2-A a ajoutés à `ServicesJeu`. */
 function services() {

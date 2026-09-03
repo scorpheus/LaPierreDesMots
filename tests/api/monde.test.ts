@@ -271,6 +271,15 @@ describe('la carte se recalcule depuis le journal', () => {
     expect(region(etat, 'foret-muette').ouverte).toBe(false);
   });
 
+  it('rallie Filou et rapporte le fanion dès que la Clairière est terminée', async () => {
+    const profil = await creerProfil();
+    await terminerClairiere(profil);
+
+    const etat = await lireMondeHttp(profil);
+    expect(etat.compagnons.find((compagnon) => compagnon.code === 'filou')?.rallieLe).not.toBeNull();
+    expect(etat.campement.find((objet) => objet.code === 'fanion-clairiere')?.placeLe).not.toBeNull();
+  });
+
   it('est idempotent : deux lectures successives rendent exactement le même monde', async () => {
     const profil = await creerProfil();
     await terminerClairiere(profil);

@@ -24,6 +24,7 @@ import { CascadeRecompense } from '../composants/CascadeRecompense.js';
 import { detailDesEtoiles } from '../composants/detail-etoiles.js';
 import { Etoiles } from '../composants/Etoiles.js';
 import { EvolutionGobi } from '../composants/EvolutionGobi.js';
+import { DessinButin } from '../monde/Butin.js';
 import { useEtatJeu, useMagasin, useServices } from '../etat/services.js';
 import { noeudSuivant, repriseDeRegion } from '../monde/reprise.js';
 import { jouerEffet } from '../services/audio-tone.js';
@@ -354,6 +355,16 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
       ? repriseRegionale?.noeud ?? null
       : null;
   const regionTerminee = regionEstTerminee(progressionRegionale);
+  const compagnonRallie = regionTerminee
+    ? requeteMonde.data?.compagnons.find(
+        (compagnon) => compagnon.region === region && compagnon.rallieLe !== null
+      ) ?? null
+    : null;
+  const objetRapporte = regionTerminee
+    ? requeteMonde.data?.campement.find(
+        (objet) => objet.region === region && objet.placeLe !== null
+      ) ?? null
+    : null;
 
   /**
    * ══════════════════════════════════════════════════════════════════════════════════════════
@@ -559,6 +570,40 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
           `null` tant que les seuils ne sont pas chargés : aucune jauge inventée, aucun
           nombre en dur (convention C2). */}
       <CascadeRecompense gain={dernierGain} />
+
+      {compagnonRallie === null && objetRapporte === null ? null : (
+        <section
+          className="recompense-region-acquis"
+          data-recompenses-region="oui"
+          aria-label="Les cadeaux de la région"
+        >
+          <h2>Ta bande et ton campement grandissent !</h2>
+          <div className="recompense-region-acquis__cartes">
+            {compagnonRallie === null ? null : (
+              <article
+                className="recompense-region-acquis__carte"
+                data-compagnon-rallie={String(compagnonRallie.code)}
+              >
+                <img
+                  src={urlAsset(String(compagnonRallie.asset))}
+                  alt=""
+                  draggable={false}
+                />
+                <p><strong>{compagnonRallie.libelle}</strong> rejoint ta bande !</p>
+              </article>
+            )}
+            {objetRapporte === null ? null : (
+              <article
+                className="recompense-region-acquis__carte"
+                data-objet-rapporte={String(objetRapporte.code)}
+              >
+                <DessinButin code={String(objetRapporte.code)} taille={112} />
+                <p><strong>{objetRapporte.libelle}</strong> rejoint le campement !</p>
+              </article>
+            )}
+          </div>
+        </section>
+      )}
 
       {nomsRegionsOuvertes.length === 0 ? null : (
         <p

@@ -25,6 +25,13 @@ export interface ProprietesCompagnon {
   readonly surChoisir?: (compagnon: CompagnonDuMonde) => void;
 }
 
+/** Évite les assemblages fautifs comme « à Les Galeries ». */
+export function lieuDeRencontre(libelleRegion?: string): string {
+  if (libelleRegion === undefined || libelleRegion.trim() === '') return 'plus loin';
+  const libelle = libelleRegion.trim();
+  return `dans ${libelle.charAt(0).toLocaleLowerCase('fr-FR')}${libelle.slice(1)}`;
+}
+
 export function Compagnon({
   compagnon,
   libelleRegion,
@@ -55,7 +62,7 @@ export function Compagnon({
       <span style={{ fontSize: '0.95rem' }}>
         {rallie
           ? compagnon.valeur
-          : `On le rencontre ${libelleRegion === undefined ? 'plus loin' : `à ${libelleRegion}`}.`}
+          : `On le rencontre ${lieuDeRencontre(libelleRegion)}.`}
       </span>
     </>
   );
@@ -125,9 +132,7 @@ export function Compagnon({
           phrase={
             rallie
               ? compagnon.valeur
-              : `On le rencontre ${
-                  libelleRegion === undefined ? 'plus loin' : `à ${libelleRegion}`
-                }.`
+              : `On le rencontre ${lieuDeRencontre(libelleRegion)}.`
           }
           visuel={<span className="compagnon-portrait compagnon-portrait--fiche">{portrait}</span>}
           surFermer={() => {

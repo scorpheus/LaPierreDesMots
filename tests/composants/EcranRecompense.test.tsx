@@ -363,7 +363,17 @@ describe('la récompense suit le plan pédagogique actif', () => {
           }
         ]
       },
-      gobi: { stade: 'oeuf', formes: [], formeActive: null }, compagnons: [], campement: []
+      gobi: { stade: 'oeuf', formes: [], formeActive: null },
+      compagnons: [{
+        code: 'filou', libelle: 'Filou', valeur: 'La malice', domaine: 'Mots outils',
+        region: 'clairiere', asset: 'assets/compagnons/filou.png',
+        rallieLe: '2026-09-03T00:00:00.000Z'
+      }],
+      campement: [{
+        code: 'fanion-clairiere', libelle: 'le fanion de la Clairière',
+        asset: 'assets/coffre/objets/fanion-clairiere.png', region: 'clairiere',
+        placeLe: '2026-09-03T00:00:00.000Z'
+      }]
     } as EtatMonde;
     progressionRecompense.valeur = [{ noeud: 'clairiere-01', etoiles: 3 }];
 
@@ -389,6 +399,10 @@ describe('la récompense suit le plan pédagogique actif', () => {
     expect(document.querySelector('[data-action="voir-carte"]')?.className).toContain(
       'action-recompense--principale'
     );
+    expect(document.querySelector('[data-compagnon-rallie="filou"]')).not.toBeNull();
+    expect(document.querySelector('[data-objet-rapporte="fanion-clairiere"]')).not.toBeNull();
+    expect(document.body.textContent).toContain('Filou rejoint ta bande');
+    expect(document.body.textContent).toContain('fanion de la Clairière rejoint le campement');
     expect(document.body.textContent).not.toContain('Encore une fois');
   });
 

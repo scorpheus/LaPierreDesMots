@@ -377,6 +377,54 @@ export async function poserObjetCampement(base: Base, profilId: string, code: st
   );
 }
 
+/** Rallie un compagnon une seule fois. La date de la première rencontre reste l'acquis. */
+export async function rallierCompagnon(
+  base: Base,
+  profilId: string,
+  code: CodeCompagnon,
+  quand: Horodatage,
+): Promise<void> {
+  await base.lancer(
+    `INSERT INTO compagnons (profil_id, code, rallie_le) VALUES (?, ?, ?)
+     ON CONFLICT (profil_id, code) DO NOTHING`,
+    [profilId, String(code), String(quand)]
+  );
+}
+
+/**
+ * Matérialise les deux promesses d'une région terminée : son compagnon et son objet de camp.
+ * La carte, recalculée depuis le journal, reste la source de vérité ; cette projection répare
+ * aussi automatiquement les profils qui avaient déjà fini une région avant ce raccordement.
+ */
+async function synchroniserRecompensesDeRegion(
+  base: Base,
+  profilId: string,
+  carte: EtatCarte,
+  referentiel: ReferentielMonde,
+): Promise<void> {
+  for (const region of carte.regions) {
+    if (region.eclatObtenuLe === null || region.pourcentageColorie < 1) continue;
+
+    const compagnon = referentiel.compagnons.find(
+      (definition) => definition.region === region.region
+    );
+    if (compagnon !== undefined) {
+      await rallierCompagnon(base, profilId, compagnon.code, region.eclatObtenuLe);
+    }
+
+    const objet = referentiel.campement.objets.find(
+      (definition) => definition.region === region.region
+    );
+    if (objet !== undefined) {
+      await base.lancer(
+        `INSERT INTO campement (profil_id, objet_code, place_le) VALUES (?, ?, ?)
+         ON CONFLICT (profil_id, objet_code) DO NOTHING`,
+        [profilId, String(objet.code), String(region.eclatObtenuLe)]
+      );
+    }
+  }
+}
+
 // ──────────────────────────────────────────────────── la sequence d'ouverture (N4, D35)
 
 interface LigneOuverture {
@@ -436,8 +484,10 @@ export async function noterVisitePoint(base: Base, profilId: string, point: stri
 
 /** `EtatMonde` complet : c'est exactement ce que rend `GET /api/profils/:id/monde`. */
 export async function lireMonde(base: Base, profilId: string, referentiel: ReferentielMonde, horloge: Horloge): Promise<EtatMonde> {
+  const carte = await lireCarte(base, profilId, referentiel);
+  await synchroniserRecompensesDeRegion(base, profilId, carte, referentiel);
   return {
-    carte: await lireCarte(base, profilId, referentiel),
+    carte,
     gobi: await lireGobi(base, profilId, referentiel, horloge),
     compagnons: await lireCompagnons(base, profilId, referentiel),
     campement: await lireCampement(base, profilId, referentiel)
