@@ -94,6 +94,156 @@
   ],
   "archives": [
     {
+      "fichier": "assets/gobi/formes/a.svg",
+      "remplacePar": "assets/coffre/formes/a.png",
+      "raison": "Forme vectorielle technique remplacée par l’illustration raster de la collection du coffre.",
+      "decision": "demande parent de refaire les SVG et les formes du coffre avec de vraies images, 2026-09-03"
+    },
+    {
+      "fichier": "assets/gobi/formes/e.svg",
+      "remplacePar": "assets/coffre/formes/e.png",
+      "raison": "Forme vectorielle technique remplacée par l’illustration raster de la collection du coffre.",
+      "decision": "demande parent, 2026-09-03"
+    },
+    {
+      "fichier": "assets/gobi/formes/i.svg",
+      "remplacePar": "assets/coffre/formes/i.png",
+      "raison": "Forme vectorielle technique remplacée par l’illustration raster de la collection du coffre.",
+      "decision": "demande parent, 2026-09-03"
+    },
+    {
+      "fichier": "assets/gobi/formes/o.svg",
+      "remplacePar": "assets/coffre/formes/o.png",
+      "raison": "Forme vectorielle technique remplacée par l’illustration raster de la collection du coffre.",
+      "decision": "demande parent, 2026-09-03"
+    },
+    {
+      "fichier": "assets/gobi/formes/u.svg",
+      "remplacePar": "assets/coffre/formes/u.png",
+      "raison": "Forme vectorielle technique remplacée par l’illustration raster de la collection du coffre.",
+      "decision": "demande parent, 2026-09-03"
+    },
+    {
+      "fichier": "assets/gobi/formes/b.svg",
+      "remplacePar": "assets/coffre/formes/b.png",
+      "raison": "Forme vectorielle technique remplacée par l’illustration raster de la collection du coffre.",
+      "decision": "demande parent, 2026-09-03"
+    },
+    {
+      "fichier": "assets/gobi/formes/d.svg",
+      "remplacePar": "assets/coffre/formes/d.png",
+      "raison": "Forme vectorielle technique remplacée par l’illustration raster de la collection du coffre.",
+      "decision": "demande parent, 2026-09-03"
+    },
+    {
+      "fichier": "assets/gobi/formes/p.svg",
+      "remplacePar": "assets/coffre/formes/p.png",
+      "raison": "Forme vectorielle technique remplacée par l’illustration raster de la collection du coffre.",
+      "decision": "demande parent, 2026-09-03"
+    },
+    {
+      "fichier": "assets/gobi/formes/q.svg",
+      "remplacePar": "assets/coffre/formes/q.png",
+      "raison": "Forme vectorielle technique remplacée par l’illustration raster de la collection du coffre.",
+      "decision": "demande parent, 2026-09-03"
+    },
+    {
+      "fichier": "assets/gobi/formes/t.svg",
+      "remplacePar": "assets/coffre/formes/t.png",
+      "raison": "Forme vectorielle technique remplacée par l’illustration raster de la collection du coffre.",
+      "decision": "demande parent, 2026-09-03"
+    },
+    {
+      "fichier": "assets/gobi/formes/on.svg",
+      "remplacePar": "assets/coffre/formes/on.png",
+      "raison": "Forme vectorielle technique remplacée par l’illustration raster de la collection du coffre.",
+      "decision": "demande parent, 2026-09-03"
+    },
+    {
+      "fichier": "assets/gobi/formes/an.svg",
+      "remplacePar": "assets/coffre/formes/an.png",
+      "raison": "Forme vectorielle technique remplacée par l’illustration raster de la collection du coffre.",
+      "decision": "demande parent, 2026-09-03"
+    },
+    {
+      "fichier": "assets/gobi/formes/in.svg",
+      "remplacePar": "assets/coffre/formes/in.png",
+      "raison": "Forme vectorielle technique remplacée par l’illustration raster de la collection du coffre.",
+      "decision": "demande parent, 2026-09-03"
+    },
+    {
+      "fichier": "assets/gobi/formes/ou.svg",
+      "remplacePar": "assets/coffre/formes/ou.png",
+      "raison": "Forme vectorielle technique remplacée par l’illustration raster de la collection du coffre.",
+      "decision": "demande parent, 2026-09-03"
+    },
+    {
+      "fichier": "assets/gobi/formes/oi.svg",
+      "remplacePar": "assets/coffre/formes/oi.png",
+      "raison": "Forme vectorielle technique remplacée par l’illustration raster de la collection du coffre.",
+      "decision": "demande parent, 2026-09-03"
+    },
+    {
+      "fichier": "assets/gobi/formes/s.svg",
+      "remplacePar": "assets/coffre/formes/s.png",
+      "raison": "Forme vectorielle technique remplacée par l’illustration raster de la collection du coffre.",
+      "decision": "demande parent, 2026-09-03"
+    },
+    {
+      "fichier": "assets/gobi/formes/x.svg",
+      "remplacePar": "assets/coffre/formes/x.png",
+      "raison": "Forme vectorielle technique remplacée par l’illustration raster de la collection du coffre.",
+      "decision": "demande parent, 2026-09-03"
+    },
+    {
+      "fichier": "assets/gobi/formes/er.svg",
+      "remplacePar": "assets/coffre/formes/er.png",
+      "raison": "Forme vectorielle technique remplacée par l’illustration raster de la collection du coffre.",
+      "decision": "demande parent, 2026-09-03"
+    },
+    {
+      "fichier": "assets/gobi/formes/ent.svg",
+      "remplacePar": "assets/coffre/formes/ent.png",
+      "raison": "Forme vectorielle technique remplacée par l’illustration raster de la collection du coffre.",
+      "decision": "demande parent, 2026-09-03"
+    },
+    {
+      "fichier": "assets/gobi/formes/ez.svg",
+      "remplacePar": "assets/coffre/formes/ez.png",
+      "raison": "Forme vectorielle technique remplacée par l’illustration raster de la collection du coffre.",
+      "decision": "demande parent, 2026-09-03"
+    },
+    {
+      "fichier": "assets/gobi/formes/eau.svg",
+      "remplacePar": "assets/coffre/formes/eau.png",
+      "raison": "Forme vectorielle technique remplacée par l’illustration raster de la collection du coffre.",
+      "decision": "demande parent, 2026-09-03"
+    },
+    {
+      "fichier": "assets/gobi/formes/ill.svg",
+      "remplacePar": "assets/coffre/formes/ill.png",
+      "raison": "Forme vectorielle technique remplacée par l’illustration raster de la collection du coffre.",
+      "decision": "demande parent, 2026-09-03"
+    },
+    {
+      "fichier": "assets/gobi/formes/gn.svg",
+      "remplacePar": "assets/coffre/formes/gn.png",
+      "raison": "Forme vectorielle technique remplacée par l’illustration raster de la collection du coffre.",
+      "decision": "demande parent, 2026-09-03"
+    },
+    {
+      "fichier": "assets/gobi/formes/ph.svg",
+      "remplacePar": "assets/coffre/formes/ph.png",
+      "raison": "Forme vectorielle technique remplacée par l’illustration raster de la collection du coffre.",
+      "decision": "demande parent, 2026-09-03"
+    },
+    {
+      "fichier": "assets/gobi/formes/ch.svg",
+      "remplacePar": "assets/coffre/formes/ch.png",
+      "raison": "Forme vectorielle technique remplacée par l’illustration raster de la collection du coffre.",
+      "decision": "demande parent, 2026-09-03"
+    },
+    {
       "fichier": "brouillons/assets/objets/soleil.svg",
       "remplacePar": "assets/objets/soleil.svg",
       "raison": "Source conservée après promotion octet pour octet vers le chemin réellement servi par l’exercice.",

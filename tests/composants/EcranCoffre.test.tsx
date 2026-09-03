@@ -310,7 +310,9 @@ describe('l’exigence commune des dix écrans', () => {
     );
     expect(nonGagne, 'aucun Éclat non gagné dans la fixture : le cas serait creux').not.toBeNull();
 
-    const silhouetteDeLaCase = nonGagne?.querySelector('path')?.getAttribute('d');
+    const imageDeLaCase = nonGagne?.querySelector('img')?.getAttribute('src');
+    expect(imageDeLaCase).toMatch(/assets\/coffre\/eclats\/[^/]+\.png$/u);
+    expect(nonGagne?.querySelector('svg')).toBeNull();
     fireEvent.click(nonGagne!);
     const fiche = document.querySelector('[data-fiche-collection="eclat"]');
     expect(fiche, 'taper un Éclat n’ouvre rien').not.toBeNull();
@@ -324,9 +326,10 @@ describe('l’exigence commune des dix écrans', () => {
       'la fiche promet la couleur comme le fait l’étagère de Gobi : ce n’est pas le même contrat'
     ).toBeNull();
     expect(
-      fiche?.querySelector('path')?.getAttribute('d'),
-      'la fiche remplace la silhouette régionale par un cristal générique'
-    ).toBe(silhouetteDeLaCase);
+      fiche?.querySelector('img')?.getAttribute('src'),
+      'la fiche ne réemploie pas la vraie image régionale de la vignette'
+    ).toBe(imageDeLaCase);
+    expect(fiche?.querySelector('svg')).toBeNull();
   });
 
   it('R28 — un objet rapporté s’ouvre aussi, et dit ce qu’il attend', async () => {

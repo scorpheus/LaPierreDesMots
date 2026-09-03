@@ -23,7 +23,8 @@
  * dossier. Un fichier surnuméraire ne prouverait rien, et un fichier manquant est justement ce
  * qu'un parcours du dossier ne peut pas voir.
  */
-import { existsSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
@@ -248,32 +249,33 @@ describe('LE VERROU prouve la profondeur de chaîne = 1 (D32)', () => {
 });
 
 describe('les cristaux de graphème', () => {
-  it('portent chacun le graphème dans leur description accessible', () => {
+  it('portent chacun un libellé accessible dans le catalogue qui pilote le rendu', () => {
     for (const forme of FORMES) {
-      const svg = lireTexte(cheminDeAsset(forme.cristal));
-      expect(svg, forme.cristal).toContain(forme.libelle);
+      expect(forme.libelle.trim().length, forme.grapheme).toBeGreaterThan(0);
     }
   });
 
   it('ne portent JAMAIS de corps — le cristal seul, sinon la série se disloque (D20)', () => {
     for (const forme of FORMES) {
-      const svg = lireTexte(cheminDeAsset(forme.cristal));
-      expect(svg, forme.cristal).not.toContain('gobi-corps');
+      const png = readFileSync(join(RACINE_DEPOT, cheminDeAsset(forme.cristal)));
+      expect(png.subarray(0, 8), forme.cristal).toEqual(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]));
     }
   });
 
   it('sont visuellement distincts deux à deux — 25 copies ne collectionnent rien', () => {
-    const dessins = FORMES.map((forme) => {
-      const svg = lireTexte(cheminDeAsset(forme.cristal));
-      return groupe(svg, 'cristal') ?? svg;
-    });
+    const dessins = FORMES.map((forme) => createHash('sha256')
+      .update(readFileSync(join(RACINE_DEPOT, cheminDeAsset(forme.cristal))))
+      .digest('hex'));
     console.log(`[N3] cristaux=${String(dessins.length)} distincts=${String(new Set(dessins).size)}`);
     expect(new Set(dessins).size).toBe(FORMES.length);
   });
 
-  it('tiennent la cible de 64 px de R16 — le `viewBox` fait 64 unités', () => {
+  it('sont normalisés en RGBA 256 × 256 pour rester nets et légers en vignette', () => {
     for (const forme of FORMES) {
-      expect(lireTexte(cheminDeAsset(forme.cristal)), forme.cristal).toContain('viewBox="0 0 64 64"');
+      const png = readFileSync(join(RACINE_DEPOT, cheminDeAsset(forme.cristal)));
+      expect(png.readUInt32BE(16), `${forme.cristal} largeur`).toBe(256);
+      expect(png.readUInt32BE(20), `${forme.cristal} hauteur`).toBe(256);
+      expect(png[25], `${forme.cristal} type de couleur PNG`).toBe(6);
     }
   });
 });

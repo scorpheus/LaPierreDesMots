@@ -16,7 +16,7 @@
  * qu'`eclats.ts` corrige. Ce fichier est là pour que le filet ne devienne jamais l'usage.
  * ══════════════════════════════════════════════════════════════════════════════════════════
  */
-import { readdirSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 
@@ -67,6 +67,20 @@ describe('Les Éclats de Pierre', () => {
       'deux régions au moins portent la même silhouette : le coffre ne dit plus ce qu’il reste ' +
         'à trouver, et c’est tout le propos de cet écran',
     ).toBe(regions.length);
+  });
+
+  it('livre une vraie image raster RGBA distincte pour chaque région', () => {
+    const assets = regions.map((region) => eclatDeRegion(region).asset);
+    expect(new Set(assets).size).toBe(regions.length);
+    for (const asset of assets) {
+      const chemin = resolve(RACINE, 'contenu', asset);
+      expect(existsSync(chemin), asset).toBe(true);
+      const png = readFileSync(chemin);
+      expect(png.subarray(0, 8), asset).toEqual(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]));
+      expect(png.readUInt32BE(16), `${asset} largeur`).toBe(256);
+      expect(png.readUInt32BE(20), `${asset} hauteur`).toBe(256);
+      expect(png[25], `${asset} type de couleur PNG`).toBe(6);
+    }
   });
 
   it('les six teintes sont DISTINCTES, et toutes des jetons de palette', () => {

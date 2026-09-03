@@ -76,127 +76,127 @@
     {
       "grapheme": "a",
       "libelle": "Gobi-A",
-      "cristal": "assets/gobi/formes/a.svg"
+      "cristal": "assets/coffre/formes/a.png"
     },
     {
       "grapheme": "e",
       "libelle": "Gobi-E",
-      "cristal": "assets/gobi/formes/e.svg"
+      "cristal": "assets/coffre/formes/e.png"
     },
     {
       "grapheme": "i",
       "libelle": "Gobi-I",
-      "cristal": "assets/gobi/formes/i.svg"
+      "cristal": "assets/coffre/formes/i.png"
     },
     {
       "grapheme": "o",
       "libelle": "Gobi-O",
-      "cristal": "assets/gobi/formes/o.svg"
+      "cristal": "assets/coffre/formes/o.png"
     },
     {
       "grapheme": "u",
       "libelle": "Gobi-U",
-      "cristal": "assets/gobi/formes/u.svg"
+      "cristal": "assets/coffre/formes/u.png"
     },
     {
       "grapheme": "b",
       "libelle": "Gobi-B",
-      "cristal": "assets/gobi/formes/b.svg"
+      "cristal": "assets/coffre/formes/b.png"
     },
     {
       "grapheme": "d",
       "libelle": "Gobi-D",
-      "cristal": "assets/gobi/formes/d.svg"
+      "cristal": "assets/coffre/formes/d.png"
     },
     {
       "grapheme": "p",
       "libelle": "Gobi-P",
-      "cristal": "assets/gobi/formes/p.svg"
+      "cristal": "assets/coffre/formes/p.png"
     },
     {
       "grapheme": "q",
       "libelle": "Gobi-Q",
-      "cristal": "assets/gobi/formes/q.svg"
+      "cristal": "assets/coffre/formes/q.png"
     },
     {
       "grapheme": "t",
       "libelle": "Gobi-T",
-      "cristal": "assets/gobi/formes/t.svg"
+      "cristal": "assets/coffre/formes/t.png"
     },
     {
       "grapheme": "on",
       "libelle": "Gobi-ON",
-      "cristal": "assets/gobi/formes/on.svg"
+      "cristal": "assets/coffre/formes/on.png"
     },
     {
       "grapheme": "an",
       "libelle": "Gobi-AN",
-      "cristal": "assets/gobi/formes/an.svg"
+      "cristal": "assets/coffre/formes/an.png"
     },
     {
       "grapheme": "in",
       "libelle": "Gobi-IN",
-      "cristal": "assets/gobi/formes/in.svg"
+      "cristal": "assets/coffre/formes/in.png"
     },
     {
       "grapheme": "ou",
       "libelle": "Gobi-OU",
-      "cristal": "assets/gobi/formes/ou.svg"
+      "cristal": "assets/coffre/formes/ou.png"
     },
     {
       "grapheme": "oi",
       "libelle": "Gobi-OI",
-      "cristal": "assets/gobi/formes/oi.svg"
+      "cristal": "assets/coffre/formes/oi.png"
     },
     {
       "grapheme": "s",
       "libelle": "Gobi-S",
-      "cristal": "assets/gobi/formes/s.svg"
+      "cristal": "assets/coffre/formes/s.png"
     },
     {
       "grapheme": "x",
       "libelle": "Gobi-X",
-      "cristal": "assets/gobi/formes/x.svg"
+      "cristal": "assets/coffre/formes/x.png"
     },
     {
       "grapheme": "er",
       "libelle": "Gobi-ER",
-      "cristal": "assets/gobi/formes/er.svg"
+      "cristal": "assets/coffre/formes/er.png"
     },
     {
       "grapheme": "ent",
       "libelle": "Gobi-ENT",
-      "cristal": "assets/gobi/formes/ent.svg"
+      "cristal": "assets/coffre/formes/ent.png"
     },
     {
       "grapheme": "ez",
       "libelle": "Gobi-EZ",
-      "cristal": "assets/gobi/formes/ez.svg"
+      "cristal": "assets/coffre/formes/ez.png"
     },
     {
       "grapheme": "eau",
       "libelle": "Gobi-EAU",
-      "cristal": "assets/gobi/formes/eau.svg"
+      "cristal": "assets/coffre/formes/eau.png"
     },
     {
       "grapheme": "ill",
       "libelle": "Gobi-ILL",
-      "cristal": "assets/gobi/formes/ill.svg"
+      "cristal": "assets/coffre/formes/ill.png"
     },
     {
       "grapheme": "gn",
       "libelle": "Gobi-GN",
-      "cristal": "assets/gobi/formes/gn.svg"
+      "cristal": "assets/coffre/formes/gn.png"
     },
     {
       "grapheme": "ph",
       "libelle": "Gobi-PH",
-      "cristal": "assets/gobi/formes/ph.svg"
+      "cristal": "assets/coffre/formes/ph.png"
     },
     {
       "grapheme": "ch",
       "libelle": "Gobi-CH",
-      "cristal": "assets/gobi/formes/ch.svg"
+      "cristal": "assets/coffre/formes/ch.png"
     }
   ]
 }

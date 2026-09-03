@@ -17,13 +17,10 @@
 // envie d'y revenir (v2 § 3.4, D25 point 3). Le coffre en montrait bien six cases, mais six
 // besaces identiques : « deux formes identiques ne se collectionneraient pas » (D44).
 //
-// ── POURQUOI LE DESSIN EST EN LIGNE, ET PAS UN FICHIER D'ASSET ──────────────────────────────
-// Six SVG sous `contenu/assets/` demanderaient leur entrée au registre, leur passage à
-// `verifier-regions-fermees`, et une modification de `contenu/monde/campement.json` — un
-// fichier qu'aucun lot du contrat du monde v4 ne possède (Q-M8-1). Le dépôt a déjà le
-// précédent : `Compagnon.tsx` et `EcranCoffre.tsx` dessinent leurs silhouettes en ligne. Le
-// choix est consigné en question ouverte ; il se défait en une passe le jour où quelqu'un
-// possède le fichier de contenu.
+// ── PASSAGE AUX VRAIES IMAGES ───────────────────────────────────────────────────────────────
+// Les six pictogrammes vectoriels de blocage ont été remplacés le 3 septembre 2026 par six
+// PNG détourés, générés séparément dans le style du campement V6. Le coffre et le campement
+// chargent cette table unique : une récompense ne peut donc plus avoir deux apparences.
 //
 // ── LA RÈGLE, LA MÊME QUE L'ÉTAGÈRE (D44) ───────────────────────────────────────────────────
 // La case non rapportée est la MÊME case, en pointillé et en Grisaille. Jamais un cadenas,
@@ -44,71 +41,45 @@
 import { useState } from 'react';
 import type { ReactElement } from 'react';
 
+import { urlAsset } from '../api/client.js';
 import { FicheObjet } from './FicheObjet.js';
 import type { ObjetCampement } from '@pierre/partage';
 
-/** Un dessin de butin : des tracés, un aplat par tracé. Trait `--trait`, 4 px, v2 § 9.1. */
+/** Une illustration de butin, détourée et lisible aussi en petite vignette. */
 interface DessinDeclare {
   /** Ce que l'enfant reconnaît d'un coup d'œil. Sert d'`aria-label` de repli. */
   readonly quoi: string;
-  readonly traces: readonly { readonly d: string; readonly aplat: string }[];
+  readonly asset: string;
 }
 
 /**
- * Les six butins, un par région, dessinés dans une boîte de 48 × 48.
- *
- * Chacun emprunte la couleur de sa région pour que la reconnaissance ne dépende pas de la
- * lecture du libellé : la Clairière est menthe, les Galeries lagon, le Marais menthe et lagon,
- * la Forêt Muette verte, le Volcan framboise et soleil, la Cité parchemin et soleil. Aucune
- * teinte n'est inventée — ce sont les sept jetons de la v2 § 9.2 et les valeurs du nuancier
- * déjà déclarées dans `global.css` (l'écart n° 2 assumé du contrat technique § 12).
+ * Les six butins, un par région. Chaque chemin pointe vers un PNG RGBA 256 × 256 dont
+ * l’empreinte est verrouillée dans `production/coffre-raster.lock.json`.
  */
 export const DESSIN_BUTIN: Readonly<Record<string, DessinDeclare>> = {
   'fanion-clairiere': {
     quoi: 'un fanion sur son mât',
-    traces: [
-      { d: 'M13,5 L18,5 L18,44 L13,44 Z', aplat: 'var(--nuancier-brun)' },
-      { d: 'M18,8 L43,15 L18,25 Z', aplat: 'var(--menthe)' }
-    ]
+    asset: 'assets/coffre/objets/fanion-clairiere.png'
   },
   'geode-galeries': {
     quoi: 'une géode ouverte',
-    traces: [
-      { d: 'M24,4 L41,15 L37,38 L11,38 L7,15 Z', aplat: 'var(--grisaille)' },
-      { d: 'M24,13 L32,19 L29,31 L19,31 L16,19 Z', aplat: 'var(--lagon)' }
-    ]
+    asset: 'assets/coffre/objets/geode-galeries.png'
   },
   'nenuphar-marais': {
     quoi: 'un nénuphar en fleur',
-    traces: [
-      { d: 'M24,20 L44,29 L24,40 L4,29 Z', aplat: 'var(--menthe)' },
-      { d: 'M24,6 L30,17 L24,23 L18,17 Z', aplat: 'var(--framboise)' }
-    ]
+    asset: 'assets/coffre/objets/nenuphar-marais.png'
   },
   'feuille-foret': {
     quoi: 'une feuille nervurée',
-    traces: [
-      { d: 'M24,4 C38,13 38,33 24,44 C10,33 10,13 24,4 Z', aplat: 'var(--nuancier-vert)' },
-      { d: 'M24,10 L24,42', aplat: 'none' }
-    ]
+    asset: 'assets/coffre/objets/feuille-foret.png'
   },
   'braise-volcan': {
     quoi: 'une braise qui rougeoie',
-    traces: [
-      {
-        d: 'M24,4 C31,15 39,18 34,30 C31,40 24,44 24,44 C24,44 17,40 14,30 C9,18 17,15 24,4 Z',
-        aplat: 'var(--nuancier-orange)'
-      },
-      { d: 'M24,22 C28,28 29,32 26,37 C24,40 22,40 21,36 C20,31 22,27 24,22 Z', aplat: 'var(--soleil)' }
-    ]
+    asset: 'assets/coffre/objets/braise-volcan.png'
   },
   'livre-cite': {
     quoi: 'un livre ouvert',
-    traces: [
-      { d: 'M4,11 L23,16 L23,42 L4,37 Z', aplat: 'var(--parchemin)' },
-      { d: 'M44,11 L25,16 L25,42 L44,37 Z', aplat: 'var(--parchemin)' },
-      { d: 'M23,16 L25,16 L25,42 L23,42 Z', aplat: 'var(--soleil)' }
-    ]
+    asset: 'assets/coffre/objets/livre-cite.png'
   }
 };
 
@@ -123,10 +94,7 @@ export const DESSIN_BUTIN: Readonly<Record<string, DessinDeclare>> = {
  */
 export const BESACE: DessinDeclare = {
   quoi: 'une besace',
-  traces: [
-    { d: 'M9,17 L39,17 L43,43 L5,43 Z', aplat: 'var(--grisaille)' },
-    { d: 'M17,17 a7,7 0 0 1 14,0', aplat: 'none' }
-  ]
+  asset: 'assets/vignettes/galeries-frise/vignette-sac.png'
 };
 
 /** Vrai si ce code a son dessin propre. Le test s'en sert ; le rendu, jamais. */
@@ -148,28 +116,17 @@ export function DessinButin({
 }): ReactElement {
   const dessin = dessinDuButin(code);
   return (
-    <svg
+    <img
       className="dessin-butin"
       width={taille}
       height={taille}
-      viewBox="0 0 48 48"
+      src={urlAsset(dessin.asset)}
+      alt=""
       aria-hidden="true"
-      focusable="false"
+      draggable={false}
+      loading="lazy"
       data-butin-dessin={estDessine(code) ? code : 'besace'}
-    >
-      {dessin.traces.map((trace) => (
-        <path
-          key={trace.d}
-          d={trace.d}
-          fill={trace.aplat}
-          // Le trait tient le style à lui seul (v2 § 9.1) : 4 px sur TOUT élément dessiné.
-          stroke="var(--trait)"
-          strokeWidth="4"
-          strokeLinejoin="round"
-          strokeLinecap="round"
-        />
-      ))}
-    </svg>
+    />
   );
 }
 

@@ -68,8 +68,8 @@ export const NOM_DE_REGION: Readonly<Record<string, string>> = {
  * Les objets passent donc à `DessinButin` (`client/src/monde/Butin.tsx`), qui les dessine un
  * par un et sert AUSSI au campement : les deux écrans montrent le même objet, jamais deux.
  *
- * Les Éclats gardent leur silhouette ici : ce sont des pièces de région, pas du butin, et
- * `contenu/monde/regions.json` ne leur déclare aucun dessin.
+ * Depuis le chantier raster du 3 septembre 2026, les Éclats et les objets portent tous une
+ * vraie image distincte ; les silhouettes vectorielles ne servent plus qu’en repli interne.
  */
 const SILHOUETTE_ECLAT = 'M24 3l13 15-5 19-8 10-8-10-5-19z';
 
@@ -206,6 +206,8 @@ function Case({
           width={compacte ? 64 : 88}
           height={compacte ? 64 : 88}
           aria-hidden="true"
+          draggable={false}
+          loading="lazy"
           style={obtenu ? undefined : { opacity: 0.55, filter: 'saturate(0)' }}
         />
       )}
@@ -335,7 +337,7 @@ export function EcranCoffre({
               // ne se traduit pas. Seul le mot que l'enfant lit change.
               cle={String(region.region)}
               libelle={NOM_DE_REGION[String(region.region)] ?? String(region.region)}
-              asset={null}
+              asset={eclatDeRegion(String(region.region)).asset}
               obtenu={region.eclatObtenuLe !== null}
               categorie="eclat"
               compacte
@@ -430,16 +432,15 @@ export function EcranCoffre({
             ouverte.categorie === 'objet' ? (
               <DessinButin code={ouverte.cle} taille={144} />
             ) : (
-              <svg width="144" height="144" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
-                <path
-                  d={eclatDeRegion(ouverte.cle).silhouette}
-                  fill={ouverte.obtenu ? eclatDeRegion(ouverte.cle).teinte : 'var(--grisaille)'}
-                  stroke="var(--trait)"
-                  strokeWidth="4"
-                  strokeLinejoin="round"
-                  strokeLinecap="round"
-                />
-              </svg>
+              <img
+                src={urlAsset(eclatDeRegion(ouverte.cle).asset)}
+                alt=""
+                width={144}
+                height={144}
+                aria-hidden="true"
+                draggable={false}
+                style={ouverte.obtenu ? undefined : { filter: 'saturate(0)', opacity: 0.55 }}
+              />
             )
           }
           surFermer={() => {

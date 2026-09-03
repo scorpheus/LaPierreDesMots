@@ -244,10 +244,9 @@ export function Gobi({
         <DessinDeGobi stade={stade} animation={animation} />
         {/* LE CRISTAL, et lui seul, porte la déclinaison (D20). Il se pose au sommet de la
             parure, comme le cristal que Gobi vient de gagner ; aucun corps de rechange n'est
-            jamais chargé. Le cadre fait 64 unités sur les 200 du dessin : c'est l'échelle à
-            laquelle un cristal de `contenu/assets/gobi/formes/` — dont le `viewBox` fait
-            précisément 64 — se lit comme un cristal de la crête et non comme un badge posé
-            dessus. */}
+            jamais chargé. Le cadre fait 64 unités sur les 200 du dessin : le PNG carré est
+            contenu dans cette boîte et se lit comme un cristal de la crête, pas comme un badge
+            posé dessus. */}
         {cristal === null ? null : (
           <image
             href={`/api/contenu/assets/${cristal}`}

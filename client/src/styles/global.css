@@ -1996,7 +1996,16 @@ body {
   background-color: transparent;
 }
 
-.case-butin .dessin-butin { inline-size: 88px; block-size: 88px; }
+.case-butin .dessin-butin {
+  inline-size: 88px;
+  block-size: 88px;
+  object-fit: contain;
+}
+
+.case-coffre > img,
+[data-case-etagere] > img {
+  object-fit: contain;
+}
 
 .case-butin[data-rapporte="oui"] {
   border-style: solid;

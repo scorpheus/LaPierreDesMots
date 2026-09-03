@@ -92,44 +92,18 @@ function Vignette({
           // `opacity` et `filter` ne sont PLUS ici — voir l'encadré sur le libellé, plus bas.
         }}
       >
-        {une.obtenue ? (
-          <img
-            src={urlAsset(String(une.cristal))}
-            alt=""
-            width={compacte ? 72 : 80}
-            height={compacte ? 72 : 80}
-            aria-hidden="true"
-          />
-        ) : (
-          <svg
-            width={compacte ? 72 : 80}
-            height={compacte ? 72 : 80}
-            viewBox="0 0 48 48"
-            aria-hidden="true"
-            focusable="false"
-            // ── LE CREUX EST SUR LE DESSIN, PLUS SUR TOUTE LA CASE ────────────────────────
-            // `opacity: 0.6` et `saturate(0)` portaient sur le `<li>` entier, donc AUSSI sur
-            // le libellé. Mesuré par axe-core, une fois que l'audit a11y a réellement atteint
-            // le campement : `#767c8c` sur `#fff6e3`, **ratio 3,88 pour 4,5 exigé**, sur les
-            // 25 cases vides de l'étagère et les 37 du coffre.
-            //
-            // Le nom de la forme est justement ce que l'enfant doit pouvoir LIRE pour savoir
-            // ce qu'il lui reste à trouver : c'est le texte le plus utile de l'écran, et
-            // c'était le moins lisible. D44 demande que la case vide se VOIE « en creux » —
-            // elle parle du dessin, pas de son étiquette.
-            style={{ opacity: 0.6, filter: 'saturate(0)' }}
-          >
-            {/* Le même cristal, en silhouette. La forme de ce qui viendra se remplir. */}
-            <path
-              d="M24,4 L44,24 L24,44 L4,24 Z"
-              fill="var(--grisaille)"
-              stroke="var(--trait)"
-              strokeWidth="3"
-              strokeLinejoin="round"
-              strokeDasharray="5 4"
-            />
-          </svg>
-        )}
+        <img
+          src={urlAsset(String(une.cristal))}
+          alt=""
+          width={compacte ? 72 : 80}
+          height={compacte ? 72 : 80}
+          aria-hidden="true"
+          draggable={false}
+          loading="lazy"
+          // Une forme non gagnée garde sa vraie silhouette, mais pas sa couleur : l'enfant
+          // voit précisément ce qu'il lui reste à trouver sans confondre les 25 cases.
+          style={une.obtenue ? undefined : { opacity: 0.55, filter: 'saturate(0)' }}
+        />
         <span style={{ fontSize: '0.9rem', textAlign: 'center' }}>{une.libelle}</span>
       </button>
     </li>
