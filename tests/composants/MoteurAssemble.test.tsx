@@ -165,6 +165,20 @@ describe('moteur assemble', () => {
     expect(habillage.moteurs).toContain('assemble');
   });
 
+  it('place la construction du mot sous l’image et la centre quelle que soit la largeur', () => {
+    const { container } = render(<Harnais />);
+    const bande = container.querySelector('[data-plateau="mot"]') as HTMLElement | null;
+    const fentes = container.querySelector('[data-fentes="mot"]') as HTMLElement | null;
+    expect(bande).not.toBeNull();
+    expect(fentes).not.toBeNull();
+    expect(bande?.style.display).toBe('flex');
+    expect(bande?.style.alignItems).toBe('center');
+    expect(bande?.style.textAlign).toBe('center');
+    expect(fentes?.getAttribute('data-alignement')).toBe('centre');
+    expect(fentes?.style.justifyContent).toBe('center');
+    expect(fentes?.style.inlineSize).toBe('100%');
+  });
+
   it('bonne réponse : l’étape avance, aucune erreur, aucun écran d’échec', () => {
     const { container } = render(<Harnais />);
     taper(container, ['[data-bloc="bloc-ta"]', '[data-bloc="bloc-pis"]']);

@@ -189,7 +189,15 @@ export function MoteurChemin(
   // --- les voisinages, en traits fins entre les centres -------------------------
   const traits = useMemo(() => {
     const vus = new Set<string>();
-    const lignes: { readonly cle: string; readonly x1: number; readonly y1: number; readonly x2: number; readonly y2: number }[] = [];
+    const lignes: {
+      readonly cle: string;
+      readonly departId: string;
+      readonly arriveeId: string;
+      readonly x1: number;
+      readonly y1: number;
+      readonly x2: number;
+      readonly y2: number;
+    }[] = [];
     for (const c of contenu.cases) {
       const depart = positionParCase.get(c.id);
       if (depart === undefined) continue;
@@ -199,16 +207,34 @@ export function MoteurChemin(
         vus.add(paire);
         const arrivee = positionParCase.get(voisine);
         if (arrivee === undefined) continue;
-        lignes.push({ cle: paire, x1: depart.x, y1: depart.y, x2: arrivee.x, y2: arrivee.y });
+        lignes.push({
+          cle: paire,
+          departId: c.id,
+          arriveeId: voisine,
+          x1: depart.x,
+          y1: depart.y,
+          x2: arrivee.x,
+          y2: arrivee.y,
+        });
       }
     }
     return lignes;
   }, [contenu.cases, positionParCase]);
 
+  const departEtape = contenu.consignes[etat.indexEtape]?.depart ?? null;
+  const casesConsommees = useMemo(() => {
+    const consommees = new Set(Object.keys(etat.acquis));
+    if (departEtape !== null && etat.position !== departEtape) consommees.add(departEtape);
+    if (etat.position !== null) consommees.delete(etat.position);
+    return consommees;
+  }, [departEtape, etat.acquis, etat.position]);
+
   const casesAtteignables = useMemo(() => {
     const courante = contenu.cases.find((c) => c.id === etat.position);
-    return new Set(courante?.voisines ?? []);
-  }, [contenu.cases, etat.position]);
+    return new Set((courante?.voisines ?? []).filter((id) => !casesConsommees.has(id)));
+  }, [casesConsommees, contenu.cases, etat.position]);
+
+  const cibleAide = etat.aide?.cible ?? null;
 
   const positionPion = etat.position === null ? null : positionParCase.get(etat.position) ?? null;
 
@@ -220,6 +246,12 @@ export function MoteurChemin(
       : (MESSAGES_DE_REFUS[etat.dernierRefus.motif] ?? '');
 
   const transitionPion = animationsDesactivees ? undefined : 'inset-inline-start 320ms ease-out, inset-block-start 320ms ease-out';
+  const messageChemin =
+    messageDeRefus !== ''
+      ? messageDeRefus
+      : cibleAide === null
+        ? 'Pars de l’épingle. Choisis un chemin jaune.'
+        : 'Gobi te montre la prochaine case en bleu.';
 
   return (
     <div
@@ -256,20 +288,44 @@ export function MoteurChemin(
         width="100%"
         height="100%"
       >
-        {traits.map((ligne) => (
-          <line
-            key={ligne.cle}
-            x1={ligne.x1}
-            y1={ligne.y1}
-            x2={ligne.x2}
-            y2={ligne.y2}
-            stroke="var(--trait)"
-            strokeOpacity={0.35}
-            strokeWidth={4}
-            strokeDasharray="2 10"
-            strokeLinecap="round"
-          />
-        ))}
+        {traits.map((ligne) => {
+          const reliePion = ligne.departId === etat.position || ligne.arriveeId === etat.position;
+          const autreId = ligne.departId === etat.position ? ligne.arriveeId : ligne.departId;
+          const active = reliePion && casesAtteignables.has(autreId);
+          const parcourue = casesConsommees.has(ligne.departId) || casesConsommees.has(ligne.arriveeId);
+          return (
+            <g
+              key={ligne.cle}
+              data-trait-actif={active ? 'oui' : 'non'}
+              data-trait-parcouru={parcourue ? 'oui' : 'non'}
+            >
+              {active ? (
+                <line
+                  x1={ligne.x1}
+                  y1={ligne.y1}
+                  x2={ligne.x2}
+                  y2={ligne.y2}
+                  stroke="var(--trait)"
+                  strokeOpacity={0.9}
+                  strokeWidth={10}
+                  strokeDasharray="14 10"
+                  strokeLinecap="round"
+                />
+              ) : null}
+              <line
+                x1={ligne.x1}
+                y1={ligne.y1}
+                x2={ligne.x2}
+                y2={ligne.y2}
+                stroke={active ? 'var(--soleil)' : parcourue ? 'var(--menthe)' : 'var(--trait)'}
+                strokeOpacity={active ? 1 : parcourue ? 0.55 : 0.42}
+                strokeWidth={active ? 6 : 4}
+                strokeDasharray={active ? '14 10' : parcourue ? undefined : '4 10'}
+                strokeLinecap="round"
+              />
+            </g>
+          );
+        })}
       </svg>
 
       {/* ------------------------------------------------------------- les cases, posées */}
@@ -283,6 +339,8 @@ export function MoteurChemin(
           const surPion = etat.position === caseChemin.id;
           const atteignable = casesAtteignables.has(caseChemin.id);
           const franchie = etat.acquis[caseChemin.id] !== undefined;
+          const consommee = casesConsommees.has(caseChemin.id);
+          const aidee = cibleAide === caseChemin.id;
           const refusee = etiquetteRefusee === caseChemin.id && etat.dernierRefus?.motif !== 'case-non-adjacente';
           const classes = ['cible'];
           if (!animationsDesactivees && refusee) classes.push('oscillation');
@@ -295,7 +353,10 @@ export function MoteurChemin(
                 data-pion={surPion ? 'oui' : 'non'}
                 data-atteignable={atteignable ? 'oui' : 'non'}
                 data-franchie={franchie ? 'oui' : 'non'}
+                data-consommee={consommee ? 'oui' : 'non'}
+                data-aide-cible={aidee ? 'oui' : 'non'}
                 className={classes.join(' ')}
+                disabled={surPion || consommee}
                 style={
                   {
                     ...styleLecture,
@@ -304,8 +365,10 @@ export function MoteurChemin(
                     // Atteignable : un halo STATIQUE (aucune image-clé), pour que les captures
                     // T4 restent stables — seule la couleur de fond diffère, jamais l'ombre de
                     // `.cible:active`.
-                    boxShadow: atteignable
-                      ? '0 0 0 4px var(--soleil), var(--ombre-bd)'
+                    boxShadow: aidee
+                      ? '0 0 0 6px var(--lagon), 0 0 0 10px var(--parchemin), var(--ombre-bd)'
+                      : atteignable
+                        ? '0 0 0 4px var(--soleil), var(--ombre-bd)'
                       : undefined,
                     backgroundColor: franchie
                       ? 'color-mix(in srgb, var(--soleil) 25%, var(--parchemin))'
@@ -347,6 +410,30 @@ export function MoteurChemin(
         )}
       </div>
 
+      <p
+        data-message-chemin="oui"
+        data-refus-texte={messageDeRefus === '' ? 'non' : 'oui'}
+        style={{
+          ...styleLecture,
+          position: 'absolute',
+          insetBlockStart: '0.75rem',
+          insetInlineStart: '50%',
+          zIndex: 4,
+          maxInlineSize: 'min(88%, 42rem)',
+          margin: 0,
+          padding: '0.65rem 1rem',
+          transform: 'translateX(-50%)',
+          border: '3px solid var(--trait)',
+          borderRadius: '999px',
+          background: 'color-mix(in srgb, var(--parchemin) 94%, transparent)',
+          boxShadow: 'var(--ombre-bd)',
+          textAlign: 'center',
+          pointerEvents: 'none',
+        } as CSSProperties}
+      >
+        {messageChemin}
+      </p>
+
       {/* ------------------------------------------------------------ la bande statique */}
       <div
         ref={bande}
@@ -357,9 +444,11 @@ export function MoteurChemin(
           insetInlineEnd: 0,
           insetBlockEnd: 0,
           zIndex: 3,
-          display: 'grid',
-          gap: '0.5rem',
-          padding: '0.75rem',
+          inlineSize: 1,
+          blockSize: 1,
+          overflow: 'hidden',
+          clip: 'rect(0 0 0 0)',
+          whiteSpace: 'nowrap',
         }}
       >
         <p
@@ -369,7 +458,7 @@ export function MoteurChemin(
           data-animations={animationsDesactivees ? 'calmes' : 'vives'}
           style={{ ...styleLecture, margin: 0, minBlockSize: '1.5em' } as CSSProperties}
         >
-          {messageDeRefus === '' ? (etat.aide === null ? '' : (etat.aide.texte ?? '')) : messageDeRefus}
+          {messageChemin}
         </p>
 
         <p

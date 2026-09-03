@@ -691,6 +691,19 @@ export function MoteurTri(
   }, [empreinteAllumees, allumees]);
 
   const etape = etat.etapes[etat.indexEtape];
+  const consigneEtape = contenu.consignes[etat.indexEtape];
+  const receptaclesDeLEtape = useMemo(() => {
+    const ids = new Set(
+      (consigneEtape?.aRanger ?? []).map((id) => elementsParId.get(id)?.receptacleAttendu ?? ''),
+    );
+    return contenu.receptacles.filter((receptacle) => ids.has(receptacle.id));
+  }, [consigneEtape, contenu.receptacles, elementsParId]);
+  const cibleEtape = receptaclesDeLEtape
+    .map((receptacle) => {
+      const critere = receptacle.critere.replace(/^les mots où tu lis /iu, '').replace(/^j’entends /iu, '');
+      return `${critere} → ${receptacle.libelle}`;
+    })
+    .join(' · ');
 
   const elementsParReceptacle = useMemo(() => {
     const carte = new Map<string, ElementTri[]>();
@@ -800,6 +813,23 @@ export function MoteurTri(
           data-plateau="geste"
           style={{ position: 'absolute', insetInlineStart: 0, insetInlineEnd: 0, insetBlockStart: 0, zIndex: 2 }}
         >
+          <div
+            data-cartouche-tri="etape"
+            style={{
+              display: 'inline-flex',
+              gap: '0.65rem',
+              alignItems: 'center',
+              marginBlockEnd: '0.35rem',
+              padding: '0.25rem 0.7rem',
+              borderRadius: '999px',
+              background: 'color-mix(in srgb, var(--soleil, #ffc93c) 28%, var(--parchemin) 72%)',
+              border: '2px solid var(--trait)',
+              fontWeight: 700,
+            }}
+          >
+            <span>{`Étape ${String(etat.indexEtape + 1)} / ${String(etat.etapes.length)}`}</span>
+            {cibleEtape === '' ? null : <span aria-label="cible actuelle">{cibleEtape}</span>}
+          </div>
           <p
             data-consigne-geste={etat.elementSaisi === null ? 'choisir' : 'deposer'}
             role="status"
@@ -902,16 +932,46 @@ export function MoteurTri(
           </div>
         )}
 
-        {/* ── le pied de page : le refus ou l'aide, jamais les deux, aucune animation ─────── */}
+        {/* ── retour immédiat : superposé au plateau, sans lui prendre de hauteur ───────────
+            Le message était auparavant dans un pied mesuré de 56 px. À chaque refus, ce pied
+            faisait donc rétrécir le décor et donnait l'impression que le jeu « sautait ». Le
+            retour reste une région live minuscule pour l'accessibilité ; la copie visible est
+            une pastille posée au-dessus de l'image, à proximité du geste. */}
+        {(messageDeRefus !== '' || etat.aide !== null) && (
+          <div
+            data-message-tri="visible"
+            style={{
+              position: 'absolute',
+              insetInlineStart: '50%',
+              insetBlockEnd: '1rem',
+              transform: 'translateX(-50%)',
+              zIndex: 4,
+              maxInlineSize: 'min(90%, 42rem)',
+              padding: '0.7rem 1.15rem',
+              borderRadius: '999px',
+              border: '3px solid var(--trait)',
+              background: 'var(--parchemin)',
+              boxShadow: 'var(--ombre-bd-appui)',
+              color: 'var(--encre, #19233f)',
+              textAlign: 'center',
+              fontWeight: 700,
+              pointerEvents: 'none',
+            }}
+          >
+            {messageDeRefus !== '' ? messageDeRefus : (etat.aide?.texte ?? 'Gobi te guide.')}
+          </div>
+        )}
         <div
           ref={pied}
           data-plateau="messages"
           style={{
             position: 'absolute',
-            insetInlineStart: 0,
-            insetInlineEnd: 0,
-            insetBlockEnd: 0,
-            zIndex: 2,
+            inlineSize: '1px',
+            blockSize: '1px',
+            overflow: 'hidden',
+            clip: 'rect(0 0 0 0)',
+            clipPath: 'inset(50%)',
+            whiteSpace: 'nowrap',
           }}
         >
           <p
@@ -919,7 +979,7 @@ export function MoteurTri(
             aria-live="polite"
             data-refus-texte={messageDeRefus === '' ? 'non' : 'oui'}
             data-animations={animationsDesactivees ? 'calmes' : 'vives'}
-            style={{ margin: 0, minBlockSize: '1.5em' }}
+            style={{ margin: 0 }}
           >
             {messageDeRefus === '' ? (etat.aide === null ? '' : (etat.aide.texte ?? '')) : messageDeRefus}
           </p>

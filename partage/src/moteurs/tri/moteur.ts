@@ -54,6 +54,36 @@ function remplacer(
 }
 
 /**
+ * Une étape décrit une série pédagogique, mais la cible annoncée peut être la règle entière
+ * (par exemple « les mots où tu lis un a »). Comme tous les mots restent visibles, un mot d'une
+ * série suivante peut donc être rangé en avance. On le retire alors des étapes à venir et on
+ * saute les étapes déjà vides, sans laisser l'enfant devant un écran « suivant » impossible.
+ */
+function avancerEtapes(
+  etapes: readonly EtatEtapeTri[],
+  indexDepart: number,
+  acquis: Readonly<Record<string, string>>,
+  instant: number,
+): { readonly etapes: readonly EtatEtapeTri[]; readonly index: number; readonly termine: boolean } {
+  const maj = etapes.map((etape) => ({
+    ...etape,
+    restantes: etape.restantes.filter((id) => acquis[id] === undefined),
+  }));
+  let index = indexDepart;
+  while (index < maj.length) {
+    const courante = maj[index];
+    if (courante === undefined || courante.restantes.length > 0) break;
+    if (courante.finMs === null) maj[index] = { ...courante, finMs: instant };
+    index += 1;
+    const suivante = maj[index];
+    if (suivante !== undefined) {
+      maj[index] = { ...suivante, debutMs: instant, derniereActionMs: instant };
+    }
+  }
+  return { etapes: maj, index: Math.min(index, Math.max(0, maj.length - 1)), termine: index >= maj.length };
+}
+
+/**
  * Fait mûrir les seuils d'inactivité et d'erreurs.
  *
  * La relecture automatique est **gratuite** (R15) : elle n'avance jamais `niveauAide`, ne
@@ -131,6 +161,10 @@ function appliquerDecision(
   }
 
   const cle = decision.acquis === null ? null : decision.acquis[0];
+  const acquis =
+    decision.acquis === null
+      ? etat.acquis
+      : { ...etat.acquis, [decision.acquis[0]]: decision.acquis[1] };
   let etapes = remplacer(etat.etapes, etat.indexEtape, {
     ...etape,
     restantes: cle === null ? etape.restantes : etape.restantes.filter((r) => r !== cle),
@@ -141,18 +175,9 @@ function appliquerDecision(
 
   // Passage automatique à l'étape suivante : il n'existe ni « valider » ni « suivant »
   // (contrat v1 § 5.3, v2 § 5.1 — le retour est immédiat).
-  let indexEtape = etat.indexEtape;
-  if (decision.etapeSatisfaite && !decision.exerciceTermine) {
-    indexEtape += 1;
-    const suivante = etapes[indexEtape];
-    if (suivante !== undefined) {
-      etapes = remplacer(etapes, indexEtape, {
-        ...suivante,
-        debutMs: instant,
-        derniereActionMs: instant,
-      });
-    }
-  }
+  const avancement = avancerEtapes(etapes, etat.indexEtape, acquis, instant);
+  etapes = avancement.etapes;
+  const indexEtape = avancement.index;
 
   return appliquerPaliers(
     {
@@ -160,14 +185,11 @@ function appliquerDecision(
       ...extra,
       etapes,
       indexEtape,
-      acquis:
-        decision.acquis === null
-          ? etat.acquis
-          : { ...etat.acquis, [decision.acquis[0]]: decision.acquis[1] },
+      acquis,
       dernierRefus: null,
       // L'aide affichée appartient à l'étape qui vient de se clore.
       aide: decision.etapeSatisfaite ? null : etat.aide,
-      termineMs: decision.exerciceTermine ? instant : etat.termineMs,
+      termineMs: avancement.termine ? instant : etat.termineMs,
     },
     instant,
   );

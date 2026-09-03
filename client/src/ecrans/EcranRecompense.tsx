@@ -70,6 +70,13 @@ export function texteProgressionRegionale(
   return termines === total ? 'Cette région est terminée. ' : 'Exercice terminé. ';
 }
 
+/** Une région est complète seulement quand son référentiel contient des nœuds et qu'ils sont tous faits. */
+export function regionEstTerminee(
+  progression: { readonly termines: number; readonly total: number } | null
+): boolean {
+  return progression !== null && progression.total > 0 && progression.termines >= progression.total;
+}
+
 export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}): ReactElement {
   const magasin = useMagasin();
   const services = useServices();
@@ -346,6 +353,7 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
     finDeSortie && progressionRegionale !== null && progressionRegionale.termines < progressionRegionale.total
       ? repriseRegionale?.noeud ?? null
       : null;
+  const regionTerminee = regionEstTerminee(progressionRegionale);
 
   /**
    * ══════════════════════════════════════════════════════════════════════════════════════════
@@ -468,8 +476,12 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
         </div>
 
         <div className="recompense-texte" data-texte-recompense="immobile">
-          <h1 className="titre" style={{ fontSize: '3rem', margin: 0, textAlign: 'center' }}>
-            Bravo&nbsp;!
+          <h1
+            className="titre"
+            data-victoire-region={regionTerminee ? 'oui' : 'non'}
+            style={{ fontSize: '3rem', margin: 0, textAlign: 'center' }}
+          >
+            {regionTerminee ? `${nomRegion} est rallumée !` : 'Bravo !'}
           </h1>
 
           <Etoiles
@@ -480,7 +492,9 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
           />
 
           <p className="zone-lecture" style={{ fontSize: '1.5rem', padding: '1rem', margin: 0 }}>
-            {FELICITATIONS[nombreEtoiles] ?? FELICITATIONS[1]}
+            {regionTerminee
+              ? `Tu as terminé tous les exercices de ${nomRegion}. La région brille de nouveau !`
+              : FELICITATIONS[nombreEtoiles] ?? FELICITATIONS[1]}
           </p>
         </div>
       </section>
@@ -606,21 +620,28 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
         {finDeSortie ? (
           <button
             type="button"
-            className={`cible action-recompense${continuerRegion === null ? ' action-recompense--principale' : ''}`}
+            className={`cible action-recompense${continuerRegion === null && !regionTerminee ? ' action-recompense--principale' : ''}`}
             data-action="fin-sortie"
             onClick={terminerSortie}
           >
             Au campement !
           </button>
         ) : null}
+        {regionTerminee ? null : (
+          <button
+            type="button"
+            className={`cible action-recompense${suivant === null && !finDeSortie ? ' action-recompense--principale' : ''}`}
+            onClick={rejouer}
+          >
+            Encore une fois
+          </button>
+        )}
         <button
           type="button"
-          className={`cible action-recompense${suivant === null && !finDeSortie ? ' action-recompense--principale' : ''}`}
-          onClick={rejouer}
+          data-action="voir-carte"
+          className={`cible action-recompense${regionTerminee ? ' action-recompense--principale' : ''}`}
+          onClick={retourCarte}
         >
-          Encore une fois
-        </button>
-        <button type="button" className="cible action-recompense" onClick={retourCarte}>
           Voir la carte
         </button>
       </div>

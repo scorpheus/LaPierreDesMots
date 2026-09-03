@@ -31,13 +31,19 @@ import { enonceUnePerte } from '@partage/ton/index.js';
 
 const enregistrements: unknown[] = [];
 let enregistrementEchoue = false;
-const { effacementsParticules } = vi.hoisted(() => ({ effacementsParticules: vi.fn() }));
+const { effacementsParticules, mondeRecompense, progressionRecompense } = vi.hoisted(() => ({
+  effacementsParticules: vi.fn(),
+  mondeRecompense: { valeur: null as EtatMonde | null },
+  progressionRecompense: { valeur: [] as Array<{ noeud: string; etoiles: number }> }
+}));
 
 vi.mock('@client/api/client', async (importOriginal) => {
   const original = await importOriginal<Record<string, unknown>>();
   return {
     ...original,
     calculerCleIdempotence: () => Promise.resolve('cle-de-test'),
+    lireMonde: () => Promise.resolve(mondeRecompense.valeur),
+    lireProgression: () => Promise.resolve(progressionRecompense.valeur),
     enregistrerTentative: (charge: unknown) => {
       enregistrements.push(charge);
       return enregistrementEchoue
@@ -130,6 +136,8 @@ function etoilesAcquises(): number {
 beforeEach(() => {
   enregistrements.length = 0;
   enregistrementEchoue = false;
+  mondeRecompense.valeur = null;
+  progressionRecompense.valeur = [];
   effacementsParticules.mockClear();
 });
 
@@ -317,6 +325,47 @@ describe('une région n’est annoncée qu’au vrai déblocage', () => {
 });
 
 describe('la récompense suit le plan pédagogique actif', () => {
+  it('met en scène la victoire régionale et renvoie vers la carte quand tous les nœuds sont faits', async () => {
+    mondeRecompense.valeur = {
+      carte: {
+        ouvertesEnParallele: 2,
+        regions: [
+          {
+            region: 'clairiere', ordre: 1, ouverte: true, pourcentageColorie: 1,
+            eclatObtenuLe: '2026-09-03T00:00:00.000Z', compagnon: null,
+            noeuds: ['clairiere-01', 'clairiere-02']
+          }
+        ]
+      },
+      gobi: { stade: 'oeuf', formes: [], formeActive: null }, compagnons: [], campement: []
+    } as EtatMonde;
+    progressionRecompense.valeur = [{ noeud: 'clairiere-01', etoiles: 3 }];
+
+    monter({
+      profil: { id: 'prf-1', prenom: 'Alma' },
+      journalise: false,
+      paquet: {
+        noeud: { id: 'clairiere-02', region: 'clairiere' },
+        exercice: { id: 'ex-02', jeu: { moteur: 'colorie' } },
+        habillage: { id: 'ecole', timings: {} }
+      },
+      resume: resume(0, false),
+      demarreLe: '2026-09-03T00:00:00.000Z',
+      termineLe: '2026-09-03T00:00:42.000Z'
+    });
+
+    await waitFor(() => {
+      expect(document.querySelector('[data-victoire-region="oui"]')).not.toBeNull();
+    });
+    expect(document.querySelector('[data-victoire-region="oui"]')?.textContent).toContain('rallumée');
+    expect(document.body.textContent).toContain('tous les exercices');
+    expect(document.querySelector('[data-action="continuer-region"]')).toBeNull();
+    expect(document.querySelector('[data-action="voir-carte"]')?.className).toContain(
+      'action-recompense--principale'
+    );
+    expect(document.body.textContent).not.toContain('Encore une fois');
+  });
+
   it('propose l’étape suivante du plan, jamais le prochain nœud arbitraire de la région', () => {
     const magasin = monter({
       etoiles: 2,

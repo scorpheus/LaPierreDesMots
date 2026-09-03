@@ -67,6 +67,25 @@ const MESSAGES_DE_REFUS: Readonly<Record<string, string>> = {
   'option-inconnue': 'On cherche une autre option pour ce mot-là.',
 };
 
+/** Les lucioles flottent doucement ; le texte de la consigne et le mot restent immobiles. */
+const FEUILLE_DE_LUCIOLES = `
+@keyframes pierre-luciole-derive {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(var(--luciole-dx), calc(var(--luciole-dy) * -1)) rotate(-2deg); }
+  50% { transform: translate(0, 0) rotate(1deg); }
+  75% { transform: translate(calc(var(--luciole-dx) * -1), var(--luciole-dy)) rotate(-1deg); }
+}
+[data-luciole-animee="oui"] {
+  animation: pierre-luciole-derive var(--luciole-duree) ease-in-out var(--luciole-delai) infinite;
+}
+`;
+
+function hacher(texte: string): number {
+  let h = 0;
+  for (let i = 0; i < texte.length; i += 1) h = (h * 31 + texte.charCodeAt(i)) >>> 0;
+  return h;
+}
+
 export function MoteurEclair(
   proprietes: ProprietesMoteur<ContenuEclair, EtatEclair, ActionEclair>,
 ): ReactElement {
@@ -232,6 +251,13 @@ export function MoteurEclair(
 
   const xEclair = emplacementEclair?.x ?? cadreJeu.largeur / 2;
   const yEclair = emplacementEclair?.y ?? cadreJeu.hauteur / 2;
+  const chercheVoyelle = useMemo(() => {
+    if (consigne === null) return false;
+    const libelles = consigne.options
+      .map((id) => optionParId.get(id)?.libelle.trim().toLocaleLowerCase('fr-FR') ?? '')
+      .filter((libelle) => libelle !== '');
+    return libelles.length > 0 && libelles.every((libelle) => /^[aeiouyéèêàâîïôöùûü]$/u.test(libelle));
+  }, [consigne, optionParId]);
 
   return (
     <div
@@ -250,6 +276,49 @@ export function MoteurEclair(
         borderRadius: 'var(--rayon-carte)',
       }}
     >
+      <style>{FEUILLE_DE_LUCIOLES}</style>
+
+      {/* Repère stable : la consigne de l'écran peut changer entre deux étapes, ce cartouche
+          rend le changement explicite sans faire bouger le texte de lecture. */}
+      {consigne === null ? null : (
+        <div
+          data-plateau="etape-eclair"
+          data-visible={eclairVisible ? 'non' : 'oui'}
+          aria-live="polite"
+          style={{
+            position: 'absolute',
+            insetBlockStart: '0.75rem',
+            insetInlineStart: '0.75rem',
+            zIndex: 3,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.65rem',
+            padding: '0.55rem 0.9rem',
+            border: '3px solid var(--trait)',
+            borderRadius: '1rem',
+            background: 'var(--parchemin)',
+            boxShadow: 'var(--ombre-bd)',
+            color: 'var(--trait)',
+            opacity: eclairVisible ? 0 : 1,
+            pointerEvents: 'none',
+            transition: 'opacity 120ms ease-out',
+            ...styleLecture,
+          } as CSSProperties}
+        >
+          <span style={{ fontSize: '0.82em', fontWeight: 700, opacity: 0.78 }}>
+            Étape {String(etat.indexEtape + 1)} sur {String(etat.etapes.length)}
+          </span>
+          <span aria-hidden="true" style={{ color: 'var(--soleil)', fontSize: '1.25em' }}>✦</span>
+          <span style={{ fontWeight: 800 }}>
+            {tours === 0
+              ? 'Un nouveau mot t’attend.'
+              : chercheVoyelle
+                ? 'Quelle voyelle lis-tu dans ce mot ?'
+                : 'Retrouve le mot que tu viens de lire.'}
+          </span>
+        </div>
+      )}
+
       {/* La commande n'est pas une réponse : elle garde donc sa propre place, au-dessus de
           l'illustration, avec une silhouette différente des mots à choisir. */}
       <div
@@ -308,19 +377,32 @@ export function MoteurEclair(
           const refusee = etiquetteRefusee === emplacement.cle;
           const classes = ['cible'];
           if (!animationsDesactivees && refusee) classes.push('oscillation');
+          const h = hacher(emplacement.cle);
+          const derive: CSSProperties = animationsDesactivees
+            ? {}
+            : ({
+                '--luciole-dx': `${String(5 + (h % 4) * 2)}px`,
+                '--luciole-dy': `${String(4 + ((h >> 3) % 3) * 2)}px`,
+                '--luciole-duree': `${String(4200 + (h % 1200))}ms`,
+                '--luciole-delai': `-${String(h % 3600)}ms`,
+              } as CSSProperties);
           return (
             <PorteurPose key={emplacement.cle} x={emplacement.x} y={emplacement.y}>
-              <button
-                key={refusee ? `${emplacement.cle}-${String(marqueRefusCourante)}` : emplacement.cle}
-                type="button"
-                data-option={emplacement.cle}
-                data-option-couleur={option.couleur ?? undefined}
-                className={`${classes.join(' ')}${option.id.startsWith('luciole-') ? ' cible-luciole' : ''}`}
-                style={{ ...styleLecture, pointerEvents: 'auto', whiteSpace: 'nowrap' } as CSSProperties}
-                onClick={(evenement) => {
-                  jouer({ type: 'repondre', option: emplacement.cle }, evenement);
-                }}
+              <div
+                data-luciole-animee={animationsDesactivees || !option.id.startsWith('luciole-') ? 'non' : 'oui'}
+                style={derive}
               >
+                <button
+                  key={refusee ? `${emplacement.cle}-${String(marqueRefusCourante)}` : emplacement.cle}
+                  type="button"
+                  data-option={emplacement.cle}
+                  data-option-couleur={option.couleur ?? undefined}
+                  className={`${classes.join(' ')}${option.id.startsWith('luciole-') ? ' cible-luciole' : ''}`}
+                  style={{ ...styleLecture, pointerEvents: 'auto', whiteSpace: 'nowrap' } as CSSProperties}
+                  onClick={(evenement) => {
+                    jouer({ type: 'repondre', option: emplacement.cle }, evenement);
+                  }}
+                >
                 {/* R11 — une couleur se MONTRE, elle ne se lit pas : la pastille porte la
                     teinte, le mot reste à côté pour qui veut le lire. */}
                 {option.couleur === undefined ? null : (
@@ -339,8 +421,9 @@ export function MoteurEclair(
                     }}
                   />
                 )}
-                {option.libelle}
-              </button>
+                  {option.libelle}
+                </button>
+              </div>
             </PorteurPose>
           );
         })}
@@ -363,14 +446,17 @@ export function MoteurEclair(
               ? '0 0 0 6px color-mix(in srgb, var(--soleil) 70%, transparent), var(--ombre-bd)'
               : 'none',
             pointerEvents: eclairVisible ? 'none' : 'auto',
+            background: eclairVisible ? 'var(--parchemin)' : 'transparent',
+            border: eclairVisible ? '3px solid var(--trait)' : '0',
+            padding: eclairVisible ? '0.85rem 1.2rem' : 0,
+            color: 'var(--trait)',
           }}
         >
           {eclairVisible && consigne !== null ? (
-            <ZoneDeLecture
-              texte={consigne.mot}
-              motsCles={[consigne.mot]}
-              etiquette={`Le mot : ${consigne.mot}`}
-            />
+            <div style={{ display: 'grid', justifyItems: 'center', gap: '0.25rem' }}>
+              <span style={{ fontSize: '0.78rem', fontWeight: 700, opacity: 0.75 }}>Lis ce mot</span>
+              <ZoneDeLecture texte={consigne.mot} motsCles={[consigne.mot]} etiquette={`Le mot : ${consigne.mot}`} />
+            </div>
           ) : null}
         </div>
       </PorteurPose>

@@ -67,9 +67,15 @@ import { contenuEclair as contenu, contenuEclairDeuxEtapes } from '../fixtures/m
  * assertions portent alors sur ce que le composant DONNE À VOIR et sur ce que le moteur
  * CALCULE, jamais sur un état interne qu'aucun écran ne montrerait.
  */
-function Harnais(): ReactElement {
+function Harnais({
+  animationsDesactivees = true,
+  contenuTest = contenu,
+}: {
+  readonly animationsDesactivees?: boolean;
+  readonly contenuTest?: typeof contenu;
+} = {}): ReactElement {
   const [etat, setEtat] = useState<EtatEclair>(() =>
-    moteurEclair.creerEtat({ contenu, habillage, alea, horloge }),
+    moteurEclair.creerEtat({ contenu: contenuTest, habillage, alea, horloge }),
   );
   const emettre = useCallback((action: ActionEclair) => {
     setEtat((precedent) => moteurEclair.reduire(precedent, action, { alea, horloge }));
@@ -118,12 +124,12 @@ function Harnais(): ReactElement {
         }}
       />
       <MoteurEclair
-        contenu={contenu}
+        contenu={contenuTest}
         habillage={habillage}
         etat={etat}
         emettre={emettre}
         services={services}
-        animationsDesactivees
+        animationsDesactivees={animationsDesactivees}
       />
     </div>
   );
@@ -332,6 +338,66 @@ describe('moteur eclair', () => {
       expect(commande?.querySelector('[data-action="revoir"]')).not.toBeNull();
       expect(plateau?.querySelector('[data-action="revoir"]')).toBeNull();
       expect(controles?.querySelector('[data-action="revoir"]')).toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('rend le changement de mot explicite dans un repère stable', () => {
+    const { container } = render(<HarnaisDeuxEtapes />);
+    const etape = (): HTMLElement | null => container.querySelector('[data-plateau="etape-eclair"]');
+    expect(etape()?.textContent).toContain('Un nouveau mot t’attend');
+    expect(etape()?.textContent).not.toContain('roue');
+
+    taper(container, ['[data-action="pret"]']);
+    taper(container, ['[data-option="opt-roue"]']);
+    expect(etape()?.textContent).toContain('Un nouveau mot t’attend');
+    expect(etape()?.textContent).not.toContain('boule');
+  });
+
+  it('anime les lucioles sans animer leur texte', () => {
+    const contenuLuciole = {
+      ...contenu,
+      consignes: contenu.consignes.map((consigne) => ({
+        ...consigne,
+        options: ['luciole-roue', 'luciole-rue'],
+        reponse: 'luciole-roue',
+      })),
+      options: contenu.options.map((option) => ({ ...option, id: `luciole-${option.id.slice(4)}` })),
+    };
+    const { container } = render(
+      <Harnais animationsDesactivees={false} contenuTest={contenuLuciole} />,
+    );
+    const luciole = container.querySelector('[data-luciole-animee="oui"]');
+    expect(luciole).not.toBeNull();
+    expect(luciole?.querySelector('[data-option]')).not.toBeNull();
+    // Le mouvement est porté par le décor enveloppant, jamais par le bouton qui porte le mot.
+    expect(luciole?.querySelector('[data-option]')?.getAttribute('data-luciole-animee')).toBeNull();
+  });
+
+  it('demande explicitement la voyelle après avoir caché le mot', () => {
+    vi.useFakeTimers();
+    try {
+      const contenuVoyelles = {
+        ...contenu,
+        consignes: contenu.consignes.map((consigne) => ({
+          ...consigne,
+          options: ['opt-a', 'opt-i'],
+          reponse: 'opt-a',
+        })),
+        options: [
+          { id: 'opt-a', libelle: 'a', bonne: true, confusionAvec: null },
+          { id: 'opt-i', libelle: 'i', bonne: false, confusionAvec: 'a' },
+        ],
+      };
+      const { container } = render(<Harnais contenuTest={contenuVoyelles} />);
+      taper(container, ['[data-action="pret"]']);
+      act(() => {
+        vi.advanceTimersByTime(5000);
+      });
+      expect(container.querySelector('[data-plateau="etape-eclair"]')?.textContent).toContain(
+        'Quelle voyelle lis-tu',
+      );
     } finally {
       vi.useRealTimers();
     }

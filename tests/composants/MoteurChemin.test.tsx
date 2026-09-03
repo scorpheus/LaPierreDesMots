@@ -193,6 +193,12 @@ describe('moteur chemin', () => {
     expect(container.querySelector('[data-moteur="chemin"]')?.getAttribute('data-aide')).toBe(
       'indice',
     );
+    expect(container.querySelector('[data-case="case-loup"]')?.getAttribute('data-aide-cible')).toBe(
+      'oui',
+    );
+    expect(container.querySelector('[data-message-chemin="oui"]')?.textContent).toContain(
+      'Gobi te montre',
+    );
     // Deuxième appel : l'escalade est monotone, elle ne saute pas au palier suivant.
     taper(container, ['[data-harnais-action="aide"]']);
     expect(container.querySelector('[data-moteur="chemin"]')?.getAttribute('data-aide')).toBe(
@@ -204,6 +210,26 @@ describe('moteur chemin', () => {
     const { container } = render(<Harnais />);
     taper(container, ['[data-case="case-loup"]', '[data-case="case-loup"]', '[data-case="case-roue"]']);
     expect(harnais(container).getAttribute('data-erreurs')).toBe('0');
+  });
+
+  it('une ancienne case ne ressemble plus à un choix après le départ', () => {
+    const { container } = render(<Harnais />);
+    taper(container, ['[data-case="case-loup"]']);
+
+    const depart = container.querySelector<HTMLButtonElement>('[data-case="case-depart"]');
+    const suite = container.querySelector<HTMLButtonElement>('[data-case="case-roue"]');
+    expect(depart?.getAttribute('data-atteignable')).toBe('non');
+    expect(depart?.getAttribute('data-consommee')).toBe('oui');
+    expect(depart?.disabled).toBe(true);
+    expect(suite?.getAttribute('data-atteignable')).toBe('oui');
+    expect(container.querySelectorAll('[data-trait-actif="oui"]')).toHaveLength(1);
+  });
+
+  it('le message utile est placé sur le plateau, pas dans la bande basse', () => {
+    const { container } = render(<Harnais />);
+    const message = container.querySelector('[data-message-chemin="oui"]');
+    expect(message?.textContent).toContain('chemin jaune');
+    expect(message?.closest('[data-plateau="controles"]')).toBeNull();
   });
 
   it('réécouter est gratuit : aucune erreur, aucun palier d’aide', () => {

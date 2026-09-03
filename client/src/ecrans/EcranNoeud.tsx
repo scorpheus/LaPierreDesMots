@@ -61,6 +61,23 @@ interface EtapeAffichable {
   readonly audio: CheminAsset | null;
 }
 
+/**
+ * La barre haute explique le geste et reste stable pendant une série. La donnée détaillée
+ * continue d'alimenter le moteur et l'écoute ; la cible qui varie appartient au plateau.
+ * `eclair` est le premier moteur migré vers ce contrat après la recette parent des lucioles.
+ */
+function texteCadreDeConsigne(moteur: string, exercice: string, texteDetaille: string): string {
+  if (moteur === 'tri') return 'Range chaque mot dans le bon panier.';
+  if (moteur !== 'eclair') return texteDetaille;
+  if (exercice === 'clairiere-luciole-couleurs-01') {
+    return 'Lis le mot. Retrouve ensuite la luciole qui porte ce mot.';
+  }
+  if (exercice === 'clairiere-luciole-voyelles-01') {
+    return 'Lis le mot. Touche ensuite la voyelle que tu lis dans ce mot.';
+  }
+  return 'Lis le mot. Touche ensuite le même mot.';
+}
+
 /** Rang des paliers d'aide. Sert à garantir la monotonie exigée au § 5.6. */
 const RANG_AIDE: Readonly<Record<string, number>> = {
   aucune: 0,
@@ -496,7 +513,7 @@ export function EcranNoeud(): ReactElement {
                 data-consigne={etape.id}
                 style={{ margin: 0, fontSize: '1.75rem' }}
               >
-                {etape.texte}
+                {texteCadreDeConsigne(codeMoteur, paquet.exercice.id, etape.texte)}
               </p>
             );
           })}

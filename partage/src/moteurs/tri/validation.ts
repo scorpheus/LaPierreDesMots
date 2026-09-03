@@ -63,8 +63,6 @@ export function evaluerTri(
   if (declare === undefined) return REFUS('element-inconnu');
   if (!etat.receptacles.some((r) => r.id === receptacle)) return REFUS('receptacle-inconnu');
   if (etat.acquis[element] !== undefined) return REFUS('element-deja-range');
-  if (!etape.restantes.includes(element)) return REFUS('element-hors-consigne');
-
   if (declare.receptacleAttendu !== receptacle) {
     const confusion: ConfusionObservee | null =
       declare.confusionAvec === null

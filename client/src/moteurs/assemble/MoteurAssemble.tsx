@@ -733,6 +733,13 @@ export function MoteurAssemble(
           insetInlineEnd: 0,
           insetBlockEnd: 0,
           zIndex: 2,
+          /* La réponse se lit sous l'illustration, jamais collée au bord gauche. */
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          textAlign: 'center',
+          paddingInline: 'clamp(0.75rem, 4vw, 3rem)',
+          boxSizing: 'border-box',
         }}
       >
         {/* ── R59 — LA LIGNE DE FENTES *EST* LE MOT QU'ON RECONSTRUIT ──────────────────────── */}
@@ -744,12 +751,16 @@ export function MoteurAssemble(
         <div
           ref={accueil.brancher}
           data-fentes="mot"
+          data-alignement="centre"
           data-restantes={String(restants.length)}
           data-survolee={accueil.survolee ? 'oui' : 'non'}
           style={{
             display: 'flex',
             flexWrap: 'wrap',
             alignItems: 'center',
+            justifyContent: 'center',
+            inlineSize: '100%',
+            maxInlineSize: '72rem',
             gap: '0.5rem',
             marginBlockEnd: '0.6rem',
             outline: accueil.survolee ? '3px dashed var(--soleil)' : undefined,

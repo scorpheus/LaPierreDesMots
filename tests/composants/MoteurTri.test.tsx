@@ -23,9 +23,10 @@ import { moteurTri } from '@partage/moteurs/tri/moteur';
 import { MoteurTri } from '@client/moteurs/tri/MoteurTri';
 import type {
   ActionTri,
+  ContenuTri,
   EtatTri,
 } from '@partage/moteurs/tri/types';
-import type { Habillage } from '@pierre/partage';
+import type { Exercice, Habillage } from '@pierre/partage';
 import type { ServicesJeu } from '@client/moteurs/types';
 
 import { aleaDeTest, horlogeDeTest, lireJson, servicesDeTest } from '../configuration/preparation.js';
@@ -62,14 +63,19 @@ const services = servicesJeuDeTest();
 
 import { contenuTri as contenu } from '../fixtures/moteurs/tri.js';
 
+const exercicePaniersVoyelles = lireJson<Exercice>(
+  'contenu/exercices/clairiere/paniers-voyelles-01.json',
+);
+const contenuPaniersVoyelles = exercicePaniersVoyelles.jeu.contenu as ContenuTri;
+
 /**
  * Le harnais expose le résumé et la progression en `data-*`. C'est volontaire : les
  * assertions portent alors sur ce que le composant DONNE À VOIR et sur ce que le moteur
  * CALCULE, jamais sur un état interne qu'aucun écran ne montrerait.
  */
-function Harnais(): ReactElement {
+function Harnais({ contenuTest = contenu }: { readonly contenuTest?: ContenuTri } = {}): ReactElement {
   const [etat, setEtat] = useState<EtatTri>(() =>
-    moteurTri.creerEtat({ contenu, habillage, alea, horloge }),
+    moteurTri.creerEtat({ contenu: contenuTest, habillage, alea, horloge }),
   );
   const emettre = useCallback((action: ActionTri) => {
     setEtat((precedent) => moteurTri.reduire(precedent, action, { alea, horloge }));
@@ -88,6 +94,8 @@ function Harnais(): ReactElement {
         etat.etapes.filter((e) => e.finMs !== null).length,
       )}
       data-avancement={progression.avancement.toFixed(3)}
+      data-index-etape={String(etat.indexEtape)}
+      data-acquis={String(Object.keys(etat.acquis).length)}
       data-confusion={
         etat.etapes
           .map((e) => (e.confusion === null ? '' : `${e.confusion.attendu}>${e.confusion.rendu}`))
@@ -118,7 +126,7 @@ function Harnais(): ReactElement {
         }}
       />
       <MoteurTri
-        contenu={contenu}
+        contenu={contenuTest}
         habillage={habillage}
         etat={etat}
         emettre={emettre}
@@ -217,5 +225,24 @@ describe('moteur tri', () => {
     const h = harnais(container);
     expect(h.getAttribute('data-erreurs')).toBe('0');
     expect(h.getAttribute('data-aide-resume')).toBe('aucune');
+  });
+
+  it('accepte rat dès la consigne du a puis saute les lots déjà rangés', () => {
+    const { container } = render(<Harnais contenuTest={contenuPaniersVoyelles} />);
+
+    // `rat`, `sac` et `banane` figurent dans les lots suivants du JSON, mais répondent déjà
+    // exactement à « les mots où tu lis un a ». Ils ne doivent pas être des boutons morts.
+    for (const id of ['mot-rat', 'mot-sac', 'mot-banane', 'mot-chat', 'mot-papa', 'mot-lac']) {
+      taper(container, [`[data-element="${id}"]`, '[data-receptacle="panier-du-a"]']);
+    }
+    expect(harnais(container).getAttribute('data-acquis')).toBe('6');
+    expect(harnais(container).getAttribute('data-index-etape')).toBe('1');
+
+    for (const id of ['mot-fil', 'mot-ville', 'mot-pic', 'mot-lit', 'mot-riz', 'mot-midi']) {
+      taper(container, [`[data-element="${id}"]`, '[data-receptacle="panier-du-i"]']);
+    }
+    expect(harnais(container).getAttribute('data-acquis')).toBe('12');
+    expect(container.querySelector('[data-moteur="tri"]')?.getAttribute('data-termine')).toBe('oui');
+    expect(harnais(container).getAttribute('data-erreurs')).toBe('0');
   });
 });
