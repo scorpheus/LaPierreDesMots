@@ -41,16 +41,17 @@ jusqu'au lot des lucioles. L'audio reste volontairement hors périmètre.
 | Changement de règle presque invisible entre deux étapes | les 14 moteurs suivent désormais la même hiérarchie : règle générale stable dans la barre haute, étape ou cible courante dans un cartouche proche du geste | 130 tests composants ciblés et campagne Chromium des 75 nœuds |
 | Images d'histoire alignées à gauche et de hauteurs différentes | les cartes sont regroupées au centre, partagent le même bord supérieur et la même hauteur ; leur cartouche est placé dans la marge pour ne plus masquer la troisième carte | `MoteurChrono.test.tsx`, captures 1920×1080 et 1920×1200 |
 | QA longue relancée pour chaque retouche | boucle courte par moteur conservée ; une campagne visuelle dédiée ouvre les 75 nœuds en 27 secondes et produit 150 captures hors références | `parcours-audit-75-noeuds.spec.ts`, `bac-a-sable/audit-75-noeuds/mesures.json` |
-| Un moteur testé ne prouvait pas ses variantes de contenu | une seconde campagne ouvre chacun des 75 nœuds, dérive un refus et une action correcte depuis son état réel, puis exige une progression et l'absence d'écran d'échec | `parcours-campagne-gestes-75.spec.ts`, 75/75 verts en 18 secondes |
+| Un moteur testé ne prouvait pas ses variantes de contenu | la campagne joue désormais chacun des 75 nœuds jusqu'à la récompense, recalcule le geste juste après chaque transition, borne les boucles et détecte toute stagnation | `parcours-campagne-gestes-75.spec.ts`, 75/75 verts, 585 étapes et 1 033 actions |
+| Coloriages hors école : objets demandés absents ou masques décalés | les quatre scènes utilisent leurs vrais rasters ; consignes, régions, centroïdes et zones tactiles sont alignés sur les objets visibles | `coloriages-raster-cibles.test.ts`, `MoteurColorie.test.tsx`, `test:contenu` |
 
 ## Encore à faire — dette visuelle réelle
 
 - Le coffre est maintenant utilisable, lisible et possède une illustration raster d'accueil. Ses
   25 formes de Gobi, ses 6 Éclats et ses 6 objets individuels restent toutefois des dessins
   techniques à remplacer au fur et à mesure de leur validation.
-- Les coloriages autres que l'école utilisent encore des dessins SVG de blockout. Le chaudron a
-  besoin d'un beau dessin raster et d'un masque de régions indexé ; le brouillon actuel contient
-  trop de petites régions pour être publié.
+- Les cinq coloriages pédagogiques utilisent maintenant leurs beaux décors raster avec des masques
+  indexés cohérents. Le chaudron libre utilise lui aussi un raster dédié ; sa finition reste une
+  activité libre distincte et ne compte jamais comme exercice de progression.
 - Plusieurs scènes ont reçu un beau fond raster, mais les éléments interactifs posés dessus restent
   parfois des pictogrammes ou des SVG. La mécanique est testée ; la finition artistique n'est pas
   terminée.
@@ -61,11 +62,10 @@ jusqu'au lot des lucioles. L'audio reste volontairement hors périmètre.
   ancres du fond V5. Le feu et le papillon actuels sont conservés, mais le reste du décor ne possède
   pas encore les micro-interactions illustrées prévues.
 - La hiérarchie règle stable / cible courante est implantée dans les 14 moteurs. La campagne
-  visuelle initiale couvre les 75 nœuds pédagogiques aux deux résolutions sans débordement ni
-  cartouche absent. La campagne gestuelle couvre désormais elle aussi 75/75 nœuds : chaque
-  exercice accepte une action correcte, produit une progression observable et reste sans écran
-  d'échec après un refus dérivable. Cela prouve la jouabilité initiale de chaque contenu, pas
-  encore sa finition artistique humaine ni toutes ses étapes successives.
+  visuelle couvre les 75 nœuds pédagogiques aux deux résolutions sans débordement ni cartouche
+  absent. La campagne gestuelle termine désormais 75/75 nœuds : 585 étapes, 914 actions correctes
+  et 119 refus contrôlés, sans stagnation ni écran d'échec. La jouabilité de toutes les étapes est
+  donc prouvée ; le jugement artistique final reste celui du parent.
 - La géographie de la carte reste à arbitrer. L'ordre pédagogique des six régions est bon, mais la
   première région occupe visuellement le centre. La recommandation consignée dans
   `bac-a-sable/audit-carte-narrative-2026-09-03.md` est de placer la Clairière en périphérie et de
@@ -80,13 +80,13 @@ CSS tout en gardant une preuve observable sur le défaut corrigé.
 
 ## État de la vérification globale après ce lot
 
-La campagne complète du 3 septembre a duré 428 secondes. Lint, TypeScript, contenu, construction,
-rejeu et contrôles QA sont verts. Les cinq échecs unitaires sont exclusivement la dette audio mise
-hors périmètre par le parent. Le réglage de lecture du mot central de `grave`, détecté par la qualité,
-a été corrigé et sa recette ciblée repasse au vert. Restent hors de ce lot : le débordement tablette
-du chaudron et du coffre, une recette de cascade qui n'observe plus que le palier intermédiaire, et
-sept références visuelles divergentes. Les références ne sont pas mises à jour automatiquement :
-les écarts doivent d'abord être validés visuellement par le parent.
+La qualité Chromium repasse entièrement au vert : 249/249 recettes, dont les 89 écrans à la
+résolution tablette, le chaudron, le coffre, les 75 nœuds et les corps de lecture jusqu'à 40 px.
+La cascade montre de nouveau ses trois paliers. Les références de la carte déjà validée par le
+parent ont été actualisées. Quatre références visuelles restent volontairement divergentes : les
+trois états du nouveau coloriage de l'école et la récompense remaniée. Elles ne seront remplacées
+qu'après validation humaine. La vérification globale conserve par ailleurs les cinq échecs audio
+explicitement mis hors périmètre par le parent.
 
 ## Asset raster ajouté pendant cette passe
 
