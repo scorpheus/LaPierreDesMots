@@ -42,6 +42,17 @@ function monter(surRetour: () => void): void {
 afterEach(() => cleanup());
 
 describe('activité libre du chaudron', () => {
+  it('donne une hauteur résoluble à la toile sans séparer ses commandes de la scène', async () => {
+    monter(vi.fn());
+    await waitFor(() => expect(screen.getByRole('button', { name: 'J’ai fini' })).toBeDefined());
+
+    const ecran = document.querySelector('[data-ecran="chaudron"]');
+    const activite = ecran?.querySelector('.activite-chaudron');
+    expect(ecran?.classList.contains('ecran-chaudron')).toBe(true);
+    expect(activite?.querySelector('[data-moteur="libre"]')).not.toBeNull();
+    expect(activite?.querySelector('[data-plateau="regions"]')).not.toBeNull();
+  });
+
   it('ne démarre pas un nœud pédagogique et ne montre pas de récompense', async () => {
     const surRetour = vi.fn();
     monter(surRetour);

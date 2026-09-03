@@ -116,7 +116,8 @@ function Case({
   asset,
   obtenu,
   categorie,
-  surOuvrir
+  surOuvrir,
+  compacte = false,
 }: {
   readonly cle: string;
   readonly libelle: string;
@@ -124,6 +125,7 @@ function Case({
   readonly obtenu: boolean;
   readonly categorie: string;
   readonly surOuvrir: () => void;
+  readonly compacte?: boolean;
 }): ReactElement {
   return (
     <li style={{ display: 'contents' }}>
@@ -138,8 +140,9 @@ function Case({
       style={{
         flexDirection: 'column',
         gap: '0.35rem',
-        inlineSize: '10rem',
-        minBlockSize: '11rem'
+        boxSizing: 'border-box',
+        inlineSize: compacte ? '7.5rem' : '10rem',
+        minBlockSize: compacte ? '8rem' : '11rem'
         // `opacity` / `filter` ne sont plus ici : voir l'encadré sur le dessin, ci-dessous.
       }}
     >
@@ -150,8 +153,8 @@ function Case({
         <DessinButin code={cle} />
       ) : asset === null ? (
         <svg
-          width="88"
-          height="88"
+          width={compacte ? 64 : 88}
+          height={compacte ? 64 : 88}
           viewBox="0 0 48 48"
           aria-hidden="true"
           focusable="false"
@@ -200,8 +203,8 @@ function Case({
         <img
           src={urlAsset(asset)}
           alt=""
-          width={88}
-          height={88}
+          width={compacte ? 64 : 88}
+          height={compacte ? 64 : 88}
           aria-hidden="true"
           style={obtenu ? undefined : { opacity: 0.55, filter: 'saturate(0)' }}
         />
@@ -251,10 +254,7 @@ export function EcranCoffre({
   const nbEclats = regions.filter((region) => region.eclatObtenuLe !== null).length;
 
   return (
-    <main
-      data-ecran="coffre"
-      style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}
-    >
+    <main data-ecran="coffre" className="ecran-coffre">
       <header style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
         <h1 className="titre" style={{ fontSize: '2.25rem', margin: 0 }}>
           Le coffre
@@ -302,11 +302,21 @@ export function EcranCoffre({
           oublié, parce qu'il n'y a plus de liste où il serait absent.
           L'attribut `data-collection-titre="formes"` est CONSERVÉ : `parcours-campement.spec.ts`
           (L2-F) l'attend, et il n'appartient pas à ce lot. */}
-      <section className="panneau" aria-label="Les formes de Gobi" data-collection-titre="formes">
-        <Etagere etagere={etagere} titre="Les formes de Gobi" />
-      </section>
+      <div className="collections-coffre">
+        <section
+          className="panneau collection-coffre collection-coffre--formes"
+          aria-label="Les formes de Gobi"
+          data-collection-titre="formes"
+        >
+          <Etagere etagere={etagere} titre="Les formes de Gobi" compacte />
+        </section>
 
-      <section className="panneau" aria-label="Les Éclats de Pierre" data-collection-titre="eclats" data-progression-restante={String(regions.length - nbEclats)}>
+        <section
+          className="panneau collection-coffre"
+          aria-label="Les Éclats de Pierre"
+          data-collection-titre="eclats"
+          data-progression-restante={String(regions.length - nbEclats)}
+        >
         <h2 className="panneau-titre" style={{ fontSize: '1.5rem' }}>
           Les Éclats de Pierre — {nbEclats} sur {regions.length}
         </h2>
@@ -326,6 +336,7 @@ export function EcranCoffre({
               asset={null}
               obtenu={region.eclatObtenuLe !== null}
               categorie="eclat"
+              compacte
               surOuvrir={() => {
                 fixerOuverte({
                   categorie: 'eclat',
@@ -337,9 +348,16 @@ export function EcranCoffre({
             />
           ))}
         </ul>
-      </section>
+        </section>
 
-      <section className="panneau" aria-label="Les objets du campement" data-collection-titre="objets" data-progression-restante={String(objets.filter((objet) => objet.placeLe === null).length)}>
+        <section
+          className="panneau collection-coffre"
+          aria-label="Les objets du campement"
+          data-collection-titre="objets"
+          data-progression-restante={String(
+            objets.filter((objet) => objet.placeLe === null).length,
+          )}
+        >
         {/* ── R40 — LE PICTOGRAMME SUIT L'OBJET, LA MIGRATION EST FINIE ──────────────────────
             Même principe que l'étagère (R27, `Etagere.tsx:150`) : le butin a quitté le
             campement pour vivre ici, et son pictogramme (`Butin.tsx:200`, 🎒) le suit — REPRIS
@@ -367,6 +385,7 @@ export function EcranCoffre({
               asset={null}
               obtenu={objet.placeLe !== null}
               categorie="objet"
+              compacte
               surOuvrir={() => {
                 fixerOuverte({
                   categorie: 'objet',
@@ -378,7 +397,8 @@ export function EcranCoffre({
             />
           ))}
         </ul>
-      </section>
+        </section>
+      </div>
 
       {ouverte === null ? null : (
         <FicheObjet

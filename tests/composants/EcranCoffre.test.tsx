@@ -111,6 +111,18 @@ afterEach(() => {
 });
 
 describe('rien ne sort jamais du coffre, et le vide se montre (R14, D25)', () => {
+  it('organise les trois collections dans l’album compact du coffre', async () => {
+    await monterEtAttendre();
+    const album = document.querySelector('.collections-coffre');
+    expect(document.querySelector('[data-ecran="coffre"]')?.classList.contains('ecran-coffre')).toBe(
+      true,
+    );
+    expect(album?.querySelectorAll(':scope > [data-collection-titre]')).toHaveLength(3);
+    expect(album?.querySelector('[data-etagere="oui"]')?.getAttribute('data-densite')).toBe(
+      'compacte',
+    );
+  });
+
   it('accueille l’enfant avec le coffre illustré publié, pas un pictogramme technique', async () => {
     await monterEtAttendre();
     const illustration = document.querySelector<HTMLImageElement>(

@@ -33,15 +33,19 @@ export interface ProprietesEtagere {
   readonly etagere: ModeleEtagere;
   /** Le titre de la section. Le campement et le coffre n'annoncent pas la même chose. */
   readonly titre?: string;
+  /** Réduit seulement les vignettes dans l'album plein écran du coffre. */
+  readonly compacte?: boolean;
 }
 
 /** Le contour d'une case : plein quand elle est gagnée, en creux sinon. Jamais de cadenas. */
 function Vignette({
   une,
-  surOuvrir
+  surOuvrir,
+  compacte,
 }: {
   readonly une: CaseEtagere;
   readonly surOuvrir: () => void;
+  readonly compacte: boolean;
 }): ReactElement {
   return (
     <li>
@@ -72,8 +76,9 @@ function Vignette({
           alignItems: 'center',
           justifyContent: 'center',
           gap: '0.35rem',
-          inlineSize: '9.5rem',
-          minBlockSize: '10rem',
+          boxSizing: 'border-box',
+          inlineSize: compacte ? '7rem' : '9.5rem',
+          minBlockSize: compacte ? '7.5rem' : '10rem',
           padding: '0.5rem',
           color: 'inherit',
           font: 'inherit',
@@ -91,14 +96,14 @@ function Vignette({
           <img
             src={urlAsset(String(une.cristal))}
             alt=""
-            width={80}
-            height={80}
+            width={compacte ? 64 : 80}
+            height={compacte ? 64 : 80}
             aria-hidden="true"
           />
         ) : (
           <svg
-            width="80"
-            height="80"
+            width={compacte ? 64 : 80}
+            height={compacte ? 64 : 80}
             viewBox="0 0 48 48"
             aria-hidden="true"
             focusable="false"
@@ -131,7 +136,11 @@ function Vignette({
   );
 }
 
-export function Etagere({ etagere, titre = 'L’étagère de Gobi' }: ProprietesEtagere): ReactElement {
+export function Etagere({
+  etagere,
+  titre = 'L’étagère de Gobi',
+  compacte = false,
+}: ProprietesEtagere): ReactElement {
   const vides = etagere.nbTotal - etagere.nbObtenues;
   const [ouverte, fixerOuverte] = useState<CaseEtagere | null>(null);
 
@@ -142,6 +151,7 @@ export function Etagere({ etagere, titre = 'L’étagère de Gobi' }: Proprietes
       data-cases-obtenues={String(etagere.nbObtenues)}
       data-cases-vides={String(vides)}
       data-progression-restante={String(vides)}
+      data-densite={compacte ? 'compacte' : 'normale'}
       aria-label={titre}
     >
       <h2 className="titre" style={{ fontSize: '1.5rem', margin: '0 0 0.75rem' }}>
@@ -169,6 +179,7 @@ export function Etagere({ etagere, titre = 'L’étagère de Gobi' }: Proprietes
           <Vignette
             key={`${String(une.rang)}-${String(une.grapheme)}`}
             une={une}
+            compacte={compacte}
             surOuvrir={() => {
               fixerOuverte(une);
             }}

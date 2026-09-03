@@ -109,12 +109,12 @@ export function EcranChaudron({ paquet: paquetInjecte = null, surRetour }: Propr
   }
 
   return (
-    <main data-ecran="chaudron" data-activite="libre" style={{ display: 'flex', flexDirection: 'column', minBlockSize: '100dvh', padding: '1rem', gap: '1rem' }}>
-      <header className="zone-lecture" style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.75rem' }}>
+    <main data-ecran="chaudron" data-activite="libre" className="ecran-chaudron">
+      <header className="zone-lecture entete-chaudron">
         <button type="button" className="cible" data-vers="campement" onClick={surRetour}>← Le campement</button>
         <h1 className="titre" style={{ margin: 0 }}>Le chaudron à couleurs</h1>
       </header>
-      <div style={{ flex: '1 1 auto', minBlockSize: 0 }}>
+      <div className="activite-chaudron">
         <MoteurLibre
           contenu={paquet.exercice.jeu.contenu as ContenuLibre}
           habillage={paquet.habillage}
