@@ -125,7 +125,7 @@
           "id": "etoile-cheval",
           "libelle": "cheval",
           "bonne": true,
-          "asset": null,
+          "asset": "assets/cartes/volcan/cheval.png",
           "depart": [
             120,
             120
@@ -140,7 +140,7 @@
           "id": "etoile-cochon",
           "libelle": "cochon",
           "bonne": true,
-          "asset": null,
+          "asset": "assets/cartes/volcan/cochon.png",
           "depart": [
             320,
             380
@@ -170,7 +170,7 @@
           "id": "etoile-vache",
           "libelle": "vache",
           "bonne": true,
-          "asset": null,
+          "asset": "assets/cartes/volcan/vache.png",
           "depart": [
             720,
             380
@@ -185,7 +185,7 @@
           "id": "etoile-quille",
           "libelle": "quille",
           "bonne": true,
-          "asset": null,
+          "asset": "assets/cartes/volcan/quille.png",
           "depart": [
             120,
             380
@@ -200,7 +200,7 @@
           "id": "etoile-queue",
           "libelle": "queue",
           "bonne": true,
-          "asset": null,
+          "asset": "assets/cartes/volcan/queue.png",
           "depart": [
             720,
             120
@@ -215,7 +215,7 @@
           "id": "etoile-musique",
           "libelle": "musique",
           "bonne": true,
-          "asset": null,
+          "asset": "assets/cartes/volcan/musique.png",
           "depart": [
             320,
             120
@@ -245,7 +245,7 @@
           "id": "etoile-phare",
           "libelle": "phare",
           "bonne": true,
-          "asset": null,
+          "asset": "assets/cartes/volcan/phare.png",
           "depart": [
             920,
             120
@@ -260,7 +260,7 @@
           "id": "etoile-dauphin",
           "libelle": "dauphin",
           "bonne": true,
-          "asset": null,
+          "asset": "assets/cartes/volcan/dauphin.png",
           "depart": [
             920,
             380

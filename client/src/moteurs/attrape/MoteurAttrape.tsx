@@ -70,6 +70,7 @@ import {
   versPixels,
 } from '../eclair/mise-en-scene.js';
 import { PorteurPose } from '../eclair/porteur-pose.js';
+import { urlAsset } from '../../api/client.js';
 
 /** Cadence du `battementHorloge`. Le moteur ne connaît aucun `setTimeout` : c'est ici. */
 const PERIODE_BATTEMENT_MS = 1000;
@@ -350,7 +351,38 @@ export function MoteurAttrape(
                     jouer({ type: 'toucher', cible: cible.id }, evenement);
                   }}
                 >
-                  {cible.libelle}
+                  {cible.asset === null || cible.asset === undefined ? null : (
+                    <img
+                      src={urlAsset(String(cible.asset))}
+                      alt=""
+                      aria-hidden="true"
+                      draggable={false}
+                      data-illustration-cible="oui"
+                      style={{
+                        display: 'block',
+                        inlineSize: '72%',
+                        blockSize: '72%',
+                        objectFit: 'contain',
+                        pointerEvents: 'none',
+                      }}
+                    />
+                  )}
+                  <span
+                    style={
+                      cible.asset === null || cible.asset === undefined
+                        ? undefined
+                        : {
+                            position: 'absolute',
+                            inlineSize: '1px',
+                            blockSize: '1px',
+                            overflow: 'hidden',
+                            clipPath: 'inset(50%)',
+                            whiteSpace: 'nowrap',
+                          }
+                    }
+                  >
+                    {cible.libelle}
+                  </span>
                 </button>
               </div>
             </PorteurPose>
