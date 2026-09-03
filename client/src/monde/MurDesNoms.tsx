@@ -13,7 +13,7 @@
 // (`formes_gobi`). Le mur affiche donc les FORMES de Gobi, et accepte en plus une liste de mots
 // quand un lot saura la produire (la maîtrise par item du Leitner, L2-D). Question consignée
 // dans `Docs/questions-en-attente.md`.
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import type { ReactElement } from 'react';
 import { useServices } from '../etat/services.js';
 import { direTexte } from '../services/voix-navigateur.js';
@@ -34,9 +34,11 @@ export interface ProprietesMurDesNoms {
 
 export function MurDesNoms({ noms, surRejouer }: ProprietesMurDesNoms): ReactElement {
   const services = useServices();
+  const [nomChoisi, fixerNomChoisi] = useState<NomDuMur | null>(null);
 
   const toucher = useCallback(
     (nom: NomDuMur): void => {
+      fixerNomChoisi(nom);
       // R15 : tout est audible en un tap, sans limite et sans coût.
       void direTexte(services.voix, nom.libelle, null, 'gobi');
       surRejouer?.(nom);
@@ -49,6 +51,25 @@ export function MurDesNoms({ noms, surRejouer }: ProprietesMurDesNoms): ReactEle
       <h2 className="titre" style={{ fontSize: '1.5rem', margin: '0 0 0.75rem' }}>
         Le mur des noms
       </h2>
+
+      {nomChoisi === null ? (
+        <p
+          className="zone-lecture"
+          data-mur-message="instruction"
+          style={{ padding: '0.75rem 1rem', margin: '0 0 0.75rem' }}
+        >
+          Touche un nom pour l’ouvrir dans ton carnet.
+        </p>
+      ) : (
+        <p
+          className="zone-lecture"
+          data-mur-message="nom-choisi"
+          aria-live="polite"
+          style={{ padding: '0.75rem 1rem', margin: '0 0 0.75rem' }}
+        >
+          Tu as rencontré « {nomChoisi.texte} ». Ce nom est gravé sur ton mur.
+        </p>
+      )}
 
       {noms.length === 0 ? (
         // Jamais un écran vide, jamais un reproche : le mur ATTEND, il ne manque pas.
@@ -73,6 +94,7 @@ export function MurDesNoms({ noms, surRejouer }: ProprietesMurDesNoms): ReactEle
                 className="cible"
                 data-nom={nom.texte}
                 aria-label={`Réécouter ${nom.libelle}`}
+                aria-pressed={nomChoisi?.texte === nom.texte}
                 onClick={() => {
                   toucher(nom);
                 }}

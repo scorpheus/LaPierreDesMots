@@ -216,7 +216,25 @@ export function composerSortie(
   //    Le représentant de chaque habillage se TIRE donc parmi les candidats qui le portent.
   //    Bénéfice second, et c'est celui que N8 cherchait : deux passages ne proposent plus le
   //    même exercice pour un habillage donné.
-  const ordonnes = [...eligibles].sort(ordreCanonique);
+  // Une nouvelle sortie doit faire avancer la région. Avant ce filtre, le sélecteur pouvait
+  // tirer à nouveau des nœuds déjà terminés (notamment Galeries 7/13), alors que des exercices
+  // inédits restaient invisibles. Avec un seul inédit, on lui adjoint juste assez de nœuds déjà
+  // vus, portant si possible d'autres habillages, pour conserver une ouverture et une clôture :
+  // le dernier exercice ne peut donc plus se perdre dans un nouveau tirage aléatoire.
+  const termines = new Set((entree.noeudsTermines ?? []).map(String));
+  const inedits = eligibles.filter((candidat) => !termines.has(String(candidat.noeud)));
+  const dejaVus = eligibles.filter((candidat) => termines.has(String(candidat.noeud)));
+  const renforts = inedits.length === 1
+    ? dejaVus
+        .filter((candidat) => candidat.habillage !== inedits[0]?.habillage)
+        .slice(0, NB_NOEUDS_PLANCHER - 1)
+    : [];
+  const eligiblesPourLaSortie = inedits.length >= NB_NOEUDS_PLANCHER
+    ? inedits
+    : inedits.length === 1 && renforts.length >= NB_NOEUDS_PLANCHER - 1
+      ? [...inedits, ...renforts]
+      : eligibles;
+  const ordonnes = [...eligiblesPourLaSortie].sort(ordreCanonique);
   let vivier: readonly NoeudCandidat[];
   if (contraintes.habillageUniqueParSortie) {
     const parHabillage = new Map<string, NoeudCandidat[]>();

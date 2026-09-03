@@ -2,6 +2,34 @@
   "$commentaire": "Premières entrées du verrou d’assets. Les champs indisponibles du générateur intégré sont explicitement nuls plutôt qu’inventés.",
   "assets": [
     {
+      "id": "coffre.ouvert.v1",
+      "fichier": "contenu/assets/coffre/coffre-ouvert-v1.png",
+      "empreinte": "sha256:11440AE12D14B73DB364F2B064C8E9B71D0942FF49A517FD1F3BC0B86ABFE35E",
+      "$empreinte": "Empreinte du fichier PNG détouré ; le générateur intégré n'a pas fourni de manifeste de pixels séparé.",
+      "generation": {
+        "outil": "générateur d’images intégré à Codex",
+        "workflow": null,
+        "checkpoint": null,
+        "modele": null,
+        "graine": null,
+        "etapes": null,
+        "cfg": null,
+        "sampler": null,
+        "resolution": [1254, 1254],
+        "prompt": "À partir du campement V6 comme référence de style uniquement : coffre au trésor ouvert en bois peint bleu, contours bleu nuit doux, ferrures dorées mates, rempli de cristaux colorés, cartes illustrées et petits souvenirs d'aventure. Illustration jeunesse éditoriale française pour enfant de 7 ans, formes organiques précises, textures mates discrètes, lumière naturelle fraîche, couleurs franches sans dominante jaune, objet détouré centré, fond uni neutre sans texte. Éviter peinture à l'huile, aquarelle floue, 3D plastique, patchs de couleur, halo, vignettage et détails adultes.",
+        "source": "contenu/assets/campement/campement-v6.png",
+        "retouche": "Le générateur ayant peint un damier au lieu d'un alpha, une seconde édition ciblée a conservé l'objet puis ffmpeg a converti le fond neutre en vrai canal alpha."
+      },
+      "qc": {
+        "technique": "ok — PNG RGBA 1254 × 1254, alpha nul au coin supérieur gauche",
+        "semantique": "coffre ouvert immédiatement identifiable, contenu enfantin et cohérent avec le campement",
+        "integration": "illustration d'accueil du coffre ; les collections restent des contrôles DOM séparés",
+        "tentatives": 1
+      },
+      "valide_par": "passe artistique à valider dans l'écran",
+      "valide_le": "2026-09-03"
+    },
+    {
       "id": "decor.carte-six-regions.v1",
       "fichier": "contenu/assets/decors/carte-six-regions.png",
       "empreinte": "sha256:621CD0C38814F0AE190B6C4C2DA7FCC0B82131AB63F9AA9D93882E0450B41E27",

@@ -153,6 +153,16 @@ afterEach(() => {
 });
 
 describe('moteur phrase', () => {
+  it('centre la phrase modèle et la ligne de mots à construire', () => {
+    const { container } = render(<Harnais />);
+    expect(container.querySelector('[data-plateau="modele"]')?.classList).toContain(
+      'modele-phrase-centre',
+    );
+    expect(
+      container.querySelector<HTMLElement>('[data-fentes="phrase"]')?.style.justifyContent,
+    ).toBe('center');
+  });
+
   it('le contenu de ce test est conforme au schéma que le moteur publie', () => {
     const ajv = new (Ajv2020 as unknown as {
       new (options?: Record<string, unknown>): { compile(s: unknown): (d: unknown) => boolean };

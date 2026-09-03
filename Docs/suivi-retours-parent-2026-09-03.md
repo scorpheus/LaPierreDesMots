@@ -14,7 +14,7 @@ jusqu'au lot des lucioles. L'audio reste volontairement hors périmètre.
 | Tri des couleurs refusant rose, vert ou bleu | toutes les couleurs sémantiques sont acceptées ; les mots qui ne sont pas des couleurs vont dans l'autre panier | `MoteurTri.test.tsx`, recette tactile dédiée |
 | Décor coupé selon la hauteur | cadrage `contain` et plateaux compacts sur les moteurs concernés | recettes 1920×1080 et 1280×720 |
 | Lune décrite ronde alors que l'image montre un croissant | consigne et réponse alignées sur le croissant | garde de contenu |
-| Éclair : bouton mal placé, décor qui rétrécit et bonne réponse toujours au milieu | bouton intégré au panneau stable, dimensions conservées et position non répétée | `MoteurEclair.test.tsx`, recette Galeries |
+| Éclair : « Montre-moi le mot » confondu avec les réponses, décor qui rétrécit et bonne réponse toujours au milieu | commande jaune dédiée au-dessus de l'illustration, mot séparé au centre, dimensions conservées et réponses brassées | `MoteurEclair.test.tsx`, recette Galeries |
 | Mot incomplet minuscule dans « Trace la lettre » | repère central d'au moins 48 px, séparé du clavier | `MoteurGrave.test.tsx`, recette Galeries |
 | Particules qui restent après un exercice | nettoyage à la sortie du nœud, à l'entrée/sortie de la récompense et avant l'exercice suivant | `EcranNoeud.test.tsx`, `EcranRecompense.test.tsx` |
 | Chaudron compté comme exercice | route libre dédiée, hors progression, sans récompense pédagogique | recette chaudron et validation du catalogue |
@@ -26,12 +26,18 @@ jusqu'au lot des lucioles. L'audio reste volontairement hors périmètre.
 | Consignes difficiles pour un enfant de sept ans | 76 fiches et 283 consignes relues ; formulations récurrentes simplifiées sans changer le geste | `formulations-ce1.test.ts`, `test:contenu` |
 | Carte avec destinations ou routes fantômes | six destinations seulement et marqueurs recalés sur les régions nommées | `EcranCarte.test.tsx`, garde carte de la QA rapide |
 | Carte entièrement grise au départ | la grisaille reste le langage de progression ; les zones se colorent depuis le journal, sans promettre une zone non ouverte | tests carte et rejeu ciblés |
+| Phrase et mots à construire tassés à gauche | modèle, fentes et retours sont centrés dans leur espace de lecture | `MoteurPhrase.test.tsx` |
+| Mur des noms sans réaction visible | instruction explicite, sélection visible et rappel du nom gravé ; le geste fonctionne sans audio | `MurDesNoms.test.tsx` |
+| Fin de sortie partielle sans moyen de continuer | « Continuer [la région] » est l'action principale et ouvre directement le premier exercice inédit | `EcranRecompense.test.tsx`, `reprise.test.ts` |
+| Retour dans une région qui repropose des exercices déjà finis | le serveur et le mode autonome transmettent le journal au sélecteur ; une sortie privilégie les inédits et garantit même le dernier restant | `selecteur.test.ts` |
+| Déblocage suivant invisible sur la carte | la carte annonce que la prochaine région s'ouvre à la fin de la région courante et compte les exercices restants | `EcranCarte.test.tsx` |
+| Coffre encore entièrement technique | une illustration raster du coffre accueille désormais l'enfant ; les six fiches d'Éclats gardent enfin leur silhouette régionale | `EcranCoffre.test.tsx`, `production/assets.lock.json` |
 
 ## Encore à faire — dette visuelle réelle
 
-- Le coffre est maintenant utilisable et lisible, mais ses formes, Éclats et objets sont encore des
-  dessins techniques. Ils doivent être remplacés par les vrais assets raster au fur et à mesure de
-  leur validation.
+- Le coffre est maintenant utilisable, lisible et possède une illustration raster d'accueil. Ses
+  25 formes de Gobi, ses 6 Éclats et ses 6 objets individuels restent toutefois des dessins
+  techniques à remplacer au fur et à mesure de leur validation.
 - Les coloriages autres que l'école utilisent encore des dessins SVG de blockout. Le chaudron a
   besoin d'un beau dessin raster et d'un masque de régions indexé ; le brouillon actuel contient
   trop de petites régions pour être publié.
@@ -51,3 +57,11 @@ La boucle courte devient la boucle normale : garde de contenu, tests du moteur t
 Chromium à la résolution concernée, puis `qa:rapide`. La campagne complète ne tourne qu'à la fin
 d'un lot transversal ou avant livraison. Cela évite de payer plusieurs minutes pour chaque retouche
 CSS tout en gardant une preuve observable sur le défaut corrigé.
+
+## Asset raster ajouté pendant cette passe
+
+`contenu/assets/coffre/coffre-ouvert-v1.png` a été produit en une génération puis une retouche
+ciblée par le générateur intégré, à partir du campement V6 comme référence de style. Le damier que
+le générateur avait peint a été converti en véritable canal alpha avec ffmpeg. Le prompt, les deux
+étapes, les dimensions et l'empreinte du fichier publié sont conservés dans
+`production/assets.lock.json`.

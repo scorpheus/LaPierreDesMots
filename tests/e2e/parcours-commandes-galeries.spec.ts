@@ -13,15 +13,21 @@ test.describe('commandes lisibles des Galeries', () => {
     mkdirSync(DOSSIER, { recursive: true });
   });
 
-  test('éclair : voir et revoir restent dans le panneau du mot sans réduire le décor', async ({ page }) => {
+  test('éclair : voir et revoir sont une commande distincte au-dessus du mot', async ({ page }) => {
     await entrerDansLeNoeud(page, 'galeries-03');
     const decor = page.locator('[data-moteur="eclair"] [data-decor-svg]');
     const avant = await decor.boundingBox();
     const panneau = page.locator('[data-plateau="eclair"]');
-    await expect(panneau.locator('[data-action="pret"]')).toBeVisible();
-    await panneau.locator('[data-action="pret"]').click();
+    const commande = page.locator('[data-plateau="commande-eclair"]');
+    await expect(commande.locator('[data-action="pret"]')).toBeVisible();
+    await expect(panneau.locator('[data-action="pret"]')).toHaveCount(0);
+    await commande.locator('[data-action="pret"]').click();
     await expect(panneau).toHaveAttribute('data-visible', 'oui');
-    await expect(panneau.locator('[data-action="revoir"]')).toBeVisible();
+    await expect(commande.locator('[data-action="revoir"]')).toBeVisible();
+    await expect(panneau.locator('[data-action="revoir"]')).toHaveCount(0);
+    const boiteCommande = await commande.boundingBox();
+    const boitePanneau = await panneau.boundingBox();
+    expect(boiteCommande?.y ?? Number.MAX_SAFE_INTEGER).toBeLessThan(boitePanneau?.y ?? 0);
     expect(await decor.boundingBox()).toEqual(avant);
     await page.screenshot({ path: resolve(DOSSIER, 'eclair-1920x1080.png'), scale: 'css' });
   });

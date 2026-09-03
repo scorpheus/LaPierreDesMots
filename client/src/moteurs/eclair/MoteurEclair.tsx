@@ -150,7 +150,7 @@ export function MoteurEclair(
     (cle: string) => {
       if (cle.startsWith(PREFIXE_ECLAIR)) {
         const mot = motParEtape.get(cle.slice(PREFIXE_ECLAIR.length)) ?? '';
-        return mesurerTexte(mot.length > 'Montre-moi le mot'.length ? mot : 'Montre-moi le mot', reglages);
+        return mesurerTexte(mot, reglages);
       }
       return mesurerTexte(optionParId.get(cle)?.libelle ?? '', reglages);
     },
@@ -250,6 +250,42 @@ export function MoteurEclair(
         borderRadius: 'var(--rayon-carte)',
       }}
     >
+      {/* La commande n'est pas une réponse : elle garde donc sa propre place, au-dessus de
+          l'illustration, avec une silhouette différente des mots à choisir. */}
+      <div
+        data-plateau="commande-eclair"
+        style={{
+          position: 'absolute',
+          insetBlockStart: '0.75rem',
+          insetInlineStart: '50%',
+          translate: '-50% 0',
+          zIndex: 3,
+          display: 'grid',
+          justifyItems: 'center',
+          gap: '0.25rem',
+          pointerEvents: 'none',
+        }}
+      >
+        <button
+          type="button"
+          data-action={tours === 0 ? 'pret' : 'revoir'}
+          className="commande-eclair"
+          style={{ ...styleLecture, pointerEvents: 'auto' } as CSSProperties}
+          onClick={() => {
+            if (tours > 0) emettre({ type: 'revoirEclair' } as ActionEclair);
+            ouvrirLaPorte();
+          }}
+        >
+          <span aria-hidden="true">👁</span>
+          {tours === 0 ? 'Montre-moi le mot' : 'Revoir le mot'}
+        </button>
+        {tours === 0 ? null : (
+          <small data-note="revoir-gratuit" className="commande-eclair-note">
+            Tu peux le revoir autant que tu veux.
+          </small>
+        )}
+      </div>
+
       {/* ------------------------------------------------------------- le décor, en fond */}
       <div style={styleZoneDeJeu(hauteurBande)}>
         <SceneDecor
@@ -330,46 +366,12 @@ export function MoteurEclair(
           }}
         >
           {eclairVisible && consigne !== null ? (
-            <div style={{ display: 'grid', gap: '0.25rem', justifyItems: 'center' }}>
-              <ZoneDeLecture
-                texte={consigne.mot}
-                motsCles={[consigne.mot]}
-                etiquette={`Le mot : ${consigne.mot}`}
-              />
-              <button
-                type="button"
-                data-action="revoir"
-                className="cible"
-                style={{ ...styleLecture, pointerEvents: 'auto' } as CSSProperties}
-                onClick={() => {
-                  emettre({ type: 'revoirEclair' } as ActionEclair);
-                  ouvrirLaPorte();
-                }}
-              >
-                Revoir le mot
-              </button>
-            </div>
-          ) : (
-            <div style={{ display: 'grid', gap: '0.25rem', justifyItems: 'center' }}>
-              <button
-                type="button"
-                data-action={tours === 0 ? 'pret' : 'revoir'}
-                className={tours === 0 ? 'cible cible-appel' : 'cible'}
-                style={styleLecture as CSSProperties}
-                onClick={() => {
-                  if (tours > 0) emettre({ type: 'revoirEclair' } as ActionEclair);
-                  ouvrirLaPorte();
-                }}
-              >
-                {tours === 0 ? 'Montre-moi le mot' : 'Revoir le mot'}
-              </button>
-              {tours === 0 ? null : (
-                <small data-note="revoir-gratuit" style={{ opacity: 0.85 }}>
-                  Tu peux le revoir autant que tu veux.
-                </small>
-              )}
-            </div>
-          )}
+            <ZoneDeLecture
+              texte={consigne.mot}
+              motsCles={[consigne.mot]}
+              etiquette={`Le mot : ${consigne.mot}`}
+            />
+          ) : null}
         </div>
       </PorteurPose>
 

@@ -25,7 +25,7 @@ import { detailDesEtoiles } from '../composants/detail-etoiles.js';
 import { Etoiles } from '../composants/Etoiles.js';
 import { EvolutionGobi } from '../composants/EvolutionGobi.js';
 import { useEtatJeu, useMagasin, useServices } from '../etat/services.js';
-import { noeudSuivant } from '../monde/reprise.js';
+import { noeudSuivant, repriseDeRegion } from '../monde/reprise.js';
 import { jouerEffet } from '../services/audio-tone.js';
 import { effacerParticules } from '../gamefeel/particules.js';
 
@@ -326,6 +326,27 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
     };
   }, [paquet, region, requeteMonde.data, requeteProgression.data]);
 
+  // Une sortie peut être clôturée avant d'avoir parcouru toute la région. Dans ce cas, le
+  // bouton « Au campement » ne doit pas être la seule issue : l'enfant doit pouvoir reprendre
+  // immédiatement au premier nœud inédit, sans repasser par une pastille qui pouvait composer
+  // un exercice déjà vu.
+  const repriseRegionale = useMemo(() => {
+    if (region === null || requeteMonde.data === undefined) return null;
+    const laRegion = requeteMonde.data.carte.regions.find((une) => une.region === region);
+    if (laRegion === undefined) return null;
+    const faits = new Set((requeteProgression.data ?? []).map((ligne) => String(ligne.noeud)));
+    faits.add(String(paquet?.noeud.id ?? ''));
+    return repriseDeRegion(laRegion.noeuds, faits);
+  }, [region, paquet, requeteMonde.data, requeteProgression.data]);
+
+  const nomRegion =
+    requeteRegions.data?.find((une) => String(une.region) === String(region))?.libelle ??
+    String(region ?? 'la région');
+  const continuerRegion =
+    finDeSortie && progressionRegionale !== null && progressionRegionale.termines < progressionRegionale.total
+      ? repriseRegionale?.noeud ?? null
+      : null;
+
   /**
    * ══════════════════════════════════════════════════════════════════════════════════════════
    * R6 — « quand on gagne assez de point et que tu dis goby a évolué, montre la goby, fait une
@@ -377,6 +398,21 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
         magasin.getState().naviguer('carte');
       });
   }, [suivant, magasin]);
+
+  const continuerLaRegion = useCallback((): void => {
+    if (continuerRegion === null) return;
+    effacerParticules();
+    fixerChargementSuivant(true);
+    void lirePaquetNoeud(continuerRegion)
+      .then((paquetSuivant) => {
+        magasin.getState().cloreSortie();
+        magasin.getState().demarrerNoeud(paquetSuivant);
+      })
+      .catch(() => {
+        fixerChargementSuivant(false);
+        magasin.getState().naviguer('carte');
+      });
+  }, [continuerRegion, magasin]);
 
   const terminerSortie = useCallback((): void => {
     effacerParticules();
@@ -555,10 +591,22 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
             {chargementSuivant ? 'On y va…' : 'On y va !'}
           </button>
         )}
-        {finDeSortie ? (
+        {continuerRegion === null ? null : (
           <button
             type="button"
             className="cible action-recompense action-recompense--principale"
+            data-action="continuer-region"
+            data-noeud-suivant={String(continuerRegion)}
+            disabled={chargementSuivant}
+            onClick={continuerLaRegion}
+          >
+            {chargementSuivant ? 'On y va…' : `Continuer ${nomRegion}`}
+          </button>
+        )}
+        {finDeSortie ? (
+          <button
+            type="button"
+            className={`cible action-recompense${continuerRegion === null ? ' action-recompense--principale' : ''}`}
             data-action="fin-sortie"
             onClick={terminerSortie}
           >

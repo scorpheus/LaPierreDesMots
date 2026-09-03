@@ -111,6 +111,15 @@ afterEach(() => {
 });
 
 describe('rien ne sort jamais du coffre, et le vide se montre (R14, D25)', () => {
+  it('accueille l’enfant avec le coffre illustré publié, pas un pictogramme technique', async () => {
+    await monterEtAttendre();
+    const illustration = document.querySelector<HTMLImageElement>(
+      '[data-coffre-illustration="raster"] img',
+    );
+    expect(illustration).not.toBeNull();
+    expect(illustration?.src).toContain('assets/coffre/coffre-ouvert-v1.png');
+  });
+
   it('rend une case d’Éclat par région — les obtenues ET les autres', async () => {
     await monterEtAttendre();
     const cases = document.querySelectorAll('[data-collection="eclat"]');
@@ -277,6 +286,7 @@ describe('l’exigence commune des dix écrans', () => {
     );
     expect(nonGagne, 'aucun Éclat non gagné dans la fixture : le cas serait creux').not.toBeNull();
 
+    const silhouetteDeLaCase = nonGagne?.querySelector('path')?.getAttribute('d');
     fireEvent.click(nonGagne!);
     const fiche = document.querySelector('[data-fiche-collection="eclat"]');
     expect(fiche, 'taper un Éclat n’ouvre rien').not.toBeNull();
@@ -289,6 +299,10 @@ describe('l’exigence commune des dix écrans', () => {
       fiche?.querySelector('[data-promesse-couleur]'),
       'la fiche promet la couleur comme le fait l’étagère de Gobi : ce n’est pas le même contrat'
     ).toBeNull();
+    expect(
+      fiche?.querySelector('path')?.getAttribute('d'),
+      'la fiche remplace la silhouette régionale par un cristal générique'
+    ).toBe(silhouetteDeLaCase);
   });
 
   it('R28 — un objet rapporté s’ouvre aussi, et dit ce qu’il attend', async () => {

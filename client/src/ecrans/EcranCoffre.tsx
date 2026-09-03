@@ -268,6 +268,29 @@ export function EcranCoffre({
         >
           Retour au campement
         </button>
+        <div
+          data-coffre-illustration="raster"
+          aria-hidden="true"
+          style={{
+            marginInlineStart: 'auto',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.75rem',
+            minInlineSize: 0,
+          }}
+        >
+          <p style={{ margin: 0, maxInlineSize: '16rem', fontWeight: 700, textAlign: 'right' }}>
+            Tes trouvailles t’attendent ici.
+          </p>
+          <img
+            src={urlAsset('assets/coffre/coffre-ouvert-v1.png')}
+            alt=""
+            width={156}
+            height={156}
+            draggable={false}
+            style={{ inlineSize: 'clamp(7rem, 12vw, 9.75rem)', blockSize: 'auto' }}
+          />
+        </div>
       </header>
 
       {/* ── LA PREMIÈRE COLLECTION PASSE À L'ÉTAGÈRE — D44, lot N6 ──────────────────────────
@@ -387,8 +410,8 @@ export function EcranCoffre({
             ) : (
               <svg width="144" height="144" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
                 <path
-                  d={SILHOUETTE_ECLAT}
-                  fill={ouverte.obtenu ? 'var(--soleil)' : 'var(--grisaille)'}
+                  d={eclatDeRegion(ouverte.cle).silhouette}
+                  fill={ouverte.obtenu ? eclatDeRegion(ouverte.cle).teinte : 'var(--grisaille)'}
                   stroke="var(--trait)"
                   strokeWidth="4"
                   strokeLinejoin="round"

@@ -12,6 +12,7 @@
 import type {
   CodeCompetence, CodeRegion, Horodatage, IdHabillage, IdNoeud, IdProfil,
 } from '../identifiants.js';
+import type { Competence, TempsNoeud } from '../contenu/types.js';
 
 // ------------------------------------------------------------------ modes de réponse (D13)
 
@@ -181,7 +182,9 @@ export interface EntreeSelecteur {
   readonly maitrises: readonly EtatMaitrise[];
   readonly revisionsDues: readonly ItemLeitner[];
   readonly noeudsDisponibles: readonly NoeudCandidat[];
-  readonly competences: readonly import('../contenu/types.js').Competence[];
+  /** Nœuds déjà terminés par ce profil. Quand fourni, les nœuds inédits sont prioritaires. */
+  readonly noeudsTermines?: readonly IdNoeud[];
+  readonly competences: readonly Competence[];
   readonly maintenant: Horodatage;
 }
 
@@ -191,7 +194,7 @@ export interface NoeudCandidat {
   readonly region: CodeRegion;
   readonly competences: readonly CodeCompetence[];
   readonly difficulte: number;
-  readonly temps: import('../contenu/types.js').TempsNoeud;
+  readonly temps: TempsNoeud;
 }
 
 /** Tout le paramétrage pédagogique, tel qu'il est lu depuis les données (C2). */

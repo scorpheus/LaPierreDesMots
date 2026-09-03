@@ -311,14 +311,16 @@ describe('moteur eclair', () => {
     }
   });
 
-  it('le bouton pour voir le mot occupe la place du mot et ne redimensionne pas le décor', () => {
+  it('la commande pour voir le mot est séparée des réponses et du panneau du mot', () => {
     vi.useFakeTimers();
     try {
       const { container } = render(<Harnais />);
       const plateau = container.querySelector('[data-plateau="eclair"]');
+      const commande = container.querySelector('[data-plateau="commande-eclair"]');
       const controles = container.querySelector('[data-plateau="controles"]');
 
-      expect(plateau?.querySelector('[data-action="pret"]')).not.toBeNull();
+      expect(commande?.querySelector('[data-action="pret"]')).not.toBeNull();
+      expect(plateau?.querySelector('[data-action="pret"]')).toBeNull();
       expect(controles?.querySelector('[data-action="pret"]')).toBeNull();
 
       taper(container, ['[data-action="pret"]']);
@@ -327,7 +329,8 @@ describe('moteur eclair', () => {
       act(() => {
         vi.advanceTimersByTime(5000);
       });
-      expect(plateau?.querySelector('[data-action="revoir"]')).not.toBeNull();
+      expect(commande?.querySelector('[data-action="revoir"]')).not.toBeNull();
+      expect(plateau?.querySelector('[data-action="revoir"]')).toBeNull();
       expect(controles?.querySelector('[data-action="revoir"]')).toBeNull();
     } finally {
       vi.useRealTimers();

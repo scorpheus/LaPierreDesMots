@@ -80,7 +80,6 @@ import {
   lireComparaison,
   lireMaitrises,
   lireMonde,
-  lireOuverture,
   lireProfil,
   lireProgression,
   lireProgressionNoeud,
@@ -89,7 +88,6 @@ import {
   lireVerrou,
   listerProfils,
   listerRelecture,
-  nomFichierExport,
   noterVisitePoint,
   objetConnu,
   pointConnu,
@@ -404,6 +402,7 @@ export const portLocal: PortApi = {
       maitrises: await lireMaitrises(base, id),
       revisionsDues: await lireRevisionsDues(base, id, maintenant),
       noeudsDisponibles: construireCandidats(noeuds, exercices),
+      noeudsTermines: (await lireProgression(base, id)).map((ligne) => ligne.noeud),
       competences,
       maintenant
     };

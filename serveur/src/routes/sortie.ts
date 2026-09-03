@@ -34,7 +34,7 @@ import { composerSortie } from '@pierre/partage/pedagogie';
 
 import type { ContexteServeur } from '../configuration.js';
 import { CODES_ERREUR, erreurApi } from '../configuration.js';
-import { lireMaitrises, lireRevisionsDues, profilExiste } from '@pierre/partage/base';
+import { lireMaitrises, lireProgression, lireRevisionsDues, profilExiste } from '@pierre/partage/base';
 import { chargerParametresPedagogie } from '../referentiels/pedagogie.js';
 
 const COMPAGNONS: readonly string[] = ['filou', 'bulle', 'roc', 'plume'];
@@ -135,6 +135,7 @@ export function enregistrerRoutesSortie(app: FastifyInstance, contexte: Contexte
       maitrises: await lireMaitrises(contexte.base, id),
       revisionsDues: await lireRevisionsDues(contexte.base, id, maintenant),
       noeudsDisponibles: construireCandidats(noeuds, exercices),
+      noeudsTermines: (await lireProgression(contexte.base, id)).map((ligne) => ligne.noeud),
       competences,
       maintenant
     };

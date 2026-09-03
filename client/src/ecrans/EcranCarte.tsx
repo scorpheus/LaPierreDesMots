@@ -399,6 +399,21 @@ export function EcranCarte({
     [magasin, profil, regionEnChargement]
   );
 
+  const prochainDeblocage = useMemo(() => {
+    const verrouillee = [...regions]
+      .sort((gauche, droite) => gauche.ordre - droite.ordre)
+      .find((une) => !une.ouverte && une.noeuds.length > 0);
+    if (verrouillee === undefined) return null;
+    const precedente = [...regions]
+      .sort((gauche, droite) => gauche.ordre - droite.ordre)
+      .find((une) => une.ordre === verrouillee.ordre - 1);
+    return {
+      region: verrouillee.region,
+      precedente: precedente?.region ?? null,
+      restant: precedente === undefined ? null : Math.max(0, precedente.noeuds.length - precedente.noeuds.filter((noeud) => noeudsFaits.has(String(noeud))).length),
+    };
+  }, [regions, noeudsFaits]);
+
   return (
     <main
       data-ecran="carte"
@@ -488,6 +503,16 @@ export function EcranCarte({
         >
           L’histoire de la Pierre
         </button>
+      )}
+      {prochainDeblocage === null ? null : (
+        <p
+          data-prochain-deblocage="oui"
+          className="zone-lecture"
+          style={{ margin: '0.65rem 0 0', fontSize: '1.05rem' }}
+        >
+          La prochaine région s’ouvrira quand la région actuelle sera entièrement coloriée.
+          {prochainDeblocage.restant === null ? null : ` Il reste ${String(prochainDeblocage.restant)} exercice${prochainDeblocage.restant > 1 ? 's' : ''} à découvrir.`}
+        </p>
       )}
       </div>
 

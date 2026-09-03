@@ -708,6 +708,7 @@ export function MoteurPhrase(
       <div
         ref={modele}
         data-plateau="modele"
+        className="modele-phrase-centre"
         style={{
           position: 'absolute',
           insetInlineStart: 0,
@@ -924,6 +925,7 @@ export function MoteurPhrase(
             display: 'flex',
             flexWrap: 'wrap',
             alignItems: 'center',
+            justifyContent: 'center',
             gap: '0.5rem',
             marginBlockEnd: '0.6rem',
           }}
@@ -964,7 +966,12 @@ export function MoteurPhrase(
             aria-live="polite"
             data-refus-texte={messageDeRefus === '' ? 'non' : 'oui'}
             data-animations={animationsDesactivees ? 'calmes' : 'vives'}
-            style={{ ...styleLecture, margin: 0, minBlockSize: '1.5em' } as CSSProperties}
+            style={{
+              ...styleLecture,
+              margin: 0,
+              minBlockSize: '1.5em',
+              textAlign: 'center'
+            } as CSSProperties}
           >
             {messageDeRefus === '' ? (etat.aide === null ? '' : (etat.aide.texte ?? '')) : messageDeRefus}
           </p>

@@ -503,6 +503,31 @@ describe('branches défensives', () => {
     ...surcharge,
   });
 
+  it('privilégie les nœuds inédits quand une région a encore du contenu', () => {
+    const plan = composerSortie(
+      entreeAvec(
+        [candidat(1), candidat(2), candidat(3), candidat(4)],
+        { noeudsTermines: ['n1', 'n2'] }
+      ),
+      PARAMETRES,
+      creerAlea(17)
+    );
+    expect(plan.etapes.map((etape) => etape.noeud)).not.toContain('n1');
+    expect(plan.etapes.map((etape) => etape.noeud)).not.toContain('n2');
+  });
+
+  it('garantit le dernier nœud inédit au lieu de le perdre parmi les reprises', () => {
+    const plan = composerSortie(
+      entreeAvec(
+        [candidat(1), candidat(2), candidat(3), candidat(4)],
+        { noeudsTermines: ['n1', 'n2', 'n3'] }
+      ),
+      PARAMETRES,
+      creerAlea(17)
+    );
+    expect(plan.etapes.map((etape) => etape.noeud)).toContain('n4');
+  });
+
   it('écarte un nœud dont une compétence est absente du référentiel', () => {
     // Une compétence inconnue n'a pas de chaîne de prérequis lisible : la supposer sans
     // prérequis ferait sauter la progression phonologique en silence.

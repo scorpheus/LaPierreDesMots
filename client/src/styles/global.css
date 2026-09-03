@@ -665,6 +665,48 @@ body {
   line-height: inherit;
 }
 
+/* Le moteur de phrase montre un modèle unique : il se lit comme le titre du tableau, centré au
+   même axe que les fentes et les mots à ranger. Les autres textes longs gardent leur alignement
+   de lecture habituel à gauche. */
+.modele-phrase-centre .ligne-lecture {
+  text-align: center;
+}
+
+.commande-eclair {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  min-block-size: 3.75rem;
+  padding: 0.7rem 1.25rem;
+  border: 3px solid var(--trait, #1b2440);
+  border-radius: 999px;
+  background: linear-gradient(180deg, #fff8d8 0%, #ffd86b 100%);
+  box-shadow: 0 5px 0 var(--trait, #1b2440), 0 9px 20px rgb(27 36 64 / 22%);
+  color: var(--trait, #1b2440);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.commande-eclair:hover,
+.commande-eclair:focus-visible {
+  filter: brightness(1.04);
+  translate: 0 -2px;
+}
+
+.commande-eclair:active {
+  translate: 0 3px;
+  box-shadow: 0 2px 0 var(--trait, #1b2440), 0 5px 12px rgb(27 36 64 / 18%);
+}
+
+.commande-eclair-note {
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: rgb(255 248 216 / 92%);
+  color: var(--trait, #1b2440);
+  font-weight: 700;
+}
+
 /* La ligne devient une cible SEULEMENT quand la règle ou le surlignage sont actifs : une cible
    interactive sans usage serait une infraction à R16 comptée par `a11y.spec.ts`. */
 .ligne-lecture-tapable {
