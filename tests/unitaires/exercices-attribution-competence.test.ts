@@ -86,14 +86,15 @@ const parConfusion = new Set(
  * jour où l'arbitrage tombe, ce test exige qu'on retire l'entrée au lieu de l'oublier.
  *
  * Chacune est consignée dans `Docs/questions-en-attente.md`, section « Lot S3 », avec sa
- * proposition de remède. Aucune ne se corrige par un simple échange de position : `gn` et `ph`
- * n'ont aucun exercice qui les travaille à titre principal (ce sont, dans les trois cas, des
- * graphèmes secondaires d'un exercice consacré à `ill` ou à `ch-qu`), et
+ * proposition de remède. `ph` n'a aucun exercice qui le travaille à titre principal et
  * `comp.consigne.multiple` est déclarée par quinze exercices sans en être jamais le sujet.
  * Les nommer ici, c'est refuser de les corriger par un geste qui rendrait le test vert sans
  * rendre le contenu juste.
+ *
+ * `gph.rare.gn` a quitté cet inventaire le 2026-09-03 : `volcan-05` travaille réellement
+ * le graphème « gn » et le journalise désormais en compétence principale.
  */
-const MUETTES_CONNUES: readonly string[] = ["comp.consigne.multiple", "gph.rare.gn", "gph.rare.ph"];
+const MUETTES_CONNUES: readonly string[] = ["comp.consigne.multiple", "gph.rare.ph"];
 
 describe("attribution des compétences — ce que le journal recevra", () => {
   it("contrôle de la mesure : le recensement porte sur des objets, et il n’est pas vide", () => {

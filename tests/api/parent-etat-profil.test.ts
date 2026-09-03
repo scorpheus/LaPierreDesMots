@@ -61,12 +61,14 @@ const PRENOM = 'Ezékiel';
 const FICHIERS_DE_NOEUD = readdirSync(join(RACINE_DEPOT, 'contenu', 'noeuds')).filter((f) =>
   f.endsWith('.json'),
 );
-const NOEUDS_LIVRES_ATTENDUS = FICHIERS_DE_NOEUD.length;
+const NOEUDS_LIVRES_ATTENDUS = FICHIERS_DE_NOEUD.filter((f) =>
+  lireJson<{ progression?: boolean }>(`contenu/noeuds/${f}`).progression !== false,
+).length;
 
 /** Les nœuds livrés d'une région, comptés sur les fichiers eux-mêmes. */
 function noeudsLivresDe(region: string): number {
   return FICHIERS_DE_NOEUD.filter(
-    (f) => lireJson<{ region: string }>(`contenu/noeuds/${f}`).region === region,
+    (f) => { const n = lireJson<{ region: string; progression?: boolean }>(`contenu/noeuds/${f}`); return n.region === region && n.progression !== false; },
   ).length;
 }
 

@@ -42,9 +42,9 @@ import {
 } from '../api/client.js';
 import { useEtatJeu, useMagasin } from '../etat/services.js';
 import { CheminEncre } from '../monde/CheminEncre.js';
+import { CarteRasterProgression } from '../monde/CarteRasterProgression.js';
 import { Parchemin } from '../monde/Parchemin.js';
 import { repriseDeRegion } from '../monde/reprise.js';
-import { VoileGrisaille } from '../monde/VoileGrisaille.js';
 
 /**
  * Le chemin du décor de la carte, relatif à `contenu/`.
@@ -78,19 +78,30 @@ import { VoileGrisaille } from '../monde/VoileGrisaille.js';
 const SVG_CARTE = 'habillages/carte/carte-monde-v3.svg';
 
 /**
+ * La carte illustrée validée par le parent le 2 septembre 2026.
+ *
+ * Variante dédiée de l'image d'ouverture : les deux biomes surnuméraires du bord supérieur ont
+ * été fondus dans un arrière-plan brumeux afin que seules les six régions jouables se lisent
+ * comme des destinations. L'image d'ouverture originale reste intacte.
+ */
+const RASTER_CARTE = 'assets/decors/carte-six-regions.png';
+
+/**
  * Les ancres de chaque région, en unités `viewBox`, **dans l'ordre de la progression**.
  *
- * Ce sont les MÊMES centres que ceux des six formes de `carte-monde.svg` : le décor porte les
- * formes, cette table porte les prises. Les faire diverger décalerait le tap du dessin, ce qui
- * ne se verrait qu'à l'usage — d'où `tests/visuel/carte.spec.ts`, qui les photographie ensemble.
+ * Elles sont mesurées sur `carte-six-regions.png` (1536 × 1024), transposées dans le `viewBox`
+ * 1200 × 800.
+ * Les précédentes coordonnées venaient de l'ancien SVG : les prises se posaient donc loin des
+ * paysages raster. Cette table est maintenant la source commune des prises, du chemin et du
+ * réveil coloré — une évolution de l'illustration ne peut plus déplacer l'un sans les autres.
  */
 const ANCRES: readonly (readonly [CodeRegion, number, number, string])[] = [
-  ['clairiere', 190, 640, 'La Clairière'],
-  ['galeries', 450, 460, 'Les Galeries'],
-  ['marais-jumeau', 240, 240, 'Le Marais Jumeau'],
-  ['foret-muette', 620, 150, 'La Forêt Muette'],
-  ['volcan', 900, 340, 'Le Volcan'],
-  ['cite-des-histoires', 1020, 630, 'La Cité des Histoires']
+  ['clairiere', 600, 470, 'La Clairière'],
+  ['galeries', 990, 560, 'Les Galeries'],
+  ['marais-jumeau', 1040, 370, 'Le Marais Jumeau'],
+  ['foret-muette', 990, 150, 'La Forêt Muette'],
+  ['volcan', 165, 590, 'Le Volcan'],
+  ['cite-des-histoires', 160, 395, 'La Cité des Histoires']
 ];
 
 /** Rayon de la prise tactile, en unités `viewBox`. 64 unités ≈ 64 px CSS à l'échelle de rendu. */
@@ -238,6 +249,7 @@ export function EcranCarte({
   const magasin = useMagasin();
   const profil = useEtatJeu((etat) => etat.profil);
   const animationsDesactivees = useEtatJeu((etat) => etat.animationsDesactivees);
+  const [rasterIndisponible, fixerRasterIndisponible] = useState(false);
 
   const requeteMonde = useQuery({
     queryKey: ['monde', profil === null ? null : String(profil.id)],
@@ -486,37 +498,38 @@ export function EcranCarte({
           sous sa taille de contenu et toute la règle serait inerte. */}
       <div data-scene-adaptative="carte">
       <Parchemin>
-        {/* Le décor. Absent, la carte le dit calmement et reste utilisable — jamais d'erreur. */}
-        {requeteDecor.data === undefined ? (
-          <text x="600" y="400" textAnchor="middle" fontSize="36" fill="var(--trait)">
-            On déplie la carte…
-          </text>
+        {/* Le PNG validé est le décor principal. Le SVG historique reste dans `<defs>` : ses
+            six silhouettes servent encore de repli si l'image ne se charge pas, mais il ne peut
+            plus recouvrir le paysage raster que le parent a validé. */}
+        {rasterIndisponible ? (
+          requeteDecor.data === undefined ? (
+            <text x="600" y="400" textAnchor="middle" fontSize="36" fill="var(--trait)">
+              On déplie la carte…
+            </text>
+          ) : (
+            <g
+              data-decor="carte"
+              data-format-decor="svg-repli"
+              aria-hidden="true"
+              dangerouslySetInnerHTML={{ __html: requeteDecor.data }}
+            />
+          )
         ) : (
-          /* Le décor est un fichier de contenu DU DÉPÔT, servi par le serveur local : il n'y a
-             ni tiers, ni saisie utilisateur dans ce balisage.
-
-             ── `aria-hidden`, AJOUTÉ PAR S4, ET CE N'EST PAS UNE PRÉCAUTION DE STYLE ─────────
-             `carte-monde-v3.svg` porte SEPT `<title>` : un pour la carte, six pour les
-             territoires. Un `<title>` donne un NOM ACCESSIBLE à son élément. Injectés tels
-             quels, les six territoires devenaient donc six nœuds nommés de plus, en doublon des
-             six prises `role="button"` qui portent déjà « La Clairière — voilee ».
-
-             Mesuré dans Chrome, arbre d'accessibilité lu par CDP
-             (`node bac-a-sable/s4-carte/mesurer-arbre-a11y.mjs`) :
-
-               décor SANS aria-hidden → 16 nœuds nommés
-                 group « La carte du monde » ×2, button ×2,
-                 graphics-symbol « La Clairiere », « Les Galeries », « Le Marais Jumeau »,
-                 « La Foret Muette », « Le Volcan », « La Cite des Histoires » — chacun DEUX fois
-               décor AVEC aria-hidden →  3 nœuds nommés
-                 group « La carte du monde », button « La Clairière — ouverte »,
-                 button « Les Galeries — ouverte »
-
-             Le décor est un DESSIN : tout ce qui répond au doigt est posé à côté, en clair, par
-             cet écran. Le masquer ne retire donc aucune information — il retire treize
-             répétitions, dont six sans leurs accents. */
-          <g
-            data-decor="carte"
+          <CarteRasterProgression
+            source={urlAsset(RASTER_CARTE)}
+            avancements={ANCRES.map(([region, x, y]) => ({
+              region,
+              ancre: [x, y] as const,
+              pourcentageColorie: parCode.get(String(region))?.pourcentageColorie ?? 0
+            }))}
+            surErreur={() => {
+              fixerRasterIndisponible(true);
+            }}
+          />
+        )}
+        {requeteDecor.data === undefined ? null : (
+          <defs
+            data-definitions-decor="carte"
             aria-hidden="true"
             dangerouslySetInnerHTML={{ __html: requeteDecor.data }}
           />
@@ -527,50 +540,6 @@ export function EcranCarte({
           parts={partsDuChemin}
           animationsDesactivees={animationsDesactivees}
         />
-
-        {/*
-          LE VOILE, RÉGION PAR RÉGION. Il n'intercepte jamais le tap.
-
-          C'est ici que les trois rendus se jouent vraiment, et pas seulement sur le sceau :
-            • `voilee`   — la région n'est pas commencée, le voile est plein, la brume bouge ;
-            • `ouverte`  — le voile s'efface EXACTEMENT à la mesure de ce qui est rallumé, donc
-                           ce qu'on voit est le VIDE restant (D25, point 3) ;
-            • `terminee` — le voile tombe à zéro et la couleur du territoire claque, entière.
-          Le voile épouse la silhouette par un `<use href="#<région>">` : les signes d'ambiance
-          de la v3 sont détourés par cette même silhouette, donc le voile couvre exactement ce
-          que le dessin remplit — aucun ornement ne dépasse du brouillard.
-        */}
-        {requeteDecor.data === undefined
-          ? null
-          : ANCRES.map(([code, ancreX, ancreY]) => {
-              const region = parCode.get(String(code));
-              const opacite = region === undefined ? 1 : 1 - region.pourcentageColorie;
-              // ── LE RALLUMAGE PAR PALIERS (arbitrage du père, 2026-08-03) ────────────────────
-              //
-              // `paliers` est le nombre de NŒUDS de la région, et `franchis` s'en déduit par
-              // `pourcentageColorie`, qui est la seule source qui fait foi : elle se recalcule
-              // depuis le journal (`tentatives`), là où un compteur tenu à part serait une
-              // seconde vérité — exactement le défaut que le lot N a corrigé sur ce même
-              // pourcentage.
-              //
-              // Une région sans nœud rend `paliers = 0` : le voile retombe alors sur l'opacité
-              // uniforme, plein et immobile, ce qui est le bon rendu pour un territoire dont le
-              // contenu n'est pas encore écrit.
-              const paliers = region?.noeuds.length ?? 0;
-              const franchis =
-                region === undefined ? 0 : Math.round(region.pourcentageColorie * paliers);
-              return (
-                <VoileGrisaille
-                  key={`voile-${String(code)}`}
-                  forme={String(code)}
-                  opacite={opacite}
-                  paliers={paliers}
-                  franchis={franchis}
-                  centre={[ancreX, ancreY]}
-                  animationsDesactivees={animationsDesactivees}
-                />
-              );
-            })}
 
         {/* Les prises : une par région, toujours présentes, jamais désactivées. */}
         {ANCRES.map(([code, x, y, libelle]) => {
@@ -587,7 +556,12 @@ export function EcranCarte({
           const nom = cartouche(x, libelle);
 
           return (
-            <g key={String(code)} data-region={String(code)} data-region-etat={etat}>
+            <g
+              key={String(code)}
+              data-region={String(code)}
+              data-region-etat={etat}
+              data-ancre-raster={`${String(x)},${String(y)}`}
+            >
               {/*
                 ── LE SCEAU, EN TROIS RENDUS ────────────────────────────────────────────────
                 Tout ce bloc est DÉCORATIF et ne reçoit jamais le doigt : `aria-hidden` et

@@ -26,7 +26,7 @@
       "consignes": [
         {
           "id": "c1",
-          "texte": "Range les mots où tu entends la dernière lettre.",
+          "texte": "Dis les mots. Range à gauche ceux dont la dernière lettre se prononce.",
           "forme": "imperative",
           "audio": null,
           "aRanger": [
@@ -42,7 +42,7 @@
         },
         {
           "id": "c2",
-          "texte": "Range aussi les mots où tu entends la dernière lettre.",
+          "texte": "Continue à gauche quand la dernière lettre se prononce.",
           "forme": "imperative",
           "audio": null,
           "aRanger": [
@@ -58,7 +58,7 @@
         },
         {
           "id": "c3",
-          "texte": "Range les mots où tu n'entends pas la dernière lettre.",
+          "texte": "Range à droite les mots dont la dernière lettre ne se prononce pas.",
           "forme": "imperative",
           "audio": null,
           "aRanger": [
@@ -74,7 +74,7 @@
         },
         {
           "id": "c4",
-          "texte": "Range aussi les mots où tu n'entends pas la dernière lettre.",
+          "texte": "Continue à droite quand la dernière lettre ne se prononce pas.",
           "forme": "imperative",
           "audio": null,
           "aRanger": [
@@ -90,7 +90,7 @@
         },
         {
           "id": "c5",
-          "texte": "Range les derniers mots.",
+          "texte": "Range les deux derniers mots dans le bon trou.",
           "forme": "imperative",
           "audio": null,
           "aRanger": [

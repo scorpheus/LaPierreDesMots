@@ -101,7 +101,20 @@ function lireDossier(dossier: string): readonly DocumentLu[] {
 
 const EXERCICES = lireDossier('contenu/exercices');
 const NOEUDS = lireDossier('contenu/noeuds');
+const NOEUDS_DE_PROGRESSION = NOEUDS.filter(
+  (noeud) => (noeud.donnees as { readonly progression?: boolean }).progression !== false
+);
+const EXERCICES_DE_PROGRESSION = EXERCICES.filter((exercice) =>
+  NOEUDS_DE_PROGRESSION.some(
+    (noeud) =>
+      (noeud.donnees as { readonly exercice?: unknown }).exercice ===
+      (exercice.donnees as { readonly id?: unknown }).id
+  )
+);
 const MOTEURS_DECLARES = declaresDuSource(lireTexte('partage/src/identifiants.ts'));
+// `libre` est atteint par `/chaudron`, hors nœud pédagogique ; sa recette dédiée vérifie ce
+// chemin. Ce garde ne mesure que les moteurs que le sélecteur peut proposer.
+const MOTEURS_DE_PROGRESSION = MOTEURS_DECLARES.filter((moteur) => moteur !== 'libre');
 
 const NOEUDS_CITES = lireJson<{
   regions: ReadonlyArray<{ region: string; noeuds: readonly string[] }>;
@@ -196,9 +209,9 @@ describe('le garde refuse l’état d’avant ce lot — 8 moteurs sur 14', () =
     )[0] as [string, string[]];
 
     const rapport = croiser({
-      moteursDeclares: MOTEURS_DECLARES,
-      exercices: EXERCICES,
-      noeuds: NOEUDS.filter(
+      moteursDeclares: MOTEURS_DE_PROGRESSION,
+      exercices: EXERCICES_DE_PROGRESSION,
+      noeuds: NOEUDS_DE_PROGRESSION.filter(
         (noeud) =>
           !exercicesCoupes.includes(
             String((noeud.donnees as { exercice?: unknown }).exercice ?? ''),
@@ -232,10 +245,10 @@ describe('le garde refuse l’état d’avant ce lot — 8 moteurs sur 14', () =
     });
 
     expect(declenchees(rapport)).toEqual([regles['MOTEUR_HORS_CARTE']]);
-    const libre = rapport.parMoteur.find((bilan) => bilan.moteur === 'libre');
-    expect(libre?.noeuds).toBe(1);
-    expect(libre?.surLaCarte).toBe(0);
-    expect(libre?.atteignable).toBe(false);
+    const bilan = rapport.parMoteur.find((entree) => entree.moteur === 'libre');
+    expect(bilan?.noeuds).toBe(1);
+    expect(bilan?.surLaCarte).toBe(0);
+    expect(bilan?.atteignable).toBe(false);
   });
 
   it('un moteur que `CodeMoteur` ne déclare pas est refusé, pas ignoré', () => {
@@ -263,9 +276,9 @@ describe('le garde refuse l’état d’avant ce lot — 8 moteurs sur 14', () =
 
 describe('CHAQUE moteur déclaré est atteignable par l’enfant (contrat de sortie du lot A4)', () => {
   const rapport = croiser({
-    moteursDeclares: MOTEURS_DECLARES,
-    exercices: EXERCICES,
-    noeuds: NOEUDS,
+    moteursDeclares: MOTEURS_DE_PROGRESSION,
+    exercices: EXERCICES_DE_PROGRESSION,
+    noeuds: NOEUDS_DE_PROGRESSION,
     noeudsCites: NOEUDS_CITES,
   });
 
@@ -280,7 +293,7 @@ describe('CHAQUE moteur déclaré est atteignable par l’enfant (contrat de sor
     // Le chiffre du lot, et il est imprimé même quand il passe : un compte qui rase le seuil
     // se voit, et c'est ce qu'on veut lire le jour où il baisse.
     expect(rapport.ecart, resumer(rapport)).toBe(0);
-    expect(rapport.nbMoteursAtteignables, resumer(rapport)).toBe(MOTEURS_DECLARES.length);
+    expect(rapport.nbMoteursAtteignables, resumer(rapport)).toBe(MOTEURS_DE_PROGRESSION.length);
   });
 
   it('chaque moteur nomme le nœud par lequel on l’atteint', () => {
@@ -293,7 +306,7 @@ describe('CHAQUE moteur déclaré est atteignable par l’enfant (contrat de sor
   });
 
   it('les six moteurs du lot A4 sont chacun reliés à un nœud cité par sa région', () => {
-    for (const moteur of SIX_MANQUANTS) {
+    for (const moteur of SIX_MANQUANTS.filter((moteur) => moteur !== 'libre')) {
       const bilan = rapport.parMoteur.find((entree) => entree.moteur === moteur);
       expect(bilan?.exercices, `${moteur} : exercices`).toBeGreaterThanOrEqual(1);
       expect(bilan?.surLaCarte, `${moteur} : nœuds cités par sa région`).toBeGreaterThanOrEqual(1);

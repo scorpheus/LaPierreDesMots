@@ -303,12 +303,11 @@ test.describe('variété d’une sortie', () => {
       }
     }
 
-    // CONTRAT DE SORTIE — le chiffre qui empêche ce cas d'être vert à vide. Tant qu'il vaut
-    // zéro, la moitié « R15 » ci-dessus n'a rien assertionné, et la ligne le dit à voix haute
-    // au lieu de laisser croire que la règle est tenue.
+    // CONTRAT DE SORTIE — le chiffre qui empêche ce cas d'être vert à vide. Il doit rejoindre
+    // le nombre total de nœuds quand la production des voix est complète.
     console.info(
       `[écouter] ${String(noeuds.length)} nœuds audités, ${String(noeudsAvecAudio)} avec audio ` +
-        `— R15 reste non satisfaite tant que ce second chiffre vaut 0 (D42, D41).`,
+        `— couverture R15 ${String(noeudsAvecAudio)}/${String(noeuds.length)} (D42, D41).`,
     );
   });
 });

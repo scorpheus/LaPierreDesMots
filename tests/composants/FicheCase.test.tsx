@@ -48,6 +48,30 @@ afterEach(() => {
 });
 
 describe('R24 — la fiche dit ce qu’une case attend', () => {
+  it('la fiche garde le dessin centré sans cercle parasite et laisse le nom en tête', () => {
+    const { container } = render(
+      <FicheCase une={uneCase(false)} commentLObtenir={null} surFermer={() => undefined} />
+    );
+    const fiche = container.querySelector('[data-fiche-case]') as HTMLElement;
+    const visuel = fiche.querySelector('[data-fiche-visuel]') as HTMLElement;
+    const titre = fiche.querySelector('h2');
+    expect(visuel.getAttribute('data-fiche-visuel-cadre')).toBe('rectangle');
+    expect(visuel.style.borderRadius).toBe('');
+    expect(visuel.style.display).toBe('grid');
+    expect(titre).not.toBeNull();
+    expect(fiche.firstElementChild?.firstElementChild).toBe(titre);
+  });
+
+  it('la fenêtre reste contenue et défilable sur une tablette 16:10', () => {
+    const { container } = render(
+      <FicheCase une={uneCase(false)} commentLObtenir={null} surFermer={() => undefined} />
+    );
+    const fenetre = container.querySelector('[data-fiche-modal] > div') as HTMLElement;
+    expect(fenetre.style.inlineSize).toContain('42rem');
+    expect(fenetre.style.maxBlockSize).toBe('calc(100dvh - 2rem)');
+    expect(fenetre.style.overflowY).toBe('auto');
+  });
+
   it('LE DÉFAUT CORRIGÉ — une case NON gagnée s’ouvre et montre sa forme en couleur', () => {
     const { container } = render(
       <FicheCase une={uneCase(false)} commentLObtenir={null} surFermer={() => undefined} />

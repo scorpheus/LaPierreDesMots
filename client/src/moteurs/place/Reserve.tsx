@@ -30,6 +30,8 @@ const TRAIT = 'var(--trait, #1B2440)';
 
 export interface ProprietesReserve {
   readonly elements: readonly ElementPlacable[];
+  /** Les identifiants présents dans les dépôts de l'exercice. */
+  readonly elementsAttendus: ReadonlySet<IdElement>;
   /** Les éléments déjà posés : ils restent visibles, grisés, et ne se reprennent pas (R14). */
   readonly places: Readonly<Record<string, string>>;
   readonly elementSaisi: IdElement | null;
@@ -39,12 +41,13 @@ export interface ProprietesReserve {
 
 function Jeton(proprietes: {
   readonly element: ElementPlacable;
+  readonly roleAttendu: 'a-placer' | 'amusant';
   readonly place: boolean;
   readonly saisi: boolean;
   readonly animationsDesactivees: boolean;
   onSaisir(element: IdElement): void;
 }): ReactElement {
-  const { element, place, saisi, animationsDesactivees, onSaisir } = proprietes;
+  const { element, roleAttendu, place, saisi, animationsDesactivees, onSaisir } = proprietes;
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: element.id,
     disabled: place,
@@ -65,6 +68,7 @@ function Jeton(proprietes: {
       ref={setNodeRef}
       type="button"
       data-element={element.id}
+      data-element-role={roleAttendu}
       data-place={place ? 'oui' : 'non'}
       data-saisi={saisi ? 'oui' : 'non'}
       disabled={place}
@@ -76,7 +80,9 @@ function Jeton(proprietes: {
       // l'enfant manipule ; ceux de la bibliothèque décrivent un « draggable item ». C'est le
       // libellé de l'objet que le lecteur d'écran doit dire.
       aria-pressed={saisi}
-      aria-label={element.libelle}
+      aria-label={
+        roleAttendu === 'amusant' ? `${element.libelle}, dessin pour s’amuser` : element.libelle
+      }
       style={{
         minWidth: `${CIBLE_MINIMALE_PX}px`,
         minHeight: '96px',
@@ -106,24 +112,34 @@ function Jeton(proprietes: {
         style={{ width: '54px', height: '54px', objectFit: 'contain', pointerEvents: 'none' }}
       />
       <span>{element.libelle}</span>
+      {roleAttendu === 'amusant' ? <small>à laisser</small> : null}
     </button>
   );
 }
 
 export function Reserve(proprietes: ProprietesReserve): ReactElement {
-  const { elements, places, elementSaisi, animationsDesactivees, onSaisir } = proprietes;
+  const { elements, elementsAttendus, places, elementSaisi, animationsDesactivees, onSaisir } = proprietes;
+  const amusants = elements.filter((element) => !elementsAttendus.has(element.id));
+  const nbAttendus = elements.length - amusants.length;
 
   return (
     <div
       data-reserve="place"
       role="group"
-      aria-label="Les objets à placer"
+      aria-label={`${nbAttendus} dessins à placer et ${amusants.length} intrus à laisser`}
       style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0.75rem' }}
     >
+      <p
+        data-place-compteur="oui"
+        style={{ flexBasis: '100%', margin: 0, textAlign: 'center', fontWeight: 700 }}
+      >
+        {nbAttendus} dessins à placer · {amusants.length} intrus à laisser
+      </p>
       {elements.map((element) => (
         <Jeton
           key={element.id}
           element={element}
+          roleAttendu={elementsAttendus.has(element.id) ? 'a-placer' : 'amusant'}
           place={Object.prototype.hasOwnProperty.call(places, element.id)}
           saisi={elementSaisi === element.id}
           animationsDesactivees={animationsDesactivees}

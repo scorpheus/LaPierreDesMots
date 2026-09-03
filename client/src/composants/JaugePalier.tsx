@@ -123,7 +123,6 @@ export function JaugePalier({
       data-restant={String(jauge.restant)}
       role="group"
       aria-label={phrase}
-      style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}
     >
       {jauge.requis <= CASES_MAX ? (
         <Cases jauge={jauge} taille={taille} />
@@ -131,7 +130,7 @@ export function JaugePalier({
         <Barre jauge={jauge} taille={taille} />
       )}
       {avecLibelle ? (
-        <p className="zone-lecture" style={{ margin: 0, fontSize: '1rem', padding: '0.25rem 0.5rem' }}>
+        <p className="zone-lecture jauge-palier-phrase">
           {phrase}
         </p>
       ) : null}

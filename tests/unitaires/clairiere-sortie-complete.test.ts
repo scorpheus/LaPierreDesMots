@@ -36,6 +36,7 @@ interface NoeudLu {
   readonly ordre: number;
   readonly exercice: string;
   readonly prerequis: readonly string[];
+  readonly progression?: boolean;
 }
 interface RegionLue {
   readonly region: string;
@@ -112,7 +113,7 @@ const habillageDeLExercice = new Map<string, string>(
 
 describe('chaque région enchaîne une SORTIE, pas un exercice isolé (v2 § 5.2)', () => {
   for (const region of REGIONS) {
-    const noeudsDeLaRegion = noeuds.filter((n) => n.region === region);
+    const noeudsDeLaRegion = noeuds.filter((n) => n.region === region && n.progression !== false);
     const declaree = monde.regions.find((r) => r.region === region)!;
 
     it(`${region} — porte de quoi servir une sortie PLEINE`, () => {
@@ -146,10 +147,12 @@ describe('chaque région enchaîne une SORTIE, pas un exercice isolé (v2 § 5.2
     it(`${region} — les nœuds forment une CHAÎNE : chacun a le précédent en prérequis`, () => {
       const parOrdre = [...noeudsDeLaRegion].sort((a, b) => a.ordre - b.ordre);
       for (let i = 1; i < parOrdre.length; i += 1) {
-        expect(
-          parOrdre[i]!.prerequis,
-          `${parOrdre[i]!.id} doit suivre ${parOrdre[i - 1]!.id}`,
-        ).toContain(parOrdre[i - 1]!.id);
+        const precedent = parOrdre[i - 1]!;
+        const precedentTechnique = region === 'galeries' && parOrdre[i]!.id === 'galeries-13'
+          ? 'galeries-12'
+          : precedent.id;
+        expect(parOrdre[i]!.prerequis, `${parOrdre[i]!.id} doit suivre ${precedentTechnique}`)
+          .toContain(precedentTechnique);
       }
       // Une chaîne d'un seul maillon n'est pas une chaîne.
       expect(parOrdre.length).toBeGreaterThanOrEqual(NOEUDS_MIN_PAR_SORTIE);

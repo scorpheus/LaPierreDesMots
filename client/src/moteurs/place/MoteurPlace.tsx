@@ -92,6 +92,21 @@ export function MoteurPlace(
 
   const etatConsigne = etat.consignes[etat.indexConsigne];
 
+  // La réserve peut contenir des dessins supplémentaires pour inviter à lire chaque carte,
+  // mais seuls les éléments cités par une consigne sont attendus. Cette distinction doit être
+  // visible avant le premier geste : cinq cartes ne signifient pas cinq tâches.
+  const elementsAttendus = useMemo(
+    () => new Set(contenu.consignes.flatMap((consigne) => consigne.depots.map((depot) => depot.element))),
+    [contenu],
+  );
+  // L'ordre du fichier n'est pas un indice : sinon les trois objets attendus, déclarés avant
+  // les deux intrus, donnent gratuitement la solution observée par le parent. Le mélange est
+  // effectué une seule fois avec l'Alea injecté, donc il reste déterministe et rejouable.
+  const reserveMelangee = useMemo(
+    () => services.alea.melanger(contenu.reserve),
+    [contenu.reserve, services.alea],
+  );
+
   // --- la relecture automatique, avec son quota ----------------------------
   const refRelectures = useRef<{ consigne: string; faites: number }>({ consigne: '', faites: 0 });
 
@@ -171,6 +186,7 @@ export function MoteurPlace(
   return (
     <DndContext sensors={capteurs} onDragStart={auDebutDuGlisse} onDragEnd={auBoutDuGlisse}>
       <div
+        className="moteur-place"
         data-moteur="place"
         data-habillage={habillage.id}
         data-termine={etat.termineMs === null ? 'non' : 'oui'}
@@ -184,7 +200,7 @@ export function MoteurPlace(
         // posé par `global.css`) : elle prend ce qui reste et rétrécit quand il en manque, pendant
         // que les commandes gardent leur taille. Le style est EN LIGNE parce qu'un style en ligne
         // bat la feuille — c'est précisément ce qui rendait la première correction inerte.
-        style={{ display: 'flex', flexDirection: 'column', gap: '1rem', blockSize: '100%', minBlockSize: 0 }}
+        style={{ blockSize: '100%', minBlockSize: 0 }}
       >
         {/* R49 (le père, 2026-08-07 : « la phrase est en haut et en bas, il y a doublon ») —
             la consigne était redite ici ET dans l'en-tête d'`EcranNoeud`, seul propriétaire du
@@ -207,7 +223,8 @@ export function MoteurPlace(
         />
 
         <Reserve
-          elements={contenu.reserve}
+          elements={reserveMelangee}
+          elementsAttendus={elementsAttendus}
           places={etat.places}
           elementSaisi={etat.elementSaisi}
           animationsDesactivees={animationsDesactivees}

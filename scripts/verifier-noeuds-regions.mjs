@@ -111,10 +111,13 @@ export function croiserNoeudsEtRegions({ documentRegions, noeuds, exercices }) {
       ? documentRegions.regions
       : [];
 
-  /** `id` du nœud → { chemin, region, ordre, exercice }, côté DISQUE. */
+  /** `id` du nœud pédagogique → { chemin, region, ordre, exercice }, côté DISQUE. */
   const surDisque = new Map();
   for (const { chemin, donnees } of noeuds) {
     if (donnees == null || typeof donnees !== 'object') continue;
+    // Une fiche de compatibilité d'activité libre ne participe ni à la carte ni à son
+    // dénominateur. Elle est vérifiée par sa recette dédiée, pas assimilée à un nœud mort.
+    if (donnees.progression === false) continue;
     surDisque.set(String(donnees.id), {
       chemin,
       region: String(donnees.region),

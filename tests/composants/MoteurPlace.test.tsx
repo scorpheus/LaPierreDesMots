@@ -123,6 +123,15 @@ describe('MoteurPlace — les prises du contrat § 7', () => {
     expect(document.querySelectorAll('[data-element]').length).toBe(contenu.reserve.length);
   });
 
+  it('ne présente pas les trois réponses avant les deux intrus dans l’ordre du fichier', () => {
+    render(<Harnais />);
+    const ordreAffiche = [...document.querySelectorAll<HTMLElement>('[data-element]')].map(
+      (element) => element.dataset['element'],
+    );
+    expect(ordreAffiche).not.toEqual(contenu.reserve.map((element) => element.id));
+    expect(new Set(ordreAffiche)).toEqual(new Set(contenu.reserve.map((element) => element.id)));
+  });
+
   it('n’émet JAMAIS data-etat="echec" — R14', () => {
     render(<Harnais />);
     // Vingt gestes faux d'affilée.
@@ -151,6 +160,31 @@ describe('MoteurPlace — les prises du contrat § 7', () => {
       expect(image, `dessin de « ${element.id} » absent`).not.toBeNull();
       expect(image?.getAttribute('src')).toBe(`/api/contenu/assets/${element.asset}`);
     }
+  });
+
+  it('annonce clairement les 3 dessins attendus et les 2 intrus à laisser', () => {
+    render(<Harnais />);
+
+    expect(document.querySelector('[data-place-compteur="oui"]')?.textContent).toContain(
+      '3 dessins à placer · 2 intrus à laisser',
+    );
+    expect(document.querySelector('[data-reserve="place"]')?.getAttribute('aria-label')).toBe(
+      '3 dessins à placer et 2 intrus à laisser',
+    );
+    expect(document.querySelectorAll('[data-element-role="a-placer"]')).toHaveLength(3);
+    expect(document.querySelectorAll('[data-element-role="amusant"]')).toHaveLength(2);
+    expect(document.querySelector('[data-element="poisson"]')?.getAttribute('aria-label')).toBe(
+      'un poisson, dessin pour s’amuser',
+    );
+  });
+
+  it('place les zones sur le ciel, le toit central et le banc de l’illustration', () => {
+    const zones = new Map(contenu.zones.map((zone) => [zone.id, zone]));
+    expect(zones.get('ciel')?.centroide).toEqual([680, 57.5]);
+    expect(zones.get('toit-ecole')?.centroide[0]).toBeGreaterThan(350);
+    expect(zones.get('toit-ecole')?.centroide[1]).toBeLessThan(180);
+    expect(zones.get('a-cote-du-banc')?.centroide[0]).toBeLessThan(250);
+    expect(zones.get('a-cote-du-banc')?.centroide[1]).toBeGreaterThan(330);
   });
 });
 

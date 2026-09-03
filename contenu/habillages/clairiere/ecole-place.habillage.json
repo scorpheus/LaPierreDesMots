@@ -76,28 +76,28 @@
             "id": "ciel",
             "libelle": "le ciel",
             "centroide": [
-              690,
-              70
+              680,
+              57.5
             ],
-            "surface": 11700
+            "surface": 12000
           },
           {
             "id": "toit-ecole",
             "libelle": "le toit de l’école",
             "centroide": [
-              290,
-              105
+              419,
+              126
             ],
-            "surface": 7200
+            "surface": 17905
           },
           {
             "id": "a-cote-du-banc",
             "libelle": "à côté du banc",
             "centroide": [
-              300,
-              400
+              161,
+              392.5
             ],
-            "surface": 10000
+            "surface": 22712.5
           }
         ]
       },

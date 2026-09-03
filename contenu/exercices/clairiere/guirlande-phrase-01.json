@@ -15,7 +15,7 @@
       "consignes": [
         {
           "id": "c1",
-          "texte": "Touche les fanions dans l’ordre.",
+          "texte": "Touche les mots dans l’ordre pour construire la phrase.",
           "forme": "imperative",
           "audio": null,
           "phrase": "Le chat est noir.",
@@ -24,7 +24,7 @@
         },
         {
           "id": "c2",
-          "texte": "Touche les fanions dans l’ordre.",
+          "texte": "Touche les mots dans l’ordre pour construire la phrase.",
           "forme": "imperative",
           "audio": null,
           "phrase": "Les fleurs sont roses.",

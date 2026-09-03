@@ -19,6 +19,10 @@
       "type": "string",
       "pattern": "^[a-z]+$",
       "description": "Temps de la structure de niveau (v2 § 5.3). Seule valeur fixee par le contrat technique v1 § 9.6 : `presentation`. L'union fermee TempsNoeud vit dans partage/src/contenu/types.ts (L-B) ; ce schema ne la duplique pas pour ne pas creer deux sources de verite."
+    },
+    "progression": {
+      "type": "boolean",
+      "description": "false pour une fiche de compatibilité réservée à une activité libre, exclue de toute progression pédagogique."
     }
   }
 }

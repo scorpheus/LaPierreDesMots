@@ -6,11 +6,9 @@
  * mesurée par `tests/unitaires/galerie-non-journalisee.test.ts`, qui porte le témoin.
  *
  * LE CHIFFRE QUE CE FICHIER CALCULE, et qui échouerait si le service était creux :
- * **le nombre d'exercices du catalogue est égal au nombre de fichiers `contenu/exercices/
- * **\/*.json` portant un `id`.** Un catalogue qui filtrerait — par région, par progression,
- * par statut de relecture — rendrait un compte inférieur, et le test le dirait avec les deux
- * chiffres et leur écart. « Un lot qui rend N occurrences n'a pas répondu à combien
- * d'objets » : on énumère donc les OBJETS sur le disque, pas les lignes d'une réponse.
+ * **le nombre d'exercices du catalogue est égal au nombre de fiches pédagogiques lançables.**
+ * Une fiche de compatibilité réservée à une activité libre est explicitement exclue : la
+ * galerie ne doit jamais la présenter comme exercice de progression.
  */
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import path from 'node:path';
@@ -72,6 +70,17 @@ function exercicesSurDisque(): readonly string[] {
   return trouves.sort();
 }
 
+function exercicesDeProgressionSurDisque(): readonly string[] {
+  const exclus = new Set(
+    readdirSync(path.join(RACINE_DEPOT, 'contenu', 'noeuds'))
+      .filter((nom) => nom.endsWith('.json'))
+      .map((nom) => lireJson<{ exercice: string; progression?: boolean }>(`contenu/noeuds/${nom}`))
+      .filter((noeud) => noeud.progression === false)
+      .map((noeud) => noeud.exercice)
+  );
+  return exercicesSurDisque().filter((id) => !exclus.has(id));
+}
+
 async function jetonParent(): Promise<string> {
   const reponse = await contexte.application.inject({
     method: 'POST',
@@ -101,11 +110,11 @@ async function galerie(profil: string, jeton: string) {
 }
 
 describe('GET /api/parent/:profil/galerie', () => {
-  it('CONTRAT — le catalogue porte TOUS les exercices du disque, sans un seul filtre', async () => {
+  it('CONTRAT — le catalogue porte toutes les fiches pédagogiques lançables, sans filtre de progression', async () => {
     const profil = await creerProfil();
     const catalogue = (await galerie(profil, await jetonParent())).json() as CatalogueGalerie;
 
-    const surDisque = exercicesSurDisque();
+    const surDisque = exercicesDeProgressionSurDisque();
     const auCatalogue = catalogue.entrees.map((e) => String(e.exercice)).sort();
 
     // LES DEUX COMPTES ET LEUR ÉCART, jamais un seul. Un catalogue partiel se voit ici, et

@@ -184,7 +184,7 @@ describe('la fin de partie est une réussite, quoi qu’il arrive (R14)', () => 
     const scene = document.querySelector('[data-scene-recompense="gobi-joie"]');
     const gobi = scene?.querySelector<HTMLImageElement>('img');
     expect(scene).not.toBeNull();
-    expect(gobi?.getAttribute('src')).toContain('assets/gobi/animation/joie.svg');
+    expect(gobi?.getAttribute('src')).toContain('assets/gobi/animation/joie.webp');
     expect(document.querySelector('h1')?.closest('[data-texte-recompense]')).not.toBeNull();
   });
 
@@ -240,6 +240,7 @@ describe('la récompense suit le plan pédagogique actif', () => {
 
     const continuer = document.querySelector('[data-action="exercice-suivant"]');
     expect(continuer?.getAttribute('data-noeud-suivant')).toBe('clairiere-04');
+    expect(continuer?.textContent).toContain('On y va');
     expect(magasin.getState().sortie?.etapes).toHaveLength(4);
   });
 

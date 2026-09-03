@@ -262,6 +262,12 @@ function ElementFlottant({
         data-element={element.id}
         data-saisi={saisi ? 'oui' : 'non'}
         data-range={range ? 'oui' : 'non'}
+        // Sur tablette, le geste naturel peut ne produire qu'une séquence pointerdown/up
+        // lorsque le capteur de glisser n'est pas activé. Le tap reste prioritaire (R16) ;
+        // pendant un vrai glisser, `transform` n'est plus nul et le dépôt dnd-kit garde la main.
+        onPointerUp={(evenement) => {
+          if (transform === null) onTaper(element, evenement);
+        }}
         onClick={(evenement) => {
           onTaper(element, evenement);
         }}

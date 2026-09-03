@@ -92,6 +92,8 @@ export interface RefusPlace {
 
 export interface EtatConsignePlace {
   readonly id: IdConsigne;
+  /** Texte humain de la consigne, conservé pour que l'aide puisse parler sans identifiant technique. */
+  readonly texte: string;
   readonly depotsRestants: readonly DepotAttendu[];
   readonly nbErreurs: number;
   readonly niveauAide: NiveauAide;

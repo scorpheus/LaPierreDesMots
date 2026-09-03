@@ -134,12 +134,13 @@ export function relecturesDues(
  * sache PRONONCER — et « rien n'est synthétisé à l'exécution » (CLAUDE.md) fait d'un texte
  * imprononçable un texte inutile.
  *
- * **`texte: null` signifie donc « rien de particulier à dire : la consigne suffit »**, et non
- * « on a oublié ». C'est la coquille qui le résout — `client/src/composants/aide-de-gobi.ts` —
- * en servant la consigne courante et la clé `<idExercice>/<idConsigne>` de son clip.
+ * **`texte: null` signifie donc « rien de particulier à dire : le code choisit la stratégie »**,
+ * et non « on a oublié ». La coquille — `client/src/composants/aide-de-gobi.ts` — affiche la
+ * stratégie du `CodeAideGobi` sans recycler le clip de consigne, car les deux phrases ne sont
+ * pas les mêmes.
  *
- * Un moteur ne renseigne `texte` que lorsqu'il a quelque chose que la consigne ne dit pas :
- * `trace` nomme le trait attendu, `libre` désamorce la notion même de réussite.
+ * Un moteur ne renseigne `texte` que lorsqu'il a un repère particulier : `trace` nomme le
+ * trait attendu, `libre` désamorce la notion même de réussite.
  * ══════════════════════════════════════════════════════════════════════════════════════════
  */
 export function construireAide(

@@ -186,6 +186,12 @@ export const moteurTri: Moteur<ContenuTri, EtatTri, ActionTri> = {
 
   creerEtat(entree: EntreeMoteur<ContenuTri>): EtatTri {
     const instant = entree.horloge.maintenantMs();
+    // Les éléments ne doivent jamais suivre l'ordre du fichier de contenu : lorsqu'un lot
+    // regroupe d'abord toutes les bonnes réponses puis tous les leurres, cet ordre devient une
+    // réponse gratuite. Le moteur garde le contenu dans l'état pour rester rejouable, mais en
+    // tire une copie mélangée une seule fois par Alea (jamais au rendu). Les consignes, elles,
+    // restent dans leur ordre pédagogique imposé.
+    const elementsMelanges = entree.alea.melanger(entree.contenu.elements);
     const etapes = entree.contenu.consignes.map(
       (etape, index): EtatEtapeTri => ({
         identifiant: etape.id,
@@ -210,7 +216,7 @@ export const moteurTri: Moteur<ContenuTri, EtatTri, ActionTri> = {
       indexEtape: 0,
       etapes,
       receptacles: [...entree.contenu.receptacles],
-      elements: [...entree.contenu.elements],
+      elements: [...elementsMelanges],
       competence: entree.contenu.competence,
       acquis: {},
       elementSaisi: null,

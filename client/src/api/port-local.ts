@@ -205,6 +205,7 @@ function construireCandidats(
   const parId = new Map<string, Exercice>(exercices.map((e) => [e.id, e]));
   const candidats: NoeudCandidat[] = [];
   for (const noeud of noeuds) {
+    if (noeud.progression === false) continue;
     const exercice = parId.get(noeud.exercice);
     if (exercice === undefined) continue;
     candidats.push({

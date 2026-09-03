@@ -244,6 +244,8 @@ describe('moteurPlace — la règle de non-échec et la monotonie de l’aide', 
     const etat = jouer(etatNeuf(), [{ type: 'demanderAide' }]);
     expect(etat.niveauAide).toBe('indice');
     expect(etat.aide?.niveau).toBe('indice');
+    expect(etat.aide?.texte).toBe('Cherche un soleil. Pose-le dans le ciel.');
+    expect(etat.aide?.texte).not.toBe(contenu.consignes[0]?.texte);
     expect(moteurPlace.resume(etat).aideUtilisee).toBe('indice');
   });
 });

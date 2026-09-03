@@ -49,6 +49,15 @@ export function enregistrerRoutesTentatives(
 
     const validee = validation.valeur;
 
+    // Une activité libre peut réemployer un paquet de nœud pour son habillage et son moteur,
+    // jamais pour devenir une tentative pédagogique par un appel direct ou un ancien lien.
+    const noeud = await contexte.contenu.chargerNoeud(validee.noeud);
+    if (noeud?.progression === false) {
+      return reponse
+        .code(422)
+        .send(erreurApi(CODES_ERREUR.invalide, `Le nœud ${validee.noeud} est une activité libre non journalisée.`));
+    }
+
     // La cle etrangere `tentatives.profil_id -> profils(id)` refuserait de toute facon
     // l'insertion ; on prefere un 404 explicite a une erreur de contrainte SQLite.
     if (!(await profilExiste(contexte.base, validee.profil))) {

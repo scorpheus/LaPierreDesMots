@@ -40,6 +40,7 @@ import type { CodeEcran, Profil } from '@pierre/partage';
 import type { EntreeGalerie, OptionsLancement } from '@pierre/partage/parent';
 import { lirePaquetNoeud, listerProfils, marquerOuvertureVue } from './api/client.js';
 import { EcranCampement } from './ecrans/EcranCampement.js';
+import { EcranChaudron } from './ecrans/EcranChaudron.js';
 import { EcranCarte } from './ecrans/EcranCarte.js';
 import { EcranCodeParent } from './ecrans/EcranCodeParent.js';
 import { EcranCoffre } from './ecrans/EcranCoffre.js';
@@ -69,6 +70,7 @@ const CHEMIN_PAR_ECRAN: Readonly<Record<CodeEcran, string>> = {
  */
 export const CHEMINS = {
   campement: '/campement',
+  chaudron: '/chaudron',
   coffre: '/coffre',
   reglagesLecture: '/reglages-lecture',
   parent: '/parent',
@@ -257,11 +259,20 @@ function HoteCampement(): ReactElement {
       surAllerCoffre={() => {
         void naviguer({ to: CHEMINS.coffre });
       }}
+      surOuvrirChaudron={() => {
+        // Le chaudron est une activité libre du campement. Il ne passe pas par `demarrerNoeud`.
+        void naviguer({ to: CHEMINS.chaudron });
+      }}
       surRejouerOuverture={() => {
         void naviguer({ to: CHEMINS.ouverture });
       }}
     />
   );
+}
+
+function HoteChaudron(): ReactElement {
+  const naviguer = useNavigate();
+  return <EcranChaudron surRetour={() => { void naviguer({ to: CHEMINS.campement }); }} />;
 }
 
 function HoteRecompense(): ReactElement {
@@ -871,6 +882,11 @@ function construireRouteur() {
       getParentRoute: () => routeRacine,
       path: CHEMINS.campement,
       component: HoteCampement
+    }),
+    createRoute({
+      getParentRoute: () => routeRacine,
+      path: CHEMINS.chaudron,
+      component: HoteChaudron
     }),
     // ── la route de la campagne de finition v3 ─────────────────────────────────────────
     createRoute({

@@ -53,6 +53,7 @@ const RACINE_PAR_DEFAUT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 export const LOCUTEUR_DES_CONSIGNES = 'narrateur';
 export const LOCUTEUR_DES_MOTS = 'maitresse';
 export const LOCUTEUR_DU_CAMPEMENT = 'gobi';
+export const LOCUTEUR_DES_AIDES = 'gobi';
 
 /** Empreinte courte d'un texte — sert au nom de fichier (`Cache-Control: immutable`, § 8). */
 export function empreinteTexte(texte) {
@@ -401,7 +402,30 @@ export function recenser(racine = RACINE_PAR_DEFAUT) {
     }
   }
 
-  // ── 2. Le campement ───────────────────────────────────────────────────────────────────
+  // ── 2. Les cinq stratégies d'aide de Gobi ─────────────────────────────────────────────
+  // Le JSON est partagé avec le composant qui les affiche : une seule source de vérité pour
+  // le texte visible et le clip. La clé reste stable par code ; l'empreinte dans le nom de
+  // fichier invalide automatiquement un ancien rendu si une phrase change.
+  const aidesGobi = join(racine, 'client', 'src', 'composants', 'aides-gobi.json');
+  if (existsSync(aidesGobi)) {
+    const aides = lireJson(aidesGobi, illisibles);
+    if (aides !== null) {
+      sources.push('client/src/composants/aides-gobi.json');
+      for (const [code, texte] of Object.entries(aides)) {
+        if (typeof texte !== 'string' || texte.length === 0) continue;
+        objets.push({
+          cle: `aide-gobi/${code}`,
+          texte,
+          locuteur: LOCUTEUR_DES_AIDES,
+          rendu: 'normal',
+          origine: 'client/src/composants/aides-gobi.json',
+          dossier: 'aides-gobi',
+        });
+      }
+    }
+  }
+
+  // ── 3. Le campement ───────────────────────────────────────────────────────────────────
   //
   // CHOIX N2-1, consigné dans `Docs/questions-en-attente.md`. Les 11 points à réaction
   // `replique` désignent des `.opus` qui n'ont jamais existé, et le SEUL texte que le dépôt
@@ -434,7 +458,7 @@ export function recenser(racine = RACINE_PAR_DEFAUT) {
     }
   }
 
-  // ── 3. La séquence d'ouverture — N4, vague 2 ─────────────────────────────────────────
+  // ── 4. La séquence d'ouverture — N4, vague 2 ─────────────────────────────────────────
   //
   // CHOIX N2-2. Le fichier n'existe pas au moment où N2 tourne : N4 est en vague 2 et le
   // contrat de sortie de N2 ne peut pas porter sur un texte qui n'est pas écrit. Le

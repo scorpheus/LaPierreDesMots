@@ -12,6 +12,11 @@ pixels des quatre nouvelles publications et laisse intacte l’entrée Pierre d�
 Le parent a ensuite validé Filou V3 — le compromis plus soutenu entre les deux propositions — et
 les V2 de Bulle, Roc et Plume. Ils sont publiés dans `contenu/assets/compagnons/`.
 
+La carte illustrée validée est le tableau `contenu/assets/ouverture/pierre.png`. Son sujet est la
+carte complète — la Pierre au centre et les six régions qui en partent — et elle est également
+servie par l'écran « La carte du monde » en raster. Le SVG historique ne reste qu'un repli local
+si ce PNG est indisponible ; il ne doit plus recouvrir l'illustration validée.
+
 Le parent a enfin validé les cinq décors. Ils sont publiés dans `contenu/assets/decors/` sous les
 noms `ecole.png`, `tapis.png`, `brume.png`, `forge.png` et `fresque-murale.png`. Ils deviennent les
 références visuelles canoniques de leurs scènes. Leur activation dans les coloriages reste soumise

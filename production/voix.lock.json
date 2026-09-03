@@ -1,6 +1,6 @@
 {
   "$commentaire": "Reproductibilité de la chaîne voix (CLAUDE.md, « fichiers de verrou »). Tout ce qu'il faut pour refabriquer un clip à l'identique : modèle, locuteur, vitesse, transposition, empreinte du texte, score de contrôle qualité. Sans lui, la bibliothèque de voix devient un cimetière de fichiers irrégénérables.",
-  "genereLe": "2026-08-07T22:12:56.751Z",
+  "genereLe": "2026-09-02T21:40:16.571Z",
   "moteurTts": "piper/2023.11.14-2",
   "moteurQc": "faster-whisper/large-v3/cpu-int8",
   "seuilQc": 0.85,
@@ -58,14 +58,14 @@
     }
   },
   "comptes": {
-    "objetsRecenses": 649,
+    "objetsRecenses": 654,
     "occurrencesDuMotAudio": 320,
-    "clesACouvrir": 367,
-    "clipsRendus": 12,
-    "clipsReutilises": 644,
-    "clipsAuManifeste": 656,
+    "clesACouvrir": 372,
+    "clipsRendus": 5,
+    "clipsReutilises": 656,
+    "clipsAuManifeste": 661,
     "clipsRefuses": 0,
-    "clipsQcMemorises": 359,
+    "clipsQcMemorises": 371,
     "clipsRepris": 0,
     "fichiersIllisibles": 0
   },
@@ -7031,6 +7031,61 @@
       "fichier": "audio/volcan/volcan-wagons-tri-02-wagon-droite.normal.45c8cdb4.opus",
       "empreinteTexte": "45c8cdb4fb0eb15bdc64e223bded0ebd9c0270fbe7c3ab6713a6151286fe9639",
       "dureeMs": 1553,
+      "qcScore": 1,
+      "qcInstrument": "transcription-inverse",
+      "tirages": 1
+    },
+    {
+      "cle": "aide-gobi/relire-consigne",
+      "rendu": "normal",
+      "locuteur": "gobi",
+      "fichier": "audio/aides-gobi/aide-gobi-relire-consigne.normal.6e817c2f.opus",
+      "empreinteTexte": "6e817c2f8db676766abfdd1a5d0d59a3114784feeeb0a4e605227f4369a177e4",
+      "dureeMs": 4307,
+      "qcScore": 1,
+      "qcInstrument": "transcription-inverse",
+      "tirages": 1
+    },
+    {
+      "cle": "aide-gobi/souffle-syllabe",
+      "rendu": "normal",
+      "locuteur": "gobi",
+      "fichier": "audio/aides-gobi/aide-gobi-souffle-syllabe.normal.1bbba033.opus",
+      "empreinteTexte": "1bbba033f3571124c5da77b098cbc9331e1779ee01794f95cf3b87e1c121f46f",
+      "dureeMs": 3407,
+      "qcScore": 1,
+      "qcInstrument": "transcription-inverse",
+      "tirages": 1
+    },
+    {
+      "cle": "aide-gobi/surligne-graphene",
+      "rendu": "normal",
+      "locuteur": "gobi",
+      "fichier": "audio/aides-gobi/aide-gobi-surligne-graphene.normal.8134f11b.opus",
+      "empreinteTexte": "8134f11be1667ddfdcf28affebfef0daddb319826bf1420fc375b5ed8fbfd83d",
+      "dureeMs": 4007,
+      "qcScore": 1,
+      "qcInstrument": "transcription-inverse",
+      "tirages": 1
+    },
+    {
+      "cle": "aide-gobi/montre-cible",
+      "rendu": "normal",
+      "locuteur": "gobi",
+      "fichier": "audio/aides-gobi/aide-gobi-montre-cible.normal.16d5cf94.opus",
+      "empreinteTexte": "16d5cf9477b82b5124084ae8747d3498fc5fc6b7972021954897f3d03233a76f",
+      "dureeMs": 1772,
+      "qcScore": 1,
+      "qcInstrument": "transcription-inverse",
+      "tirages": 1
+    },
+    {
+      "cle": "aide-gobi/montre-couleur",
+      "rendu": "normal",
+      "locuteur": "gobi",
+      "fichier": "audio/aides-gobi/aide-gobi-montre-couleur.normal.293474c6.opus",
+      "empreinteTexte": "293474c64bb6d4e2f12621f45aaaed0df37acc88362daa27f13999c1f2ab2950",
+      "dureeMs": 3407,
       "qcScore": 1,
       "qcInstrument": "transcription-inverse",
       "tirages": 1

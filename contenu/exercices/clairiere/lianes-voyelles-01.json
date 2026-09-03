@@ -15,7 +15,7 @@
       "consignes": [
         {
           "id": "c1",
-          "texte": "Suis les mots où tu lis un a.",
+          "texte": "Suis le chemin des mots avec la lettre a.",
           "forme": "imperative",
           "audio": null,
           "depart": "depart-arbre",
@@ -24,7 +24,7 @@
         },
         {
           "id": "c2",
-          "texte": "Suis les mots où tu lis un i.",
+          "texte": "Suis le chemin des mots avec la lettre i.",
           "forme": "imperative",
           "audio": null,
           "depart": "depart-arbre",
@@ -33,7 +33,7 @@
         },
         {
           "id": "c3",
-          "texte": "Suis les mots où tu lis un o.",
+          "texte": "Suis le chemin des mots avec la lettre o.",
           "forme": "imperative",
           "audio": null,
           "depart": "depart-arbre",
@@ -42,7 +42,7 @@
         },
         {
           "id": "c4",
-          "texte": "Suis les mots où tu lis un u.",
+          "texte": "Suis le chemin des mots avec la lettre u.",
           "forme": "imperative",
           "audio": null,
           "depart": "depart-arbre",

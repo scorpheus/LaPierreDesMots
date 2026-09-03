@@ -143,6 +143,7 @@ export const ETATS: readonly EtatModele[] = [
     ]
   },
   { code: 'campement', nature: 'jouable', role: 'le campement de Gobi' },
+  { code: 'chaudron', nature: 'jouable', role: 'l’activité libre de coloriage' },
   { code: 'coffre', nature: 'jouable', role: 'les collections' },
   { code: 'ouverture', nature: 'jouable', role: 'la séquence d’ouverture (D35)' },
   { code: 'reglages-lecture', nature: 'jouable', role: 'comment je lis (D19)' },
@@ -433,6 +434,20 @@ export const TRANSITIONS: readonly TransitionModele[] = [
     vers: 'noeud',
     prise: { selecteur: '[data-pastille-sortie]' },
     motif: 'D46 — repartir en sortie depuis le campement, sans repasser par la carte'
+  },
+  {
+    depuis: 'campement',
+    vers: 'chaudron',
+    prise: { selecteur: '[data-point="chaudron"]' },
+    motif: 'R25 — ouvrir l’activité libre du chaudron depuis le campement'
+  },
+
+  // ── depuis le chaudron ──────────────────────────────────────────────────────────────
+  {
+    depuis: 'chaudron',
+    vers: 'campement',
+    prise: { selecteur: '[data-vers="campement"]' },
+    motif: 'R25 — revenir au campement depuis l’activité libre'
   },
 
   // ── depuis le coffre ──────────────────────────────────────────────────────────────────

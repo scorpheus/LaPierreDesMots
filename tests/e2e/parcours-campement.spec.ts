@@ -134,8 +134,8 @@ test.describe('parcours campement — R11', () => {
 
     await page.locator('[data-vers="campement"]').click();
     await page.locator('[data-point="chaudron"]').click();
-    await expect(page.locator('[data-ecran="noeud"]')).toBeVisible();
-    await expect(page.locator('[data-moteur="libre"]')).toBeVisible();
+    await expect(page.locator('[data-ecran="chaudron"]')).toBeVisible();
+    await expect(page.locator('[data-activite="libre"]')).toBeVisible();
   });
 
   test('Gobi porte son stade au campement, et la jauge montre le vide restant', async ({
@@ -194,7 +194,7 @@ test.describe('parcours campement — R11', () => {
 
     // Il MÈNE quelque part — c'est R25.
     await expect(
-      page.locator('[data-ecran="noeud"]'),
+      page.locator('[data-ecran="chaudron"]'),
       'le chaudron ne mène nulle part : c’est le défaut que R25 a corrigé'
     ).toBeVisible();
 

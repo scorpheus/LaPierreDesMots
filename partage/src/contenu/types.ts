@@ -37,6 +37,12 @@ export interface Noeud {
   readonly exercice: IdExercice;
   readonly prerequis: readonly IdNoeud[];
   readonly temps: TempsNoeud;
+  /**
+   * `false` réserve une fiche technique à une activité libre : elle reste chargeable par son
+   * écran dédié, mais ne peut ni composer une sortie, ni compter dans la carte ou le journal.
+   * Absent vaut `true`, afin de ne pas changer les nœuds pédagogiques déjà validés.
+   */
+  readonly progression?: boolean;
 }
 
 /** D'où vient la fiche papier dont l'exercice est tiré. Absente pour un contenu original. */

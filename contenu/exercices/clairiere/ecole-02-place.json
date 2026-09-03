@@ -1,7 +1,7 @@
 {
   "id": "clairiere-ecole-02-place",
   "version": 1,
-  "titre": "Place les objets dans la cour",
+  "titre": "Place 3 dessins dans la cour",
   "origine": { "source": "fiches-origine/NIVEAU 1.pdf", "niveau": 1, "fiche": 1 },
   "competences": ["comp.consigne.simple"],
   "difficulte": 1,
@@ -43,12 +43,12 @@
           "id": "ciel",
           "libelle": "le ciel",
           "polygone": [
-            [625, 25],
-            [755, 25],
-            [755, 115],
-            [625, 115]
+            [600, 20],
+            [760, 20],
+            [760, 95],
+            [600, 95]
           ],
-          "centroide": [690, 70],
+          "centroide": [680, 57.5],
           "relation": "dans",
           "ancre": null
         },
@@ -56,12 +56,13 @@
           "id": "toit-ecole",
           "libelle": "le toit de l’école",
           "polygone": [
-            [245, 65],
-            [335, 65],
-            [335, 145],
-            [245, 145]
+            [315, 120],
+            [425, 43],
+            [520, 125],
+            [520, 170],
+            [315, 170]
           ],
-          "centroide": [290, 105],
+          "centroide": [419, 126],
           "relation": "sur",
           "ancre": "le toit de l’école"
         },
@@ -69,12 +70,12 @@
           "id": "a-cote-du-banc",
           "libelle": "à côté du banc",
           "polygone": [
-            [250, 350],
-            [350, 350],
-            [350, 450],
-            [250, 450]
+            [70, 335],
+            [245, 335],
+            [275, 450],
+            [55, 450]
           ],
-          "centroide": [300, 400],
+          "centroide": [161, 392.5],
           "relation": "a-cote-de",
           "ancre": "le banc"
         }

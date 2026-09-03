@@ -16,6 +16,6 @@
     "tsBuildInfoFile": "./dist-types/tsconfig.tsbuildinfo",
     "rootDir": "."
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts", "vite.config.ts"],
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.json", "src/**/*.d.ts", "vite.config.ts"],
   "references": [{ "path": "../partage" }]
 }

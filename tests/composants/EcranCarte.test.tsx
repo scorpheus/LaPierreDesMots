@@ -175,6 +175,21 @@ afterEach(() => {
 });
 
 describe('une prise n’existe que si elle répond (M23)', () => {
+  it('sert la carte illustrée validée en raster, avec le SVG seulement en repli', async () => {
+    await monterEtAttendre();
+
+    const raster = document.querySelector('[data-decor-raster="carte"]');
+    expect(raster, 'la carte principale ne doit pas retomber sur le SVG historique').not.toBeNull();
+    expect(raster?.getAttribute('data-format-decor')).toBe('raster');
+    expect(raster?.querySelector('image')?.getAttribute('href')).toContain(
+      'assets/decors/carte-six-regions.png',
+    );
+    expect(document.querySelector('[data-decor="carte"][data-format-decor="svg-repli"]')).toBeNull();
+    // Les silhouettes SVG restent disponibles pour le seul repli réseau, mais ne sont plus
+    // peintes au-dessus du paysage raster.
+    expect(document.querySelector('[data-definitions-decor="carte"]')).not.toBeNull();
+  });
+
   it('rend les SIX régions, ouvertes comme voilées — aucune n’est cachée', async () => {
     await monterEtAttendre();
     const groupes = document.querySelectorAll('[data-region]');
@@ -261,6 +276,49 @@ describe('une prise n’existe que si elle répond (M23)', () => {
 });
 
 describe('la carte montre le VIDE restant (D25, point 3)', () => {
+  it('un monde sans couleur désature réellement tout le PNG et ne révèle aucun paysage', async () => {
+    const mondeInitial = mondeDeTest();
+    mondeServi = {
+      ...mondeInitial,
+      carte: {
+        ...mondeInitial.carte,
+        regions: mondeInitial.carte.regions.map((region) => ({
+          ...region,
+          pourcentageColorie: 0,
+          eclatObtenuLe: null
+        }))
+      }
+    };
+    await monterEtAttendre();
+
+    const grisaille = document.querySelector('[data-carte-grisaille="totale"]');
+    expect(grisaille?.getAttribute('filter')).toBe('url(#carte-raster-grisaille)');
+    expect(document.querySelectorAll('[data-revelation-region]')).toHaveLength(0);
+  });
+
+  it('la couleur réapparaît uniquement dans les régions progressées, aux ancres du raster', async () => {
+    await monterEtAttendre();
+
+    expect(
+      document
+        .querySelector('[data-revelation-region="clairiere"]')
+        ?.getAttribute('data-revelation-pourcentage')
+    ).toBe('1.00');
+    expect(
+      document
+        .querySelector('[data-revelation-region="galeries"]')
+        ?.getAttribute('data-revelation-pourcentage')
+    ).toBe('0.40');
+    expect(document.querySelectorAll('[data-revelation-region]')).toHaveLength(2);
+    expect(document.querySelector('[data-region="clairiere"]')?.getAttribute('data-ancre-raster'))
+      .toBe('600,470');
+    expect(document.querySelector('[data-region="galeries"]')?.getAttribute('data-ancre-raster'))
+      .toBe('990,560');
+    expect(
+      document.querySelector('[data-region="marais-jumeau"]')?.getAttribute('data-ancre-raster')
+    ).toBe('1040,370');
+  });
+
   it('l’état de chaque région suit le monde servi, il n’est pas peint en dur', async () => {
     await monterEtAttendre();
     const etats = new Map(

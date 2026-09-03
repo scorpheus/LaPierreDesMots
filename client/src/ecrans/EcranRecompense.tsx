@@ -355,7 +355,7 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
           <span className="recompense-eclat recompense-eclat--un">✦</span>
           <span className="recompense-eclat recompense-eclat--deux">✦</span>
           <span className="recompense-eclat recompense-eclat--trois">✦</span>
-          <img src={urlAsset('assets/gobi/animation/joie.svg')} alt="" draggable={false} />
+          <img src={urlAsset('assets/gobi/animation/joie.webp')} alt="" draggable={false} />
         </div>
 
         <div className="recompense-texte" data-texte-recompense="immobile">
@@ -407,27 +407,19 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
       {resume === null ? null : (
         <ul
           data-detail-etoiles="oui"
-          style={{
-            listStyle: 'none',
-            margin: 0,
-            padding: '0.75rem 1rem',
-            display: 'grid',
-            gap: '0.4rem',
-            justifyItems: 'start',
-            maxInlineSize: '34rem'
-          }}
+          className="recompense-detail-etoiles"
         >
           {detailDesEtoiles(resume).map((ligne) => (
             <li
               key={ligne.rang}
               data-etoile-detail={String(ligne.rang)}
               data-acquise={ligne.acquise ? 'oui' : 'non'}
-              style={{ display: 'flex', alignItems: 'baseline', gap: '0.6rem' }}
+              className="recompense-detail-etoile"
             >
-              <span aria-hidden="true" style={{ fontSize: '1.4rem', opacity: ligne.acquise ? 1 : 0.35 }}>
+              <span aria-hidden="true" className="recompense-detail-signe">
                 ★
               </span>
-              <span style={{ opacity: ligne.acquise ? 1 : 0.8 }}>{ligne.texte}</span>
+              <span className="recompense-detail-texte">{ligne.texte}</span>
             </li>
           ))}
         </ul>
@@ -445,41 +437,41 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
           nombre en dur (convention C2). */}
       <CascadeRecompense gain={dernierGain} />
 
-      <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+      <div className="actions-recompense" data-actions-recompense="oui">
         {/* L'APPEL PRINCIPAL, quand il reste quelque chose à faire. « Rejouer » perd sa classe
             d'appel dans ce cas : c'est « continuer » que l'enfant doit voir en premier, et
             deux boutons qui appellent également n'appellent plus. */}
         {suivant === null ? null : (
           <button
             type="button"
-            className="cible cible-appel"
+            className="cible action-recompense action-recompense--principale"
             data-action="exercice-suivant"
             data-noeud-suivant={String(suivant)}
             disabled={chargementSuivant}
             onClick={allerAuSuivant}
           >
-            {chargementSuivant ? 'On y va…' : 'Exercice suivant'}
+            {chargementSuivant ? 'On y va…' : 'On y va !'}
           </button>
         )}
         {finDeSortie ? (
           <button
             type="button"
-            className="cible cible-appel"
+            className="cible action-recompense action-recompense--principale"
             data-action="fin-sortie"
             onClick={terminerSortie}
           >
-            Retour au campement
+            Au campement !
           </button>
         ) : null}
         <button
           type="button"
-          className={suivant === null && !finDeSortie ? 'cible cible-appel' : 'cible'}
+          className={`cible action-recompense${suivant === null && !finDeSortie ? ' action-recompense--principale' : ''}`}
           onClick={rejouer}
         >
-          Rejouer
+          Encore une fois
         </button>
-        <button type="button" className="cible" onClick={retourCarte}>
-          Retour à la carte
+        <button type="button" className="cible action-recompense" onClick={retourCarte}>
+          Voir la carte
         </button>
       </div>
     </main>

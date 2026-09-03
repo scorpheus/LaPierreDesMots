@@ -6791,6 +6791,12 @@ compétence à part entière — auquel cas un exercice doit la porter en positi
 **étiquette descriptive**, auquel cas elle n'a rien à faire dans `competences` et devrait vivre
 ailleurs dans le schéma.
 
+**Mise à jour du 2026-09-03 — `gn` résolu.** La recette détaillée de `volcan-05` a établi que
+sa consigne et son parcours portent exclusivement sur « gn » : la valeur
+`jeu.contenu.competence = gph.rare.ill` était une incohérence de fiche. Elle vaut maintenant
+`gph.rare.gn`, qui reçoit donc un vrai canal de journalisation. L'arbitrage reste ouvert pour
+`gph.rare.ph` et `comp.consigne.multiple`.
+
 ## S3-Q2 — « Partir en sortie » ne sait proposer que 10 nœuds sur 76, et quatre régions sur six lui répondent 409
 
 C'est le point le plus lourd trouvé par ce lot, et il n'appartient pas au contenu seul.
@@ -7335,13 +7341,13 @@ Recensement par OBJET sur les 76 exercices :
 
 ```
 compétences distinctes déclarées        : 29
-  jamais en position 0                  :  3
+  jamais en position 0                  :  2
   ... nommées par une confusion         :  0
-  ... AFFAMÉES (aucune réussite jamais) :  3   comp.consigne.multiple · gph.rare.gn · gph.rare.ph
+  ... AFFAMÉES (aucune réussite jamais) :  2   comp.consigne.multiple · gph.rare.ph
 ```
 
 Et `tests/unitaires/moteurs-couverture.test.ts:70` compte une compétence comme couverte dès qu'un
-exercice la **déclare**, à n'importe quelle position. **Les trois sont donc vertes pour R12 avec un
+exercice la **déclare**, à n'importe quelle position. **Les deux sont donc vertes pour R12 avec un
 journal vide pour toujours** : BKT et Leitner ne les verront jamais monter.
 
 **Je n'ai pas corrigé le code, et c'est délibéré.** Changer l'imputation — répartir une réussite

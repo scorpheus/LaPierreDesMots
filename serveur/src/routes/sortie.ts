@@ -50,13 +50,14 @@ interface ParametresProfil {
  * Une difficulte inventee a 1 ferait de ce noeud un echauffement plausible, et l'enfant
  * ouvrirait sa sortie sur un exercice dont personne ne sait ce qu'il vaut.
  */
-function construireCandidats(
-  noeuds: readonly { id: string; region: string; exercice: string; temps: string }[],
+export function construireCandidats(
+  noeuds: readonly { id: string; region: string; exercice: string; temps: string; progression?: boolean }[],
   exercices: readonly Exercice[]
 ): readonly NoeudCandidat[] {
   const parId = new Map<string, Exercice>(exercices.map((e) => [e.id, e]));
   const candidats: NoeudCandidat[] = [];
   for (const noeud of noeuds) {
+    if (noeud.progression === false) continue;
     const exercice = parId.get(noeud.exercice);
     if (exercice === undefined) {
       continue;

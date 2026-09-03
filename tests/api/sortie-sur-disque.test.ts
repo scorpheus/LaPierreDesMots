@@ -326,8 +326,52 @@ describe('un profil NEUF peut partir en sortie dans les régions qui lui sont ou
   });
 });
 
-describe('LA MARCHE — les 76 nœuds livrés sont joués, dans l’ordre, sur le dépôt de disque', () => {
-  it('chaque nœud est jouable, chaque région finit par offrir une sortie', async () => {
+describe('le chaudron est une activité libre, jamais un exercice de progression', () => {
+  it('est exclu de la carte et le serveur refuse toute tentative qui voudrait le journaliser', async () => {
+    const noeud = lireJson<NoeudLu & { readonly progression?: boolean }>('contenu/noeuds/galeries-12.json');
+    const regions = lireJson<{
+      readonly regions: readonly { readonly region: string; readonly noeuds: readonly string[] }[];
+    }>('contenu/monde/regions.json');
+    const exercice = lireJson<ExerciceLu>('contenu/exercices/galeries/paroi-libre-01.json');
+
+    // La fiche reste l'alimentation technique de `/chaudron`, mais elle ne doit plus compter
+    // parmi les nœuds pédagogiques ni devenir une récompense par un appel direct à l'API.
+    expect(noeud.progression).toBe(false);
+    expect(regions.regions.flatMap((region) => region.noeuds)).not.toContain(noeud.id);
+
+    const profil = await creerProfil('Chaudron');
+    const reponse = await contexte.application.inject({
+      method: 'POST',
+      url: '/api/tentatives',
+      payload: {
+        cleIdempotence: 'chaudron-libre-non-journalise-'.padEnd(64, '0'),
+        profil,
+        noeud: noeud.id,
+        exercice: exercice.id,
+        moteur: exercice.jeu.moteur,
+        habillage: exercice.jeu.habillage,
+        graine: 424_242,
+        demarreLe: INSTANT_DE_REFERENCE,
+        termineLe: '2026-08-01T09:01:00.000Z',
+        resume: {
+          reussi: true,
+          nbErreurs: 0,
+          aideUtilisee: 'aucune',
+          dureeMs: 60_000,
+          etapes: [],
+        },
+      },
+    });
+
+    expect(reponse.statusCode, reponse.body).toBe(422);
+    const journal = contexte.base.prepare('SELECT COUNT(*) AS n FROM tentatives WHERE noeud_id = ?')
+      .get(noeud.id) as { n: number };
+    expect(journal.n, 'le chaudron libre a écrit une tentative pédagogique').toBe(0);
+  });
+});
+
+describe('LA MARCHE — les nœuds de progression livrés sont joués, dans l’ordre, sur le dépôt de disque', () => {
+  it('chaque nœud de progression est jouable, chaque région finit par offrir une sortie', async () => {
     // ⚠ CE CAS NE LIT PAS LE CONTENU POUR LE JUGER : il le JOUE. C'est la seule mesure qui
     // réponde à « le contenu nouveau est-il atteignable ? », et elle a trouvé le défaut du
     // référentiel que la lecture n'avait pas vu.
@@ -339,7 +383,8 @@ describe('LA MARCHE — les 76 nœuds livrés sont joués, dans l’ordre, sur l
     const profil = await creerProfil('Marche');
     const noeuds = readdirSync(join(RACINE_DEPOT, 'contenu', 'noeuds'))
       .filter((f) => f.endsWith('.json'))
-      .map((f) => lireJson<NoeudLu>(`contenu/noeuds/${f}`));
+      .map((f) => lireJson<NoeudLu & { readonly progression?: boolean }>(`contenu/noeuds/${f}`))
+      .filter((noeud) => noeud.progression !== false);
     const exercices = new Map(
       readdirSync(join(RACINE_DEPOT, 'contenu', 'exercices'), {
         recursive: true,

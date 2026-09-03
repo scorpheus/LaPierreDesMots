@@ -13,7 +13,7 @@
 // Usage :  node scripts/demarrer.mjs [--dev] [--port 8080] [--sans-construire]
 
 import { spawn } from 'node:child_process';
-import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -133,9 +133,35 @@ function verifierInstallation() {
 
 // ---------------------------------------------------------------- construction
 
-/** @param {string} chemin @returns {boolean} */
-function absent(chemin) {
-  return !existsSync(join(RACINE, chemin));
+/**
+ * Renvoie le fichier le plus récent d'une arborescence. Les dossiers de sortie sont exclus :
+ * leur propre écriture ne doit évidemment pas déclencher une nouvelle construction.
+ * @param {string} cheminRelatif
+ * @returns {number}
+ */
+function dateLaPlusRecente(cheminRelatif) {
+  const chemin = join(RACINE, cheminRelatif);
+  if (!existsSync(chemin)) return 0;
+  const etat = statSync(chemin);
+  if (!etat.isDirectory()) return etat.mtimeMs;
+
+  let plusRecente = etat.mtimeMs;
+  for (const entree of readdirSync(chemin, { withFileTypes: true })) {
+    if (entree.name === 'dist' || entree.name === 'node_modules') continue;
+    plusRecente = Math.max(
+      plusRecente,
+      dateLaPlusRecente(join(cheminRelatif, entree.name)),
+    );
+  }
+  return plusRecente;
+}
+
+/** @param {string} sortie @param {string[]} entrees */
+function constructionPerimee(sortie, entrees) {
+  const cheminSortie = join(RACINE, sortie);
+  if (!existsSync(cheminSortie)) return true;
+  const dateSortie = statSync(cheminSortie).mtimeMs;
+  return entrees.some((entree) => dateLaPlusRecente(entree) > dateSortie);
 }
 
 /**
@@ -151,18 +177,32 @@ async function construireSiNecessaire(options) {
 
   // `partage/` est requis dans les deux modes : `serveur/` s'exécute sur `partage/dist/`
   // (contrat § 3.2), y compris quand le client est servi par Vite.
-  if (absent('partage/dist/index.js')) {
+  if (constructionPerimee('partage/dist/index.js', ['partage/src', 'partage/package.json'])) {
     etape('Compilation de partage…');
     await executer('npm', ['run', 'construire', '-w', '@pierre/partage']);
   }
 
   if (options.dev) return;
 
-  if (absent('serveur/dist/index.js')) {
+  if (
+    constructionPerimee('serveur/dist/index.js', [
+      'serveur/src',
+      'serveur/package.json',
+      'partage/dist/index.js',
+    ])
+  ) {
     etape('Compilation du serveur…');
     await executer('npm', ['run', 'construire', '-w', '@pierre/serveur']);
   }
-  if (absent('client/dist/index.html')) {
+  if (
+    constructionPerimee('client/dist/index.html', [
+      'client/src',
+      'client/index.html',
+      'client/package.json',
+      'client/vite.config.ts',
+      'partage/dist/index.js',
+    ])
+  ) {
     etape('Compilation du client…');
     await executer('npm', ['run', 'construire', '-w', '@pierre/client']);
   }

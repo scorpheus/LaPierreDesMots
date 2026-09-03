@@ -21,7 +21,7 @@
  * sortie, jamais affecté », et il est invisible au compilateur comme à la relecture.
  *
  * Ce fichier passe donc par le CHEMIN DE L'ENFANT — profil, campement, tap — sans injecter quoi
- * que ce soit, et exige d'arriver dans un nœud.
+ * que ce soit, et exige d'arriver dans l'activité libre du chaudron.
  * ══════════════════════════════════════════════════════════════════════════════════════════════
  */
 import { readFileSync } from "node:fs";
@@ -63,7 +63,7 @@ test.describe("R25 — le chaudron ouvre le coloriage libre", () => {
     ).toBe("campement.chaudron");
   });
 
-  test("LE DÉFAUT CORRIGÉ — taper le chaudron mène à un nœud, par le chemin de l’enfant", async ({
+  test("LE CHAUDRON EST UNE ACTIVITÉ LIBRE — par le chemin de l’enfant", async ({
     page,
   }) => {
     // AUCUNE injection : ni `surOuvrirChaudron`, ni `allerAuNoeud`. C'est précisément le
@@ -77,11 +77,7 @@ test.describe("R25 — le chaudron ouvre le coloriage libre", () => {
     await expect(chaudron, "le chaudron n’offre aucun bouton").toBeVisible();
     await chaudron.click();
 
-    await expect(
-      page.locator('[data-ecran="noeud"]'),
-      "taper le chaudron n’a mené nulle part : c’est exactement le défaut de R25, " +
-        "un rappel déclaré et jamais fourni",
-    ).toBeVisible();
+    await expect(page.locator('[data-ecran="chaudron"][data-activite="libre"]')).toBeVisible();
   });
 
   test("et c’est bien un coloriage SANS consigne — la sortie de secours, pas un exercice de plus", async ({
@@ -94,7 +90,7 @@ test.describe("R25 — le chaudron ouvre le coloriage libre", () => {
     await choisirLeProfil(page);
     await page.locator('[data-vers="campement"]').click();
     await page.locator("[data-chaudron] button").click();
-    await expect(page.locator('[data-moteur="libre"]')).toBeVisible();
+    await expect(page.locator('[data-ecran="chaudron"] [data-moteur="libre"]')).toBeVisible();
   });
 
   test("AUCUN écran d’échec sur ce chemin (R14)", async ({ page }) => {
@@ -102,7 +98,7 @@ test.describe("R25 — le chaudron ouvre le coloriage libre", () => {
     await choisirLeProfil(page);
     await page.locator('[data-vers="campement"]').click();
     await page.locator("[data-chaudron] button").click();
-    await expect(page.locator('[data-ecran="noeud"]')).toBeVisible();
+    await expect(page.locator('[data-ecran="chaudron"]')).toBeVisible();
 
     const texte = ((await page.locator("body").textContent()) ?? "").toLowerCase();
     for (const interdit of ["erreur", "raté", "échec", "perdu", "mijote encore"]) {

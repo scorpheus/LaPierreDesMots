@@ -125,6 +125,19 @@ afterEach(() => {
 });
 
 describe('R11 comptée dans le DOM', () => {
+  it('présente la carte, le coffre et l’histoire comme des cartes illustrées, pas comme une barre technique', () => {
+    monter({ surRejouerOuverture: vi.fn() });
+
+    for (const destination of ['carte', 'coffre', 'ouverture']) {
+      const action = document.querySelector<HTMLElement>(`[data-vers="${destination}"]`);
+      expect(action, `${destination} manque dans la barre du campement`).not.toBeNull();
+      expect(action?.classList.contains('action-campement')).toBe(true);
+      expect(action?.querySelector('[aria-hidden="true"]')).not.toBeNull();
+      expect(action?.querySelector('[data-illustration-campement]')).not.toBeNull();
+      expect(action?.querySelector('[data-action-campement-texte="detail"]')).not.toBeNull();
+    }
+  });
+
   it('ouvre les destinations utiles directement depuis leur dessin', () => {
     const allerCarte = vi.fn();
     const allerCoffre = vi.fn();
@@ -248,6 +261,13 @@ describe('le campement montre le monde sans jamais le cacher', () => {
   it('affiche le stade de Gobi sur la racine du composant', () => {
     monter();
     expect(document.querySelector('[data-stade-gobi="crete"]')).not.toBeNull();
+    const dessin = document.querySelector('[data-dessin-gobi-raster]');
+    expect(dessin?.getAttribute('data-dessin-gobi-raster')).toBe(
+      'assets/gobi/stades/stade-5.webp',
+    );
+    expect(dessin?.querySelector('image')?.getAttribute('href')).toContain(
+      'assets/gobi/stades/stade-5.webp',
+    );
   });
 
   it('porte le cristal de la forme active, et non un second corps (D20)', () => {

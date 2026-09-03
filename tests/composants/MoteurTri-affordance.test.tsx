@@ -109,6 +109,14 @@ describe('R16 — l’enfant VOIT qu’il a quelque chose en main', () => {
     ).not.toBe(avant);
   });
 
+  it('un tap tactile (pointerdown/pointerup) prend le mot sans exiger un glisser', () => {
+    const { container } = render(<Harnais />);
+    const element = premierElement(container);
+    fireEvent.pointerDown(element, { pointerId: 1, clientX: 10, clientY: 10 });
+    fireEvent.pointerUp(element, { pointerId: 1, clientX: 10, clientY: 10 });
+    expect(element.getAttribute('data-saisi')).toBe('oui');
+  });
+
   it('la phrase décrit LE PROCHAIN GESTE, pas la règle générale', () => {
     const { container } = render(<Harnais />);
     const phrase = (): Element | null => container.querySelector('[data-consigne-geste]');

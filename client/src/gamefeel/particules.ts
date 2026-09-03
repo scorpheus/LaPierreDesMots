@@ -146,8 +146,17 @@ function animer(
   couleur: string
 ): void {
   const vivantes = [...particules];
+  const generation = generationParticules;
 
   const frame = (): void => {
+    // Le canevas peut avoir été démonté ou affecté à un autre écran entre deux frames.
+    // Dans ce cas, la gerbe ne doit ni continuer à travailler ni réapparaître sur le nouvel écran.
+    if (
+      generation !== generationParticules ||
+      (canevasCourant !== null && canevasCourant !== canevas)
+    ) {
+      return;
+    }
     const maintenant = performanceMs();
     contexte.clearRect(0, 0, canevas.width, canevas.height);
 
@@ -196,12 +205,27 @@ function animer(
 // gerbes pour un seul doigt.
 
 let canevasCourant: HTMLCanvasElement | null = null;
+let generationParticules = 0;
+
+/** Interrompt la gerbe courante et efface son canevas avant de changer d’écran. */
+export function effacerParticules(): void {
+  generationParticules += 1;
+  const canevas = canevasCourant;
+  if (canevas === null) return;
+  const contexte = typeof canevas.getContext === 'function' ? canevas.getContext('2d') : null;
+  contexte?.clearRect(0, 0, canevas.width, canevas.height);
+  canevas.setAttribute(ATTRIBUT_COMPTE, '0');
+}
 
 /** Appelé par `<Particules>` au montage. Rend la fonction de désinscription. */
 export function enregistrerCanevas(canevas: HTMLCanvasElement): () => void {
+  if (canevasCourant !== null && canevasCourant !== canevas) {
+    effacerParticules();
+  }
   canevasCourant = canevas;
   return () => {
     if (canevasCourant === canevas) {
+      effacerParticules();
       canevasCourant = null;
     }
   };

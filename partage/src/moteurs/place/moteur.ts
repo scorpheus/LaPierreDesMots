@@ -97,6 +97,33 @@ function cibleDeDemonstration(consigne: EtatConsignePlace): string | null {
 }
 
 /**
+ * Un indice de placement doit faire avancer l'enfant. Relire toute la consigne ne distingue
+ * pas l'objet à choisir de l'endroit où le poser, surtout quand cinq cartes sont visibles.
+ * Les identifiants viennent du contenu validé ; ils sont rendus lisibles ici sans inventer de
+ * nouveau vocabulaire pédagogique.
+ */
+function texteAidePlace(consigne: EtatConsignePlace, niveau: NiveauAide): string | null {
+  const depot = consigne.depotsRestants[0];
+  if (depot === undefined) return null;
+  const identifiantObjet = depot.element.replaceAll('-', ' ');
+  const texte = consigne.texte.replace(/[.!?]\s*$/u, '');
+  const indexObjet = texte.toLocaleLowerCase().indexOf(identifiantObjet.toLocaleLowerCase());
+  const avantObjet =
+    indexObjet < 0
+      ? ''
+      : (/(?:un|une|le|la|les|des)\s*$/iu.exec(texte.slice(0, indexObjet))?.[0]?.trim() ?? '');
+  const objet = `${avantObjet === '' ? 'le' : avantObjet} ${identifiantObjet}`;
+  const zone =
+    indexObjet < 0
+      ? depot.zone.replaceAll('-', ' ')
+      : texte.slice(indexObjet + identifiantObjet.length).trim();
+  if (niveau === 'indice') {
+    return `Cherche ${objet}. Pose-le ${zone}.`;
+  }
+  return `Regarde ${zone}. C’est ici que va ${objet}.`;
+}
+
+/**
  * Fait mûrir les seuils d'inactivité et d'erreurs. Appelée après CHAQUE action, pas
  * seulement sur `battementHorloge` : une 2ᵉ erreur doit déclencher l'indice immédiatement.
  *
@@ -142,7 +169,11 @@ function appliquerPaliers(etat: EtatPlace, instant: number): EtatPlace {
     ...etat,
     consignes: remplacerConsigne(etat.consignes, etat.indexConsigne, majConsigne),
     niveauAide: aideLaPlusHaute(etat.niveauAide, niveau),
-    aide: construireAide(niveau, cibleDeDemonstration(majConsigne), null),
+    aide: construireAide(
+      niveau,
+      cibleDeDemonstration(majConsigne),
+      texteAidePlace(majConsigne, niveau),
+    ),
   };
 }
 
@@ -151,6 +182,7 @@ function creerEtat(entree: EntreeMoteur<ContenuPlace>): EtatPlace {
   const consignes: readonly EtatConsignePlace[] = entree.contenu.consignes.map(
     (consigne, index): EtatConsignePlace => ({
       id: consigne.id,
+      texte: consigne.texte,
       depotsRestants: [...consigne.depots],
       nbErreurs: 0,
       niveauAide: 'aucune',
@@ -355,7 +387,11 @@ function reduire(etat: EtatPlace, action: ActionPlace, contexte: ContexteMoteur)
         ...etat,
         consignes: remplacerConsigne(etat.consignes, etat.indexConsigne, majConsigne),
         niveauAide: aideLaPlusHaute(etat.niveauAide, niveau),
-        aide: construireAide(niveau, cibleDeDemonstration(majConsigne), null),
+        aide: construireAide(
+          niveau,
+          cibleDeDemonstration(majConsigne),
+          texteAidePlace(majConsigne, niveau),
+        ),
       };
     }
 

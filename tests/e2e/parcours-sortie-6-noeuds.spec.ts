@@ -103,8 +103,11 @@ function exerciceParNoeud(): ReadonlyMap<string, string> {
       id: string;
       region: string;
       exercice: string;
+      progression?: boolean;
     };
-    if (String(noeud.region) === REGION) table.set(String(noeud.id), String(noeud.exercice));
+    if (String(noeud.region) === REGION && noeud.progression !== false) {
+      table.set(String(noeud.id), String(noeud.exercice));
+    }
   }
   return table;
 }

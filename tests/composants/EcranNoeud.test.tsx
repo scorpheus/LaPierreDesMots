@@ -119,6 +119,20 @@ afterEach(() => {
 });
 
 describe('l’écran du nœud a une sortie, et elle mène ailleurs (M2)', () => {
+  it('donne une stratégie visible différente de la consigne, sans recycler son clip audio', () => {
+    monter();
+    const consigne = document.querySelector('[data-consigne="c1"]')?.textContent?.trim();
+
+    fireEvent.click(document.querySelector('[data-action="aide"]')!);
+
+    const gobi = document.querySelector('[data-gobi-dit="aide"]');
+    const texteAide = gobi?.querySelector('.gobi-bulle p')?.textContent?.trim();
+    expect(gobi?.getAttribute('data-aide-source')).toBe('strategie');
+    expect(gobi?.getAttribute('data-aide-code')).toBe('relire-consigne');
+    expect(texteAide).not.toBe(consigne);
+    expect(gobi?.querySelector('[data-action="ecouter"]')).toBeNull();
+  });
+
   it('rend le nœud, et non l’écran d’attente, dès que le paquet est posé', () => {
     monter();
     expect(document.querySelector('[data-ecran="noeud"]')).not.toBeNull();

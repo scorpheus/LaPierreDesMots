@@ -101,6 +101,9 @@ describe('le garde refuse l’état historique, celui-là même qui est réappar
   );
 
   const idsLivres = noeudsLivres.map((noeud) => noeud.donnees.id).sort();
+  const nbNoeudsDeProgression = noeudsLivres.filter(
+    (noeud) => (noeud.donnees as NoeudSurDisque & { readonly progression?: boolean }).progression !== false
+  ).length;
 
   /** Le document RÉEL, lu sur disque. */
   const documentReel = lireJson<{
@@ -135,10 +138,10 @@ describe('le garde refuse l’état historique, celui-là même qui est réappar
       .filter((anomalie) => anomalie.regle === regles['NOEUD_INVISIBLE'])
       .map((anomalie) => anomalie.ou);
 
-    expect(invisibles).toHaveLength(idsLivres.length - 1);
+    expect(invisibles).toHaveLength(nbNoeudsDeProgression - 1);
     expect(rapport.nbNoeudsCites).toBe(1);
-    expect(rapport.nbNoeudsSurDisque).toBe(idsLivres.length);
-    expect(rapport.ecart).toBe(1 - idsLivres.length);
+    expect(rapport.nbNoeudsSurDisque).toBe(nbNoeudsDeProgression);
+    expect(rapport.ecart).toBe(1 - nbNoeudsDeProgression);
   });
 
   it('les six nœuds des Galeries omis : l’écart est nommé région par région', () => {
@@ -196,7 +199,7 @@ describe('le garde refuse l’état historique, celui-là même qui est réappar
     });
 
     expect(declenchees(rapport)).toEqual([regles['NOEUD_CITE_DEUX_FOIS']]);
-    expect(rapport.nbNoeudsSurDisque).toBe(idsLivres.length);
+    expect(rapport.nbNoeudsSurDisque).toBe(nbNoeudsDeProgression);
   });
 
   it('un nœud qui invente une septième région est refusé', () => {
@@ -229,7 +232,7 @@ describe('le garde refuse l’état historique, celui-là même qui est réappar
     });
 
     expect(declenchees(rapport)).toEqual([regles['EXERCICE_ABSENT']]);
-    expect(rapport.anomalies).toHaveLength(idsLivres.length);
+    expect(rapport.anomalies).toHaveLength(nbNoeudsDeProgression);
   });
 
   it('deux nœuds au même rang dans une région sont refusés : la reprise deviendrait arbitraire', () => {

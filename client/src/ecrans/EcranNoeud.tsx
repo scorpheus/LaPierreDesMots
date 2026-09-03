@@ -385,10 +385,9 @@ export function EcranNoeud(): ReactElement {
   const indexCourant = progression?.etapeCourante ?? 0;
   const etapeCourante = etapes[indexCourant] ?? null;
 
-  // R46 — ce que Gobi dit, et le clip qui le dit. Voir `composants/aide-de-gobi.ts` pour le
-  // détail du défaut et des trois issues. Résolu ici parce que c'est ici, et nulle part
-  // ailleurs, que se rencontrent l'aide du moteur, la consigne courante et l'identifiant
-  // d'exercice dont la clé de manifeste est faite.
+  // L'aide est résolue ici : la coquille connaît l'étape, mais ne détourne plus son clip de
+  // consigne. Voir `composants/aide-de-gobi.ts` : une stratégie visible sans clip vaut mieux
+  // qu'une phrase affichée différente de celle qui serait entendue.
   const aideDeGobi = resoudreAideDeGobi(aide, etapeCourante, paquet.exercice.id);
 
   // La jauge du palier intermédiaire — « trois étoiles sur cinq » (D25, point 3). C'est celle
@@ -465,7 +464,7 @@ export function EcranNoeud(): ReactElement {
         <div style={{ flex: '1 1 auto' }}>
           {etapeSortie === null || sortie === null ? null : (
             <p data-progression-sortie style={{ margin: '0 0 0.4rem', fontWeight: 700 }}>
-              Étape {String(rangSortie + 1)} sur {String(sortie.etapes.length)} de ta sortie
+              Exercice {String(rangSortie + 1)} sur {String(sortie.etapes.length)}
             </p>
           )}
           {etapes.map((etape, index) => {
@@ -565,11 +564,9 @@ export function EcranNoeud(): ReactElement {
           écrit dans `MoteurAssemble.tsx` pour le bouton « écouter », et il vaut mot pour mot
           pour l'aide : « seul l'écran le connaît ».
 
-          La clé est construite exactement comme celle de la barre de consigne, dix lignes plus
-          haut : `<idExercice>/<idConsigne>`. Ce n'est pas une coïncidence, c'est le point —
-          Gobi RELIT la consigne, donc il joue le clip de la consigne. Couverture mesurée sur
-          le manifeste livré : 286 consignes, 286 clips `normal`, taux 1.000. Zéro clip à
-          produire pour que « ? Gobi » devienne audible sur les quatorze moteurs. */}
+          La consigne et l'aide sont deux textes différents. La première garde son clip narrateur
+          dans la barre du haut ; l'aide ne réutilise pas ce clip. Les stratégies Gobi restent
+          visuelles tant que leurs cinq clips dédiés ne sont pas produits et validés. */}
       <Gobi
         aide={aide}
         niveau={niveauAide}

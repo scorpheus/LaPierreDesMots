@@ -2,6 +2,26 @@
   "$commentaire": "Premières entrées du verrou d’assets. Les champs indisponibles du générateur intégré sont explicitement nuls plutôt qu’inventés.",
   "assets": [
     {
+      "id": "decor.carte-six-regions.v1",
+      "fichier": "contenu/assets/decors/carte-six-regions.png",
+      "empreinte": "sha256:621CD0C38814F0AE190B6C4C2DA7FCC0B82131AB63F9AA9D93882E0450B41E27",
+      "generation": {
+        "outil": "image_gen intégré",
+        "workflow": "édition précise d'objet",
+        "graine": null,
+        "prompt": "Fondre le glacier nord-ouest et la montagne-lac nord dans un arrière-plan brumeux non jouable, puis retirer entièrement leurs deux routes de gemmes cyan et vertes ; préserver strictement les six régions restantes et la Pierre.",
+        "source": "contenu/brouillons/decors/carte-six-regions-v2.png"
+      },
+      "qc": {
+        "technique": "ok — PNG 1536 × 1024, empreinte enregistrée",
+        "semantique": "deux faux territoires et leurs routes orphelines retirés après retour parent ; six destinations conservées",
+        "integration": "réservé à la carte ; l'image d'ouverture reste inchangée",
+        "tentatives": 2
+      },
+      "valide_par": "retour parent sur la suppression des deux zones surnuméraires",
+      "valide_le": "2026-09-02"
+    },
+    {
       "id": "ouverture.pierre.v1",
       "fichier": "contenu/assets/ouverture/pierre.png",
       "empreinte": "sha256:577BF1088DBCDF534785946E736C944FF30F579B02BCB1BC769E8937B614B69F",
@@ -296,7 +316,7 @@
     {
       "id": "decor.ecole.v3",
       "fichier": "contenu/assets/decors/ecole.png",
-      "empreinte": "sha256:E53A98E3CA7F1335E5D40355BA0DDA10C553AAFBE9FCC7E50F02D4912F0400C7",
+      "empreinte": "sha256:861C101D22618A3693F1C676C131B453F2CCEC8405682EF86ED11408B1E87AD9",
       "generation": {
         "outil": "générateur d’images intégré à Codex",
         "workflow": null,
@@ -305,16 +325,16 @@
         "resolution": [1536, 1024],
         "prompt": null,
         "source_prompt": "Le verbatim original n’est pas embarqué ; le socle et la variante fidèles sont consignés dans Docs/production-visuelle-vague-2026-09-02.md.",
-        "source": "contenu/brouillons/decors/ecole-v3.png"
+        "source": "contenu/brouillons/decors/ecole-visage-sans-ballon-v1.png"
       },
       "qc": {
         "technique": "ok — PNG RGB 1536 × 1024, ratio 3:2",
-        "semantique": "validé comme référence visuelle ; activation coloriage soumise à la porte mot/objet",
-        "integration": "publié comme canonique visuel, embarqué dans l’APK",
-        "tentatives": 3
+        "semantique": "validé : maîtresse avec visage accueillant et ballon pré-peint retiré",
+        "integration": "publié comme canonique visuel de l’exercice de placement, embarqué dans l’APK",
+        "tentatives": 4
       },
       "valide_par": "parent",
-      "valide_le": "2026-09-02"
+      "valide_le": "2026-09-03"
     },
     {
       "id": "decor.tapis.v2",

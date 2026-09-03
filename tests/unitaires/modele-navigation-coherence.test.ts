@@ -137,10 +137,11 @@ describe('l’audit du modèle se déclenche vraiment', () => {
       .filter((anomalie) => anomalie.regle === REGLES_MODELE.ETAT_INATTEIGNABLE)
       .map((anomalie) => anomalie.ou)
       .sort();
-    // Le coffre tombe avec lui : sans campement NI visite, plus aucun chemin ne l'atteint.
+    // Le coffre et le chaudron tombent avec lui : sans campement NI visite, plus aucun chemin
+    // ne les atteint.
     // C'est ce que « atteignable » veut dire, et un audit qui ne le verrait pas ne servirait
     // à rien.
-    expect(nommes).toEqual(['campement', 'coffre']);
+    expect(nommes).toEqual(['campement', 'chaudron', 'coffre']);
   });
 
   it('une dérogation sans motif ni couverture est refusée', () => {

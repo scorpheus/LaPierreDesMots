@@ -813,6 +813,19 @@ body {
   padding: 1rem 1.25rem;
 }
 
+/* Fiche de collection : le visuel reste seul, centré dans son espace. Le cadre circulaire
+   précédent ressemblait à un élément du dessin et écrasait les petits SVG des pièces ; le nom
+   passait alors visuellement derrière la fenêtre sur tablette. La fiche porte maintenant un
+   espace neutre, et ses assets (SVG ou raster) ne peuvent pas déborder sur le titre. */
+[data-fiche-visuel-cadre='rectangle'] > :is(svg, img) {
+  display: block;
+  inline-size: auto;
+  block-size: auto;
+  max-inline-size: 100%;
+  max-block-size: 100%;
+  object-fit: contain;
+}
+
 /* Le bandeau de titre d'un panneau : un aplat franc, cerné, qui ne se lit jamais comme du
    texte à déchiffrer. Le contraste encre-sur-soleil vaut 9,4:1 — bien au-delà des 4,5 exigés,
    et c'est le même couple que `.cible-appel` emploie déjà. */
@@ -987,6 +1000,80 @@ body {
   padding-inline: 0.5rem;
   font-size: clamp(2rem, 3.2vw, 3rem);
   line-height: 1;
+}
+
+/* Les sorties sont des petites cartes de voyage. La couleur et le relief désignent l'action ;
+   le mot vient seulement confirmer l'intention à l'enfant qui commence à lire. */
+.action-campement,
+.campement-entete [data-pictogramme="sortie"] {
+  display: grid;
+  grid-template-rows: auto auto auto;
+  place-items: center;
+  align-content: center;
+  gap: 0.2rem;
+  min-block-size: 9.5rem;
+  padding: 0.65rem 0.5rem 0.8rem;
+  border: var(--epaisseur-trait) solid var(--trait);
+  border-radius: 1.35rem;
+  background: linear-gradient(150deg, #fff8df 0%, #f2d991 100%);
+  box-shadow: 0 0.38rem 0 rgb(27 36 64 / 25%);
+  color: var(--trait);
+  font: inherit;
+  font-weight: 800;
+  line-height: 1.05;
+  text-align: center;
+  transition: transform 130ms ease, box-shadow 130ms ease;
+}
+
+.action-campement--carte { background: linear-gradient(150deg, #e6f7ef 0%, #9fdcc8 100%); }
+.action-campement--coffre { background: linear-gradient(150deg, #fff4c8 0%, #f5bd64 100%); }
+.action-campement--histoire { background: linear-gradient(150deg, #eee7ff 0%, #c8b5e9 100%); }
+
+.action-campement:focus-visible,
+.campement-entete [data-pictogramme="sortie"]:focus-visible {
+  outline: 0.28rem solid var(--framboise);
+  outline-offset: 0.18rem;
+}
+
+.action-campement:hover,
+.action-campement:active,
+.campement-entete [data-pictogramme="sortie"]:hover,
+.campement-entete [data-pictogramme="sortie"]:active {
+  box-shadow: 0 0.14rem 0 rgb(27 36 64 / 25%);
+  transform: translateY(0.22rem);
+}
+
+.action-campement-vignette {
+  display: block;
+  inline-size: 5.4rem;
+  block-size: 4.1rem;
+  border: 0.16rem solid rgb(27 36 64 / 38%);
+  border-radius: 0.8rem;
+  background-repeat: no-repeat;
+  background-size: 500% auto;
+  box-shadow: inset 0 0 0 0.16rem rgb(255 255 255 / 52%);
+}
+
+.action-campement-vignette--carte {
+  background-position: 15% 42%;
+}
+
+.action-campement-vignette--coffre {
+  background-position: 16% 58%;
+}
+
+.action-campement-vignette--histoire {
+  background-position: 42% 80%;
+}
+
+.action-campement [data-action-campement-texte="nom"] {
+  font-size: 1.13rem;
+}
+
+.action-campement [data-action-campement-texte="detail"] {
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1.12;
 }
 
 .campement-grille {
@@ -1170,6 +1257,138 @@ body {
   display: grid;
   justify-items: center;
   gap: 0.9rem;
+}
+
+.recompense-detail-etoiles {
+  display: grid;
+  inline-size: min(34rem, 100%);
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0.8rem 1rem;
+  list-style: none;
+  border: 0.16rem solid rgb(27 36 64 / 18%);
+  border-radius: 1.15rem;
+  background: rgb(255 255 255 / 48%);
+}
+
+.recompense-detail-etoile {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+}
+
+.recompense-detail-signe {
+  color: var(--soleil);
+  font-size: 1.4rem;
+  text-shadow: 0 1px 0 white;
+}
+
+.recompense-detail-etoile[data-acquise="non"] .recompense-detail-signe,
+.recompense-detail-etoile[data-acquise="non"] .recompense-detail-texte {
+  opacity: 0.48;
+}
+
+.cascade-recompense {
+  display: flex;
+  inline-size: min(56rem, 100%);
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.cascade-recompense-liste {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cascade-recompense-gain {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0.55rem 1rem;
+  border: var(--epaisseur-trait) solid var(--trait);
+  border-radius: 1.2rem;
+  background: color-mix(in srgb, var(--parchemin) 88%, white);
+  box-shadow: 0 0.28rem 0 rgb(27 36 64 / 19%);
+  color: var(--trait);
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+.cascade-embleme {
+  display: grid;
+  inline-size: 2.45rem;
+  block-size: 2.45rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 0.15rem solid var(--trait);
+  border-radius: 50%;
+  background: #fff8d8;
+  color: #cf8c13;
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+.cascade-embleme--intermediaire { background: #f5dfef; color: #a74f7d; }
+.cascade-embleme--rare { background: #dff2e8; color: #247e6e; }
+
+.cascade-recompense-detail { font-size: 0.84em; font-weight: 700; }
+
+.cascade-recompense-jauges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.jauge-palier {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-inline-size: min(14rem, 100%);
+}
+
+.jauge-palier-phrase {
+  margin: 0;
+  padding: 0.28rem 0.55rem;
+  font-size: 1rem;
+}
+
+.actions-recompense {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+  inline-size: min(56rem, 100%);
+}
+
+.action-recompense {
+  min-inline-size: 10.5rem;
+  padding: 0.75rem 1.1rem;
+  border: var(--epaisseur-trait) solid var(--trait);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--parchemin) 92%, white);
+  box-shadow: 0 0.3rem 0 rgb(27 36 64 / 22%);
+  color: var(--trait);
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+.action-recompense--principale {
+  background: linear-gradient(150deg, #ffe47c 0%, #f5b94f 100%);
+  box-shadow: 0 0.38rem 0 rgb(27 36 64 / 28%);
+  font-size: 1.25rem;
+}
+
+.action-recompense:active {
+  box-shadow: 0 0.12rem 0 rgb(27 36 64 / 22%);
+  transform: translateY(0.18rem);
 }
 
 .recompense-eclat {
@@ -1817,6 +2036,33 @@ body {
   block-size: auto;
   /* Centrée dans la place qu'on lui laisse, plutôt que collée en haut à gauche. */
   margin-inline: auto;
+}
+
+/* `place` associe une grande illustration et cinq cartes. En paysage, les empiler réduisait
+   l'école à une vignette de 212 px de large : les cibles devenaient théoriquement présentes,
+   mais impossibles à comprendre. La réserve vit donc à droite de la scène ; le mode étroit
+   revient naturellement à une colonne. */
+.moteur-place {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(360px, 2fr);
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 1rem;
+}
+
+.moteur-place > svg[data-scene="place"] {
+  grid-row: 1 / span 2;
+  align-self: center;
+}
+
+.moteur-place > [data-reserve="place"] {
+  align-content: center;
+}
+
+@media (max-width: 900px), (orientation: portrait) {
+  .moteur-place {
+    display: flex;
+    flex-direction: column;
+  }
 }
 
 /* ══════════════════════════════════════════════════════════════════════════════════════════════

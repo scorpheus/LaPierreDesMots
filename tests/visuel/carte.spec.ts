@@ -97,8 +97,14 @@ test.describe('la carte du monde', () => {
     await ouvrirLaCarte(page);
 
     expect(await comptes(page)).toEqual({ voilee: 4, ouverte: 2, terminee: 0 });
-    // Le voile est bien posé, et il n'intercepte pas le tap : la région reste atteignable.
-    expect(await page.locator('[data-voile="grisaille"]').count()).toBeGreaterThan(0);
+    // La carte validée est un raster : les gris et les couleurs font partie de son illustration,
+    // ils ne doivent plus être recouverts par les silhouettes du SVG historique. Les prises de
+    // région restent des éléments DOM séparés et sont donc toujours atteignables.
+    await expect(page.locator('[data-decor-raster="carte"]')).toHaveAttribute(
+      'data-format-decor',
+      'raster'
+    );
+    await expect(page.locator('[data-decor="carte"][data-format-decor="svg-repli"]')).toHaveCount(0);
 
     await expect(page.locator('[data-ecran="carte"]')).toHaveScreenshot('carte-voilee.png');
   });

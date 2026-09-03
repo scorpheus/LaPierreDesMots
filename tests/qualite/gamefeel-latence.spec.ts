@@ -1,12 +1,12 @@
 /**
- * Les deux chiffres du contrat de sortie de L2-A — MESURÉS, jamais affirmés.
+ * La latence et l'absence de feu d'artifice générique — MESURÉES, jamais affirmées.
  *
  * Contrat des features v2 § 10.4 :
  *   • « Délai médian appui → première mutation du DOM » — échoue au-dessus de **100 ms** ;
- *   • « Nombre de particules émises au pic, compté sur le canevas » — échoue au-dessus de **14**.
+ *   • « Nombre de particules émises au pic, compté sur le canevas » — doit rester à **0**.
  *
  * Les deux viennent de la v2 § 8 : « une réponse visible en moins de 100 ms sur tout appui,
- * même si le traitement prend plus longtemps » et « 14 particules maximum ». Ce sont les deux
+ * même si le traitement prend plus longtemps ». Ce sont les deux
  * seules affirmations de game feel que rien d'autre ne peut vérifier — un œil humain ne
  * distingue pas 90 ms de 140 ms, et personne ne compte quatorze points à l'écran.
  *
@@ -38,8 +38,6 @@ const NOEUD = 'clairiere-01';
 
 /** Seuil de la v2 § 8, cité. Ce n'est pas un réglage de ce fichier. */
 const LATENCE_MAX_MS = 100;
-/** Seuil de la v2 § 8, cité. `PARTICULES_MAX` en est la déclaration côté code. */
-const PARTICULES_MAX = 14;
 /** Nombre d'appuis mesurés. Une médiane sur vingt points est stable ; sur trois, non. */
 const APPUIS = 20;
 
@@ -172,13 +170,13 @@ test.describe('game feel — la règle des 100 ms', () => {
   });
 });
 
-test.describe('game feel — la gerbe de particules', () => {
+test.describe('game feel — aucune gerbe générique', () => {
   // On lève `reducedMotion: 'reduce'` de `playwright.config.ts` POUR CE BLOC SEULEMENT.
   // Sans cela, la couche de particules est absente du DOM par conception (v2 § 8) et le
   // chiffre du contrat de sortie serait mesuré sur un détecteur débranché.
   test.use({ reducedMotion: 'no-preference' });
 
-  test('jamais plus de 14 particules à l’écran, même sur une longue série', async ({ page }) => {
+  test('une longue série ne déclenche aucun feu d’artifice', async ({ page }) => {
     await preparer(page, true);
 
     const canevas = page.locator('[data-particules-couche="oui"]');
@@ -186,8 +184,7 @@ test.describe('game feel — la gerbe de particules', () => {
 
     let pic = 0;
 
-    // Neuf bonnes réponses de suite : la gerbe grossit avec la série (v2 § 8), donc c'est bien
-    // le PIC qu'on relève, pas la première gerbe.
+    // Neuf bonnes réponses de suite : le canevas doit rester vide à chaque image.
     for (let geste = 0; geste < 9; geste += 1) {
       const fait = await page.evaluate(async () => {
         const crochets = (window as FenetreTest).__test;
@@ -227,11 +224,6 @@ test.describe('game feel — la gerbe de particules', () => {
       }
     }
 
-    console.log(`[L2-A] particules au pic : ${String(pic)} (borne v2 § 8 : ${String(PARTICULES_MAX)})`);
-
-    // Le détecteur n'est pas creux : il a vu quelque chose.
-    expect(pic).toBeGreaterThan(0);
-    // Et il n'a jamais vu plus que la borne de la v2 § 8.
-    expect(pic).toBeLessThanOrEqual(PARTICULES_MAX);
+    expect(pic).toBe(0);
   });
 });

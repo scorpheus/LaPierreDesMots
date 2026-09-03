@@ -3,6 +3,7 @@
   "region": "galeries",
   "ordre": 12,
   "exercice": "galeries-paroi-libre-01",
+  "progression": false,
   "prerequis": [
     "galeries-11"
   ],

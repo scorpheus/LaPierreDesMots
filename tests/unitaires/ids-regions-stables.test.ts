@@ -326,9 +326,9 @@ describe('aucun nœud livré n’est invisible sur la carte (contrat § 6.2)', (
   );
 
   /** Les nœuds réellement livrés, lus SUR DISQUE — leur `id`, pas leur nom de fichier. */
-  const surDisque = (fichiersSous(`${RACINE_DEPOT}contenu/noeuds`, '.json') as string[]).map(
-    (absolu) => lireJson<{ id: string; region: string }>(absolu.slice(RACINE_DEPOT.length).split('\\').join('/'))
-  );
+  const surDisque = (fichiersSous(`${RACINE_DEPOT}contenu/noeuds`, '.json') as string[])
+    .map((absolu) => lireJson<{ id: string; region: string; progression?: boolean }>(absolu.slice(RACINE_DEPOT.length).split('\\').join('/')))
+    .filter((noeud) => noeud.progression !== false);
 
   const cites = document.regions.flatMap((r) => r.noeuds);
 

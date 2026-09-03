@@ -119,6 +119,8 @@ export function EcranCampement({
     readonly id: string;
     readonly libelle: string;
   } | null>(null);
+  const [ouvertureChaudronEnCours, fixerOuvertureChaudronEnCours] = useState(false);
+  const [messageOuvertureChaudron, fixerMessageOuvertureChaudron] = useState<string | null>(null);
 
   const requeteCampement = useQuery({
     queryKey: ["monde", "campement"],
@@ -201,9 +203,19 @@ export function EcranCampement({
       surOuvrirChaudron(noeudLibre);
       return;
     }
-    void lirePaquetNoeud(noeudLibre).then((paquet) => {
-      magasin.getState().demarrerNoeud(paquet);
-    });
+    fixerOuvertureChaudronEnCours(true);
+    fixerMessageOuvertureChaudron(null);
+    void lirePaquetNoeud(noeudLibre)
+      .then((paquet) => {
+        magasin.getState().demarrerNoeud(paquet);
+      })
+      .catch(() => {
+        // Le campement ne doit jamais laisser un tap sans réponse : si le serveur local a été
+        // arrêté ou sert encore un contenu ancien, le chaudron explique quoi faire et reste
+        // réessayable, sans afficher un écran d'erreur pédagogique.
+        fixerOuvertureChaudronEnCours(false);
+        fixerMessageOuvertureChaudron('Le chaudron est prêt. Réessaie de l’ouvrir.');
+      });
   }, [magasin, noeudLibre, surOuvrirChaudron]);
 
   const allerCarte = useCallback((): void => {
@@ -257,11 +269,10 @@ export function EcranCampement({
     <main data-ecran="campement" className="campement-page">
       {/* ── LES SORTIES DU CAMPEMENT — R18 : ça se comprend sans lire ────────────────────────
           Le père n'a pas compris le campement. Le défaut mesuré n'était pas le décor, c'était
-          la barre du haut : trois mots posés côte à côte, sans image, dans la police de lecture.
-          Chaque destination porte désormais un PICTOGRAMME de 2,75 rem au-dessus de son mot —
-          `data-pictogramme` le rend comptable, et `parcours-campement-sans-texte.spec.ts`
-          échoue si une seule destination en manque. Le mot reste, pour l'adulte et pour le
-          lecteur d'écran ; il n'est plus la seule prise. */}
+          la barre du haut : trois boutons techniques posés côte à côte. Chaque destination est
+          maintenant une carte illustrée avec son emblème et une courte promesse. `data-pictogramme`
+          reste comptable par `parcours-campement-sans-texte.spec.ts` ; le mot reste, pour
+          l'adulte et le lecteur d'écran, sans être la seule prise. */}
       <header data-campement-sorties="oui" className="campement-entete">
         <h1 className="titre campement-titre">Le campement</h1>
 
@@ -272,32 +283,38 @@ export function EcranCampement({
 
         <button
           type="button"
-          className="cible"
+          className="cible action-campement action-campement--carte"
           data-vers="carte"
           data-pictogramme="carte"
           aria-label="Ouvrir la carte du monde"
           onClick={allerCarte}
-          style={{ flexDirection: "column", gap: "0.35rem", inlineSize: "11rem" }}
         >
-          <span aria-hidden="true" style={{ fontSize: "2.75rem", lineHeight: 1 }}>
-            🗺️
-          </span>
-          <span>La carte</span>
+          <span
+            aria-hidden="true"
+            className="action-campement-vignette action-campement-vignette--carte"
+            data-illustration-campement="carte"
+            style={{ backgroundImage: `url(${urlAsset('assets/campement/campement-v6.png')})` }}
+          >🗺️</span>
+          <span data-action-campement-texte="nom">La carte</span>
+          <span data-action-campement-texte="detail">Choisir un chemin</span>
         </button>
 
         <button
           type="button"
-          className="cible"
+          className="cible action-campement action-campement--coffre"
           data-vers="coffre"
           data-pictogramme="coffre"
           aria-label="Ouvrir le coffre aux collections"
           onClick={allerCoffre}
-          style={{ flexDirection: "column", gap: "0.35rem", inlineSize: "11rem" }}
         >
-          <span aria-hidden="true" style={{ fontSize: "2.75rem", lineHeight: 1 }}>
-            🧰
-          </span>
-          <span>Le coffre</span>
+          <span
+            aria-hidden="true"
+            className="action-campement-vignette action-campement-vignette--coffre"
+            data-illustration-campement="coffre"
+            style={{ backgroundImage: `url(${urlAsset('assets/campement/campement-v6.png')})` }}
+          >🧰</span>
+          <span data-action-campement-texte="nom">Le coffre</span>
+          <span data-action-campement-texte="detail">Mes trouvailles</span>
         </button>
 
         {/* D35, point 3 : l'histoire du début se rejoue à volonté, et seulement d'ici — jamais
@@ -305,17 +322,20 @@ export function EcranCampement({
         {surRejouerOuverture === undefined ? null : (
           <button
             type="button"
-            className="cible"
+            className="cible action-campement action-campement--histoire"
             data-vers="ouverture"
             data-pictogramme="ouverture"
             aria-label="Revoir l’histoire du début"
             onClick={surRejouerOuverture}
-            style={{ flexDirection: "column", gap: "0.35rem", inlineSize: "11rem" }}
           >
-            <span aria-hidden="true" style={{ fontSize: "2.75rem", lineHeight: 1 }}>
-              📖
-            </span>
-            <span>Revoir l’histoire</span>
+            <span
+              aria-hidden="true"
+            className="action-campement-vignette action-campement-vignette--histoire"
+            data-illustration-campement="histoire"
+            style={{ backgroundImage: `url(${urlAsset('assets/campement/campement-v6.png')})` }}
+          >📖</span>
+            <span data-action-campement-texte="nom">Revoir l’histoire</span>
+            <span data-action-campement-texte="detail">La Pierre raconte</span>
           </button>
         )}
       </header>
@@ -606,7 +626,8 @@ export function EcranCampement({
 
         <Chaudron
           {...(noeudLibre === null ? {} : { surOuvrir: ouvrirLeChaudron })}
-          enChargement={campement === null}
+          enChargement={campement === null || ouvertureChaudronEnCours}
+          messageExterne={messageOuvertureChaudron}
           animationsDesactivees={animationsDesactivees}
         />
 

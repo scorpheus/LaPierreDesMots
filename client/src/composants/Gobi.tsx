@@ -36,18 +36,10 @@
 // pas du tout dans le composant. Ce n'était pas un dessin plus pauvre que l'asset : c'était un
 // autre personnage. Le Gobi que le père a validé n'avait jamais atteint l'écran.
 //
-// LE MOTIF DU DESSIN EN LIGNE EST CONSERVÉ, ET IL RESTE JUSTE : Gobi apparaît dans la bulle
-// d'aide de CHAQUE exercice ; un `fetch` par montage coûterait une requête là où le budget vise
-// une réponse sous 100 ms. Ce qui change, c'est la SOURCE de ce qui est dessiné. Le composant
-// ne redessine plus de mémoire : `scripts/gobi-dessin.mjs` EXTRAIT les groupes des quinze SVG
-// de `contenu/assets/gobi/` vers `gobi-dessin.gen.ts`, et c'est ce texte-là qui est monté.
-// `node scripts/gobi-dessin.mjs --verifier` recompare les deux et sort en 1 s'ils divergent :
-// « le dessin monté à l'écran est celui du fichier du stade » cesse d'être une promesse.
-//
-// Coût mesuré du module embarqué : 32 247 octets, **5 986 octets gzip** — 2,4 % d'un budget de
-// bundle initial fixé à 250 Ko gzip. C'est ce que la règle « le corps ne change jamais » fait
-// économiser : sans elle il aurait fallu embarquer 10 stades × 5 états = 50 dessins complets,
-// et non 1 corps + 10 parures + 5 gestes.
+// Les SVG extraits ont servi de blockout, mais le parent a ensuite validé les rendus raster de
+// production. Le composant sert désormais ces fichiers : dix stades au repos et cinq poses
+// d'animation. Ils restent des assets locaux mis en cache par le navigateur ; aucun dessin de
+// remplacement n'est inventé dans le code.
 //
 // ── CE QUE R46 ET R41 CHANGENT, ET LE DÉFAUT EXACT QU'ILS RÉPARENT ────────────────────────
 //
@@ -77,14 +69,14 @@
 //      la confiance plus sûrement qu'un bouton absent ». La propriété reste OBLIGATOIRE — en
 //      la rendant seulement optionnelle, un appelant pourrait l'oublier ; en la rendant
 //      nullable, il doit trancher.
-import { useMemo } from 'react';
 import type { ReactElement } from 'react';
 import type {
   AideProposee, CheminAsset, CodeStadeGobi, EtatAnimationGobi, NiveauAide,
 } from '@pierre/partage';
 import type { AideResolue } from './aide-de-gobi.js';
 import { BoutonEcouter } from './BoutonEcouter.js';
-import { GOBI_CORPS, GOBI_GESTE, GOBI_PARURE, GOBI_VUE } from './gobi-dessin.gen.js';
+import { urlAsset } from '../api/client.js';
+import { GOBI_VUE } from './gobi-dessin.gen.js';
 
 export interface ProprietesGobi {
   /** L'aide que le moteur propose, ou `null` quand il n'en propose aucune. */
@@ -126,18 +118,7 @@ export interface ProprietesGobi {
 const INVITE_PAR_DEFAUT = 'Si tu veux, je peux t’aider. Ça ne coûte rien.';
 
 /**
- * Le dessin monté, composé des groupes EXTRAITS des quinze SVG.
- *
- * L'ORDRE DES QUATRE GROUPES EST CELUI DES FICHIERS, et il porte l'empilement : le corps
- * d'abord (ombre au sol, pieds, fourrure, ventre, cœur de Pierre), la parure du stade
- * derrière/au-dessus de la tête, puis les bras, puis le visage — c'est le visage qui doit
- * rester au-dessus de tout, sinon un bras levé le recouvre.
- *
- * `dangerouslySetInnerHTML` est ici le contraire d'un raccourci : c'est ce qui garantit que le
- * DOM porte **les octets du fichier**, sans traduction ni réinterprétation en JSX. Le contenu
- * est une constante de compilation issue du dépôt, jamais une entrée d'utilisateur. C'est le
- * même mécanisme que `SceneSvg`, `ScenePlace`, `EcranCarte` et `TableauOuverture` emploient
- * déjà pour servir un habillage.
+ * Le dessin monté vient des rendus raster validés de production, servis en WebP 512 px.
  */
 /**
  * EXPORTÉ pour R6 — l'écran d'évolution montre Gobi en grand, sans le panneau d'aide.
@@ -149,6 +130,19 @@ const INVITE_PAR_DEFAUT = 'Si tu veux, je peux t’aider. Ça ne coûte rien.';
  *
  * Il rend un `<g>` : il vit dans un `<svg viewBox={GOBI_VUE}>`, jamais à la racine.
  */
+const RANG_PAR_STADE: Readonly<Record<CodeStadeGobi, number>> = {
+  oeuf: 1,
+  fissure: 2,
+  boule: 3,
+  'premier-cristal': 4,
+  crete: 5,
+  couronne: 6,
+  equipe: 7,
+  besace: 8,
+  veilleur: 9,
+  gardien: 10,
+};
+
 export function DessinDeGobi({
   stade,
   animation
@@ -156,15 +150,24 @@ export function DessinDeGobi({
   readonly stade: CodeStadeGobi;
   readonly animation: EtatAnimationGobi;
 }): ReactElement {
-  // MÉMORISÉ : `dangerouslySetInnerHTML` compare l'objet par référence. Un objet neuf à chaque
-  // rendu ferait ré-analyser 4 Ko de balisage à chaque frappe de l'enfant sur l'exercice.
-  const dessin = useMemo(
-    () => ({
-      __html: GOBI_CORPS + GOBI_PARURE[stade] + GOBI_GESTE[animation].bras + GOBI_GESTE[animation].visage
-    }),
-    [stade, animation]
+  const asset =
+    animation === 'repos'
+      ? `assets/gobi/stades/stade-${String(RANG_PAR_STADE[stade])}.webp`
+      : `assets/gobi/animation/${animation}.webp`;
+
+  return (
+    <g id="gobi-dessin" data-dessin-gobi-raster={asset}>
+      <image
+        href={urlAsset(asset)}
+        x="0"
+        y="0"
+        width="200"
+        height="200"
+        preserveAspectRatio="xMidYMid meet"
+        aria-hidden="true"
+      />
+    </g>
   );
-  return <g id="gobi-dessin" dangerouslySetInnerHTML={dessin} />;
 }
 
 export function Gobi({
@@ -191,7 +194,7 @@ export function Gobi({
         // Appelant sans coquille de nœud : on n'invente rien, on republie ce que le moteur a
         // dit — et `manquant` quand il n'a rien dit, au lieu de repeindre le trou en invitation.
         (aide.texte !== null && aide.texte !== ''
-          ? { texte: aide.texte, cle: null, source: 'moteur' as const }
+          ? { texte: aide.texte, cle: null, source: 'strategie' as const }
           : { texte: null, cle: null, source: 'manquant' as const }));
 
   const texteDeLAide = resolue === null ? null : resolue.texte;
@@ -210,6 +213,8 @@ export function Gobi({
       // test comme pour l'œil.
       data-gobi-dit={aide === null ? 'invite' : 'aide'}
       {...(source === null ? {} : { 'data-aide-source': source })}
+      {...(aide === null ? {} : { 'data-aide-code': aide.code })}
+      {...(aide?.cible === null || aide?.cible === undefined ? {} : { 'data-aide-cible': aide.cible })}
       data-stade-gobi={stade}
       data-animation-gobi={animation}
       {...(libelleForme === null ? {} : { 'data-forme-gobi': libelleForme })}

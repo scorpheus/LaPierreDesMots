@@ -85,6 +85,7 @@ export function FicheObjet({
     <div
       {...marqueRacine}
       data-fiche-objet="oui"
+      data-fiche-modal="oui"
       data-obtenue={obtenu ? 'oui' : 'non'}
       role="dialog"
       aria-modal="true"
@@ -97,7 +98,8 @@ export function FicheObjet({
         zIndex: 70,
         display: 'grid',
         placeItems: 'center',
-        padding: '1.5rem',
+        padding: 'clamp(1rem, 3vw, 3rem)',
+        overflowY: 'auto',
         background: 'rgba(27, 36, 64, 0.55)'
       }}
     >
@@ -110,32 +112,44 @@ export function FicheObjet({
           background: 'var(--parchemin, #FFF6E3)',
           border: '4px solid var(--trait, #1B2440)',
           borderRadius: 'var(--rayon-carte, 16px)',
-          padding: '1.5rem',
-          maxInlineSize: '32rem',
+          boxSizing: 'border-box',
+          inlineSize: 'min(100%, 42rem)',
+          maxBlockSize: 'calc(100dvh - 2rem)',
+          overflowY: 'auto',
+          padding: 'clamp(1.25rem, 3vw, 2rem)',
           display: 'grid',
           justifyItems: 'center',
           gap: '1rem'
         }}
       >
+        <h2
+          className="titre"
+          style={{
+            fontSize: 'clamp(1.5rem, 3vw, 2rem)',
+            margin: 0,
+            textAlign: 'center',
+            overflowWrap: 'anywhere'
+          }}
+        >
+          {titre}
+        </h2>
+
         <div
           data-fiche-visuel="oui"
+          data-fiche-visuel-cadre="rectangle"
           data-couleur-revelee={couleurRevelee || obtenu ? 'oui' : 'non'}
           style={{
-            inlineSize: '9rem',
-            blockSize: '9rem',
+            inlineSize: 'min(14rem, 58vw)',
+            blockSize: 'min(14rem, 28vh)',
+            minBlockSize: '7rem',
             display: 'grid',
             placeItems: 'center',
-            borderRadius: '50%',
-            border: `4px ${obtenu ? 'solid' : 'dashed'} var(--trait, #1B2440)`,
+            overflow: 'visible',
             filter: filtreSilhouette
           }}
         >
           {visuel}
         </div>
-
-        <h2 className="titre" style={{ fontSize: '1.75rem', margin: 0, textAlign: 'center' }}>
-          {titre}
-        </h2>
 
         <p className="zone-lecture" style={{ margin: 0, fontSize: '1.25rem', textAlign: 'center' }}>
           {phrase}

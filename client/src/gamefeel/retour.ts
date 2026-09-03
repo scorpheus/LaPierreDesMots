@@ -13,7 +13,6 @@
 // `Promise<void>` et qu'aucune n'attend `jouerEffet`.
 
 import type { CodePalier, FournisseurAudio, FournisseurHaptique } from '@pierre/partage';
-import { PARTICULES_MAX } from './particules.js';
 import { demiTonsDeSerie } from './serie.js';
 
 export interface OptionsDepot {
@@ -75,18 +74,6 @@ const SON_DU_PALIER: Readonly<Record<CodePalier, 'etoile' | 'palier-intermediair
     rare: 'palier-rare'
   };
 
-/**
- * Nombre de particules d'un dépôt correct, selon la série.
- *
- * La gerbe grossit avec la série, exactement comme la hauteur du son monte : c'est la même
- * idée, sur le canal visuel. Elle est **écrêtée à `PARTICULES_MAX`** — la v2 § 8 dit 14, et
- * aucune série, si longue soit-elle, ne fait passer cette borne.
- */
-function nombreDeParticules(serie: number): number {
-  const base = 6;
-  return Math.min(PARTICULES_MAX, base + Math.max(0, Math.trunc(serie) - 1) * 2);
-}
-
 export function creerRetourSensoriel(options: OptionsRetour): RetourSensoriel {
   // La série vit ICI et nulle part ailleurs. Un second compteur dans l'hôte serait un second
   // endroit à réinitialiser, donc un endroit à oublier.
@@ -109,9 +96,9 @@ export function creerRetourSensoriel(options: OptionsRetour): RetourSensoriel {
 
       jouer('depot-correct', demiTonsDeSerie(serie));
       options.haptique.vibrer('depot-correct');
-      if (!options.animationsDesactivees) {
-        options.emettreParticules(depot.origine, nombreDeParticules(serie));
-      }
+      // Décision parent du 2026-09-02 : la gerbe générique masquait les dessins et persistait
+      // parfois sur l'écran suivant. Le retour positif reste porté par le son, la vibration et
+      // la réaction propre au moteur ; aucune particule n'est émise ici.
     },
 
     async depotRefuse(): Promise<void> {

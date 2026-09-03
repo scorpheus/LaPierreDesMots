@@ -7,8 +7,8 @@
  *   1. la hauteur MONTE avec la série, et elle est plafonnée pour ne jamais sonner strident ;
  *   2. elle se RÉINITIALISE sur refus — et sur refus seulement.
  *
- * Il prouve aussi les deux garde-fous de la v2 § 8 qui n'ont d'intérêt que mesurés :
- *   • **14 particules au maximum**, quelle que soit la longueur de la série ;
+ * Il prouve aussi les deux garde-fous qui n'ont d'intérêt que mesurés :
+ *   • **aucun feu d'artifice générique**, conformément à la décision parent du 2026-09-02 ;
  *   • **aucune vibration sur un refus** — « l'erreur est un mouvement, pas une punition ».
  *
  * Tout est en environnement `node` : `creerRetourSensoriel` ne touche ni le DOM ni React, et
@@ -20,7 +20,6 @@ import fc from 'fast-check';
 import type { CodeEffet, CodeVibration, FournisseurAudio, FournisseurHaptique } from '@pierre/partage';
 
 import { PLAFOND_DEMI_TONS, demiTonsDeSerie } from '@client/gamefeel/serie.js';
-import { PARTICULES_MAX } from '@client/gamefeel/particules.js';
 import { creerRetourSensoriel } from '@client/gamefeel/retour.js';
 import { aimanter, AIMANTATION_PX } from '@client/gamefeel/aimantation.js';
 import { imagesClesRefus, OSCILLATION_REFUS_PX } from '@client/gamefeel/ressort.js';
@@ -205,16 +204,12 @@ describe('les garde-fous de la v2 § 8, mesurés et non affirmés', () => {
     expect(new Set(sons.map((son) => son.code)).size).toBe(3);
   });
 
-  test('JAMAIS plus de 14 particules, même sur une série de 200', async () => {
+  test('aucun feu d’artifice générique, même sur une série de 200', async () => {
     const { retour, gerbes } = retourDeTest();
     for (let index = 0; index < 200; index += 1) {
       await retour.depotCorrect({ origine: ORIGINE, serie: 0 });
     }
-    expect(gerbes).toHaveLength(200);
-    expect(Math.max(...gerbes)).toBeLessThanOrEqual(PARTICULES_MAX);
-    expect(Math.max(...gerbes)).toBe(PARTICULES_MAX);
-    // La gerbe grossit vraiment : sinon la borne serait tenue par un détecteur creux.
-    expect(gerbes[0]).toBeLessThan(PARTICULES_MAX);
+    expect(gerbes).toEqual([]);
   });
 
   test('animations calmes : plus une seule particule, mais le son reste', async () => {

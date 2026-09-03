@@ -59,6 +59,8 @@ interface ExerciceLu {
 interface NoeudLu {
   readonly id?: unknown;
   readonly region?: unknown;
+  readonly exercice?: unknown;
+  readonly progression?: unknown;
 }
 
 interface FichierJson {
@@ -85,12 +87,12 @@ export async function construireCatalogueExercices(
     listerJson(path.join(racineContenu, 'noeuds'), racineDepot)
   ]);
 
-  const regionParNoeud = indexerRegions(fichiersNoeuds);
+  const noeudsParId = indexerNoeuds(fichiersNoeuds);
   const statutParExercice = await indexerStatuts(base);
 
   const entrees: EntreeGalerie[] = [];
   for (const fichier of fichiersExercices) {
-    const entree = versEntree(fichier, regionParNoeud, statutParExercice);
+    const entree = versEntree(fichier, noeudsParId, statutParExercice);
     if (entree !== null) {
       entrees.push(entree);
     }
@@ -117,12 +119,12 @@ async function indexerStatuts(base: Base): Promise<ReadonlyMap<string, StatutVal
   return index;
 }
 
-function indexerRegions(fichiers: readonly FichierJson[]): ReadonlyMap<string, CodeRegion> {
-  const index = new Map<string, CodeRegion>();
+function indexerNoeuds(fichiers: readonly FichierJson[]): ReadonlyMap<string, { readonly region: CodeRegion; readonly progression: boolean }> {
+  const index = new Map<string, { readonly region: CodeRegion; readonly progression: boolean }>();
   for (const { objet } of fichiers) {
     const noeud = objet as NoeudLu;
     if (typeof noeud.id === 'string' && typeof noeud.region === 'string') {
-      index.set(noeud.id, noeud.region as CodeRegion);
+      index.set(noeud.id, { region: noeud.region as CodeRegion, progression: noeud.progression !== false });
     }
   }
   return index;
@@ -130,7 +132,7 @@ function indexerRegions(fichiers: readonly FichierJson[]): ReadonlyMap<string, C
 
 function versEntree(
   fichier: FichierJson,
-  regionParNoeud: ReadonlyMap<string, CodeRegion>,
+  noeudsParId: ReadonlyMap<string, { readonly region: CodeRegion; readonly progression: boolean }>,
   statutParExercice: ReadonlyMap<string, StatutValidation>
 ): EntreeGalerie | null {
   const exercice = fichier.objet as ExerciceLu;
@@ -143,6 +145,7 @@ function versEntree(
 
   const jeu = exercice.jeu ?? {};
   const noeud = typeof jeu.noeud === 'string' ? (jeu.noeud as IdNoeud) : null;
+  if (noeud !== null && noeudsParId.get(noeud)?.progression === false) return null;
 
   return {
     exercice: id as IdExercice,
@@ -167,7 +170,7 @@ function versEntree(
     // seconde table de correspondance qui aurait pu diverger. Mesuré : 76 exercices sur 76
     // déclarent `jeu.noeud`, aucun ne rend `null`.
     noeud,
-    region: noeud === null ? null : (regionParNoeud.get(noeud) ?? null),
+    region: noeud === null ? null : (noeudsParId.get(noeud)?.region ?? null),
     chemin: fichier.relatif
   };
 }

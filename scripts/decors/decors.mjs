@@ -299,9 +299,11 @@ const CLAIRIERE = [
       z('arbre-feuilles', 'les feuilles de l’arbre', F.lobe(640, 250, 108, 6, 0.68, 44, 0.4, 0.72)),
       z('arbre-tronc', 'le tronc de l’arbre', F.rect(622, 330, 36, 84)),
       z('banc-assise', 'l’assise du banc', F.rect(38, 466, 114, 26)),
-      z('ciel', 'le ciel', F.rect(625, 25, 130, 90), { fill: 'none', trait: 'stroke-width="2" stroke-dasharray="8 7"' }),
-      z('toit-ecole', 'le toit de l’école', F.rect(245, 65, 90, 80), { fill: 'none', trait: 'stroke-width="2" stroke-dasharray="8 7"' }),
-      z('a-cote-du-banc', 'à côté du banc', F.rect(250, 350, 100, 100), { fill: 'none', trait: 'stroke-width="2" stroke-dasharray="8 7"' }),
+      // Coordonnées mesurées sur `contenu/assets/decors/ecole.png` (1536×1024), ramenées
+      // dans le viewBox 922×615 : ciel dégagé, pan bleu du toit central, puis banc de gauche.
+      z('ciel', 'le ciel', F.rect(600, 20, 160, 75), { fill: 'none', trait: 'stroke-width="2" stroke-dasharray="8 7"' }),
+      z('toit-ecole', 'le toit de l’école', [[315, 120], [425, 43], [520, 125], [520, 170], [315, 170]], { fill: 'none', trait: 'stroke-width="2" stroke-dasharray="8 7"' }),
+      z('a-cote-du-banc', 'à côté du banc', [[70, 335], [245, 335], [275, 450], [55, 450]], { fill: 'none', trait: 'stroke-width="2" stroke-dasharray="8 7"' }),
     ],
     traits: [
       ligne([[175, 260], [270, 196], [365, 260]]),
