@@ -605,6 +605,188 @@ body {
   inline-size: 100%;
 }
 
+/* Choix de la bande avant une sortie. Les portraits sont les assets validés du coffre ; leur
+   mouvement reste volontairement léger pour ne pas concurrencer la lecture. */
+.choix-compagnon {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: clamp(1rem, 3vw, 2.5rem);
+  background: color-mix(in srgb, var(--trait) 58%, transparent);
+  backdrop-filter: blur(5px);
+}
+
+.choix-compagnon__carte {
+  position: relative;
+  inline-size: min(64rem, 100%);
+  max-block-size: calc(100dvh - 2rem);
+  overflow: auto;
+  padding: clamp(1.25rem, 3vw, 2.5rem);
+  border: var(--epaisseur-trait) solid var(--trait);
+  border-radius: calc(var(--rayon-carte) * 1.35);
+  background: var(--parchemin);
+  box-shadow: 0.8rem 0.9rem 0 color-mix(in srgb, var(--trait) 65%, transparent);
+}
+
+.choix-compagnon__fermer {
+  position: absolute;
+  inset-block-start: 1rem;
+  inset-inline-start: 1rem;
+}
+
+.choix-compagnon__entete {
+  max-inline-size: 42rem;
+  margin-inline: auto;
+  padding-inline: 5rem;
+  text-align: center;
+}
+
+.choix-compagnon__entete > h2 {
+  margin: 0.15rem 0 0.4rem;
+  font-size: clamp(1.8rem, 4vw, 2.65rem);
+}
+
+.choix-compagnon__entete > p {
+  margin: 0;
+}
+
+.choix-compagnon__destination {
+  color: color-mix(in srgb, var(--trait) 72%, var(--foret));
+  font-weight: 800;
+}
+
+.choix-compagnon__liste {
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  flex-wrap: wrap;
+  gap: clamp(0.75rem, 2vw, 1.25rem);
+  margin-block: 1.5rem;
+}
+
+.choix-compagnon__tuile {
+  flex: 1 1 9rem;
+  max-inline-size: 12rem;
+  min-block-size: 13.5rem;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.75rem;
+  background: color-mix(in srgb, var(--parchemin) 82%, white);
+  transition: transform 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
+}
+
+.choix-compagnon__tuile[data-selectionne='oui'] {
+  transform: translateY(-0.35rem);
+  background: color-mix(in srgb, var(--soleil) 36%, var(--parchemin));
+  box-shadow: 0 0 0 0.35rem var(--soleil), var(--ombre-bd);
+}
+
+.choix-compagnon__portrait {
+  display: grid;
+  place-items: center;
+  inline-size: 7rem;
+  block-size: 8rem;
+  transform-origin: 50% 88%;
+}
+
+.choix-compagnon__portrait > img {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: contain;
+  user-select: none;
+}
+
+.choix-compagnon__tuile[data-animation-compagnon='filou'] .choix-compagnon__portrait {
+  animation: compagnon-filou 2.4s ease-in-out infinite;
+}
+
+.choix-compagnon__tuile[data-animation-compagnon='roc'] .choix-compagnon__portrait {
+  animation: compagnon-roc 3.2s ease-in-out infinite;
+}
+
+.choix-compagnon__tuile[data-animation-compagnon='plume'] .choix-compagnon__portrait {
+  animation: compagnon-plume 1.9s ease-in-out infinite;
+}
+
+.choix-compagnon__tuile[data-animation-compagnon='bulle'] .choix-compagnon__portrait {
+  animation: compagnon-bulle 2.8s ease-in-out infinite;
+}
+
+.choix-compagnon__partir {
+  display: flex;
+  margin-inline: auto;
+  padding-inline: 2rem;
+  font-size: 1.2rem;
+}
+
+/* `.cible` est déclarée plus bas dans la feuille. Cette spécificité conserve le bouton comme
+   bloc centré au lieu de laisser son affichage `inline-flex` annuler les marges automatiques. */
+.choix-compagnon .choix-compagnon__partir {
+  display: flex;
+  inline-size: max-content;
+}
+
+@keyframes compagnon-filou {
+  0%, 100% { transform: translateY(0) rotate(-1deg); }
+  45% { transform: translateY(-0.35rem) rotate(1.5deg); }
+  60% { transform: translateY(-0.18rem) rotate(0deg); }
+}
+
+@keyframes compagnon-roc {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-0.12rem) scale(1.025, 0.985); }
+}
+
+@keyframes compagnon-plume {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  42% { transform: translateY(-0.48rem) rotate(-1.5deg); }
+  58% { transform: translateY(-0.3rem) rotate(1.5deg); }
+}
+
+@keyframes compagnon-bulle {
+  0%, 100% { transform: translateY(0) rotate(1deg); }
+  50% { transform: translateY(-0.42rem) rotate(-1deg); }
+}
+
+/* La bande du campement reprend les mêmes signatures de mouvement. Un portrait non rallié
+   reste immobile : il est une promesse à découvrir, pas un faux compagnon déjà présent. */
+[data-compagnon='filou'][data-rallie='oui'] .compagnon-portrait--tuile {
+  animation: compagnon-filou 2.4s ease-in-out infinite;
+}
+
+[data-compagnon='roc'][data-rallie='oui'] .compagnon-portrait--tuile {
+  animation: compagnon-roc 3.2s ease-in-out infinite;
+}
+
+[data-compagnon='plume'][data-rallie='oui'] .compagnon-portrait--tuile {
+  animation: compagnon-plume 1.9s ease-in-out infinite;
+}
+
+[data-compagnon='bulle'][data-rallie='oui'] .compagnon-portrait--tuile {
+  animation: compagnon-bulle 2.8s ease-in-out infinite;
+}
+
+html[data-animations='desactivees'] .choix-compagnon__portrait {
+  animation: none !important;
+}
+
+html[data-animations='desactivees'] .compagnon-portrait--tuile {
+  animation: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .choix-compagnon__portrait {
+    animation: none !important;
+  }
+
+  .compagnon-portrait--tuile {
+    animation: none !important;
+  }
+}
+
 @media (max-width: 900px), (orientation: portrait) {
   .ecran-carte {
     block-size: auto !important;
@@ -622,6 +804,15 @@ body {
 
   .destinations-carte [data-depart] {
     flex: 1 1 17rem;
+  }
+
+  .choix-compagnon__entete {
+    padding: 4rem 0 0;
+  }
+
+  .choix-compagnon__tuile {
+    flex-basis: 8rem;
+    min-block-size: 12rem;
   }
 }
 

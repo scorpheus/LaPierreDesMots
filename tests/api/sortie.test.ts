@@ -148,6 +148,9 @@ async function composer(profil: string, corps: Record<string, unknown> = { regio
 describe('structure d’une sortie composée', () => {
   it('rend 201 et un plan qui ouvre sur un échauffement et clôt sur une synthèse', async () => {
     const profil = await creerProfil();
+    contexte.base
+      .prepare('INSERT INTO compagnons (profil_id, code, rallie_le) VALUES (?, ?, ?)')
+      .run(profil, 'filou', '2026-09-01T08:00:00.000Z');
     const reponse = await composer(profil, { region: 'clairiere', compagnon: 'filou' });
     expect(reponse.statusCode).toBe(201);
 
@@ -186,6 +189,13 @@ describe('structure d’une sortie composée', () => {
   it('ignore un compagnon inconnu plutôt que de le recopier tel quel', async () => {
     const profil = await creerProfil();
     const plan = (await composer(profil, { region: 'clairiere', compagnon: 'dragon' }))
+      .json() as PlanSortie;
+    expect(plan.compagnon).toBeNull();
+  });
+
+  it('ne laisse pas partir avec un compagnon que ce profil n’a pas encore rallié', async () => {
+    const profil = await creerProfil();
+    const plan = (await composer(profil, { region: 'clairiere', compagnon: 'filou' }))
       .json() as PlanSortie;
     expect(plan.compagnon).toBeNull();
   });

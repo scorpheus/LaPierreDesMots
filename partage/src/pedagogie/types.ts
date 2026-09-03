@@ -10,7 +10,7 @@
  */
 
 import type {
-  CodeCompetence, CodeRegion, Horodatage, IdHabillage, IdNoeud, IdProfil,
+  CodeCompetence, CodeMoteur, CodeRegion, Horodatage, IdHabillage, IdNoeud, IdProfil,
 } from '../identifiants.js';
 import type { Competence, TempsNoeud } from '../contenu/types.js';
 
@@ -179,6 +179,8 @@ export interface EntreeSelecteur {
   readonly profil: IdProfil;
   readonly region: CodeRegion;
   readonly compagnon: CodeCompagnon | null;
+  /** Moteurs mis en avant par le compagnon choisi, lus dans le référentiel du monde. */
+  readonly moteursFavorises?: readonly CodeMoteur[];
   readonly maitrises: readonly EtatMaitrise[];
   readonly revisionsDues: readonly ItemLeitner[];
   readonly noeudsDisponibles: readonly NoeudCandidat[];
@@ -195,6 +197,8 @@ export interface NoeudCandidat {
   readonly competences: readonly CodeCompetence[];
   readonly difficulte: number;
   readonly temps: TempsNoeud;
+  /** Mécanique de l'exercice, utilisée uniquement comme préférence douce du compagnon. */
+  readonly moteur?: CodeMoteur;
 }
 
 /** Tout le paramétrage pédagogique, tel qu'il est lu depuis les données (C2). */

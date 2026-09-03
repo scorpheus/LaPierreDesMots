@@ -31,6 +31,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { mondeDeTest, profilDeTest } from './donnees-ecrans.js';
 
 const paquetsDemandes: string[] = [];
+const demandesDeSortie: { region: string; compagnon: string | null }[] = [];
 
 /** Le monde servi par le bouchon. Une variable, pour qu'un cas puisse en poser un autre. */
 let mondeServi: ReturnType<typeof mondeDeTest> = mondeDeTest();
@@ -53,6 +54,23 @@ vi.mock('@client/api/client', async (importOriginal) => {
   return {
     ...original,
     lireMonde: () => Promise.resolve(mondeServi),
+    composerSortie: (_profil: unknown, demande: { region: string; compagnon: string | null }) => {
+      demandesDeSortie.push(demande);
+      return Promise.resolve({
+        profil: 'prf-1',
+        region: demande.region,
+        compagnon: demande.compagnon,
+        etapes: [{
+          rang: 1,
+          role: 'echauffement',
+          noeud: `${demande.region}-01`,
+          habillage: 'clairiere.h01',
+          competences: ['gph.a'],
+          revisions: []
+        }],
+        composeeLe: '2026-09-01T08:00:00.000Z'
+      });
+    },
     // Aucun nœud terminé : la reprise tombe donc sur le PREMIER nœud de chaque région.
     lireProgression: () => Promise.resolve([]),
     lirePaquetNoeud: (id: unknown) => {
@@ -165,6 +183,7 @@ function prise(region: string): Element | null {
 
 beforeEach(() => {
   paquetsDemandes.length = 0;
+  demandesDeSortie.length = 0;
   mondeServi = mondeDeTest();
   installerFetchLocal();
 });
@@ -258,12 +277,22 @@ describe('une prise n’existe que si elle répond (M23)', () => {
     }
   });
 
-  it('taper une région ouverte DEMANDE son premier nœud non terminé', async () => {
+  it('demande avec qui partir avant de composer la sortie', async () => {
     await monterEtAttendre();
     fireEvent.click(prise('galeries')!);
+
+    const choix = document.querySelector('[data-choix-compagnon]');
+    expect(choix?.getAttribute('role')).toBe('dialog');
+    expect(choix?.textContent).toContain('Avec qui pars-tu');
+    expect(document.querySelector('[data-choisir-compagnon="filou"]')).not.toBeNull();
+    expect(demandesDeSortie).toEqual([]);
+
+    fireEvent.click(document.querySelector('[data-choisir-compagnon="filou"]')!);
+    fireEvent.click(document.querySelector('[data-confirmer-depart]')!);
     await waitFor(() => {
       expect(paquetsDemandes).toEqual(['galeries-01']);
     });
+    expect(demandesDeSortie).toEqual([{ region: 'galeries', compagnon: 'filou' }]);
   });
 
   it('taper une région voilée ne demande RIEN, et n’affiche aucun reproche', async () => {
@@ -417,7 +446,8 @@ describe('l’exigence commune des dix écrans', () => {
               dernier.magasin.getState().ecran !== 'carte' ||
               dernier.campement.length > 0 ||
               dernier.ouverture.length > 0 ||
-              paquetsDemandes.length > 0
+              paquetsDemandes.length > 0 ||
+              document.querySelector('[data-choix-compagnon]') !== null
             );
           }
         };

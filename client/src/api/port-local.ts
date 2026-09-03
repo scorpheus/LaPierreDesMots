@@ -35,6 +35,7 @@ import type { ComparaisonTypographie, ReglagesLecture } from '@pierre/partage/le
 import { composerSortie as composerSortiePure } from '@pierre/partage/pedagogie';
 import type { CodeCompagnon, EtatMaitrise, ItemLeitner, PlanSortie } from '@pierre/partage/pedagogie';
 import type { CodeObjetCampement, EtatMonde } from '@pierre/partage/monde';
+import { moteursFavorises } from '@pierre/partage/monde';
 import {
   confirmationValide,
   estPorteeReinitialisation,
@@ -212,7 +213,8 @@ function construireCandidats(
       region: noeud.region,
       competences: exercice.competences,
       difficulte: exercice.difficulte,
-      temps: noeud.temps
+      temps: noeud.temps,
+      moteur: exercice.jeu.moteur
     });
   }
   return candidats;
@@ -384,9 +386,19 @@ export const portLocal: PortApi = {
       throw new ErreurReseau(400, '(local)', 'Le champ « region » est obligatoire.');
     }
     const region = regionTexte as CodeRegion;
-    const compagnon = COMPAGNONS.includes(String(demande.compagnon))
+    const compagnonDemande = COMPAGNONS.includes(String(demande.compagnon))
       ? (demande.compagnon as CodeCompagnon)
       : null;
+    const compagnonRallie = compagnonDemande === null
+      ? undefined
+      : await base.uneLigne<{ readonly code: string }>(
+          'SELECT code FROM compagnons WHERE profil_id = ? AND code = ?',
+          [id, compagnonDemande]
+        );
+    const compagnon = compagnonRallie === undefined ? null : compagnonDemande;
+    const definitionCompagnon = referentielMonde.compagnons.find(
+      (definition) => definition.code === compagnon
+    ) ?? null;
 
     const [noeuds, exercices] = await Promise.all([depotContenu.listerNoeuds(), depotContenu.listerExercices()]);
     const competences =
@@ -399,6 +411,7 @@ export const portLocal: PortApi = {
       profil: id,
       region,
       compagnon,
+      moteursFavorises: moteursFavorises(definitionCompagnon),
       maitrises: await lireMaitrises(base, id),
       revisionsDues: await lireRevisionsDues(base, id, maintenant),
       noeudsDisponibles: construireCandidats(noeuds, exercices),

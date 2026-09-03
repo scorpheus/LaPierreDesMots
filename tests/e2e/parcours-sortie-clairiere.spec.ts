@@ -115,6 +115,8 @@ test.describe('la Clairière enchaîne une SORTIE — ce que l’enfant atteint 
     const depart = page.locator(`[data-depart="${REGION}"]`);
     await expect(depart, 'la Clairière n’offre aucune prise pour entrer').toHaveCount(1);
     await depart.click();
+    await expect(page.locator('[data-choix-compagnon]')).toBeVisible();
+    await page.locator('[data-confirmer-depart]').click();
 
     const noeud = page.locator('[data-ecran="noeud"]');
     await expect(noeud).toBeVisible();

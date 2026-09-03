@@ -528,6 +528,30 @@ describe('branches défensives', () => {
     expect(plan.etapes.map((etape) => etape.noeud)).toContain('n4');
   });
 
+  it('met en avant une mécanique du compagnon sans changer la difficulté des extrémités', () => {
+    const candidats = [
+      { ...candidat(1), difficulte: 1, moteur: 'tri' as const },
+      { ...candidat(2), difficulte: 2, moteur: 'assemble' as const },
+      { ...candidat(3), difficulte: 2, moteur: 'phrase' as const },
+      { ...candidat(4), difficulte: 2, moteur: 'trace' as const },
+      { ...candidat(5), difficulte: 2, moteur: 'colorie' as const },
+      { ...candidat(6), difficulte: 3, moteur: 'chrono' as const },
+    ];
+    const quatreEtapes = {
+      ...PARAMETRES,
+      selecteur: { ...CONTRAINTES, nbNoeudsMin: 4, nbNoeudsMax: 4 },
+    };
+    const plan = composerSortie(
+      entreeAvec(candidats, { compagnon: 'roc', moteursFavorises: ['trace'] }),
+      quatreEtapes,
+      creerAlea(17)
+    );
+
+    expect(plan.etapes.map((etape) => etape.noeud)).toContain('n4');
+    expect(plan.etapes[0]?.noeud).toBe('n1');
+    expect(plan.etapes[plan.etapes.length - 1]?.noeud).toBe('n6');
+  });
+
   it('écarte un nœud dont une compétence est absente du référentiel', () => {
     // Une compétence inconnue n'a pas de chaîne de prérequis lisible : la supposer sans
     // prérequis ferait sauter la progression phonologique en silence.

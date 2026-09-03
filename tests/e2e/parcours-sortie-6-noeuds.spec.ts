@@ -224,6 +224,8 @@ test.describe('Les Galeries sont une région JOUABLE, pas seulement ouverte (D38
       'Les Galeries n’offrent aucune prise alors que D38 les ouvre dès le départ',
     ).toHaveCount(1);
     await depart.click();
+    await expect(page.locator('[data-choix-compagnon]')).toBeVisible();
+    await page.locator('[data-confirmer-depart]').click();
 
     const noeud = page.locator('[data-ecran="noeud"]');
     await expect(noeud).toBeVisible();

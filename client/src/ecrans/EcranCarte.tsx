@@ -31,7 +31,14 @@
 import { useCallback, useMemo, useState } from 'react';
 import type { ReactElement } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import type { CodeRegion, EtatMonde, EtatRegion, IdNoeud } from '@pierre/partage';
+import type {
+  CodeCompagnon,
+  CodeRegion,
+  Compagnon,
+  EtatMonde,
+  EtatRegion,
+  IdNoeud
+} from '@pierre/partage';
 import { etatAfficheRegion, regionsOuvertes } from '@pierre/partage/monde';
 import {
   composerSortie,
@@ -85,6 +92,20 @@ const SVG_CARTE = 'habillages/carte/carte-monde-v3.svg';
  * comme des destinations. L'image d'ouverture originale reste intacte.
  */
 const RASTER_CARTE = 'assets/decors/carte-six-regions.png';
+
+/** Portrait courant de Gobi dans le choix de départ : son évolution doit rester visible ici. */
+const ASSET_GOBI_PAR_STADE: Readonly<Record<string, string>> = {
+  oeuf: 'assets/gobi/stades/stade-1.webp',
+  fissure: 'assets/gobi/stades/stade-2.webp',
+  boule: 'assets/gobi/stades/stade-3.webp',
+  'premier-cristal': 'assets/gobi/stades/stade-4.webp',
+  crete: 'assets/gobi/stades/stade-5.webp',
+  couronne: 'assets/gobi/stades/stade-6.webp',
+  equipe: 'assets/gobi/stades/stade-7.webp',
+  besace: 'assets/gobi/stades/stade-8.webp',
+  veilleur: 'assets/gobi/stades/stade-9.webp',
+  gardien: 'assets/gobi/stades/stade-10.webp'
+};
 
 /**
  * Les ancres de chaque région, en unités `viewBox`, **dans l'ordre de la progression**.
@@ -250,6 +271,12 @@ export function EcranCarte({
   const profil = useEtatJeu((etat) => etat.profil);
   const animationsDesactivees = useEtatJeu((etat) => etat.animationsDesactivees);
   const [rasterIndisponible, fixerRasterIndisponible] = useState(false);
+  const [destinationDemandee, fixerDestinationDemandee] = useState<{
+    readonly region: CodeRegion;
+    readonly noeudDeRepli: IdNoeud;
+    readonly libelle: string;
+  } | null>(null);
+  const [compagnonChoisi, fixerCompagnonChoisi] = useState<CodeCompagnon | null>(null);
 
   const requeteMonde = useQuery({
     queryKey: ['monde', profil === null ? null : String(profil.id)],
@@ -315,6 +342,10 @@ export function EcranCarte({
     () => new Set((requeteProgression.data ?? []).map((ligne) => String(ligne.noeud))),
     [requeteProgression.data]
   );
+  const compagnonsRallies: readonly Compagnon[] = useMemo(
+    () => (monde?.compagnons ?? []).filter((compagnon) => compagnon.rallieLe !== null),
+    [monde]
+  );
 
   /**
    * Où reprendre dans une région : le premier nœud non terminé.
@@ -371,10 +402,14 @@ export function EcranCarte({
 
   const [regionEnChargement, fixerRegionEnChargement] = useState<CodeRegion | null>(null);
   const entrer = useCallback(
-    (codeRegion: CodeRegion, noeudDeRepli: IdNoeud): void => {
+    (
+      codeRegion: CodeRegion,
+      noeudDeRepli: IdNoeud,
+      compagnon: CodeCompagnon | null
+    ): void => {
       if (profil === null || regionEnChargement !== null) return;
       fixerRegionEnChargement(codeRegion);
-      void composerSortie(profil.id, { region: String(codeRegion), compagnon: null })
+      void composerSortie(profil.id, { region: String(codeRegion), compagnon })
         .then(async (plan) => {
           const premiere = plan.etapes[0];
           if (premiere === undefined) {
@@ -397,6 +432,15 @@ export function EcranCarte({
         });
     },
     [magasin, profil, regionEnChargement]
+  );
+
+  const proposerDepart = useCallback(
+    (region: CodeRegion, noeudDeRepli: IdNoeud, libelle: string): void => {
+      if (regionEnChargement !== null) return;
+      fixerDestinationDemandee({ region, noeudDeRepli, libelle });
+      fixerCompagnonChoisi(compagnonsRallies[0]?.code ?? null);
+    },
+    [compagnonsRallies, regionEnChargement]
   );
 
   const prochainDeblocage = useMemo(() => {
@@ -739,7 +783,7 @@ export function EcranCarte({
                 aria-label={`${libelle} — ${etat}`}
                 onClick={() => {
                   if (ouverte && premierNoeud !== null) {
-                    entrer(code, premierNoeud);
+                    proposerDepart(code, premierNoeud, libelle);
                   }
                 }}
                 onKeyDown={(evenement) => {
@@ -748,7 +792,7 @@ export function EcranCarte({
                     ouverte &&
                     premierNoeud !== null
                   ) {
-                    entrer(code, premierNoeud);
+                    proposerDepart(code, premierNoeud, libelle);
                   }
                 }}
               />
@@ -824,7 +868,7 @@ export function EcranCarte({
                 aria-label={`Partir vers ${libelle}`}
                 onClick={() => {
                   if (noeudDeReprise !== null) {
-                    entrer(code, noeudDeReprise);
+                    proposerDepart(code, noeudDeReprise, libelle);
                   }
                 }}
                 style={{ flexDirection: 'column', gap: '0.5rem', padding: '1.25rem' }}
@@ -858,6 +902,92 @@ export function EcranCarte({
         </div>
       </section>
       </div>
+
+      {destinationDemandee === null ? null : (
+        <section
+          className="choix-compagnon"
+          data-choix-compagnon={String(destinationDemandee.region)}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="titre-choix-compagnon"
+        >
+          <div className="choix-compagnon__carte">
+            <button
+              type="button"
+              className="cible choix-compagnon__fermer"
+              aria-label="Fermer le choix d’accompagnant"
+              onClick={() => fixerDestinationDemandee(null)}
+            >
+              Retour
+            </button>
+            <div className="choix-compagnon__entete">
+              <p className="choix-compagnon__destination">
+                Départ pour {destinationDemandee.libelle}
+              </p>
+              <h2 id="titre-choix-compagnon" className="titre">
+                Avec qui pars-tu&nbsp;?
+              </h2>
+              <p>Choisis ton compagnon. Il donnera sa couleur à cette sortie.</p>
+            </div>
+            <div className="choix-compagnon__liste">
+              <button
+                type="button"
+                className="cible choix-compagnon__tuile"
+                data-choisir-compagnon="gobi"
+                data-selectionne={compagnonChoisi === null ? 'oui' : 'non'}
+                aria-pressed={compagnonChoisi === null}
+                onClick={() => fixerCompagnonChoisi(null)}
+              >
+                <span className="choix-compagnon__portrait" aria-hidden="true">
+                  <img
+                    src={urlAsset(
+                      ASSET_GOBI_PAR_STADE[String(monde?.gobi.stade ?? '')] ??
+                        'assets/gobi/stades/stade-1.webp'
+                    )}
+                    alt=""
+                    draggable={false}
+                  />
+                </span>
+                <strong>Gobi</strong>
+                <span>Ton guide fidèle</span>
+              </button>
+              {compagnonsRallies.map((compagnon) => (
+                <button
+                  key={String(compagnon.code)}
+                  type="button"
+                  className="cible choix-compagnon__tuile"
+                  data-choisir-compagnon={String(compagnon.code)}
+                  data-selectionne={compagnonChoisi === compagnon.code ? 'oui' : 'non'}
+                  data-animation-compagnon={
+                    animationsDesactivees ? 'calme' : String(compagnon.code)
+                  }
+                  aria-pressed={compagnonChoisi === compagnon.code}
+                  onClick={() => fixerCompagnonChoisi(compagnon.code)}
+                >
+                  <span className="choix-compagnon__portrait" aria-hidden="true">
+                    <img src={urlAsset(String(compagnon.asset))} alt="" draggable={false} />
+                  </span>
+                  <strong>{compagnon.libelle}</strong>
+                  <span>{compagnon.valeur}</span>
+                </button>
+              ))}
+            </div>
+            <button
+              type="button"
+              className="cible cible-appel choix-compagnon__partir"
+              data-confirmer-depart
+              disabled={regionEnChargement !== null}
+              onClick={() => {
+                const destination = destinationDemandee;
+                fixerDestinationDemandee(null);
+                entrer(destination.region, destination.noeudDeRepli, compagnonChoisi);
+              }}
+            >
+              {regionEnChargement === null ? 'Partir à l’aventure' : 'On prépare les sacs…'}
+            </button>
+          </div>
+        </section>
+      )}
     </main>
   );
 }

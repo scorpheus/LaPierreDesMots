@@ -404,8 +404,8 @@ export const TRANSITIONS: readonly TransitionModele[] = [
   {
     depuis: 'carte',
     vers: 'noeud',
-    prise: { selecteur: '[data-depart]' },
-    motif: 'entrer dans une région ouverte — la reprise au premier nœud non terminé'
+    prise: null,
+    motif: 'choisir une région, puis confirmer la bande avant le premier nœud'
   },
 
   // ── depuis le campement ───────────────────────────────────────────────────────────────
@@ -561,6 +561,16 @@ export const TRANSITIONS: readonly TransitionModele[] = [
  * faiblesse de l'explorateur, mais parce que c'est le but de la porte.
  */
 export const RECETTES: readonly RecetteModele[] = [
+  {
+    nom: 'choisir sa bande et partir',
+    depuis: 'carte',
+    vers: 'noeud',
+    gestes: [
+      { selecteur: '[data-depart]' },
+      { selecteur: '[data-confirmer-depart]' }
+    ],
+    motif: 'v2 § 4.3 — avant une sortie, l’enfant choisit qui l’accompagne'
+  },
   {
     nom: 'poser le code du foyer et entrer',
     depuis: 'code-parent',

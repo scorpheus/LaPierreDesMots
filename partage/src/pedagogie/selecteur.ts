@@ -282,7 +282,16 @@ export function composerSortie(
   const restants = [...vivier];
   const echauffement = tirerDansLePalier(restants, 'facile', alea);
   const synthese = tirerDansLePalier(restants, 'difficile', alea);
-  const milieu = alea.melanger(restants).slice(0, Math.max(0, n - NB_NOEUDS_PLANCHER));
+  const moteursFavorises = new Set((entree.moteursFavorises ?? []).map(String));
+  const favorises = restants.filter(
+    (candidat) => candidat.moteur !== undefined && moteursFavorises.has(String(candidat.moteur))
+  );
+  const ordinaires = restants.filter((candidat) => !favorises.includes(candidat));
+  // Une préférence, jamais une obligation : le compagnon amène d'abord une mécanique qui lui
+  // ressemble quand elle est disponible, sans écarter de compétence ni casser les paliers de
+  // difficulté. Le reste demeure mélangé par l'Alea injecté.
+  const milieu = [...alea.melanger(favorises), ...alea.melanger(ordinaires)]
+    .slice(0, Math.max(0, n - NB_NOEUDS_PLANCHER));
 
   const choisis: NoeudCandidat[] = [echauffement, ...milieu, synthese];
 

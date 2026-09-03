@@ -31,11 +31,13 @@ import type {
 } from '@pierre/partage';
 import { ErreurPierre } from '@pierre/partage';
 import { composerSortie } from '@pierre/partage/pedagogie';
+import { moteursFavorises } from '@pierre/partage/monde';
 
 import type { ContexteServeur } from '../configuration.js';
 import { CODES_ERREUR, erreurApi } from '../configuration.js';
 import { lireMaitrises, lireProgression, lireRevisionsDues, profilExiste } from '@pierre/partage/base';
 import { chargerParametresPedagogie } from '../referentiels/pedagogie.js';
+import { chargerReferentielMonde } from '../referentiels/monde.js';
 
 const COMPAGNONS: readonly string[] = ['filou', 'bulle', 'roc', 'plume'];
 
@@ -68,7 +70,8 @@ export function construireCandidats(
       region: noeud.region as CodeRegion,
       competences: exercice.competences,
       difficulte: exercice.difficulte,
-      temps: noeud.temps as NoeudCandidat['temps']
+      temps: noeud.temps as NoeudCandidat['temps'],
+      moteur: exercice.jeu.moteur
     });
   }
   return candidats;
@@ -112,9 +115,19 @@ export function enregistrerRoutesSortie(app: FastifyInstance, contexte: Contexte
         .code(400)
         .send(erreurApi(CODES_ERREUR.invalide, 'Le champ « region » est obligatoire.'));
     }
-    const compagnon = COMPAGNONS.includes(String(corps.compagnon))
+    const compagnonDemande = COMPAGNONS.includes(String(corps.compagnon))
       ? (String(corps.compagnon) as CodeCompagnon)
       : null;
+    const compagnonRallie = compagnonDemande === null
+      ? undefined
+      : await contexte.base.uneLigne<{ readonly code: string }>(
+          'SELECT code FROM compagnons WHERE profil_id = ? AND code = ?',
+          [id, compagnonDemande]
+        );
+    const compagnon = compagnonRallie === undefined ? null : compagnonDemande;
+    const definitionCompagnon = chargerReferentielMonde().compagnons.find(
+      (definition) => definition.code === compagnon
+    ) ?? null;
 
     const [noeuds, exercices] = await Promise.all([
       contexte.contenu.listerNoeuds(),
@@ -132,6 +145,7 @@ export function enregistrerRoutesSortie(app: FastifyInstance, contexte: Contexte
       profil: id,
       region: region as CodeRegion,
       compagnon,
+      moteursFavorises: moteursFavorises(definitionCompagnon),
       maitrises: await lireMaitrises(contexte.base, id),
       revisionsDues: await lireRevisionsDues(contexte.base, id, maintenant),
       noeudsDisponibles: construireCandidats(noeuds, exercices),
