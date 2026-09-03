@@ -17,8 +17,9 @@
   -->
   <g id="calque-fond">
     <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
+    <image data-fond-illustre="ecole" href="/api/contenu/assets/assets/decors/exercices/galeries-veine.png" x="0" y="0" width="960" height="600" preserveAspectRatio="xMidYMid slice"/>
   </g>
-  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round">
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round" opacity="0" aria-hidden="true">
     <path id="paroi-de-la-mine" class="zone" data-region-svg="paroi-de-la-mine" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L960,0 L960,168 L933.3,173.8 L906.7,176.9 L880,175.8 L853.3,171.1 L826.7,164.9 L800,160.2 L773.3,159.1 L746.7,162.2 L720,168 L693.3,173.8 L666.7,176.9 L640,175.8 L613.3,171.1 L586.7,164.9 L560,160.2 L533.3,159.1 L506.7,162.2 L480,168 L453.3,173.8 L426.7,176.9 L400,175.8 L373.3,171.1 L346.7,164.9 L320,160.2 L293.3,159.1 L266.7,162.2 L240,168 L213.3,173.8 L186.7,176.9 L160,175.8 L133.3,171.1 L106.7,164.9 L80,160.2 L53.3,159.1 L26.7,162.2 L0,168 Z"/>
     <path id="sol-de-la-mine" class="zone" data-region-svg="sol-de-la-mine" fill="#8E97A8" fill-rule="evenodd" d="M0,530 L26.7,536.1 L53.3,537.9 L80,534 L106.7,527.3 L133.3,522.5 L160,523.1 L186.7,528.6 L213.3,535.1 L240,538 L266.7,535.1 L293.3,528.6 L320,523.1 L346.7,522.5 L373.3,527.3 L400,534 L426.7,537.9 L453.3,536.1 L480,530 L506.7,523.9 L533.3,522.1 L560,526 L586.7,532.7 L613.3,537.5 L640,536.9 L666.7,531.4 L693.3,524.9 L720,522 L746.7,524.9 L773.3,531.4 L800,536.9 L826.7,537.5 L853.3,532.7 L880,526 L906.7,522.1 L933.3,523.9 L960,530 L960,600 L0,600 Z"/>
     <path id="filon" class="zone" data-region-svg="filon" fill="#8E97A8" fill-rule="evenodd" d="M60,230 L880,208 L902,420 L40,442 Z"/>
@@ -29,7 +30,7 @@
     <path id="lampe" class="zone" data-region-svg="lampe" fill="#8E97A8" fill-rule="evenodd" d="M89.1,468 L114.9,468 L107.5,482.6 L127.8,492.4 L135.1,509.5 L129.6,560.7 L138.8,572.9 L138.8,585.1 L65.2,585.1 L65.2,572.9 L74.4,560.7 L68.9,509.5 L76.2,492.4 L96.5,482.6 Z"/>
     <path id="eclat-de-quartz" class="zone" data-region-svg="eclat-de-quartz" fill="#8E97A8" fill-rule="evenodd" d="M560,458 L590,481 L583.4,528.5 L560,540 L536.6,528.5 L530,481 Z"/>
   </g>
-  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0" aria-hidden="true">
     <path class="trait" d="M60,250 L880,228"/>
   </g>
 </svg>

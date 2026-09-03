@@ -85,8 +85,8 @@
             "id": "toit-ecole",
             "libelle": "le toit de l’école",
             "centroide": [
-              419,
-              126
+              420.7,
+              114.4
             ],
             "surface": 17905
           },
@@ -94,7 +94,7 @@
             "id": "a-cote-du-banc",
             "libelle": "à côté du banc",
             "centroide": [
-              161,
+              123.8,
               392.5
             ],
             "surface": 22712.5

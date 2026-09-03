@@ -17,8 +17,9 @@
   -->
   <g id="calque-fond">
     <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
+    <image data-fond-illustre="ecole" href="/api/contenu/assets/assets/decors/exercices/volcan-etoiles-filantes.png" x="0" y="0" width="960" height="600" preserveAspectRatio="xMidYMid slice"/>
   </g>
-  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round">
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round" opacity="0" aria-hidden="true">
     <path id="ciel-rouge" class="zone" data-region-svg="ciel-rouge" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L960,0 L960,318 L933.3,323.5 L906.7,328.3 L880,331.9 L853.3,333.8 L826.7,333.8 L800,331.9 L773.3,328.3 L746.7,323.5 L720,318 L693.3,312.5 L666.7,307.7 L640,304.1 L613.3,302.2 L586.7,302.2 L560,304.1 L533.3,307.7 L506.7,312.5 L480,318 L453.3,323.5 L426.7,328.3 L400,331.9 L373.3,333.8 L346.7,333.8 L320,331.9 L293.3,328.3 L266.7,323.5 L240,318 L213.3,312.5 L186.7,307.7 L160,304.1 L133.3,302.2 L106.7,302.2 L80,304.1 L53.3,307.7 L26.7,312.5 L0,318 Z"/>
     <path id="pente-de-cendre" class="zone" data-region-svg="pente-de-cendre" fill="#8E97A8" fill-rule="evenodd" d="M0,430 L26.7,436.4 L53.3,439.8 L80,438.7 L106.7,433.4 L133.3,426.6 L160,421.3 L186.7,420.2 L213.3,423.6 L240,430 L266.7,436.4 L293.3,439.8 L320,438.7 L346.7,433.4 L373.3,426.6 L400,421.3 L426.7,420.2 L453.3,423.6 L480,430 L506.7,436.4 L533.3,439.8 L560,438.7 L586.7,433.4 L613.3,426.6 L640,421.3 L666.7,420.2 L693.3,423.6 L720,430 L746.7,436.4 L773.3,439.8 L800,438.7 L826.7,433.4 L853.3,426.6 L880,421.3 L906.7,420.2 L933.3,423.6 L960,430 L960,600 L0,600 Z"/>
     <path id="cratere" class="zone" data-region-svg="cratere" fill="#8E97A8" fill-rule="evenodd" d="M240,432 L420,248 L542,248 L722,432 Z"/>
@@ -29,7 +30,7 @@
     <path id="braise-au-sol" class="zone" data-region-svg="braise-au-sol" fill="#8E97A8" fill-rule="evenodd" d="M175.6,563.2 L165.6,565.6 L154.4,564.7 L145.2,563.7 L137.4,565.2 L127.9,568.4 L116.8,569.5 L108,566.1 L104.3,559.6 L103.5,553.4 L100.4,549 L93.1,544.9 L86.1,539.5 L85.3,533.2 L92.4,528.2 L102.5,525.3 L110.2,522.8 L114.6,518.3 L119.7,512.3 L128.3,508.2 L138.8,508.8 L147.6,513.2 L154,517.7 L161.4,519.7 L171.7,520.4 L182.3,522.8 L187.7,528.2 L185.6,534.8 L180,540.4 L177.2,545 L178.7,550.5 L179.9,557.3 Z"/>
     <path id="eclat-de-lave" class="zone" data-region-svg="eclat-de-lave" fill="#8E97A8" fill-rule="evenodd" d="M862,428 L895,456.6 L887.7,515.7 L862,530 L836.3,515.7 L829,456.6 Z"/>
   </g>
-  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0" aria-hidden="true">
     <path class="trait" d="M420,248 L542,248"/>
   </g>
 </svg>

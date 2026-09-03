@@ -17,8 +17,9 @@
   -->
   <g id="calque-fond">
     <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L800,0 L800,600 L0,600 Z"/>
+    <image data-fond-illustre="ecole" href="/api/contenu/assets/assets/decors/exercices/galeries-tracer-paroi.png" x="0" y="0" width="800" height="600" preserveAspectRatio="xMidYMid slice"/>
   </g>
-  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round">
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round" opacity="0" aria-hidden="true">
     <path id="strate-haute" class="zone" data-region-svg="strate-haute" fill="#8E97A8" fill-rule="evenodd" d="M30,170 L212,158 L214,206 L32,218 Z"/>
     <path id="strate-basse" class="zone" data-region-svg="strate-basse" fill="#8E97A8" fill-rule="evenodd" d="M30,250 L210,240 L216,288 L34,298 Z"/>
     <path id="strate-droite" class="zone" data-region-svg="strate-droite" fill="#8E97A8" fill-rule="evenodd" d="M600,190 L772,178 L776,230 L604,242 Z"/>
@@ -26,7 +27,7 @@
     <path id="sol-de-sable" class="zone" data-region-svg="sol-de-sable" fill="#8E97A8" fill-rule="evenodd" d="M0,522 L22.2,527.4 L44.4,528.9 L66.7,525.5 L88.9,519.6 L111.1,515.4 L133.3,515.9 L155.6,520.8 L177.8,526.5 L200,529 L222.2,526.5 L244.4,520.8 L266.7,515.9 L288.9,515.4 L311.1,519.6 L333.3,525.5 L355.6,528.9 L377.8,527.4 L400,522 L422.2,516.6 L444.4,515.1 L466.7,518.5 L488.9,524.4 L511.1,528.6 L533.3,528.1 L555.6,523.2 L577.8,517.5 L600,515 L622.2,517.5 L644.4,523.2 L666.7,528.1 L688.9,528.6 L711.1,524.4 L733.3,518.5 L755.6,515.1 L777.8,516.6 L800,522 L800,600 L0,600 Z"/>
     <path id="paroi" class="zone" data-region-svg="paroi" fill="none" fill-rule="evenodd" d="M235,90 L565,90 L565,490 L235,490 Z"/>
   </g>
-  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0" aria-hidden="true">
     <path class="trait" d="M235,140 L565,140"/>
     <path class="trait" d="M0,522 L800,522"/>
   </g>

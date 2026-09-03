@@ -17,8 +17,9 @@
   -->
   <g id="calque-fond">
     <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
+    <image data-fond-illustre="ecole" href="/api/contenu/assets/assets/decors/exercices/cite-vitrail.png" x="0" y="0" width="960" height="600" preserveAspectRatio="xMidYMid slice"/>
   </g>
-  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round">
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round" opacity="0" aria-hidden="true">
     <path id="nef" class="zone" data-region-svg="nef" fill="#8E97A8" fill-rule="evenodd" d="M60,138 L900,138 L862,520 L98,520 Z"/>
     <path id="sol-de-la-nef" class="zone" data-region-svg="sol-de-la-nef" fill="#8E97A8" fill-rule="evenodd" d="M0,530 L26.7,536.1 L53.3,536.1 L80,530 L106.7,523.9 L133.3,523.9 L160,530 L186.7,536.1 L213.3,536.1 L240,530 L266.7,523.9 L293.3,523.9 L320,530 L346.7,536.1 L373.3,536.1 L400,530 L426.7,523.9 L453.3,523.9 L480,530 L506.7,536.1 L533.3,536.1 L560,530 L586.7,523.9 L613.3,523.9 L640,530 L666.7,536.1 L693.3,536.1 L720,530 L746.7,523.9 L773.3,523.9 L800,530 L826.7,536.1 L853.3,536.1 L880,530 L906.7,523.9 L933.3,523.9 L960,530 L960,600 L0,600 Z"/>
     <path id="plomb" class="zone" data-region-svg="plomb" fill="#8E97A8" fill-rule="evenodd" d="M200,470 L200,330 L207,267.7 L227.7,208.5 L261.1,155.4 L305.4,111.1 L358.5,77.7 L417.7,57 L480,50 L542.3,57 L601.5,77.7 L654.6,111.1 L698.9,155.4 L732.3,208.5 L753,267.7 L760,330 L760,470 Z M245,470 L245,345 L250.9,292.7 L268.3,243 L296.3,198.5 L333.5,161.3 L378,133.3 L427.7,115.9 L480,110 L532.3,115.9 L582,133.3 L626.5,161.3 L663.7,198.5 L691.7,243 L709.1,292.7 L715,345 L715,470 Z"/>
@@ -29,7 +30,7 @@
     <path id="cierge" class="zone" data-region-svg="cierge" fill="#8E97A8" fill-rule="evenodd" d="M149,378 L156.4,396.5 L154,412.3 L149,420.2 L144,412.3 L141.6,396.5 L145.3,422.9 L161.4,422.9 L161.4,502.1 L136.6,502.1 L136.6,422.9 L152.7,422.9 Z"/>
     <path id="banc-de-la-nef" class="zone" data-region-svg="banc-de-la-nef" fill="#8E97A8" fill-rule="evenodd" d="M700,440 L900,428 L908,478 L706,490 Z"/>
   </g>
-  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0" aria-hidden="true">
     <path class="trait" d="M98,520 L862,520"/>
   </g>
 </svg>

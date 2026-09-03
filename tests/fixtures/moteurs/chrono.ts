@@ -28,7 +28,7 @@ export const contenuChrono: ContenuChrono = {
     },
   ],
   vignettes: [
-    { id: 'vig-reveil', libelle: 'il se réveille', asset: null, taille: [200, 160] },
+    { id: 'vig-reveil', libelle: 'il se réveille', asset: 'assets/vignettes/reveil.png', taille: [200, 160] },
     { id: 'vig-sortie', libelle: 'il sort', asset: null, taille: [200, 160] },
     { id: 'vig-lune', libelle: 'il regarde la lune', asset: null, taille: [200, 160] },
   ],

@@ -80,6 +80,17 @@ function echapper(valeur: string): string {
   return valeur.replace(/["\\]/gu, '\\$&');
 }
 
+/**
+ * Phase transitoire des décors illustrés : tant que leurs masques indexés ne sont pas produits,
+ * la progression rend la couleur à l'image entière par paliers. Le calcul reste déterministe et
+ * disparaîtra au profit des régions exactes sans changer le contrat des moteurs.
+ */
+export function grisailleDuRaster(nombreAllume: number, nombreTotal: number): number {
+  if (nombreTotal <= 0) return 0;
+  const progression = Math.min(1, Math.max(0, nombreAllume / nombreTotal));
+  return Math.round((1 - progression) * 1_000) / 1_000;
+}
+
 export function SceneDecor({
   habillage,
   allumees,
@@ -107,6 +118,13 @@ export function SceneDecor({
 
   const vb = useMemo(() => lireViewBox(habillage.scene.viewBox), [habillage]);
   const dureeMs = animationsDesactivees ? 0 : Math.max(0, habillage.timings.recolorationMs);
+  const nombreRegions = useMemo(
+    () => habillage.scene.calques
+      .filter((calque) => calque.role === 'coloriable')
+      .reduce((total, calque) => total + calque.regions.length, 0),
+    [habillage],
+  );
+  const grisailleRaster = grisailleDuRaster(allumees.length, nombreRegions);
 
   /**
    * Les règles de recoloration, dérivées des seules régions allumées.
@@ -122,6 +140,7 @@ export function SceneDecor({
       // La grisaille est l'état PAR DÉFAUT, pas un filtre : le SVG sort de la production avec
       // `fill="#8E97A8"`. Il n'y a donc rien à désaturer — seulement des régions à rallumer.
       `${portee} [data-region-svg] { transition: fill ${String(dureeMs)}ms ease-in-out; }`,
+      `${portee} [data-fond-illustre] { filter: grayscale(${String(grisailleRaster)}); transition: filter ${String(dureeMs)}ms ease-in-out; }`,
     ];
     for (const region of allumees) {
       lignes.push(
@@ -138,7 +157,7 @@ export function SceneDecor({
       );
     }
     return lignes.join('\n');
-  }, [habillage, allumees, dureeMs, animationsDesactivees, vb]);
+  }, [habillage, allumees, dureeMs, animationsDesactivees, vb, grisailleRaster]);
 
   if (corps === null) return null;
 

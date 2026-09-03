@@ -17,8 +17,9 @@
   -->
   <g id="calque-fond">
     <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
+    <image data-fond-illustre="ecole" href="/api/contenu/assets/assets/decors/exercices/foret-feuilles.png" x="0" y="0" width="960" height="600" preserveAspectRatio="xMidYMid slice"/>
   </g>
-  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round">
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round" opacity="0" aria-hidden="true">
     <path id="ciel-d-automne" class="zone" data-region-svg="ciel-d-automne" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L960,0 L960,138 L933.3,143.5 L906.7,147.5 L880,149 L853.3,147.5 L826.7,143.5 L800,138 L773.3,132.5 L746.7,128.5 L720,127 L693.3,128.5 L666.7,132.5 L640,138 L613.3,143.5 L586.7,147.5 L560,149 L533.3,147.5 L506.7,143.5 L480,138 L453.3,132.5 L426.7,128.5 L400,127 L373.3,128.5 L346.7,132.5 L320,138 L293.3,143.5 L266.7,147.5 L240,149 L213.3,147.5 L186.7,143.5 L160,138 L133.3,132.5 L106.7,128.5 L80,127 L53.3,128.5 L26.7,132.5 L0,138 Z"/>
     <path id="tapis-du-sol" class="zone" data-region-svg="tapis-du-sol" fill="#8E97A8" fill-rule="evenodd" d="M0,490 L26.7,497.7 L53.3,501.8 L80,500.4 L106.7,494.1 L133.3,485.9 L160,479.6 L186.7,478.2 L213.3,482.3 L240,490 L266.7,497.7 L293.3,501.8 L320,500.4 L346.7,494.1 L373.3,485.9 L400,479.6 L426.7,478.2 L453.3,482.3 L480,490 L506.7,497.7 L533.3,501.8 L560,500.4 L586.7,494.1 L613.3,485.9 L640,479.6 L666.7,478.2 L693.3,482.3 L720,490 L746.7,497.7 L773.3,501.8 L800,500.4 L826.7,494.1 L853.3,485.9 L880,479.6 L906.7,478.2 L933.3,482.3 L960,490 L960,600 L0,600 Z"/>
     <path id="branche-haute" class="zone" data-region-svg="branche-haute" fill="#8E97A8" fill-rule="evenodd" d="M1.5,163.9 L300.1,132 L640.2,160 L961.7,121.9 L958.3,94.1 L639.8,132 L299.9,104 L-1.5,136.1 Z"/>
@@ -29,7 +30,7 @@
     <path id="gland-qui-tombe" class="zone" data-region-svg="gland-qui-tombe" fill="#8E97A8" fill-rule="evenodd" d="M452,178 L468.3,183.6 L479.2,196.8 L479.2,210 L473.8,217.5 L472.4,243.8 L460.2,268.2 L443.8,268.2 L431.6,243.8 L430.2,217.5 L424.8,210 L424.8,196.8 L435.7,183.6 Z"/>
     <path id="souche-au-sol" class="zone" data-region-svg="souche-au-sol" fill="#8E97A8" fill-rule="evenodd" d="M72.2,459.7 L104.6,446.5 L137,454.4 L172.6,443.8 L201.8,459.7 L208.3,541.5 L182.4,554.7 L137,546.8 L91.6,554.7 L65.7,541.5 Z M104.6,472.9 L169.4,472.9 L169.4,501.9 L104.6,501.9 Z"/>
   </g>
-  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0" aria-hidden="true">
     <path class="trait" d="M0,492 L960,484"/>
   </g>
 </svg>

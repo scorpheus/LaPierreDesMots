@@ -80,7 +80,7 @@
           "id": "image-renards",
           "libelle": "les renards",
           "face": "image",
-          "asset": null,
+          "asset": "assets/cartes/foret/renard.png",
           "paire": "paire-renard"
         },
         {
@@ -94,7 +94,7 @@
           "id": "image-hiboux",
           "libelle": "les hiboux",
           "face": "image",
-          "asset": null,
+          "asset": "assets/cartes/foret/hibou.png",
           "paire": "paire-hibou"
         },
         {
@@ -108,7 +108,7 @@
           "id": "image-arbres",
           "libelle": "les arbres",
           "face": "image",
-          "asset": null,
+          "asset": "assets/cartes/foret/arbre.png",
           "paire": "paire-arbre"
         },
         {
@@ -122,7 +122,7 @@
           "id": "image-feuilles",
           "libelle": "les feuilles",
           "face": "image",
-          "asset": null,
+          "asset": "assets/cartes/foret/feuille.png",
           "paire": "paire-feuille"
         },
         {
@@ -136,7 +136,7 @@
           "id": "image-oiseaux",
           "libelle": "les oiseaux",
           "face": "image",
-          "asset": null,
+          "asset": "assets/cartes/foret/oiseau.png",
           "paire": "paire-oiseau"
         },
         {
@@ -150,7 +150,7 @@
           "id": "image-fleurs",
           "libelle": "les fleurs",
           "face": "image",
-          "asset": null,
+          "asset": "assets/cartes/foret/fleur.png",
           "paire": "paire-fleur"
         }
       ],

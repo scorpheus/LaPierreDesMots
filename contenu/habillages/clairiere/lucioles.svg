@@ -17,8 +17,9 @@
   -->
   <g id="calque-fond">
     <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
+    <image data-fond-illustre="ecole" href="/api/contenu/assets/assets/decors/exercices/clairiere-lucioles.png" x="0" y="0" width="960" height="600" preserveAspectRatio="xMidYMid slice"/>
   </g>
-  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round">
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round" opacity="0" aria-hidden="true">
     <path id="nuit-claire" class="zone" data-region-svg="nuit-claire" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L960,0 L960,258 L933.3,266 L906.7,271.9 L880,274 L853.3,271.9 L826.7,266 L800,258 L773.3,250 L746.7,244.1 L720,242 L693.3,244.1 L666.7,250 L640,258 L613.3,266 L586.7,271.9 L560,274 L533.3,271.9 L506.7,266 L480,258 L453.3,250 L426.7,244.1 L400,242 L373.3,244.1 L346.7,250 L320,258 L293.3,266 L266.7,271.9 L240,274 L213.3,271.9 L186.7,266 L160,258 L133.3,250 L106.7,244.1 L80,242 L53.3,244.1 L26.7,250 L0,258 Z"/>
     <path id="sentier" class="zone" data-region-svg="sentier" fill="#8E97A8" fill-rule="evenodd" d="M65.8,593.3 L261.7,543.9 L481.1,564 L700.5,524 L926.9,553.8 L933.1,506.2 L699.5,476 L478.9,516 L258.3,496.1 L54.2,546.7 Z"/>
     <path id="herbe-haute" class="zone" data-region-svg="herbe-haute" fill="#8E97A8" fill-rule="evenodd" d="M0,554 L11.1,531 L23.3,512.2 L32.2,512.2 L44.4,531 L55.6,554 L66.7,516.9 L78.9,486.6 L87.8,486.6 L100,516.9 L111.1,554 L122.2,526.3 L134.4,503.7 L143.3,503.7 L155.6,526.3 L166.7,554 L177.8,512.2 L190,478 L198.9,478 L211.1,512.2 L222.2,554 L233.3,521.6 L245.6,495.1 L254.4,495.1 L266.7,521.6 L277.8,554 L288.9,531 L301.1,512.2 L310,512.2 L322.2,531 L333.3,554 L344.4,516.9 L356.7,486.6 L365.6,486.6 L377.8,516.9 L388.9,554 L400,526.3 L412.2,503.7 L421.1,503.7 L433.3,526.3 L444.4,554 L455.6,512.2 L467.8,478 L476.7,478 L488.9,512.2 L500,554 L500,576 L0,576 Z"/>
@@ -29,7 +30,7 @@
     <path id="luciole-lointaine" class="zone" data-region-svg="luciole-lointaine" fill="#8E97A8" fill-rule="evenodd" d="M663.7,207 L673,204.2 L679.6,209.8 L679.6,216.8 L692.8,211.2 L702,218.2 L696.7,225.2 L683.5,223.8 L687.5,233.6 L686.2,246.2 L678.2,257.4 L683.5,263 L678.2,270 L659.8,270 L654.5,263 L659.8,257.4 L651.8,246.2 L650.5,233.6 L654.5,223.8 L641.3,225.2 L636,218.2 L645.2,211.2 L658.4,216.8 L658.4,209.8 Z"/>
     <path id="fleur-de-nuit" class="zone" data-region-svg="fleur-de-nuit" fill="#8E97A8" fill-rule="evenodd" d="M120,260 L128.5,285.3 L154.6,280 L137,300 L154.6,320 L128.5,314.7 L120,340 L111.5,314.7 L85.4,320 L103,300 L85.4,280 L111.5,285.3 Z"/>
   </g>
-  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0" aria-hidden="true">
     <path class="trait" d="M60,592 L930,552"/>
   </g>
 </svg>

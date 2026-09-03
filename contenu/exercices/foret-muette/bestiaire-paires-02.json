@@ -80,7 +80,7 @@
           "id": "image-ours",
           "libelle": "l'ours brun",
           "face": "image",
-          "asset": null,
+          "asset": "assets/cartes/foret/ours.png",
           "paire": "paire-ours"
         },
         {
@@ -94,7 +94,7 @@
           "id": "image-hibou",
           "libelle": "le hibou gris",
           "face": "image",
-          "asset": null,
+          "asset": "assets/cartes/foret/hibou-gris.png",
           "paire": "paire-hibou"
         },
         {
@@ -108,7 +108,7 @@
           "id": "image-arbre",
           "libelle": "l'arbre vert",
           "face": "image",
-          "asset": null,
+          "asset": "assets/cartes/foret/arbre-vert.png",
           "paire": "paire-arbre"
         },
         {
@@ -122,7 +122,7 @@
           "id": "image-enfant",
           "libelle": "les enfants de l'école",
           "face": "image",
-          "asset": null,
+          "asset": "assets/cartes/foret/enfants.png",
           "paire": "paire-enfant"
         },
         {
@@ -136,7 +136,7 @@
           "id": "image-oiseau",
           "libelle": "les oiseaux du matin",
           "face": "image",
-          "asset": null,
+          "asset": "assets/cartes/foret/oiseaux.png",
           "paire": "paire-oiseau"
         },
         {
@@ -150,7 +150,7 @@
           "id": "image-etoile",
           "libelle": "les étoiles de la nuit",
           "face": "image",
-          "asset": null,
+          "asset": "assets/cartes/foret/etoiles.png",
           "paire": "paire-etoile"
         }
       ],

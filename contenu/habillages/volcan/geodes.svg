@@ -17,8 +17,9 @@
   -->
   <g id="calque-fond">
     <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
+    <image data-fond-illustre="ecole" href="/api/contenu/assets/assets/decors/exercices/volcan-geodes.png" x="0" y="0" width="960" height="600" preserveAspectRatio="xMidYMid slice"/>
   </g>
-  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round">
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round" opacity="0" aria-hidden="true">
     <path id="paroi-de-la-mine" class="zone" data-region-svg="paroi-de-la-mine" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L960,0 L960,158 L933.3,163 L906.7,166.7 L880,168 L853.3,166.7 L826.7,163 L800,158 L773.3,153 L746.7,149.3 L720,148 L693.3,149.3 L666.7,153 L640,158 L613.3,163 L586.7,166.7 L560,168 L533.3,166.7 L506.7,163 L480,158 L453.3,153 L426.7,149.3 L400,148 L373.3,149.3 L346.7,153 L320,158 L293.3,163 L266.7,166.7 L240,168 L213.3,166.7 L186.7,163 L160,158 L133.3,153 L106.7,149.3 L80,148 L53.3,149.3 L26.7,153 L0,158 Z"/>
     <path id="sol-de-cendre" class="zone" data-region-svg="sol-de-cendre" fill="#8E97A8" fill-rule="evenodd" d="M0,480 L26.7,486.9 L53.3,488.9 L80,484.5 L106.7,476.9 L133.3,471.5 L160,472.2 L186.7,478.4 L213.3,485.8 L240,489 L266.7,485.8 L293.3,478.4 L320,472.2 L346.7,471.5 L373.3,476.9 L400,484.5 L426.7,488.9 L453.3,486.9 L480,480 L506.7,473.1 L533.3,471.1 L560,475.5 L586.7,483.1 L613.3,488.5 L640,487.8 L666.7,481.6 L693.3,474.2 L720,471 L746.7,474.2 L773.3,481.6 L800,487.8 L826.7,488.5 L853.3,483.1 L880,475.5 L906.7,471.1 L933.3,473.1 L960,480 L960,600 L0,600 Z"/>
     <path id="geode-un" class="zone" data-region-svg="geode-un" fill="#8E97A8" fill-rule="evenodd" d="M209,218 L265.6,237.2 L301.9,283.3 L297.9,348.6 L253.4,394.6 L188.8,406.2 L132.2,375.4 L112,317.8 L136.3,256.4 Z M209,264.1 L253.4,298.6 L241.3,356.2 L180.7,363.9 L156.5,306.3 Z"/>
@@ -29,7 +30,7 @@
     <path id="lampe-de-geode" class="zone" data-region-svg="lampe-de-geode" fill="#8E97A8" fill-rule="evenodd" d="M733.1,468 L758.9,468 L751.5,481.4 L771.8,490.4 L779.1,506.1 L773.6,553.1 L782.8,564.3 L782.8,575.5 L709.2,575.5 L709.2,564.3 L718.4,553.1 L712.9,506.1 L720.2,490.4 L740.5,481.4 Z"/>
     <path id="eclat-de-geode" class="zone" data-region-svg="eclat-de-geode" fill="#8E97A8" fill-rule="evenodd" d="M450,468 L482,493.8 L475,547.1 L450,560 L425,547.1 L418,493.8 Z"/>
   </g>
-  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0" aria-hidden="true">
     <path class="trait" d="M0,482 L960,474"/>
   </g>
 </svg>

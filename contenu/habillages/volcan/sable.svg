@@ -17,8 +17,9 @@
   -->
   <g id="calque-fond">
     <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
+    <image data-fond-illustre="ecole" href="/api/contenu/assets/assets/decors/exercices/volcan-sable.png" x="0" y="0" width="960" height="600" preserveAspectRatio="xMidYMid slice"/>
   </g>
-  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round">
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round" opacity="0" aria-hidden="true">
     <path id="ciel-de-cendre" class="zone" data-region-svg="ciel-de-cendre" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L960,0 L960,138 L933.3,142.5 L906.7,145.8 L880,147 L853.3,145.8 L826.7,142.5 L800,138 L773.3,133.5 L746.7,130.2 L720,129 L693.3,130.2 L666.7,133.5 L640,138 L613.3,142.5 L586.7,145.8 L560,147 L533.3,145.8 L506.7,142.5 L480,138 L453.3,133.5 L426.7,130.2 L400,129 L373.3,130.2 L346.7,133.5 L320,138 L293.3,142.5 L266.7,145.8 L240,147 L213.3,145.8 L186.7,142.5 L160,138 L133.3,133.5 L106.7,130.2 L80,129 L53.3,130.2 L26.7,133.5 L0,138 Z"/>
     <path id="mer-sombre" class="zone" data-region-svg="mer-sombre" fill="#8E97A8" fill-rule="evenodd" d="M0,240 L26.7,247.7 L53.3,249.8 L80,245 L106.7,236.6 L133.3,230.6 L160,231.3 L186.7,238.3 L213.3,246.4 L240,250 L266.7,246.4 L293.3,238.3 L320,231.3 L346.7,230.6 L373.3,236.6 L400,245 L426.7,249.8 L453.3,247.7 L480,240 L506.7,232.3 L533.3,230.2 L560,235 L586.7,243.4 L613.3,249.4 L640,248.7 L666.7,241.7 L693.3,233.6 L720,230 L746.7,233.6 L773.3,241.7 L800,248.7 L826.7,249.4 L853.3,243.4 L880,235 L906.7,230.2 L933.3,232.3 L960,240 L960,340 L0,340 Z"/>
     <path id="plage-noire" class="zone" data-region-svg="plage-noire" fill="#8E97A8" fill-rule="evenodd" d="M0,340 L26.7,346.9 L53.3,346.9 L80,340 L106.7,333.1 L133.3,333.1 L160,340 L186.7,346.9 L213.3,346.9 L240,340 L266.7,333.1 L293.3,333.1 L320,340 L346.7,346.9 L373.3,346.9 L400,340 L426.7,333.1 L453.3,333.1 L480,340 L506.7,346.9 L533.3,346.9 L560,340 L586.7,333.1 L613.3,333.1 L640,340 L666.7,346.9 L693.3,346.9 L720,340 L746.7,333.1 L773.3,333.1 L800,340 L826.7,346.9 L853.3,346.9 L880,340 L906.7,333.1 L933.3,333.1 L960,340 L960,600 L0,600 Z"/>
@@ -29,7 +30,7 @@
     <path id="rocher-de-la-plage" class="zone" data-region-svg="rocher-de-la-plage" fill="#8E97A8" fill-rule="evenodd" d="M237.2,490.1 L227.1,496.8 L212.1,500.2 L198.2,501.9 L188,505.2 L179.2,511.4 L168,518.1 L153.6,521.4 L139.3,518.9 L128.5,511.8 L121.2,504.1 L113.4,498.8 L101.7,495.5 L87.5,491.6 L76.4,485 L74,476.3 L80.6,467.6 L90.7,460.7 L97.8,454.7 L100,447.5 L101.3,438.3 L107,429.5 L119.1,424.4 L134.7,424.6 L149.3,428 L161.3,430.7 L173.2,430.4 L187.5,428.2 L203.4,427.9 L216.5,432.3 L222.5,440.8 L222.2,450.3 L221.1,458.4 L224.2,465.1 L231.8,472.3 L238.2,481 Z"/>
     <path id="coquille-noire" class="zone" data-region-svg="coquille-noire" fill="#8E97A8" fill-rule="evenodd" d="M434,600 L413.8,593.9 L395.9,581.6 L383.6,561.2 L378,538.8 L387,528.6 L393.7,534.7 L402.6,522.5 L411.6,530.6 L422.8,518.4 L434,528.6 L445.2,518.4 L456.4,530.6 L465.4,522.5 L474.3,534.7 L481,528.6 L490,538.8 L484.4,561.2 L472.1,581.6 L454.2,593.9 Z"/>
   </g>
-  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0" aria-hidden="true">
     <path class="trait" d="M0,342 L960,334"/>
   </g>
 </svg>

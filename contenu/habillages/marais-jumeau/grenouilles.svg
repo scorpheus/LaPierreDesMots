@@ -17,8 +17,9 @@
   -->
   <g id="calque-fond">
     <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
+    <image data-fond-illustre="ecole" href="/api/contenu/assets/assets/decors/exercices/marais-grenouilles.png" x="0" y="0" width="960" height="600" preserveAspectRatio="xMidYMid slice"/>
   </g>
-  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round">
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round" opacity="0" aria-hidden="true">
     <path id="rive-de-vase" class="zone" data-region-svg="rive-de-vase" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L960,0 L960,218 L933.3,223 L906.7,226.7 L880,228 L853.3,226.7 L826.7,223 L800,218 L773.3,213 L746.7,209.3 L720,208 L693.3,209.3 L666.7,213 L640,218 L613.3,223 L586.7,226.7 L560,228 L533.3,226.7 L506.7,223 L480,218 L453.3,213 L426.7,209.3 L400,208 L373.3,209.3 L346.7,213 L320,218 L293.3,223 L266.7,226.7 L240,228 L213.3,226.7 L186.7,223 L160,218 L133.3,213 L106.7,209.3 L80,208 L53.3,209.3 L26.7,213 L0,218 Z"/>
     <path id="eau-du-marais" class="zone" data-region-svg="eau-du-marais" fill="#8E97A8" fill-rule="evenodd" d="M0,260 L26.7,267.7 L53.3,271.8 L80,270.4 L106.7,264.1 L133.3,255.9 L160,249.6 L186.7,248.2 L213.3,252.3 L240,260 L266.7,267.7 L293.3,271.8 L320,270.4 L346.7,264.1 L373.3,255.9 L400,249.6 L426.7,248.2 L453.3,252.3 L480,260 L506.7,267.7 L533.3,271.8 L560,270.4 L586.7,264.1 L613.3,255.9 L640,249.6 L666.7,248.2 L693.3,252.3 L720,260 L746.7,267.7 L773.3,271.8 L800,270.4 L826.7,264.1 L853.3,255.9 L880,249.6 L906.7,248.2 L933.3,252.3 L960,260 L960,600 L0,600 Z"/>
     <path id="roseaux-du-fond" class="zone" data-region-svg="roseaux-du-fond" fill="#8E97A8" fill-rule="evenodd" d="M0,240 L16,203.1 L33.6,172.9 L46.4,172.9 L64,203.1 L80,240 L96,180.4 L113.6,131.7 L126.4,131.7 L144,180.4 L160,240 L176,195.5 L193.6,159.2 L206.4,159.2 L224,195.5 L240,240 L256,172.9 L273.6,118 L286.4,118 L304,172.9 L320,240 L320,258 L0,258 Z"/>
@@ -29,7 +30,7 @@
     <path id="grenouille-trois" class="zone" data-region-svg="grenouille-trois" fill="#8E97A8" fill-rule="evenodd" d="M684,218.6 L686,206.8 L694,201.8 L702,206.8 L704,213.5 L720,213.5 L722,206.8 L730,201.8 L738,206.8 L740,218.6 L750,225.3 L760,237 L762,248.8 L752,252.2 L746,242.1 L742,255.5 L732,265.6 L718,269 L706,269 L692,265.6 L682,255.5 L678,242.1 L672,252.2 L662,248.8 L664,237 L674,225.3 Z"/>
     <path id="libellule-temoin" class="zone" data-region-svg="libellule-temoin" fill="#8E97A8" fill-rule="evenodd" d="M888,118 L895.4,122.9 L895.4,131.1 L910.1,126.2 L930.3,131.1 L934,142.6 L915.6,145.9 L897.2,144.2 L897.2,150.8 L917.4,154.1 L932.2,163.9 L924.8,173.8 L906.4,167.2 L895.4,160.6 L893.5,183.6 L889.8,200 L886.2,200 L882.5,183.6 L880.6,160.6 L869.6,167.2 L851.2,173.8 L843.8,163.9 L858.6,154.1 L878.8,150.8 L878.8,144.2 L860.4,145.9 L842,142.6 L845.7,131.1 L865.9,126.2 L880.6,131.1 L880.6,122.9 Z"/>
   </g>
-  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0" aria-hidden="true">
     <path class="trait" d="M0,262 L960,254"/>
   </g>
 </svg>

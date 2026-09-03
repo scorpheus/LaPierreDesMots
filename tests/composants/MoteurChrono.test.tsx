@@ -153,6 +153,16 @@ afterEach(() => {
 });
 
 describe('moteur chrono', () => {
+  it("affiche l'image et la légende d'une vignette narrative", () => {
+    const { container } = render(<Harnais />);
+    const vignette = container.querySelector<HTMLElement>('[data-vignette="vig-reveil"]');
+    const image = vignette?.querySelector<HTMLImageElement>('img[data-illustration-vignette="oui"]');
+
+    expect(image).not.toBeNull();
+    expect(image?.getAttribute('src')).toContain('assets/vignettes/reveil.png');
+    expect(vignette?.textContent).toContain('il se réveille');
+    expect(vignette?.style.flexDirection).toBe('column');
+  });
   it('le contenu de ce test est conforme au schéma que le moteur publie', () => {
     const ajv = new (Ajv2020 as unknown as {
       new (options?: Record<string, unknown>): { compile(s: unknown): (d: unknown) => boolean };

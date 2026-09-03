@@ -17,8 +17,9 @@
   -->
   <g id="calque-fond">
     <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
+    <image data-fond-illustre="ecole" href="/api/contenu/assets/assets/decors/exercices/galeries-passage.png" x="0" y="0" width="960" height="600" preserveAspectRatio="xMidYMid slice"/>
   </g>
-  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round">
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round" opacity="0" aria-hidden="true">
     <path id="paroi-du-passage" class="zone" data-region-svg="paroi-du-passage" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L960,0 L960,200 L933.3,206 L906.7,210.4 L880,212 L853.3,210.4 L826.7,206 L800,200 L773.3,194 L746.7,189.6 L720,188 L693.3,189.6 L666.7,194 L640,200 L613.3,206 L586.7,210.4 L560,212 L533.3,210.4 L506.7,206 L480,200 L453.3,194 L426.7,189.6 L400,188 L373.3,189.6 L346.7,194 L320,200 L293.3,206 L266.7,210.4 L240,212 L213.3,210.4 L186.7,206 L160,200 L133.3,194 L106.7,189.6 L80,188 L53.3,189.6 L26.7,194 L0,200 Z"/>
     <path id="ruisseau" class="zone" data-region-svg="ruisseau" fill="#8E97A8" fill-rule="evenodd" d="M-14.2,543.7 L27.5,557.3 L72.6,567.9 L120,572 L167.4,567.9 L212.5,557.3 L254.2,543.7 L292.5,531.3 L327.4,522.9 L360,520 L392.6,522.9 L427.5,531.3 L465.8,543.7 L507.5,557.3 L552.6,567.9 L600,572 L647.4,567.9 L692.5,557.3 L734.2,543.7 L772.5,531.3 L807.4,522.9 L840,520 L872.6,522.9 L907.5,531.3 L945.8,543.7 L974.2,456.3 L932.5,442.7 L887.4,432.1 L840,428 L792.6,432.1 L747.5,442.7 L705.8,456.3 L667.5,468.7 L632.6,477.1 L600,480 L567.4,477.1 L532.5,468.7 L494.2,456.3 L452.5,442.7 L407.4,432.1 L360,428 L312.6,432.1 L267.5,442.7 L225.8,456.3 L187.5,468.7 L152.6,477.1 L120,480 L87.4,477.1 L52.5,468.7 L14.2,456.3 Z"/>
     <path id="rive-gauche" class="zone" data-region-svg="rive-gauche" fill="#8E97A8" fill-rule="evenodd" d="M0,540 L240,518 L200,600 L0,600 Z"/>
@@ -29,7 +30,7 @@
     <path id="lanterne-du-passage" class="zone" data-region-svg="lanterne-du-passage" fill="#8E97A8" fill-rule="evenodd" d="M860.3,138 L891.7,138 L882.7,157.4 L907.4,170.4 L916.3,193.1 L909.6,261.1 L920.8,277.3 L920.8,293.5 L831.2,293.5 L831.2,277.3 L842.4,261.1 L835.7,193.1 L844.6,170.4 L869.3,157.4 Z"/>
     <path id="stalactite-du-passage" class="zone" data-region-svg="stalactite-du-passage" fill="#8E97A8" fill-rule="evenodd" d="M560,58 L573,141.5 L579.5,146.9 L584,154.1 L585.9,162.3 L585.1,170.7 L581.6,178.4 L575.8,184.6 L568.4,188.6 L560,190 L551.6,188.6 L544.2,184.6 L538.4,178.4 L534.9,170.7 L534.1,162.3 L536,154.1 L540.5,146.9 L547,141.5 Z"/>
   </g>
-  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0" aria-hidden="true">
     <path class="trait" d="M876,60 L876,140"/>
   </g>
 </svg>

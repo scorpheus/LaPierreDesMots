@@ -17,8 +17,9 @@
   -->
   <g id="calque-fond">
     <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
+    <image data-fond-illustre="ecole" href="/api/contenu/assets/assets/decors/exercices/marais-roseaux.png" x="0" y="0" width="960" height="600" preserveAspectRatio="xMidYMid slice"/>
   </g>
-  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round">
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round" opacity="0" aria-hidden="true">
     <path id="ciel-du-soir" class="zone" data-region-svg="ciel-du-soir" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L960,0 L960,148 L933.3,151.4 L906.7,154.4 L880,156.7 L853.3,157.8 L826.7,157.8 L800,156.7 L773.3,154.4 L746.7,151.4 L720,148 L693.3,144.6 L666.7,141.6 L640,139.3 L613.3,138.2 L586.7,138.2 L560,139.3 L533.3,141.6 L506.7,144.6 L480,148 L453.3,151.4 L426.7,154.4 L400,156.7 L373.3,157.8 L346.7,157.8 L320,156.7 L293.3,154.4 L266.7,151.4 L240,148 L213.3,144.6 L186.7,141.6 L160,139.3 L133.3,138.2 L106.7,138.2 L80,139.3 L53.3,141.6 L26.7,144.6 L0,148 Z"/>
     <path id="rive-molle" class="zone" data-region-svg="rive-molle" fill="#8E97A8" fill-rule="evenodd" d="M0,430 L960,408 L960,482 L0,502 Z"/>
     <path id="eau-basse" class="zone" data-region-svg="eau-basse" fill="#8E97A8" fill-rule="evenodd" d="M0,500 L26.7,506.9 L53.3,508.9 L80,504.5 L106.7,496.9 L133.3,491.5 L160,492.2 L186.7,498.4 L213.3,505.8 L240,509 L266.7,505.8 L293.3,498.4 L320,492.2 L346.7,491.5 L373.3,496.9 L400,504.5 L426.7,508.9 L453.3,506.9 L480,500 L506.7,493.1 L533.3,491.1 L560,495.5 L586.7,503.1 L613.3,508.5 L640,507.8 L666.7,501.6 L693.3,494.2 L720,491 L746.7,494.2 L773.3,501.6 L800,507.8 L826.7,508.5 L853.3,503.1 L880,495.5 L906.7,491.1 L933.3,493.1 L960,500 L960,600 L0,600 Z"/>
@@ -30,7 +31,7 @@
     <path id="etiquette-trois" class="zone" data-region-svg="etiquette-trois" fill="#8E97A8" fill-rule="evenodd" d="M558,194 L720,194 L720,258 L558,258 Z"/>
     <path id="libellule-du-soir" class="zone" data-region-svg="libellule-du-soir" fill="#8E97A8" fill-rule="evenodd" d="M856,218 L865,223.9 L865,233.7 L882.9,227.8 L907.5,233.7 L912,247.4 L889.6,251.3 L867.2,249.4 L867.2,257.2 L891.8,261.1 L909.8,272.9 L900.8,284.6 L878.4,276.8 L865,269 L862.7,296.4 L858.2,316 L853.8,316 L849.3,296.4 L847,269 L833.6,276.8 L811.2,284.6 L802.2,272.9 L820.2,261.1 L844.8,257.2 L844.8,249.4 L822.4,251.3 L800,247.4 L804.5,233.7 L829.1,227.8 L847,233.7 L847,223.9 Z"/>
   </g>
-  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0" aria-hidden="true">
     <path class="trait" d="M0,502 L960,480"/>
   </g>
 </svg>

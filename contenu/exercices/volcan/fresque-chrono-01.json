@@ -83,7 +83,7 @@
         {
           "id": "vignette-cour",
           "libelle": "Le cochon entre dans la cour.",
-          "asset": null,
+          "asset": "assets/vignettes/volcan-fresque/vignette-cour.png",
           "taille": [
             220,
             160
@@ -92,7 +92,7 @@
         {
           "id": "vignette-ruche",
           "libelle": "Il marche vers la ruche.",
-          "asset": null,
+          "asset": "assets/vignettes/volcan-fresque/vignette-ruche.png",
           "taille": [
             220,
             160
@@ -101,7 +101,7 @@
         {
           "id": "vignette-mouche",
           "libelle": "Une mouche est sur son nez.",
-          "asset": null,
+          "asset": "assets/vignettes/volcan-fresque/vignette-mouche.png",
           "taille": [
             220,
             160
@@ -110,7 +110,7 @@
         {
           "id": "vignette-danse",
           "libelle": "Le cochon danse.",
-          "asset": null,
+          "asset": "assets/vignettes/volcan-fresque/vignette-danse.png",
           "taille": [
             220,
             160
@@ -119,7 +119,7 @@
         {
           "id": "vignette-quille",
           "libelle": "La fille a une quille.",
-          "asset": null,
+          "asset": "assets/vignettes/volcan-fresque/vignette-quille.png",
           "taille": [
             220,
             160
@@ -128,7 +128,7 @@
         {
           "id": "vignette-sac",
           "libelle": "Elle range la quille dans le sac.",
-          "asset": null,
+          "asset": "assets/vignettes/volcan-fresque/vignette-sac.png",
           "taille": [
             220,
             160
@@ -137,7 +137,7 @@
         {
           "id": "vignette-joue",
           "libelle": "Puis elle joue avec le chat.",
-          "asset": null,
+          "asset": "assets/vignettes/volcan-fresque/vignette-joue.png",
           "taille": [
             220,
             160
@@ -146,7 +146,7 @@
         {
           "id": "vignette-montagne",
           "libelle": "La montagne est très grande.",
-          "asset": null,
+          "asset": "assets/vignettes/volcan-fresque/vignette-montagne.png",
           "taille": [
             220,
             160
@@ -155,7 +155,7 @@
         {
           "id": "vignette-ligne",
           "libelle": "Gobi marche sur la ligne.",
-          "asset": null,
+          "asset": "assets/vignettes/volcan-fresque/vignette-ligne.png",
           "taille": [
             220,
             160
@@ -164,7 +164,7 @@
         {
           "id": "vignette-champignon",
           "libelle": "Puis Gobi trouve un champignon.",
-          "asset": null,
+          "asset": "assets/vignettes/volcan-fresque/vignette-champignon.png",
           "taille": [
             220,
             160

@@ -28,10 +28,9 @@
  * dès la création de l'état, un emplacement DÉRIVÉ et STABLE (jamais recalculé quand une autre
  * carte est acquise) — c'est cette stabilité, et non une case explicite, qui tient R59 ici.
  *
- * ── UN DÉFAUT DE CONTENU CONNU, NON CORRIGÉ ICI ───────────────────────────────────────────────
- * Faute d'assets dessinés (`asset: null`, D2), la face « image » affiche son libellé en clair :
- * l'appariement reste une tâche de lecture, pas encore un memory à cartes retournées. Signalé
- * dans les `$commentaire` de plusieurs exercices ; ni le contenu ni la règle ne sont à moi.
+ * La face `image` affiche son asset lorsqu'il existe et ne révèle jamais son libellé à l'écran :
+ * le libellé reste le nom accessible du bouton. Un contenu ancien sans asset conserve un repli
+ * textuel afin de ne jamais rendre une carte vide.
  *
  * TROIS INVARIANTS DE RENDU, inchangés et opposables :
  *   - aucun `data-etat="echec"` n'est émis ici, ni ailleurs (R14) ;
@@ -52,6 +51,7 @@ import { DndContext, PointerSensor, useDraggable, useDroppable, useSensor, useSe
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 import type { ActionPaires, ContenuPaires, EtatPaires } from '@pierre/partage';
 
+import { urlAsset } from '../../api/client.js';
 import { SceneDecor } from '../../habillages/SceneDecor.js';
 import type { RegionAllumee } from '../../habillages/SceneDecor.js';
 import { deriverEmplacements, regionsColoriables } from '../../habillages/emplacements.js';
@@ -176,6 +176,7 @@ function CarteFlottante({
         data-retournee={retournee ? 'oui' : 'non'}
         data-appariee={appariee ? 'oui' : 'non'}
         disabled={appariee}
+        aria-label={carte.libelle}
         onClick={(evenement) => {
           onTaper(carte, evenement);
         }}
@@ -196,7 +197,24 @@ function CarteFlottante({
           } as CSSProperties
         }
       >
-        {carte.libelle}
+        {carte.face === 'image' && carte.asset !== null ? (
+          <img
+            data-illustration-carte="oui"
+            src={urlAsset(String(carte.asset))}
+            alt=""
+            aria-hidden="true"
+            draggable={false}
+            style={{
+              display: 'block',
+              inlineSize: 'clamp(72px, 8vw, 112px)',
+              blockSize: 'clamp(72px, 8vw, 112px)',
+              objectFit: 'contain',
+              borderRadius: '1rem',
+            }}
+          />
+        ) : (
+          carte.libelle
+        )}
       </button>
     </span>
   );
@@ -305,7 +323,11 @@ export function MoteurPaires(
 
   const mesurer = useCallback(
     (cle: string): Boite => {
-      const libelle = cartesParId.get(cle)?.libelle ?? '';
+      const carte = cartesParId.get(cle);
+      const libelle = carte?.libelle ?? '';
+      if (carte?.face === 'image' && carte.asset !== null) {
+        return { largeur: 128, hauteur: 128 };
+      }
       const corps = reglages.corpsPx;
       const interlettrage = reglages.interlettrageEm * corps;
       return {

@@ -17,8 +17,9 @@
   -->
   <g id="calque-fond">
     <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
+    <image data-fond-illustre="ecole" href="/api/contenu/assets/assets/decors/exercices/foret-bestiaire.png" x="0" y="0" width="960" height="600" preserveAspectRatio="xMidYMid slice"/>
   </g>
-  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round">
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round" opacity="0" aria-hidden="true">
     <path id="canopee-du-bestiaire" class="zone" data-region-svg="canopee-du-bestiaire" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L960,0 L960,148 L933.3,155 L906.7,160.1 L880,162 L853.3,160.1 L826.7,155 L800,148 L773.3,141 L746.7,135.9 L720,134 L693.3,135.9 L666.7,141 L640,148 L613.3,155 L586.7,160.1 L560,162 L533.3,160.1 L506.7,155 L480,148 L453.3,141 L426.7,135.9 L400,134 L373.3,135.9 L346.7,141 L320,148 L293.3,155 L266.7,160.1 L240,162 L213.3,160.1 L186.7,155 L160,148 L133.3,141 L106.7,135.9 L80,134 L53.3,135.9 L26.7,141 L0,148 Z"/>
     <path id="sous-bois" class="zone" data-region-svg="sous-bois" fill="#8E97A8" fill-rule="evenodd" d="M0,430 L26.7,437.7 L53.3,441.8 L80,440.4 L106.7,434.1 L133.3,425.9 L160,419.6 L186.7,418.2 L213.3,422.3 L240,430 L266.7,437.7 L293.3,441.8 L320,440.4 L346.7,434.1 L373.3,425.9 L400,419.6 L426.7,418.2 L453.3,422.3 L480,430 L506.7,437.7 L533.3,441.8 L560,440.4 L586.7,434.1 L613.3,425.9 L640,419.6 L666.7,418.2 L693.3,422.3 L720,430 L746.7,437.7 L773.3,441.8 L800,440.4 L826.7,434.1 L853.3,425.9 L880,419.6 L906.7,418.2 L933.3,422.3 L960,430 L960,600 L0,600 Z"/>
     <path id="lichen" class="zone" data-region-svg="lichen" fill="#8E97A8" fill-rule="evenodd" d="M200.4,247.8 L190.1,253 L172,254.5 L159.9,255.4 L159.3,260.9 L162.9,271.4 L160,280.5 L148.3,281.6 L134.3,275 L124.3,268.3 L117,269 L107,276.6 L93.3,282.9 L82.4,280.7 L80.1,271 L82.9,260.9 L80.5,256.3 L66.9,256 L48.9,254.6 L40.3,249.1 L47.9,241.7 L63.4,236.1 L71.8,232.1 L66.6,226.6 L56,217.7 L53.8,209.1 L65.3,206.1 L82.8,209 L95.5,211.9 L100.7,208.3 L104.6,198.3 L113.1,189.9 L124.5,190.4 L133,199.4 L137.4,208.7 L143.7,211.1 L157.2,207.3 L174.4,204.4 L184.4,208.2 L181.1,217.3 L171.1,226.1 L168.1,231.3 L178.6,235 L194.3,240.6 Z"/>
@@ -29,7 +30,7 @@
     <path id="champignon-du-sous-bois" class="zone" data-region-svg="champignon-du-sous-bois" fill="#8E97A8" fill-rule="evenodd" d="M112,444.7 L138.9,453.7 L159,476.1 L168,494 L132.2,498.5 L129.9,534.3 L136.6,545.5 L87.4,545.5 L94.1,534.3 L91.8,498.5 L56,494 L65,476.1 L85.1,453.7 Z"/>
     <path id="gland-tombe" class="zone" data-region-svg="gland-tombe" fill="#8E97A8" fill-rule="evenodd" d="M384,468 L401.3,474.1 L412.8,488.4 L412.8,502.7 L407,510.8 L405.6,539.4 L392.6,565.9 L375.4,565.9 L362.4,539.4 L361,510.8 L355.2,502.7 L355.2,488.4 L366.7,474.1 Z"/>
   </g>
-  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0" aria-hidden="true">
     <path class="trait" d="M0,432 L960,424"/>
   </g>
 </svg>

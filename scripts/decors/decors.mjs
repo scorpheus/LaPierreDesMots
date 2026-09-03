@@ -70,14 +70,41 @@ const NUANCIER = {
   'cite-des-histoires': ['orange', 'jaune', 'rose', 'violet', 'blanc', 'brun'],
 };
 
+/**
+ * Les décors maîtres validés sont servis comme fond illustré pour les moteurs de
+ * placement, tri, phrase, etc. Le SVG généré reste présent (et ses régions restent
+ * tapables) mais sa géométrie est masquée pour éviter le blockout par-dessus l'image.
+ * Les quatre scènes `colorie` sont volontairement exclues : elles utilisent les
+ * scènes raster indexées et leurs masques dédiés.
+ */
+function fondRasterExercice(spec) {
+  // Les moteurs colorie/libre ont leur propre contrat de calques (fond/trait/masques).
+  // Ne pas leur substituer un maître complet : cela neutraliserait la recoloration.
+  if (spec.moteurs?.some((moteur) => moteur === 'colorie' || moteur === 'libre')) return undefined;
+  const nom = spec.fichier.replace(/\.svg$/u, '').split('/').pop();
+  const prefixe = spec.region === 'marais-jumeau'
+    ? 'marais'
+    : spec.region === 'foret-muette'
+      ? 'foret'
+      : spec.region === 'cite-des-histoires'
+      ? 'cite'
+      : spec.region;
+  return `/api/contenu/assets/assets/decors/exercices/${prefixe}-${nom}.png`;
+}
+
 /** Complète une scène : viewBox par défaut, chemin du `.habillage.json` dérivé du SVG. */
 function scene(spec) {
+  const fondRaster = fondRasterExercice(spec);
   return {
     viewBox: '0 0 960 600',
     traits: [],
     timings: TEMPO,
     nuancier: NUANCIER[spec.region],
     ...spec,
+    ...(spec.fondIllustre || !fondRaster ? {} : {
+      fondIllustre: fondRaster,
+      masquerGeometrie: true,
+    }),
     fichierHabillage: `habillages/${spec.fichier.replace(/\.svg$/u, '.habillage.json')}`,
   };
 }

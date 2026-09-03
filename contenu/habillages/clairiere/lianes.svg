@@ -17,8 +17,9 @@
   -->
   <g id="calque-fond">
     <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
+    <image data-fond-illustre="ecole" href="/api/contenu/assets/assets/decors/exercices/clairiere-lianes.png" x="0" y="0" width="960" height="600" preserveAspectRatio="xMidYMid slice"/>
   </g>
-  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round">
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round" opacity="0" aria-hidden="true">
     <path id="jour-entre-branches" class="zone" data-region-svg="jour-entre-branches" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L960,0 L960,118 L933.3,124.4 L906.7,127.8 L880,126.7 L853.3,121.4 L826.7,114.6 L800,109.3 L773.3,108.2 L746.7,111.6 L720,118 L693.3,124.4 L666.7,127.8 L640,126.7 L613.3,121.4 L586.7,114.6 L560,109.3 L533.3,108.2 L506.7,111.6 L480,118 L453.3,124.4 L426.7,127.8 L400,126.7 L373.3,121.4 L346.7,114.6 L320,109.3 L293.3,108.2 L266.7,111.6 L240,118 L213.3,124.4 L186.7,127.8 L160,126.7 L133.3,121.4 L106.7,114.6 L80,109.3 L53.3,108.2 L26.7,111.6 L0,118 Z"/>
     <path id="clairiere-sol" class="zone" data-region-svg="clairiere-sol" fill="#8E97A8" fill-rule="evenodd" d="M0,500 L26.7,507 L53.3,512.1 L80,514 L106.7,512.1 L133.3,507 L160,500 L186.7,493 L213.3,487.9 L240,486 L266.7,487.9 L293.3,493 L320,500 L346.7,507 L373.3,512.1 L400,514 L426.7,512.1 L453.3,507 L480,500 L506.7,493 L533.3,487.9 L560,486 L586.7,487.9 L613.3,493 L640,500 L666.7,507 L693.3,512.1 L720,514 L746.7,512.1 L773.3,507 L800,500 L826.7,493 L853.3,487.9 L880,486 L906.7,487.9 L933.3,493 L960,500 L960,600 L0,600 Z"/>
     <path id="branche" class="zone" data-region-svg="branche" fill="#8E97A8" fill-rule="evenodd" d="M41.6,194.9 L300.3,163 L620.2,181 L931.2,152.9 L928.8,127.1 L619.8,155 L299.7,137 L38.4,169.1 Z"/>
@@ -30,7 +31,7 @@
     <path id="champignon-du-sol" class="zone" data-region-svg="champignon-du-sol" fill="#8E97A8" fill-rule="evenodd" d="M130,474.7 L156.9,483.7 L177,506.1 L186,524 L150.2,528.5 L147.9,564.3 L154.6,575.5 L105.4,575.5 L112.1,564.3 L109.8,528.5 L74,524 L83,506.1 L103.1,483.7 Z"/>
     <path id="pierre-mousse" class="zone" data-region-svg="pierre-mousse" fill="#8E97A8" fill-rule="evenodd" d="M921.1,558.1 L913.7,562.9 L903.6,565.5 L893.5,566.7 L884.6,567.8 L876.1,569.8 L866.6,572.1 L855.7,573.1 L845.2,571.5 L837.1,567 L832.8,561 L830.8,554.9 L829,549.6 L825.7,544.5 L821.9,538.8 L820.1,532.2 L822.9,525.9 L830.3,521.1 L840.4,518.5 L850.5,517.3 L859.4,516.2 L867.9,514.2 L877.4,511.9 L888.3,510.9 L898.8,512.5 L906.9,517 L911.2,523 L913.2,529.1 L915,534.4 L918.3,539.5 L922.1,545.2 L923.9,551.8 Z"/>
   </g>
-  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0" aria-hidden="true">
     <path class="trait" d="M40,196 L930,158"/>
     <path class="trait" d="M120,540 L860,528"/>
   </g>

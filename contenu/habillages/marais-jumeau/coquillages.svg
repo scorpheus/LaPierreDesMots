@@ -17,8 +17,9 @@
   -->
   <g id="calque-fond">
     <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
+    <image data-fond-illustre="ecole" href="/api/contenu/assets/assets/decors/exercices/marais-coquillages.png" x="0" y="0" width="960" height="600" preserveAspectRatio="xMidYMid slice"/>
   </g>
-  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round">
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round" opacity="0" aria-hidden="true">
     <path id="ciel-de-mer" class="zone" data-region-svg="ciel-de-mer" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L960,0 L960,158 L933.3,163 L906.7,166.7 L880,168 L853.3,166.7 L826.7,163 L800,158 L773.3,153 L746.7,149.3 L720,148 L693.3,149.3 L666.7,153 L640,158 L613.3,163 L586.7,166.7 L560,168 L533.3,166.7 L506.7,163 L480,158 L453.3,153 L426.7,149.3 L400,148 L373.3,149.3 L346.7,153 L320,158 L293.3,163 L266.7,166.7 L240,168 L213.3,166.7 L186.7,163 L160,158 L133.3,153 L106.7,149.3 L80,148 L53.3,149.3 L26.7,153 L0,158 Z"/>
     <path id="sable-mouille" class="zone" data-region-svg="sable-mouille" fill="#8E97A8" fill-rule="evenodd" d="M0,380 L26.7,387.7 L53.3,391.8 L80,390.4 L106.7,384.1 L133.3,375.9 L160,369.6 L186.7,368.2 L213.3,372.3 L240,380 L266.7,387.7 L293.3,391.8 L320,390.4 L346.7,384.1 L373.3,375.9 L400,369.6 L426.7,368.2 L453.3,372.3 L480,380 L506.7,387.7 L533.3,391.8 L560,390.4 L586.7,384.1 L613.3,375.9 L640,369.6 L666.7,368.2 L693.3,372.3 L720,380 L746.7,387.7 L773.3,391.8 L800,390.4 L826.7,384.1 L853.3,375.9 L880,369.6 L906.7,368.2 L933.3,372.3 L960,380 L960,600 L0,600 Z"/>
     <path id="ecume" class="zone" data-region-svg="ecume" fill="#8E97A8" fill-rule="evenodd" d="M-5.9,388.1 L27.1,397.8 L62.1,404.1 L97.9,404.1 L132.9,397.8 L165.9,388.1 L196.9,379 L225.9,373.7 L254.1,373.7 L283.1,379 L314.1,388.1 L347.1,397.8 L382.1,404.1 L417.9,404.1 L452.9,397.8 L485.9,388.1 L516.9,379 L545.9,373.7 L574.1,373.7 L603.1,379 L634.1,388.1 L667.1,397.8 L702.1,404.1 L737.9,404.1 L772.9,397.8 L805.9,388.1 L836.9,379 L865.9,373.7 L894.1,373.7 L923.1,379 L954.1,388.1 L965.9,347.9 L932.9,338.2 L897.9,331.9 L862.1,331.9 L827.1,338.2 L794.1,347.9 L763.1,357 L734.1,362.3 L705.9,362.3 L676.9,357 L645.9,347.9 L612.9,338.2 L577.9,331.9 L542.1,331.9 L507.1,338.2 L474.1,347.9 L443.1,357 L414.1,362.3 L385.9,362.3 L356.9,357 L325.9,347.9 L292.9,338.2 L257.9,331.9 L222.1,331.9 L187.1,338.2 L154.1,347.9 L123.1,357 L94.1,362.3 L65.9,362.3 L36.9,357 L5.9,347.9 Z"/>
@@ -29,7 +30,7 @@
     <path id="etoile-de-mer" class="zone" data-region-svg="etoile-de-mer" fill="#8E97A8" fill-rule="evenodd" d="M620,446 L634.1,480.6 L671.4,483.3 L642.8,507.4 L651.7,543.7 L620,524 L588.3,543.7 L597.2,507.4 L568.6,483.3 L605.9,480.6 Z"/>
     <path id="bois-flotte" class="zone" data-region-svg="bois-flotte" fill="#8E97A8" fill-rule="evenodd" d="M61.1,513 L219.6,499 L317.2,520.7 L322.8,495.3 L220.4,473 L58.9,487 Z"/>
   </g>
-  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0" aria-hidden="true">
     <path class="trait" d="M0,380 L960,366"/>
   </g>
 </svg>

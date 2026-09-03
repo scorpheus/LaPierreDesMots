@@ -17,8 +17,9 @@
   -->
   <g id="calque-fond">
     <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
+    <image data-fond-illustre="ecole" href="/api/contenu/assets/assets/decors/exercices/marais-poissons.png" x="0" y="0" width="960" height="600" preserveAspectRatio="xMidYMid slice"/>
   </g>
-  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round">
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round" opacity="0" aria-hidden="true">
     <path id="ciel-au-dessus" class="zone" data-region-svg="ciel-au-dessus" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L960,0 L960,118 L933.3,123.8 L906.7,126.9 L880,125.8 L853.3,121.1 L826.7,114.9 L800,110.2 L773.3,109.1 L746.7,112.2 L720,118 L693.3,123.8 L666.7,126.9 L640,125.8 L613.3,121.1 L586.7,114.9 L560,110.2 L533.3,109.1 L506.7,112.2 L480,118 L453.3,123.8 L426.7,126.9 L400,125.8 L373.3,121.1 L346.7,114.9 L320,110.2 L293.3,109.1 L266.7,112.2 L240,118 L213.3,123.8 L186.7,126.9 L160,125.8 L133.3,121.1 L106.7,114.9 L80,110.2 L53.3,109.1 L26.7,112.2 L0,118 Z"/>
     <path id="reflet" class="zone" data-region-svg="reflet" fill="#8E97A8" fill-rule="evenodd" d="M-5.7,212.3 L27.3,220.7 L62.2,226.2 L97.8,226.2 L132.7,220.7 L165.7,212.3 L196.7,204.3 L225.8,199.6 L254.2,199.6 L283.3,204.3 L314.3,212.3 L347.3,220.7 L382.2,226.2 L417.8,226.2 L452.7,220.7 L485.7,212.3 L516.7,204.3 L545.8,199.6 L574.2,199.6 L603.3,204.3 L634.3,212.3 L667.3,220.7 L702.2,226.2 L737.8,226.2 L772.7,220.7 L805.7,212.3 L836.7,204.3 L865.8,199.6 L894.2,199.6 L923.3,204.3 L954.3,212.3 L965.7,167.7 L932.7,159.3 L897.8,153.8 L862.2,153.8 L827.3,159.3 L794.3,167.7 L763.3,175.7 L734.2,180.4 L705.8,180.4 L676.7,175.7 L645.7,167.7 L612.7,159.3 L577.8,153.8 L542.2,153.8 L507.3,159.3 L474.3,167.7 L443.3,175.7 L414.2,180.4 L385.8,180.4 L356.7,175.7 L325.7,167.7 L292.7,159.3 L257.8,153.8 L222.2,153.8 L187.3,159.3 L154.3,167.7 L123.3,175.7 L94.2,180.4 L65.8,180.4 L36.7,175.7 L5.7,167.7 Z"/>
     <path id="vase" class="zone" data-region-svg="vase" fill="#8E97A8" fill-rule="evenodd" d="M0,500 L26.7,507.7 L53.3,509.8 L80,505 L106.7,496.6 L133.3,490.6 L160,491.3 L186.7,498.3 L213.3,506.4 L240,510 L266.7,506.4 L293.3,498.3 L320,491.3 L346.7,490.6 L373.3,496.6 L400,505 L426.7,509.8 L453.3,507.7 L480,500 L506.7,492.3 L533.3,490.2 L560,495 L586.7,503.4 L613.3,509.4 L640,508.7 L666.7,501.7 L693.3,493.6 L720,490 L746.7,493.6 L773.3,501.7 L800,508.7 L826.7,509.4 L853.3,503.4 L880,495 L906.7,490.2 L933.3,492.3 L960,500 L960,600 L0,600 Z"/>
@@ -29,7 +30,7 @@
     <path id="bulle" class="zone" data-region-svg="bulle" fill="#8E97A8" fill-rule="evenodd" d="M730,220 L727.7,231.5 L721.2,241.2 L711.5,247.7 L700,250 L688.5,247.7 L678.8,241.2 L672.3,231.5 L670,220 L672.3,208.5 L678.8,198.8 L688.5,192.3 L700,190 L711.5,192.3 L721.2,198.8 L727.7,208.5 Z"/>
     <path id="galet-du-fond" class="zone" data-region-svg="galet-du-fond" fill="#8E97A8" fill-rule="evenodd" d="M169.1,554.8 L161.4,559.5 L151,562.3 L140.5,563.8 L130.9,565.2 L121.2,567.1 L110.2,568.6 L98.6,568.2 L88.4,565.2 L81.5,560 L77.9,554.1 L75.5,548.6 L72.5,543.4 L69.1,537.7 L67.8,531.4 L70.9,525.2 L78.6,520.5 L89,517.7 L99.5,516.2 L109.1,514.8 L118.8,512.9 L129.8,511.4 L141.4,511.8 L151.6,514.8 L158.5,520 L162.1,525.9 L164.5,531.4 L167.5,536.6 L170.9,542.3 L172.2,548.6 Z"/>
   </g>
-  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0" aria-hidden="true">
     <path class="trait" d="M0,192 L960,186"/>
   </g>
 </svg>

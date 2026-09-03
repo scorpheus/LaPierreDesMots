@@ -17,8 +17,9 @@
   -->
   <g id="calque-fond">
     <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
+    <image data-fond-illustre="ecole" href="/api/contenu/assets/assets/decors/exercices/cite-bibliotheque.png" x="0" y="0" width="960" height="600" preserveAspectRatio="xMidYMid slice"/>
   </g>
-  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round">
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round" opacity="0" aria-hidden="true">
     <path id="mur-du-fond" class="zone" data-region-svg="mur-du-fond" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L960,0 L960,118 L933.3,122 L906.7,124.9 L880,126 L853.3,124.9 L826.7,122 L800,118 L773.3,114 L746.7,111.1 L720,110 L693.3,111.1 L666.7,114 L640,118 L613.3,122 L586.7,124.9 L560,126 L533.3,124.9 L506.7,122 L480,118 L453.3,114 L426.7,111.1 L400,110 L373.3,111.1 L346.7,114 L320,118 L293.3,122 L266.7,124.9 L240,126 L213.3,124.9 L186.7,122 L160,118 L133.3,114 L106.7,111.1 L80,110 L53.3,111.1 L26.7,114 L0,118 Z"/>
     <path id="parquet" class="zone" data-region-svg="parquet" fill="#8E97A8" fill-rule="evenodd" d="M0,490 L26.7,496.1 L53.3,496.1 L80,490 L106.7,483.9 L133.3,483.9 L160,490 L186.7,496.1 L213.3,496.1 L240,490 L266.7,483.9 L293.3,483.9 L320,490 L346.7,496.1 L373.3,496.1 L400,490 L426.7,483.9 L453.3,483.9 L480,490 L506.7,496.1 L533.3,496.1 L560,490 L586.7,483.9 L613.3,483.9 L640,490 L666.7,496.1 L693.3,496.1 L720,490 L746.7,483.9 L773.3,483.9 L800,490 L826.7,496.1 L853.3,496.1 L880,490 L906.7,483.9 L933.3,483.9 L960,490 L960,600 L0,600 Z"/>
     <path id="etagere-haute" class="zone" data-region-svg="etagere-haute" fill="#8E97A8" fill-rule="evenodd" d="M80,150 L640,150 L640,302 L80,302 Z M110,180 L610,180 L610,272 L110,272 Z"/>
@@ -29,7 +30,7 @@
     <path id="livre-ouvert" class="zone" data-region-svg="livre-ouvert" fill="#8E97A8" fill-rule="evenodd" d="M338.9,485.9 L415.4,474.7 L422.6,474.7 L499.1,485.9 L499.1,566.6 L422.6,557.6 L415.4,557.6 L338.9,566.6 Z"/>
     <path id="lampe-de-lecture" class="zone" data-region-svg="lampe-de-lecture" fill="#8E97A8" fill-rule="evenodd" d="M85.5,358 L108.5,358 L101.9,371.4 L120,380.4 L126.5,396.1 L121.6,443.1 L129.8,454.3 L129.8,465.5 L64.2,465.5 L64.2,454.3 L72.4,443.1 L67.5,396.1 L74,380.4 L92.1,371.4 Z"/>
   </g>
-  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0" aria-hidden="true">
     <path class="trait" d="M110,226 L610,226"/>
     <path class="trait" d="M110,390 L610,390"/>
   </g>

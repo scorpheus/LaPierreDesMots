@@ -17,8 +17,9 @@
   -->
   <g id="calque-fond">
     <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
+    <image data-fond-illustre="ecole" href="/api/contenu/assets/assets/decors/exercices/foret-pas-japonais.png" x="0" y="0" width="960" height="600" preserveAspectRatio="xMidYMid slice"/>
   </g>
-  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round">
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round" opacity="0" aria-hidden="true">
     <path id="canopee-basse" class="zone" data-region-svg="canopee-basse" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L960,0 L960,128 L933.3,134.4 L906.7,137.8 L880,136.7 L853.3,131.4 L826.7,124.6 L800,119.3 L773.3,118.2 L746.7,121.6 L720,128 L693.3,134.4 L666.7,137.8 L640,136.7 L613.3,131.4 L586.7,124.6 L560,119.3 L533.3,118.2 L506.7,121.6 L480,128 L453.3,134.4 L426.7,137.8 L400,136.7 L373.3,131.4 L346.7,124.6 L320,119.3 L293.3,118.2 L266.7,121.6 L240,128 L213.3,134.4 L186.7,137.8 L160,136.7 L133.3,131.4 L106.7,124.6 L80,119.3 L53.3,118.2 L26.7,121.6 L0,128 Z"/>
     <path id="ruisseau" class="zone" data-region-svg="ruisseau" fill="#8E97A8" fill-rule="evenodd" d="M-26.8,451.1 L12.8,466 L57.9,479 L107.3,485.7 L157.8,483.4 L205.3,473 L247.7,458.5 L284.6,444.2 L316.1,433.2 L342.4,427.3 L365.8,426.1 L390.2,429.6 L419,438.1 L453.2,451.1 L492.8,466 L537.9,479 L587.3,485.7 L637.8,483.4 L685.3,473 L727.7,458.5 L764.6,444.2 L796.1,433.2 L822.4,427.3 L845.8,426.1 L870.2,429.6 L899,438.1 L933.2,451.1 L986.8,308.9 L947.2,294 L902.1,281 L852.7,274.3 L802.2,276.6 L754.7,287 L712.3,301.5 L675.4,315.8 L643.9,326.8 L617.6,332.7 L594.2,333.9 L569.8,330.4 L541,321.9 L506.8,308.9 L467.2,294 L422.1,281 L372.7,274.3 L322.2,276.6 L274.7,287 L232.3,301.5 L195.4,315.8 L163.9,326.8 L137.6,332.7 L114.2,333.9 L89.8,330.4 L61,321.9 L26.8,308.9 Z"/>
     <path id="fougere" class="zone" data-region-svg="fougere" fill="#8E97A8" fill-rule="evenodd" d="M147,178 L165.2,192.5 L183.4,216.7 L198,226.4 L208.9,250.6 L219.8,265.1 L216.2,289.3 L223.4,313.5 L212.5,332.9 L208.9,361.9 L190.7,376.4 L172.5,395.8 L154.3,405.5 L154.3,420 L139.7,420 L139.7,405.5 L121.5,395.8 L103.3,376.4 L85.1,361.9 L81.5,332.9 L70.6,313.5 L77.8,289.3 L74.2,265.1 L85.1,250.6 L96,226.4 L110.6,216.7 L128.8,192.5 Z"/>
@@ -29,7 +30,7 @@
     <path id="souche-du-bord" class="zone" data-region-svg="souche-du-bord" fill="#8E97A8" fill-rule="evenodd" d="M793.2,207.3 L823.6,195.1 L854,202.4 L887.4,192.6 L914.8,207.3 L920.9,282.9 L896.6,295.1 L854,287.8 L811.4,295.1 L787.1,282.9 Z M823.6,219.5 L884.4,219.5 L884.4,246.3 L823.6,246.3 Z"/>
     <path id="champignon-humide" class="zone" data-region-svg="champignon-humide" fill="#8E97A8" fill-rule="evenodd" d="M424,193.5 L446.1,200.9 L462.6,219.3 L470,234 L440.6,237.7 L438.7,267.1 L444.2,276.3 L403.8,276.3 L409.3,267.1 L407.4,237.7 L378,234 L385.4,219.3 L401.9,200.9 Z"/>
   </g>
-  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0" aria-hidden="true">
     <path class="trait" d="M80,520 L930,496"/>
   </g>
 </svg>

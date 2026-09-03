@@ -17,8 +17,9 @@
   -->
   <g id="calque-fond">
     <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L800,0 L800,600 L0,600 Z"/>
+    <image data-fond-illustre="ecole" href="/api/contenu/assets/assets/decors/exercices/galeries-tracer-cristal.png" x="0" y="0" width="800" height="600" preserveAspectRatio="xMidYMid slice"/>
   </g>
-  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round">
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round" opacity="0" aria-hidden="true">
     <path id="paroi-gauche" class="zone" data-region-svg="paroi-gauche" fill="#8E97A8" fill-rule="evenodd" d="M0,60 L220,82 L210,500 L0,522 Z"/>
     <path id="paroi-droite" class="zone" data-region-svg="paroi-droite" fill="#8E97A8" fill-rule="evenodd" d="M578,88 L800,56 L800,528 L592,494 Z"/>
     <path id="cristal-gauche" class="zone" data-region-svg="cristal-gauche" fill="#8E97A8" fill-rule="evenodd" d="M110,150 L156,201 L145.9,306.5 L110,332 L74.1,306.5 L64,201 Z"/>
@@ -26,7 +27,7 @@
     <path id="sol-de-la-galerie" class="zone" data-region-svg="sol-de-la-galerie" fill="#8E97A8" fill-rule="evenodd" d="M0,520 L22.2,525.1 L44.4,527.9 L66.7,526.9 L88.9,522.7 L111.1,517.3 L133.3,513.1 L155.6,512.1 L177.8,514.9 L200,520 L222.2,525.1 L244.4,527.9 L266.7,526.9 L288.9,522.7 L311.1,517.3 L333.3,513.1 L355.6,512.1 L377.8,514.9 L400,520 L422.2,525.1 L444.4,527.9 L466.7,526.9 L488.9,522.7 L511.1,517.3 L533.3,513.1 L555.6,512.1 L577.8,514.9 L600,520 L622.2,525.1 L644.4,527.9 L666.7,526.9 L688.9,522.7 L711.1,517.3 L733.3,513.1 L755.6,512.1 L777.8,514.9 L800,520 L800,600 L0,600 Z"/>
     <path id="ardoise" class="zone" data-region-svg="ardoise" fill="none" fill-rule="evenodd" d="M250,90 L550,90 L550,490 L250,490 Z"/>
   </g>
-  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0" aria-hidden="true">
     <path class="trait" d="M250,130 L550,130"/>
     <path class="trait" d="M0,522 L800,522"/>
   </g>

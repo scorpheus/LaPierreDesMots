@@ -85,7 +85,7 @@
         {
           "id": "vignette-nuage",
           "libelle": "Le nuage est très gris.",
-          "asset": null,
+          "asset": "assets/vignettes/cite-vitrail/vignette-nuage.png",
           "taille": [
             220,
             160
@@ -94,7 +94,7 @@
         {
           "id": "vignette-pluie",
           "libelle": "Puis la pluie tombe sur la forêt.",
-          "asset": null,
+          "asset": "assets/vignettes/cite-vitrail/vignette-pluie.png",
           "taille": [
             220,
             160
@@ -103,7 +103,7 @@
         {
           "id": "vignette-riviere",
           "libelle": "La pluie entre dans la rivière.",
-          "asset": null,
+          "asset": "assets/vignettes/cite-vitrail/vignette-riviere.png",
           "taille": [
             220,
             160
@@ -112,7 +112,7 @@
         {
           "id": "vignette-lac",
           "libelle": "La rivière entre dans le lac.",
-          "asset": null,
+          "asset": "assets/vignettes/cite-vitrail/vignette-lac.png",
           "taille": [
             220,
             160
@@ -121,7 +121,7 @@
         {
           "id": "vignette-grand",
           "libelle": "Le lac est très grand.",
-          "asset": null,
+          "asset": "assets/vignettes/cite-vitrail/vignette-grand.png",
           "taille": [
             220,
             160
@@ -130,7 +130,7 @@
         {
           "id": "vignette-soleil",
           "libelle": "Puis le soleil est chaud.",
-          "asset": null,
+          "asset": "assets/vignettes/cite-vitrail/vignette-soleil.png",
           "taille": [
             220,
             160
@@ -139,7 +139,7 @@
         {
           "id": "vignette-petit",
           "libelle": "Le nuage est petit.",
-          "asset": null,
+          "asset": "assets/vignettes/cite-vitrail/vignette-petit.png",
           "taille": [
             220,
             160
@@ -148,7 +148,7 @@
         {
           "id": "vignette-gros",
           "libelle": "Puis le nuage est gros.",
-          "asset": null,
+          "asset": "assets/vignettes/cite-vitrail/vignette-gros.png",
           "taille": [
             220,
             160
@@ -157,7 +157,7 @@
         {
           "id": "vignette-jardin",
           "libelle": "La pluie tombe sur le jardin.",
-          "asset": null,
+          "asset": "assets/vignettes/cite-vitrail/vignette-jardin.png",
           "taille": [
             220,
             160

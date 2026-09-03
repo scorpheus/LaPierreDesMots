@@ -17,8 +17,9 @@
   -->
   <g id="calque-fond">
     <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
+    <image data-fond-illustre="ecole" href="/api/contenu/assets/assets/decors/exercices/foret-veillee-automne.png" x="0" y="0" width="960" height="600" preserveAspectRatio="xMidYMid slice"/>
   </g>
-  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round">
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round" opacity="0" aria-hidden="true">
     <path id="ciel-de-nuit" class="zone" data-region-svg="ciel-de-nuit" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L960,0 L960,228 L933.3,232.1 L906.7,235.7 L880,238.4 L853.3,239.8 L826.7,239.8 L800,238.4 L773.3,235.7 L746.7,232.1 L720,228 L693.3,223.9 L666.7,220.3 L640,217.6 L613.3,216.2 L586.7,216.2 L560,217.6 L533.3,220.3 L506.7,223.9 L480,228 L453.3,232.1 L426.7,235.7 L400,238.4 L373.3,239.8 L346.7,239.8 L320,238.4 L293.3,235.7 L266.7,232.1 L240,228 L213.3,223.9 L186.7,220.3 L160,217.6 L133.3,216.2 L106.7,216.2 L80,217.6 L53.3,220.3 L26.7,223.9 L0,228 Z"/>
     <path id="clairiere-rousse" class="zone" data-region-svg="clairiere-rousse" fill="#8E97A8" fill-rule="evenodd" d="M0,470 L26.7,476.4 L53.3,479.8 L80,478.7 L106.7,473.4 L133.3,466.6 L160,461.3 L186.7,460.2 L213.3,463.6 L240,470 L266.7,476.4 L293.3,479.8 L320,478.7 L346.7,473.4 L373.3,466.6 L400,461.3 L426.7,460.2 L453.3,463.6 L480,470 L506.7,476.4 L533.3,479.8 L560,478.7 L586.7,473.4 L613.3,466.6 L640,461.3 L666.7,460.2 L693.3,463.6 L720,470 L746.7,476.4 L773.3,479.8 L800,478.7 L826.7,473.4 L853.3,466.6 L880,461.3 L906.7,460.2 L933.3,463.6 L960,470 L960,600 L0,600 Z"/>
     <path id="arbre-roux-gauche" class="zone" data-region-svg="arbre-roux-gauche" fill="#8E97A8" fill-rule="evenodd" d="M296.1,206.1 L282.3,216.3 L258.6,220.3 L237.7,221.5 L226.7,226.5 L223,239.3 L217.8,256.4 L205.1,268.9 L186.4,269.7 L168.4,259.2 L155.1,245.5 L144.3,237.9 L129.4,239.7 L107.7,245.7 L84.5,247 L69.7,238.8 L69.1,223.2 L78.2,207 L85.2,195 L80.1,186.4 L63.6,176.9 L47.3,164 L43.9,149.9 L57.7,139.7 L81.4,135.7 L102.3,134.5 L113.3,129.5 L117,116.7 L122.2,99.6 L134.9,87.1 L153.6,86.3 L171.6,96.8 L184.9,110.5 L195.7,118.1 L210.6,116.3 L232.3,110.3 L255.5,109 L270.3,117.2 L270.9,132.8 L261.8,149 L254.8,161 L259.9,169.6 L276.4,179.1 L292.7,192 Z"/>
@@ -30,7 +31,7 @@
     <path id="buche-de-veillee" class="zone" data-region-svg="buche-de-veillee" fill="#8E97A8" fill-rule="evenodd" d="M398,486 L576,470 L586,510 L404,526 Z"/>
     <path id="lune-rousse" class="zone" data-region-svg="lune-rousse" fill="#8E97A8" fill-rule="evenodd" d="M910,108 L907.7,122.8 L900.8,136.2 L890.2,146.8 L876.8,153.7 L862,156 L847.2,153.7 L833.8,146.8 L823.2,136.2 L816.3,122.8 L814,108 L816.3,93.2 L823.2,79.8 L833.8,69.2 L847.2,62.3 L862,60 L876.8,62.3 L890.2,69.2 L900.8,79.8 L907.7,93.2 Z"/>
   </g>
-  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0" aria-hidden="true">
     <path class="trait" d="M0,472 L960,464"/>
   </g>
 </svg>

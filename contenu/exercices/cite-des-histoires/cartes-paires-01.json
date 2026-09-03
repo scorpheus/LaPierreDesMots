@@ -101,7 +101,7 @@
           "id": "image-cartable",
           "libelle": "le cartable",
           "face": "image",
-          "asset": null,
+          "asset": "assets/cartes/cite/cartable.png",
           "paire": "paire-cartable"
         },
         {
@@ -115,7 +115,7 @@
           "id": "image-ecole",
           "libelle": "l'école",
           "face": "image",
-          "asset": null,
+          "asset": "assets/cartes/cite/ecole.png",
           "paire": "paire-ecole"
         },
         {
@@ -129,7 +129,7 @@
           "id": "image-maitresse",
           "libelle": "la maîtresse",
           "face": "image",
-          "asset": null,
+          "asset": "assets/cartes/cite/maitresse.png",
           "paire": "paire-maitresse"
         },
         {
@@ -143,7 +143,7 @@
           "id": "image-cahier",
           "libelle": "le cahier",
           "face": "image",
-          "asset": null,
+          "asset": "assets/cartes/cite/cahier.png",
           "paire": "paire-cahier"
         },
         {
@@ -157,7 +157,7 @@
           "id": "image-ami",
           "libelle": "l'ami et son livre",
           "face": "image",
-          "asset": null,
+          "asset": "assets/cartes/cite/ami.png",
           "paire": "paire-ami"
         },
         {
@@ -171,7 +171,7 @@
           "id": "image-matin",
           "libelle": "le matin gris",
           "face": "image",
-          "asset": null,
+          "asset": "assets/cartes/cite/matin-gris.png",
           "paire": "paire-matin"
         },
         {
@@ -185,7 +185,7 @@
           "id": "image-cour",
           "libelle": "la cour",
           "face": "image",
-          "asset": null,
+          "asset": "assets/cartes/cite/cour.png",
           "paire": "paire-cour"
         },
         {
@@ -199,7 +199,7 @@
           "id": "image-livre",
           "libelle": "le livre et la table",
           "face": "image",
-          "asset": null,
+          "asset": "assets/cartes/cite/livre.png",
           "paire": "paire-livre"
         }
       ],

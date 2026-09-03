@@ -80,7 +80,7 @@
           "id": "image-bille",
           "libelle": "la bille",
           "face": "image",
-          "asset": null,
+          "asset": "assets/cartes/volcan/bille.png",
           "paire": "paire-bille"
         },
         {
@@ -94,7 +94,7 @@
           "id": "image-fille",
           "libelle": "la fille",
           "face": "image",
-          "asset": null,
+          "asset": "assets/cartes/volcan/fille.png",
           "paire": "paire-fille"
         },
         {
@@ -108,7 +108,7 @@
           "id": "image-famille",
           "libelle": "la famille",
           "face": "image",
-          "asset": null,
+          "asset": "assets/cartes/volcan/famille.png",
           "paire": "paire-famille"
         },
         {
@@ -122,7 +122,7 @@
           "id": "image-quille",
           "libelle": "la quille",
           "face": "image",
-          "asset": null,
+          "asset": "assets/cartes/volcan/quille.png",
           "paire": "paire-quille"
         },
         {
@@ -136,7 +136,7 @@
           "id": "image-feuille",
           "libelle": "la feuille",
           "face": "image",
-          "asset": null,
+          "asset": "assets/cartes/volcan/feuille.png",
           "paire": "paire-feuille"
         },
         {
@@ -150,7 +150,7 @@
           "id": "image-grenouille",
           "libelle": "la grenouille",
           "face": "image",
-          "asset": null,
+          "asset": "assets/cartes/volcan/grenouille.png",
           "paire": "paire-grenouille"
         }
       ],

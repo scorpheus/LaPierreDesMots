@@ -85,7 +85,7 @@
         {
           "id": "vignette-plage",
           "libelle": "Gobi est sur la plage.",
-          "asset": null,
+          "asset": "assets/vignettes/cite-pellicule-01/vignette-plage.png",
           "taille": [
             220,
             160
@@ -94,7 +94,7 @@
         {
           "id": "vignette-seau",
           "libelle": "Il a un seau.",
-          "asset": null,
+          "asset": "assets/vignettes/cite-pellicule-01/vignette-seau.png",
           "taille": [
             220,
             160
@@ -103,7 +103,7 @@
         {
           "id": "vignette-sable",
           "libelle": "Le sable est dans le seau.",
-          "asset": null,
+          "asset": "assets/vignettes/cite-pellicule-01/vignette-sable.png",
           "taille": [
             220,
             160
@@ -112,7 +112,7 @@
         {
           "id": "vignette-petit",
           "libelle": "Le château est petit.",
-          "asset": null,
+          "asset": "assets/vignettes/cite-pellicule-01/vignette-petit.png",
           "taille": [
             220,
             160
@@ -121,7 +121,7 @@
         {
           "id": "vignette-grand",
           "libelle": "Puis le château est très grand.",
-          "asset": null,
+          "asset": "assets/vignettes/cite-pellicule-01/vignette-grand.png",
           "taille": [
             220,
             160
@@ -130,7 +130,7 @@
         {
           "id": "vignette-montre",
           "libelle": "Gobi montre le château.",
-          "asset": null,
+          "asset": "assets/vignettes/cite-pellicule-01/vignette-montre.png",
           "taille": [
             220,
             160
@@ -139,7 +139,7 @@
         {
           "id": "vignette-plume",
           "libelle": "Plume entre sur la plage.",
-          "asset": null,
+          "asset": "assets/vignettes/cite-pellicule-01/vignette-plume.png",
           "taille": [
             220,
             160
@@ -148,7 +148,7 @@
         {
           "id": "vignette-caillou",
           "libelle": "Elle range un caillou sur le château.",
-          "asset": null,
+          "asset": "assets/vignettes/cite-pellicule-01/vignette-caillou.png",
           "taille": [
             220,
             160
@@ -157,7 +157,7 @@
         {
           "id": "vignette-danse",
           "libelle": "Puis Plume danse.",
-          "asset": null,
+          "asset": "assets/vignettes/cite-pellicule-01/vignette-danse.png",
           "taille": [
             220,
             160

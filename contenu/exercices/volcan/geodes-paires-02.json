@@ -96,7 +96,7 @@
           "id": "image-cheval",
           "libelle": "le cheval",
           "face": "image",
-          "asset": null,
+          "asset": "assets/cartes/volcan/cheval.png",
           "paire": "paire-cheval"
         },
         {
@@ -110,7 +110,7 @@
           "id": "image-quille",
           "libelle": "la quille",
           "face": "image",
-          "asset": null,
+          "asset": "assets/cartes/volcan/quille.png",
           "paire": "paire-quille"
         },
         {
@@ -124,7 +124,7 @@
           "id": "image-cochon",
           "libelle": "le cochon",
           "face": "image",
-          "asset": null,
+          "asset": "assets/cartes/volcan/cochon.png",
           "paire": "paire-cochon"
         },
         {
@@ -138,7 +138,7 @@
           "id": "image-musique",
           "libelle": "la musique",
           "face": "image",
-          "asset": null,
+          "asset": "assets/cartes/volcan/musique.png",
           "paire": "paire-musique"
         },
         {
@@ -152,7 +152,7 @@
           "id": "image-vache",
           "libelle": "la vache",
           "face": "image",
-          "asset": null,
+          "asset": "assets/cartes/volcan/vache.png",
           "paire": "paire-vache"
         },
         {
@@ -166,7 +166,7 @@
           "id": "image-queue",
           "libelle": "la queue",
           "face": "image",
-          "asset": null,
+          "asset": "assets/cartes/volcan/queue.png",
           "paire": "paire-queue"
         },
         {
@@ -180,7 +180,7 @@
           "id": "image-phare",
           "libelle": "le phare",
           "face": "image",
-          "asset": null,
+          "asset": "assets/cartes/volcan/phare.png",
           "paire": "paire-phare"
         },
         {
@@ -194,7 +194,7 @@
           "id": "image-dauphin",
           "libelle": "le dauphin",
           "face": "image",
-          "asset": null,
+          "asset": "assets/cartes/volcan/dauphin.png",
           "paire": "paire-dauphin"
         }
       ],

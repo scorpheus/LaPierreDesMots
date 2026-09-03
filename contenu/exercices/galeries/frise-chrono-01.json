@@ -51,16 +51,16 @@
         }
       ],
       "vignettes": [
-        { "id": "vignette-pot", "libelle": "Gobi trouve un pot.", "asset": null, "taille": [220, 160] },
-        { "id": "vignette-bol", "libelle": "Il trouve un bol.", "asset": null, "taille": [220, 160] },
-        { "id": "vignette-panier", "libelle": "Il range le pot et le bol.", "asset": null, "taille": [220, 160] },
-        { "id": "vignette-tas", "libelle": "Gobi montre le tas.", "asset": null, "taille": [220, 160] },
-        { "id": "vignette-dos", "libelle": "Il montre le dos du chien.", "asset": null, "taille": [220, 160] },
-        { "id": "vignette-dame", "libelle": "Il montre la dame.", "asset": null, "taille": [220, 160] },
-        { "id": "vignette-four", "libelle": "Gobi trouve un four.", "asset": null, "taille": [220, 160] },
-        { "id": "vignette-verre", "libelle": "Il trouve un verre.", "asset": null, "taille": [220, 160] },
-        { "id": "vignette-sac", "libelle": "Gobi range le sac.", "asset": null, "taille": [220, 160] },
-        { "id": "vignette-zebre", "libelle": "Il montre le zèbre.", "asset": null, "taille": [220, 160] }
+        { "id": "vignette-pot", "libelle": "Gobi trouve un pot.", "asset": "assets/vignettes/galeries-frise/vignette-pot.png", "taille": [504, 248] },
+        { "id": "vignette-bol", "libelle": "Il trouve un bol.", "asset": "assets/vignettes/galeries-frise/vignette-bol.png", "taille": [504, 248] },
+        { "id": "vignette-panier", "libelle": "Il range le pot et le bol.", "asset": "assets/vignettes/galeries-frise/vignette-panier.png", "taille": [504, 248] },
+        { "id": "vignette-tas", "libelle": "Gobi montre le tas.", "asset": "assets/vignettes/galeries-frise/vignette-tas.png", "taille": [504, 248] },
+        { "id": "vignette-dos", "libelle": "Il montre le dos du chien.", "asset": "assets/vignettes/galeries-frise/vignette-dos.png", "taille": [504, 248] },
+        { "id": "vignette-dame", "libelle": "Il montre la dame.", "asset": "assets/vignettes/galeries-frise/vignette-dame.png", "taille": [504, 248] },
+        { "id": "vignette-four", "libelle": "Gobi trouve un four.", "asset": "assets/vignettes/galeries-frise/vignette-four.png", "taille": [504, 248] },
+        { "id": "vignette-verre", "libelle": "Il trouve un verre.", "asset": "assets/vignettes/galeries-frise/vignette-verre.png", "taille": [504, 248] },
+        { "id": "vignette-sac", "libelle": "Gobi range le sac.", "asset": "assets/vignettes/galeries-frise/vignette-sac.png", "taille": [504, 248] },
+        { "id": "vignette-zebre", "libelle": "Il montre le zèbre.", "asset": "assets/vignettes/galeries-frise/vignette-zebre.png", "taille": [504, 248] }
       ],
       "competence": "gph.confusion.sourde-sonore"
     }

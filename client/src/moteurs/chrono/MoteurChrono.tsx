@@ -38,6 +38,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { CSSProperties, ReactElement } from 'react';
 import type { ActionChrono, ContenuChrono, EtatChrono, Habillage } from '@pierre/partage';
 
+import { urlAsset } from '../../api/client.js';
 import { SceneDecor } from '../../habillages/SceneDecor.js';
 import type { RegionAllumee } from '../../habillages/SceneDecor.js';
 import { deriverEmplacements, regionsColoriables } from '../../habillages/emplacements.js';
@@ -185,6 +186,7 @@ function planifier(parametres: {
 function VignetteSaisissable({
   cle,
   libelle,
+  asset,
   classes,
   numero,
   region,
@@ -195,6 +197,7 @@ function VignetteSaisissable({
 }: {
   readonly cle: string;
   readonly libelle: string;
+  readonly asset: string | null;
   readonly classes: readonly string[];
   readonly numero: number | string;
   readonly region: string;
@@ -227,11 +230,35 @@ function VignetteSaisissable({
           whiteSpace: 'normal',
           maxInlineSize: `${String(largeurMax)}px`,
           textAlign: 'center',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          inlineSize: asset === null ? undefined : '240px',
+          boxSizing: 'border-box',
         } as CSSProperties
       }
       onClick={surTap}
     >
-      {libelle}
+      {asset === null ? null : (
+        <img
+          data-illustration-vignette="oui"
+          src={urlAsset(asset)}
+          alt=""
+          aria-hidden="true"
+          draggable={false}
+          style={{
+            display: 'block',
+            inlineSize: '100%',
+            maxInlineSize: '200px',
+            aspectRatio: '4 / 3',
+            objectFit: 'cover',
+            borderRadius: '0.8rem',
+            marginBlockEnd: '0.45rem',
+          }}
+        />
+      )}
+      <span>{libelle}</span>
     </button>
   );
 }
@@ -360,17 +387,21 @@ export function MoteurChrono(
    */
   const mesurer = useCallback(
     (cle: string): Boite => {
-      const libelle = vignetteParId.get(cle)?.libelle ?? '';
+      const vignette = vignetteParId.get(cle);
+      const libelle = vignette?.libelle ?? '';
       const corps = reglages.corpsPx;
       const interlettrage = reglages.interlettrageEm * corps;
       const largeurTexteSurUneLigne = libelle.length * (corps * LARGEUR_GLYPHE + interlettrage);
       const largeurUtile = LARGEUR_MAX_PASTILLE - 2 * (PADDING_X + BORDURE);
       const lignes = Math.max(1, Math.ceil(largeurTexteSurUneLigne / largeurUtile));
       return {
-        largeur: Math.max(CIBLE_MIN, Math.min(largeurTexteSurUneLigne, largeurUtile) + 2 * (PADDING_X + BORDURE)),
+        largeur: vignette?.asset === null || vignette?.asset === undefined
+          ? Math.max(CIBLE_MIN, Math.min(largeurTexteSurUneLigne, largeurUtile) + 2 * (PADDING_X + BORDURE))
+          : 240,
         hauteur: Math.max(
           CIBLE_MIN,
-          lignes * corps * reglages.interligne + 2 * (PADDING_Y + BORDURE),
+          lignes * corps * reglages.interligne + 2 * (PADDING_Y + BORDURE) +
+            (vignette?.asset === null || vignette?.asset === undefined ? 0 : 160),
         ),
       };
     },
@@ -586,6 +617,7 @@ export function MoteurChrono(
                     }
                     cle={emplacement.cle}
                     libelle={vignette.libelle}
+                    asset={vignette.asset === null ? null : String(vignette.asset)}
                     classes={classes}
                     numero={etat.acquis[emplacement.cle] ?? ''}
                     region={emplacement.region ?? ''}

@@ -85,7 +85,7 @@
         {
           "id": "vignette-maison",
           "libelle": "Gobi entre dans la maison.",
-          "asset": null,
+          "asset": "assets/vignettes/cite-pellicule-02/vignette-maison.png",
           "taille": [
             220,
             160
@@ -94,7 +94,7 @@
         {
           "id": "vignette-cahier",
           "libelle": "Il a un cahier.",
-          "asset": null,
+          "asset": "assets/vignettes/cite-pellicule-02/vignette-cahier.png",
           "taille": [
             220,
             160
@@ -103,7 +103,7 @@
         {
           "id": "vignette-papa",
           "libelle": "Papa montre le cahier.",
-          "asset": null,
+          "asset": "assets/vignettes/cite-pellicule-02/vignette-papa.png",
           "taille": [
             220,
             160
@@ -112,7 +112,7 @@
         {
           "id": "vignette-table",
           "libelle": "Le cahier est sur la table.",
-          "asset": null,
+          "asset": "assets/vignettes/cite-pellicule-02/vignette-table.png",
           "taille": [
             220,
             160
@@ -121,7 +121,7 @@
         {
           "id": "vignette-compte",
           "libelle": "Gobi compte.",
-          "asset": null,
+          "asset": "assets/vignettes/cite-pellicule-02/vignette-compte.png",
           "taille": [
             220,
             160
@@ -130,7 +130,7 @@
         {
           "id": "vignette-dessin",
           "libelle": "Puis papa montre le dessin.",
-          "asset": null,
+          "asset": "assets/vignettes/cite-pellicule-02/vignette-dessin.png",
           "taille": [
             220,
             160
@@ -139,7 +139,7 @@
         {
           "id": "vignette-sac",
           "libelle": "Gobi range le cahier dans le sac.",
-          "asset": null,
+          "asset": "assets/vignettes/cite-pellicule-02/vignette-sac.png",
           "taille": [
             220,
             160
@@ -148,7 +148,7 @@
         {
           "id": "vignette-jardin",
           "libelle": "Puis Gobi joue dans le jardin.",
-          "asset": null,
+          "asset": "assets/vignettes/cite-pellicule-02/vignette-jardin.png",
           "taille": [
             220,
             160
@@ -157,7 +157,7 @@
         {
           "id": "vignette-lit",
           "libelle": "Le soir, Gobi est dans son lit.",
-          "asset": null,
+          "asset": "assets/vignettes/cite-pellicule-02/vignette-lit.png",
           "taille": [
             220,
             160

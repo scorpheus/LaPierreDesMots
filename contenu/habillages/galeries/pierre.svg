@@ -17,8 +17,9 @@
   -->
   <g id="calque-fond">
     <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
+    <image data-fond-illustre="ecole" href="/api/contenu/assets/assets/decors/exercices/galeries-pierre.png" x="0" y="0" width="960" height="600" preserveAspectRatio="xMidYMid slice"/>
   </g>
-  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round">
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round" opacity="0" aria-hidden="true">
     <path id="paroi-seche" class="zone" data-region-svg="paroi-seche" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L960,0 L960,178 L933.3,183 L906.7,186.7 L880,188 L853.3,186.7 L826.7,183 L800,178 L773.3,173 L746.7,169.3 L720,168 L693.3,169.3 L666.7,173 L640,178 L613.3,183 L586.7,186.7 L560,188 L533.3,186.7 L506.7,183 L480,178 L453.3,173 L426.7,169.3 L400,168 L373.3,169.3 L346.7,173 L320,178 L293.3,183 L266.7,186.7 L240,188 L213.3,186.7 L186.7,183 L160,178 L133.3,173 L106.7,169.3 L80,168 L53.3,169.3 L26.7,173 L0,178 Z"/>
     <path id="sol-de-la-salle" class="zone" data-region-svg="sol-de-la-salle" fill="#8E97A8" fill-rule="evenodd" d="M0,520 L26.7,526.1 L53.3,527.9 L80,524 L106.7,517.3 L133.3,512.5 L160,513.1 L186.7,518.6 L213.3,525.1 L240,528 L266.7,525.1 L293.3,518.6 L320,513.1 L346.7,512.5 L373.3,517.3 L400,524 L426.7,527.9 L453.3,526.1 L480,520 L506.7,513.9 L533.3,512.1 L560,516 L586.7,522.7 L613.3,527.5 L640,526.9 L666.7,521.4 L693.3,514.9 L720,512 L746.7,514.9 L773.3,521.4 L800,526.9 L826.7,527.5 L853.3,522.7 L880,516 L906.7,512.1 L933.3,513.9 L960,520 L960,600 L0,600 Z"/>
     <path id="dalle" class="zone" data-region-svg="dalle" fill="#8E97A8" fill-rule="evenodd" d="M180,240 L760,224 L792,470 L150,486 Z"/>
@@ -29,7 +30,7 @@
     <path id="copeau-de-pierre" class="zone" data-region-svg="copeau-de-pierre" fill="#8E97A8" fill-rule="evenodd" d="M820,500 L900,486 L914,528 L830,542 Z"/>
     <path id="goutte-sur-la-dalle" class="zone" data-region-svg="goutte-sur-la-dalle" fill="#8E97A8" fill-rule="evenodd" d="M872,300 L882,344.7 L887,348.8 L890.5,354.3 L892,360.7 L891.3,367.2 L888.6,373.1 L884.2,377.9 L878.4,380.9 L872,382 L865.6,380.9 L859.8,377.9 L855.4,373.1 L852.7,367.2 L852,360.7 L853.5,354.3 L857,348.8 L862,344.7 Z"/>
   </g>
-  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0" aria-hidden="true">
     <path class="trait" d="M200,260 L740,246"/>
     <path class="trait" d="M200,452 L764,438"/>
   </g>

@@ -28,7 +28,7 @@ export const contenuPaires: ContenuPaires = {
   ],
   cartes: [
     { id: 'carte-mot-loup', libelle: 'loup', face: 'mot', asset: null, paire: 'paire-loup' },
-    { id: 'carte-img-loup', libelle: 'un loup', face: 'image', asset: null, paire: 'paire-loup' },
+    { id: 'carte-img-loup', libelle: 'un loup', face: 'image', asset: 'assets/cartes/loup.png', paire: 'paire-loup' },
     { id: 'carte-mot-roue', libelle: 'roue', face: 'mot', asset: null, paire: 'paire-roue' },
     { id: 'carte-img-roue', libelle: 'une roue', face: 'image', asset: null, paire: 'paire-roue' },
   ],

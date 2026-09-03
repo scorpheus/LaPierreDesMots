@@ -17,8 +17,9 @@
   -->
   <g id="calque-fond">
     <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
+    <image data-fond-illustre="ecole" href="/api/contenu/assets/assets/decors/exercices/cite-rayonnages.png" x="0" y="0" width="960" height="600" preserveAspectRatio="xMidYMid slice"/>
   </g>
-  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round">
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round" opacity="0" aria-hidden="true">
     <path id="mur-de-la-salle" class="zone" data-region-svg="mur-de-la-salle" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L960,0 L960,128 L933.3,132 L906.7,134.9 L880,136 L853.3,134.9 L826.7,132 L800,128 L773.3,124 L746.7,121.1 L720,120 L693.3,121.1 L666.7,124 L640,128 L613.3,132 L586.7,134.9 L560,136 L533.3,134.9 L506.7,132 L480,128 L453.3,124 L426.7,121.1 L400,120 L373.3,121.1 L346.7,124 L320,128 L293.3,132 L266.7,134.9 L240,136 L213.3,134.9 L186.7,132 L160,128 L133.3,124 L106.7,121.1 L80,120 L53.3,121.1 L26.7,124 L0,128 Z"/>
     <path id="parquet-cire" class="zone" data-region-svg="parquet-cire" fill="#8E97A8" fill-rule="evenodd" d="M0,500 L26.7,506.1 L53.3,506.1 L80,500 L106.7,493.9 L133.3,493.9 L160,500 L186.7,506.1 L213.3,506.1 L240,500 L266.7,493.9 L293.3,493.9 L320,500 L346.7,506.1 L373.3,506.1 L400,500 L426.7,493.9 L453.3,493.9 L480,500 L506.7,506.1 L533.3,506.1 L560,500 L586.7,493.9 L613.3,493.9 L640,500 L666.7,506.1 L693.3,506.1 L720,500 L746.7,493.9 L773.3,493.9 L800,500 L826.7,506.1 L853.3,506.1 L880,500 L906.7,493.9 L933.3,493.9 L960,500 L960,600 L0,600 Z"/>
     <path id="rayonnage-gauche" class="zone" data-region-svg="rayonnage-gauche" fill="#8E97A8" fill-rule="evenodd" d="M70,160 L410,160 L410,482 L70,482 Z M100,190 L380,190 L380,452 L100,452 Z"/>
@@ -29,7 +30,7 @@
     <path id="pupitre-du-milieu" class="zone" data-region-svg="pupitre-du-milieu" fill="#8E97A8" fill-rule="evenodd" d="M178,522.7 L400,494.1 L400,508.4 L302.3,526.8 L311.2,590 L266.8,590 L275.7,526.8 L178,537 Z"/>
     <path id="lampe-du-rayonnage" class="zone" data-region-svg="lampe-du-rayonnage" fill="#8E97A8" fill-rule="evenodd" d="M507.5,118 L530.5,118 L523.9,130.2 L542,138.4 L548.5,152.7 L543.6,195.5 L551.8,205.7 L551.8,215.9 L486.2,215.9 L486.2,205.7 L494.4,195.5 L489.5,152.7 L496,138.4 L514.1,130.2 Z"/>
   </g>
-  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0" aria-hidden="true">
     <path class="trait" d="M100,320 L380,320"/>
     <path class="trait" d="M578,330 L844,330"/>
   </g>

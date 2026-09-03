@@ -153,6 +153,16 @@ afterEach(() => {
 });
 
 describe('moteur paires', () => {
+  it("affiche l'illustration d'une carte image sans révéler son mot", () => {
+    const { container } = render(<Harnais />);
+    const carte = container.querySelector<HTMLElement>('[data-carte="carte-img-loup"]');
+    const image = carte?.querySelector<HTMLImageElement>('img[data-illustration-carte="oui"]');
+
+    expect(image).not.toBeNull();
+    expect(image?.getAttribute('src')).toContain('assets/cartes/loup.png');
+    expect(carte?.textContent).not.toContain('un loup');
+    expect(carte?.getAttribute('aria-label')).toBe('un loup');
+  });
   it('le contenu de ce test est conforme au schéma que le moteur publie', () => {
     const ajv = new (Ajv2020 as unknown as {
       new (options?: Record<string, unknown>): { compile(s: unknown): (d: unknown) => boolean };

@@ -81,7 +81,7 @@
           "id": "image-lapin",
           "libelle": "le lapin",
           "face": "image",
-          "asset": null,
+          "asset": "assets/cartes/marais/lapin.png",
           "paire": "paire-lapin"
         },
         {
@@ -95,7 +95,7 @@
           "id": "image-matin",
           "libelle": "le matin",
           "face": "image",
-          "asset": null,
+          "asset": "assets/cartes/marais/matin.png",
           "paire": "paire-matin"
         },
         {
@@ -109,7 +109,7 @@
           "id": "image-jardin",
           "libelle": "le jardin",
           "face": "image",
-          "asset": null,
+          "asset": "assets/cartes/marais/jardin.png",
           "paire": "paire-jardin"
         },
         {
@@ -123,7 +123,7 @@
           "id": "image-sapin",
           "libelle": "le sapin",
           "face": "image",
-          "asset": null,
+          "asset": "assets/cartes/marais/sapin.png",
           "paire": "paire-sapin"
         },
         {
@@ -137,7 +137,7 @@
           "id": "image-main",
           "libelle": "la main",
           "face": "image",
-          "asset": null,
+          "asset": "assets/cartes/marais/main.png",
           "paire": "paire-main"
         },
         {
@@ -151,7 +151,7 @@
           "id": "image-pain",
           "libelle": "le pain",
           "face": "image",
-          "asset": null,
+          "asset": "assets/cartes/marais/pain.png",
           "paire": "paire-pain"
         }
       ],

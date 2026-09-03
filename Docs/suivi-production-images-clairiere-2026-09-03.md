@@ -8,13 +8,13 @@ les assets servis à l'enfant avant validation explicite du parent.
 
 ## File de production
 
-1. `collier` — V1 produite, validation parent en attente
-2. `guirlande` — en attente
-3. `lianes` — en attente
-4. `luciole` — en attente
-5. `lucioles` — en attente
-6. `paniers` — en attente
-7. `veillee` — en attente
+1. `collier` — V1 validée et intégrée
+2. `guirlande` — V1 validée et intégrée
+3. `lianes` — V1 validée et intégrée
+4. `luciole` — V3 validée et intégrée
+5. `lucioles` — V1 validée et intégrée
+6. `paniers` — V2 validée et intégrée
+7. `veillee` — V1 validée et intégrée
 
 ## Décor `clairiere/collier`
 
@@ -29,8 +29,8 @@ les assets servis à l'enfant avant validation explicite du parent.
   `contenu/assets/decors/ecole.png`
 - Relecture visuelle contradictoire : promouvable, sans dominante sépia ni patch de couleur
   gênant ; composition et objets lisibles pour un enfant de 7 ans
-- Validation parent : en attente
-- Intégration applicative : non commencée
+- Validation parent : obtenue lors de la revue groupée du 2026-09-03
+- Intégration applicative : maître publié dans `contenu/assets/decors/exercices/` et branché
 
 Une première proposition de contrôle qui demandait un dessin au trait sur fond blanc a été
 écartée : elle contredisait la direction raster illustrée validée par le parent.

@@ -2,9 +2,10 @@
 
 ## Décision parent
 
-Le parent a validé le premier décor `clairiere/collier` puis demandé de produire l'ensemble des
-images avant une validation groupée. Les images restent dans `contenu/brouillons/` jusqu'à cette
-validation. Aucun brouillon de ce lot n'est encore servi à l'enfant.
+Le parent a validé le premier décor `clairiere/collier`, puis les planches groupées de l'ensemble
+du lot, et a demandé leur intégration dans les exercices le 2026-09-03. Les sources de production
+restent dans `contenu/brouillons/`; les exports stables sont maintenant servis depuis
+`contenu/assets/`.
 
 L'audio reste explicitement hors périmètre.
 
@@ -12,12 +13,12 @@ L'audio reste explicitement hors périmètre.
 
 | Série | Production | État |
 |---|---:|---|
-| Décors maîtres | 48 / 48 | produits en 1536 × 1024 ; validation parent groupée à faire |
-| Cartes illustrées | 6 planches, 39 sujets | produits ; découpe et détourage après validation |
-| Vignettes narratives | 5 planches, 47 cellules | produites selon les JSON servis ; découpe après validation |
+| Décors maîtres | 48 / 48 | validés, publiés en 1536 × 1024 et branchés dans les SVG servis |
+| Cartes illustrées | 6 planches, 39 sujets | 39 exports 512 × 512 ; 40 références de cartes image branchées |
+| Vignettes narratives | 5 planches, 47 cellules | 47 exports 4:3 branchés dans les cinq exercices chrono |
 | Masques indexés | 0 / 622 | à produire après validation des maîtres |
 | Calques fond / trait | 0 / 96 | à dériver après validation des maîtres |
-| Intégration dans les habillages | 0 / 48 | interdite avant validation parent |
+| Intégration dans les habillages | 48 / 48 | intégration raster effective ; prises SVG conservées |
 
 Les cartes ont été produites par planches plutôt que par 39 appels distincts : six appels donnent
 les 39 sujets et les cellules seront exportées individuellement. Cette méthode économise 33
@@ -70,6 +71,39 @@ le chemin `exec-…png` exact rendu par leur propre appel. La règle pour les lo
 Les planches groupées sont dans `bac-a-sable/production-images/planches-contact-finales/` : une
 planche par région, une planche `cartes.png` et une planche `vignettes.png`.
 
-Après validation parent, la suite est : figer la sélection, extraire cartes et vignettes, produire
-les masques indexés et les calques, brancher les habillages, puis tester chaque exercice avec ses
-vrais assets.
+## Intégration livrée
+
+- `scripts/decors/decors.mjs` associe automatiquement les 47 scènes générées à leur maître raster ;
+  `galeries.grottes`, scène historique non régénérée par ce script, porte le 48e maître.
+- Les géométries SVG restent dans le DOM pour préserver les emplacements et les interactions, mais
+  leur blockout est masqué visuellement devant l'illustration.
+- `scripts/assets/extraire-cartes.py` et `scripts/vignettes/extraire-planches.py` rendent la découpe
+  reproductible. Une erreur de chemin (`cartes/` au lieu de `assets/cartes/`) et une erreur de
+  grille (4 × 4 au lieu de 4 × 3) ont été attrapées par les tests ciblés avant livraison.
+- Les moteurs `paires` et `chrono` rendent désormais réellement le champ `asset`. Une carte image
+  ne révèle pas son mot ; une vignette narrative conserve sa légende sous l'image.
+
+## Transition avant les masques indexés
+
+Les maîtres validés sont des illustrations couleur, tandis que les 622 masques précis ne sont pas
+encore produits. Pour ne pas perdre la promesse « le monde part en gris et reprend ses couleurs »,
+`SceneDecor` applique provisoirement une grisaille complète au début puis la retire par paliers à
+chaque acquisition. Cette transition agit sur l'image entière, pas encore région par région.
+
+La prochaine passe image consiste à dériver les calques fond/trait et les masques indexés, puis à
+remplacer cette transition globale par la recoloration régionale exacte. Les scènes `colorie` et
+`libre` n'ont pas reçu un maître complet : elles conservent leur pipeline indexé spécifique afin de
+ne pas neutraliser le geste de coloriage.
+
+## Recette d'intégration
+
+- contenu : 620 contrôles, 0 problème ;
+- tests ciblés décors/cartes/vignettes et moteurs : 23/23, puis 20/20 après ajout de la grisaille ;
+- parcours navigateur isolés : 3/3, avec chargement réel du décor, des cartes et des vignettes ;
+- QA rapide des 76 activités : 14/14 contrôles verts en 171 ms ;
+- construction production et construction test : réussies ; bundle initial à 208,66 Ko gzip ;
+- passe T1 large : 2 266/2 268. Les deux échecs sont les mêmes 11 divergences de textes audio
+  antérieures à ce lot. L'audio est explicitement hors périmètre et désactivé par décision parent,
+  donc aucun manifeste ni clip n'a été modifié pour rendre artificiellement cette passe verte.
+
+Les captures de recette sont conservées dans `bac-a-sable/captures-integration-images/`.

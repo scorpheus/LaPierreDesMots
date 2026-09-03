@@ -17,8 +17,9 @@
   -->
   <g id="calque-fond">
     <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
+    <image data-fond-illustre="ecole" href="/api/contenu/assets/assets/decors/exercices/cite-ponts.png" x="0" y="0" width="960" height="600" preserveAspectRatio="xMidYMid slice"/>
   </g>
-  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round">
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round" opacity="0" aria-hidden="true">
     <path id="ciel-de-la-cite" class="zone" data-region-svg="ciel-de-la-cite" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L960,0 L960,148 L933.3,153 L906.7,156.7 L880,158 L853.3,156.7 L826.7,153 L800,148 L773.3,143 L746.7,139.3 L720,138 L693.3,139.3 L666.7,143 L640,148 L613.3,153 L586.7,156.7 L560,158 L533.3,156.7 L506.7,153 L480,148 L453.3,143 L426.7,139.3 L400,138 L373.3,139.3 L346.7,143 L320,148 L293.3,153 L266.7,156.7 L240,158 L213.3,156.7 L186.7,153 L160,148 L133.3,143 L106.7,139.3 L80,138 L53.3,139.3 L26.7,143 L0,148 Z"/>
     <path id="place-du-bas" class="zone" data-region-svg="place-du-bas" fill="#8E97A8" fill-rule="evenodd" d="M0,500 L26.7,506.1 L53.3,507.9 L80,504 L106.7,497.3 L133.3,492.5 L160,493.1 L186.7,498.6 L213.3,505.1 L240,508 L266.7,505.1 L293.3,498.6 L320,493.1 L346.7,492.5 L373.3,497.3 L400,504 L426.7,507.9 L453.3,506.1 L480,500 L506.7,493.9 L533.3,492.1 L560,496 L586.7,502.7 L613.3,507.5 L640,506.9 L666.7,501.4 L693.3,494.9 L720,492 L746.7,494.9 L773.3,501.4 L800,506.9 L826.7,507.5 L853.3,502.7 L880,496 L906.7,492.1 L933.3,493.9 L960,500 L960,600 L0,600 Z"/>
     <path id="tour-gauche" class="zone" data-region-svg="tour-gauche" fill="#8E97A8" fill-rule="evenodd" d="M169,118 L234.5,194.4 L220,194.4 L220,232.6 L234.5,232.6 L234.5,500 L103.5,500 L103.5,232.6 L118,232.6 L118,194.4 L103.5,194.4 Z"/>
@@ -29,7 +30,7 @@
     <path id="livre-pose-deux" class="zone" data-region-svg="livre-pose-deux" fill="#8E97A8" fill-rule="evenodd" d="M527.3,460.8 L578.6,452.8 L583.4,452.8 L634.7,460.8 L634.7,518.4 L583.4,512 L578.6,512 L527.3,518.4 Z"/>
     <path id="lanterne-du-pont" class="zone" data-region-svg="lanterne-du-pont" fill="#8E97A8" fill-rule="evenodd" d="M591.1,178 L616.9,178 L609.5,192.6 L629.8,202.4 L637.1,219.5 L631.6,270.7 L640.8,282.9 L640.8,295.1 L567.2,295.1 L567.2,282.9 L576.4,270.7 L570.9,219.5 L578.2,202.4 L598.5,192.6 Z"/>
   </g>
-  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0" aria-hidden="true">
     <path class="trait" d="M0,502 L960,494"/>
   </g>
 </svg>
