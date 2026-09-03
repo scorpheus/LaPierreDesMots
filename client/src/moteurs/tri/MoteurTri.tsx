@@ -17,7 +17,7 @@
  *   2. **les réceptacles sont posés sur le décor** — chaque `receptacles[].zone` (un polygone
  *      DÉJÀ fourni par le contenu, dans le même repère `viewBox` que le décor) donne sa boîte
  *      englobante, transformée en pixels par la MÊME projection que le décor
- *      (`transformeSlice`/`versPixels`) : le panneau du wagon est donc à l'endroit où le wagon
+ *      (`transformeMeet`/`versPixels`) : le panneau du wagon est donc à l'endroit où le wagon
  *      est dessiné, jamais un rectangle gris flottant ailleurs ;
  *   3. **les mots sont devant**, à des emplacements DÉRIVÉS (`deriverEmplacements`), jamais
  *      écrits à la main ;
@@ -76,7 +76,7 @@ import {
   deriverEmplacements,
   lireViewBox,
   regionsColoriables,
-  transformeSlice,
+  transformeMeet,
   versPixels,
 } from '../../habillages/emplacements.js';
 import type {
@@ -138,6 +138,16 @@ const FENTE_PADDING_Y = 6;
 const FENTE_BORDURE = 3;
 const FENTE_MIN = 40;
 
+/**
+ * Les zones du contenu décrivent les objets dessinés dans le viewBox. Avec un rendu `slice`,
+ * les recopier comme largeur/hauteur CSS transformait un panier en panneau de 700 × 500 px.
+ * Elles restent la source de POSITION, mais l'interface visible garde une taille de plateau.
+ */
+const LARGEUR_RECEPTACLE_MAX = 420;
+const HAUTEUR_RECEPTACLE_MAX = 156;
+const HAUTEUR_CRITERE_RECEPTACLE = 42;
+const ZOOM_DECOR_TRI = 1.2;
+
 const DUREE_VOL_MS = 320;
 
 function ZONE_DE_JEU(hauteurBandeau: number, hauteurPied: number): CSSProperties {
@@ -192,17 +202,32 @@ interface PanneauReceptacleGeometrie {
 function panneauxReceptacles(
   receptacles: readonly ReceptacleTri[],
   t: TransformeDecor,
+  limites: Bornes,
 ): readonly PanneauReceptacleGeometrie[] {
   return receptacles.map((receptacle) => {
     const b = bornesDuPolygone(receptacle.zone);
     const [x1, y1] = versPixels([b.xMin, b.yMin], t);
     const [x2, y2] = versPixels([b.xMax, b.yMax], t);
+    const x = Math.min(x1, x2);
+    const y = Math.min(y1, y2);
+    const largeurZone = Math.abs(x2 - x1);
+    const hauteurZone = Math.abs(y2 - y1);
+    const largeur = Math.max(CIBLE_MIN * 2, Math.min(largeurZone, LARGEUR_RECEPTACLE_MAX));
+    const hauteur = Math.max(CIBLE_MIN, Math.min(hauteurZone, HAUTEUR_RECEPTACLE_MAX));
+    const xCentre = x + (largeurZone - largeur) / 2;
+    const yCentre = y + (hauteurZone - hauteur) / 2;
     return {
       receptacle,
-      x: Math.min(x1, x2),
-      y: Math.min(y1, y2),
-      largeur: Math.abs(x2 - x1),
-      hauteur: Math.abs(y2 - y1),
+      // Le panneau compact reste centré dans la zone dessinée du réceptacle.
+      // Si `slice` rogne le bas du décor sur un écran très large, il est toutefois remonté
+      // dans la partie visible : un panier hors cadre est une destination sans issue.
+      x: Math.max(limites.xMin + MARGE, Math.min(xCentre, limites.xMax - largeur - MARGE)),
+      y: Math.max(
+        limites.yMin + MARGE,
+        Math.min(yCentre, limites.yMax - hauteur - HAUTEUR_CRITERE_RECEPTACLE - MARGE),
+      ),
+      largeur,
+      hauteur,
     };
   });
 }
@@ -331,8 +356,8 @@ function PanneauReceptacle({
         position: 'absolute',
         insetInlineStart: `${String(x)}px`,
         insetBlockStart: `${String(y)}px`,
-        inlineSize: `${String(Math.max(largeur, CIBLE_MIN * 2))}px`,
-        minBlockSize: `${String(Math.max(hauteur, CIBLE_MIN))}px`,
+        inlineSize: `${String(largeur)}px`,
+        minBlockSize: `${String(hauteur)}px`,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -371,7 +396,7 @@ function PanneauReceptacle({
           alignContent: 'flex-start',
           gap: '0.3rem',
           inlineSize: '100%',
-          minBlockSize: `${String(Math.max(hauteur, CIBLE_MIN))}px`,
+          minBlockSize: `${String(hauteur)}px`,
           padding: '0.6rem',
           borderRadius: 'var(--rayon-carte)',
           border: `var(--epaisseur-trait) ${attend || isOver ? 'solid' : 'dashed'} var(--trait)`,
@@ -381,6 +406,7 @@ function PanneauReceptacle({
           boxShadow: attend ? 'var(--ombre-bd)' : 'var(--ombre-bd-appui)',
           cursor: 'pointer',
           touchAction: 'manipulation',
+          pointerEvents: 'auto',
         }}
       >
         {elements.map((element) => (
@@ -568,11 +594,30 @@ export function MoteurTri(
   );
 
   const vb = useMemo(() => lireViewBox(habillage.scene.viewBox), [habillage]);
-  const transformeDecor = useMemo(() => transformeSlice(vb, cadreJeu), [vb, cadreJeu]);
+  const transformeDecor = useMemo(
+    () => transformeMeet(vb, cadreJeu, ZOOM_DECOR_TRI),
+    [vb, cadreJeu],
+  );
+
+  const limitesDecor = useMemo<Bornes>(
+    () => ({
+      xMin: Math.max(0, vb.x * transformeDecor.echelle + transformeDecor.decalageX),
+      yMin: Math.max(0, vb.y * transformeDecor.echelle + transformeDecor.decalageY),
+      xMax: Math.min(
+        cadreJeu.largeur,
+        (vb.x + vb.largeur) * transformeDecor.echelle + transformeDecor.decalageX,
+      ),
+      yMax: Math.min(
+        cadreJeu.hauteur,
+        (vb.y + vb.hauteur) * transformeDecor.echelle + transformeDecor.decalageY,
+      ),
+    }),
+    [vb, transformeDecor, cadreJeu],
+  );
 
   const panneaux = useMemo(
-    () => panneauxReceptacles(contenu.receptacles, transformeDecor),
-    [contenu.receptacles, transformeDecor],
+    () => panneauxReceptacles(contenu.receptacles, transformeDecor, limitesDecor),
+    [contenu.receptacles, transformeDecor, limitesDecor],
   );
 
   const bornes = useMemo<Bornes>(() => {
@@ -581,17 +626,17 @@ export function MoteurTri(
         ? cadreJeu.hauteur
         : Math.min(...panneaux.map((p) => p.y));
     return {
-      xMin: MARGE,
-      yMin: MARGE,
-      xMax: Math.max(cadreJeu.largeur - MARGE, MARGE + CIBLE_MIN),
+      xMin: limitesDecor.xMin + MARGE,
+      yMin: limitesDecor.yMin + MARGE,
+      xMax: Math.max(limitesDecor.xMax - MARGE, limitesDecor.xMin + MARGE + CIBLE_MIN),
       // Les mots ne descendent jamais sous le haut des panneaux de réceptacles : c'est ce qui
       // évite que la zone des mots et celle des réceptacles se chevauchent.
       yMax: Math.max(
-        Math.min(cadreJeu.hauteur - MARGE, hautDesReceptacles - ESPACE_AVANT_RECEPTACLES),
-        MARGE + CIBLE_MIN,
+        Math.min(limitesDecor.yMax - MARGE, hautDesReceptacles - ESPACE_AVANT_RECEPTACLES),
+        limitesDecor.yMin + MARGE + CIBLE_MIN,
       ),
     };
-  }, [cadreJeu, panneaux]);
+  }, [limitesDecor, panneaux]);
 
   const cles = useMemo(() => etat.elements.map((e) => e.id), [etat.elements]);
 
@@ -774,6 +819,8 @@ export function MoteurTri(
             allumees={allumees}
             derniere={derniere}
             animationsDesactivees={animationsDesactivees}
+            ajustement="contenir"
+            zoom={ZOOM_DECOR_TRI}
           />
         </div>
 
@@ -809,7 +856,16 @@ export function MoteurTri(
 
         {/* ── les réceptacles, posés sur le décor : la boîte de `zone`, en pixels ─────────── */}
         <div
-          style={{ position: 'absolute', ...ZONE_DE_JEU(hauteurBandeau, hauteurPied), zIndex: 1 }}
+          data-plateau="receptacles"
+          style={{
+            position: 'absolute',
+            ...ZONE_DE_JEU(hauteurBandeau, hauteurPied),
+            zIndex: 1,
+            // Cette couche couvre toute la scène. Sans cette ligne, sa surface transparente
+            // intercepte le doigt avant les mots placés dans la couche sœur : les tests qui
+            // appelaient `dispatchEvent` directement ne pouvaient pas voir ce défaut réel.
+            pointerEvents: 'none',
+          }}
         >
           {panneaux.map((geometrie, rang) => (
             <PanneauReceptacle

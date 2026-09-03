@@ -57,6 +57,10 @@ export interface ProprietesSceneDecor {
   /** La dernière allumée — celle depuis laquelle la couleur balaie (v2 ligne 79). */
   readonly derniere: RegionAllumee | null;
   readonly animationsDesactivees: boolean;
+  /** `contenir` montre l'illustration entière ; le défaut reste un fond couvrant. */
+  readonly ajustement?: 'couvrir' | 'contenir';
+  /** Agrandissement léger appliqué autour du centre, utile après un rendu `contenir`. */
+  readonly zoom?: number;
 }
 
 /**
@@ -96,6 +100,8 @@ export function SceneDecor({
   allumees,
   derniere,
   animationsDesactivees,
+  ajustement = 'couvrir',
+  zoom = 1,
 }: ProprietesSceneDecor): ReactElement | null {
   const [corps, fixerCorps] = useState<string | null>(null);
 
@@ -187,8 +193,14 @@ export function SceneDecor({
         // COUVRIR, et non contenir. C'est le point 1 de la décision du père : « le décor c'est
         // le fond ». En `meet`, un décor 960×600 posé dans un cadre portrait laisse plus de
         // 500 px de vide — très exactement ce que la capture montrait.
-        preserveAspectRatio="xMidYMid slice"
-        style={{ display: 'block', width: '100%', height: '100%' }}
+        preserveAspectRatio={ajustement === 'contenir' ? 'xMidYMid meet' : 'xMidYMid slice'}
+        style={{
+          display: 'block',
+          width: '100%',
+          height: '100%',
+          transform: zoom === 1 ? undefined : `scale(${String(zoom)})`,
+          transformOrigin: 'center',
+        }}
       >
         <g data-calques="habillage" dangerouslySetInnerHTML={{ __html: corps }} />
         {derniere === null || animationsDesactivees ? null : (

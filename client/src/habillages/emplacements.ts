@@ -277,6 +277,20 @@ export function transformeSlice(vb: ViewBox, cadre: Cadre): TransformeDecor {
   };
 }
 
+/**
+ * Affiche tout le décor dans le cadre. Ce mode convient aux plateaux de tri dont les objets
+ * dessinés (paniers, grottes, wagons) sont eux-mêmes les destinations : les rogner ou les grossir
+ * romprait la relation entre l'image et le geste.
+ */
+export function transformeMeet(vb: ViewBox, cadre: Cadre, zoom = 1): TransformeDecor {
+  const echelle = Math.min(cadre.largeur / vb.largeur, cadre.hauteur / vb.hauteur) * zoom;
+  return {
+    echelle,
+    decalageX: cadre.largeur / 2 - (vb.x + vb.largeur / 2) * echelle,
+    decalageY: cadre.hauteur / 2 - (vb.y + vb.hauteur / 2) * echelle,
+  };
+}
+
 export function versPixels(
   point: readonly [number, number],
   t: TransformeDecor,
