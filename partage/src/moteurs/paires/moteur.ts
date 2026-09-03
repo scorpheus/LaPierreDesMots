@@ -132,24 +132,39 @@ function appliquerDecision(
   }
 
   const cle = decision.acquis === null ? null : decision.acquis[0];
-  let etapes = remplacer(etat.etapes, etat.indexEtape, {
-    ...etape,
-    restantes: cle === null ? etape.restantes : etape.restantes.filter((r) => r !== cle),
-    premiereActionMs: etape.premiereActionMs ?? instant,
-    derniereActionMs: instant,
-    finMs: decision.etapeSatisfaite ? instant : etape.finMs,
+  // Une paire correcte peut appartenir à n'importe quelle étape encore visible sur le plateau.
+  // On la retire donc de son étape propriétaire, pas forcément de l'étape courante.
+  let etapes: readonly EtatEtapePaires[] = etat.etapes.map((candidate, index) => {
+    const contenait = cle !== null && candidate.restantes.includes(cle);
+    const restantes = contenait
+      ? candidate.restantes.filter((restante) => restante !== cle)
+      : candidate.restantes;
+    const devientVide = contenait && restantes.length === 0;
+    return {
+      ...candidate,
+      restantes,
+      debutMs: devientVide && candidate.debutMs === 0 ? instant : candidate.debutMs,
+      premiereActionMs:
+        index === etat.indexEtape ? candidate.premiereActionMs ?? instant : candidate.premiereActionMs,
+      derniereActionMs: contenait || index === etat.indexEtape ? instant : candidate.derniereActionMs,
+      finMs: devientVide ? instant : candidate.finMs,
+    };
   });
 
   // Passage automatique à l'étape suivante : il n'existe ni « valider » ni « suivant »
   // (contrat v1 § 5.3, v2 § 5.1 — le retour est immédiat).
   let indexEtape = etat.indexEtape;
   if (decision.etapeSatisfaite && !decision.exerciceTermine) {
-    indexEtape += 1;
+    // Des paires d'étapes futures peuvent déjà avoir été trouvées. On saute leurs étapes
+    // devenues vides au lieu de les rouvrir et de bloquer la sortie.
+    do {
+      indexEtape += 1;
+    } while (etapes[indexEtape]?.restantes.length === 0 && indexEtape < etapes.length - 1);
     const suivante = etapes[indexEtape];
     if (suivante !== undefined) {
       etapes = remplacer(etapes, indexEtape, {
         ...suivante,
-        debutMs: instant,
+        debutMs: suivante.debutMs === 0 ? instant : suivante.debutMs,
         derniereActionMs: instant,
       });
     }
@@ -178,7 +193,8 @@ export const moteurPaires: Moteur<ContenuPaires, EtatPaires, ActionPaires> = {
   code: 'paires',
   version: 1,
   capacites: {
-    ordreEtapesImpose: true,
+    // Le plateau entier est visible : l'enfant peut constituer n'importe quelle paire.
+    ordreEtapesImpose: false,
     recolorieLeDecor: false,
     // Aligné sur `maxItems` du schéma de contenu : les deux doivent bouger ensemble.
     nbEtapesMax: 6,

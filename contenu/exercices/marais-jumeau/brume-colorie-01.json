@@ -26,7 +26,7 @@
       "consignes": [
         {
           "id": "c1",
-          "texte": "Colorie le caillou en brun.",
+          "texte": "Colorie le gros caillou au bord de l'eau en brun.",
           "forme": "imperative",
           "audio": null,
           "cibles": [
@@ -38,6 +38,7 @@
           "motsCles": [
             "colorie",
             "caillou",
+            "eau",
             "brun"
           ]
         },

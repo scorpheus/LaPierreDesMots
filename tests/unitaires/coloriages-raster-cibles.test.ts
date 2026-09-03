@@ -78,7 +78,7 @@ const SCENES: readonly SceneAttendue[] = [
     habillage: 'contenu/habillages/marais-jumeau/brume.habillage.json',
     svg: 'contenu/habillages/marais-jumeau/brume.svg',
     cibles: [
-      { region: 'caillou', mot: 'caillou', couleur: 'brun', boite: [460, 480, 580, 570] },
+      { region: 'caillou', mot: 'caillou', couleur: 'brun', boite: [360, 400, 500, 520] },
       { region: 'saule-de-la-berge', mot: 'saule', couleur: 'noir', boite: [0, 0, 390, 300] },
       { region: 'roue', mot: 'escargot', couleur: 'rose', boite: [190, 490, 310, 580] },
       { region: 'nenuphar-perdu', mot: 'nénuphar', couleur: 'jaune', boite: [700, 420, 800, 520] },

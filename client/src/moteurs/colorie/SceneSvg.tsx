@@ -88,7 +88,18 @@ const STYLES_SCENE = `
 .pierre-region--refus { animation: pierre-oscille 180ms ease-in-out 1; }
 .pierre-region--demonstration { animation: pierre-halo 900ms ease-in-out infinite; }
 .pierre-fond-illustre--gris { filter: grayscale(1) saturate(0); }
-.pierre-prise-colorie { cursor: pointer; fill: transparent; pointer-events: all; }
+.pierre-prise-colorie {
+  cursor: pointer;
+  fill: transparent;
+  pointer-events: all;
+  vector-effect: non-scaling-stroke;
+}
+.pierre-prise-colorie.pierre-region--demonstration {
+  stroke: var(--soleil, #FFC93C);
+  stroke-width: 4;
+  stroke-dasharray: 10 8;
+  filter: drop-shadow(0 2px 3px rgba(27, 36, 64, .35));
+}
 .pierre-prise-colorie:focus { outline: none; }
 .pierre-prise-colorie:focus-visible { stroke: var(--soleil, #FFC93C); stroke-width: 4; }
 @keyframes pierre-oscille {
@@ -388,7 +399,13 @@ export function SceneSvg(proprietes: ProprietesSceneSvg): ReactElement {
       const groupe = svg.querySelector(`#${calque.id}`);
       if (groupe === null) continue;
       groupe.setAttribute('data-calque', calque.role);
-      if (calque.role !== 'coloriable') {
+      if (calque.role === 'coloriable') {
+        // Les décors raster masquent volontairement la géométrie technique dans le fichier
+        // source. Une fois montée dans le jeu, elle doit redevenir visible pour que la couleur
+        // choisie apparaisse réellement au lieu de rester annulée par `opacity="0"` du parent.
+        groupe.setAttribute('opacity', '1');
+        (groupe as SVGGElement).style.opacity = '1';
+      } else {
         (groupe as SVGGElement).style.pointerEvents = 'none';
       }
     }
@@ -408,11 +425,12 @@ export function SceneSvg(proprietes: ProprietesSceneSvg): ReactElement {
       noeud.setAttribute('data-region-source', identifiant);
       noeud.setAttribute('data-peinte', couleur === undefined ? 'non' : 'oui');
       noeud.setAttribute('fill', couleur === undefined ? REMPLISSAGE_VIDE : hexDeCouleur(couleur));
-      const active = identifiantsActifs === null || identifiantsActifs.has(identifiant);
-      // Sur les décors illustrés, seule la consigne courante reçoit un aplat. Le mélange
-      // `color` conserve les ombres et le trait de l'image, tout en rendant la teinte locale
-      // immédiatement visible. Les anciennes zones de blockout restent ainsi invisibles.
-      (noeud as SVGGraphicsElement).style.opacity = active || couleur !== undefined ? '0.92' : '0';
+      // Sur les décors illustrés, seules les régions déjà réussies reçoivent un aplat. Le
+      // mélange `color` conserve les ombres et le trait de l'image. Les anciennes zones de
+      // blockout et la cible encore vierge restent ainsi invisibles.
+      // Avant la réussite, seul le contour de la prise guide le doigt. Afficher ici le gris
+      // bleuté de `REMPLISSAGE_VIDE` donnait l'impression que la réponse était déjà coloriée.
+      (noeud as SVGGraphicsElement).style.opacity = couleur !== undefined ? '0.92' : '0';
       (noeud as SVGGraphicsElement).style.mixBlendMode = 'color';
       noeud.classList.add('pierre-region');
       if (couleur === undefined) noeud.removeAttribute('data-couleur');
@@ -513,6 +531,7 @@ export function SceneSvg(proprietes: ProprietesSceneSvg): ReactElement {
                   cy={region.centroide[1]}
                   r={rayonPrise}
                   data-region-svg={region.id}
+                  data-active={active ? 'oui' : 'non'}
                   data-peinte={couleur === undefined ? 'non' : 'oui'}
                   aria-disabled={!active}
                   {...(couleur === undefined ? {} : { 'data-couleur': couleur })}

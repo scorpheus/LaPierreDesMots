@@ -587,6 +587,16 @@ describe('MoteurColorie — le décor réel survit aux re-rendus', () => {
     expect(apres.getAttribute('tabindex')).toBe('0');
     expect(apres.getAttribute('aria-label')).toBe(libelle);
   });
+
+  it('réactive le calque coloriable masqué par le raster et matérialise la prise courante', () => {
+    render(<CadreStable />);
+    const calque = document.querySelector('#calque-zones');
+    expect(calque?.getAttribute('opacity')).toBe('1');
+
+    const prise = document.querySelector('[data-calque="prises"] [data-region-svg]');
+    expect(prise?.getAttribute('data-active')).toBe('oui');
+    expect(prise?.classList.contains('pierre-prise-colorie')).toBe(true);
+  });
 });
 
 /**

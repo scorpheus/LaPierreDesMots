@@ -796,7 +796,9 @@ const MARAIS = [
       z('nenuphar-perdu', 'le nénuphar blanc', F.lobe(750, 472, 42, 8, 0.72, 34, 0.2, 0.78)),
       z('route', 'le ponton', [[522, 302], [830, 310], [824, 364], [600, 350], [522, 332]]),
       z('roue', 'l’escargot', F.ellipse(248, 536, 54, 38, 24)),
-      z('caillou', 'le caillou', F.lobe(522, 524, 52, 5, 0.8, 32, 0.9, 0.6)),
+      // Gros rocher isolé au bord de l'eau dans le raster : l'ancienne prise (522, 524)
+      // tombait dans l'eau et rendait la première consigne impossible au doigt.
+      z('caillou', 'le gros caillou au bord de l’eau', F.lobe(430, 458, 66, 6, 0.78, 28, 0.7, 0.72)),
     ],
     traits: [ligne([[0, 462], [560, 442]])],
   }),

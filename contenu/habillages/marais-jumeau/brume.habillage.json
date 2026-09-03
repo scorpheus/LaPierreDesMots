@@ -155,12 +155,12 @@
           },
           {
             "id": "caillou",
-            "libelle": "le caillou",
+            "libelle": "le gros caillou au bord de l’eau",
             "centroide": [
-              520.2,
-              521.2
+              430,
+              458
             ],
-            "surface": 4115.8
+            "surface": 7755.4
           }
         ]
       },

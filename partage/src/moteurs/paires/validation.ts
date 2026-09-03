@@ -70,15 +70,24 @@ export function evaluerPaires(
       competence: etat.competence,
     });
   }
-  if (!etape.restantes.includes(a.paire)) return REFUS('paire-hors-consigne');
+  // Le plateau montre toutes les cartes à la fois : une paire juste ne doit jamais être
+  // refusée parce qu'elle figurait dans une consigne déclarée plus loin. Les étapes restent
+  // utiles au journal et à la progression, mais elles n'imposent aucun ordre au memory.
+  const paireEncoreDemandee = etat.etapes
+    .slice(etat.indexEtape)
+    .some((candidate) => candidate.restantes.includes(a.paire));
+  if (!paireEncoreDemandee) return REFUS('paire-hors-consigne');
 
-  const etapeSatisfaite = etape.restantes.length === 1;
+  const etapeSatisfaite = etape.restantes.length === 1 && etape.restantes[0] === a.paire;
+  const exerciceTermine = etat.etapes
+    .slice(etat.indexEtape)
+    .reduce((total, candidate) => total + candidate.restantes.length, 0) === 1;
   return {
     acceptee: true,
     motif: null,
     compteErreur: false,
     etapeSatisfaite,
-    exerciceTermine: etapeSatisfaite && etat.indexEtape === etat.etapes.length - 1,
+    exerciceTermine,
     confusion: null,
     acquis: [a.paire, 'appariee'],
   };

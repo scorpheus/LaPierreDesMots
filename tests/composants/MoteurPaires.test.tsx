@@ -23,6 +23,7 @@ import { moteurPaires } from '@partage/moteurs/paires/moteur';
 import { MoteurPaires } from '@client/moteurs/paires/MoteurPaires';
 import type {
   ActionPaires,
+  ContenuPaires,
   EtatPaires,
 } from '@partage/moteurs/paires/types';
 import type { Habillage } from '@pierre/partage';
@@ -167,8 +168,8 @@ describe('moteur paires', () => {
     const { container } = render(<Harnais />);
     const cartouche = container.querySelector('[data-cartouche-paires="etape"]');
     expect(cartouche?.textContent).toContain('Trouve les paires.');
-    expect(cartouche?.textContent).toContain('Étape 1 / 10');
-    expect(cartouche?.textContent).toMatch(/0 \/ \d+ paires/);
+    expect(cartouche?.textContent).not.toContain('Étape');
+    expect(cartouche?.textContent).toContain('0 / 1 paires');
     expect(cartouche?.textContent).not.toContain('loup');
   });
   it('le contenu de ce test est conforme au schéma que le moteur publie', () => {
@@ -234,5 +235,68 @@ describe('moteur paires', () => {
     const h = harnais(container);
     expect(h.getAttribute('data-erreurs')).toBe('0');
     expect(h.getAttribute('data-aide-resume')).toBe('aucune');
+  });
+
+  it('accepte une paire correcte même si elle appartient à une étape suivante', () => {
+    const contenuMarais = lireJson<{ jeu: { contenu: ContenuPaires } }>(
+      'contenu/exercices/marais-jumeau/coquillages-paires-01.json',
+    ).jeu.contenu;
+    const horlogeLocale = horlogeDeTest();
+    const aleaLocale = aleaDeTest();
+    let etat = moteurPaires.creerEtat({
+      contenu: contenuMarais,
+      habillage,
+      horloge: horlogeLocale,
+      alea: aleaLocale,
+    });
+    expect(etat.etapes[0]?.restantes).not.toContain('paire-sapin');
+
+    etat = moteurPaires.reduire(etat, { type: 'retourner', carte: 'image-sapin' }, {
+      horloge: horlogeLocale,
+      alea: aleaLocale,
+    });
+    etat = moteurPaires.reduire(etat, { type: 'retourner', carte: 'mot-sapin' }, {
+      horloge: horlogeLocale,
+      alea: aleaLocale,
+    });
+
+    expect(etat.acquis['paire-sapin']).toBe('appariee');
+    expect(etat.dernierRefus).toBeNull();
+    expect(etat.etapes[1]?.restantes).not.toContain('paire-sapin');
+    expect(etat.indexEtape).toBe(0);
+  });
+
+  it('termine le plateau quand toutes les paires sont trouvées dans l’ordre inverse des groupes', () => {
+    const contenuMarais = lireJson<{ jeu: { contenu: ContenuPaires } }>(
+      'contenu/exercices/marais-jumeau/coquillages-paires-01.json',
+    ).jeu.contenu;
+    const horlogeLocale = horlogeDeTest();
+    const aleaLocale = aleaDeTest();
+    let etat = moteurPaires.creerEtat({
+      contenu: contenuMarais,
+      habillage,
+      horloge: horlogeLocale,
+      alea: aleaLocale,
+    });
+
+    const ordreInverse = contenuMarais.consignes
+      .flatMap((consigne) => consigne.aApparier)
+      .reverse();
+    for (const paire of ordreInverse) {
+      const cartes = contenuMarais.cartes.filter((carte) => carte.paire === paire);
+      expect(cartes).toHaveLength(2);
+      etat = moteurPaires.reduire(etat, { type: 'retourner', carte: cartes[0]!.id }, {
+        horloge: horlogeLocale,
+        alea: aleaLocale,
+      });
+      etat = moteurPaires.reduire(etat, { type: 'retourner', carte: cartes[1]!.id }, {
+        horloge: horlogeLocale,
+        alea: aleaLocale,
+      });
+    }
+
+    expect(Object.keys(etat.acquis)).toHaveLength(ordreInverse.length);
+    expect(etat.etapes.every((etapePaire) => etapePaire.restantes.length === 0)).toBe(true);
+    expect(etat.termineMs).not.toBeNull();
   });
 });

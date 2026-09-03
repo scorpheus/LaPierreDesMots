@@ -66,8 +66,8 @@ export interface EtatEtapePaires {
    * Les cartes étaient rangées deux par deux, `mot-X · image-X`, exactement dans l'ordre
    * d'`aApparier` : retourner les deux premières cartes visibles complétait toujours LA BONNE
    * paire. Mesuré : 130 consignes sur 130. Ce champ ne pilote aucune règle — `paires` n'impose
-   * aucun ordre de complétion, une paire quelconque de `restantes` est acceptée à tout moment
-   * (`validation.ts`) — il ne fait que PROJETER, pour cette étape, l'ordre réel du plateau
+   * aucun ordre de complétion, une paire quelconque encore présente dans l'un des groupes est
+   * acceptée à tout moment (`validation.ts`) — il ne fait que PROJETER l'ordre réel du plateau
    * mélangé une seule fois à la création de l'état, par `Alea`.
    *
    * Déclaré AVANT `restantes` : le garde Q4 (`tests/unitaires/melange-des-reponses.test.ts`)
@@ -76,7 +76,7 @@ export interface EtatEtapePaires {
    * satisferait aussi ce critère, mais il n'est pas mélangé.
    */
   readonly ordreAffichage: readonly IdPaire[];
-  /** Ce qu'il reste à faire sur cette étape. Vide = étape close. */
+  /** Ce qu'il reste dans ce groupe pédagogique. Le groupe n'impose aucun ordre au plateau. */
   readonly restantes: readonly string[];
   readonly nbErreurs: number;
   readonly niveauAide: NiveauAide;

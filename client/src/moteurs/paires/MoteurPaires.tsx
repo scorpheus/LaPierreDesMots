@@ -420,9 +420,12 @@ export function MoteurPaires(
   }, [empreinteAllumees, allumees]);
 
   const etape = etat.etapes[etat.indexEtape];
-  // `ordreAffichage` est la projection complète et stable des paires de l'étape ; il permet
-  // d'afficher la progression sans relire le contenu ni révéler une paire précise.
-  const pairesAttendues = etape?.ordreAffichage ?? [];
+  // Toutes les cartes sont visibles ensemble : le compteur porte donc sur tout le plateau,
+  // jamais sur un groupe interne que l'enfant ne voit pas et qui imposerait un faux ordre.
+  const pairesAttendues = useMemo(
+    () => [...new Set(etat.etapes.flatMap((candidate) => candidate.ordreAffichage))],
+    [etat.etapes],
+  );
   const pairesTrouvees = pairesAttendues.filter((paire) => etat.acquis[paire] !== undefined).length;
 
   const carteRefusee = etat.dernierRefus === null ? null : etat.dernierRefus.carte;
@@ -507,7 +510,6 @@ export function MoteurPaires(
           >
             <span style={{ fontWeight: 800 }}>Trouve les paires.</span>
             <span aria-hidden="true" style={{ opacity: 0.72 }}>·</span>
-            <span>{`Étape ${String(etat.indexEtape + 1)} / ${String(etat.etapes.length)}`}</span>
             <span>{`${String(pairesTrouvees)} / ${String(pairesAttendues.length)} paires`}</span>
           </div>
         )}

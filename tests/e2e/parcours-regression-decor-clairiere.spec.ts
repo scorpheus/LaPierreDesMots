@@ -119,13 +119,15 @@ test.describe('régression Clairière — décor, cadrage et vrai geste de color
 
     const prisePull = scene.locator('[data-calque="prises"] [data-region-svg="pull-maitresse"]');
     const formePull = scene.locator('[data-region-source="pull-maitresse"]');
-    await expect(formePull).toHaveCSS('opacity', '0.92');
+    // La zone vierge reste réellement grise et aucun aplat ne donne la réponse avant le geste.
+    await expect(formePull).toHaveCSS('opacity', '0');
 
     await page.getByRole('button', { name: 'bleu' }).click();
     await prisePull.click();
 
     await expect(prisePull).toHaveAttribute('data-peinte', 'oui');
     await expect(formePull).toHaveAttribute('fill', '#2FA8E0');
+    await expect(formePull).toHaveCSS('opacity', '0.92');
     await expect(scene.locator('[data-region-source="banc"]')).toHaveCSS('opacity', '0');
 
     mkdirSync(DOSSIER_CAPTURES, { recursive: true });
