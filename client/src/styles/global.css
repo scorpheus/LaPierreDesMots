@@ -2190,6 +2190,27 @@ body {
   justify-content: center;
 }
 
+/* Les 25 formes restent de grandes cartes explorables. La grille emploie l'espace du panneau
+   au lieu de les miniaturiser : une case conserve les 144 px validés pour le doigt et le dessin. */
+.collection-coffre--formes [data-etagere='oui'] ul {
+  box-sizing: border-box;
+  inline-size: 100%;
+  max-inline-size: 100%;
+  flex-wrap: wrap !important;
+  justify-content: center;
+  gap: 0.25rem !important;
+}
+
+.collection-coffre--formes [data-etagere='oui'] {
+  inline-size: 100%;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+
+.collection-coffre--formes [data-etagere='oui'] li {
+  flex: 0 0 auto;
+}
+
 @media (max-width: 900px), (orientation: portrait) {
   .ecran-coffre {
     block-size: auto;

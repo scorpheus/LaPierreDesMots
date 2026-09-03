@@ -77,8 +77,8 @@ function Vignette({
           justifyContent: 'center',
           gap: '0.35rem',
           boxSizing: 'border-box',
-          inlineSize: compacte ? '7rem' : '9.5rem',
-          minBlockSize: compacte ? '7.5rem' : '10rem',
+          inlineSize: compacte ? '9rem' : '9.5rem',
+          minBlockSize: compacte ? '9rem' : '10rem',
           padding: '0.5rem',
           color: 'inherit',
           font: 'inherit',
@@ -96,14 +96,14 @@ function Vignette({
           <img
             src={urlAsset(String(une.cristal))}
             alt=""
-            width={compacte ? 64 : 80}
-            height={compacte ? 64 : 80}
+            width={compacte ? 72 : 80}
+            height={compacte ? 72 : 80}
             aria-hidden="true"
           />
         ) : (
           <svg
-            width={compacte ? 64 : 80}
-            height={compacte ? 64 : 80}
+            width={compacte ? 72 : 80}
+            height={compacte ? 72 : 80}
             viewBox="0 0 48 48"
             aria-hidden="true"
             focusable="false"
