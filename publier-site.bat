@@ -48,6 +48,9 @@ echo   Commande exacte, a executer seulement apres son accord explicite :
 echo.
 echo     git -C bac-a-sable/publication-gh-pages push origin gh-pages:gh-pages
 echo.
+echo   GitHub Pages est deja configure sur gh-pages / racine.
+echo   Ce push declenchera automatiquement l Action Pages officielle.
+echo.
 pause
 exit /b 0
 

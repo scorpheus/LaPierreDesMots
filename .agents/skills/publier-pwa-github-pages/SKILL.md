@@ -47,8 +47,8 @@ illustré hors connexion avant qu'un téléchargement complet explicite ait ét�
    le worktree ignoré `bac-a-sable/publication-gh-pages`.
 4. Inspecter le commit local et le fichier `SOURCE_COMMIT.txt`.
 5. S'arrêter, annoncer au propriétaire la commande distante affichée par le script ainsi que son
-   effet, puis attendre son accord. La première publication demande aussi son accord avant de
-   configurer Pages sur la branche `gh-pages`, dossier racine.
+   effet, puis attendre son accord. GitHub Pages est déjà configuré sur la branche `gh-pages`,
+   dossier racine, avec HTTPS forcé ; le push déclenche automatiquement l'Action Pages officielle.
 
 Après une publication autorisée, vérifier l'installation et la persistance sur
 `https://scorpheus.github.io/LaPierreDesMots/`, sans supprimer la base locale existante.

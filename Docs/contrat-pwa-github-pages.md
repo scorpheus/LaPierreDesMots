@@ -1,7 +1,7 @@
 # Contrat — PWA autonome publiée sur GitHub Pages
 
-**Statut : architecture validée par le propriétaire le 2026-09-04 ; implantation et recette
-locale réalisées, publication distante non autorisée à ce stade.**
+**Statut : architecture validée par le propriétaire le 2026-09-04 ; implantation, recette locale
+et première publication HTTPS réalisées le même jour.**
 Ce document complète l’addendum de portage Android sans modifier les quatre documents de
 référence. Il décrit une troisième cible de la même application : le navigateur autonome.
 
@@ -90,6 +90,11 @@ n’exécute jamais de push et affiche la commande distante qui ne pourra être 
 l’annonce et l’accord du propriétaire. La procédure répétable validée est consignée dans
 `.agents/skills/publier-pwa-github-pages/SKILL.md`.
 
+GitHub Pages est configuré sur la branche `gh-pages`, dossier racine, avec HTTPS forcé. Chaque
+nouveau push autorisé de cette branche déclenche l’Action gérée par GitHub
+`pages build and deployment` ; elle livre le build déjà produit sur le PC et ne recompile pas les
+sources privées de voix ou de polices.
+
 ## 6. Lots et propriété des fichiers
 
 1. **Gardes rouges — réalisé.** Nouveaux tests dédiés : sélection du port `pwa`, base persistante après
@@ -102,10 +107,10 @@ l’annonce et l’accord du propriétaire. La procédure répétable validée e
    local fidèle à GitHub Pages et commande `tester:pwa`.
 5. **Sauvegarde — réalisé.** Export/import versionné de la progression, avec validation et refus atomique
    d’un fichier incomplet ou d’une version inconnue.
-6. **Publication préparée localement.** `publier-site.bat` et le constructeur du worktree
-   `gh-pages` existent. La création effective du site et tout push distant attendent l’annonce et
-   l’accord prévus au § 5 ; aucun fichier de workflow GitHub Actions ni paramètre distant n’a été
-   créé ou modifié.
+6. **Publication réalisée.** `publier-site.bat` et le constructeur du worktree `gh-pages`
+   existent. La première branche a été publiée après l’annonce et l’accord prévus au § 5, puis
+   GitHub Pages a été activé sur `gh-pages` / racine. Aucun workflow personnalisé n’est nécessaire :
+   l’Action Pages officielle déploie automatiquement le livrable statique.
 
 L’orchestrateur seul installe, compile et lance `npm run verifier`. Les agents travaillent sur des
 fichiers disjoints et lisent ce document au lieu d’en recopier une variante dans leurs briefs.
@@ -143,3 +148,17 @@ de `npm run verifier` a croisé une seconde campagne lancée simultanément dans
 écritures concurrentes dans `tests/rapports/` rendent ce rapport consolidé impropre comme preuve.
 Il ne doit pas être relancé en parallèle ; la campagne déjà conduite par l’autre chantier reste la
 source attendue pour la validation globale.
+
+### Première publication du 2026-09-04
+
+- source : commit `7c491cfe69a870d9ca60a4b39dd8f7de8106e661` ;
+- livrable : version `3c8e0b5858ccc99d`, 1 592 fichiers applicatifs, 194,4 Mio ;
+- branche de livraison : commit `25124d60d79d2b3cd2fb898274eb587b2b262fac` sur `gh-pages` ;
+- Action Pages : exécution `33866967883`, construction, déploiement et rapport réussis ;
+- URL : `https://scorpheus.github.io/LaPierreDesMots/`, HTTPS forcé.
+
+La recette Chromium sur cette URL publique confirme la relecture du profil après fermeture, le
+rechargement hors connexion sous contrôle du service worker, le refus du second onglet, la portée
+`https://scorpheus.github.io/LaPierreDesMots/`, l’export/import de SQLite, le refus atomique d’une
+sauvegarde invalide, zéro requête `/api/`, zéro erreur de page et la conservation d’une route
+profonde après rafraîchissement.

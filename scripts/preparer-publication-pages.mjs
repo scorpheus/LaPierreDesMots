@@ -433,8 +433,8 @@ export function preparerBrancheLocale() {
   console.log('');
   console.log('  git -C bac-a-sable/publication-gh-pages push origin gh-pages:gh-pages');
   console.log('');
-  console.log('[pages] au premier envoi seulement, il faudra aussi configurer Pages sur');
-  console.log('        gh-pages / (root) dans Settings > Pages.');
+  console.log('[pages] GitHub Pages est configure sur gh-pages / racine ; ce push declenchera');
+  console.log('        automatiquement l Action Pages officielle.');
 }
 
 const arguments_ = new Set(process.argv.slice(2));
