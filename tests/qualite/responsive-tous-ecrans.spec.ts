@@ -18,6 +18,24 @@ const FORMATS = [
   { nom: 'téléphone paysage', largeur: 640, hauteur: 360 },
 ] as const;
 
+/* Une matrice courte autour des dimensions usuelles ET des seuils CSS. Les deux valeurs 899/901
+   empêchent notamment qu'un correctif ne fonctionne qu'exactement sur les quatre captures de la
+   campagne générale. Ces formats ne rejouent que les trois écrans de coque. */
+const FORMATS_COQUE = [
+  { nom: 'petit téléphone portrait', largeur: 320, hauteur: 568 },
+  { nom: 'téléphone portrait étroit', largeur: 360, hauteur: 640 },
+  { nom: 'téléphone portrait courant', largeur: 390, hauteur: 844 },
+  { nom: 'téléphone portrait large', largeur: 412, hauteur: 915 },
+  { nom: 'petit téléphone paysage', largeur: 568, hauteur: 320 },
+  { nom: 'téléphone paysage étroit', largeur: 640, hauteur: 360 },
+  { nom: 'téléphone paysage courant', largeur: 844, hauteur: 390 },
+  { nom: 'téléphone paysage large', largeur: 915, hauteur: 412 },
+  { nom: 'juste sous le seuil compact', largeur: 899, hauteur: 700 },
+  { nom: 'juste au-dessus du seuil compact', largeur: 901, hauteur: 700 },
+  { nom: 'fenêtre PC réduite', largeur: 800, hauteur: 600 },
+  { nom: 'bureau plein écran', largeur: 1920, hauteur: 1080 },
+] as const;
+
 interface DefautResponsive {
   readonly ecran: string;
   readonly raison: string;
@@ -100,6 +118,12 @@ async function defautsDe(page: Page, ecran: string): Promise<DefautResponsive[]>
 }
 
 test.describe('responsive — aucune commande ne disparaît', () => {
+  /* Chaque cas traverse les 89 écrans. Les quatre lancer en parallèle après les campagnes axe et
+     latence peut affamer un seul serveur jusqu'au délai de 240 s, alors qu'ils terminent ensemble
+     en moins d'une minute à froid. En série, chaque mesure dispose du navigateur qu'elle juge et
+     le résultat ne dépend plus de la contention laissée par la phase précédente. */
+  test.describe.configure({ mode: 'serial' });
+
   for (const format of FORMATS) {
     test(`${format.nom} — tous les écrans restent utilisables`, async ({ page }) => {
       test.setTimeout(240_000);
@@ -114,6 +138,49 @@ test.describe('responsive — aucune commande ne disparaît', () => {
         defauts,
         `${format.nom} (${String(format.largeur)}×${String(format.hauteur)} CSS) : défauts responsive`,
       ).toEqual([]);
+    });
+  }
+});
+
+test.describe('responsive — la coque ne garde pas les proportions tablette sur téléphone', () => {
+  const recettesCoque = recettesDEcrans().filter((recette) =>
+    ['profils', 'carte', 'campement'].includes(recette.attendu),
+  );
+
+  for (const format of FORMATS_COQUE) {
+    test(`${format.nom} — navigation compacte et texte proportionné`, async ({ page }) => {
+      await page.setViewportSize({ width: format.largeur, height: format.hauteur });
+      for (const recette of recettesCoque) {
+        await recette.aller(page);
+        await expect(page.locator(`[data-ecran="${recette.attendu}"]`)).toBeVisible();
+        await defautsDe(page, recette.nom);
+
+        const mesure = await page.evaluate((ecran) => {
+          const selecteurEntete =
+            ecran === 'profils' ? '.entete-profils' :
+            ecran === 'carte' ? '.entete-carte' : '.campement-entete';
+          const entete = document.querySelector<HTMLElement>(selecteurEntete);
+          const tailles = [...(entete?.querySelectorAll<HTMLElement>('button, h1') ?? [])]
+            .map((element) => Number.parseFloat(getComputedStyle(element).fontSize));
+          return {
+            hauteurEntete: entete?.getBoundingClientRect().height ?? 0,
+            plusGrandePolice: Math.max(0, ...tailles),
+          };
+        }, recette.attendu);
+
+        const compact = format.largeur <= 900 || format.hauteur <= 520;
+        const hauteurMaximale = compact
+          ? recette.attendu === 'campement' ? 125 : recette.attendu === 'profils' ? 110 : 82
+          : recette.attendu === 'campement' ? 205 : recette.attendu === 'profils' ? 150 : 105;
+        expect(
+          mesure.hauteurEntete,
+          `${recette.nom} : l’en-tête occupe trop de hauteur sur ${format.nom}`,
+        ).toBeLessThanOrEqual(hauteurMaximale);
+        expect(
+          mesure.plusGrandePolice,
+          `${recette.nom} : la typographie de navigation reste dimensionnée pour une tablette`,
+        ).toBeLessThanOrEqual(compact ? 32 : 68);
+      }
     });
   }
 });

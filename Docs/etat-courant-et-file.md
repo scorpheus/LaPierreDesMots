@@ -44,6 +44,16 @@ annulé, remplacé ou reporté.
   deux cycles de mise en page. Une capture partiellement chargée ne peut plus valider l'écran.
 - Résultat du 4 septembre : 4/4 formats verts, soit 356 visites d'écran. Le téléphone portrait a
   en plus réussi trois répétitions concurrentes consécutives.
+- Une seconde garde porte désormais sur la qualité de composition de la coque, pas seulement sur
+  l'absence de rognage. Elle parcourt 12 cadres : téléphones de 320 à 915 px dans les deux sens,
+  les deux côtés du seuil compact (899/901 px), une fenêtre PC réduite et le plein écran.
+- Sur les écrans courts ou étroits, la surface tactile reste à 64 px mais l'habillage devient
+  compact : texte d'interface borné en pixels CSS, bordure et relief allégés, vignettes réduites,
+  détails secondaires retirés de la barre du campement. L'échelle de lecture du profil continue
+  de s'appliquer au contenu pédagogique, sans faire grossir démesurément la navigation.
+- La composition de la carte dépend également de l'orientation : flux vertical resserré en
+  portrait ; carte et destinations côte à côte en paysage bas. L'ancienne piste de `72svh`, qui
+  créait un grand vide sous l'introduction en portrait, n'est plus utilisée pour la carte.
 - Les cibles tactiles restent à 64 px. Sur petit écran, les scènes riches deviennent des plateaux
   localement défilables au lieu d'être écrasées : campement, chaudron et moteur `place`.
 - La hauteur disponible utilise `dvh`/`svh` et les seuils tiennent aussi compte d'une fenêtre
@@ -51,8 +61,13 @@ annulé, remplacé ou reporté.
 - `npm run test:responsive` est la boucle courte du chantier web. `npm run test:qualite` séquence
   désormais l'audit général, la latence isolée, la matrice responsive puis le budget du bundle ;
   les lancer en concurrence faussait la mesure de latence par contention CPU.
-- Validation finale du lot : 247/247 contrôles qualité généraux, 2/2 contrôles de latence,
-  4/4 formats responsive et 6/6 contrôles de bundle.
+- Les quatre balayages complets de 89 écrans sont séquencés dans leur fichier : après une longue
+  campagne, les lancer en parallèle pouvait affamer un seul serveur de test jusqu'au délai maximal.
+  Mesurés en série, ils terminent chacun en 30 à 37 secondes sans résultat dépendant de la charge.
+- Validation finale du lot initial : 247/247 contrôles qualité généraux, 2/2 contrôles de latence,
+  4/4 formats responsive et 6/6 contrôles de bundle. Passe de densité ajoutée ensuite : 16/16 cas
+  verts en boucle courte ; dans la chaîne qualité complète, 265/265 cas et 6/6 contrôles de bundle
+  sont verts (245,2 Kio gzip sur un budget de 250 Kio).
 
 ## Dernier chantier terminé : audio
 

@@ -2872,7 +2872,226 @@ html[data-animations='desactivees'] .compagnon-portrait--tuile {
   }
 }
 
+@media (max-width: 900px), (max-height: 520px) {
+  /* Sur téléphone, une cible reste confortable pour le doigt (64 px), mais elle ne conserve
+     pas l'habillage massif de la tablette. La densité visuelle vient du texte, des marges,
+     de la vignette et du relief — pas de la surface réellement tapable. */
+  .ecran-profils {
+    gap: 0.65rem !important;
+    padding: 0.65rem !important;
+  }
+
+  .entete-profils {
+    gap: 0.1rem;
+  }
+
+  .entete-profils__surtitre {
+    padding: 2px 10px;
+    font-size: 11px;
+    letter-spacing: 0.055em;
+  }
+
+  .entete-profils h1 {
+    font-size: clamp(26px, 8vw, 32px);
+  }
+
+  .entete-profils p {
+    margin-block-start: 2px;
+    font-size: 13px;
+    line-height: 1.15;
+  }
+
+  .ecran-carte {
+    gap: 0.5rem !important;
+    padding: 0.5rem !important;
+  }
+
+  .entete-carte {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 0.35rem !important;
+  }
+
+  .entete-carte > h1 {
+    inline-size: auto;
+    font-size: clamp(18px, 5.4vw, 23px) !important;
+    line-height: 1.05;
+  }
+
+  .entete-carte > .cible {
+    min-inline-size: var(--cible-min);
+    padding: 0.3rem 0.45rem;
+    border-width: 3px;
+    border-radius: 1rem;
+    box-shadow: 0 3px 0 0 var(--trait);
+    font-size: clamp(11px, 3.1vw, 13px);
+    font-weight: 700;
+    line-height: 1.05;
+    text-align: center;
+  }
+
+  .introduction-carte {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.35rem;
+    min-block-size: 0;
+  }
+
+  .introduction-carte > p {
+    font-size: clamp(12px, 3.5vw, 15px) !important;
+    line-height: 1.2;
+  }
+
+  .introduction-carte > .cible {
+    padding: 0.35rem 0.55rem;
+    border-width: 3px;
+    border-radius: 1rem;
+    box-shadow: 0 3px 0 0 var(--trait);
+    font-size: clamp(11px, 3.2vw, 14px);
+    line-height: 1.05;
+    text-align: center;
+  }
+
+  .introduction-carte > [data-prochain-deblocage] {
+    grid-column: 1 / -1;
+    margin: 0 !important;
+    padding: 0.45rem 0.6rem;
+    font-size: 12px !important;
+    line-height: 1.2;
+  }
+
+  .destinations-carte {
+    padding: 0.5rem;
+    border-width: 3px;
+    border-radius: 1rem;
+  }
+
+  .destinations-carte [data-depart] {
+    min-block-size: var(--cible-min);
+    padding: 0.45rem !important;
+    border-width: 3px;
+    border-radius: 1rem;
+  }
+
+  .destinations-carte [data-depart] .titre {
+    font-size: 16px !important;
+  }
+
+  .destinations-carte [data-depart] span:not(.titre) {
+    font-size: 12px !important;
+    line-height: 1.1;
+  }
+
+  /* La carte suit son propre rapport au lieu d'être centrée dans une piste de 72 vh : cette
+     piste produisait un grand désert entre l'explication et le dessin en portrait. */
+  .corps-carte {
+    grid-template-rows: auto auto;
+  }
+
+  [data-scene-adaptative="carte"] {
+    flex: none;
+    inline-size: 100%;
+    aspect-ratio: 3 / 2;
+  }
+
+  .campement-page {
+    gap: 0.6rem;
+    padding: 0.5rem;
+  }
+
+  .campement-entete {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.3rem;
+    padding: 0.3rem;
+    border-width: 3px;
+    border-radius: 1.1rem;
+    box-shadow: 0 3px 0 0 var(--trait);
+  }
+
+  .campement-titre {
+    grid-column: 1 / -1;
+    padding: 0;
+    font-size: 22px;
+    line-height: 1;
+    text-align: center;
+  }
+
+  .action-campement,
+  .campement-entete [data-pictogramme="sortie"] {
+    inline-size: 100% !important;
+    min-inline-size: 0;
+    min-block-size: var(--cible-min);
+    grid-template-rows: auto auto;
+    gap: 0.1rem;
+    padding: 0.2rem;
+    border-width: 3px;
+    border-radius: 0.85rem;
+    box-shadow: 0 3px 0 rgb(27 36 64 / 25%);
+  }
+
+  .action-campement-vignette {
+    inline-size: 2.5rem;
+    block-size: 1.85rem;
+    border-width: 2px;
+    border-radius: 0.45rem;
+  }
+
+  .action-campement [data-action-campement-texte="nom"] {
+    font-size: clamp(11px, 3vw, 13px);
+    line-height: 1;
+  }
+
+  .action-campement [data-action-campement-texte="detail"],
+  .campement-entete [data-pictogramme="sortie"] [data-sortie-etape] {
+    display: none;
+  }
+
+  .campement-entete [data-pictogramme="sortie"] > [aria-hidden="true"] {
+    font-size: 24px !important;
+  }
+
+  .campement-entete [data-pictogramme="sortie"] > .titre {
+    font-size: clamp(11px, 3vw, 13px) !important;
+    line-height: 1;
+  }
+
+}
+
+/* En paysage bas, la largeur disponible sert réellement : carte à gauche, départs à droite.
+   Empiler les deux comme en portrait forçait à défiler avant même d'apercevoir une destination. */
+@media (orientation: landscape) and (max-height: 520px) {
+  .introduction-carte {
+    grid-template-columns: minmax(9rem, 1fr) auto minmax(12rem, 1.35fr);
+    align-items: stretch;
+  }
+
+  .introduction-carte > [data-prochain-deblocage] {
+    grid-column: auto;
+    display: flex;
+    align-items: center;
+  }
+
+  .corps-carte {
+    grid-template-columns: minmax(0, 1fr) minmax(12rem, 17rem);
+    grid-template-rows: minmax(15rem, calc(100svh - 9rem));
+  }
+
+  [data-scene-adaptative="carte"] {
+    block-size: 100%;
+    aspect-ratio: auto;
+  }
+
+  .destinations-carte > div {
+    flex-direction: column;
+  }
+
+  .destinations-carte [data-depart] {
+    flex: 0 0 auto;
+  }
+}
+
 @media (max-width: 600px) {
+
   /* Les scènes riches gardent leurs cibles de 64 px. Elles deviennent des plateaux que l'on
      explore horizontalement, plutôt que des miniatures aux prises superposées ou rognées. */
   .campement-grille,
