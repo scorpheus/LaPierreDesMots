@@ -154,7 +154,10 @@ un défaut visuel ou une seconde panne d’infrastructure.
 
 La publication exige que ces empreintes soient encore exactes, puis automatise le push, l’attente
 de l’Action officielle, le contrôle de l’état `built` et une recette HTTP de la racine, du manifeste,
-de son icône, du service worker et de la version. La persistance réelle sur tablette reste une
+de son icône, du service worker, de la version et des quinze WebP de Gobi. Ce dernier contrôle est
+obligatoire depuis qu’une publication a révélé que le port autonome indexait SVG et PNG, mais pas
+WebP : les sources et les tests de Gobi étaient présents tandis que son image disparaissait sur
+GitHub Pages. La persistance réelle sur tablette reste une
 recette humaine : le script ne supprime ni ne remplace les données OPFS du navigateur.
 
 ### Mesure du 2026-09-04

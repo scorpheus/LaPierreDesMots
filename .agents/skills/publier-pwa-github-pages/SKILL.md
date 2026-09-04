@@ -77,7 +77,8 @@ illustré hors connexion avant qu'un téléchargement complet explicite ait ét�
 
    Cette commande revérifie les empreintes préparées, pousse exactement `gh-pages`, attend l’Action
    `pages build and deployment`, exige son succès et l’état Pages `built`, puis contrôle en HTTPS
-   la page racine, `version-build.json`, le service worker, le manifeste et son icône.
+   la page racine, `version-build.json`, le service worker, le manifeste, son icône et les quinze
+   WebP de Gobi réellement employés par les écrans.
 
 Sans argument, un double-clic sur `publier-site.bat` équivaut à `--preparer` et conserve la fenêtre
 ouverte. En automatisation, toujours préciser le mode afin de ne pas introduire de pause.

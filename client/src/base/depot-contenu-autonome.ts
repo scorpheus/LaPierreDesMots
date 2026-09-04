@@ -57,6 +57,14 @@ const ASSETS_URL = {
     import: 'default',
     eager: true
   }) as Record<string, string>),
+  // Les quinze rendus raster de Gobi sont en WebP. Sans ce glob, le serveur LAN les sert,
+  // mais la PWA retombe sur `/api/contenu/...` — une route absente de GitHub Pages — et le
+  // personnage disparaît alors que tous les tests portant seulement sur SVG/PNG restent verts.
+  ...(import.meta.glob('../../../contenu/assets/**/*.webp', {
+    query: '?url',
+    import: 'default',
+    eager: true
+  }) as Record<string, string>),
   ...(import.meta.glob('../../../contenu/audio/**/*.opus', {
     query: '?url',
     import: 'default',

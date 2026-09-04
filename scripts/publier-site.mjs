@@ -241,6 +241,27 @@ export function extrairePremierAsset(manifeste) {
   return new URL(icone.src, URL_SITE).href;
 }
 
+const ASSETS_CRITIQUES_GOBI = [
+  ...Array.from({ length: 10 }, (_, rang) => `assets/gobi/stades/stade-${String(rang + 1)}.webp`),
+  ...['aide', 'apparition', 'hesitation', 'joie', 'repos'].map(
+    (pose) => `assets/gobi/animation/${pose}.webp`,
+  ),
+];
+
+export function extraireAssetsCritiquesGobi(manifeste) {
+  return ASSETS_CRITIQUES_GOBI.map((chemin) => {
+    const suffixe = `/contenu/${chemin}`;
+    const entree = Object.entries(manifeste).find(([source]) =>
+      source.replaceAll('\\', '/').endsWith(suffixe),
+    )?.[1];
+    exiger(
+      typeof entree === 'object' && entree !== null && typeof entree.file === 'string',
+      `Le build ne contient pas l asset critique ${chemin}.`,
+    );
+    return new URL(entree.file, URL_SITE).href;
+  });
+}
+
 async function attendre(etiquette, lireEtat, accepter, delaiMs = 180_000) {
   const fin = Date.now() + delaiMs;
   let dernier;
@@ -258,7 +279,7 @@ async function fetchOk(url) {
   return reponse;
 }
 
-async function verifierSiteDistant(versionAttendue) {
+async function verifierSiteDistant(versionAttendue, assetsCritiques) {
   const suffixe = `?publication=${encodeURIComponent(versionAttendue)}`;
   await attendre(
     'La version publique',
@@ -271,6 +292,7 @@ async function verifierSiteDistant(versionAttendue) {
   exiger((await serviceWorker.text()).includes(versionAttendue), 'Le service worker public ne porte pas la version attendue.');
   const manifeste = await (await fetchOk(new URL(`manifest.webmanifest${suffixe}`, URL_SITE))).json();
   await fetchOk(extrairePremierAsset(manifeste));
+  for (const asset of assetsCritiques) await fetchOk(asset);
 }
 
 function nomDepotGithub() {
@@ -329,6 +351,10 @@ export async function preparerPublication() {
   executer(process.execPath, ['scripts/preparer-publication-pages.mjs', '--branche']);
 
   const actuel = etatActuel();
+  const manifesteVite = lireJson(
+    path.join(DOSSIER_PUBLICATION, '.vite', 'manifest.json'),
+    'Le manifeste Vite du livrable',
+  );
   const etat = {
     schema: 1,
     prepareLe: new Date().toISOString(),
@@ -337,6 +363,7 @@ export async function preparerPublication() {
     pagesCommit: actuel.pagesCommit,
     version: actuel.version,
     rapport: bilan,
+    assetsCritiques: extraireAssetsCritiquesGobi(manifesteVite),
     url: URL_SITE,
     commandeDistante: 'git -C bac-a-sable/publication-gh-pages push origin gh-pages:gh-pages',
   };
@@ -372,7 +399,8 @@ export async function publier() {
   );
 
   console.log('\n[publication] Verification du site public et de ses caches...');
-  await verifierSiteDistant(etat.version);
+  exiger(Array.isArray(etat.assetsCritiques), 'La préparation ne porte pas les assets critiques.');
+  await verifierSiteDistant(etat.version, etat.assetsCritiques);
   ecrireEtat({
     ...etat,
     publieLe: new Date().toISOString(),

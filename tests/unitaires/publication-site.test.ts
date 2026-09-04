@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest';
 import {
   depouillerRapportPlaywright,
   estIncidentReseauRelancable,
+  extraireAssetsCritiquesGobi,
   extrairePremierAsset,
   identifierProcessusTests,
   verifierEtatPrepare,
@@ -101,5 +102,25 @@ describe('publication GitHub Pages automatisee', () => {
     expect(extrairePremierAsset({ icons: [{ src: 'icones/gobi.svg' }] })).toBe(
       'https://scorpheus.github.io/LaPierreDesMots/icones/gobi.svg',
     );
+  });
+
+  it('exige les quinze WebP de Gobi dans le manifeste de livraison', () => {
+    const manifeste = Object.fromEntries([
+      ...Array.from({ length: 10 }, (_, rang) => {
+        const numero = rang + 1;
+        return [
+          `../contenu/assets/gobi/stades/stade-${String(numero)}.webp`,
+          { file: `assets/stade-${String(numero)}.hash.webp` },
+        ];
+      }),
+      ...['aide', 'apparition', 'hesitation', 'joie', 'repos'].map((pose) => [
+        `../contenu/assets/gobi/animation/${pose}.webp`,
+        { file: `assets/${pose}.hash.webp` },
+      ]),
+    ]);
+
+    expect(extraireAssetsCritiquesGobi(manifeste)).toHaveLength(15);
+    delete manifeste['../contenu/assets/gobi/animation/joie.webp'];
+    expect(() => extraireAssetsCritiquesGobi(manifeste)).toThrow(/animation\/joie\.webp/u);
   });
 });

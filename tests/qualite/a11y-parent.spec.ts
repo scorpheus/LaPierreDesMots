@@ -127,6 +127,9 @@ test.describe('axe-core sur les deux écrans parent', () => {
 test.describe('R16 — le pavé du code se tape avec le pouce', () => {
   test('chaque touche fait au moins 64 × 64 px CSS', async ({ page }) => {
     await ouvrirLaPorte(page);
+    // La requête d'état peut remplacer le pavé d'ouverture par celui de définition. Mesurer
+    // entre les deux compte alors une ancienne touche démontée à 0×0, pas une petite cible.
+    await attendreQueLaPorteAitDecide(page);
 
     const touches = page.locator('[data-touche]');
     const nb = await touches.count();
