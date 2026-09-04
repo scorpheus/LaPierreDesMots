@@ -272,7 +272,7 @@ export function finaliserLivrable() {
   const serviceWorker = modele
     .replace('__PIERRE_VERSION__', version)
     .replace('__PIERRE_BASE__', BASE_PAGES)
-    .replace('__PIERRE_PRECACHE__', JSON.stringify(precache, null, 2));
+    .replace('globalThis.__PIERRE_PRECACHE__', JSON.stringify(precache, null, 2));
   exiger(!serviceWorker.includes('__PIERRE_'), 'Un marqueur du service worker n a pas ete remplace.');
   writeFileSync(path.join(DIST_PWA, 'service-worker.js'), serviceWorker, 'utf8');
 

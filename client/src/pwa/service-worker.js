@@ -9,11 +9,11 @@
  * l'etat mesure du depot, sont mis en cache a leur premiere lecture. Ainsi « disponible hors
  * connexion » signifie honnêtement : tout le noyau et tous les ecrans illustres deja visites.
  */
-/* global self, caches, __PIERRE_PRECACHE__ */
+/* global self, caches */
 
 const VERSION = '__PIERRE_VERSION__';
 const BASE = '__PIERRE_BASE__';
-const PRECACHE = __PIERRE_PRECACHE__;
+const PRECACHE = globalThis.__PIERRE_PRECACHE__;
 const PREFIXE = 'pierre-des-mots-pwa-';
 const CACHE_NOYAU = `${PREFIXE}noyau-${VERSION}`;
 const CACHE_IMAGES = `${PREFIXE}images-${VERSION}`;

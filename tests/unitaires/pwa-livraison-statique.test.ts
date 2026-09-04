@@ -180,6 +180,17 @@ describe('service worker et cache hors ligne', () => {
     /(?:^|[\\/])(?:service[-.]?worker|sw)\.(?:m?[jt]s)$/iu.test(fichier)
   );
 
+  it('ne porte chaque marqueur de construction qu’une seule fois', () => {
+    const source = lireSiPresent(travailleurs[0]);
+
+    for (const marqueur of ['__PIERRE_VERSION__', '__PIERRE_BASE__', '__PIERRE_PRECACHE__']) {
+      expect(
+        source.split(marqueur).length - 1,
+        `${marqueur} serait remplacé partiellement et bloquerait la finalisation du build`
+      ).toBe(1);
+    }
+  });
+
   it('enregistre un service worker sous la base du dépôt', () => {
     const sources = SOURCES_CLIENT.filter((fichier) => /\.[cm]?[jt]sx?$/iu.test(fichier))
       .map((fichier) => sansCommentaires(readFileSync(fichier, 'utf8')))
