@@ -1,7 +1,7 @@
 {
-  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. ORIGINE : NIVEAU 5, fiche 5, « Les devoirs à la maison ». CORRIGÉ PRODUIT : les cinq étapes du PDF sont imprimées dans le désordre (« Sébastien écrit la réponse » y figure en 1, « Sébastien n’arrive pas à faire une addition » en 4) ; le texte source donne l’ordre réel — « Sébastien rentre de l’école… c’est une addition qu’il n’arrive pas à faire… Son papa s’assoit à côté de lui… il transforme les chiffres en jetons… Ensemble, ils écrivent la réponse dans le cahier ». Les neuf vignettes en descendent. `addition`, `jeton`, `chiffre` ne sont pas au lexique CE1 ; `compte` l’est, et c’est le même geste. Aucune vignette réemployée.",
+  "$commentaire": "VALIDÉ PAR LE PARENT LE 2026-09-04. Trois histoires simples en trois images, sans vignette réemployée : devoirs, cubes, coucher.",
   "id": "cite-des-histoires-pellicule-chrono-02",
-  "version": 1,
+  "version": 2,
   "titre": "Le cahier de Gobi",
   "origine": {
     "source": "fiches-origine/NIVEAU 5.pdf",
@@ -32,12 +32,8 @@
           "texte": "Range les images dans l'ordre de l'histoire.",
           "forme": "imperative",
           "audio": null,
-          "recit": "Gobi entre dans la maison. Il a un cahier. Papa montre le cahier.",
-          "ordre": [
-            "vignette-maison",
-            "vignette-cahier",
-            "vignette-papa"
-          ],
+            "recit": "Gobi rentre à la maison avec son sac fermé. Il sort son cahier et l'ouvre sur la table. Papa s'assoit près de Gobi pour l'aider.",
+            "ordre": ["vignette-sac-ferme", "vignette-cahier-ouvert", "vignette-papa-aide"],
           "motsCles": [
             "range",
             "image",
@@ -50,12 +46,8 @@
           "texte": "Range aussi les images dans l'ordre de l'histoire.",
           "forme": "imperative",
           "audio": null,
-          "recit": "Le cahier est sur la table. Gobi compte les dessins. Puis papa montre un dessin.",
-          "ordre": [
-            "vignette-table",
-            "vignette-compte",
-            "vignette-dessin"
-          ],
+            "recit": "Gobi pose deux cubes sur la table. Papa ajoute un cube. Gobi aligne les trois cubes et sourit.",
+            "ordre": ["vignette-deux-cubes", "vignette-troisieme-cube", "vignette-trois-cubes"],
           "motsCles": [
             "range",
             "image",
@@ -68,12 +60,8 @@
           "texte": "Range les dernières images dans l'ordre.",
           "forme": "imperative",
           "audio": null,
-          "recit": "Gobi range le cahier dans le sac. Puis il joue dans le jardin. Le soir, Gobi dort dans son lit.",
-          "ordre": [
-            "vignette-sac",
-            "vignette-jardin",
-            "vignette-lit"
-          ],
+            "recit": "Gobi ferme son cahier terminé. Il range le cahier dans son sac. Le soir, Gobi dort dans son lit.",
+            "ordre": ["vignette-cahier-termine", "vignette-cahier-range", "vignette-lit"],
           "motsCles": [
             "range",
             "image",
@@ -83,85 +71,58 @@
       ],
       "vignettes": [
         {
-          "id": "vignette-maison",
-          "libelle": "Gobi entre dans la maison.",
-          "asset": "assets/vignettes/cite-pellicule-02/vignette-maison.png",
-          "taille": [
-            220,
-            160
-          ]
+          "id": "vignette-sac-ferme",
+          "libelle": "Gobi rentre à la maison avec son sac fermé.",
+          "asset": "assets/vignettes/cite-pellicule-02/vignette-sac-ferme.png",
+          "taille": [512, 384]
         },
         {
-          "id": "vignette-cahier",
-          "libelle": "Il a un cahier.",
-          "asset": "assets/vignettes/cite-pellicule-02/vignette-cahier.png",
-          "taille": [
-            220,
-            160
-          ]
+          "id": "vignette-cahier-ouvert",
+          "libelle": "Il sort son cahier et l'ouvre sur la table.",
+          "asset": "assets/vignettes/cite-pellicule-02/vignette-cahier-ouvert.png",
+          "taille": [512, 384]
         },
         {
-          "id": "vignette-papa",
-          "libelle": "Papa montre le cahier.",
-          "asset": "assets/vignettes/cite-pellicule-02/vignette-papa.png",
-          "taille": [
-            220,
-            160
-          ]
+          "id": "vignette-papa-aide",
+          "libelle": "Papa s'assoit près de Gobi pour l'aider.",
+          "asset": "assets/vignettes/cite-pellicule-02/vignette-papa-aide.png",
+          "taille": [512, 384]
         },
         {
-          "id": "vignette-table",
-          "libelle": "Le cahier est sur la table.",
-          "asset": "assets/vignettes/cite-pellicule-02/vignette-table.png",
-          "taille": [
-            220,
-            160
-          ]
+          "id": "vignette-deux-cubes",
+          "libelle": "Gobi pose deux cubes sur la table.",
+          "asset": "assets/vignettes/cite-pellicule-02/vignette-deux-cubes.png",
+          "taille": [512, 384]
         },
         {
-          "id": "vignette-compte",
-          "libelle": "Gobi compte.",
-          "asset": "assets/vignettes/cite-pellicule-02/vignette-compte.png",
-          "taille": [
-            220,
-            160
-          ]
+          "id": "vignette-troisieme-cube",
+          "libelle": "Papa ajoute un cube.",
+          "asset": "assets/vignettes/cite-pellicule-02/vignette-troisieme-cube.png",
+          "taille": [512, 384]
         },
         {
-          "id": "vignette-dessin",
-          "libelle": "Puis papa montre le dessin.",
-          "asset": "assets/vignettes/cite-pellicule-02/vignette-dessin.png",
-          "taille": [
-            220,
-            160
-          ]
+          "id": "vignette-trois-cubes",
+          "libelle": "Gobi aligne les trois cubes et sourit.",
+          "asset": "assets/vignettes/cite-pellicule-02/vignette-trois-cubes.png",
+          "taille": [512, 384]
         },
         {
-          "id": "vignette-sac",
-          "libelle": "Gobi range le cahier dans le sac.",
-          "asset": "assets/vignettes/cite-pellicule-02/vignette-sac.png",
-          "taille": [
-            220,
-            160
-          ]
+          "id": "vignette-cahier-termine",
+          "libelle": "Gobi ferme son cahier terminé.",
+          "asset": "assets/vignettes/cite-pellicule-02/vignette-cahier-termine.png",
+          "taille": [512, 384]
         },
         {
-          "id": "vignette-jardin",
-          "libelle": "Puis Gobi joue dans le jardin.",
-          "asset": "assets/vignettes/cite-pellicule-02/vignette-jardin.png",
-          "taille": [
-            220,
-            160
-          ]
+          "id": "vignette-cahier-range",
+          "libelle": "Il range le cahier dans son sac.",
+          "asset": "assets/vignettes/cite-pellicule-02/vignette-cahier-range.png",
+          "taille": [512, 384]
         },
         {
           "id": "vignette-lit",
-          "libelle": "Le soir, Gobi est dans son lit.",
+          "libelle": "Le soir, Gobi dort dans son lit.",
           "asset": "assets/vignettes/cite-pellicule-02/vignette-lit.png",
-          "taille": [
-            220,
-            160
-          ]
+          "taille": [512, 384]
         }
       ],
       "competence": "comp.chronologie"

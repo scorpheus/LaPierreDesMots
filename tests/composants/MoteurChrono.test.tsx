@@ -198,16 +198,20 @@ describe('moteur chrono', () => {
     expect(cartouche?.textContent).not.toContain('0 / 3');
   });
 
-  it('raconte la suite tas-dos-dame dans un ordre causal', () => {
+  it('raconte le lancer de balle dans un ordre causal', () => {
     const exercice = lireJson<{
       jeu: { contenu: { consignes: Array<{ id: string; recit: string; ordre: string[] }> } };
     }>('contenu/exercices/galeries/frise-chrono-01.json');
     const consigne = exercice.jeu.contenu.consignes.find((c) => c.id === 'c2');
     expect(consigne).toBeDefined();
     expect(consigne?.recit).toBe(
-      'Gobi voit un tas. Une dame lui montre ce qui bouge derrière. C’est le dos d’un chien.',
+      'Le chien regarde la balle dans la main de la dame. La dame lance la balle au loin. Le chien rapporte la balle à la dame.',
     );
-    expect(consigne?.ordre).toEqual(['vignette-tas', 'vignette-dame', 'vignette-dos']);
+    expect(consigne?.ordre).toEqual([
+      'vignette-balle-tenue',
+      'vignette-balle-lancee',
+      'vignette-balle-rapportee',
+    ]);
   });
   it('le contenu de ce test est conforme au schéma que le moteur publie', () => {
     const ajv = new (Ajv2020 as unknown as {

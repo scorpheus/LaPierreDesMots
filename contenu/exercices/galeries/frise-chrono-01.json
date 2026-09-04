@@ -1,16 +1,27 @@
 {
-  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Lot S3 : la marque de bouchon est retirée de ce texte — elle nommait l'état antérieur du fichier, et un recensement par mot comptait ce contenu-ci parmi les bouchons livrés. Lot M1 — réécriture du contenu bouchon du lot A4. DEUX CHOSES CHANGENT, ET UNE SEULE EST UN AJOUT DE VOLUME. (1) La compétence : A4 déclarait `comp.consigne.simple` faute de mieux, en écrivant que « le référentiel est un objet protégé et n'en porte aucun » de chronologie — le point O10 était ouvert. Il l'est toujours pour la chronologie, mais le référentiel porte désormais `gph.confusion.sourde-sonore`, et c'est ce que ce contenu-ci travaille : chaque récit oppose une sourde à sa sonore (p/b, t/d, f/v, s/z), et l'enfant ne peut ordonner les vignettes qu'en LISANT laquelle porte quelle consonne. `comp.consigne.simple` est conservée en seconde compétence : elle décrit la consigne, l'autre décrit le contenu. `comp.consigne.multiple` reste ÉCARTÉE pour le motif exact de A4, qui n'a pas bougé — elle a `comp.consigne.simple` en prérequis, et `competenceEligible` (partage/src/pedagogie/selecteur.ts) écarte des sorties tout nœud dont un prérequis est sous 60 % : sur un profil neuf, ce nœud serait inatteignable. (2) Le volume : une consigne devient quatre. Contrainte mesurée qui les borne à quatre et non cinq — `acquis[vignette]` n'est jamais remis à zéro et le schéma plafonne `vignettes` à 10 : quatre lots disjoints de 3, 3, 2 et 2 vignettes saturent exactement ce plafond. Le choix de A4 de ne pas dépasser quatre vignettes par récit est conservé et pour la même raison : chaque vignette est une phrase à lire, et l'enfant déchiffre encore (D14).",
+  "$commentaire": "VALIDÉ PAR LE PARENT LE 2026-09-04. Trois histoires simples en trois images, sans vignette réemployée : panier, balle, eau qui bout.",
   "id": "galeries-frise-chrono-01",
-  "version": 2,
+  "version": 4,
   "titre": "La frise gravée",
-  "competences": ["gph.confusion.sourde-sonore", "comp.consigne.simple"],
+  "competences": [
+    "gph.confusion.sourde-sonore",
+    "comp.consigne.simple"
+  ],
   "difficulte": 3,
   "jeu": {
     "moteur": "chrono",
     "habillage": "galeries.frise",
     "noeud": "galeries-09",
-    "etoiles": { "sansAide": true, "sansErreur": true },
-    "aideGobi": ["relire-consigne", "souffle-syllabe", "surligne-graphene", "montre-cible"],
+    "etoiles": {
+      "sansAide": true,
+      "sansErreur": true
+    },
+    "aideGobi": [
+      "relire-consigne",
+      "souffle-syllabe",
+      "surligne-graphene",
+      "montre-cible"
+    ],
     "contenu": {
       "consignes": [
         {
@@ -18,49 +29,138 @@
           "texte": "Range les images dans l’ordre de l’histoire.",
           "forme": "imperative",
           "audio": null,
-          "recit": "Gobi trouve un pot. Puis il trouve un bol. Alors il range le pot et le bol dans le panier.",
-          "ordre": ["vignette-pot", "vignette-bol", "vignette-panier"],
-          "motsCles": ["range", "images", "ordre", "histoire"]
+          "recit": "Gobi trouve un panier et un bol posés à côté. Il pose le bol dans le panier. Gobi repart avec le bol rangé dans le panier.",
+          "ordre": [
+            "vignette-panier-vide",
+            "vignette-bol-range",
+            "vignette-panier-porte"
+          ],
+          "motsCles": [
+            "range",
+            "images",
+            "ordre",
+            "histoire"
+          ]
         },
         {
           "id": "c2",
           "texte": "Range les images dans l’ordre de l’histoire.",
           "forme": "imperative",
           "audio": null,
-          "recit": "Gobi voit un tas. Une dame lui montre ce qui bouge derrière. C’est le dos d’un chien.",
-          "ordre": ["vignette-tas", "vignette-dame", "vignette-dos"],
-          "motsCles": ["range", "images", "ordre", "histoire"]
+          "recit": "Le chien regarde la balle dans la main de la dame. La dame lance la balle au loin. Le chien rapporte la balle à la dame.",
+          "ordre": [
+            "vignette-balle-tenue",
+            "vignette-balle-lancee",
+            "vignette-balle-rapportee"
+          ],
+          "motsCles": [
+            "range",
+            "images",
+            "ordre",
+            "histoire"
+          ]
         },
         {
           "id": "c3",
           "texte": "Range les images dans l’ordre de l’histoire.",
           "forme": "imperative",
           "audio": null,
-          "recit": "Gobi a chaud près du four. Il s’éloigne et boit un verre d’eau.",
-          "ordre": ["vignette-four", "vignette-verre"],
-          "motsCles": ["range", "images", "ordre", "histoire"]
-        },
-        {
-          "id": "c4",
-          "texte": "Range les images dans l’ordre de l’histoire.",
-          "forme": "imperative",
-          "audio": null,
-          "recit": "Gobi prépare son sac. Il part au zoo et découvre un zèbre.",
-          "ordre": ["vignette-sac", "vignette-zebre"],
-          "motsCles": ["range", "images", "ordre", "histoire"]
+          "recit": "Gobi remplit un pot avec de l’eau froide. Il pose le pot sur le feu. L’eau bout et de la vapeur monte du pot.",
+          "ordre": [
+            "vignette-pot-rempli",
+            "vignette-pot-feu",
+            "vignette-pot-bout"
+          ],
+          "motsCles": [
+            "range",
+            "images",
+            "ordre",
+            "histoire"
+          ]
         }
       ],
       "vignettes": [
-        { "id": "vignette-pot", "libelle": "Gobi trouve un pot.", "asset": "assets/vignettes/galeries-frise/vignette-pot.png", "taille": [504, 248] },
-        { "id": "vignette-bol", "libelle": "Il trouve un bol.", "asset": "assets/vignettes/galeries-frise/vignette-bol.png", "taille": [504, 248] },
-        { "id": "vignette-panier", "libelle": "Il range le pot et le bol.", "asset": "assets/vignettes/galeries-frise/vignette-panier.png", "taille": [504, 248] },
-        { "id": "vignette-tas", "libelle": "Gobi montre le tas.", "asset": "assets/vignettes/galeries-frise/vignette-tas.png", "taille": [504, 248] },
-        { "id": "vignette-dos", "libelle": "Il montre le dos du chien.", "asset": "assets/vignettes/galeries-frise/vignette-dos.png", "taille": [504, 248] },
-        { "id": "vignette-dame", "libelle": "Il montre la dame.", "asset": "assets/vignettes/galeries-frise/vignette-dame.png", "taille": [504, 248] },
-        { "id": "vignette-four", "libelle": "Gobi trouve un four.", "asset": "assets/vignettes/galeries-frise/vignette-four.png", "taille": [504, 248] },
-        { "id": "vignette-verre", "libelle": "Il trouve un verre.", "asset": "assets/vignettes/galeries-frise/vignette-verre.png", "taille": [504, 248] },
-        { "id": "vignette-sac", "libelle": "Gobi range le sac.", "asset": "assets/vignettes/galeries-frise/vignette-sac.png", "taille": [504, 248] },
-        { "id": "vignette-zebre", "libelle": "Il montre le zèbre.", "asset": "assets/vignettes/galeries-frise/vignette-zebre.png", "taille": [504, 248] }
+        {
+          "id": "vignette-panier-vide",
+          "libelle": "Gobi trouve un panier et un bol posés à côté.",
+          "asset": "assets/vignettes/galeries-frise/vignette-panier-vide.png",
+          "taille": [
+            512,
+            384
+          ]
+        },
+        {
+          "id": "vignette-bol-range",
+          "libelle": "Il pose le bol dans le panier.",
+          "asset": "assets/vignettes/galeries-frise/vignette-bol-range.png",
+          "taille": [
+            512,
+            384
+          ]
+        },
+        {
+          "id": "vignette-panier-porte",
+          "libelle": "Gobi repart avec le bol dans le panier.",
+          "asset": "assets/vignettes/galeries-frise/vignette-panier-porte.png",
+          "taille": [
+            512,
+            384
+          ]
+        },
+        {
+          "id": "vignette-balle-tenue",
+          "libelle": "Le chien regarde la balle dans la main de la dame.",
+          "asset": "assets/vignettes/galeries-frise/vignette-balle-tenue.png",
+          "taille": [
+            512,
+            384
+          ]
+        },
+        {
+          "id": "vignette-balle-lancee",
+          "libelle": "La dame lance la balle.",
+          "asset": "assets/vignettes/galeries-frise/vignette-balle-lancee.png",
+          "taille": [
+            512,
+            384
+          ]
+        },
+        {
+          "id": "vignette-balle-rapportee",
+          "libelle": "Le chien rapporte la balle.",
+          "asset": "assets/vignettes/galeries-frise/vignette-balle-rapportee.png",
+          "taille": [
+            512,
+            384
+          ]
+        },
+        {
+          "id": "vignette-pot-rempli",
+          "libelle": "Gobi remplit un pot avec de l’eau.",
+          "asset": "assets/vignettes/galeries-frise/vignette-pot-rempli.png",
+          "taille": [
+            512,
+            384
+          ]
+        },
+        {
+          "id": "vignette-pot-feu",
+          "libelle": "Il pose le pot sur le feu.",
+          "asset": "assets/vignettes/galeries-frise/vignette-pot-feu.png",
+          "taille": [
+            512,
+            384
+          ]
+        },
+        {
+          "id": "vignette-pot-bout",
+          "libelle": "L’eau bout et la vapeur monte.",
+          "asset": "assets/vignettes/galeries-frise/vignette-pot-bout.png",
+          "taille": [
+            512,
+            384
+          ]
+        }
       ],
       "competence": "gph.confusion.sourde-sonore"
     }

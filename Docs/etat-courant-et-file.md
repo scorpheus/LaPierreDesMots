@@ -129,8 +129,9 @@ annulé, remplacé ou reporté.
 
 ## Dernier chantier terminé : audio
 
-- Population recensée : 667 objets audio, 674 clips avec les variantes.
-- Couverture des consignes : 369/369, soit 100 %.
+- Population recensée après la réduction de la frise des Galeries à trois récits : 666 objets
+  audio, 674 clips avec les variantes.
+- Couverture des consignes : 368/368, soit 100 %.
 - Refus : 0. Deux clips ont nécessité une nouvelle synthèse après le contrôle inverse.
 - Instrument final : Whisper `large-v3` sur CPU/int8. Le mode CUDA a de nouveau présenté son
   comportement non borné : mémoire GPU occupée mais aucun résultat écrit après environ douze
@@ -144,16 +145,15 @@ annulé, remplacé ou reporté.
 1. Faire tester la version responsive sur la tablette et le téléphone réels, et intégrer les
    nouveaux retours sans
    perdre les tâches déjà ouvertes.
-2. Refaire les planches des exercices de chronologie. `pellicule-chrono-01` est validé. Les quatre
-   autres premières propositions ont été refusées : leurs textes n'imposaient pas un ordre assez
-   évident, même lorsque les images partageaient le même style. Les douze nouveaux triplets sont
-   écrits avant toute nouvelle génération dans
-   `bac-a-sable/chronologies-2026-09-04/textes-a-valider.md` et attendent la validation parent.
+2. Tester sur l’appareil réel les cinq exercices de chronologie reconstruits. Les quinze triplets
+   ont été validés par le parent puis publiés sous forme de 45 cartes 4:3 ; le verrou de pixels et
+   les gardes de correspondance texte/image sont décrits dans
+   [publication-chronologies-visuelles-2026-09-04.md](publication-chronologies-visuelles-2026-09-04.md).
 3. Faire une passe de finition artistique sur les écrans que le test tablette jugera encore trop
    légers, en commençant par les éléments réellement visibles dans le parcours enfant. Les quatre
    fonds régionaux validés sont désormais publiés ; ne pas en générer davantage avant ce test réel.
-4. La recette PWA du lot intégré est verte. Ne republier qu'une fois la version locale et les
-   références visuelles validées.
+4. Préparer la nouvelle PWA depuis le commit propre du lot Chronologie, puis publier `gh-pages`
+   uniquement après la recette globale et l’accord distant explicite du parent.
 
 ## Retours parent à surveiller pendant le test
 

@@ -15,7 +15,10 @@
         "etapes": null,
         "cfg": null,
         "sampler": null,
-        "resolution": [1254, 1254],
+        "resolution": [
+          1254,
+          1254
+        ],
         "prompt": "À partir du campement V6 comme référence de style uniquement : coffre au trésor ouvert en bois peint bleu, contours bleu nuit doux, ferrures dorées mates, rempli de cristaux colorés, cartes illustrées et petits souvenirs d'aventure. Illustration jeunesse éditoriale française pour enfant de 7 ans, formes organiques précises, textures mates discrètes, lumière naturelle fraîche, couleurs franches sans dominante jaune, objet détouré centré, fond uni neutre sans texte. Éviter peinture à l'huile, aquarelle floue, 3D plastique, patchs de couleur, halo, vignettage et détails adultes.",
         "source": "contenu/assets/campement/campement-v6.png",
         "retouche": "Le générateur ayant peint un damier au lieu d'un alpha, une seconde édition ciblée a conservé l'objet puis ffmpeg a converti le fond neutre en vrai canal alpha."
@@ -58,7 +61,10 @@
         "workflow": null,
         "checkpoint": null,
         "graine": null,
-        "resolution": [1536, 1024],
+        "resolution": [
+          1536,
+          1024
+        ],
         "prompt": "Illustration panoramique 3:2 pour le premier tableau d’ouverture d’un jeu éducatif destiné à un enfant de 7 ans. Reprendre fidèlement le style graphique du campement de référence : livre jeunesse éditorial, dessin organique précis, textures mates discrètes, lumière naturelle fraîche, profondeur lisible en trois plans, contours bleu nuit doux, couleurs franches mais non criardes, aucune dominante jaune, aucune peinture à l’huile, aucun aspect 3D ou plastique, aucun patch de couleur. Au centre, une grande Pierre des Mots ancienne et rassurante se fissure doucement en plusieurs éclats lumineux, comme une invitation à les rassembler, pas comme une catastrophe. Autour, une clairière et des collines perdent progressivement leurs couleurs vers les bords et deviennent gris bleuté. Quelques petits éclats colorés suivent une courbe vers six régions lointaines. Atmosphère merveilleuse, chaleureuse, claire, adaptée au CE1, composition immédiatement compréhensible. Aucun personnage, aucun texte, aucune lettre, aucun symbole écrit, aucun cadre, aucun filigrane. Laisser une zone de respiration en bas pour que l’interface ajoute sa phrase séparément. Format exact 3:2 paysage."
       },
       "qc": {
@@ -84,7 +90,10 @@
         "etapes": null,
         "cfg": null,
         "sampler": null,
-        "resolution": [1536, 1024],
+        "resolution": [
+          1536,
+          1024
+        ],
         "prompt": "Illustration jeunesse éditoriale française, dessin organique précis, aplats mats légèrement texturés, contours bleu nuit doux, lumière naturelle fraîche, paysage 3:2, aucun texte ni lettre, aucun cadre ni filigrane ; éviter filtre jaune, peinture à l’huile, aquarelle floue, 3D, patchs de couleur, halo et vignettage. Références : le campement V6 et la Pierre publiée. Paysage dont les couleurs se retirent doucement depuis les bords ; fragments de la Pierre encore colorés au centre, image pleine d’espoir.",
         "source_prompt": "Socle et variante consignés après génération dans Docs/production-visuelle-vague-2026-09-02.md ; le verbatim de l’appel n’est pas embarqué dans le PNG."
       },
@@ -111,7 +120,10 @@
         "etapes": null,
         "cfg": null,
         "sampler": null,
-        "resolution": [1536, 1024],
+        "resolution": [
+          1536,
+          1024
+        ],
         "prompt": "Illustration jeunesse éditoriale française, dessin organique précis, aplats mats légèrement texturés, contours bleu nuit doux, lumière naturelle fraîche, paysage 3:2, aucun texte ni lettre, aucun cadre ni filigrane ; éviter filtre jaune, peinture à l’huile, aquarelle floue, 3D, patchs de couleur, halo et vignettage. Références : le campement V6 et la Pierre publiée. Enfant non genré vu de dos lisant un livre ; formes lumineuses abstraites, jamais des lettres, qui recolorent un pré, un arbre, un oiseau et une maison.",
         "source_prompt": "Socle et variante consignés après génération dans Docs/production-visuelle-vague-2026-09-02.md ; le verbatim de l’appel n’est pas embarqué dans le PNG."
       },
@@ -138,7 +150,10 @@
         "etapes": null,
         "cfg": null,
         "sampler": null,
-        "resolution": [1535, 1024],
+        "resolution": [
+          1535,
+          1024
+        ],
         "prompt": "Illustration jeunesse éditoriale française, dessin organique précis, aplats mats légèrement texturés, contours bleu nuit doux, lumière naturelle fraîche, paysage 3:2, aucun texte ni lettre, aucun cadre ni filigrane ; éviter filtre jaune, peinture à l’huile, aquarelle floue, 3D, patchs de couleur, halo et vignettage. Références : le campement V6 et la Pierre publiée. Exactement Gobi, Filou, Bulle, Roc et Plume au campement, silhouettes et attributs distincts, accueillant l’enfant.",
         "source_prompt": "Socle et variante consignés après génération dans Docs/production-visuelle-vague-2026-09-02.md ; le verbatim de l’appel n’est pas embarqué dans le PNG."
       },
@@ -165,7 +180,10 @@
         "etapes": null,
         "cfg": null,
         "sampler": null,
-        "resolution": [1536, 1024],
+        "resolution": [
+          1536,
+          1024
+        ],
         "prompt": "Illustration jeunesse éditoriale française, dessin organique précis, aplats mats légèrement texturés, contours bleu nuit doux, lumière naturelle fraîche, paysage 3:2, aucun texte ni lettre, aucun cadre ni filigrane ; éviter filtre jaune, peinture à l’huile, aquarelle floue, 3D, patchs de couleur, halo et vignettage. Références : le campement V6 et la Pierre publiée. Gobi tend la main à l’enfant vu de dos ; un sentier mène à la Clairière qu’un éclat rallume en couleurs.",
         "source_prompt": "Socle et variante consignés après génération dans Docs/production-visuelle-vague-2026-09-02.md ; le verbatim de l’appel n’est pas embarqué dans le PNG."
       },
@@ -187,7 +205,10 @@
         "workflow": null,
         "checkpoint": null,
         "graine": null,
-        "resolution": [1586, 992],
+        "resolution": [
+          1586,
+          992
+        ],
         "prompt": "Édition précise du V5 : retirer seulement les flammes, étincelles et leur lueur du foyer central en conservant pierres, bûches et support ; retirer seulement le papillon bleu-vert en bas à gauche et reconstruire fleurs, herbe et feuilles ; préserver cadrage, objets, textures, couleurs et style jeunesse, sans dominante jaune, ajout, texte ni filigrane."
       },
       "qc": {
@@ -208,7 +229,10 @@
         "workflow": "imagegen puis scripts/sprites/normaliser-planche.mjs",
         "checkpoint": null,
         "graine": null,
-        "resolution": [1024, 512],
+        "resolution": [
+          1024,
+          512
+        ],
         "prompt": "Huit phases régulières 4 × 2 d’une petite flamme de feu de camp, même style illustré jeunesse peint que le campement V5, ancre bas-centre stable, fond noir uni, sans bûches, décor, texte ni séparation."
       },
       "qc": {
@@ -229,7 +253,10 @@
         "workflow": "imagegen puis scripts/sprites/normaliser-planche.mjs",
         "checkpoint": null,
         "graine": null,
-        "resolution": [1024, 512],
+        "resolution": [
+          1024,
+          512
+        ],
         "prompt": "Huit phases régulières 4 × 2 d’un seul papillon bleu et turquoise battant des ailes, même style illustré jeunesse que le campement V5, corps centré et échelle stable, fond noir uni, sans plante, décor, texte ni autre insecte."
       },
       "qc": {
@@ -250,7 +277,10 @@
         "workflow": null,
         "checkpoint": null,
         "graine": null,
-        "resolution": [1086, 1448],
+        "resolution": [
+          1086,
+          1448
+        ],
         "prompt": null,
         "source_prompt": "Le verbatim original n’est pas embarqué ; le brief fidèle est consigné dans Docs/production-visuelle-vague-2026-09-02.md.",
         "brief_documente": "Conserver presque à l’identique l’identité, la pose, les yeux simples, la loupe et le foulard turquoise de la V2 ; rendre seulement le pelage environ 15 % plus soutenu, plus orangé sable et un peu plus contrasté ; mêmes aplats mats et contours organiques ; personnage entier centré sur fond blanc pur, sans halo, ombre, décor, texte, peinture, 3D ni esthétique Disney/Pixar.",
@@ -275,7 +305,10 @@
         "workflow": null,
         "checkpoint": null,
         "graine": null,
-        "resolution": [1086, 1448],
+        "resolution": [
+          1086,
+          1448
+        ],
         "prompt": null,
         "source_prompt": "Le verbatim original n’est pas embarqué ; le brief fidèle est consigné dans Docs/production-visuelle-vague-2026-09-02.md.",
         "brief_documente": "Bulle, ondine bleu lagon avec son livre, personnage entier sur fond blanc ; petits yeux noirs mats, bouche simple, aucune proportion chibi et trois valeurs maximum par couleur.",
@@ -300,7 +333,10 @@
         "workflow": null,
         "checkpoint": null,
         "graine": null,
-        "resolution": [1086, 1448],
+        "resolution": [
+          1086,
+          1448
+        ],
         "prompt": null,
         "source_prompt": "Le verbatim original n’est pas embarqué ; le brief fidèle est consigné dans Docs/production-visuelle-vague-2026-09-02.md.",
         "brief_documente": "Roc, golem gris chaud moussu avec burin et tablier bleu pétrole, personnage entier sur fond blanc ; petits yeux noirs mats, bouche simple, aucune proportion chibi et trois valeurs maximum par couleur.",
@@ -325,7 +361,10 @@
         "workflow": null,
         "checkpoint": null,
         "graine": null,
-        "resolution": [1086, 1448],
+        "resolution": [
+          1086,
+          1448
+        ],
         "prompt": null,
         "source_prompt": "Le verbatim original n’est pas embarqué ; le brief fidèle est consigné dans Docs/production-visuelle-vague-2026-09-02.md.",
         "brief_documente": "Plume, oiseau bleu à poitrine crème avec sacoche, personnage entier sur fond blanc ; petits yeux noirs mats, bouche simple, aucune proportion chibi et trois valeurs maximum par couleur.",
@@ -350,7 +389,10 @@
         "workflow": null,
         "checkpoint": null,
         "graine": null,
-        "resolution": [1536, 1024],
+        "resolution": [
+          1536,
+          1024
+        ],
         "prompt": null,
         "source_prompt": "Le verbatim original n’est pas embarqué ; le socle et la variante fidèles sont consignés dans Docs/production-visuelle-vague-2026-09-02.md.",
         "source": "contenu/brouillons/decors/ecole-visage-sans-ballon-v1.png"
@@ -373,7 +415,10 @@
         "workflow": null,
         "checkpoint": null,
         "graine": null,
-        "resolution": [1536, 1024],
+        "resolution": [
+          1536,
+          1024
+        ],
         "prompt": null,
         "source_prompt": "Le verbatim original n’est pas embarqué ; le socle et la variante fidèles sont consignés dans Docs/production-visuelle-vague-2026-09-02.md.",
         "source": "bac-a-sable/assets-a-valider-2026-09-04/foret-tapis.png",
@@ -397,7 +442,10 @@
         "workflow": null,
         "checkpoint": null,
         "graine": null,
-        "resolution": [1536, 1024],
+        "resolution": [
+          1536,
+          1024
+        ],
         "prompt": null,
         "source_prompt": "Le verbatim original n’est pas embarqué ; le socle et la variante fidèles sont consignés dans Docs/production-visuelle-vague-2026-09-02.md.",
         "source": "bac-a-sable/assets-a-valider-2026-09-04/marais-brume.png",
@@ -421,7 +469,10 @@
         "workflow": null,
         "checkpoint": null,
         "graine": null,
-        "resolution": [1536, 1024],
+        "resolution": [
+          1536,
+          1024
+        ],
         "prompt": null,
         "source_prompt": "Le verbatim original n’est pas embarqué ; le socle et la variante fidèles sont consignés dans Docs/production-visuelle-vague-2026-09-02.md.",
         "source": "bac-a-sable/assets-a-valider-2026-09-04/volcan-forge.png",
@@ -445,7 +496,10 @@
         "workflow": "scripts/coloriages/publier-chaudron.mjs",
         "checkpoint": null,
         "graine": null,
-        "resolution": [1536, 1024],
+        "resolution": [
+          1536,
+          1024
+        ],
         "prompt": null,
         "source_prompt": "Le verbatim original n’est pas embarqué ; le brouillon exact validé est verrouillé par ses empreintes.",
         "source": "contenu/brouillons/campement/coloriage-chaudron-v3-organique.png",
@@ -480,7 +534,10 @@
         "workflow": null,
         "checkpoint": null,
         "graine": null,
-        "resolution": [1536, 1024],
+        "resolution": [
+          1536,
+          1024
+        ],
         "prompt": null,
         "source_prompt": "Le verbatim original n’est pas embarqué ; le socle et la variante fidèles sont consignés dans Docs/production-visuelle-vague-2026-09-02.md.",
         "source": "bac-a-sable/assets-a-valider-2026-09-04/cite-fresque-murale.png",
@@ -604,7 +661,10 @@
         "workflow": "imagegen puis scripts/sprites/normaliser-planche.mjs",
         "modele": null,
         "graine": null,
-        "resolution": [1024, 512],
+        "resolution": [
+          1024,
+          512
+        ],
         "prompt": null,
         "brief_documente": "Huit poses enfantines cohérentes par compagnon, planche 4 × 2, personnage entier, identité canonique conservée, sans texte ni élément coupé.",
         "sources": [
@@ -615,9 +675,18 @@
         ]
       },
       "derivees": {
-        "roc": { "fichier": "contenu/assets/compagnons/animations/roc-8.png", "empreinte": "sha256:7126FD0EC2C94AA8444849971BE8D450930B920FAB2539E0908A270E53AA93A0" },
-        "plume": { "fichier": "contenu/assets/compagnons/animations/plume-8-v2.png", "empreinte": "sha256:DC5BC6B703A1507631FAF0D066E86F016AA283DDABF224EDABBA171E484F10FE" },
-        "bulle": { "fichier": "contenu/assets/compagnons/animations/bulle-8.png", "empreinte": "sha256:6F218C430A6AC67CB4DF1CB86B6DE67912017030C0BE18C8DACB6151BDF5C786" }
+        "roc": {
+          "fichier": "contenu/assets/compagnons/animations/roc-8.png",
+          "empreinte": "sha256:7126FD0EC2C94AA8444849971BE8D450930B920FAB2539E0908A270E53AA93A0"
+        },
+        "plume": {
+          "fichier": "contenu/assets/compagnons/animations/plume-8-v2.png",
+          "empreinte": "sha256:DC5BC6B703A1507631FAF0D066E86F016AA283DDABF224EDABBA171E484F10FE"
+        },
+        "bulle": {
+          "fichier": "contenu/assets/compagnons/animations/bulle-8.png",
+          "empreinte": "sha256:6F218C430A6AC67CB4DF1CB86B6DE67912017030C0BE18C8DACB6151BDF5C786"
+        }
       },
       "qc": {
         "technique": "ok — quatre atlas RGBA 1024 × 512, huit cellules de 256 px, ancre bas-centre stable et aucun débordement",
@@ -637,24 +706,353 @@
         "workflow": "planche unique puis huit découpes carrées",
         "modele": null,
         "graine": null,
-        "resolution": [512, 512],
+        "resolution": [
+          512,
+          512
+        ],
         "prompt": null,
         "brief_documente": "Huit cartes jeunesse immédiatement reconnaissables et cohérentes : tomate, carotte, salade, citron, olive, raisin, pomme dans un panier et prune dans un bol."
       },
       "derivees": {
-        "carotte": { "fichier": "contenu/assets/cartes/cite/carotte.png", "empreinte": "sha256:2A701685CE65C60ED6561FD0CA429491EF6E01CE6AFF5951C250A1DE3DDD32CF" },
-        "salade": { "fichier": "contenu/assets/cartes/cite/salade.png", "empreinte": "sha256:6569F1723571FDAFEA857DC60797ED66E9E36436D530DDB0ACD29E2612ECA527" },
-        "citron": { "fichier": "contenu/assets/cartes/cite/citron.png", "empreinte": "sha256:4D0BF1360EF55E8ECD4D136742E04684F62B146C8405BCAF72B68FA7EE4600D0" },
-        "olive": { "fichier": "contenu/assets/cartes/cite/olive.png", "empreinte": "sha256:61C7BA3790916F6D2B44256CD2CA5EFCECE79CB9808B8E0F2DEE4C0A9A35DC8F" },
-        "raisin": { "fichier": "contenu/assets/cartes/cite/raisin.png", "empreinte": "sha256:B5103B08ED8E017EB7A45753D8E5025BCDC160DAD7CEDD22F6886A1301535F1A" },
-        "pomme_panier": { "fichier": "contenu/assets/cartes/cite/pomme-panier.png", "empreinte": "sha256:27F94EC13AD2DC252DB9CC73AE583FBE68FFCEB7A081A96E222B9EC3A1700A56" },
-        "prune_bol": { "fichier": "contenu/assets/cartes/cite/prune-bol.png", "empreinte": "sha256:A8BD4C89E4B5656577339A82612FB9DEE2EB6991E0721213197319C64F4D9C5C" }
+        "carotte": {
+          "fichier": "contenu/assets/cartes/cite/carotte.png",
+          "empreinte": "sha256:2A701685CE65C60ED6561FD0CA429491EF6E01CE6AFF5951C250A1DE3DDD32CF"
+        },
+        "salade": {
+          "fichier": "contenu/assets/cartes/cite/salade.png",
+          "empreinte": "sha256:6569F1723571FDAFEA857DC60797ED66E9E36436D530DDB0ACD29E2612ECA527"
+        },
+        "citron": {
+          "fichier": "contenu/assets/cartes/cite/citron.png",
+          "empreinte": "sha256:4D0BF1360EF55E8ECD4D136742E04684F62B146C8405BCAF72B68FA7EE4600D0"
+        },
+        "olive": {
+          "fichier": "contenu/assets/cartes/cite/olive.png",
+          "empreinte": "sha256:61C7BA3790916F6D2B44256CD2CA5EFCECE79CB9808B8E0F2DEE4C0A9A35DC8F"
+        },
+        "raisin": {
+          "fichier": "contenu/assets/cartes/cite/raisin.png",
+          "empreinte": "sha256:B5103B08ED8E017EB7A45753D8E5025BCDC160DAD7CEDD22F6886A1301535F1A"
+        },
+        "pomme_panier": {
+          "fichier": "contenu/assets/cartes/cite/pomme-panier.png",
+          "empreinte": "sha256:27F94EC13AD2DC252DB9CC73AE583FBE68FFCEB7A081A96E222B9EC3A1700A56"
+        },
+        "prune_bol": {
+          "fichier": "contenu/assets/cartes/cite/prune-bol.png",
+          "empreinte": "sha256:A8BD4C89E4B5656577339A82612FB9DEE2EB6991E0721213197319C64F4D9C5C"
+        }
       },
       "qc": {
         "technique": "ok — huit PNG 512 × 512 raccordés aux huit cartes qui n’avaient aucun asset",
         "semantique": "validé en lot par le parent",
         "integration": "moteur paires de cite-des-histoires-12",
         "tentatives": 1
+      },
+      "valide_par": "parent",
+      "valide_le": "2026-09-04"
+    },
+    {
+      "id": "chronologie.cite-pellicule-01.v1",
+      "fichier": "contenu/assets/vignettes/cite-pellicule-01/vignette-plage.png",
+      "empreinte": "sha256:B863F126EED2B0AA8BDFAE0CC8C078290753A457F28907F72FF313F5C6E67634",
+      "$empreinte": "Empreinte des pixels décodés, conformément au skill generer-asset.",
+      "generation": {
+        "outil": "générateur d’images intégré à Codex",
+        "workflow": "planche cohérente 3 × 3 puis neuf découpes 4:3",
+        "modele": null,
+        "graine": null,
+        "resolution": [
+          512,
+          384
+        ],
+        "prompt": null,
+        "brief_documente": "Neuf scènes jeunesse sans texte, organisées en trois histoires de trois moments cause-action-résultat immédiatement ordonnables par un enfant de 7 ans. Style illustré validé du jeu : contours bleu nuit doux, couleurs naturelles franches, textures mates, sans dominante jaune, sans peinture floue ni 3D plastique.",
+        "source": "bac-a-sable/chronologies-2026-09-04/cite-des-histoires-pellicule-chrono-01-planche.png"
+      },
+      "derivees": {
+        "seau": {
+          "fichier": "contenu/assets/vignettes/cite-pellicule-01/vignette-seau.png",
+          "empreinte": "sha256:540860ACBAC2CD591A7284CA5749941303B694A4EFFBCD21769DCCE6773C9413"
+        },
+        "sable": {
+          "fichier": "contenu/assets/vignettes/cite-pellicule-01/vignette-sable.png",
+          "empreinte": "sha256:02D957E12BC7A14F8C8171D41104466C3F7266861DF06C0C285518060C85C2A7"
+        },
+        "petit": {
+          "fichier": "contenu/assets/vignettes/cite-pellicule-01/vignette-petit.png",
+          "empreinte": "sha256:47F56C1FE26BC1A3B22DE6CDD78EF4EAC22CF58ABFDEC58D23968E5598DCD321"
+        },
+        "grand": {
+          "fichier": "contenu/assets/vignettes/cite-pellicule-01/vignette-grand.png",
+          "empreinte": "sha256:FCC9DBDEB827556C69110730CB4D3BF7A20CB5DB1361B3F1300DC66D58798E75"
+        },
+        "montre": {
+          "fichier": "contenu/assets/vignettes/cite-pellicule-01/vignette-montre.png",
+          "empreinte": "sha256:1C7AED2EF64C5E17D313EEAEB4099EB7AE530E0E50A4E0C6E1091931D788E474"
+        },
+        "plume": {
+          "fichier": "contenu/assets/vignettes/cite-pellicule-01/vignette-plume.png",
+          "empreinte": "sha256:F1C1DE2A83B1AB6CF4235BD74B2E8ECD66D64973323C2FB8322094BB98F8DD64"
+        },
+        "caillou": {
+          "fichier": "contenu/assets/vignettes/cite-pellicule-01/vignette-caillou.png",
+          "empreinte": "sha256:7EB6DDB084DA8DF220ADDE713FA7EB46FF1C2DCE85A2600BC8DF0759E4DC20E8"
+        },
+        "danse": {
+          "fichier": "contenu/assets/vignettes/cite-pellicule-01/vignette-danse.png",
+          "empreinte": "sha256:F8B88E085044C0AA17DC89E824DEAAC7DB10D54F812018870A97C5704F80BF55"
+        }
+      },
+      "qc": {
+        "technique": "ok — neuf PNG 512 × 384, ratio 4:3, aucune gouttière de planche dans les découpes",
+        "semantique": "ok — trois triplets distincts ; continuité des personnages, objets et actions vérifiée sur la planche de production",
+        "integration": "moteur chrono ; ordre JSON identique à l’ordre des neuf fichiers verrouillés",
+        "tentatives": 1
+      },
+      "valide_par": "parent",
+      "valide_le": "2026-09-04"
+    },
+    {
+      "id": "chronologie.cite-pellicule-02.v1",
+      "fichier": "contenu/assets/vignettes/cite-pellicule-02/vignette-sac-ferme.png",
+      "empreinte": "sha256:CC87A34053C99D97B517633A6CCB8B6EDE24D2AA20B7F2C01244B9AE181CC570",
+      "$empreinte": "Empreinte des pixels décodés, conformément au skill generer-asset.",
+      "generation": {
+        "outil": "générateur d’images intégré à Codex",
+        "workflow": "planche cohérente 3 × 3 puis neuf découpes 4:3",
+        "modele": null,
+        "graine": null,
+        "resolution": [
+          512,
+          384
+        ],
+        "prompt": null,
+        "brief_documente": "Neuf scènes jeunesse sans texte, organisées en trois histoires de trois moments cause-action-résultat immédiatement ordonnables par un enfant de 7 ans. Style illustré validé du jeu : contours bleu nuit doux, couleurs naturelles franches, textures mates, sans dominante jaune, sans peinture floue ni 3D plastique.",
+        "source": "bac-a-sable/chronologies-2026-09-04/cite-des-histoires-pellicule-chrono-02-planche-v2.png"
+      },
+      "derivees": {
+        "cahier-ouvert": {
+          "fichier": "contenu/assets/vignettes/cite-pellicule-02/vignette-cahier-ouvert.png",
+          "empreinte": "sha256:C029AC77A739C9E98809FE3654C5B89531E0D4699FE1D15104DDDCB1A7EB4B77"
+        },
+        "papa-aide": {
+          "fichier": "contenu/assets/vignettes/cite-pellicule-02/vignette-papa-aide.png",
+          "empreinte": "sha256:F4A673A34931E121087D1B36E60432681F0404F29DC2F3D308DE09726B24D404"
+        },
+        "deux-cubes": {
+          "fichier": "contenu/assets/vignettes/cite-pellicule-02/vignette-deux-cubes.png",
+          "empreinte": "sha256:A41FE1E9F8C27FBDE3B36570D44980D00C769B56F879DA0943DF5C484CB072B9"
+        },
+        "troisieme-cube": {
+          "fichier": "contenu/assets/vignettes/cite-pellicule-02/vignette-troisieme-cube.png",
+          "empreinte": "sha256:D138142F8C06757FC0B66F09837877287D7B5653FEFC782E2C8325EA13F71A8E"
+        },
+        "trois-cubes": {
+          "fichier": "contenu/assets/vignettes/cite-pellicule-02/vignette-trois-cubes.png",
+          "empreinte": "sha256:EA93ABF07DA54FFDE943A70BA394EF5A3ACBC9463CF404652637D6D87AD5C4B1"
+        },
+        "cahier-termine": {
+          "fichier": "contenu/assets/vignettes/cite-pellicule-02/vignette-cahier-termine.png",
+          "empreinte": "sha256:D648E828D29628DCBB879C3CF190A79BD4B807AE81B1DCCD4535F65BF069C677"
+        },
+        "cahier-range": {
+          "fichier": "contenu/assets/vignettes/cite-pellicule-02/vignette-cahier-range.png",
+          "empreinte": "sha256:0A4190A0EC7871E5510215EDAFCC1ACCC73A3EC571C40F57FB913C1D169A722F"
+        },
+        "lit": {
+          "fichier": "contenu/assets/vignettes/cite-pellicule-02/vignette-lit.png",
+          "empreinte": "sha256:ACB1236B6E4D2981B509B0249AE326A2EB8D13E616F023395E573047143F77C4"
+        }
+      },
+      "qc": {
+        "technique": "ok — neuf PNG 512 × 384, ratio 4:3, aucune gouttière de planche dans les découpes",
+        "semantique": "ok — trois triplets distincts ; continuité des personnages, objets et actions vérifiée sur la planche de production",
+        "integration": "moteur chrono ; ordre JSON identique à l’ordre des neuf fichiers verrouillés",
+        "tentatives": 2
+      },
+      "valide_par": "parent",
+      "valide_le": "2026-09-04"
+    },
+    {
+      "id": "chronologie.cite-vitrail.v1",
+      "fichier": "contenu/assets/vignettes/cite-vitrail/vignette-nuage-gris.png",
+      "empreinte": "sha256:2C97B438157CAB3C33189815DE50C967C5F27027BCF2216464F81CAD91ED5294",
+      "$empreinte": "Empreinte des pixels décodés, conformément au skill generer-asset.",
+      "generation": {
+        "outil": "générateur d’images intégré à Codex",
+        "workflow": "planche cohérente 3 × 3 puis neuf découpes 4:3",
+        "modele": null,
+        "graine": null,
+        "resolution": [
+          512,
+          384
+        ],
+        "prompt": null,
+        "brief_documente": "Neuf scènes jeunesse sans texte, organisées en trois histoires de trois moments cause-action-résultat immédiatement ordonnables par un enfant de 7 ans. Style illustré validé du jeu : contours bleu nuit doux, couleurs naturelles franches, textures mates, sans dominante jaune, sans peinture floue ni 3D plastique.",
+        "source": "bac-a-sable/chronologies-2026-09-04/cite-des-histoires-vitrail-chrono-01-planche-v2.png"
+      },
+      "derivees": {
+        "pluie-forte": {
+          "fichier": "contenu/assets/vignettes/cite-vitrail/vignette-pluie-forte.png",
+          "empreinte": "sha256:ADBCE715A439B176BF8D259697386B8A77D0719779FB5A338C12C655E8824C95"
+        },
+        "arc-en-ciel": {
+          "fichier": "contenu/assets/vignettes/cite-vitrail/vignette-arc-en-ciel.png",
+          "empreinte": "sha256:2012C6492BB120990C0A28178853125B3690AE2A4A814B262AE9BB28642B9AD9"
+        },
+        "fleur-seche": {
+          "fichier": "contenu/assets/vignettes/cite-vitrail/vignette-fleur-seche.png",
+          "empreinte": "sha256:23D1A1556D4EB7A50B6EA94C13E5D5B641B75196E9CD870C092134922ADD0180"
+        },
+        "fleur-arrosee": {
+          "fichier": "contenu/assets/vignettes/cite-vitrail/vignette-fleur-arrosee.png",
+          "empreinte": "sha256:1EB96F0F9C0EEB654D9568586FD4BE8C0EFB28963036392D8F673D81A727CC30"
+        },
+        "fleur-ouverte": {
+          "fichier": "contenu/assets/vignettes/cite-vitrail/vignette-fleur-ouverte.png",
+          "empreinte": "sha256:E80ABB2E21D242811B13CC94F11079DCA9062859325A47F4DB11196974A3E7F9"
+        },
+        "tonneau-vide": {
+          "fichier": "contenu/assets/vignettes/cite-vitrail/vignette-tonneau-vide.png",
+          "empreinte": "sha256:4F764B39C4E7B81E23890A2232705FB6426A40F3EDDA7AF3263AEE14B4A1AB9F"
+        },
+        "tonneau-rempli": {
+          "fichier": "contenu/assets/vignettes/cite-vitrail/vignette-tonneau-rempli.png",
+          "empreinte": "sha256:BA25FED7EE4CD40A8FA1EF16991E220B9464A3E86EA7E301C1325F507DA0E5F6"
+        },
+        "tonneau-plein": {
+          "fichier": "contenu/assets/vignettes/cite-vitrail/vignette-tonneau-plein.png",
+          "empreinte": "sha256:0D24FBBE4F5CBD206E70FE8DBF5A47B668499249468E36646A03E41BE21E8E5E"
+        }
+      },
+      "qc": {
+        "technique": "ok — neuf PNG 512 × 384, ratio 4:3, aucune gouttière de planche dans les découpes",
+        "semantique": "ok — trois triplets distincts ; continuité des personnages, objets et actions vérifiée sur la planche de production",
+        "integration": "moteur chrono ; ordre JSON identique à l’ordre des neuf fichiers verrouillés",
+        "tentatives": 2
+      },
+      "valide_par": "parent",
+      "valide_le": "2026-09-04"
+    },
+    {
+      "id": "chronologie.galeries-frise.v1",
+      "fichier": "contenu/assets/vignettes/galeries-frise/vignette-panier-vide.png",
+      "empreinte": "sha256:466A4D089D9507DF8B18BD51E14DDC42F0904DE503B4CB0AD25935B2E3A34688",
+      "$empreinte": "Empreinte des pixels décodés, conformément au skill generer-asset.",
+      "generation": {
+        "outil": "générateur d’images intégré à Codex",
+        "workflow": "planche cohérente 3 × 3 puis neuf découpes 4:3",
+        "modele": null,
+        "graine": null,
+        "resolution": [
+          512,
+          384
+        ],
+        "prompt": null,
+        "brief_documente": "Neuf scènes jeunesse sans texte, organisées en trois histoires de trois moments cause-action-résultat immédiatement ordonnables par un enfant de 7 ans. Style illustré validé du jeu : contours bleu nuit doux, couleurs naturelles franches, textures mates, sans dominante jaune, sans peinture floue ni 3D plastique.",
+        "source": "bac-a-sable/chronologies-2026-09-04/galeries-frise-chrono-01-planche-v2.png"
+      },
+      "derivees": {
+        "bol-range": {
+          "fichier": "contenu/assets/vignettes/galeries-frise/vignette-bol-range.png",
+          "empreinte": "sha256:837FCCC55BA01AF5C5704F28489F1FDB7833FF4DDDCE958EDE2102D0A4185DD6"
+        },
+        "panier-porte": {
+          "fichier": "contenu/assets/vignettes/galeries-frise/vignette-panier-porte.png",
+          "empreinte": "sha256:A0758900E01923B33F0B30F3CB916E325DF91DF7BCEC9B9096E70A7888D1CE47"
+        },
+        "balle-tenue": {
+          "fichier": "contenu/assets/vignettes/galeries-frise/vignette-balle-tenue.png",
+          "empreinte": "sha256:B1CFA1D78EC92D6F00C7C60C643B912FEDF17649E84B88EB2909698893A00B10"
+        },
+        "balle-lancee": {
+          "fichier": "contenu/assets/vignettes/galeries-frise/vignette-balle-lancee.png",
+          "empreinte": "sha256:C76541E056583835F977FF593B6FC82703CD44FBD256A10EA64A0EB1948B032C"
+        },
+        "balle-rapportee": {
+          "fichier": "contenu/assets/vignettes/galeries-frise/vignette-balle-rapportee.png",
+          "empreinte": "sha256:DDF894D976128A4700AC8E0B5418B7A8EA7639ED3B8D18FD583BF3666E6DA7AF"
+        },
+        "pot-rempli": {
+          "fichier": "contenu/assets/vignettes/galeries-frise/vignette-pot-rempli.png",
+          "empreinte": "sha256:C33B972186B7593AD68EC5C0357785902431C8E303D42ACB80BBD900185E1D8D"
+        },
+        "pot-feu": {
+          "fichier": "contenu/assets/vignettes/galeries-frise/vignette-pot-feu.png",
+          "empreinte": "sha256:F17E3EE0C37526DB08CC7EE26AA11D3690327216C4F7246D63F32B2F27815816"
+        },
+        "pot-bout": {
+          "fichier": "contenu/assets/vignettes/galeries-frise/vignette-pot-bout.png",
+          "empreinte": "sha256:E0FE9E48FCE4A06055974E5760BC2A48CE3DE399B9A464426ECB4F70BA623E3F"
+        }
+      },
+      "qc": {
+        "technique": "ok — neuf PNG 512 × 384, ratio 4:3, aucune gouttière de planche dans les découpes",
+        "semantique": "ok — trois triplets distincts ; continuité des personnages, objets et actions vérifiée sur la planche de production",
+        "integration": "moteur chrono ; ordre JSON identique à l’ordre des neuf fichiers verrouillés",
+        "tentatives": 1
+      },
+      "valide_par": "parent",
+      "valide_le": "2026-09-04"
+    },
+    {
+      "id": "chronologie.volcan-fresque.v1",
+      "fichier": "contenu/assets/vignettes/volcan-fresque/vignette-cochon-ruche.png",
+      "empreinte": "sha256:B61946D9CEAE3D67CE2A7980C7856DC4620133BCE58C690C86020B1D908BD4A7",
+      "$empreinte": "Empreinte des pixels décodés, conformément au skill generer-asset.",
+      "generation": {
+        "outil": "générateur d’images intégré à Codex",
+        "workflow": "planche cohérente 3 × 3 puis neuf découpes 4:3",
+        "modele": null,
+        "graine": null,
+        "resolution": [
+          512,
+          384
+        ],
+        "prompt": null,
+        "brief_documente": "Neuf scènes jeunesse sans texte, organisées en trois histoires de trois moments cause-action-résultat immédiatement ordonnables par un enfant de 7 ans. Style illustré validé du jeu : contours bleu nuit doux, couleurs naturelles franches, textures mates, sans dominante jaune, sans peinture floue ni 3D plastique.",
+        "source": "bac-a-sable/chronologies-2026-09-04/volcan-fresque-chrono-01-planche-v2.png"
+      },
+      "derivees": {
+        "abeille-nez": {
+          "fichier": "contenu/assets/vignettes/volcan-fresque/vignette-abeille-nez.png",
+          "empreinte": "sha256:B63BB434B636B247C43CE47871CC88538EDC6FF5DE04A6135AA624E560D4A5DE"
+        },
+        "cochon-court": {
+          "fichier": "contenu/assets/vignettes/volcan-fresque/vignette-cochon-court.png",
+          "empreinte": "sha256:4149838FFFBA7A195410B487A0E11CA09BF49A7D025ACEE8451F2C6581855E93"
+        },
+        "quilles-placees": {
+          "fichier": "contenu/assets/vignettes/volcan-fresque/vignette-quilles-placees.png",
+          "empreinte": "sha256:00B9D9FADAAFF7BB030E26C2C01A8B3E263E7541AA6CB6E6246106AB1908745D"
+        },
+        "balle-lancee": {
+          "fichier": "contenu/assets/vignettes/volcan-fresque/vignette-balle-lancee.png",
+          "empreinte": "sha256:BA3F640A5F5841CC46F2E6B011DCD70D9D1B6A3B1CC5009B5547FC2DA287CA98"
+        },
+        "quilles-tombees": {
+          "fichier": "contenu/assets/vignettes/volcan-fresque/vignette-quilles-tombees.png",
+          "empreinte": "sha256:D1AD75094635E46E23CB045F4CFB7C09D0E2EC631B155537572E25F259791FE0"
+        },
+        "pierre": {
+          "fichier": "contenu/assets/vignettes/volcan-fresque/vignette-pierre.png",
+          "empreinte": "sha256:673D96FBC4C675CE072FE0CA5DBE04B2D5D6690D6CC54DAD5869E67461B39BB4"
+        },
+        "pierre-soulevee": {
+          "fichier": "contenu/assets/vignettes/volcan-fresque/vignette-pierre-soulevee.png",
+          "empreinte": "sha256:3E9AC0ABFE5A8CB7CA1BA2BE7AC7BAE595C4DB5F18CEA148A2EB81865C4B6665"
+        },
+        "champignon": {
+          "fichier": "contenu/assets/vignettes/volcan-fresque/vignette-champignon.png",
+          "empreinte": "sha256:5C4790BDD00C26D13EAA1EB758CC9BADC28846E86FFDB60B74CDDB85B7BF3106"
+        }
+      },
+      "qc": {
+        "technique": "ok — neuf PNG 512 × 384, ratio 4:3, aucune gouttière de planche dans les découpes",
+        "semantique": "ok — trois triplets distincts ; continuité des personnages, objets et actions vérifiée sur la planche de production",
+        "integration": "moteur chrono ; ordre JSON identique à l’ordre des neuf fichiers verrouillés",
+        "tentatives": 2
       },
       "valide_par": "parent",
       "valide_le": "2026-09-04"

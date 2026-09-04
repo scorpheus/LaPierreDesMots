@@ -1,7 +1,7 @@
 {
-  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. ORIGINE : NIVEAU 5, fiche 4, « Le voyage de l’eau du nuage au robinet ». CORRIGÉ PRODUIT : les cinq étapes du PDF sont imprimées dans le désordre ; le texte source donne l’ordre — « L’eau commence son voyage dans les nuages. Quand il pleut, l’eau tombe… Elle coule ensuite vers les lacs… Dans les usines, l’eau est filtrée… Des tuyaux transportent cette eau jusqu’aux maisons ». RÉÉCRITURE ET SA LIMITE, dite plutôt que masquée : le mot `eau` n’est PAS au lexique CE1, ni `usine de filtrage`, ni `robinet`, ni `tuyau`. Le cycle est donc raconté avec les mots qui y sont — nuage, pluie, rivière, lac, soleil —, ce qui garde le voyage et perd le robinet. Neuf vignettes, aucune réemployée.",
+  "$commentaire": "VALIDÉ PAR LE PARENT LE 2026-09-04. Trois histoires simples en trois images, sans vignette réemployée : pluie, fleur, tonneau.",
   "id": "cite-des-histoires-vitrail-chrono-01",
-  "version": 1,
+  "version": 2,
   "titre": "Le voyage de la pluie",
   "origine": {
     "source": "fiches-origine/NIVEAU 5.pdf",
@@ -32,12 +32,8 @@
           "texte": "Range les images dans l'ordre de l'histoire.",
           "forme": "imperative",
           "audio": null,
-          "recit": "Le nuage est très gris. Puis la pluie tombe sur la forêt. La pluie entre dans la rivière.",
-          "ordre": [
-            "vignette-nuage",
-            "vignette-pluie",
-            "vignette-riviere"
-          ],
+            "recit": "Un gros nuage gris arrive au-dessus de la forêt. La pluie tombe très fort. Une grande flaque apparaît et un arc-en-ciel se forme.",
+            "ordre": ["vignette-nuage-gris", "vignette-pluie-forte", "vignette-arc-en-ciel"],
           "motsCles": [
             "range",
             "image",
@@ -50,12 +46,8 @@
           "texte": "Range aussi les images dans l'ordre de l'histoire.",
           "forme": "imperative",
           "audio": null,
-          "recit": "La rivière entre dans le lac. Le lac devient très grand. Puis le soleil chauffe le lac.",
-          "ordre": [
-            "vignette-lac",
-            "vignette-grand",
-            "vignette-soleil"
-          ],
+            "recit": "Une fleur sèche penche la tête. Gobi verse de l'eau au pied de la fleur. La fleur se redresse et s'ouvre.",
+            "ordre": ["vignette-fleur-seche", "vignette-fleur-arrosee", "vignette-fleur-ouverte"],
           "motsCles": [
             "range",
             "image",
@@ -68,12 +60,8 @@
           "texte": "Range les dernières images dans l'ordre.",
           "forme": "imperative",
           "audio": null,
-          "recit": "Le nuage est petit. Puis le nuage est gros. La pluie tombe sur le jardin.",
-          "ordre": [
-            "vignette-petit",
-            "vignette-gros",
-            "vignette-jardin"
-          ],
+            "recit": "Un tonneau est placé sous la gouttière. La pluie coule du toit dans le tonneau. Le tonneau est plein d'eau après la pluie.",
+            "ordre": ["vignette-tonneau-vide", "vignette-tonneau-rempli", "vignette-tonneau-plein"],
           "motsCles": [
             "range",
             "image",
@@ -83,85 +71,58 @@
       ],
       "vignettes": [
         {
-          "id": "vignette-nuage",
-          "libelle": "Le nuage est très gris.",
-          "asset": "assets/vignettes/cite-vitrail/vignette-nuage.png",
-          "taille": [
-            220,
-            160
-          ]
+          "id": "vignette-nuage-gris",
+          "libelle": "Un gros nuage gris arrive au-dessus de la forêt.",
+          "asset": "assets/vignettes/cite-vitrail/vignette-nuage-gris.png",
+          "taille": [512, 384]
         },
         {
-          "id": "vignette-pluie",
-          "libelle": "Puis la pluie tombe sur la forêt.",
-          "asset": "assets/vignettes/cite-vitrail/vignette-pluie.png",
-          "taille": [
-            220,
-            160
-          ]
+          "id": "vignette-pluie-forte",
+          "libelle": "La pluie tombe très fort.",
+          "asset": "assets/vignettes/cite-vitrail/vignette-pluie-forte.png",
+          "taille": [512, 384]
         },
         {
-          "id": "vignette-riviere",
-          "libelle": "La pluie entre dans la rivière.",
-          "asset": "assets/vignettes/cite-vitrail/vignette-riviere.png",
-          "taille": [
-            220,
-            160
-          ]
+          "id": "vignette-arc-en-ciel",
+          "libelle": "Une grande flaque apparaît et un arc-en-ciel se forme.",
+          "asset": "assets/vignettes/cite-vitrail/vignette-arc-en-ciel.png",
+          "taille": [512, 384]
         },
         {
-          "id": "vignette-lac",
-          "libelle": "La rivière entre dans le lac.",
-          "asset": "assets/vignettes/cite-vitrail/vignette-lac.png",
-          "taille": [
-            220,
-            160
-          ]
+          "id": "vignette-fleur-seche",
+          "libelle": "Une fleur sèche penche la tête.",
+          "asset": "assets/vignettes/cite-vitrail/vignette-fleur-seche.png",
+          "taille": [512, 384]
         },
         {
-          "id": "vignette-grand",
-          "libelle": "Le lac est très grand.",
-          "asset": "assets/vignettes/cite-vitrail/vignette-grand.png",
-          "taille": [
-            220,
-            160
-          ]
+          "id": "vignette-fleur-arrosee",
+          "libelle": "Gobi verse de l'eau au pied de la fleur.",
+          "asset": "assets/vignettes/cite-vitrail/vignette-fleur-arrosee.png",
+          "taille": [512, 384]
         },
         {
-          "id": "vignette-soleil",
-          "libelle": "Puis le soleil est chaud.",
-          "asset": "assets/vignettes/cite-vitrail/vignette-soleil.png",
-          "taille": [
-            220,
-            160
-          ]
+          "id": "vignette-fleur-ouverte",
+          "libelle": "La fleur se redresse et s'ouvre.",
+          "asset": "assets/vignettes/cite-vitrail/vignette-fleur-ouverte.png",
+          "taille": [512, 384]
         },
         {
-          "id": "vignette-petit",
-          "libelle": "Le nuage est petit.",
-          "asset": "assets/vignettes/cite-vitrail/vignette-petit.png",
-          "taille": [
-            220,
-            160
-          ]
+          "id": "vignette-tonneau-vide",
+          "libelle": "Un tonneau est placé sous la gouttière.",
+          "asset": "assets/vignettes/cite-vitrail/vignette-tonneau-vide.png",
+          "taille": [512, 384]
         },
         {
-          "id": "vignette-gros",
-          "libelle": "Puis le nuage est gros.",
-          "asset": "assets/vignettes/cite-vitrail/vignette-gros.png",
-          "taille": [
-            220,
-            160
-          ]
+          "id": "vignette-tonneau-rempli",
+          "libelle": "La pluie coule du toit dans le tonneau.",
+          "asset": "assets/vignettes/cite-vitrail/vignette-tonneau-rempli.png",
+          "taille": [512, 384]
         },
         {
-          "id": "vignette-jardin",
-          "libelle": "La pluie tombe sur le jardin.",
-          "asset": "assets/vignettes/cite-vitrail/vignette-jardin.png",
-          "taille": [
-            220,
-            160
-          ]
+          "id": "vignette-tonneau-plein",
+          "libelle": "Le tonneau est plein d'eau après la pluie.",
+          "asset": "assets/vignettes/cite-vitrail/vignette-tonneau-plein.png",
+          "taille": [512, 384]
         }
       ],
       "competence": "comp.chronologie"

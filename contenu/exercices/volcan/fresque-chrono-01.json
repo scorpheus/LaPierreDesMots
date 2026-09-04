@@ -1,7 +1,7 @@
 {
-  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Trois récits, dix vignettes, aucune réemployée d'un récit à l'autre : `acquis` n'est jamais remis à zéro et une vignette reprise serait refusée en `vignette-deja-numerotee`. Quatre vignettes au premier récit et trois au second — chaque vignette est une PHRASE à lire, et quatre phrases sont déjà un texte pour un enfant qui déchiffre encore (D14), même raison que `frise-chrono-01`. Les deux premiers récits sont bâtis sur les mots en `ch` et en `qu` ; le troisième sur ceux en `gn`, que le lexique CE1 ne portait pas encore au début de ce lot.",
+  "$commentaire": "VALIDÉ PAR LE PARENT LE 2026-09-04. Trois histoires simples en trois images, sans vignette réemployée : abeille, quilles, champignon.",
   "id": "volcan-fresque-chrono-01",
-  "version": 1,
+  "version": 3,
   "titre": "La fresque du cochon et de la fille",
   "competences": [
     "gph.rare.ch-qu",
@@ -29,16 +29,15 @@
           "texte": "Range les images dans l'ordre de l'histoire.",
           "forme": "imperative",
           "audio": null,
-          "recit": "Le cochon entre dans la cour. Il marche vers la ruche. Une mouche est sur son nez. Le cochon danse.",
+          "recit": "Un cochon marche près d’une ruche. Une abeille se pose sur son nez. Le cochon court loin de la ruche.",
           "ordre": [
-            "vignette-cour",
-            "vignette-ruche",
-            "vignette-mouche",
-            "vignette-danse"
+            "vignette-cochon-ruche",
+            "vignette-abeille-nez",
+            "vignette-cochon-court"
           ],
           "motsCles": [
             "range",
-            "image",
+            "images",
             "ordre",
             "histoire"
           ]
@@ -48,15 +47,15 @@
           "texte": "Range aussi les images dans l'ordre de l'histoire.",
           "forme": "imperative",
           "audio": null,
-          "recit": "La fille a une quille. Elle range la quille dans le sac. Puis elle joue avec le chat.",
+          "recit": "La fille place trois quilles debout. Elle fait rouler une balle vers les quilles. La balle renverse les trois quilles.",
           "ordre": [
-            "vignette-quille",
-            "vignette-sac",
-            "vignette-joue"
+            "vignette-quilles-placees",
+            "vignette-balle-lancee",
+            "vignette-quilles-tombees"
           ],
           "motsCles": [
             "range",
-            "image",
+            "images",
             "ordre",
             "histoire"
           ]
@@ -66,108 +65,100 @@
           "texte": "Range les dernières images dans l'ordre.",
           "forme": "imperative",
           "audio": null,
-          "recit": "Gobi voit une grande montagne. Il suit la ligne. Puis il trouve un champignon.",
+          "recit": "Gobi découvre une grosse pierre. Il soulève la pierre avec ses deux mains. Un champignon apparaît sous la pierre.",
           "ordre": [
-            "vignette-montagne",
-            "vignette-ligne",
+            "vignette-pierre",
+            "vignette-pierre-soulevee",
             "vignette-champignon"
           ],
           "motsCles": [
             "range",
-            "image",
-            "ordre"
+            "images",
+            "ordre",
+            "histoire"
           ]
         }
       ],
       "vignettes": [
         {
-          "id": "vignette-cour",
-          "libelle": "Le cochon entre dans la cour.",
-          "asset": "assets/vignettes/volcan-fresque/vignette-cour.png",
+          "id": "vignette-cochon-ruche",
+          "libelle": "Un cochon marche près d’une ruche.",
+          "asset": "assets/vignettes/volcan-fresque/vignette-cochon-ruche.png",
           "taille": [
-            220,
-            160
+            512,
+            384
           ]
         },
         {
-          "id": "vignette-ruche",
-          "libelle": "Il marche vers la ruche.",
-          "asset": "assets/vignettes/volcan-fresque/vignette-ruche.png",
+          "id": "vignette-abeille-nez",
+          "libelle": "Une mouche se pose sur son nez.",
+          "asset": "assets/vignettes/volcan-fresque/vignette-abeille-nez.png",
           "taille": [
-            220,
-            160
+            512,
+            384
           ]
         },
         {
-          "id": "vignette-mouche",
-          "libelle": "Une mouche est sur son nez.",
-          "asset": "assets/vignettes/volcan-fresque/vignette-mouche.png",
+          "id": "vignette-cochon-court",
+          "libelle": "Le cochon court loin de la ruche.",
+          "asset": "assets/vignettes/volcan-fresque/vignette-cochon-court.png",
           "taille": [
-            220,
-            160
+            512,
+            384
           ]
         },
         {
-          "id": "vignette-danse",
-          "libelle": "Le cochon danse.",
-          "asset": "assets/vignettes/volcan-fresque/vignette-danse.png",
+          "id": "vignette-quilles-placees",
+          "libelle": "La fille place trois quilles debout.",
+          "asset": "assets/vignettes/volcan-fresque/vignette-quilles-placees.png",
           "taille": [
-            220,
-            160
+            512,
+            384
           ]
         },
         {
-          "id": "vignette-quille",
-          "libelle": "La fille a une quille.",
-          "asset": "assets/vignettes/volcan-fresque/vignette-quille.png",
+          "id": "vignette-balle-lancee",
+          "libelle": "Elle fait rouler une balle vers les quilles.",
+          "asset": "assets/vignettes/volcan-fresque/vignette-balle-lancee.png",
           "taille": [
-            220,
-            160
+            512,
+            384
           ]
         },
         {
-          "id": "vignette-sac",
-          "libelle": "Elle range la quille dans le sac.",
-          "asset": "assets/vignettes/volcan-fresque/vignette-sac.png",
+          "id": "vignette-quilles-tombees",
+          "libelle": "La balle renverse les trois quilles.",
+          "asset": "assets/vignettes/volcan-fresque/vignette-quilles-tombees.png",
           "taille": [
-            220,
-            160
+            512,
+            384
           ]
         },
         {
-          "id": "vignette-joue",
-          "libelle": "Puis elle joue avec le chat.",
-          "asset": "assets/vignettes/volcan-fresque/vignette-joue.png",
+          "id": "vignette-pierre",
+          "libelle": "Gobi découvre une grosse pierre.",
+          "asset": "assets/vignettes/volcan-fresque/vignette-pierre.png",
           "taille": [
-            220,
-            160
+            512,
+            384
           ]
         },
         {
-          "id": "vignette-montagne",
-          "libelle": "La montagne est très grande.",
-          "asset": "assets/vignettes/volcan-fresque/vignette-montagne.png",
+          "id": "vignette-pierre-soulevee",
+          "libelle": "Il soulève la pierre avec ses deux mains.",
+          "asset": "assets/vignettes/volcan-fresque/vignette-pierre-soulevee.png",
           "taille": [
-            220,
-            160
-          ]
-        },
-        {
-          "id": "vignette-ligne",
-          "libelle": "Gobi marche sur la ligne.",
-          "asset": "assets/vignettes/volcan-fresque/vignette-ligne.png",
-          "taille": [
-            220,
-            160
+            512,
+            384
           ]
         },
         {
           "id": "vignette-champignon",
-          "libelle": "Puis Gobi trouve un champignon.",
+          "libelle": "Un champignon apparaît sous la pierre.",
           "asset": "assets/vignettes/volcan-fresque/vignette-champignon.png",
           "taille": [
-            220,
-            160
+            512,
+            384
           ]
         }
       ],
