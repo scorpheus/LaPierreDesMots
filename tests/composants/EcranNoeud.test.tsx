@@ -131,6 +131,23 @@ function monterSansPaquet(): MagasinJeu {
   return magasin;
 }
 
+function choisirCompagnon(magasin: MagasinJeu, code: 'filou' | 'roc' | 'plume' | 'bulle'): void {
+  magasin.getState().demarrerSortie({
+    profil: 'profil-compagnon',
+    region: 'clairiere',
+    compagnon: code,
+    etapes: [{
+      rang: 1,
+      role: 'echauffement',
+      noeud: PAQUET.noeud.id,
+      habillage: PAQUET.habillage.id,
+      competences: [],
+      revisions: [],
+    }],
+    composeeLe: '2026-09-04T20:00:00.000Z',
+  } as never);
+}
+
 beforeEach(() => {
   installerFetchLocal();
   effacementsParticules.mockClear();
@@ -160,6 +177,35 @@ describe('l’écran du nœud a une sortie, et elle mène ailleurs (M2)', () => 
     expect(gobi?.getAttribute('data-aide-code')).toBe('relire-consigne');
     expect(texteAide).not.toBe(consigne);
     expect(gobi?.querySelector('[data-action="ecouter"]')).toBeNull();
+  });
+
+  it.each([
+    ['filou', 'Filou', 'assets/compagnons/filou.png'],
+    ['roc', 'Roc', 'assets/compagnons/roc.png'],
+    ['plume', 'Plume', 'assets/compagnons/plume.png'],
+    ['bulle', 'Bulle', 'assets/compagnons/bulle.png']
+  ] as const)('fait porter l’aide au compagnon choisi : %s', (code, libelle, asset) => {
+    const { magasin } = monter();
+    choisirCompagnon(magasin, code);
+    fireEvent.click(document.querySelector('[data-action="aide"]')!);
+
+    const aideur = document.querySelector('[data-aideur]');
+    expect(aideur?.getAttribute('data-aideur')).toBe(code);
+    expect(aideur?.querySelector('img')?.getAttribute('src')).toContain(asset);
+    expect(document.querySelector('.gobi-bulle')?.textContent).not.toContain('Gobi');
+    expect(document.querySelector('[data-action="aide"]')?.getAttribute('aria-label'))
+      .toBe(`Demander de l’aide à ${libelle}`);
+  });
+
+  it('conserve Gobi comme repli quand aucune bande n’est sélectionnée', () => {
+    monter();
+    fireEvent.click(document.querySelector('[data-action="aide"]')!);
+
+    expect(document.querySelector('[data-aideur]')).toBeNull();
+    expect(document.querySelector('[data-gobi-dit="aide"] svg')?.getAttribute('aria-label'))
+      .toContain('Gobi');
+    expect(document.querySelector('[data-action="aide"]')?.getAttribute('aria-label'))
+      .toBe('Demander de l’aide à Gobi');
   });
 
   it('rend le nœud, et non l’écran d’attente, dès que le paquet est posé', () => {

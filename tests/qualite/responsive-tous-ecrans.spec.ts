@@ -8,10 +8,10 @@
 import { expect, test } from '../harnais-serveur.js';
 
 import {
+  appliquerReglagesLectureReels,
   entrerDansLeNoeud,
   moteursDeclares,
   noeudsLivres,
-  preparer,
   recettesDEcrans,
 } from '../e2e/qa-outils.js';
 
@@ -45,26 +45,6 @@ const FORMATS_COQUE = [
 interface DefautResponsive {
   readonly ecran: string;
   readonly raison: string;
-}
-
-async function appliquerReglagesLectureReels(page: Page, prenom = 'Responsive'): Promise<void> {
-  await preparer(page, prenom);
-  const profilId = await page.locator('[data-profil]').first().getAttribute('data-profil');
-  expect(profilId, 'le profil de la recette doit exposer son identifiant').not.toBeNull();
-  const reponse = await page.request.put(`/api/profils/${profilId!}/reglages`, {
-    data: {
-      police: 'andika',
-      corpsPx: 27,
-      interlettrageEm: 0.06,
-      espacementMotsEm: 0.08,
-      interligne: 2,
-      colorationSyllabique: false,
-      surlignageLigneCourante: false,
-      regleDeLecture: false,
-      fond: 'parchemin',
-    },
-  });
-  expect(reponse.ok(), 'les réglages réels de la capture doivent être appliqués').toBe(true);
 }
 
 /**

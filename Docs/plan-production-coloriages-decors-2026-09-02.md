@@ -35,18 +35,17 @@ indépendants.
 
 | Consigne | Région exacte | Couleur |
 |---|---|---|
-| Colorie le nid en brun. | `nid` | brun |
-| Colorie le chat en noir. | `chat` | noir |
-| Colorie le rat en violet. | `rat` | violet |
-| Colorie l’arbre en vert. | `arbre` | vert |
-| Colorie la feuille du haut en rouge. | `feuille-haute` | rouge |
-| Colorie la feuille du bas en jaune. | `feuille-basse` | jaune |
-| Le ciel du soir est orange. | `ciel` | orange |
+| Colorie le centre du tapis en brun. | `gland-du-tapis` (identifiant historique conservé) | brun |
+| Colorie la feuille en haut à gauche en noir. | `feuille-du-tapis-un` | noir |
+| Colorie la feuille en haut, au milieu, en violet. | `feuille-du-tapis-deux` | violet |
+| Colorie la feuille en haut à droite en vert. | `feuille-du-tapis-trois` | vert |
+| Colorie la feuille de gauche en rouge. | `feuille-haute` (identifiant historique conservé) | rouge |
+| Colorie la feuille du bas, au milieu, en jaune. | `feuille-basse` | jaune |
+| Colorie la feuille de droite en orange. | `feuille-du-tapis-quatre` | orange |
 
-Contraintes d’image : ajouter un nid, un chat et un rat clairement séparés, absents du brief
-canonique ; désigner par la composition un arbre principal sans ambiguïté avec les trois troncs ;
-placer deux grandes feuilles isolées à des hauteurs nettement différentes. Les objets doivent
-rester naturels dans le chemin vers la cabane, pas posés comme une collection d’icônes.
+Le PNG publié fait désormais autorité : le centre uni du tapis et six motifs de sa bordure sont
+les seules cibles. Les anciens noms de régions restent stables pour ne pas invalider les sorties
+enregistrées, mais leurs libellés visibles et leurs géométries suivent les objets du raster.
 
 ### Brume — `marais.brume`
 
@@ -151,4 +150,3 @@ plusieurs réponses plausibles.
 7. **Activer scène par scène**, avec SVG conservé comme repli portant exactement les mêmes
    identifiants. Synchroniser les nuanciers, le verrou d’assets et les tests avant de mettre à jour
    les références visuelles.
-

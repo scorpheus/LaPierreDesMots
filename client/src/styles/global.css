@@ -589,6 +589,14 @@ body {
   block-size: min(15rem, 52vw);
 }
 
+/* Dans l'aide, le compagnon remplace Gobi : il ne réutilise surtout pas le grand format des
+   fiches de choix, qui pousserait la bulle hors de l'écran sur tablette. */
+.compagnon-portrait--aide {
+  inline-size: 4rem;
+  block-size: 4rem;
+  flex: 0 0 4rem;
+}
+
 @media (max-width: 600px) {
   .ecran-profils {
     padding: 1.1rem !important;
@@ -3016,6 +3024,38 @@ body {
     display: flex;
     flex-direction: column;
   }
+
+  /* Sur tablette, l'étape variable suit l'image au lieu de flotter devant le ciel et le toit.
+     Sa hauteur peut donc suivre la police du profil sans qu'aucun décalage magique ne vieillisse. */
+  .moteur-place > [data-plateau="etape-place"] {
+    position: relative !important;
+    inset: auto !important;
+    order: 2;
+    flex: 0 0 auto;
+    align-self: center;
+    transform: none !important;
+    margin-block: 0.35rem;
+  }
+
+  .moteur-place .scene-place-defilable {
+    order: 1;
+    display: block;
+    flex: 1 1 auto;
+    min-block-size: 0;
+  }
+
+  .moteur-place .scene-place-defilable > svg[data-scene="place"] {
+    inline-size: 100%;
+    block-size: 100%;
+  }
+
+  .moteur-place > [data-reserve="place"] {
+    order: 3;
+  }
+
+  .moteur-place > [data-rappel] {
+    order: 4;
+  }
 }
 
 /* ══════════════════════════════════════════════════════════════════════════════════════════════
@@ -3260,6 +3300,12 @@ body {
     inline-size: 3rem;
     block-size: 3rem;
     flex: 0 0 3rem;
+  }
+
+  [data-ecran="noeud"] > .gobi > .compagnon-portrait--aide {
+    inline-size: 3rem;
+    block-size: 3rem;
+    flex-basis: 3rem;
   }
 
   [data-ecran="noeud"] > .gobi .gobi-bulle {
@@ -3783,7 +3829,10 @@ body {
     min-inline-size: 600px;
   }
 
-  .scene-place-defilable {
+  /* La règle tablette `.moteur-place .scene-place-defilable` est plus spécifique. On reprend
+     ici la même portée : sinon Flexbox réduisait cette scène à 0 px sur un téléphone, tandis
+     que le SVG de 400 px continuait à dépasser visuellement hors de son parent. */
+  .moteur-place .scene-place-defilable {
     display: block;
     flex: 0 0 400px;
     inline-size: 100%;
@@ -3793,7 +3842,7 @@ body {
     overflow-y: hidden;
   }
 
-  .scene-place-defilable > svg[data-scene="place"] {
+  .moteur-place .scene-place-defilable > svg[data-scene="place"] {
     inline-size: 600px !important;
     block-size: 400px !important;
     min-inline-size: 600px;

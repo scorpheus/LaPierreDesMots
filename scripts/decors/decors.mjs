@@ -975,8 +975,8 @@ const FORET = [
     fichier: 'foret-muette/tapis.svg',
     libelle: 'Le tapis de feuilles',
     description:
-      'Un chemin forestier couvert de feuilles : un gland central et six feuilles bien ' +
-      'séparées servent de cibles au coloriage.',
+      'Un grand tapis forestier : son centre uni et six motifs de feuilles bien visibles ' +
+      'sur la bordure servent de cibles au coloriage.',
     region: 'foret-muette',
     moteurs: ['colorie'],
     fondIllustre: '/api/contenu/assets/assets/decors/tapis.png',
@@ -993,13 +993,17 @@ const FORET = [
       z('chat', 'le chat', F.poser('chat', 250, 250, 142, 172)),
       z('rat', 'le rat', F.poser('souris', 110, 330, 122, 94)),
       z('nid', 'le nid', F.poser('nid', 770, 250, 112, 82)),
-      z('gland-du-tapis', 'le gland du centre', F.poser('gland', 462, 358, 56, 54)),
-      z('feuille-du-tapis-un', 'la feuille de gauche', F.poser('feuilleDentee', 128, 306, 118, 82)),
-      z('feuille-du-tapis-deux', 'la petite feuille du centre', F.poser('feuilleDentee', 366, 364, 86, 60)),
-      z('feuille-du-tapis-trois', 'la grande feuille verte', F.poser('feuilleDentee', 438, 398, 132, 86)),
-      z('feuille-du-tapis-quatre', 'la feuille de droite', F.poser('feuilleDentee', 716, 416, 112, 76)),
-      z('feuille-basse', 'la feuille du bas', F.poser('feuilleDentee', 610, 504, 122, 82)),
-      z('feuille-haute', 'la feuille du haut', F.poser('feuilleDentee', 548, 292, 104, 72)),
+      // Coordonnées mesurées sur le PNG publié, après son cadrage xMidYMid slice en 960×600.
+      // Le précédent jeu de zones décrivait un gland absent et plusieurs feuilles posées sur
+      // la partie unie du tapis : le moteur fonctionnait, mais l'enfant ne pouvait rien viser.
+      // Les identifiants historiques restent stables pour ne pas invalider une sortie en cours.
+      z('gland-du-tapis', 'le centre du tapis', [[310, 360], [480, 350], [650, 360], [704, 420], [480, 432], [256, 420]]),
+      z('feuille-du-tapis-un', 'la feuille en haut à gauche', F.lobe(310, 324, 32, 6, 0.74, 36, 0, 0.72)),
+      z('feuille-du-tapis-deux', 'la feuille en haut, au milieu', F.lobe(500, 324, 33, 7, 0.72, 38, 0.08, 0.72)),
+      z('feuille-du-tapis-trois', 'la feuille en haut à droite', F.lobe(700, 324, 34, 5, 0.7, 34, 0.14, 0.7)),
+      z('feuille-haute', 'la feuille de gauche', F.lobe(252, 386, 33, 6, 0.76, 36, 0.18, 0.74)),
+      z('feuille-basse', 'la feuille du bas, au milieu', F.lobe(490, 463, 35, 7, 0.7, 40, 0.05, 0.7)),
+      z('feuille-du-tapis-quatre', 'la feuille de droite', F.lobe(755, 386, 34, 5, 0.78, 32, 0.22, 0.72)),
     ],
     traits: [ligne([[0, 502], [960, 494]])],
   }),

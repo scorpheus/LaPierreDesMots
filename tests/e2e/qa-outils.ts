@@ -668,6 +668,37 @@ export async function entrerDansLeNoeud(
 }
 
 /**
+ * Rejoue le profil typographique observé sur la tablette familiale.
+ *
+ * Une recette responsive qui conserve les petits réglages par défaut ne reproduit pas le cas
+ * réel : avec Andika à 27 px et un interligne de 2, un cartouche peut doubler de hauteur et
+ * recouvrir le plateau alors que toutes les simples assertions de visibilité restent vertes.
+ */
+export async function appliquerReglagesLectureReels(
+  page: Page,
+  prenom = 'Responsive',
+): Promise<void> {
+  await preparer(page, prenom);
+  const profilId = await page.locator('[data-profil]').filter({ hasText: prenom }).first()
+    .getAttribute('data-profil');
+  expect(profilId, 'le profil de la recette doit exposer son identifiant').not.toBeNull();
+  const reponse = await page.request.put(`/api/profils/${profilId!}/reglages`, {
+    data: {
+      police: 'andika',
+      corpsPx: 27,
+      interlettrageEm: 0.06,
+      espacementMotsEm: 0.08,
+      interligne: 2,
+      colorationSyllabique: false,
+      surlignageLigneCourante: false,
+      regleDeLecture: false,
+      fond: 'parchemin',
+    },
+  });
+  expect(reponse.ok(), 'les réglages réels de la capture doivent être appliqués').toBe(true);
+}
+
+/**
  * Ouvre la zone parent et rend la main sur le dashboard.
  *
  * Le code du foyer est POSÉ ici quand il n'existe pas encore : depuis le lot N5,

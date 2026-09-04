@@ -31,7 +31,9 @@ test.describe('retours parent — chemin de la Clairière', () => {
 
     await page.locator('[data-action="aide"]').click();
     await expect(page.locator('[data-case="case-papa"]')).toHaveAttribute('data-aide-cible', 'oui');
-    await expect(page.locator('[data-message-chemin="oui"]')).toContainText('Gobi te montre');
+    await expect(page.locator('[data-message-chemin="oui"]')).toContainText(
+      'Indice : une case possible brille en bleu.',
+    );
 
     await page.screenshot({
       path: resolve(DOSSIER, 'chemin-lisible-1920x1080.png'),

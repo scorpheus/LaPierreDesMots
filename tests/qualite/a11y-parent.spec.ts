@@ -176,6 +176,14 @@ test.describe('R14 s’applique aussi hors du jeu', () => {
     page
   }) => {
     await ouvrirLaPorte(page);
+    // Une base isolée n'a pas encore de code : on le pose d'abord, puis on referme réellement
+    // la zone parent. Sans cette précondition, « 9999 » définissait le code au lieu d'être un
+    // code faux, et taper avant la décision du serveur perdait parfois le quatrième chiffre.
+    await entrer(page);
+    await page.getByRole('button', { name: 'Fermer l’espace parent' }).click();
+    await page.locator('[data-acces-parent]').click();
+    await expect(page.locator('[data-parent="code"]')).toBeVisible();
+    await attendreQueLaPorteAitDecide(page);
     for (const chiffre of '9999') {
       await page.locator(`[data-touche="${chiffre}"]`).click();
     }

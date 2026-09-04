@@ -31,6 +31,7 @@ import { enonceUnePerte } from '@partage/ton/index.js';
 
 const enregistrements: unknown[] = [];
 let enregistrementEchoue = false;
+let promesseEnregistrement: Promise<unknown> | null = null;
 const { effacementsParticules, mondeRecompense, progressionRecompense } = vi.hoisted(() => ({
   effacementsParticules: vi.fn(),
   mondeRecompense: { valeur: null as EtatMonde | null },
@@ -46,6 +47,7 @@ vi.mock('@client/api/client', async (importOriginal) => {
     lireProgression: () => Promise.resolve(progressionRecompense.valeur),
     enregistrerTentative: (charge: unknown) => {
       enregistrements.push(charge);
+      if (promesseEnregistrement !== null) return promesseEnregistrement;
       return enregistrementEchoue
         ? Promise.reject(new Error('la Pierre n’a pas répondu'))
         : Promise.resolve({});
@@ -136,6 +138,7 @@ function etoilesAcquises(): number {
 beforeEach(() => {
   enregistrements.length = 0;
   enregistrementEchoue = false;
+  promesseEnregistrement = null;
   mondeRecompense.valeur = null;
   progressionRecompense.valeur = [];
   effacementsParticules.mockClear();
@@ -266,6 +269,35 @@ describe('la fin de partie est une réussite, quoi qu’il arrive (R14)', () => 
     expect(document.querySelectorAll('[data-etat="echec"]')).toHaveLength(0);
     expect(etoilesAcquises()).toBe(3);
     vi.mocked(console.warn).mockRestore();
+  });
+
+  it('une ancienne réponse réseau ne marque pas la tentative suivante comme déjà envoyée', async () => {
+    let resoudre: ((valeur: unknown) => void) | null = null;
+    promesseEnregistrement = new Promise((resolution) => {
+      resoudre = resolution;
+    });
+
+    const magasin = monter({
+      etoiles: 2,
+      profil: { id: 'prf-1', prenom: 'Alma' },
+      paquet: {
+        noeud: { id: 'clairiere-01' },
+        exercice: { id: 'clairiere-ecole-01', jeu: { moteur: 'colorie' } },
+        habillage: { id: 'ecole', timings: { interEtoilesMs: 180 } }
+      },
+      resume: resume(1, false),
+      demarreLe: '2026-09-01T08:00:00.000Z',
+      termineLe: '2026-09-01T08:00:42.000Z'
+    });
+
+    await waitFor(() => expect(enregistrements).toHaveLength(1));
+    expect(magasin.getState().tentativeEnvoyee).toBe(true);
+
+    // C'est ce que `demarrerNoeud` fait pour la tentative suivante.
+    magasin.setState({ tentativeEnvoyee: false });
+    resoudre?.({});
+
+    await waitFor(() => expect(magasin.getState().tentativeEnvoyee).toBe(false));
   });
 });
 

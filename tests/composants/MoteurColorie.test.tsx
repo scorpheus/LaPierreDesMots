@@ -509,6 +509,34 @@ describe('MoteurColorie — le décor réel', () => {
     expect(evenement).toBe(false);
     expect(region(premiereCible.region).getAttribute('data-peinte')).toBe('oui');
   });
+
+  it('un tap sur la forme entière peint la cible, pas seulement son cercle technique', async () => {
+    const onPeindre = vi.fn();
+    const corpsSvgReel = lireTexte(CHEMIN_SVG_ECOLE)
+      .replace(/^[\s\S]*?<svg[^>]*>/i, '')
+      .replace(/<\/svg>[\s\S]*$/i, '');
+    render(
+      <SceneSvg
+        habillage={habillage}
+        remplissages={{}}
+        regionEnDemonstration={null}
+        regionEnRefus={null}
+        marqueRefus={0}
+        animationsDesactivees
+        regionsActives={[premiereCible.region]}
+        svgMarkup={corpsSvgReel}
+        onPeindre={onPeindre}
+      />
+    );
+
+    const forme = document.querySelector(
+      `[data-region-source="${premiereCible.region}"]`,
+    );
+    expect(forme).not.toBeNull();
+    fireEvent.pointerDown(forme!);
+
+    expect(onPeindre).toHaveBeenCalledWith(premiereCible.region);
+  });
 });
 
 /**

@@ -274,9 +274,10 @@ export function SceneSvg(proprietes: ProprietesSceneSvg): ReactElement {
   const designer = useCallback(
     (cible: Element | null, point: readonly [number, number]): IdRegionSvg | null => {
       const noeud = cible !== null && typeof cible.closest === 'function'
-        ? cible.closest('[data-region-svg]')
+        ? cible.closest('[data-region-svg], [data-region-source]')
         : null;
-      const direct = noeud?.getAttribute('data-region-svg');
+      const direct =
+        noeud?.getAttribute('data-region-svg') ?? noeud?.getAttribute('data-region-source');
       if (
         typeof direct === 'string' &&
         direct.length > 0 &&
@@ -413,6 +414,7 @@ export function SceneSvg(proprietes: ProprietesSceneSvg): ReactElement {
     const selecteur = calquesColoriables.map((calque) => `#${calque.id} > [id]`).join(', ');
     if (selecteur.length === 0) return undefined;
     const noeuds = Array.from(svg.querySelectorAll(selecteur));
+    const fondEstIllustre = svg.querySelector('[data-fond-illustre]') !== null;
 
     for (const noeud of noeuds) {
       const identifiant = noeud.getAttribute('id');
@@ -432,6 +434,9 @@ export function SceneSvg(proprietes: ProprietesSceneSvg): ReactElement {
       // bleuté de `REMPLISSAGE_VIDE` donnait l'impression que la réponse était déjà coloriée.
       (noeud as SVGGraphicsElement).style.opacity = couleur !== undefined ? '0.92' : '0';
       (noeud as SVGGraphicsElement).style.mixBlendMode = 'color';
+      // Le trait technique d'un masque ne fait pas partie du PNG. Le laisser visible après
+      // la réussite dessinait une bordure vectorielle bleue autour du motif peint.
+      if (fondEstIllustre) (noeud as SVGGraphicsElement).style.stroke = 'none';
       noeud.classList.add('pierre-region');
       if (couleur === undefined) noeud.removeAttribute('data-couleur');
       else noeud.setAttribute('data-couleur', couleur);

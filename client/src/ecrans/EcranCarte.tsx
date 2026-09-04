@@ -131,7 +131,9 @@ const ANCRES: readonly (readonly [CodeRegion, number, number, string])[] = [
 ];
 
 /** Rayon de la prise tactile, en unités `viewBox`. 64 unités ≈ 64 px CSS à l'échelle de rendu. */
-const RAYON_PRISE = 46;
+/* 50 unités restent 65 px CSS quand la carte tient dans les 800 px de la tablette. À 46, la
+   même prise tombait à 60 px : visible et fonctionnelle, mais sous le minimum tactile R16. */
+const RAYON_PRISE = 50;
 
 /** Rayon du sceau visible. Plus petit que la prise : le territoire se voit à travers. */
 const RAYON_SCEAU = 34;

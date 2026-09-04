@@ -280,7 +280,7 @@ export function MoteurChemin(
       ? messageDeRefus
       : cibleAide === null
         ? ''
-        : 'Gobi te montre la prochaine case en bleu.';
+        : 'Indice : une case possible brille en bleu.';
 
   return (
     <div
@@ -372,6 +372,13 @@ export function MoteurChemin(
           const consommee = casesConsommees.has(caseChemin.id);
           const aidee = cibleAide === caseChemin.id;
           const refusee = etiquetteRefusee === caseChemin.id && etat.dernierRefus?.motif !== 'case-non-adjacente';
+          const statut = surPion
+            ? 'actuelle'
+            : consommee || franchie
+              ? 'parcourue'
+              : atteignable
+                ? 'possible'
+                : 'libre';
           const classes = ['cible'];
           if (!animationsDesactivees && refusee) classes.push('oscillation');
           return (
@@ -386,6 +393,16 @@ export function MoteurChemin(
                 data-consommee={consommee ? 'oui' : 'non'}
                 data-aide-cible={aidee ? 'oui' : 'non'}
                 data-deja-fait={franchie || consommee ? 'oui' : 'non'}
+                data-statut-chemin={statut}
+                aria-label={`${caseChemin.libelle}, ${
+                  statut === 'actuelle'
+                    ? 'case actuelle'
+                    : statut === 'parcourue'
+                      ? 'case déjà parcourue'
+                      : statut === 'possible'
+                        ? 'chemin possible'
+                        : 'case du chemin'
+                }`}
                 className={classes.join(' ')}
                 disabled={surPion || consommee}
                 style={
@@ -396,6 +413,7 @@ export function MoteurChemin(
                     justifyItems: 'center',
                     alignContent: 'center',
                     gap: '0.08rem',
+                    position: 'relative',
                     minInlineSize: '4rem',
                     minBlockSize: '4rem',
                     maxInlineSize: regimeCompact ? '8.5rem' : '12rem',
@@ -410,18 +428,30 @@ export function MoteurChemin(
                       : atteignable
                         ? '0 0 0 4px var(--soleil), var(--ombre-bd)'
                       : undefined,
-                    backgroundColor: franchie
-                      ? 'color-mix(in srgb, var(--soleil) 25%, var(--parchemin))'
-                      : undefined,
+                    backgroundColor: surPion
+                      ? 'color-mix(in srgb, var(--lagon) 28%, var(--parchemin))'
+                      : franchie || consommee
+                        ? 'color-mix(in srgb, var(--menthe) 32%, var(--parchemin))'
+                        : undefined,
+                    opacity: consommee ? 0.82 : 1,
                   } as CSSProperties
                 }
                 onClick={(evenement) => {
                   jouer({ type: 'avancer', caseVisee: caseChemin.id }, evenement);
                 }}
               >
-                {franchie || consommee ? (
-                  <span aria-hidden="true" style={{ fontSize: '0.72em', fontWeight: 800 }}>
-                    ✓ Déjà fait
+                {statut === 'parcourue' ? (
+                  <span
+                    aria-hidden="true"
+                    style={{
+                      position: 'absolute',
+                      insetInlineEnd: '0.2rem',
+                      insetBlockStart: '0.05rem',
+                      fontSize: '0.62em',
+                      fontWeight: 900,
+                    }}
+                  >
+                    ✓
                   </span>
                 ) : null}
                 <span>{caseChemin.libelle}</span>
@@ -462,16 +492,16 @@ export function MoteurChemin(
           ...styleLecture,
           position: 'absolute',
           insetBlockStart: 0,
-          insetInlineStart: '50%',
+          insetInlineStart: '0.5rem',
+          insetInlineEnd: '0.5rem',
           zIndex: 4,
-          inlineSize: regimeCompact ? '100%' : 'auto',
-          maxInlineSize: regimeCompact ? '100%' : 'min(88%, 42rem)',
+          inlineSize: 'auto',
+          maxInlineSize: 'none',
           margin: 0,
           padding: regimeCompact ? '0.3rem 0.55rem' : '0.65rem 1rem',
-          transform: 'translateX(-50%)',
           border: '3px solid var(--trait)',
-          borderRadius: regimeCompact ? '0 0 var(--rayon-carte) var(--rayon-carte)' : '999px',
-          background: 'color-mix(in srgb, var(--parchemin) 94%, transparent)',
+          borderRadius: regimeCompact ? '0 0 var(--rayon-carte) var(--rayon-carte)' : 'var(--rayon-carte)',
+          background: 'var(--parchemin)',
           boxShadow: 'var(--ombre-bd)',
           display: 'grid',
           justifyItems: 'center',
@@ -479,9 +509,10 @@ export function MoteurChemin(
           textAlign: 'center',
           pointerEvents: 'none',
         } as CSSProperties}
+        data-fond-opaque="oui"
       >
         <span data-regle-chemin="oui" style={{ fontSize: regimeCompact ? '0.68em' : '0.78em', fontWeight: 700, opacity: 0.75 }}>
-          La règle du chemin
+          À chercher maintenant
         </span>
         <strong style={{ fontSize: regimeCompact ? '0.78em' : undefined }}>
           {consigneCourante?.texte ?? 'Suis le bon chemin.'}
@@ -489,7 +520,7 @@ export function MoteurChemin(
         <span data-cible-chemin="oui" style={{ fontSize: regimeCompact ? '0.68em' : '0.82em', fontWeight: 700 }}>
           {caseCourante === null
             ? 'Choisis la première case du chemin.'
-            : `Tu es sur « ${caseCourante.libelle} ». Choisis une case voisine.`}
+            : `Départ : « ${caseCourante.libelle} ». Touche une case reliée en jaune.`}
         </span>
         {retourChemin === '' ? null : (
           <span data-retour-chemin="oui" style={{ fontSize: '0.82em' }}>

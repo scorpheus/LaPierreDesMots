@@ -197,7 +197,7 @@ describe('moteur chemin', () => {
       'oui',
     );
     expect(container.querySelector('[data-message-chemin="oui"]')?.textContent).toContain(
-      'Gobi te montre',
+      'une case possible brille en bleu',
     );
     // Deuxième appel : l'escalade est monotone, elle ne saute pas au palier suivant.
     taper(container, ['[data-harnais-action="aide"]']);
@@ -222,7 +222,9 @@ describe('moteur chemin', () => {
     expect(depart?.getAttribute('data-consommee')).toBe('oui');
     expect(depart?.getAttribute('data-deja-fait')).toBe('oui');
     expect(depart?.disabled).toBe(true);
-    expect(depart?.textContent).toContain('Déjà fait');
+    expect(depart?.textContent).not.toContain('Déjà fait');
+    expect(depart?.textContent).toContain('✓');
+    expect(depart?.getAttribute('data-statut-chemin')).toBe('parcourue');
     expect(suite?.getAttribute('data-atteignable')).toBe('oui');
     expect(container.querySelectorAll('[data-trait-actif="oui"]')).toHaveLength(1);
   });
@@ -231,8 +233,8 @@ describe('moteur chemin', () => {
     const { container } = render(<Harnais />);
     const message = container.querySelector('[data-message-chemin="oui"]');
     expect(message?.textContent).toContain('Suis les cases où tu entends [u].');
-    expect(message?.querySelector('[data-regle-chemin="oui"]')?.textContent).toContain('règle');
-    expect(message?.querySelector('[data-cible-chemin="oui"]')?.textContent).toContain('Tu es sur');
+    expect(message?.querySelector('[data-regle-chemin="oui"]')?.textContent).toContain('chercher maintenant');
+    expect(message?.querySelector('[data-cible-chemin="oui"]')?.textContent).toContain('Départ');
     expect(message?.textContent).not.toMatch(/Étape\s+\d+\s+sur/u);
     expect(message?.closest('[data-plateau="controles"]')).toBeNull();
   });

@@ -1,5 +1,5 @@
 {
-  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Les sept cibles suivent désormais le raster publié : un gland et six feuilles distinctes. Le mot gland porte la consonne finale muette travaillée ; les repères spatiaux évitent toute cible inventée. Aucune région n'est peinte deux fois et aucune cible n'est grise.",
+  "$commentaire": "Les sept cibles suivent le raster publié : le centre uni du tapis et six motifs de feuilles distincts sur sa bordure. Le mot tapis porte la consonne finale muette travaillée ; les repères spatiaux désignent les motifs réellement visibles. Aucune région n'est peinte deux fois et aucune cible n'est grise.",
   "id": "foret-muette-tapis-colorie-01",
   "version": 1,
   "titre": "Le tapis de feuilles",
@@ -26,7 +26,7 @@
       "consignes": [
         {
           "id": "c1",
-          "texte": "Colorie le gland du centre en brun.",
+          "texte": "Colorie le centre du tapis en brun.",
           "forme": "imperative",
           "audio": null,
           "cibles": [
@@ -37,14 +37,14 @@
           ],
           "motsCles": [
             "colorie",
-            "gland",
+            "tapis",
             "centre",
             "brun"
           ]
         },
         {
           "id": "c2",
-          "texte": "Colorie la feuille de gauche en noir.",
+          "texte": "Colorie la feuille en haut à gauche en noir.",
           "forme": "imperative",
           "audio": null,
           "cibles": [
@@ -56,13 +56,14 @@
           "motsCles": [
             "colorie",
             "feuille",
+            "haut",
             "gauche",
             "noir"
           ]
         },
         {
           "id": "c3",
-          "texte": "Colorie la petite feuille en violet.",
+          "texte": "Colorie la feuille en haut, au milieu, en violet.",
           "forme": "imperative",
           "audio": null,
           "cibles": [
@@ -73,14 +74,15 @@
           ],
           "motsCles": [
             "colorie",
-            "petite",
+            "haut",
             "feuille",
+            "milieu",
             "violet"
           ]
         },
         {
           "id": "c4",
-          "texte": "Colorie la grande feuille en vert.",
+          "texte": "Colorie la feuille en haut à droite en vert.",
           "forme": "imperative",
           "audio": null,
           "cibles": [
@@ -91,14 +93,15 @@
           ],
           "motsCles": [
             "colorie",
-            "grande",
+            "haut",
             "feuille",
+            "droite",
             "vert"
           ]
         },
         {
           "id": "c5",
-          "texte": "Colorie la feuille du haut en rouge.",
+          "texte": "Colorie la feuille de gauche en rouge.",
           "forme": "imperative",
           "audio": null,
           "cibles": [
@@ -110,13 +113,13 @@
           "motsCles": [
             "colorie",
             "feuille",
-            "haut",
+            "gauche",
             "rouge"
           ]
         },
         {
           "id": "c6",
-          "texte": "Colorie la feuille du bas en jaune.",
+          "texte": "Colorie la feuille du bas, au milieu, en jaune.",
           "forme": "imperative",
           "audio": null,
           "cibles": [
@@ -129,6 +132,7 @@
             "colorie",
             "feuille",
             "bas",
+            "milieu",
             "jaune"
           ]
         },

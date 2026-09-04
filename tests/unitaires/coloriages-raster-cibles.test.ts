@@ -5,6 +5,9 @@
  * rendaient ces scènes injouables : objet absent de la consigne, cible hors de son repère raster,
  * centroïde hors du tracé et couleur annoncée différente de la couleur attendue.
  */
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -12,6 +15,7 @@ import {
   pointDansRegion,
   polygonesDuChemin,
 } from '../../scripts/verifier-regions-fermees.mjs';
+import { decoderPng } from '../../scripts/sprites/png.mjs';
 import { lireJson, lireTexte } from '../configuration/preparation.js';
 
 type Boite = readonly [xmin: number, ymin: number, xmax: number, ymax: number];
@@ -46,6 +50,7 @@ interface CibleAttendue {
   readonly mot: string;
   readonly couleur: string;
   readonly boite: Boite;
+  readonly motifRasterVisible?: boolean;
 }
 
 interface SceneAttendue {
@@ -53,6 +58,7 @@ interface SceneAttendue {
   readonly exercice: string;
   readonly habillage: string;
   readonly svg: string;
+  readonly raster?: string;
   readonly cibles: readonly CibleAttendue[];
 }
 
@@ -62,14 +68,15 @@ const SCENES: readonly SceneAttendue[] = [
     exercice: 'contenu/exercices/foret-muette/tapis-colorie-01.json',
     habillage: 'contenu/habillages/foret-muette/tapis.habillage.json',
     svg: 'contenu/habillages/foret-muette/tapis.svg',
+    raster: 'contenu/assets/decors/tapis.png',
     cibles: [
-      { region: 'gland-du-tapis', mot: 'gland', couleur: 'brun', boite: [460, 350, 520, 410] },
-      { region: 'feuille-du-tapis-un', mot: 'feuille', couleur: 'noir', boite: [120, 300, 250, 395] },
-      { region: 'feuille-du-tapis-deux', mot: 'feuille', couleur: 'violet', boite: [360, 350, 460, 435] },
-      { region: 'feuille-du-tapis-trois', mot: 'feuille', couleur: 'vert', boite: [430, 390, 580, 490] },
-      { region: 'feuille-haute', mot: 'feuille', couleur: 'rouge', boite: [540, 285, 660, 370] },
-      { region: 'feuille-basse', mot: 'feuille', couleur: 'jaune', boite: [600, 500, 740, 590] },
-      { region: 'feuille-du-tapis-quatre', mot: 'feuille', couleur: 'orange', boite: [710, 410, 840, 500] },
+      { region: 'gland-du-tapis', mot: 'tapis', couleur: 'brun', boite: [440, 360, 520, 430] },
+      { region: 'feuille-du-tapis-un', mot: 'feuille', couleur: 'noir', boite: [280, 295, 345, 355], motifRasterVisible: true },
+      { region: 'feuille-du-tapis-deux', mot: 'feuille', couleur: 'violet', boite: [470, 295, 535, 355], motifRasterVisible: true },
+      { region: 'feuille-du-tapis-trois', mot: 'feuille', couleur: 'vert', boite: [670, 295, 735, 355], motifRasterVisible: true },
+      { region: 'feuille-haute', mot: 'feuille', couleur: 'rouge', boite: [220, 355, 285, 415], motifRasterVisible: true },
+      { region: 'feuille-basse', mot: 'feuille', couleur: 'jaune', boite: [455, 435, 525, 495], motifRasterVisible: true },
+      { region: 'feuille-du-tapis-quatre', mot: 'feuille', couleur: 'orange', boite: [725, 355, 790, 415], motifRasterVisible: true },
     ],
   },
   {
@@ -125,6 +132,32 @@ function dansBoite([x, y]: readonly [number, number], [xmin, ymin, xmax, ymax]: 
   return x >= xmin && x <= xmax && y >= ymin && y <= ymax;
 }
 
+function ecartTypeLuminositeAutour(
+  fichier: string,
+  [xViewBox, yViewBox]: readonly [number, number],
+): number {
+  const image = decoderPng(readFileSync(resolve(process.cwd(), fichier)));
+  const echelle = Math.max(960 / image.largeur, 600 / image.hauteur);
+  const margeX = (960 - image.largeur * echelle) / 2;
+  const margeY = (600 - image.hauteur * echelle) / 2;
+  const centreX = Math.round((xViewBox - margeX) / echelle);
+  const centreY = Math.round((yViewBox - margeY) / echelle);
+  const rayon = Math.max(8, Math.round(15 / echelle));
+  const luminosites: number[] = [];
+  for (let y = Math.max(0, centreY - rayon); y <= Math.min(image.hauteur - 1, centreY + rayon); y += 1) {
+    for (let x = Math.max(0, centreX - rayon); x <= Math.min(image.largeur - 1, centreX + rayon); x += 1) {
+      const index = (y * image.largeur + x) * 4;
+      const rouge = image.pixels[index] ?? 0;
+      const vert = image.pixels[index + 1] ?? 0;
+      const bleu = image.pixels[index + 2] ?? 0;
+      luminosites.push(0.2126 * rouge + 0.7152 * vert + 0.0722 * bleu);
+    }
+  }
+  const moyenne = luminosites.reduce((somme, valeur) => somme + valeur, 0) / luminosites.length;
+  const variance = luminosites.reduce((somme, valeur) => somme + (valeur - moyenne) ** 2, 0) / luminosites.length;
+  return Math.sqrt(variance);
+}
+
 describe.each(SCENES)('$nom : les cibles suivent le raster', (scene) => {
   const exercice = lireJson<ExerciceColorie>(scene.exercice);
   const habillage = lireJson<HabillageColorie>(scene.habillage);
@@ -164,6 +197,18 @@ describe.each(SCENES)('$nom : les cibles suivent le raster', (scene) => {
         pointDansRegion(polygonesDuChemin(d!)!, region!.centroide),
         attendue.region,
       ).toBe(true);
+    }
+  });
+
+  it('place les petites cibles sur un motif réellement visible du PNG', () => {
+    if (scene.raster === undefined) return;
+    for (const attendue of scene.cibles.filter((cible) => cible.motifRasterVisible === true)) {
+      const region = regions.get(attendue.region);
+      expect(region, attendue.region).toBeDefined();
+      expect(
+        ecartTypeLuminositeAutour(scene.raster, region!.centroide),
+        `${attendue.region} tombe sur une zone uniforme du raster`,
+      ).toBeGreaterThan(20);
     }
   });
 });

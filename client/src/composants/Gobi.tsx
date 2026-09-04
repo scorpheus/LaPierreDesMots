@@ -71,7 +71,7 @@
 //      nullable, il doit trancher.
 import type { ReactElement } from 'react';
 import type {
-  AideProposee, CheminAsset, CodeStadeGobi, EtatAnimationGobi, NiveauAide,
+  AideProposee, CheminAsset, CodeCompagnon, CodeStadeGobi, EtatAnimationGobi, NiveauAide,
 } from '@pierre/partage';
 import type { AideResolue } from './aide-de-gobi.js';
 import { BoutonEcouter } from './BoutonEcouter.js';
@@ -108,6 +108,12 @@ export interface ProprietesGobi {
   readonly cristal?: CheminAsset | null;
   /** Libellé de la forme portée, pour le lecteur d'écran. */
   readonly libelleForme?: string | null;
+  /** Compagnon qui porte réellement l'aide de la sortie ; absent = Gobi. */
+  readonly compagnon?: Readonly<{
+    readonly code: CodeCompagnon;
+    readonly libelle: string;
+    readonly asset: CheminAsset;
+  }> | null;
   /** L'un des 5 états de l'addendum § A.2. */
   readonly animation?: EtatAnimationGobi;
   /** Taille du dessin, en pixels. 64 dans la bulle d'aide, davantage au campement. */
@@ -178,6 +184,7 @@ export function Gobi({
   stade = 'oeuf',
   cristal = null,
   libelleForme = null,
+  compagnon = null,
   animation = 'repos',
   taille = 64
 }: ProprietesGobi): ReactElement {
@@ -207,6 +214,7 @@ export function Gobi({
   return (
     <aside
       className="gobi"
+      {...(compagnon === null ? {} : { 'data-aideur': compagnon.code })}
       data-gobi-niveau={niveau}
       // « Gobi parle-t-il, ou attend-il ? » — la distinction que le DOM ne portait pas, et
       // sans laquelle « avant le tap » et « après le tap » étaient indiscernables pour un
@@ -217,6 +225,7 @@ export function Gobi({
       {...(aide?.cible === null || aide?.cible === undefined ? {} : { 'data-aide-cible': aide.cible })}
       data-stade-gobi={stade}
       data-animation-gobi={animation}
+      aria-label={compagnon === null ? 'Aide de Gobi' : `Aide de ${compagnon.libelle}`}
       {...(libelleForme === null ? {} : { 'data-forme-gobi': libelleForme })}
       aria-live="polite"
       style={{
@@ -230,7 +239,7 @@ export function Gobi({
           dentelé, joues orangées, grands yeux ronds à deux reflets, et le cœur de Pierre
           rayonnant au ventre. Le corps ne change pas de stade en stade — seule la parure
           pousse, et seul le geste change d'un état d'animation à l'autre. */}
-      <svg
+      {compagnon === null ? <svg
         width={taille}
         height={taille}
         viewBox={GOBI_VUE}
@@ -258,7 +267,11 @@ export function Gobi({
             preserveAspectRatio="xMidYMid meet"
           />
         )}
-      </svg>
+      </svg> : (
+        <span className="compagnon-portrait compagnon-portrait--aide" data-aideur={compagnon.code}>
+          <img src={urlAsset(compagnon.asset)} alt="" draggable={false} />
+        </span>
+      )}
 
       <div
         className="zone-lecture gobi-bulle"
@@ -287,8 +300,8 @@ export function Gobi({
         <BoutonEcouter
           texte={texte}
           cle={resolue?.cle ?? null}
-          locuteur="gobi"
-          libelle="Réécouter ce que dit Gobi"
+          locuteur={compagnon?.code ?? 'gobi'}
+          libelle={`Réécouter ce que dit ${compagnon?.libelle ?? 'Gobi'}`}
         />
       )}
 
@@ -314,10 +327,10 @@ export function Gobi({
         // le test mais de donner au bouton la prise que les autres avaient déjà.
         data-action="aide"
         onClick={surDemande}
-        aria-label="Demander de l’aide à Gobi"
+        aria-label={`Demander de l’aide à ${compagnon?.libelle ?? 'Gobi'}`}
       >
         <span aria-hidden="true">?</span>
-        <span>Gobi</span>
+        <span>{compagnon?.libelle ?? 'Gobi'}</span>
       </button>
       )}
     </aside>

@@ -66,6 +66,36 @@ zéro à chaque paquet, puis une géométrie inchangée sur trois images du navi
 attente en millisecondes. Après ce correctif, les 150 écrans de la campagne (75 nœuds × 2 vues)
 passent en 51,9 s sans confondre chargement et défaut responsive.
 
+La photo suivante a montré pourquoi « les pièces sont visibles » n'est pas encore une preuve de
+composition. Sur `place`, le cartouche existait, la scène existait et la cible du toit existait,
+mais le premier flottait devant la troisième. La garde dédiée joue maintenant les trois étapes et
+mesure l'intersection du cartouche avec `ciel`, `a-cote-du-banc` puis `toit-ecole`. Sur `chemin`,
+elle mesure la largeur et la hauteur du panneau, le début du plateau et les intersections entre
+cases. Ces gardes ont un contrôle négatif conservé au rapport de tâche : retour aux positions
+absolues historiques → **2 recettes rouges sur 2**. Le branchement des quatre compagnons a subi le
+même contrôle : forcer `compagnon={null}` → **4 cas rouges sur 4**.
+
+Ce passage a également révélé deux défauts collatéraux que la suite refuse désormais de taire : la
+mise à l'échelle de la carte ramenait les prises de région de 92 unités SVG à 60 px CSS sur la
+tablette, et une règle CSS moins spécifique laissait le conteneur de `place` haut de 0 px sur
+téléphone. Le rayon utile est maintenant calculé pour rester au-dessus de 64 px dans ce cadre ; la
+scène téléphone reprend explicitement la priorité CSS et conserve ses 400 px défilables.
+
+Le coloriage du tapis a ajouté un autre principe : vérifier un centroïde contre une boîte écrite
+dans le test ne prouve pas que l'objet existe dans le PNG. La boucle courte croise maintenant trois
+preuves : la consigne et la région concordent, le centroïde tombe dans le tracé, puis une fenêtre de
+pixels autour de chaque petite cible présente assez de contraste local pour matérialiser un motif.
+Une recette Chromium joue ensuite les sept étapes par de vrais taps à `800 × 1100`. Avec l'ancien
+« gland du centre » absent du décor, les trois contrôles du tapis rougissaient ; après remappage sur
+le centre uni et les six feuilles de la bordure, ils passent, ainsi que la sortie complète.
+
+Cette sortie complète a aussi découvert une course que les cas isolés ne pouvaient pas produire :
+une réponse de journalisation du nœud précédent pouvait revenir après le démarrage du suivant et
+poser son drapeau global `tentativeEnvoyee`. La récompense suivante n'envoyait alors rien. Le test
+de composant retient volontairement la première réponse, démarre logiquement une nouvelle tentative
+puis la libère ; la campagne des 75 nœuds vérifie ensuite que toutes les récompenses sont réellement
+portées par le serveur.
+
 ## Parallélisme de la recette navigateur
 
 Dix travailleurs ont produit `ERR_NO_BUFFER_SPACE` sur Windows. Un seul travailleur a évité la

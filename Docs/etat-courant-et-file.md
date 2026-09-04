@@ -1,6 +1,6 @@
 # État courant et file de travail
 
-Dernière mise à jour : 4 septembre 2026.
+Dernière mise à jour : 5 septembre 2026.
 
 Ce document est la mémoire de passage du projet. La conversation principale reste le poste de
 pilotage : tout nouveau retour du parent s'ajoute à cette file tant qu'il n'est pas explicitement
@@ -9,8 +9,7 @@ annulé, remplacé ou reporté.
 ## Point de reprise
 
 - Branche : `main`.
-- Base du présent lot : `cfb544f` — automatisation de publication et vérification exhaustive des
-  visuels PWA. Le plafond à quatre travailleurs a depuis validé les 521 parcours E2E.
+- Base du présent lot : `5874524` — couverture responsive des quatorze moteurs sur tablette.
 - Serveur de jeu : écoute sur `0.0.0.0:8080` ; adresse LAN mesurée le 4 septembre :
   `http://192.168.1.19:8080`.
 - Version de production compilée et servie.
@@ -34,8 +33,8 @@ annulé, remplacé ou reporté.
 - Les huit images manquantes du second jeu de paires de la Cité sont publiées et raccordées.
 - La Pierre centrale est désormais la conclusion : la Clairière part du chemin au sud et le centre
   ne se révèle qu'après l'obtention des six Éclats.
-- Derniers contrôles séparés : 2411/2411 tests unitaires, composants et API, 521/521 parcours E2E
-  à quatre travailleurs et 274/274 contrôles qualité et responsive. Le contrat exhaustif rejoué
+- Derniers contrôles séparés : 2433/2433 tests unitaires, composants et API, 524/524 parcours E2E
+  à quatre travailleurs et 294/294 contrôles qualité et responsive. Le contrat exhaustif rejoué
   seul couvre 15 écrans sur 15, 89 recettes et 76 nœuds, avec un écart nul. Lint, TypeScript,
   construction de production et budget du bundle réussissent également.
 - Les sept divergences visuelles ont été montrées puis validées par le parent. Les références ont
@@ -89,8 +88,7 @@ annulé, remplacé ou reporté.
   s'ouvre plus déjà défilée et tient entièrement à `640×360`.
 - Vérification intermédiaire après ces corrections : 35/35 tests de composants ciblés, test de
   fiche 1/1, lint ciblé sans erreur, puis les **178 visites** des 89 écrans en téléphone portrait
-  et paysage sans commande perdue ni garde de composition déclenchée. La validation globale reste
-  à relancer après la fin du chantier PWA concurrent.
+  et paysage sans commande perdue ni garde de composition déclenchée.
 - La passe suivante a recomposé `tri`, `assemble`, `chemin`, `histoire`, `trace` et `grave` : les
   règles variables sont séparées des consignes stables, les constructions sont centrées et les
   plateaux courts ne se recouvrent plus. Les captures ciblées téléphone ont révélé puis fermé les
@@ -163,17 +161,44 @@ annulé, remplacé ou reporté.
   ce garde, elle pouvait mesurer le cadre de repli de `tri` puis capturer sa géométrie finale : un
   faux rouge et, inversement, un risque de juger un écran pas encore chargé. La campagne stabilisée
   passe les **150 écrans** (75 nœuds × 2 vues) en 51,9 s.
-- Recette de clôture du 4 septembre : **VERT, 12/12 étapes en 700,7 s** — 2 422 tests unitaires,
-  645 validations de contenu, 521 parcours E2E, 13 références visuelles, 294 contrôles qualité et
-  11 contrôles de bundle, zéro échec. La charge initiale mesure 232,2 Kio gzip sur 250 : Andika reste
+- Recette de clôture du 5 septembre : **VERT, 12/12 étapes** — 2 433 tests unitaires,
+  645 validations de contenu, 524 parcours E2E, 13 références visuelles, 294 contrôles qualité et
+  11 contrôles de bundle, zéro échec. La charge initiale mesure 233,4 Kio gzip sur 250 : Andika reste
   embarquée et se charge à la première zone de lecture au lieu d'être préchargée sur l'accueil.
+- Une nouvelle photo réelle a fermé trois angles morts de cette recette. Dans `place`, le cartouche
+  variable est désormais dans le flux sous l'école : il ne peut plus cacher le soleil, le banc ou
+  le toit, quelle que soit sa hauteur typographique. Dans `chemin`, la règle variable emploie toute
+  la largeur, le départ et les liaisons jaunes sont explicités et les cases parcourues ne répètent
+  plus « Déjà fait » sur le décor. Enfin, le compagnon inscrit dans `PlanSortie` porte réellement
+  l'aide : portrait, nom du bouton et locuteur suivent Filou, Roc, Plume ou Bulle ; Gobi n'est que
+  le repli sans compagnon choisi.
+- Les contrôles négatifs ont réintroduit séparément l'ancien cartouche superposé, l'ancienne bulle
+  de chemin à 392 px et le forçage de Gobi : les deux recettes navigateur et les quatre cas de
+  compagnons sont tous devenus rouges, puis verts après restauration. La même campagne a découvert
+  une prise de carte réduite à 60 px CSS et une scène `place` de hauteur nulle à 360 px ; elles sont
+  corrigées respectivement à au moins 64 px et à 400 px défilables. Le détecteur de tests trompeurs
+  reste vert : 0 bloquant, plafond historique de 93 avertissements.
+- La photo du coloriage `foret-muette-08` a invalidé la précédente validation de contenu : le PNG
+  ne portait aucun « gland du centre » et cinq des six feuilles étaient visées hors de leur motif.
+  La consigne nomme désormais le centre uni du tapis puis six feuilles réellement présentes sur sa
+  bordure. Les sept prises ont été remesurées sur le cadrage raster, et un tap sur la forme complète
+  est accepté en plus du cercle technique. Le garde unitaire ne se contente plus de rectangles
+  déclarés par lui-même : il mesure le contraste local des six motifs dans le PNG. L'ancien contenu
+  a fait rougir 3 contrôles sur 3 ; après correction, 12/12 contrôles unitaires, 30/30 composants,
+  645/645 contrôles de contenu et la recette réelle des sept taps à `800 × 1100` sont verts.
+- La campagne exhaustive a ensuite révélé une course de sauvegarde : la réponse réseau d'un ancien
+  nœud pouvait revenir après l'ouverture du suivant et marquer sa tentative comme déjà envoyée.
+  Le drapeau est désormais posé au départ de chaque envoi, jamais au retour d'une réponse devenue
+  ancienne. Le contrôle différé de composant passe 22/22 et la campagne des 75 nœuds repasse en
+  entier jusqu'à leurs récompenses, sans réussite perdue côté serveur.
 
 ## Dernier chantier terminé : audio
 
 - Population recensée après la réduction de la frise des Galeries à trois récits : 666 objets
-  audio, 674 clips avec les variantes.
+  audio, 673 clips avec les variantes.
 - Couverture des consignes : 368/368, soit 100 %.
-- Refus : 0. Deux clips ont nécessité une nouvelle synthèse après le contrôle inverse.
+- Refus : 0. Dix clips ont été resynthétisés pour les nouvelles consignes et les mots `tapis` et
+  `milieu` ; 663 clips existants ont été réutilisés.
 - Instrument final : Whisper `large-v3` sur CPU/int8. Le mode CUDA a de nouveau présenté son
   comportement non borné : mémoire GPU occupée mais aucun résultat écrit après environ douze
   minutes. Il a été interrompu sans perdre les clips synthétisés.
@@ -183,9 +208,12 @@ annulé, remplacé ou reporté.
 
 ## File ouverte
 
-1. Faire tester sur la tablette les nouveaux rendus `chrono`, `tri`, `eclair` et les deux écrans de
-   l'école avec la maîtresse sur le serveur local reconstruit. Intégrer les retours sans perdre les
-   tâches ouvertes.
+1. Faire tester sur la tablette les nouveaux rendus `chrono`, `tri`, `eclair`, `chemin` et les deux
+   écrans de l'école avec la maîtresse sur le serveur local reconstruit. Vérifier aussi que le
+   compagnon choisi reste visible dans l'aide pendant toute la sortie. Rejouer aussi le tapis de
+   la Forêt Muette : sa première étape dit maintenant « Colorie le centre du tapis en brun », puis
+   les six feuilles sont repérées par leur position. Intégrer les retours sans perdre les tâches
+   ouvertes.
 2. Tester sur l’appareil réel les cinq exercices de chronologie reconstruits. Les quinze triplets
    ont été validés par le parent puis publiés sous forme de 45 cartes 4:3 ; le verrou de pixels et
    les gardes de correspondance texte/image sont décrits dans

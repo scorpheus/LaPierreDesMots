@@ -16,6 +16,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
 import type { CheminAsset, JaugePalier as ModeleJauge, NiveauAide } from '@pierre/partage';
+import { compagnonsDuDocument } from '@pierre/partage/monde';
+import compagnonsDocument from '../../../contenu/monde/compagnons.json' with { type: 'json' };
 import { jaugesDe } from '@pierre/partage/recompenses';
 import { Gobi } from '../composants/Gobi.js';
 import { resoudreAideDeGobi } from '../composants/aide-de-gobi.js';
@@ -434,6 +436,14 @@ export function EcranNoeud(): ReactElement {
   // consigne. Voir `composants/aide-de-gobi.ts` : une stratégie visible sans clip vaut mieux
   // qu'une phrase affichée différente de celle qui serait entendue.
   const aideDeGobi = resoudreAideDeGobi(aide, etapeCourante, paquet.exercice.id);
+  const compagnonAide = useMemo(() => {
+    const code = sortie?.compagnon ?? null;
+    if (code === null) return null;
+    const definition = compagnonsDuDocument(compagnonsDocument).find((c) => c.code === code);
+    return definition === undefined
+      ? null
+      : { code: definition.code, libelle: definition.libelle, asset: definition.asset };
+  }, [sortie?.compagnon]);
 
   // La jauge du palier intermédiaire — « trois étoiles sur cinq » (D25, point 3). C'est celle
   // qui a du sens PENDANT une partie : elle dit ce que ce nœud-ci rapproche.
@@ -618,6 +628,7 @@ export function EcranNoeud(): ReactElement {
         niveau={niveauAide}
         surDemande={() => emettre(ACTION_AIDE)}
         aideResolue={aideDeGobi}
+        compagnon={compagnonAide}
       />
     </main>
   );

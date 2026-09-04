@@ -142,6 +142,12 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
     const profilId = String(profil.id);
     const noeudId = String(paquet.noeud.id);
 
+    // Le drapeau décrit CETTE tentative, pas la réponse réseau. Il doit donc être posé avant
+    // l'envoi : si l'enfant ouvre déjà le nœud suivant quand une ancienne réponse revient,
+    // celle-ci ne doit surtout pas marquer la NOUVELLE tentative comme envoyée. Cette course
+    // faisait disparaître aléatoirement des réussites lors d'un enchaînement rapide.
+    magasin.getState().marquerTentativeEnvoyee();
+
     void (async () => {
       try {
         const cle = await calculerCleIdempotence(profilId, noeudId, demarreLe, graine);
@@ -180,7 +186,6 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
         };
 
         const reponse = await enregistrerTentative(charge);
-        magasin.getState().marquerTentativeEnvoyee();
         // ── LA CASCADE VIENT DU SERVEUR — lot A1 (R31) ────────────────────────────────────
         // Avant ce lot, `magasin.ts` calculait `dernierGain` lui-même, dans une variable qui
         // repartait de zéro à chaque rechargement : rien de ce que l'enfant gagnait n'était
