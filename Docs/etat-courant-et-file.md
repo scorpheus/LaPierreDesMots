@@ -31,7 +31,7 @@ annulé, remplacé ou reporté.
 - Les quatre portraits de compagnons ont une animation CSS légère et distincte, neutralisée par le
   réglage d'animations calmes.
 - Derniers contrôles séparés : 2398/2398 tests unitaires et composants, 521/521 parcours E2E à
-  quatre travailleurs et 273/273 contrôles qualité. Lint, TypeScript, construction de production
+  quatre travailleurs et 25/25 scénarios de la matrice responsive. Lint, TypeScript, construction de production
   et budget du bundle réussissent également.
 - Seule porte encore rouge : sept divergences visuelles connues — six migrations volontaires de
   blockouts SVG vers les rasters, plus la récompense. Les références n'ont pas été modifiées sans
@@ -116,6 +116,10 @@ annulé, remplacé ou reporté.
 - Les sept divergences visuelles sont expliquées : six remplacent volontairement les blockouts SVG
   par la carte ou les décors raster ; la septième concerne la récompense et reste à montrer au
   parent avant toute mise à jour de référence.
+- La passe de composition suivante supprime le vide de 84 à 119 px entre la carte et ses départs
+  en portrait, ramène les départs paysage à 64–80 px et retire les sous-défilements du coffre à
+  1017×640. La matrice responsive complète repasse 25/25 en 2 min 36 s ; TypeScript et les 11
+  contrôles de bundle restent verts (249,2 Kio gzip sur 250 Kio).
 
 ## Dernier chantier terminé : audio
 

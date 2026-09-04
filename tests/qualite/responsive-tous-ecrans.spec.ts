@@ -238,14 +238,23 @@ test.describe('responsive — la coque ne garde pas les proportions tablette sur
               const scene = document.querySelector<HTMLElement>('[data-scene-adaptative="carte"]');
               const destinations = document.querySelector<HTMLElement>('.destinations-carte');
               const titreDestinations = destinations?.querySelector<HTMLElement>('h2');
+              const boiteScene = scene?.getBoundingClientRect();
+              const boiteDestinations = destinations?.getBoundingClientRect();
+              const hauteursDeparts = [...(destinations?.querySelectorAll<HTMLElement>('[data-depart]') ?? [])]
+                .map((depart) => depart.getBoundingClientRect().height);
               return {
-                partCarte: (scene?.getBoundingClientRect().width ?? 0) / innerWidth,
+                partCarte: (boiteScene?.width ?? 0) / innerWidth,
                 sousScroll: destinations === null
                   ? 0
                   : Math.max(0, destinations.scrollHeight - destinations.clientHeight),
                 corpsTitre: titreDestinations === null
                   ? 0
                   : Number.parseFloat(getComputedStyle(titreDestinations).fontSize),
+                espaceAvantDestinations:
+                  boiteScene === undefined || boiteDestinations === undefined
+                    ? 0
+                    : Math.max(0, boiteDestinations.top - boiteScene.bottom),
+                plusGrandDepart: Math.max(0, ...hauteursDeparts),
               };
             })() : null,
           };
@@ -300,8 +309,35 @@ test.describe('responsive — la coque ne garde pas les proportions tablette sur
             mesure.carte.corpsTitre,
             `${recette.nom} : « Où veux-tu aller ? » ne doit pas dominer la carte`,
           ).toBeLessThanOrEqual(compact ? 20 : 28);
+          expect(
+            mesure.carte.espaceAvantDestinations,
+            `${recette.nom} : aucun grand vide ne doit séparer la carte de ses destinations`,
+          ).toBeLessThanOrEqual(32);
+          if (format.largeur > format.hauteur && format.hauteur <= 520) {
+            expect(
+              mesure.carte.plusGrandDepart,
+              `${recette.nom} : un départ ne doit pas devenir un panneau géant en paysage court`,
+            ).toBeLessThanOrEqual(80);
+          }
         }
       }
     });
   }
+});
+
+test('tablette paysage — le coffre confie le défilement à son écran, pas à ses collections', async ({ page }) => {
+  const recette = recettesDEcrans().find((candidate) => candidate.attendu === 'coffre');
+  if (recette === undefined) throw new Error('Recette du coffre absente');
+
+  await page.setViewportSize({ width: 1017, height: 640 });
+  await recette.aller(page);
+  await expect(page.locator('[data-ecran="coffre"]')).toBeVisible();
+
+  const sousScrolls = await page.locator('.collections-coffre, .collection-coffre').evaluateAll(
+    (elements) => elements.map((element) => {
+      const noeud = element as HTMLElement;
+      return Math.max(0, noeud.scrollHeight - noeud.clientHeight);
+    }),
+  );
+  expect(Math.max(0, ...sousScrolls)).toBe(0);
 });

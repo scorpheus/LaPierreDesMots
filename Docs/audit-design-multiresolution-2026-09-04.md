@@ -38,9 +38,10 @@ environ 313×208 px après correction.
   une ligne et la hauteur disponible borne la scène : à `640×360`, le campement complet occupe
   environ 396×248 px sous l'en-tête au lieu d'être coupé. Les prises restent à 64 px conformément
   à R16.
-- **Carte** : en paysage téléphone, le panneau « Où veux-tu aller ? » domine la carte et possède
-  son propre scroll. La carte doit rester le héros sur au moins 50 à 60 % de la largeur ; la page
-  doit porter le seul scroll.
+- **Carte — corrigée** : en paysage téléphone, la carte conserve au moins 50 % de la largeur et les
+  départs sont ramenés à des cartes tactiles de 64 à 80 px, sans paragraphe répétitif. En portrait,
+  la grille ne distribue plus sa hauteur libre entre la carte et les destinations : le vide mesuré
+  à 84–119 px est désormais borné à 32 px. La page porte le seul scroll.
 - **Récompense — corrigée, validation visuelle à refaire** : l'action de continuation était sous
   le pli à `360×640`, `640×360` et `800×600`. Elle suit maintenant immédiatement la scène de
   victoire ; sous 700 px de largeur ou de hauteur, Gobi, le titre et les étoiles adoptent un
@@ -50,7 +51,9 @@ environ 313×208 px après correction.
   réduisent uniquement leurs marges sur petit écran.
 - **Dashboard et galerie parent — corrigés** : en-têtes et onglets se recomposent à 360 px, les
   cartes et tableaux suivent la largeur disponible et l'écran racine ne crée plus de sous-scroll.
-- **Fiche du coffre — corrigée, validation parent requise** : le focus de la sortie faisait
+- **Coffre et fiche — corrigés, validation parent requise** : à 1017×640, les trois collections
+  conservaient jusqu'à 489 px de contenu dans des sous-panneaux distincts. Le coffre utilise
+  désormais son écran comme unique surface de défilement jusqu'à 1100 px. Le focus de la sortie faisait
   défiler la modale jusqu'en bas dès son ouverture, donc coupait le titre. Le focus utilise
   désormais `preventScroll`; en paysage court, titre, objet, explication et sortie tiennent
   ensemble sans sacrifier la cible de 64 px.
@@ -97,8 +100,8 @@ La correction doit se faire **par moteur partagé**, jamais par 76 exceptions lo
 
 ## Ordre d'implantation
 
-1. Campement et carte : les deux hubs qui donnent l'impression générale du jeu — première
-   correction implantée, validation parent encore requise.
+1. Campement et carte : les deux hubs qui donnent l'impression générale du jeu — corrections
+   implantées et gardées par la matrice responsive, validation parent encore requise.
 2. Gabarit `colorie` P0 — corrigé ; puis `eclair` et `tri`.
 3. Récompense, réglages, fiche coffre et outils parent.
 4. Autres gabarits de moteurs — passe téléphone implantée ; validation tablette réelle à faire.
