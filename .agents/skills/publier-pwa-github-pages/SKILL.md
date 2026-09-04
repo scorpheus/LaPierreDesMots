@@ -61,7 +61,9 @@ illustré hors connexion avant qu'un téléchargement complet explicite ait ét�
 1. Exécuter une seule fois `publier-site.bat --preparer`. Ne pas lancer `npm run verifier` avant :
    cette commande le fait déjà et relit ses rapports. Elle refuse un dépôt sale, les assets locaux
    absents et toute campagne Vitest/Playwright concurrente de ce dépôt avant d’engager les tests
-   longs. Elle ne tue jamais un processus automatiquement.
+   longs. Elle ne tue jamais un processus automatiquement. Si l’unique échec est
+   `ERR_NO_BUFFER_SPACE` dans l’E2E, elle rejoue une seule fois la famille E2E complète et conserve
+   les onze autres preuves vertes ; tout autre échec arrête la préparation.
 2. Lire son résumé : commit source, commit `gh-pages`, version du build et nombre de preuves. Le
    fichier ignoré `bac-a-sable/publication-gh-pages-etat.json` lie ces quatre valeurs. Toute
    modification ultérieure invalide la publication au lieu d’envoyer d’autres octets.
@@ -70,7 +72,7 @@ illustré hors connexion avant qu'un téléchargement complet explicite ait ét�
 4. Après accord, exécuter :
 
    ```powershell
-   publier-site.bat --publier
+   .\publier-site.bat --publier
    ```
 
    Cette commande revérifie les empreintes préparées, pousse exactement `gh-pages`, attend l’Action

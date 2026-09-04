@@ -15,7 +15,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { verifierEntreesLocales } from './preparer-publication-pages.mjs';
-import { lireEtapes, STATUTS } from './rapport.mjs';
+import { ecrireEtape, genererRapport, lireEtapes, STATUTS } from './rapport.mjs';
 
 export const RACINE = path.resolve(fileURLToPath(new URL('../', import.meta.url)));
 export const DOSSIER_PUBLICATION = path.join(RACINE, 'bac-a-sable', 'publication-gh-pages');
@@ -45,7 +45,7 @@ function executer(programme, arguments_, options = {}) {
     shell: options.shell ?? false,
   });
   if (resultat.error) throw resultat.error;
-  if (resultat.status !== 0) {
+  if (resultat.status !== 0 && !options.codesAcceptes?.includes(resultat.status)) {
     const detail = options.capturer
       ? `${resultat.stdout ?? ''}${resultat.stderr ?? ''}`.trim()
       : '';
@@ -61,10 +61,15 @@ function sortie(programme, arguments_, cwd = RACINE) {
   return String(executer(programme, arguments_, { cwd, capturer: true }).stdout).trim();
 }
 
-function npm(script) {
+function npm(script, options = {}) {
   const npmExec = process.env['npm_execpath'];
-  if (npmExec?.endsWith('.js')) executer(process.execPath, [npmExec, 'run', script]);
-  else executer('npm', ['run', script], { shell: process.platform === 'win32' });
+  if (npmExec?.endsWith('.js')) {
+    return executer(process.execPath, [npmExec, 'run', script], options);
+  }
+  return executer('npm', ['run', script], {
+    ...options,
+    shell: process.platform === 'win32',
+  });
 }
 
 function depotPropre(cwd = RACINE) {
@@ -126,6 +131,63 @@ export function verifierRapportVert(etapes) {
     etapes: etapes.length,
     cas: etapes.reduce((total, etape) => total + (etape.total ?? 0), 0),
   };
+}
+
+export function estIncidentReseauRelancable(etapes) {
+  const bloquantes = etapes.filter((etape) => STATUTS[etape.statut]?.bloquant !== false);
+  return (
+    bloquantes.length === 1 &&
+    bloquantes[0]?.etape === 'test:e2e' &&
+    Array.isArray(bloquantes[0].details) &&
+    bloquantes[0].details.length > 0 &&
+    bloquantes[0].details.every((detail) => /ERR_NO_BUFFER_SPACE/iu.test(String(detail?.message ?? detail)))
+  );
+}
+
+export function depouillerRapportPlaywright(brut) {
+  const details = [];
+  let total = 0;
+  const parcourir = (suites = []) => {
+    for (const suite of suites) {
+      for (const cas of suite.specs ?? []) {
+        total += 1;
+        if (!cas.ok) {
+          details.push({
+            ou: `${cas.file ?? suite.file ?? ''} › ${cas.title}`,
+            message: String(cas.tests?.[0]?.results?.[0]?.error?.message ?? 'scénario en échec')
+              .split('\n')[0],
+          });
+        }
+      }
+      parcourir(suite.suites);
+    }
+  };
+  parcourir(brut.suites);
+  return { total, echecs: details.length, details };
+}
+
+function relancerE2eApresIncidentReseau() {
+  console.log(
+    '\n[publication] Windows a manque de ressources reseau. Nouvelle tentative de la seule ' +
+      'famille E2E, sans rejouer les onze etapes deja vertes...',
+  );
+  exigerAucuneCampagneConcurrente();
+  const debut = Date.now();
+  const cheminBrut = path.join(RACINE, 'tests', 'rapports', 'brut', 'test-e2e.playwright.json');
+  npm('test:e2e', { env: { PIERRE_RAPPORT_JSON: 'tests/rapports/brut/test-e2e.playwright.json' } });
+  const bilan = depouillerRapportPlaywright(lireJson(cheminBrut, 'Le rapport Playwright E2E'));
+  exiger(bilan.echecs === 0, `La seconde campagne E2E porte ${String(bilan.echecs)} echec(s).`);
+  ecrireEtape({
+    etape: 'test:e2e',
+    statut: 'reussite',
+    dureeMs: Date.now() - debut,
+    total: bilan.total,
+    echecs: 0,
+    details: [],
+    note: 'relance E2E complète après ERR_NO_BUFFER_SPACE ; les autres étapes vertes ont été conservées.',
+    artefacts: ['tests/rapports/brut/test-e2e.playwright.json'],
+  });
+  genererRapport({ commande: 'publier-site.bat --preparer (reprise E2E)' });
 }
 
 function lireJson(chemin, libelle) {
@@ -251,7 +313,12 @@ export async function preparerPublication() {
   verifierEntreesLocales();
 
   console.log('\n[publication] Verification complete, executee une seule fois...');
-  npm('verifier');
+  const verification = npm('verifier', { codesAcceptes: [1] });
+  if (verification.status !== 0) {
+    const etapesApresEchec = lireEtapes();
+    if (estIncidentReseauRelancable(etapesApresEchec)) relancerE2eApresIncidentReseau();
+    else verifierRapportVert(etapesApresEchec);
+  }
   exigerAucuneCampagneConcurrente();
   const bilan = verifierRapportVert(lireEtapes());
 

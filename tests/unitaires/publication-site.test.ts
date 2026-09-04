@@ -3,6 +3,8 @@ import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 import {
+  depouillerRapportPlaywright,
+  estIncidentReseauRelancable,
   extrairePremierAsset,
   identifierProcessusTests,
   verifierEtatPrepare,
@@ -37,6 +39,48 @@ describe('publication GitHub Pages automatisee', () => {
         { etape: 'test', statut: 'reussite', total: 42 },
       ]),
     ).toEqual({ etapes: 2, cas: 43 });
+  });
+
+  it('ne relance que l incident reseau Windows isole de la famille E2E', () => {
+    expect(
+      estIncidentReseauRelancable([
+        { etape: 'lint', statut: 'reussite' },
+        {
+          etape: 'test:e2e',
+          statut: 'echec',
+          details: [{ message: 'page.goto: net::ERR_NO_BUFFER_SPACE' }],
+        },
+      ]),
+    ).toBe(true);
+    expect(
+      estIncidentReseauRelancable([
+        { etape: 'test:e2e', statut: 'echec', details: [{ message: 'le bouton ne répond pas' }] },
+      ]),
+    ).toBe(false);
+  });
+
+  it('depouille la relance Playwright sans transformer un cas rouge en vert', () => {
+    expect(
+      depouillerRapportPlaywright({
+        suites: [
+          {
+            file: 'parcours.spec.ts',
+            specs: [
+              { title: 'vert', ok: true },
+              {
+                title: 'rouge',
+                ok: false,
+                tests: [{ results: [{ error: { message: 'attendu vrai\ndetail' } }] }],
+              },
+            ],
+          },
+        ],
+      }),
+    ).toEqual({
+      total: 2,
+      echecs: 1,
+      details: [{ ou: 'parcours.spec.ts › rouge', message: 'attendu vrai' }],
+    });
   });
 
   it('refuse de publier quand les octets prepares ne correspondent plus', () => {

@@ -135,9 +135,9 @@ La publication n’est proposée que si les preuves suivantes sont vertes dans l
 La procédure quotidienne ne recopie plus manuellement les commandes :
 
 ```powershell
-publier-site.bat --preparer
+.\publier-site.bat --preparer
 # arrêt obligatoire : annonce du push et accord explicite du propriétaire
-publier-site.bat --publier
+.\publier-site.bat --publier
 ```
 
 La préparation contrôle d’abord le dépôt, les voix et les polices locales ainsi que l’absence de
@@ -146,6 +146,11 @@ au lieu de les arrêter : un processus peut appartenir à un autre chantier lég
 verte, le commit source, le commit de livraison et la version du build sont ensuite liés dans
 `bac-a-sable/publication-gh-pages-etat.json`. Ce fichier est ignoré par Git et ne constitue pas une
 autorisation distante.
+
+Un `ERR_NO_BUFFER_SPACE` isolé dans l’E2E indique une pénurie de ressources réseau Windows, pas un
+échec fonctionnel. Dans ce seul cas mesuré, le script rejoue une fois la famille E2E complète et
+conserve les onze autres rapports verts. Il ne relance jamais automatiquement une assertion métier,
+un défaut visuel ou une seconde panne d’infrastructure.
 
 La publication exige que ces empreintes soient encore exactes, puis automatise le push, l’attente
 de l’Action officielle, le contrôle de l’état `built` et une recette HTTP de la racine, du manifeste,
