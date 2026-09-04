@@ -116,6 +116,9 @@ export default tseslint.config(
       '**/node_modules/**',
       '**/dist/**',
       '**/dist-test/**',
+      // Livrable statique GitHub Pages : bundles Vite minifiés, même statut que les deux
+      // sorties ci-dessus. Il est ignoré par Git et ne doit jamais être relinté comme une source.
+      '**/dist-pwa/**',
       // `dist-autonome/` — le build Android/Capacitor du portage (Docs/addendum-portage-android.md
       // § 5) : mêmes bundles minifiés que `dist/`, juste un autre nom de dossier. Sans cette ligne,
       // `npm run lint` relit du JS généré (`==`, expressions nues, `customElements`/`document`

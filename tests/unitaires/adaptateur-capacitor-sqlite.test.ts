@@ -103,8 +103,8 @@ describe('adaptateur Capacitor SQLite — conformité au contrat Base', () => {
     await migrer(base);
 
     await expect(
-      base.transaction(async () => {
-        await base.lancer(
+      base.transaction(async (transaction) => {
+        await transaction.lancer(
           `INSERT INTO profils (id, prenom, avatar_json, palette_variante, cree_le, dernier_acces_le)
            VALUES ('p1', 'Test', '{}', 'clairiere', '2026-09-01T08:00:00Z', '2026-09-01T08:00:00Z')`
         );
@@ -116,15 +116,14 @@ describe('adaptateur Capacitor SQLite — conformité au contrat Base', () => {
     expect(Number(compte.n)).toBe(0);
   });
 
-  it('les appels imbriqués DANS une transaction ne bloquent pas — le verrou est réentrant', async () => {
+  it('les appels DANS une transaction utilisent la Base transactionnelle sans se bloquer', async () => {
     const { connexion } = creerFausseConnexionCapacitor();
     const base = creerBaseCapacitorSqlite(connexion);
     await migrer(base);
 
     const horloge = horlogeDeTest();
-    // `enregistrerTentative` ouvre sa propre transaction et, à l'intérieur, rappelle `base.*`
-    // à de nombreuses reprises (lecture du profil, écriture de la progression, etc.) — un
-    // verrou non réentrant se bloquerait ici indéfiniment (le test échouerait par timeout).
+    // `enregistrerTentative` ouvre sa propre transaction et passe la Base transactionnelle
+    // reçue à ses dépôts auxiliaires. La connexion native reste verrouillée une seule fois.
     const profil = await creerProfil(
       base,
       { prenom: 'Alma', avatar: {} as never, paletteVariante: 'clairiere' },
@@ -157,5 +156,41 @@ describe('adaptateur Capacitor SQLite — conformité au contrat Base', () => {
     );
     expect(resultat.deja).toBe(false);
     expect(resultat.tentative.profil).toBe(profil.id);
+  });
+
+  it('retient un appel public concurrent jusqu’à la validation de la transaction', async () => {
+    const { connexion, db } = creerFausseConnexionCapacitor();
+    const base = creerBaseCapacitorSqlite(connexion);
+    await migrer(base);
+
+    let signalerEcritureInterne!: () => void;
+    const ecritureInterne = new Promise<void>((resoudre) => {
+      signalerEcritureInterne = resoudre;
+    });
+    let libererTransaction!: () => void;
+    const transactionSuspendue = new Promise<void>((resoudre) => {
+      libererTransaction = resoudre;
+    });
+
+    const enTransaction = base.transaction(async (transaction) => {
+      await transaction.lancer(
+        `INSERT INTO profils (id, prenom, avatar_json, palette_variante, cree_le, dernier_acces_le)
+         VALUES ('interne', 'Interne', '{}', 'clairiere', '2026-09-01T08:00:00Z', '2026-09-01T08:00:00Z')`
+      );
+      signalerEcritureInterne();
+      await transactionSuspendue;
+    });
+    await ecritureInterne;
+
+    const appelConcurrent = base.lancer(
+      `INSERT INTO profils (id, prenom, avatar_json, palette_variante, cree_le, dernier_acces_le)
+       VALUES ('externe', 'Externe', '{}', 'clairiere', '2026-09-01T08:00:00Z', '2026-09-01T08:00:00Z')`
+    );
+    expect(db.prepare("SELECT id FROM profils WHERE id = 'externe'").get()).toBeUndefined();
+
+    libererTransaction();
+    await enTransaction;
+    await appelConcurrent;
+    expect(db.prepare("SELECT id FROM profils WHERE id = 'externe'").get()).toEqual({ id: 'externe' });
   });
 });

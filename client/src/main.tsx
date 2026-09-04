@@ -18,6 +18,7 @@ import { Application, creerFileDAttente } from './Application.js';
 import { creerMagasin } from './etat/magasin.js';
 import { creerServicesParDefaut, resoudreGraineParDefaut } from './etat/services.js';
 import { appliquerVariablesPalette } from './habillages/chargeur.js';
+import { demanderPersistanceStockage } from './pwa/persistance-stockage.js';
 import './styles/global.css';
 
 // Idempotent, et appelé par CHAQUE racine de composition (§ 4.3) : client, serveur, tests.
@@ -34,6 +35,10 @@ const graine = resoudreGraineParDefaut();
 const services = creerServicesParDefaut(graine);
 const magasin = creerMagasin(services, graine);
 const fileDAttente = creerFileDAttente();
+
+if (import.meta.env.MODE === 'pwa') {
+  void demanderPersistanceStockage();
+}
 
 if (import.meta.env.MODE === 'test') {
   const { monterCrochetsDeTest } = await import('./testabilite/crochets.js');

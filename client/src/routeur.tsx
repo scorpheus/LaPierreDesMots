@@ -64,6 +64,29 @@ const CHEMIN_PAR_ECRAN: Readonly<Record<CodeEcran, string>> = {
   recompense: '/recompense'
 };
 
+/** Base publique du routeur : `/` en LAN, `/LaPierreDesMots/` sur GitHub Pages. */
+const BASE_ROUTEUR = import.meta.env.BASE_URL.replace(/\/$/u, '');
+
+function cheminPublic(cheminInterne: string): string {
+  if (BASE_ROUTEUR === '') return cheminInterne;
+  return cheminInterne === '/' ? `${BASE_ROUTEUR}/` : `${BASE_ROUTEUR}${cheminInterne}`;
+}
+
+function cheminInterne(cheminPublicActuel: string): string {
+  if (BASE_ROUTEUR === '') return cheminPublicActuel;
+  if (cheminPublicActuel === BASE_ROUTEUR || cheminPublicActuel === `${BASE_ROUTEUR}/`) return '/';
+  return cheminPublicActuel.startsWith(`${BASE_ROUTEUR}/`)
+    ? cheminPublicActuel.slice(BASE_ROUTEUR.length)
+    : cheminPublicActuel;
+}
+
+function estRouteConnue(chemin: string): boolean {
+  return (
+    Object.values(CHEMIN_PAR_ECRAN).includes(chemin) ||
+    Object.values(CHEMINS).includes(chemin as (typeof CHEMINS)[keyof typeof CHEMINS])
+  );
+}
+
 /**
  * Les chemins que le magasin ne connaît pas. Déclarés ici, une seule fois, plutôt qu'écrits en
  * littéral dans chaque `navigate` : c'est la table des routes que le contrat demande.
@@ -935,6 +958,9 @@ function construireRouteur() {
 
   return createRouter({
     routeTree: arbre,
+    // TanStack retire cette base a l'entree et la remet a chaque navigation. Les routes du jeu
+    // restent donc `/carte`, `/parent/dashboard`, etc. dans tout le code applicatif.
+    basepath: import.meta.env.BASE_URL,
     /**
      * ══════════════════════════════════════════════════════════════════════════════════════
      * R21 / R22 — HISTORIQUE DU NAVIGATEUR, ET NON PLUS EN MÉMOIRE.
@@ -969,12 +995,20 @@ export function Routeur(): ReactElement {
   useEffect(() => {
     const aller = (ecran: CodeEcran): void => {
       const cible = CHEMIN_PAR_ECRAN[ecran];
-      if (routeur.history.location.pathname !== cible) {
-        routeur.history.push(cible);
+      const ciblePublique = cheminPublic(cible);
+      if (routeur.history.location.pathname !== ciblePublique) {
+        routeur.history.push(ciblePublique);
       }
     };
 
-    aller(magasin.getState().ecran);
+    // Au chargement direct d'une URL profonde, le magasin n'a pas encore relu le joueur. Le
+    // forcer immédiatement vers `/` effacerait chemin, recherche et fragment juste avant que
+    // l'hydratation puisse confirmer l'écran. Une route connue reste donc en place pendant cet
+    // unique état transitoire ; l'état suivant la conserve ou ramène normalement aux profils.
+    const cheminAuDemarrage = cheminInterne(routeur.history.location.pathname);
+    if (magasin.getState().ecran !== 'chargement' || !estRouteConnue(cheminAuDemarrage)) {
+      aller(magasin.getState().ecran);
+    }
 
     const arreterMagasin = magasin.subscribe((etat, precedent) => {
       if (etat.ecran !== precedent.ecran) {
@@ -1008,7 +1042,9 @@ export function Routeur(): ReactElement {
     );
 
     const arreterHistorique = routeur.history.subscribe(() => {
-      const ecranDuChemin = cheminsDuMagasin.get(routeur.history.location.pathname);
+      const ecranDuChemin = cheminsDuMagasin.get(
+        cheminInterne(routeur.history.location.pathname)
+      );
       if (ecranDuChemin === undefined) return;
       if (magasin.getState().ecran !== ecranDuChemin) {
         magasin.getState().naviguer(ecranDuChemin);

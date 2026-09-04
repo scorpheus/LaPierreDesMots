@@ -249,7 +249,7 @@ export function Gobi({
             posé dessus. */}
         {cristal === null ? null : (
           <image
-            href={`/api/contenu/assets/${cristal}`}
+            href={urlAsset(String(cristal))}
             x="68"
             y="-8"
             width="64"

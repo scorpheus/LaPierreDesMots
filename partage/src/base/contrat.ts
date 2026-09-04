@@ -37,5 +37,5 @@ export interface Base {
    * même transaction, ce qui n'existait pas avant. Sans sérialisation, deux requêtes HTTP
    * concurrentes pourraient entrelacer leurs écritures dans la MÊME transaction non validée.
    */
-  transaction<T>(action: () => Promise<T>): Promise<T>;
+  transaction<T>(action: (transaction: Base) => Promise<T>): Promise<T>;
 }

@@ -113,6 +113,24 @@ export function variablesHabillage(habillage: Habillage): Readonly<Record<string
 const cacheSvg = new Map<string, Promise<string>>();
 
 /**
+ * Réécrit les assets liés par un SVG servi par le serveur LAN.
+ *
+ * Les habillages existants portent encore la forme canonique de l'API HTTP. Le chemin seul est
+ * confié au résolveur ; la requête, le fragment et le type de guillemet restent inchangés afin
+ * que le même balisage fonctionne après traduction vers un asset de build autonome.
+ */
+export function reecrireLiensAssetsDuSvg(
+  svg: string,
+  resoudre: (cheminRelatif: string) => string = urlAsset
+): string {
+  return svg.replace(
+    /(\b(?:xlink:)?href\s*=\s*)(["'])\/api\/contenu\/assets\/([^"'?#]+)((?:[?#][^"']*)?)\2/giu,
+    (_correspondance, attribut: string, guillemet: string, chemin: string, suffixe: string) =>
+      `${attribut}${guillemet}${resoudre(chemin)}${suffixe}${guillemet}`
+  );
+}
+
+/**
  * Charge le SVG d'une scène, une seule fois par chemin.
  * Le résultat est du BALISAGE BRUT : c'est le moteur de rendu (L-E) qui l'injecte et qui
  * pose `data-region-svg` sur chaque `<path>` coloriable (§ 10).
@@ -130,7 +148,7 @@ export function chargerSvg(cheminRelatif: string): Promise<string> {
           `SVG introuvable : ${cheminRelatif} (réponse ${String(reponse.status)}).`
         );
       }
-      return reponse.text();
+      return reecrireLiensAssetsDuSvg(await reponse.text());
     })
     .catch((cause: unknown) => {
       // Un asset manquant ne doit pas rester en cache : le rechargement suivant réessaie.

@@ -62,6 +62,11 @@ const ASSETS_URL = {
     import: 'default',
     eager: true
   }) as Record<string, string>),
+  ...(import.meta.glob('../../../contenu/audio/manifeste.json', {
+    query: '?url',
+    import: 'default',
+    eager: true
+  }) as Record<string, string>),
   ...(import.meta.glob('../../../contenu/modeles-lettres/**/*.json', {
     query: '?url',
     import: 'default',

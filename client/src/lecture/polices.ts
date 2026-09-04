@@ -40,8 +40,8 @@ export function familleDe(police: CodePolice): string {
 /**
  * Les fichiers WOFF2 embarqués, par code de police, avec leur graisse.
  *
- * Servis depuis `client/public/polices/`, donc à l'URL `/polices/<fichier>` une fois le client
- * bâti. Cette table est ce que `vite.config.ts` précharge et ce que `polices.css` déclare.
+ * Servis depuis `client/public/polices/`, sous la base publique du build. Cette table est ce que
+ * `vite.config.ts` précharge et ce que `polices.css` déclare.
  * `verdana` n'y figure pas, et c'est le fait mesurable de l'écart n° 5.
  */
 export const FICHIERS_EMBARQUES: readonly {
@@ -62,7 +62,10 @@ export const FICHIERS_EMBARQUES: readonly {
 
 /** URL d'un fichier de police, servi par le dossier public du client. Jamais un domaine tiers. */
 export function urlDePolice(fichier: string): string {
-  return `/polices/${fichier}`;
+  const base = import.meta.env.BASE_URL.endsWith('/')
+    ? import.meta.env.BASE_URL
+    : `${import.meta.env.BASE_URL}/`;
+  return `${base}polices/${fichier}`;
 }
 
 /**

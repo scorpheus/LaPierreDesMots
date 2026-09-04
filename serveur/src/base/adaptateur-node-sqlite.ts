@@ -2,7 +2,7 @@
  * Adaptateur `Base` sur `node:sqlite` — le seul point ou le serveur touche `DatabaseSync`
  * en dehors de `connexion.ts`. Voir Docs/addendum-portage-android.md § 3-4.
  *
- * VERROU REENTRANT — nécessaire, pas cosmétique.
+ * VERROU TRANSACTIONNEL — nécessaire, pas cosmétique.
  *
  * `DatabaseSync` est synchrone ; le contrat `Base` est async partout (pour rester compatible
  * avec l'adaptateur Capacitor, qui traverse un pont natif). Un `await` — même sur une valeur déjà
@@ -14,18 +14,15 @@
  * transaction ouverte d'une requête A et serait validée ou annulée avec elle.
  *
  * Le verrou sérialise donc TOUTES les méthodes de cet adaptateur, pas seulement `transaction()`.
- * Il doit être RÉENTRANT : le code À L'INTÉRIEUR d'un `transaction()` appelle lui-même `lancer`,
- * `uneLigne`, etc. sur ce même `Base` (voir `depots/tentatives.ts`) — un verrou non réentrant se
- * bloquerait donc lui-même. `AsyncLocalStorage` marque « on est déjà dans la section critique »
- * pour toute la portée async du `transaction()` en cours, afin que ces appels internes
- * s'exécutent directement au lieu de se remettre en file derrière eux-mêmes. Un appel concurrent
- * qui n'est PAS dans cette portée (une autre requête HTTP) continue, lui, d'attendre son tour.
+ * Le callback reçoit une `Base` transactionnelle dédiée : ses méthodes s'exécutent directement
+ * sur la connexion déjà verrouillée, tandis qu'un appel fait sur la `Base` publique attend dans
+ * la file. Cette capacité explicite est également implantable dans un Worker navigateur, sans
+ * dépendre de `AsyncLocalStorage` ni d'un compteur global qui confondrait deux appels async.
  *
  * Coût négligeable : les appels `node:sqlite` sont synchrones et la base est minuscule (un
  * enfant).
  */
 
-import { AsyncLocalStorage } from 'node:async_hooks';
 import type { DatabaseSync } from 'node:sqlite';
 
 import type { Base, ResultatEcriture } from '@pierre/partage/base';
@@ -44,18 +41,11 @@ function versParametresSqlite(parametres: readonly unknown[]): never[] {
   return parametres as never[];
 }
 
-function creerVerrouReentrant(): <T>(action: () => Promise<T>) => Promise<T> {
-  const dansLaSectionCritique = new AsyncLocalStorage<true>();
+function creerVerrou(): <T>(action: () => Promise<T>) => Promise<T> {
   let file: Promise<unknown> = Promise.resolve();
 
   return function verrouiller<T>(action: () => Promise<T>): Promise<T> {
-    if (dansLaSectionCritique.getStore() === true) {
-      return action();
-    }
-    const resultat = file.then(
-      () => dansLaSectionCritique.run(true, action),
-      () => dansLaSectionCritique.run(true, action)
-    );
+    const resultat = file.then(action, action);
     file = resultat.then(
       () => undefined,
       () => undefined
@@ -65,45 +55,69 @@ function creerVerrouReentrant(): <T>(action: () => Promise<T>) => Promise<T> {
 }
 
 export function creerBaseNodeSqlite(base: DatabaseSync): Base {
-  const verrouiller = creerVerrouReentrant();
+  const verrouiller = creerVerrou();
+
+  const executer = (sql: string): Promise<void> => {
+    base.exec(sql);
+    return Promise.resolve();
+  };
+
+  const lancer = (
+    sql: string,
+    parametres: readonly unknown[] = []
+  ): Promise<ResultatEcriture> => {
+    const resultat = base.prepare(sql).run(...versParametresSqlite(parametres));
+    return Promise.resolve({
+      changements: Number(resultat.changes),
+      dernierIdInsere: resultat.lastInsertRowid
+    });
+  };
+
+  const uneLigne = <T>(
+    sql: string,
+    parametres: readonly unknown[] = []
+  ): Promise<T | undefined> => {
+    const ligne = base.prepare(sql).get(...versParametresSqlite(parametres)) as LigneBrute | undefined;
+    return Promise.resolve(ligne as T | undefined);
+  };
+
+  const lignes = <T>(sql: string, parametres: readonly unknown[] = []): Promise<readonly T[]> => {
+    const resultat = base.prepare(sql).all(...versParametresSqlite(parametres)) as readonly LigneBrute[];
+    return Promise.resolve(resultat as readonly T[]);
+  };
+
+  const baseTransactionnelle: Base = {
+    executer,
+    lancer,
+    uneLigne,
+    lignes,
+    transaction<T>(): Promise<T> {
+      return Promise.reject(new Error('Les transactions imbriquees ne sont pas prises en charge.'));
+    }
+  };
 
   return {
     executer(sql: string): Promise<void> {
-      return verrouiller(() => {
-        base.exec(sql);
-        return Promise.resolve();
-      });
+      return verrouiller(() => executer(sql));
     },
 
     lancer(sql: string, parametres: readonly unknown[] = []): Promise<ResultatEcriture> {
-      return verrouiller(() => {
-        const resultat = base.prepare(sql).run(...versParametresSqlite(parametres));
-        return Promise.resolve({
-          changements: Number(resultat.changes),
-          dernierIdInsere: resultat.lastInsertRowid
-        });
-      });
+      return verrouiller(() => lancer(sql, parametres));
     },
 
     uneLigne<T>(sql: string, parametres: readonly unknown[] = []): Promise<T | undefined> {
-      return verrouiller(() => {
-        const ligne = base.prepare(sql).get(...versParametresSqlite(parametres)) as LigneBrute | undefined;
-        return Promise.resolve(ligne as T | undefined);
-      });
+      return verrouiller(() => uneLigne<T>(sql, parametres));
     },
 
     lignes<T>(sql: string, parametres: readonly unknown[] = []): Promise<readonly T[]> {
-      return verrouiller(() => {
-        const lignes = base.prepare(sql).all(...versParametresSqlite(parametres)) as readonly LigneBrute[];
-        return Promise.resolve(lignes as readonly T[]);
-      });
+      return verrouiller(() => lignes<T>(sql, parametres));
     },
 
-    transaction<T>(action: () => Promise<T>): Promise<T> {
+    transaction<T>(action: (transaction: Base) => Promise<T>): Promise<T> {
       return verrouiller(async () => {
         base.exec('BEGIN IMMEDIATE;');
         try {
-          const resultat = await action();
+          const resultat = await action(baseTransactionnelle);
           base.exec('COMMIT;');
           return resultat;
         } catch (erreur) {

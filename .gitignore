@@ -10,6 +10,7 @@ outils/
 dist/
 dist-test/
 dist-autonome/
+dist-pwa/
 *.tsbuildinfo
 
 # --- données de jeu (le dossier `donnees/` est suivi par son `.gitkeep`, pas son contenu)

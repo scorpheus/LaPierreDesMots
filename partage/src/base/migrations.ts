@@ -79,9 +79,9 @@ export async function appliquerMigrations(
       continue;
     }
 
-    await base.transaction(async () => {
-      await base.executer(fichier.sql);
-      await base.lancer(
+    await base.transaction(async (transaction) => {
+      await transaction.executer(fichier.sql);
+      await transaction.lancer(
         'INSERT INTO schema_migrations (version, nom, empreinte, applique_le) VALUES (?, ?, ?, ?)',
         [fichier.version, fichier.nom, fichier.empreinte, horodatageIso]
       );

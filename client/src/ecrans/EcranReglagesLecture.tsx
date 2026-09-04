@@ -12,12 +12,8 @@
 //     « 0,10 em » ; il dit « comme ça je vois mieux ». L'aperçu est une vraie `ZoneDeLecture`,
 //     jamais une imitation.
 //
-// ⚠ ÉCART SIGNALÉ AU RAPPORT DE L2-B. Le contrat des features v2 § 5.1 pose qu'un seul fichier
-// appelle le réseau côté client — `client/src/api/client.ts`, possédé par L2-H — mais son § 4
-// ne nomme AUCUN symbole pour `GET`/`PUT /api/profils/:id/reglages`, alors que son § 5.3 rend
-// ces deux chemins normatifs. Les deux appels ci-dessous les emploient tels quels et sont les
-// SEULS de ce lot à toucher au réseau pour les réglages : le jour où L2-H publie un lecteur
-// typé, c'est ce fichier et lui seul qui est repris.
+// Lecture et écriture passent par le port stable : le même écran sert le mode LAN et les modes
+// autonomes sans connaître leur transport ni leur stockage.
 import { useCallback, useEffect, useState } from "react";
 import type { ReactElement } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -31,9 +27,10 @@ import {
 import type { BorneReglage, CodePolice, ReglagesLecture } from "@pierre/partage/lecture";
 import type { Profil } from "@pierre/partage";
 
+import { ecrireReglagesLecture } from "../api/client.js";
 import { ApercuReglages } from "../lecture/ApercuReglages.js";
 import { policeDisponible } from "../lecture/polices.js";
-import { cleReglages } from "../lecture/reglages-du-profil.js";
+import { cleReglages, lireReglages } from "../lecture/reglages-du-profil.js";
 import { useEtatJeu, useServices } from "../etat/services.js";
 
 /** Libellé lisible et prononçable de chaque police. Jamais le code technique à l'écran. */
@@ -78,8 +75,6 @@ function positionLisible(valeur: number, borne: BorneReglage): string {
   return `${String(crans + 1)} sur ${String(total + 1)}`;
 }
 
-const CHEMIN_REGLAGES = (id: string): string => `/api/profils/${encodeURIComponent(id)}/reglages`;
-
 export interface ProprietesEcranReglagesLecture {
   /** Profil visé. Par défaut, celui de la session. `null` : réglages non persistés. */
   readonly profil?: Profil | null;
@@ -100,19 +95,10 @@ export function EcranReglagesLecture({
   const [reglages, fixerReglages] = useState<ReglagesLecture>(REGLAGES_PAR_DEFAUT);
 
   const enregistres = useQuery({
-    queryKey: ["reglages-lecture", idProfil],
+    queryKey: cleReglages(idProfil),
     enabled: idProfil !== null,
     staleTime: 0,
-    queryFn: async (): Promise<ReglagesLecture> => {
-      const reponse = await fetch(CHEMIN_REGLAGES(idProfil ?? ""), {
-        headers: { Accept: "application/json" },
-      });
-      if (!reponse.ok) {
-        // Aucun écran d'erreur : le profil neuf n'a pas encore de ligne, et c'est normal.
-        return REGLAGES_PAR_DEFAUT;
-      }
-      return normaliserReglages((await reponse.json()) as Partial<ReglagesLecture>);
-    },
+    queryFn: async (): Promise<ReglagesLecture> => lireReglages(idProfil ?? ""),
   });
 
   useEffect(() => {
@@ -126,15 +112,12 @@ export function EcranReglagesLecture({
       if (idProfil === null) {
         return voulus;
       }
-      const reponse = await fetch(CHEMIN_REGLAGES(idProfil), {
-        method: "PUT",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify(voulus),
-      });
-      if (!reponse.ok) {
+      try {
+        return normaliserReglages(await ecrireReglagesLecture(idProfil, voulus));
+      } catch {
+        // Aucun écran d'erreur : l'aperçu reste fidèle au dernier geste et le suivant réessaiera.
         return voulus;
       }
-      return normaliserReglages((await reponse.json()) as Partial<ReglagesLecture>);
     },
   });
 

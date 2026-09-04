@@ -48,6 +48,8 @@ import { CourbeLatence } from '../parent/CourbeLatence.js';
 import { FileRelecture } from '../parent/FileRelecture.js';
 import { ReglagesParent } from '../parent/ReglagesParent.js';
 import { TopConfusions } from '../parent/TopConfusions.js';
+import { EtatStockagePwa } from '../pwa/EtatStockagePwa.js';
+import { SauvegardePwa } from '../pwa/SauvegardePwa.js';
 
 export interface ProprietesEcranDashboard {
   readonly profil: IdProfil;
@@ -184,6 +186,9 @@ export function EcranDashboard({
           Fermer l’espace parent
         </button>
       </header>
+
+      <EtatStockagePwa />
+      <SauvegardePwa />
 
       {/* Les TROIS onglets — « les deux » depuis H2, et le commentaire le disait encore.
           `role="tablist"` et `aria-selected` plutôt qu'un simple trio de boutons : axe-core en

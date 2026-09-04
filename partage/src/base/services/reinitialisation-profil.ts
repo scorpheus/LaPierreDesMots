@@ -158,26 +158,26 @@ export async function reinitialiserProfil(
 
   const effectueLe = String(horloge.maintenant());
 
-  const lignes = await base.transaction(async () => {
-    await base.executer('PRAGMA defer_foreign_keys = ON;');
+  const lignes = await base.transaction(async (transaction) => {
+    await transaction.executer('PRAGMA defer_foreign_keys = ON;');
 
     const comptes: LigneRapportReinitialisation[] = [];
-    for (const table of await tablesPorteusesDeProfil(base)) {
+    for (const table of await tablesPorteusesDeProfil(transaction)) {
       if (!porteeEfface(portee, table)) {
         continue;
       }
-      const compte = await base.uneLigne<{ readonly n: number }>(
+      const compte = await transaction.uneLigne<{ readonly n: number }>(
         `SELECT COUNT(*) AS n FROM ${table} WHERE profil_id = ?`,
         [profilId]
       );
-      await base.lancer(`DELETE FROM ${table} WHERE profil_id = ?`, [profilId]);
+      await transaction.lancer(`DELETE FROM ${table} WHERE profil_id = ?`, [profilId]);
       comptes.push({ table, lignesEffacees: Number(compte?.n ?? 0) });
     }
 
     // `dernier_acces_le` est touché dans la même transaction : le profil vient d'être
     // manipulé, et l'écran d'état doit le dire. `prenom` et `avatar_json` ne bougent JAMAIS —
     // les deux portées les conservent, c'est l'enfant qui reste.
-    await base.lancer('UPDATE profils SET dernier_acces_le = ? WHERE id = ?', [effectueLe, profilId]);
+    await transaction.lancer('UPDATE profils SET dernier_acces_le = ? WHERE id = ?', [effectueLe, profilId]);
 
     return comptes;
   });
@@ -261,9 +261,9 @@ export async function supprimerProfil(
   // compris celles que la portée `progression` conserve (prénom, avatar, réglages de lecture).
   const rapport = await reinitialiserProfil(base, profilId, 'complete', horloge);
 
-  await base.transaction(async () => {
-    await base.executer('PRAGMA defer_foreign_keys = ON;');
-    await base.lancer('DELETE FROM profils WHERE id = ?', [profilId]);
+  await base.transaction(async (transaction) => {
+    await transaction.executer('PRAGMA defer_foreign_keys = ON;');
+    await transaction.lancer('DELETE FROM profils WHERE id = ?', [profilId]);
   });
 
   return {

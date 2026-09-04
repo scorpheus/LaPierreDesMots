@@ -24,27 +24,18 @@
 import type { CleAudio, DemandeVoix, FournisseurVoix } from '@pierre/partage';
 import { MANIFESTE_VIDE, clipDe, lireManifeste } from '@pierre/partage/voix';
 import type { ManifesteVoix, RenduVoix } from '@pierre/partage/voix';
+import { urlAsset } from '../api/client.js';
 
-/** Route du manifeste — `serveur/src/routes/audio.ts`, contrat v3 § 8. */
-export const CHEMIN_MANIFESTE = '/api/audio/manifeste';
+/** Manifeste de voix, résolu par le port actif pour rester disponible hors ligne. */
+export const CHEMIN_MANIFESTE = urlAsset('audio/manifeste.json');
 
 /**
- * L'URL d'un clip, sur la route DÉDIÉE — jamais sur la route générique d'assets.
- *
- * Les deux mènent aux mêmes octets : `GET /api/contenu/assets/audio/…` et
- * `GET /api/audio/…` lisent tous deux le même `DepotContenu`. Ce n'est pas indifférent pour
- * autant. La route dédiée pose `Cache-Control: public, max-age=31536000, immutable`, et elle
- * seule peut le faire : le nom de fichier d'un clip porte l'empreinte de son texte (§ 8),
- * donc un texte corrigé produit un NOM différent, donc un cache immuable ne peut jamais
- * servir une consigne périmée à l'enfant. La route générique n'a pas cette garantie sur ce
- * qu'elle sert, et ne peut donc pas promettre autant.
- *
- * `ClipVoix.fichier` est relatif à `contenu/` et commence par `audio/` ; la route, elle, est
- * déjà montée sous `/api/audio/`. On retire le préfixe plutôt que de le doubler.
+ * `ClipVoix.fichier` est relatif à `contenu/` et commence normalement par `audio/`.
+ * `urlAsset` conserve ce contrat en mode LAN et le traduit vers l'asset embarqué dans les
+ * modes autonomes. Le repli accepte encore un ancien manifeste qui omettrait le préfixe.
  */
 export function urlDuClip(fichier: string): string {
-  const relatif = fichier.startsWith('audio/') ? fichier.slice('audio/'.length) : fichier;
-  return `/api/audio/${relatif.split('/').map(encodeURIComponent).join('/')}`;
+  return urlAsset(fichier.startsWith('audio/') ? fichier : `audio/${fichier}`);
 }
 
 /** Ce que la coquille peut faire au fournisseur, en plus de l'interface partagée. */

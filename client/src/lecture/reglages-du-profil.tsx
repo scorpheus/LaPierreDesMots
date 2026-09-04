@@ -36,13 +36,9 @@ import { useQuery } from '@tanstack/react-query';
 import { BORNES_REGLAGES, REGLAGES_PAR_DEFAUT, normaliserReglages, variablesCss } from '@pierre/partage/lecture';
 import type { ReglagesLecture } from '@pierre/partage/lecture';
 
+import { lireReglagesLecture } from '../api/client.js';
 import { useEtatJeu } from '../etat/services.js';
 import { FournisseurReglagesLecture } from './ZoneDeLecture.js';
-
-/** Le chemin des réglages d'un profil. Même route que l'écran de réglages, § 5.3. */
-export function cheminReglages(id: string): string {
-  return `/api/profils/${encodeURIComponent(id)}/reglages`;
-}
 
 /** La clé de cache, partagée avec `EcranReglagesLecture`. Une seule vérité. */
 export function cleReglages(idProfil: string | null): readonly unknown[] {
@@ -50,14 +46,12 @@ export function cleReglages(idProfil: string | null): readonly unknown[] {
 }
 
 export async function lireReglages(idProfil: string): Promise<ReglagesLecture> {
-  const reponse = await fetch(cheminReglages(idProfil), {
-    headers: { Accept: 'application/json' },
-  });
-  if (!reponse.ok) {
+  try {
+    return normaliserReglages(await lireReglagesLecture(idProfil));
+  } catch {
     // Un profil neuf n'a pas encore de ligne, et ce n'est pas une erreur. Aucun écran d'échec.
     return REGLAGES_PAR_DEFAUT;
   }
-  return normaliserReglages((await reponse.json()) as Partial<ReglagesLecture>);
 }
 
 /**

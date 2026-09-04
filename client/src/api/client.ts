@@ -2,7 +2,7 @@
 // d'entrée STABLE conservé pour les 37 fichiers qui l'importent déjà : ce fichier ne parle plus
 // lui-même réseau, il choisit UNE FOIS, au chargement du module, laquelle des deux
 // implémentations de `PortApi` servir — `PortApiHttp` (mode LAN, `port-http.ts`) ou
-// `PortApiLocal` (mode autonome Android, `port-local.ts`, zéro réseau).
+// `PortApiLocal` (modes autonomes Android et PWA, `port-local.ts`, zéro réseau).
 //
 // L'IMPORT EST DYNAMIQUE, ET C'EST CE QUI GARDE LE BUDGET DE BUNDLE LAN INTACT (< 250 Ko gzip).
 // `import.meta.env.MODE` est une CHAÎNE LITTÉRALE remplacée par Vite à la compilation : la
@@ -21,7 +21,9 @@ export type { PaquetNoeudAttendu, DashboardParent } from './contrat.js';
 export { ErreurReseau, calculerCleIdempotence, fermerZoneParent, jetonParentPose } from './commun.js';
 
 const port: PortApi =
-  import.meta.env.MODE === 'autonome'
+  import.meta.env.MODE === 'pwa'
+    ? (await import('./port-local.js')).portLocal
+    : import.meta.env.MODE === 'autonome'
     ? (await import('./port-local.js')).portLocal
     : (await import('./port-http.js')).portHttp;
 

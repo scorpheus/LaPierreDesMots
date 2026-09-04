@@ -253,20 +253,20 @@ export async function enregistrerTentative(
     ? validee.resume.aideUtilisee
     : 'aucune';
 
-  return base.transaction(async () => {
-    const dejaLa = await lireParCle(base, validee.cleIdempotence);
+  return base.transaction(async (transaction) => {
+    const dejaLa = await lireParCle(transaction, validee.cleIdempotence);
     if (dejaLa !== null) {
       return {
         deja: true,
         tentative: dejaLa,
         etapesJournalisees: 0,
         etapesEcartees: 0,
-        gainCascade: await gainCascadeActuel(base, validee.profil, seuilsCascade)
+        gainCascade: await gainCascadeActuel(transaction, validee.profil, seuilsCascade)
       };
     }
 
     try {
-      await base.lancer(`INSERT INTO tentatives (${CHAMPS}) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [
+      await transaction.lancer(`INSERT INTO tentatives (${CHAMPS}) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [
         await deriverIdentifiant(validee.cleIdempotence),
         validee.cleIdempotence,
         validee.profil,
@@ -289,31 +289,31 @@ export async function enregistrerTentative(
       // deja les ecrivains ; si la contrainte UNIQUE parle quand meme, un autre processus a
       // gagne la course : sa tentative fait foi, la notre est le doublon que l'idempotence doit
       // absorber — pas une erreur a remonter a l'enfant.
-      const concurrente = await lireParCle(base, validee.cleIdempotence);
+      const concurrente = await lireParCle(transaction, validee.cleIdempotence);
       if (concurrente !== null) {
         return {
           deja: true,
           tentative: concurrente,
           etapesJournalisees: 0,
           etapesEcartees: 0,
-          gainCascade: await gainCascadeActuel(base, validee.profil, seuilsCascade)
+          gainCascade: await gainCascadeActuel(transaction, validee.profil, seuilsCascade)
         };
       }
       throw erreur;
     }
 
-    await appliquerTentativeALaProgression(base, validee.profil, validee.noeud, etoiles, validee.termineLe);
-    await toucherProfil(base, validee.profil, horloge);
+    await appliquerTentativeALaProgression(transaction, validee.profil, validee.noeud, etoiles, validee.termineLe);
+    await toucherProfil(transaction, validee.profil, horloge);
 
-    const inseree = await lireParCle(base, validee.cleIdempotence);
+    const inseree = await lireParCle(transaction, validee.cleIdempotence);
     if (inseree === null) {
       throw new Error("La tentative vient d'etre inseree et reste introuvable.");
     }
 
-    const alimentation = await alimenterPedagogie(base, inseree.id, validee, pedagogie);
+    const alimentation = await alimenterPedagogie(transaction, inseree.id, validee, pedagogie);
 
     const gainCascade = await appliquerCascadeEtRecompenses(
-      base,
+      transaction,
       validee.profil,
       etoiles,
       validee.termineLe,

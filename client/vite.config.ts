@@ -11,7 +11,7 @@
 //   4. `publicDir` et le préchargement de l'Andika régulière (v2 § 9.3, D19).
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
-import type { Plugin } from 'vite';
+import type { HtmlTagDescriptor, Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwind from '@tailwindcss/vite';
 
@@ -92,21 +92,119 @@ const POLICES_PRECHARGEES = ['andika-regular.woff2'];
  * compte les requêtes sortantes pendant le rendu des cinq polices, et le seuil est zéro
  * (v2 § 9.3, « aucun appel à Google Fonts »).
  */
-function prechargerPolices(): Plugin {
+function joindreBase(base: string, chemin: string): string {
+  return `${base}${chemin.replace(/^\/+/, '')}`;
+}
+
+function prechargerPolices(base: string): Plugin {
   return {
     name: 'pierre-precharger-polices',
     transformIndexHtml() {
-      return POLICES_PRECHARGEES.map((fichier) => ({
+      const balises: HtmlTagDescriptor[] = POLICES_PRECHARGEES.map((fichier) => ({
         tag: 'link',
         attrs: {
           rel: 'preload',
           as: 'font',
           type: 'font/woff2',
-          href: `/polices/${fichier}`,
+          href: joindreBase(base, `polices/${fichier}`),
           crossorigin: ''
         },
         injectTo: 'head' as const
       }));
+      return balises;
+    }
+  };
+}
+
+/**
+ * Les chemins absolus du mode LAN ne doivent pas fuir dans le livrable Pages.
+ *
+ * Deux familles ne peuvent pas etre corrigees dans leurs sources sans casser le serveur LAN :
+ * les WOFF2 de `public/` et les PNG references depuis les SVG d'habillage. Vite connait ici le
+ * nom empreinte de chaque asset emis ; le remplacement est donc mesure sur le bundle, jamais
+ * devine depuis un nom de fichier.
+ */
+function adapterCheminsPwa(base: string): Plugin {
+  return {
+    name: 'pierre-chemins-pwa',
+    enforce: 'post',
+    generateBundle(_options, bundle) {
+      const sortieParCheminContenu = new Map<string, string>();
+
+      for (const sortie of Object.values(bundle)) {
+        if (sortie.type !== 'asset') continue;
+        const noms = [
+          sortie.originalFileName,
+          ...((sortie as typeof sortie & { originalFileNames?: readonly string[] }).originalFileNames ?? [])
+        ];
+        for (const nom of noms) {
+          if (nom == null) continue;
+          const normalise = `/${nom.replaceAll('\\', '/')}`;
+          const marqueur = '/contenu/';
+          const position = normalise.lastIndexOf(marqueur);
+          if (position !== -1) {
+            sortieParCheminContenu.set(
+              normalise.slice(position + marqueur.length),
+              joindreBase(base, sortie.fileName)
+            );
+          }
+        }
+      }
+
+      const introuvables = new Set<string>();
+      for (const sortie of Object.values(bundle)) {
+        if (sortie.type === 'chunk') {
+          // `client/src/lecture/polices.ts` fabrique aussi ces URL a l'execution. Le contrat
+          // interdit de changer sa forme LAN ; seul le build PWA recoit donc le sous-chemin.
+          sortie.code = sortie.code.replace(
+            /(["'`])\/polices\//gu,
+            `$1${joindreBase(base, 'polices/')}`
+          );
+          continue;
+        }
+        if (sortie.type !== 'asset') continue;
+        let source = sortie.source;
+        if (typeof source !== 'string') continue;
+
+        if (sortie.fileName.endsWith('.css')) {
+          source = source.replace(
+            /url\((["']?)\/polices\//gu,
+            `url($1${joindreBase(base, 'polices/')}`
+          );
+        }
+
+        if (sortie.fileName.endsWith('.svg')) {
+          source = source.replace(
+            /(href|xlink:href)=(["'])\/api\/contenu\/assets\/([^"']+)\2/gu,
+            (
+              attributComplet: string,
+              attribut: string,
+              guillemet: string,
+              cheminEncode: string
+            ) => {
+              let chemin = cheminEncode;
+              try {
+                chemin = decodeURIComponent(cheminEncode);
+              } catch {
+                // Le chemin brut sera signale comme introuvable plus bas.
+              }
+              const cible = sortieParCheminContenu.get(chemin);
+              if (cible === undefined) {
+                introuvables.add(chemin);
+                return attributComplet;
+              }
+              return `${attribut}=${guillemet}${cible}${guillemet}`;
+            }
+          );
+        }
+        sortie.source = source;
+      }
+
+      if (introuvables.size > 0) {
+        this.error(
+          `Assets imbriques introuvables dans le build PWA : ${[...introuvables].sort().join(', ')}`
+        );
+      }
     }
   };
 }
@@ -114,6 +212,8 @@ function prechargerPolices(): Plugin {
 export default defineConfig(({ mode }) => {
   const estTest = mode === 'test';
   const estAutonome = mode === 'autonome';
+  const estPwa = mode === 'pwa';
+  const base = estPwa ? '/LaPierreDesMots/' : '/';
 
   return {
     // ═══════════════════════════════════════════════════════════════════════════════════════
@@ -148,8 +248,13 @@ export default defineConfig(({ mode }) => {
     // Gardé par `tests/e2e/parcours-profondeur-url.spec.ts`, qui recharge CHAQUE route de
     // `CHEMINS` par une vraie navigation et exige que l'application monte.
     // ═══════════════════════════════════════════════════════════════════════════════════════
-    base: '/',
-    plugins: [react(), tailwind(), prechargerPolices()],
+    base,
+    plugins: [
+      react(),
+      tailwind(),
+      prechargerPolices(base),
+      ...(estPwa ? [adapterCheminsPwa(base)] : [])
+    ],
 
     // Les cinq WOFF2 vivent dans `client/public/polices/` et sont copiés tels quels à la
     // racine du bundle : `/polices/andika-regular.woff2`. Ils ne sont PAS versionnés — ils
@@ -159,6 +264,11 @@ export default defineConfig(({ mode }) => {
 
     resolve: { alias: ALIAS_PARTAGE },
 
+    // Le Worker SQLite contient un import dynamique (configuration du VFS avant chargement du
+    // WASM) : sa sortie doit donc rester en modules ES, seul format Rollup compatible avec ce
+    // découpage.
+    worker: { format: 'es' },
+
     // `host: true` : la tablette du LAN doit pouvoir joindre le serveur de développement.
     server: { port: PORT_VITE, strictPort: true, host: true, proxy: PROXY_API },
     preview: { port: PORT_VITE + 1, strictPort: true, host: true, proxy: PROXY_API },
@@ -167,8 +277,11 @@ export default defineConfig(({ mode }) => {
       // Trois sorties, qui ne se croisent JAMAIS (§ 7.3, prolongé par le portage Android) :
       // `dist/` (LAN, contrat § 7.3, `verifier-bundle.mjs` l'inspecte), `dist-test/` (Playwright),
       // `dist-autonome/` (Capacitor `webDir`, Lot 5 — Docs/addendum-portage-android.md § 6).
-      outDir: estTest ? 'dist-test' : estAutonome ? 'dist-autonome' : 'dist',
+      outDir: estTest ? 'dist-test' : estAutonome ? 'dist-autonome' : estPwa ? 'dist-pwa' : 'dist',
       emptyOutDir: true,
+      // La finalisation PWA emploie ce manifeste pour relier les images imbriquées dans les
+      // SVG aux noms empreintés réellement émis par Vite.
+      manifest: estPwa,
       target: 'es2022',
       // Sources de débogage dans le build de test uniquement : elles ne doivent jamais
       // peser dans le budget de 250 Ko gzip mesuré sur `dist/` (§ 7.3).
@@ -177,7 +290,7 @@ export default defineConfig(({ mode }) => {
       // Le budget de 250 Ko gzip (§ 7.3) est un contrat du mode LAN. Le mode autonome embarque
       // `contenu/` (7,29 Mo) et le pont SQLite : lui appliquer la même alerte serait du bruit,
       // pas un garde-fou — `verifier-bundle.mjs` ne mesure d'ailleurs que `dist/`.
-      chunkSizeWarningLimit: estAutonome ? 8192 : 250
+      chunkSizeWarningLimit: estAutonome || estPwa ? 8192 : 250
     },
 
     // Le montage de `window.__test` est gardé par `import.meta.env.MODE === 'test'` dans

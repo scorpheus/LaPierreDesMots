@@ -8,19 +8,13 @@ import type { ReactElement } from 'react';
 
 import { decouperSyllabes } from '@pierre/partage/lecture';
 import type { SegmentSyllabe } from '@pierre/partage/lecture';
+import { urlAsset } from '../api/client.js';
 
 /**
- * URL du référentiel, servi par `GET /api/contenu/assets/*` — chemin NORMATIF du contrat
- * technique v1 § 3.3, et non une invention de ce fichier.
- *
- * Écrit ici plutôt qu'emprunté à `urlAsset` de `client/src/api/client.ts` : ce fichier est
- * réécrit par L2-H pendant cette campagne, et l'importer pour une seule chaîne ferait dépendre
- * toute la coloration syllabique — donc toute la suite `ZoneDeLecture.test` — de l'état
- * d'avancement d'un autre lot. Mesuré : au moment d'écrire ces lignes, `client.ts` importait
- * `@pierre/partage/parent`, qui n'existait pas encore, et la suite composant de L2-B ne
- * chargeait plus. La dépendance a été coupée ; le chemin, lui, reste celui du contrat.
+ * URL du référentiel résolue par le port actif : route de contenu en mode LAN, asset embarqué
+ * en mode autonome. Une frontière unique évite qu'une PWA interroge GitHub Pages comme une API.
  */
-const URL_LEXIQUE = '/api/contenu/assets/referentiel/syllabation-exceptions.json';
+const URL_LEXIQUE = urlAsset('referentiel/syllabation-exceptions.json');
 
 /** Table plate `mot -> syllabes`, telle que `decouperSyllabes` l'attend. */
 export type LexiqueSyllabation = Readonly<Record<string, readonly string[]>>;
@@ -88,15 +82,6 @@ export function fixerLexiqueSyllabation(lexique: LexiqueSyllabation): void {
 
 /**
  * Charge le lexique d'exceptions depuis `contenu/referentiel/`, une seule fois par session.
- *
- * ⚠ ÉCART SIGNALÉ AU RAPPORT DE L2-B. Le contrat des features v2 § 5.1 pose qu'« un seul
- * fichier appelle le réseau côté client », `client/src/api/client.ts`, possédé par L2-H — mais
- * il ne nomme AUCUN symbole pour lire ce référentiel, et le lexique n'est atteignable ni par
- * un import relatif (il est hors du `rootDir` de `client/tsconfig.json`, qui n'appartient à
- * aucun lot) ni par un alias (`client/tsconfig.json` porterait les `paths`, même fichier).
- * Refuser de charger reviendrait à livrer un fichier de référentiel que rien ne lit — un
- * détecteur qui déclare un poids qu'il n'applique jamais. **Ce site d'appel est le seul à
- * reprendre** le jour où L2-H publiera un lecteur typé.
  *
  * L'échec est SILENCIEUX et sans conséquence visible : la règle de découpage prend le relais,
  * `certain` vaut `false`, et rien ne casse à l'écran. Un référentiel absent ne doit jamais

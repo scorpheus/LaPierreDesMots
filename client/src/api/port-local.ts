@@ -1,5 +1,5 @@
-// `PortApiLocal` — mode autonome (Android, hors ligne). Lot 4 du portage Android
-// (Docs/addendum-portage-android.md § 3-6bis). Zéro réseau : chaque méthode appelle directement
+// `PortApiLocal` — modes autonomes Android et PWA, hors ligne. Lot 4 du portage Android puis
+// Docs/contrat-pwa-github-pages.md § 2. Zéro réseau : chaque méthode appelle directement
 // les dépôts/services de `@pierre/partage/base` contre la base SQLite locale
 // (`@capacitor-community/sqlite`, Lot 3), exactement la même logique que les routes Fastify —
 // ce fichier EST le contenu de ces routes, débarrassé de Fastify.
@@ -106,11 +106,10 @@ import {
   verifierCode,
   versHex
 } from '@pierre/partage/base';
-import type { AlimentationPedagogique } from '@pierre/partage/base';
+import type { AlimentationPedagogique, Base } from '@pierre/partage/base';
 
 import type { DashboardParent, PaquetNoeudAttendu, PortApi } from './contrat.js';
 import { ErreurReseau, lireJetonParent, poserJetonParent } from './commun.js';
-import { ouvrirBaseCapacitor, creerBaseCapacitorSqlite } from '../base/adaptateur-capacitor-sqlite.js';
 import { migrerBaseAutonome } from '../base/migrations-autonome.js';
 import { creerDepotContenuAutonome, urlAssetAutonome } from '../base/depot-contenu-autonome.js';
 import { construireCatalogueExercicesAutonome } from '../base/catalogue-galerie-autonome.js';
@@ -124,15 +123,28 @@ import {
 
 let basePromise: ReturnType<typeof creerBase> | null = null;
 
-async function creerBase() {
-  const connexion = await ouvrirBaseCapacitor();
-  const base = creerBaseCapacitorSqlite(connexion);
+async function ouvrirBaseLocale(): Promise<Base> {
+  if (import.meta.env.MODE === 'pwa') {
+    return (await import('../base/adaptateur-sqlite-wasm.js')).ouvrirBaseNavigateur();
+  }
+  const { ouvrirBaseCapacitor, creerBaseCapacitorSqlite } = await import(
+    '../base/adaptateur-capacitor-sqlite.js'
+  );
+  return creerBaseCapacitorSqlite(await ouvrirBaseCapacitor());
+}
+
+async function creerBase(): Promise<Base> {
+  const base = await ouvrirBaseLocale();
   await migrerBaseAutonome(base, horloge.maintenant());
   return base;
 }
 
 function garantirBase(): ReturnType<typeof creerBase> {
-  basePromise ??= creerBase();
+  basePromise ??= creerBase().catch((cause: unknown) => {
+    basePromise = null;
+    console.error('[base-locale] ouverture ou migration impossible :', cause);
+    throw cause;
+  });
   return basePromise;
 }
 
