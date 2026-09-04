@@ -9,11 +9,13 @@ annulé, remplacé ou reporté.
 ## Point de reprise
 
 - Branche : `main`.
-- Dernier commit fonctionnel avant le chantier responsive : `2172a91` — couverture audio complète.
+- Base du présent lot : `afedbe5` — responsive du chaudron et fiabilisation initiale des campagnes.
+  Le plafond à quatre travailleurs a depuis validé les 521 parcours E2E.
 - Serveur de jeu : écoute sur `0.0.0.0:8080` ; adresse LAN mesurée le 4 septembre :
   `http://192.168.1.19:8080`.
 - Version de production compilée et servie.
-- Dépôt propre avant le lancement du rendu audio.
+- Un autre agent traite séparément la PWA et GitHub Pages ; l’intégration de ce lot devra être
+  vérifiée quand il aura terminé.
 
 ## Validé techniquement
 
@@ -28,11 +30,12 @@ annulé, remplacé ou reporté.
   autonome.
 - Les quatre portraits de compagnons ont une animation CSS légère et distincte, neutralisée par le
   réglage d'animations calmes.
-- Campagne complète après audio : 2361/2361 tests unitaires et composants, 645/645 contrôles de
-  contenu, 521/521 parcours E2E et 249/249 contrôles qualité. Lint, TypeScript, construction de
-  production, budget du bundle, rejeu et contrôles de la QA réussissent également.
-- Seule étape rouge : quatre divergences visuelles déjà connues sur la cour d'école et le moteur
-  de coloriage. Les références n'ont pas été modifiées sans validation parentale.
+- Derniers contrôles séparés : 2398/2398 tests unitaires et composants, 521/521 parcours E2E à
+  quatre travailleurs et 273/273 contrôles qualité. Lint, TypeScript, construction de production
+  et budget du bundle réussissent également.
+- Seule porte encore rouge : sept divergences visuelles connues — six migrations volontaires de
+  blockouts SVG vers les rasters, plus la récompense. Les références n'ont pas été modifiées sans
+  validation parentale.
 
 ## Chantier en cours : responsive multi-écrans et composition professionnelle
 
@@ -102,11 +105,11 @@ annulé, remplacé ou reporté.
   découpé en trois lots indépendants et `RESPONSIVE_LOT=1|2|3` permet de rejouer seulement le tiers
   concerné. Les six lots téléphone (portrait et paysage) passent en 1 min 24 s au total ; un lot
   isolé prend 12 à 15 s.
-- Le dernier contrôle complet a distingué deux défauts d'infrastructure d'un défaut produit : le
-  worker Vitest et le chargement du parcours d'ouverture ont expiré sous contention, sans aucune
-  assertion métier en échec. Le test d'ouverture repasse seul (1/1) puis avec toute sa spec (8/8).
-  Le plafond navigateur par défaut revient donc à la valeur documentée de 6 travailleurs, avec un
-  test de configuration, au lieu des 10 qui avaient réintroduit la saturation Windows.
+- Une campagne à six travailleurs a encore épuisé les sockets Windows après 318 cas : un
+  `ERR_NO_BUFFER_SPACE`, puis trois pages incapables de finir leur chargement. Les quatre cas
+  concernés repassent seuls, 8/8 en 58,1 s. Le plafond navigateur par défaut est donc abaissé à
+  quatre travailleurs et gardé par un test de configuration. La campagne complète repasse ainsi
+  521/521 en 6 min 30 s, sans saturation.
 - Le seul débordement produit de ce contrôle concernait le chaudron à 1017 × 640 : `100vw`
   comptait la barre de défilement et ajoutait 15 à 32 px. Le chaudron se borne désormais à son
   conteneur ; son lot tablette paysage repasse en 19,7 s.
@@ -126,12 +129,12 @@ annulé, remplacé ou reporté.
 - `contenu/audio/` est volontairement ignoré par Git et embarqué depuis le poste de production ; le
   verrou reproductible suivi par Git est `production/voix.lock.json`.
 
-## À faire après l'audio
+## File ouverte
 
 1. Faire tester la version responsive sur la tablette et le téléphone réels, et intégrer les
    nouveaux retours sans
    perdre les tâches déjà ouvertes.
-2. Examiner avec le parent les quatre divergences de références visuelles historiques. Ne jamais
+2. Examiner avec le parent les sept divergences de références visuelles historiques. Ne jamais
    mettre les références à jour sans sa validation.
 3. Faire une passe de finition artistique sur les écrans que le test tablette jugera encore trop
    légers, en commençant par les éléments réellement visibles dans le parcours enfant. Valider et
@@ -142,6 +145,12 @@ annulé, remplacé ou reporté.
 5. Revoir l'histoire globale de la carte lorsque le parent souhaitera trancher la place de la
    Clairière : point de départ central actuel ou région périphérique menant à une résolution au
    centre.
+6. Relire avec le parent les six récits CE1 préparés dans `contenu/brouillons/`, puis seulement les
+   promouvoir et régénérer leurs répliques audio.
+7. Valider la planche des huit cartes-image de la Cité, les intégrer dans le jeu et consigner leur
+   provenance dans `production/assets.lock.json`.
+8. Intégrer puis vérifier le chantier PWA/GitHub Pages de l'autre agent sans écraser les finitions
+   du jeu local.
 
 ## Retours parent à surveiller pendant le test
 

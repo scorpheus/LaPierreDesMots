@@ -78,10 +78,10 @@ function viewportDeValidation(): { width: number; height: number } {
  *    non stabilisée dans l'audit R16. **Aucun des deux n'est un défaut de produit : ce sont des
  *    mesures prises sur une machine affamée.** À 24 c'est pire, et le mur DOUBLE.
  *
- * Le point de fonctionnement retenu est désormais **6** : c'est la dernière campagne complète
- * verte sous Windows, et les décors raster ont depuis augmenté la pression mémoire de chaque
- * page. À 10, une campagne récente a laissé un worker Vitest sans réponse puis retardé le
- * chargement d'un bundle Playwright au-delà de 90 s. Le plafond est absolu, pas proportionnel :
+ * Le point de fonctionnement retenu est désormais **4** : une campagne E2E à 6 a épuisé les
+ * sockets Windows (`ERR_NO_BUFFER_SPACE`) après 318 cas, puis produit trois faux échecs par pages
+ * incomplètement chargées. Les quatre cas ont tous repassé seuls (8 assertions sur leurs variantes).
+ * Le plafond est absolu, pas proportionnel :
  * au-delà, la contention est pure perte. La moitié des cœurs reste la borne sur une petite
  * machine, parce qu'un cas consomme DEUX processus — un Chromium et le serveur Node qui lui est
  * propre.
@@ -92,7 +92,7 @@ function viewportDeValidation(): { width: number; height: number } {
  * percentage`. Une chaîne venue de l'environnement aurait fait échouer la campagne au
  * chargement de la configuration, de la façon la plus opaque qui soit.
  */
-const PLAFOND_TRAVAILLEURS = 6;
+const PLAFOND_TRAVAILLEURS = 4;
 
 function travailleurs(): number | string {
   const demande = process.env["PIERRE_TRAVAILLEURS"];

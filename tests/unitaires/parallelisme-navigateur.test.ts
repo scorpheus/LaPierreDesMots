@@ -9,7 +9,7 @@ const configuration = readFileSync(
 );
 
 describe('parallélisme des campagnes navigateur', () => {
-  it('borne le réglage par défaut à six travailleurs sur Windows', () => {
-    expect(configuration).toMatch(/const PLAFOND_TRAVAILLEURS = 6;/u);
+  it('borne le réglage par défaut à quatre travailleurs sur Windows', () => {
+    expect(configuration).toMatch(/const PLAFOND_TRAVAILLEURS = 4;/u);
   });
 });
