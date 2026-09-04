@@ -541,6 +541,44 @@ body {
   user-select: none;
 }
 
+/* Atlas 4×2 normalisés : une seule cellule visible à la fois, sans interpolation. */
+.compagnon-sprite {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  background-position: 0 0;
+  background-repeat: no-repeat;
+  background-size: 400% 200%;
+}
+
+.compagnon-sprite > img {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: contain;
+  user-select: none;
+}
+
+.compagnon-sprite--atlas > img {
+  visibility: hidden;
+}
+
+.compagnon-sprite--grisaille {
+  filter: saturate(0);
+}
+
+.compagnon-sprite--atlas:not(.compagnon-sprite--grisaille) {
+  animation: compagnon-sprite-huit-poses 2.6s steps(1, end) infinite;
+}
+
+@keyframes compagnon-sprite-huit-poses {
+  0% { background-position: 0 0; } 12.5% { background-position: 33.333% 0; }
+  25% { background-position: 66.666% 0; } 37.5% { background-position: 100% 0; }
+  50% { background-position: 0 100%; } 62.5% { background-position: 33.333% 100%; }
+  75% { background-position: 66.666% 100%; } 87.5% { background-position: 100% 100%; }
+}
+
+
 .compagnon-portrait--tuile {
   inline-size: 6.25rem;
   block-size: 7.5rem;
@@ -1021,22 +1059,6 @@ body {
   user-select: none;
 }
 
-.choix-compagnon__tuile[data-animation-compagnon='filou'] .choix-compagnon__portrait {
-  animation: compagnon-filou 2.4s ease-in-out infinite;
-}
-
-.choix-compagnon__tuile[data-animation-compagnon='roc'] .choix-compagnon__portrait {
-  animation: compagnon-roc 3.2s ease-in-out infinite;
-}
-
-.choix-compagnon__tuile[data-animation-compagnon='plume'] .choix-compagnon__portrait {
-  animation: compagnon-plume 1.9s ease-in-out infinite;
-}
-
-.choix-compagnon__tuile[data-animation-compagnon='bulle'] .choix-compagnon__portrait {
-  animation: compagnon-bulle 2.8s ease-in-out infinite;
-}
-
 .choix-compagnon__partir {
   display: flex;
   margin-inline: auto;
@@ -1049,64 +1071,6 @@ body {
 .choix-compagnon .choix-compagnon__partir {
   display: flex;
   inline-size: max-content;
-}
-
-@keyframes compagnon-filou {
-  0%, 100% { transform: translateY(0) rotate(-1deg); }
-  45% { transform: translateY(-0.35rem) rotate(1.5deg); }
-  60% { transform: translateY(-0.18rem) rotate(0deg); }
-}
-
-@keyframes compagnon-roc {
-  0%, 100% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(-0.12rem) scale(1.025, 0.985); }
-}
-
-@keyframes compagnon-plume {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  42% { transform: translateY(-0.48rem) rotate(-1.5deg); }
-  58% { transform: translateY(-0.3rem) rotate(1.5deg); }
-}
-
-@keyframes compagnon-bulle {
-  0%, 100% { transform: translateY(0) rotate(1deg); }
-  50% { transform: translateY(-0.42rem) rotate(-1deg); }
-}
-
-/* La bande du campement reprend les mêmes signatures de mouvement. Un portrait non rallié
-   reste immobile : il est une promesse à découvrir, pas un faux compagnon déjà présent. */
-[data-compagnon='filou'][data-rallie='oui'] .compagnon-portrait--tuile {
-  animation: compagnon-filou 2.4s ease-in-out infinite;
-}
-
-[data-compagnon='roc'][data-rallie='oui'] .compagnon-portrait--tuile {
-  animation: compagnon-roc 3.2s ease-in-out infinite;
-}
-
-[data-compagnon='plume'][data-rallie='oui'] .compagnon-portrait--tuile {
-  animation: compagnon-plume 1.9s ease-in-out infinite;
-}
-
-[data-compagnon='bulle'][data-rallie='oui'] .compagnon-portrait--tuile {
-  animation: compagnon-bulle 2.8s ease-in-out infinite;
-}
-
-html[data-animations='desactivees'] .choix-compagnon__portrait {
-  animation: none !important;
-}
-
-html[data-animations='desactivees'] .compagnon-portrait--tuile {
-  animation: none !important;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .choix-compagnon__portrait {
-    animation: none !important;
-  }
-
-  .compagnon-portrait--tuile {
-    animation: none !important;
-  }
 }
 
 @media (max-width: 900px), (orientation: portrait) {
@@ -3680,4 +3644,13 @@ html[data-animations='desactivees'] .compagnon-portrait--tuile {
     max-inline-size: 100% !important;
     max-block-size: calc(100svh - 7rem) !important;
   }
+}
+/* Les atlas remplacent les anciennes oscillations CSS des portraits, sans toucher aux zones. */
+html[data-animations='desactivees'] .compagnon-sprite,
+html[data-animations='desactivees'] .choix-compagnon__portrait .compagnon-sprite,
+html[data-animations='desactivees'] .compagnon-portrait--tuile .compagnon-sprite {
+  animation: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .compagnon-sprite { animation: none !important; }
 }

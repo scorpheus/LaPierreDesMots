@@ -39,7 +39,11 @@ import type {
   EtatRegion,
   IdNoeud
 } from '@pierre/partage';
-import { etatAfficheRegion, regionsOuvertes } from '@pierre/partage/monde';
+import {
+  conclusionCentraleAccessible,
+  etatAfficheRegion,
+  regionsOuvertes
+} from '@pierre/partage/monde';
 import {
   composerSortie,
   lireMonde,
@@ -52,6 +56,7 @@ import { CheminEncre } from '../monde/CheminEncre.js';
 import { CarteRasterProgression } from '../monde/CarteRasterProgression.js';
 import { Parchemin } from '../monde/Parchemin.js';
 import { repriseDeRegion } from '../monde/reprise.js';
+import { SpriteCompagnon } from '../composants/SpriteCompagnon.js';
 
 /**
  * Le chemin du décor de la carte, relatif à `contenu/`.
@@ -117,7 +122,7 @@ const ASSET_GOBI_PAR_STADE: Readonly<Record<string, string>> = {
  * réveil coloré — une évolution de l'illustration ne peut plus déplacer l'un sans les autres.
  */
 const ANCRES: readonly (readonly [CodeRegion, number, number, string])[] = [
-  ['clairiere', 600, 470, 'La Clairière'],
+  ['clairiere', 600, 690, 'La Clairière'],
   ['galeries', 990, 560, 'Les Galeries'],
   ['marais-jumeau', 1040, 370, 'Le Marais Jumeau'],
   ['foret-muette', 990, 150, 'La Forêt Muette'],
@@ -130,6 +135,9 @@ const RAYON_PRISE = 46;
 
 /** Rayon du sceau visible. Plus petit que la prise : le territoire se voit à travers. */
 const RAYON_SCEAU = 34;
+
+/** La Pierre des Mots est la destination de conclusion, au centre de la carte. */
+const ANCRE_CONCLUSION = [600, 470] as const;
 
 /**
  * LES TROIS RENDUS D'UNE RÉGION — contrat du monde v4 § 2, point 3 de M7.
@@ -277,6 +285,7 @@ export function EcranCarte({
     readonly libelle: string;
   } | null>(null);
   const [compagnonChoisi, fixerCompagnonChoisi] = useState<CodeCompagnon | null>(null);
+  const [conclusionOuverte, fixerConclusionOuverte] = useState(false);
 
   const requeteMonde = useQuery({
     queryKey: ['monde', profil === null ? null : String(profil.id)],
@@ -328,6 +337,7 @@ export function EcranCarte({
 
   const monde: EtatMonde | null = requeteMonde.data ?? null;
   const regions: readonly EtatRegion[] = monde?.carte.regions ?? [];
+  const conclusionAccessible = monde !== null && conclusionCentraleAccessible(monde.carte);
   const jouables = useMemo(
     () => new Set(monde === null ? [] : regionsOuvertes(monde.carte).map((code) => String(code))),
     [monde]
@@ -591,6 +601,7 @@ export function EcranCarte({
               ancre: [x, y] as const,
               pourcentageColorie: parCode.get(String(region))?.pourcentageColorie ?? 0
             }))}
+            conclusionActive={conclusionAccessible}
             surErreur={() => {
               fixerRasterIndisponible(true);
             }}
@@ -829,6 +840,48 @@ export function EcranCarte({
             </g>
           );
         })}
+        {conclusionAccessible ? (
+          <g data-conclusion-centrale-groupe="pierre">
+            <g aria-hidden="true" style={{ pointerEvents: 'none' }}>
+              <circle
+                cx={ANCRE_CONCLUSION[0]}
+                cy={ANCRE_CONCLUSION[1]}
+                r={RAYON_SCEAU + 11}
+                fill="var(--parchemin)"
+                fillOpacity={0.58}
+                stroke="var(--soleil)"
+                strokeWidth={7}
+              />
+              <path
+                d={ETOILE_ECLAT}
+                transform={`translate(${String(ANCRE_CONCLUSION[0])} ${String(ANCRE_CONCLUSION[1])})`}
+                fill="var(--soleil)"
+                stroke="var(--trait)"
+                strokeWidth={4}
+                strokeLinejoin="round"
+              />
+            </g>
+            <circle
+              data-conclusion-centrale="pierre"
+              data-ancre-raster={`${String(ANCRE_CONCLUSION[0])},${String(ANCRE_CONCLUSION[1])}`}
+              cx={ANCRE_CONCLUSION[0]}
+              cy={ANCRE_CONCLUSION[1]}
+              r={RAYON_PRISE}
+              fill="var(--parchemin)"
+              fillOpacity={0}
+              role="button"
+              tabIndex={0}
+              aria-label="La Pierre des Mots est entière"
+              style={{ cursor: 'pointer', pointerEvents: 'all' }}
+              onClick={() => fixerConclusionOuverte(true)}
+              onKeyDown={(evenement) => {
+                if (evenement.key === 'Enter' || evenement.key === ' ') {
+                  fixerConclusionOuverte(true);
+                }
+              }}
+            />
+          </g>
+        ) : null}
       </Parchemin>
       </div>
 
@@ -838,6 +891,23 @@ export function EcranCarte({
           Où veux-tu aller&nbsp;?
         </h2>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
+          {conclusionAccessible ? (
+            <button
+              type="button"
+              className="cible cible-appel"
+              data-depart-conclusion="pierre"
+              aria-label="Aller au centre pour réunir la Pierre des Mots"
+              onClick={() => fixerConclusionOuverte(true)}
+              style={{ flexDirection: 'column', gap: '0.5rem', padding: '1.25rem' }}
+            >
+              <span className="titre" style={{ fontSize: '1.375rem' }}>
+                La Pierre t’attend !
+              </span>
+              <span style={{ fontSize: '1rem' }}>
+                Tes six Éclats sont réunis. Va au centre.
+              </span>
+            </button>
+          ) : null}
           {/*
             UN DÉPART N'EXISTE QUE S'IL MÈNE QUELQUE PART — D48, et c'est la même règle que
             les pastilles de la carte ci-dessus appliquent déjà.
@@ -903,6 +973,30 @@ export function EcranCarte({
       </section>
       </div>
 
+      {conclusionAccessible && conclusionOuverte ? (
+        <section
+          className="choix-compagnon"
+          data-conclusion-pierre="oui"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="titre-conclusion-pierre"
+        >
+          <div className="choix-compagnon__carte">
+            <h2 id="titre-conclusion-pierre" className="titre">
+              La Pierre des Mots est entière !
+            </h2>
+            <p>Tu as rassemblé les six Éclats. Le monde a retrouvé ses couleurs.</p>
+            <button
+              type="button"
+              className="cible cible-appel"
+              onClick={() => fixerConclusionOuverte(false)}
+            >
+              Revoir la carte
+            </button>
+          </div>
+        </section>
+      ) : null}
+
       {destinationDemandee === null ? null : (
         <section
           className="choix-compagnon"
@@ -965,7 +1059,10 @@ export function EcranCarte({
                   onClick={() => fixerCompagnonChoisi(compagnon.code)}
                 >
                   <span className="choix-compagnon__portrait" aria-hidden="true">
-                    <img src={urlAsset(String(compagnon.asset))} alt="" draggable={false} />
+                    <SpriteCompagnon
+                      code={compagnon.code}
+                      assetStatique={String(compagnon.asset)}
+                    />
                   </span>
                   <strong>{compagnon.libelle}</strong>
                   <span>{compagnon.valeur}</span>

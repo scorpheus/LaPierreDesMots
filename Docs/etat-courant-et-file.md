@@ -14,8 +14,9 @@ annulé, remplacé ou reporté.
 - Serveur de jeu : écoute sur `0.0.0.0:8080` ; adresse LAN mesurée le 4 septembre :
   `http://192.168.1.19:8080`.
 - Version de production compilée et servie.
-- Un autre agent traite séparément la PWA et GitHub Pages ; l’intégration de ce lot devra être
-  vérifiée quand il aura terminé.
+- Le chantier PWA/GitHub Pages est terminé et publié sur
+  `https://scorpheus.github.io/LaPierreDesMots/`. Sa recette doit être rejouée après les présentes
+  modifications avant la prochaine publication.
 
 ## Validé techniquement
 
@@ -28,14 +29,19 @@ annulé, remplacé ou reporté.
 - Le choix de compagnon précède une sortie. Seuls Gobi et les compagnons ralliés sont proposés.
 - Le compagnon choisi favorise réellement ses moteurs déclarés, côté serveur comme en mode Android
   autonome.
-- Les quatre portraits de compagnons ont une animation CSS légère et distincte, neutralisée par le
-  réglage d'animations calmes.
-- Derniers contrôles séparés : 2398/2398 tests unitaires et composants, 521/521 parcours E2E à
-  quatre travailleurs et 25/25 scénarios de la matrice responsive. Lint, TypeScript, construction de production
-  et budget du bundle réussissent également.
+- Les quatre compagnons utilisent désormais leurs atlas raster validés de huit poses ; le portrait
+  statique reste le repli et le mode calme coupe l'animation.
+- Les huit images manquantes du second jeu de paires de la Cité sont publiées et raccordées.
+- La Pierre centrale est désormais la conclusion : la Clairière part du chemin au sud et le centre
+  ne se révèle qu'après l'obtention des six Éclats.
+- Derniers contrôles séparés : 2411/2411 tests unitaires, composants et API, 521/521 parcours E2E
+  à quatre travailleurs et 274/274 contrôles qualité et responsive. Le contrat exhaustif rejoué
+  seul couvre 15 écrans sur 15, 89 recettes et 76 nœuds, avec un écart nul. Lint, TypeScript,
+  construction de production et budget du bundle réussissent également.
 - Seule porte encore rouge : sept divergences visuelles connues — six migrations volontaires de
   blockouts SVG vers les rasters, plus la récompense. Les références n'ont pas été modifiées sans
-  validation parentale.
+  validation parentale. La planche actuelle à valider est
+  `bac-a-sable/validation-references-visuelles-2026-09-04.png`.
 
 ## Chantier en cours : responsive multi-écrans et composition professionnelle
 
@@ -96,9 +102,8 @@ annulé, remplacé ou reporté.
   raster, sans SVG nominal ni cercle parasite.
 - Les décors illustrés déjà produits sont enfin raccordés automatiquement aux scènes régionales :
   47 correspondances PNG sont présentes. Le SVG demeure la géométrie interactive et le repli si
-  le raster manque. Quatre nouveaux fonds (`fresque-murale`, `tapis`, `brume`, `forge`) sont
-  préparés dans `bac-a-sable/assets-a-valider-2026-09-04/` et attendent la validation parent avant
-  toute promotion, conformément à D7.
+  le raster manque. Les quatre fonds (`fresque-murale`, `tapis`, `brume`, `forge`) validés par le
+  parent sont publiés et verrouillés en production.
 - La garde de composition vérifie aussi que l'écran racine ne crée pas son propre sous-scroll
   horizontal. Le cas croisé 568 × 320 du campement conserve maintenant le rapport exact du PNG.
 - Le balayage des 89 écrans n'est plus un test monolithique de quatre minutes : chaque format est
@@ -118,8 +123,11 @@ annulé, remplacé ou reporté.
   parent avant toute mise à jour de référence.
 - La passe de composition suivante supprime le vide de 84 à 119 px entre la carte et ses départs
   en portrait, ramène les départs paysage à 64–80 px et retire les sous-défilements du coffre à
-  1017×640. La matrice responsive complète repasse 25/25 en 2 min 36 s ; TypeScript et les 11
-  contrôles de bundle restent verts (249,2 Kio gzip sur 250 Kio).
+  1017×640. La recette qualité finale repasse 274/274 en 4 min 54 s ; TypeScript et les 11
+  contrôles de bundle restent verts (250,0 Kio gzip sur 250 Kio).
+- La PWA intégrée a été reconstruite avec les nouveaux décors, cartes et atlas : livrable
+  `3489471b43cd49c6`, 197,8 Mio au total et 15,9 Mio de précache atomique. Elle n'est pas
+  republiée avant la validation locale et visuelle.
 
 ## Dernier chantier terminé : audio
 
@@ -141,24 +149,13 @@ annulé, remplacé ou reporté.
 2. Examiner avec le parent les sept divergences de références visuelles historiques. Ne jamais
    mettre les références à jour sans sa validation.
 3. Faire une passe de finition artistique sur les écrans que le test tablette jugera encore trop
-   légers, en commençant par les éléments réellement visibles dans le parcours enfant. Valider et
-   promouvoir le lot des quatre fonds préparés avant d'en générer davantage.
-4. Faire valider puis intégrer les quatre planches d'animation préparées dans
-   `bac-a-sable/assets-a-valider-2026-09-04/sprites-compagnons/`. Filou, Roc, Plume et Bulle ont
-   chacun huit poses normalisées en cellules de 256 × 256 px, ancrées en bas au centre. La première
-   planche de Plume a été refusée visuellement malgré une porte technique verte (morceaux détachés) ;
-   sa version `plume-8-v2.png`, régénérée sur fond uniforme puis contrôlée visuellement, la remplace.
-   Aucune planche n'est encore dans les assets de production : la validation artistique parentale
-   reste la porte avant raccordement.
-5. Revoir l'histoire globale de la carte lorsque le parent souhaitera trancher la place de la
-   Clairière : point de départ central actuel ou région périphérique menant à une résolution au
-   centre.
-6. Relire avec le parent les six récits CE1 préparés dans `contenu/brouillons/`, puis seulement les
-   promouvoir et régénérer leurs répliques audio.
-7. Valider la planche des huit cartes-image de la Cité, les intégrer dans le jeu et consigner leur
-   provenance dans `production/assets.lock.json`.
-8. Intégrer puis vérifier le chantier PWA/GitHub Pages de l'autre agent sans écraser les finitions
-   du jeu local.
+   légers, en commençant par les éléments réellement visibles dans le parcours enfant. Les quatre
+   fonds régionaux validés sont désormais publiés ; ne pas en générer davantage avant ce test réel.
+4. Relire avec le parent les six récits CE1 réunis dans
+   `bac-a-sable/validation-histoires-2026-09-04.html`, puis seulement les promouvoir et régénérer
+   leurs répliques audio.
+5. La recette PWA du lot intégré est verte. Ne republier qu'une fois la version locale et les
+   références visuelles validées.
 
 ## Retours parent à surveiller pendant le test
 
@@ -180,8 +177,7 @@ annulé, remplacé ou reporté.
 - L'audit des 249 champs `asset: null` a séparé 241 cartes volontairement textuelles de huit
   images réellement manquantes dans `cite-des-histoires-cartes-paires-02`. Une unique planche a
   produit tomate, carotte, salade, citron, olive, raisin, pomme dans un panier et prune dans un bol.
-  Les huit découpes carrées attendent la validation parent dans
-  `bac-a-sable/assets-a-valider-2026-09-04/cartes-cite-salade/`.
+  Les huit découpes carrées ont été validées, publiées et raccordées à l'exercice.
 
 Ces points ont reçu des corrections globales et des tests, mais restent dans la file tant que le
 parent ne les a pas validés sur l'appareil réel.

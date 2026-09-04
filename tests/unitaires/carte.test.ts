@@ -10,6 +10,7 @@ import { describe, expect, it } from 'vitest';
 import {
   appliquerEclat,
   carteInitiale,
+  conclusionCentraleAccessible,
   etatAfficheRegion,
   paralleleDuDocument,
   recalculerRecoloration,
@@ -255,6 +256,22 @@ describe('appliquerEclat — un acquis n’est jamais repris (R14)', () => {
 
   it('refuse une région que la carte ne connaît pas, au lieu de l’ignorer en silence', () => {
     expect(() => appliquerEclat(neuve(), 'vallee-des-rois' as never, QUAND)).toThrow();
+  });
+});
+
+describe('conclusionCentraleAccessible — les six Éclats ramènent à la Pierre', () => {
+  it('reste fermée tant qu’un seul Éclat manque, puis s’ouvre après le sixième', () => {
+    expect(conclusionCentraleAccessible(apresEclats(DEFINITIONS.length - 1))).toBe(false);
+    expect(conclusionCentraleAccessible(apresEclats(DEFINITIONS.length))).toBe(true);
+  });
+
+  it('ne confond pas la recoloration d’une région avec son Éclat obtenu', () => {
+    const sansEclat = neuve();
+    const regions = sansEclat.regions.map((region) => ({
+      ...region,
+      pourcentageColorie: 1
+    }));
+    expect(conclusionCentraleAccessible({ ...sansEclat, regions })).toBe(false);
   });
 });
 

@@ -347,3 +347,14 @@ export function etatAfficheRegion(region: EtatRegion): EtatAfficheRegion {
   }
   return region.ouverte ? 'ouverte' : 'voilee';
 }
+
+/**
+ * La Pierre centrale n'est pas une septième région : elle conclut les six régions de la v2.
+ *
+ * L'Éclat est le trophée narratif qui fait foi. Une recoloration à 100 % sans Éclat ne suffit
+ * pas : la projection peut être relue pendant que le journal finit d'enregistrer le dernier
+ * nœud, et la conclusion ne doit jamais précéder sa récompense.
+ */
+export function conclusionCentraleAccessible(carte: EtatCarte): boolean {
+  return carte.regions.length > 0 && carte.regions.every((region) => region.eclatObtenuLe !== null);
+}

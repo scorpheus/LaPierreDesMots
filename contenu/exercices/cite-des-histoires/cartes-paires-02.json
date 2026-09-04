@@ -100,7 +100,7 @@
           "id": "image-tomate",
           "libelle": "rouge",
           "face": "image",
-          "asset": null,
+          "asset": "assets/cartes/cite/tomate.png",
           "paire": "paire-tomate"
         },
         {
@@ -114,7 +114,7 @@
           "id": "image-carotte",
           "libelle": "orange",
           "face": "image",
-          "asset": null,
+          "asset": "assets/cartes/cite/carotte.png",
           "paire": "paire-carotte"
         },
         {
@@ -128,7 +128,7 @@
           "id": "image-salade",
           "libelle": "verte",
           "face": "image",
-          "asset": null,
+          "asset": "assets/cartes/cite/salade.png",
           "paire": "paire-salade"
         },
         {
@@ -142,7 +142,7 @@
           "id": "image-citron",
           "libelle": "jaune",
           "face": "image",
-          "asset": null,
+          "asset": "assets/cartes/cite/citron.png",
           "paire": "paire-citron"
         },
         {
@@ -156,7 +156,7 @@
           "id": "image-olive",
           "libelle": "noire",
           "face": "image",
-          "asset": null,
+          "asset": "assets/cartes/cite/olive.png",
           "paire": "paire-olive"
         },
         {
@@ -170,7 +170,7 @@
           "id": "image-raisin",
           "libelle": "violet",
           "face": "image",
-          "asset": null,
+          "asset": "assets/cartes/cite/raisin.png",
           "paire": "paire-raisin"
         },
         {
@@ -184,7 +184,7 @@
           "id": "image-pomme",
           "libelle": "le panier",
           "face": "image",
-          "asset": null,
+          "asset": "assets/cartes/cite/pomme-panier.png",
           "paire": "paire-pomme"
         },
         {
@@ -198,7 +198,7 @@
           "id": "image-prune",
           "libelle": "le bol",
           "face": "image",
-          "asset": null,
+          "asset": "assets/cartes/cite/prune-bol.png",
           "paire": "paire-prune"
         }
       ],

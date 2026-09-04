@@ -340,7 +340,7 @@ describe('la carte montre le VIDE restant (D25, point 3)', () => {
     ).toBe('0.40');
     expect(document.querySelectorAll('[data-revelation-region]')).toHaveLength(2);
     expect(document.querySelector('[data-region="clairiere"]')?.getAttribute('data-ancre-raster'))
-      .toBe('600,470');
+      .toBe('600,690');
     expect(document.querySelector('[data-region="galeries"]')?.getAttribute('data-ancre-raster'))
       .toBe('990,560');
     expect(
@@ -428,6 +428,39 @@ describe('la carte montre le VIDE restant (D25, point 3)', () => {
     console.log(`[QA-2 · carte] monde terminé → départs : ${departs.join(', ')}`);
     expect(departs.length).toBeGreaterThan(0);
     expect(prise(departs[0]!)?.getAttribute('role')).toBe('button');
+  });
+
+  it('réserve la Pierre centrale pour la conclusion après les six Éclats', async () => {
+    await monterEtAttendre();
+    expect(document.querySelector('[data-conclusion-centrale]')).toBeNull();
+
+    const tout = mondeDeTest();
+    mondeServi = {
+      ...tout,
+      carte: {
+        ...tout.carte,
+        regions: tout.carte.regions.map((region) => ({
+          ...region,
+          ouverte: true,
+          pourcentageColorie: 1,
+          eclatObtenuLe: '2026-09-01T08:00:00.000Z'
+        }))
+      }
+    } as never;
+
+    cleanup();
+    await monterEtAttendre();
+    const pierre = document.querySelector('[data-conclusion-centrale]');
+    expect(pierre?.getAttribute('role')).toBe('button');
+    expect(pierre?.getAttribute('data-ancre-raster')).toBe('600,470');
+    const departConclusion = document.querySelector('[data-depart-conclusion]');
+    expect(departConclusion?.textContent).toContain('Va au centre');
+    expect(document.querySelector('[data-region="clairiere"]')?.getAttribute('data-ancre-raster'))
+      .toBe('600,690');
+
+    fireEvent.click(departConclusion!);
+    expect(document.querySelector('[data-conclusion-pierre]')?.textContent)
+      .toContain('La Pierre des Mots est entière');
   });
 });
 

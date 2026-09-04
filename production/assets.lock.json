@@ -367,7 +367,7 @@
     {
       "id": "decor.tapis.v2",
       "fichier": "contenu/assets/decors/tapis.png",
-      "empreinte": "sha256:30DF99C0192FB2384489669E8FA57303FF4BA007716D57E3C22FAA1471A2CD2A",
+      "empreinte": "sha256:DCD578C9AFEDD91BD09C75F8CB59686300F111331AAE0F3FEF8840B9122A0442",
       "generation": {
         "outil": "générateur d’images intégré à Codex",
         "workflow": null,
@@ -376,7 +376,8 @@
         "resolution": [1536, 1024],
         "prompt": null,
         "source_prompt": "Le verbatim original n’est pas embarqué ; le socle et la variante fidèles sont consignés dans Docs/production-visuelle-vague-2026-09-02.md.",
-        "source": "contenu/brouillons/decors/tapis-v2.png"
+        "source": "bac-a-sable/assets-a-valider-2026-09-04/foret-tapis.png",
+        "retouche": "Nouvelle illustration validée en lot par le parent le 4 septembre 2026."
       },
       "qc": {
         "technique": "ok — PNG RGB 1536 × 1024, ratio 3:2",
@@ -385,12 +386,12 @@
         "tentatives": 2
       },
       "valide_par": "parent",
-      "valide_le": "2026-09-02"
+      "valide_le": "2026-09-04"
     },
     {
       "id": "decor.brume.v2",
       "fichier": "contenu/assets/decors/brume.png",
-      "empreinte": "sha256:5E8ACD2D99392B1D0A73FD0B3EE6C8D031BD0D7D7977BE2602D772275F72AD4F",
+      "empreinte": "sha256:23A041B2916B21BA7FF33F7CE24297E48FDF7BFB8FD82A4FDCA4A16263BA09B8",
       "generation": {
         "outil": "générateur d’images intégré à Codex",
         "workflow": null,
@@ -399,7 +400,8 @@
         "resolution": [1536, 1024],
         "prompt": null,
         "source_prompt": "Le verbatim original n’est pas embarqué ; le socle et la variante fidèles sont consignés dans Docs/production-visuelle-vague-2026-09-02.md.",
-        "source": "contenu/brouillons/decors/brume-v2.png"
+        "source": "bac-a-sable/assets-a-valider-2026-09-04/marais-brume.png",
+        "retouche": "Nouvelle illustration validée en lot par le parent le 4 septembre 2026."
       },
       "qc": {
         "technique": "ok — PNG RGB 1536 × 1024, ratio 3:2",
@@ -408,12 +410,12 @@
         "tentatives": 2
       },
       "valide_par": "parent",
-      "valide_le": "2026-09-02"
+      "valide_le": "2026-09-04"
     },
     {
       "id": "decor.forge.v2",
       "fichier": "contenu/assets/decors/forge.png",
-      "empreinte": "sha256:68AA67670A3DA5BAC280271CA3469A73B247E6963E6130009474D7EE3FF773CC",
+      "empreinte": "sha256:8462082C874DCD04DB3150D966F21A7AF6DADAE0AA684A8967F8CDB139FF8ABD",
       "generation": {
         "outil": "générateur d’images intégré à Codex",
         "workflow": null,
@@ -422,7 +424,8 @@
         "resolution": [1536, 1024],
         "prompt": null,
         "source_prompt": "Le verbatim original n’est pas embarqué ; le socle et la variante fidèles sont consignés dans Docs/production-visuelle-vague-2026-09-02.md.",
-        "source": "contenu/brouillons/decors/forge-v2.png"
+        "source": "bac-a-sable/assets-a-valider-2026-09-04/volcan-forge.png",
+        "retouche": "Nouvelle illustration validée en lot par le parent le 4 septembre 2026."
       },
       "qc": {
         "technique": "ok — PNG RGB 1536 × 1024, ratio 3:2",
@@ -431,7 +434,7 @@
         "tentatives": 2
       },
       "valide_par": "parent",
-      "valide_le": "2026-09-02"
+      "valide_le": "2026-09-04"
     },
     {
       "id": "coloriage.chaudron.v3",
@@ -471,7 +474,7 @@
     {
       "id": "decor.fresque-murale.v2",
       "fichier": "contenu/assets/decors/fresque-murale.png",
-      "empreinte": "sha256:E91DD727161061CCD079F02228B788070E6D8D810B25BD42F9CBECA05C3A8C16",
+      "empreinte": "sha256:9AC15DFBFF64DE9F831664D767F655267055F3C27989BCF82F8DAB7B891518D5",
       "generation": {
         "outil": "générateur d’images intégré à Codex",
         "workflow": null,
@@ -480,7 +483,8 @@
         "resolution": [1536, 1024],
         "prompt": null,
         "source_prompt": "Le verbatim original n’est pas embarqué ; le socle et la variante fidèles sont consignés dans Docs/production-visuelle-vague-2026-09-02.md.",
-        "source": "contenu/brouillons/decors/fresque-murale-v2.png"
+        "source": "bac-a-sable/assets-a-valider-2026-09-04/cite-fresque-murale.png",
+        "retouche": "Nouvelle illustration validée en lot par le parent le 4 septembre 2026."
       },
       "qc": {
         "technique": "ok — PNG RGB 1536 × 1024, ratio 3:2",
@@ -489,7 +493,7 @@
         "tentatives": 2
       },
       "valide_par": "parent",
-      "valide_le": "2026-09-02"
+      "valide_le": "2026-09-04"
     },
     {
       "id": "objet.place.soleil.v1",
@@ -590,6 +594,70 @@
       },
       "valide_par": "parent",
       "valide_le": "2026-09-02"
+    },
+    {
+      "id": "compagnons.animations.huit-poses.v1",
+      "fichier": "contenu/assets/compagnons/animations/filou-8.png",
+      "empreinte": "sha256:1469193439CF81DD35C331DDBA9522A4952E433BCA851F91B1593242721C255E",
+      "generation": {
+        "outil": "générateur d’images intégré à Codex",
+        "workflow": "imagegen puis scripts/sprites/normaliser-planche.mjs",
+        "modele": null,
+        "graine": null,
+        "resolution": [1024, 512],
+        "prompt": null,
+        "brief_documente": "Huit poses enfantines cohérentes par compagnon, planche 4 × 2, personnage entier, identité canonique conservée, sans texte ni élément coupé.",
+        "sources": [
+          "production/personnages/filou/canonique.png",
+          "production/personnages/roc/canonique.png",
+          "production/personnages/plume/canonique.png",
+          "production/personnages/bulle/canonique.png"
+        ]
+      },
+      "derivees": {
+        "roc": { "fichier": "contenu/assets/compagnons/animations/roc-8.png", "empreinte": "sha256:7126FD0EC2C94AA8444849971BE8D450930B920FAB2539E0908A270E53AA93A0" },
+        "plume": { "fichier": "contenu/assets/compagnons/animations/plume-8-v2.png", "empreinte": "sha256:DC5BC6B703A1507631FAF0D066E86F016AA283DDABF224EDABBA171E484F10FE" },
+        "bulle": { "fichier": "contenu/assets/compagnons/animations/bulle-8.png", "empreinte": "sha256:6F218C430A6AC67CB4DF1CB86B6DE67912017030C0BE18C8DACB6151BDF5C786" }
+      },
+      "qc": {
+        "technique": "ok — quatre atlas RGBA 1024 × 512, huit cellules de 256 px, ancre bas-centre stable et aucun débordement",
+        "semantique": "validé en lot par le parent ; Plume v1 refusée puis remplacée par la v2 sans morceaux détachés",
+        "integration": "animation par positions de fond ; repli statique et neutralisation animations calmes",
+        "tentatives": 5
+      },
+      "valide_par": "parent",
+      "valide_le": "2026-09-04"
+    },
+    {
+      "id": "cartes.cite.salade.v1",
+      "fichier": "contenu/assets/cartes/cite/tomate.png",
+      "empreinte": "sha256:93D71FF007345C4F06FDE41DF22C175455887A8BDF0D579D113879CBCDC63E76",
+      "generation": {
+        "outil": "générateur d’images intégré à Codex",
+        "workflow": "planche unique puis huit découpes carrées",
+        "modele": null,
+        "graine": null,
+        "resolution": [512, 512],
+        "prompt": null,
+        "brief_documente": "Huit cartes jeunesse immédiatement reconnaissables et cohérentes : tomate, carotte, salade, citron, olive, raisin, pomme dans un panier et prune dans un bol."
+      },
+      "derivees": {
+        "carotte": { "fichier": "contenu/assets/cartes/cite/carotte.png", "empreinte": "sha256:2A701685CE65C60ED6561FD0CA429491EF6E01CE6AFF5951C250A1DE3DDD32CF" },
+        "salade": { "fichier": "contenu/assets/cartes/cite/salade.png", "empreinte": "sha256:6569F1723571FDAFEA857DC60797ED66E9E36436D530DDB0ACD29E2612ECA527" },
+        "citron": { "fichier": "contenu/assets/cartes/cite/citron.png", "empreinte": "sha256:4D0BF1360EF55E8ECD4D136742E04684F62B146C8405BCAF72B68FA7EE4600D0" },
+        "olive": { "fichier": "contenu/assets/cartes/cite/olive.png", "empreinte": "sha256:61C7BA3790916F6D2B44256CD2CA5EFCECE79CB9808B8E0F2DEE4C0A9A35DC8F" },
+        "raisin": { "fichier": "contenu/assets/cartes/cite/raisin.png", "empreinte": "sha256:B5103B08ED8E017EB7A45753D8E5025BCDC160DAD7CEDD22F6886A1301535F1A" },
+        "pomme_panier": { "fichier": "contenu/assets/cartes/cite/pomme-panier.png", "empreinte": "sha256:27F94EC13AD2DC252DB9CC73AE583FBE68FFCEB7A081A96E222B9EC3A1700A56" },
+        "prune_bol": { "fichier": "contenu/assets/cartes/cite/prune-bol.png", "empreinte": "sha256:A8BD4C89E4B5656577339A82612FB9DEE2EB6991E0721213197319C64F4D9C5C" }
+      },
+      "qc": {
+        "technique": "ok — huit PNG 512 × 512 raccordés aux huit cartes qui n’avaient aucun asset",
+        "semantique": "validé en lot par le parent",
+        "integration": "moteur paires de cite-des-histoires-12",
+        "tentatives": 1
+      },
+      "valide_par": "parent",
+      "valide_le": "2026-09-04"
     }
   ]
 }

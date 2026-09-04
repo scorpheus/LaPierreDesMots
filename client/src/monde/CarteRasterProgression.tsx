@@ -31,8 +31,10 @@ interface MasqueRegionRaster {
  */
 const MASQUES: Readonly<Record<CodeRaster, MasqueRegionRaster>> = {
   clairiere: {
-    d: 'M310 360 C365 278 505 262 625 294 C748 326 855 418 848 570 C841 676 727 732 592 708 C460 710 337 648 304 544 C286 486 291 414 310 360 Z',
-    rayon: 265
+    // La Clairière est le chemin de départ au sud. La Pierre centrale reste hors de ce masque :
+    // elle ne retrouve sa couleur qu'après les six Éclats.
+    d: 'M284 524 C361 484 459 510 527 575 C581 624 576 716 528 768 L324 800 L130 800 C174 705 214 596 284 524 Z',
+    rayon: 225
   },
   galeries: {
     d: 'M792 473 C890 431 1083 449 1178 529 L1188 689 L1038 696 C940 691 836 664 787 597 C766 557 771 508 792 473 Z',
@@ -56,6 +58,10 @@ const MASQUES: Readonly<Record<CodeRaster, MasqueRegionRaster>> = {
   }
 };
 
+/** La Pierre brisée au centre : conclusion distincte des six paysages régionaux. */
+const MASQUE_CONCLUSION =
+  'M422 338 C494 286 697 287 785 365 C842 416 830 541 757 592 C667 649 506 638 427 565 C372 510 365 398 422 338 Z';
+
 export interface AvancementRaster {
   readonly region: CodeRaster;
   readonly ancre: readonly [number, number];
@@ -65,6 +71,8 @@ export interface AvancementRaster {
 export interface ProprietesCarteRasterProgression {
   readonly source: string;
   readonly avancements: readonly AvancementRaster[];
+  /** Les six Éclats ont été obtenus : la Pierre centrale peut retrouver ses couleurs. */
+  readonly conclusionActive?: boolean;
   readonly surErreur?: () => void;
 }
 
@@ -83,6 +91,7 @@ function borne(pourcentage: number): number {
 export function CarteRasterProgression({
   source,
   avancements,
+  conclusionActive = false,
   surErreur
 }: ProprietesCarteRasterProgression): ReactElement {
   return (
@@ -117,6 +126,9 @@ export function CarteRasterProgression({
             </g>
           );
         })}
+        <clipPath id="carte-raster-zone-conclusion">
+          <path d={MASQUE_CONCLUSION} />
+        </clipPath>
       </defs>
       <image
         href={source}
@@ -153,6 +165,21 @@ export function CarteRasterProgression({
           </g>
         );
       })}
+      {conclusionActive ? (
+        <g
+          data-revelation-conclusion="pierre"
+          clipPath="url(#carte-raster-zone-conclusion)"
+        >
+          <image
+            href={source}
+            x="0"
+            y="0"
+            width="1200"
+            height="800"
+            preserveAspectRatio="xMidYMid slice"
+          />
+        </g>
+      ) : null}
     </g>
   );
 }

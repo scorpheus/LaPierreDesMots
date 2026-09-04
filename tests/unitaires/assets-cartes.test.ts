@@ -9,8 +9,8 @@ const fichiersCartes = readdirSync(join(racine, 'assets', 'cartes'), { withFileT
     : []);
 
 describe('cartes illustrées', () => {
-  it('publie les 39 cartes issues des six planches validées', () => {
-    expect(fichiersCartes.filter((chemin) => chemin.endsWith('.png'))).toHaveLength(39);
+  it('publie les 47 cartes issues des sept planches validées', () => {
+    expect(fichiersCartes.filter((chemin) => chemin.endsWith('.png'))).toHaveLength(47);
   });
 
   it('ne laisse aucun asset de carte référencé introuvable', () => {
@@ -18,6 +18,7 @@ describe('cartes illustrées', () => {
       'foret-muette/bestiaire-paires-01.json', 'foret-muette/bestiaire-paires-02.json',
       'marais-jumeau/coquillages-paires-01.json', 'volcan/geodes-paires-01.json',
       'volcan/geodes-paires-02.json', 'cite-des-histoires/cartes-paires-01.json',
+      'cite-des-histoires/cartes-paires-02.json',
     ];
     for (const exercice of exercices) {
       const contenu = JSON.parse(readFileSync(join(racine, 'exercices', exercice), 'utf8')) as {

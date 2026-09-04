@@ -42,8 +42,9 @@ export { construireEtagere } from './etagere.js';
 
 export type { DefinitionRegion, DocumentRegions, EtatAfficheRegion } from './carte.js';
 export {
-  appliquerEclat, carteInitiale, etatAfficheRegion, ouvrirCeQuiDoitLEtre, paralleleDuDocument,
-  recalculerRecoloration, regionsDuDocument, regionsOuvertes,
+  appliquerEclat, carteInitiale, conclusionCentraleAccessible, etatAfficheRegion,
+  ouvrirCeQuiDoitLEtre, paralleleDuDocument, recalculerRecoloration, regionsDuDocument,
+  regionsOuvertes,
 } from './carte.js';
 
 export type { DefinitionCompagnon } from './compagnons.js';

@@ -14,8 +14,8 @@
 import { useState } from 'react';
 import type { ReactElement } from 'react';
 
-import { urlAsset } from '../api/client.js';
 import { FicheObjet } from '../monde/FicheObjet.js';
+import { SpriteCompagnon } from './SpriteCompagnon.js';
 import type { Compagnon as CompagnonDuMonde } from '@pierre/partage';
 
 export interface ProprietesCompagnon {
@@ -40,14 +40,10 @@ export function Compagnon({
   const rallie = compagnon.rallieLe !== null;
   const [ficheOuverte, fixerFicheOuverte] = useState(false);
   const portrait = (
-    <img
-      src={urlAsset(String(compagnon.asset))}
-      alt=""
-      draggable={false}
-      data-portrait-compagnon={String(compagnon.code)}
-      // La Grisaille garde exactement le même portrait : aucune seconde image, aucune identité
-      // différente avant et après la rencontre.
-      style={{ filter: rallie ? 'none' : 'saturate(0)' }}
+    <SpriteCompagnon
+      code={compagnon.code}
+      assetStatique={String(compagnon.asset)}
+      classe={rallie ? '' : 'compagnon-sprite--grisaille'}
     />
   );
 
