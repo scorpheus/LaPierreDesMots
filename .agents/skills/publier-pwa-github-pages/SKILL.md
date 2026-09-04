@@ -1,6 +1,6 @@
 ---
 name: publier-pwa-github-pages
-description: Construire, tester ou publier la PWA de La Pierre des Mots sur GitHub Pages, avec SQLite WASM/OPFS et sauvegarde locale. À utiliser pour toute recette PWA, préparation gh-pages ou mise en ligne du site.
+description: Construire, tester ou publier la PWA de La Pierre des Mots sur GitHub Pages, avec SQLite WASM/OPFS et sauvegarde locale. À utiliser pour toute recette PWA, préparation gh-pages, mise en ligne ou question sur le passage d’un commit au site public.
 ---
 
 # Publier la PWA sur GitHub Pages
@@ -8,6 +8,25 @@ description: Construire, tester ou publier la PWA de La Pierre des Mots sur GitH
 Lire d'abord `Docs/contrat-pwa-github-pages.md`. Le livrable est construit sur la machine du
 propriétaire, car les voix et plusieurs polices requises sont ignorées par Git. GitHub Pages livre
 ensuite les fichiers statiques ; il ne détient jamais la base de progression.
+
+## Modèle de déploiement actuel
+
+Un commit sur `main`, même réussi, **ne modifie jamais à lui seul le site public**. Le runner GitHub
+ne compile pas les sources : il ne possède ni les voix ni toutes les polices locales. La chaîne
+effective est :
+
+```text
+commit(s) source sur le PC
+→ publier-site.bat : vérification + compilation locale + commit local gh-pages
+→ push autorisé de gh-pages
+→ Action GitHub Pages officielle : livraison HTTPS
+→ recette sur https://scorpheus.github.io/LaPierreDesMots/
+```
+
+Ne pas inventer un workflow qui compile sur un runner GitHub hébergé. Une automatisation depuis
+chaque commit demanderait un runner auto-hébergé sur le PC et constitue un autre chantier. Tant
+qu'elle n'est pas décidée, dire clairement au propriétaire qu'une nouvelle version reste invisible
+en ligne jusqu'à l'exécution de `publier-site.bat` puis au push de `gh-pages`.
 
 ## Autorisation GitHub — arrêt obligatoire
 
@@ -49,6 +68,14 @@ illustré hors connexion avant qu'un téléchargement complet explicite ait ét�
 5. S'arrêter, annoncer au propriétaire la commande distante affichée par le script ainsi que son
    effet, puis attendre son accord. GitHub Pages est déjà configuré sur la branche `gh-pages`,
    dossier racine, avec HTTPS forcé ; le push déclenche automatiquement l'Action Pages officielle.
+6. Après accord, exécuter exactement :
+
+   ```powershell
+   git -C bac-a-sable/publication-gh-pages push origin gh-pages:gh-pages
+   ```
+
+7. Attendre la fin de l'Action `pages build and deployment`. Ne pas annoncer la publication sur un
+   simple push : exiger son statut `success` et l'état Pages `built`.
 
 Après une publication autorisée, vérifier l'installation et la persistance sur
 `https://scorpheus.github.io/LaPierreDesMots/`, sans supprimer la base locale existante.
