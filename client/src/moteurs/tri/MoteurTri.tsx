@@ -150,6 +150,22 @@ const ZOOM_DECOR_TRI = 1.2;
 
 const DUREE_VOL_MS = 320;
 
+/** Composition locale : le plateau ne doit jamais couper une cible quand Gobi ou le pied
+ * réduisent la hauteur disponible. Le scroll éventuel appartient à l'écran parent. */
+const FEUILLE_RESPONSIVE_TRI = `
+  [data-moteur="tri"] { overflow: visible !important; }
+  [data-moteur="tri"] [data-plateau="geste"] { position: relative !important; inset: auto !important; }
+  [data-moteur="tri"] [data-plateau="elements"],
+  [data-moteur="tri"] [data-plateau="receptacles"] { overflow: visible; }
+  [data-moteur="tri"] [data-cartouche-tri="etape"] { max-inline-size: calc(100% - 1rem); }
+  [data-moteur="tri"] [data-receptacle] { max-inline-size: min(100%, 26rem); }
+  @media (max-width: 600px) {
+    [data-moteur="tri"] [data-cartouche-tri="etape"] { font-size: 0.95rem; gap: 0.35rem; }
+    [data-moteur="tri"] [data-consigne-geste] { font-size: 1rem !important; }
+    [data-moteur="tri"] [data-receptacle] { inline-size: min(100%, 20rem) !important; }
+  }
+`;
+
 function ZONE_DE_JEU(hauteurBandeau: number, hauteurPied: number): CSSProperties {
   return {
     insetInlineStart: 0,
@@ -797,7 +813,7 @@ export function MoteurTri(
           borderRadius: 'var(--rayon-carte)',
         }}
       >
-        <style>{FEUILLE_DU_VOL}</style>
+          <style>{FEUILLE_DU_VOL}{FEUILLE_RESPONSIVE_TRI}</style>
 
         {/* ── R49 — LA CONSIGNE N'EST PLUS RÉPÉTÉE ICI ────────────────────────────────────
             `EcranNoeud` la porte déjà, en tête d'écran (`barre-consigne`, `data-consigne`),

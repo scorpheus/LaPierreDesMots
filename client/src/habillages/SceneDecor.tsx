@@ -40,6 +40,7 @@ import type { ReactElement } from 'react';
 
 import type { Habillage } from '@pierre/partage';
 
+import { urlAsset } from '../api/client.js';
 import { chargerSceneHabillage } from './chargeur.js';
 import { lireViewBox } from './emplacements.js';
 
@@ -95,6 +96,29 @@ export function grisailleDuRaster(nombreAllume: number, nombreTotal: number): nu
   return Math.round((1 - progression) * 1_000) / 1_000;
 }
 
+/**
+ * Convention des décors illustrés : un SVG régional possède un PNG homonyme sous
+ * `assets/decors/exercices`. Le JSON reste l'autorité pour la scène et ses régions ; cette
+ * dérivation ne sert qu'à choisir le fond visuel, sans modifier le contenu.
+ */
+export function cheminRasterDuScene(cheminScene: string): string | null {
+  const correspondance = /^habillages\/([^/]+)\/([^/]+)\.svg$/u.exec(cheminScene);
+  if (correspondance === null) return null;
+  const region = correspondance[1];
+  const nom = correspondance[2];
+  if (region === undefined || nom === undefined) return null;
+  const prefixes: Record<string, string> = {
+    'cite-des-histoires': 'cite',
+    'foret-muette': 'foret',
+    'marais-jumeau': 'marais',
+  };
+  const prefixe = prefixes[region] ?? region;
+  if (!['clairiere', 'foret', 'marais', 'volcan', 'cite', 'galeries'].includes(prefixe)) {
+    return null;
+  }
+  return `assets/decors/exercices/${prefixe}-${nom}.png`;
+}
+
 export function SceneDecor({
   habillage,
   allumees,
@@ -104,6 +128,16 @@ export function SceneDecor({
   zoom = 1,
 }: ProprietesSceneDecor): ReactElement | null {
   const [corps, fixerCorps] = useState<string | null>(null);
+  const [rasterDisponible, fixerRasterDisponible] = useState<boolean | null>(null);
+
+  const cheminRaster = useMemo(
+    () => cheminRasterDuScene(String(habillage.scene.fichier)),
+    [habillage],
+  );
+  const urlRaster = useMemo(
+    () => (cheminRaster === null ? null : urlAsset(cheminRaster)),
+    [cheminRaster],
+  );
 
   useEffect(() => {
     let vivant = true;
@@ -121,6 +155,10 @@ export function SceneDecor({
       vivant = false;
     };
   }, [habillage]);
+
+  useEffect(() => {
+    fixerRasterDisponible(null);
+  }, [urlRaster]);
 
   const vb = useMemo(() => lireViewBox(habillage.scene.viewBox), [habillage]);
   const dureeMs = animationsDesactivees ? 0 : Math.max(0, habillage.timings.recolorationMs);
@@ -145,8 +183,8 @@ export function SceneDecor({
     const lignes: string[] = [
       // La grisaille est l'état PAR DÉFAUT, pas un filtre : le SVG sort de la production avec
       // `fill="#8E97A8"`. Il n'y a donc rien à désaturer — seulement des régions à rallumer.
-      `${portee} [data-region-svg] { transition: fill ${String(dureeMs)}ms ease-in-out; }`,
-      `${portee} [data-fond-illustre] { filter: grayscale(${String(grisailleRaster)}); transition: filter ${String(dureeMs)}ms ease-in-out; }`,
+      `${portee} [data-region-svg] { fill: ${rasterDisponible === true ? 'transparent' : '#8E97A8'}; transition: fill ${String(dureeMs)}ms ease-in-out; }`,
+      `${portee} [data-fond-illustre] { display: ${rasterDisponible === true ? 'none' : 'initial'}; filter: grayscale(${String(grisailleRaster)}); transition: filter ${String(dureeMs)}ms ease-in-out; }`,
     ];
     for (const region of allumees) {
       lignes.push(
@@ -163,7 +201,7 @@ export function SceneDecor({
       );
     }
     return lignes.join('\n');
-  }, [habillage, allumees, dureeMs, animationsDesactivees, vb, grisailleRaster]);
+  }, [habillage, allumees, dureeMs, animationsDesactivees, vb, grisailleRaster, rasterDisponible]);
 
   if (corps === null) return null;
 
@@ -187,6 +225,28 @@ export function SceneDecor({
       }}
     >
       <style>{regles}</style>
+      {urlRaster === null ? null : (
+        <img
+          src={urlRaster}
+          alt=""
+          aria-hidden="true"
+          data-decor-raster={String(habillage.id)}
+          draggable={false}
+          onLoad={() => fixerRasterDisponible(true)}
+          onError={() => fixerRasterDisponible(false)}
+          style={{
+            position: 'absolute',
+            inset: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: ajustement === 'contenir' ? 'contain' : 'cover',
+            transform: zoom === 1 ? undefined : `scale(${String(zoom)})`,
+            transformOrigin: 'center',
+            filter: `grayscale(${String(grisailleRaster)})`,
+            transition: `filter ${String(dureeMs)}ms ease-in-out`,
+          }}
+        />
+      )}
       <svg
         data-decor-svg={String(habillage.id)}
         viewBox={`${String(vb.x)} ${String(vb.y)} ${String(vb.largeur)} ${String(vb.hauteur)}`}

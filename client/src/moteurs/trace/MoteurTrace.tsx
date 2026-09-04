@@ -316,7 +316,7 @@ export function MoteurTrace(
         // la porte seule désormais, avec son `BoutonEcouter`. L'ardoise en profite — elle
         // récupère la place, ce qui réduit encore le vide mesuré ci-dessus.
         display: 'grid',
-        gridTemplateRows: '1fr auto',
+        gridTemplateRows: 'auto minmax(0, 1fr) auto',
         rowGap: '0.75rem',
         blockSize: '100%',
         minBlockSize: 0,
@@ -324,6 +324,26 @@ export function MoteurTrace(
         paddingInline: '0.25rem',
       }}
     >
+      <style>{`
+        [data-moteur="trace"] [data-plateau="cible-trace"] {
+          position: static !important;
+          transform: none !important;
+          justify-self: center;
+          max-inline-size: min(92%, 30rem);
+          overflow-wrap: anywhere;
+        }
+        [data-moteur="trace"] [data-scene="trace"] {
+          max-inline-size: min(100%, 70rem);
+          max-block-size: 100%;
+        }
+        @media (max-height: 520px) {
+          [data-moteur="trace"] { row-gap: 0.35rem !important; }
+          [data-moteur="trace"] [data-plateau="cible-trace"] {
+            padding-block: 0.2rem !important;
+            font-size: clamp(1rem, 3.5vw, 1.35rem);
+          }
+        }
+      `}</style>
       {/* Cible courante : la consigne détaillée reste dans la barre de `EcranNoeud`, mais le
           graphème travaillé doit rester visible au voisinage immédiat de l'ardoise. Cette
           carte est en superposition : elle ne crée aucune rangée supplémentaire et ne
@@ -334,10 +354,7 @@ export function MoteurTrace(
         data-cible-lettre={lettre?.lettre ?? ''}
         aria-label={lettre === null ? 'Aucune lettre' : `Lettre à tracer : ${lettre.lettre}`}
         style={{
-          position: 'absolute',
-          insetBlockStart: '0.5rem',
-          insetInlineStart: '50%',
-          transform: 'translateX(-50%)',
+          position: 'static',
           zIndex: 1,
           padding: '0.35rem 0.85rem',
           backgroundColor: 'var(--parchemin, #FBF6EA)',

@@ -103,6 +103,25 @@ describe('les données de la v1 (lot L-F)', () => {
     const utiles = new Set(contenu.consignes.flatMap((c) => c.cibles.map((x) => x.couleur)));
     expect(contenu.nuancierAutorise.length).toBeGreaterThan(utiles.size);
   });
+
+  it('la consigne courante accepte ses zones dans n’importe quel ordre, sans remplir les autres', () => {
+    let etat = etatInitial();
+    while (consigneActive(etat).ciblesRestantes.length < 2) {
+      for (const cible of consigneActive(etat).ciblesRestantes) {
+        etat = peindre(etat, cible);
+      }
+    }
+
+    const [premiere, seconde] = [...consigneActive(etat).ciblesRestantes].reverse();
+    if (premiere === undefined || seconde === undefined) throw new Error('deux zones attendues requises');
+
+    etat = peindre(etat, premiere);
+    expect(etat.remplissages[premiere.region]).toBe(premiere.couleur);
+    expect(etat.remplissages[seconde.region]).toBeUndefined();
+
+    etat = peindre(etat, seconde);
+    expect(etat.remplissages[seconde.region]).toBe(seconde.couleur);
+  });
 });
 
 // ──────────────────────────────────────────────────────────── les quatre motifs de refus

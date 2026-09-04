@@ -165,10 +165,12 @@ describe('moteur histoire', () => {
     expect(habillage.moteurs).toContain('histoire');
   });
 
-  it('affiche la question variable près des réponses avec son repère d’étape', () => {
+  it('affiche la question variable près des réponses sans jargon de rang', () => {
     const { container } = render(<Harnais />);
     const carte = container.querySelector('[data-plateau="etape-histoire"]');
-    expect(carte?.textContent).toContain('Étape 1 sur 1');
+    expect(carte?.textContent).toContain('À toi de choisir');
+    expect(carte?.textContent).not.toMatch(/Étape\s+\d+\s+sur/u);
+    expect(carte?.getAttribute('aria-label')).toContain('Question actuelle');
     expect(container.querySelector('[data-cible-histoire="oui"]')?.textContent).toBe(
       'Le loup sort la nuit.',
     );

@@ -220,16 +220,20 @@ describe('moteur chemin', () => {
     const suite = container.querySelector<HTMLButtonElement>('[data-case="case-roue"]');
     expect(depart?.getAttribute('data-atteignable')).toBe('non');
     expect(depart?.getAttribute('data-consommee')).toBe('oui');
+    expect(depart?.getAttribute('data-deja-fait')).toBe('oui');
     expect(depart?.disabled).toBe(true);
+    expect(depart?.textContent).toContain('Déjà fait');
     expect(suite?.getAttribute('data-atteignable')).toBe('oui');
     expect(container.querySelectorAll('[data-trait-actif="oui"]')).toHaveLength(1);
   });
 
-  it('le message utile est placé sur le plateau, pas dans la bande basse', () => {
+  it('sépare la règle, la position courante et les chemins déjà faits sans jargon de rang', () => {
     const { container } = render(<Harnais />);
     const message = container.querySelector('[data-message-chemin="oui"]');
     expect(message?.textContent).toContain('Suis les cases où tu entends [u].');
-    expect(message?.textContent).toContain('Étape 1 sur 1');
+    expect(message?.querySelector('[data-regle-chemin="oui"]')?.textContent).toContain('règle');
+    expect(message?.querySelector('[data-cible-chemin="oui"]')?.textContent).toContain('Tu es sur');
+    expect(message?.textContent).not.toMatch(/Étape\s+\d+\s+sur/u);
     expect(message?.closest('[data-plateau="controles"]')).toBeNull();
   });
 

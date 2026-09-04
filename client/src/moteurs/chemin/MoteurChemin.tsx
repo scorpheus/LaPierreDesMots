@@ -46,7 +46,7 @@
  *   - **toute cible fait au moins 64 px** — la classe `.cible` le pose, jamais un nombre recopié.
  */
 
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { CSSProperties, ReactElement } from 'react';
 import type { ActionChemin, ContenuChemin, EtatChemin } from '@pierre/partage';
 import { styleDeLecture, useReglagesLecture } from '../../lecture/ZoneDeLecture.js';
@@ -58,7 +58,6 @@ import {
   planifierCascade,
   regionsAllumeesDepuisAcquis,
   regionsColoriables,
-  styleZoneDeJeu,
   useDerniereAllumee,
   useMesureCadre,
 } from '../eclair/mise-en-scene.js';
@@ -144,7 +143,35 @@ export function MoteurChemin(
 
   // --- la mesure du cadre -----------------------------------------------------
   const { racine, bande, cadre, hauteurBande } = useMesureCadre();
-  const { cadreJeu, bornes } = useMemo(() => cadreJeuEtBornes(cadre, hauteurBande), [cadre, hauteurBande]);
+  const regimeCompact = cadre.largeur <= 700 || cadre.hauteur <= 520;
+
+  const panneau = useRef<HTMLDivElement | null>(null);
+  const [hauteurPanneau, fixerHauteurPanneau] = useState(0);
+  useEffect(() => {
+    const noeud = panneau.current;
+    if (noeud === null) return undefined;
+    const relever = (): void => fixerHauteurPanneau(noeud.getBoundingClientRect().height);
+    relever();
+    if (typeof ResizeObserver !== 'function') return undefined;
+    const observateur = new ResizeObserver(relever);
+    observateur.observe(noeud);
+    return () => { observateur.disconnect(); };
+  }, [regimeCompact, consigneCourante?.texte, etat.position]);
+
+  const { cadreJeu: cadrePlateau, bornes: bornesPlateau } = useMemo(
+    () => cadreJeuEtBornes(cadre, hauteurBande + hauteurPanneau),
+    [cadre, hauteurBande, hauteurPanneau],
+  );
+  const stylePlateau = useMemo<CSSProperties>(
+    () => ({
+      position: 'absolute',
+      insetInlineStart: 0,
+      insetInlineEnd: 0,
+      insetBlockStart: `${String(hauteurPanneau)}px`,
+      insetBlockEnd: `${String(hauteurBande)}px`,
+    }),
+    [hauteurBande, hauteurPanneau],
+  );
 
   const regions = useMemo(() => regionsColoriables(habillage), [habillage]);
   const centroideParRegion = useMemo(
@@ -169,11 +196,11 @@ export function MoteurChemin(
         habillage,
         listesParEtape: [idsCases],
         regions,
-        cadre: cadreJeu,
-        bornes,
+        cadre: cadrePlateau,
+        bornes: bornesPlateau,
         mesurer,
       }),
-    [habillage, idsCases, regions, cadreJeu, bornes, mesurer],
+    [habillage, idsCases, regions, cadrePlateau, bornesPlateau, mesurer],
   );
   const emplacements = plans[0]?.resultat.emplacements ?? [];
   const positionParCase = useMemo(
@@ -238,6 +265,7 @@ export function MoteurChemin(
   const cibleAide = etat.aide?.cible ?? null;
 
   const positionPion = etat.position === null ? null : positionParCase.get(etat.position) ?? null;
+  const caseCourante = etat.position === null ? null : caseParId.get(etat.position) ?? null;
 
   const etiquetteRefusee = etat.dernierRefus === null ? null : etat.dernierRefus.caseVisee;
   const marqueRefusCourante = etat.dernierRefus === null ? 0 : etat.dernierRefus.instantMs;
@@ -262,6 +290,7 @@ export function MoteurChemin(
       data-termine={etat.termineMs === null ? 'non' : 'oui'}
       data-aide={etat.niveauAide}
       data-etape={etape === undefined ? '' : etape.identifiant}
+      data-composition={regimeCompact ? 'compacte' : 'confort'}
       data-regions-allumees={String(allumees.length)}
       style={{
         position: 'relative',
@@ -272,7 +301,7 @@ export function MoteurChemin(
       }}
     >
       {/* ------------------------------------------------------------- le décor, en fond */}
-      <div style={styleZoneDeJeu(hauteurBande)}>
+      <div style={stylePlateau}>
         <SceneDecor
           habillage={habillage}
           allumees={allumees}
@@ -285,7 +314,7 @@ export function MoteurChemin(
       {/* ----------------------------------------------------- les voisinages, en traits */}
       <svg
         aria-hidden="true"
-        style={{ ...styleZoneDeJeu(hauteurBande), zIndex: 1, pointerEvents: 'none' }}
+        style={{ ...stylePlateau, zIndex: 1, pointerEvents: 'none' }}
         width="100%"
         height="100%"
       >
@@ -332,7 +361,7 @@ export function MoteurChemin(
       {/* ------------------------------------------------------------- les cases, posées */}
       <div
         data-plateau="cases"
-        style={{ ...styleZoneDeJeu(hauteurBande), zIndex: 2, pointerEvents: 'none' }}
+        style={{ ...stylePlateau, zIndex: 2, pointerEvents: 'none' }}
       >
         {contenu.cases.map((caseChemin) => {
           const pos = positionParCase.get(caseChemin.id);
@@ -356,13 +385,23 @@ export function MoteurChemin(
                 data-franchie={franchie ? 'oui' : 'non'}
                 data-consommee={consommee ? 'oui' : 'non'}
                 data-aide-cible={aidee ? 'oui' : 'non'}
+                data-deja-fait={franchie || consommee ? 'oui' : 'non'}
                 className={classes.join(' ')}
                 disabled={surPion || consommee}
                 style={
                   {
                     ...styleLecture,
                     pointerEvents: 'auto',
-                    whiteSpace: 'nowrap',
+                    display: 'grid',
+                    justifyItems: 'center',
+                    alignContent: 'center',
+                    gap: '0.08rem',
+                    minInlineSize: '4rem',
+                    minBlockSize: '4rem',
+                    maxInlineSize: regimeCompact ? '8.5rem' : '12rem',
+                    padding: regimeCompact ? '0.35rem 0.5rem' : undefined,
+                    whiteSpace: 'normal',
+                    lineHeight: 1.05,
                     // Atteignable : un halo STATIQUE (aucune image-clé), pour que les captures
                     // T4 restent stables — seule la couleur de fond diffère, jamais l'ombre de
                     // `.cible:active`.
@@ -380,8 +419,12 @@ export function MoteurChemin(
                   jouer({ type: 'avancer', caseVisee: caseChemin.id }, evenement);
                 }}
               >
-                {franchie ? <span aria-hidden="true">✓&nbsp;</span> : null}
-                {caseChemin.libelle}
+                {franchie || consommee ? (
+                  <span aria-hidden="true" style={{ fontSize: '0.72em', fontWeight: 800 }}>
+                    ✓ Déjà fait
+                  </span>
+                ) : null}
+                <span>{caseChemin.libelle}</span>
               </button>
             </PorteurPose>
           );
@@ -412,33 +455,42 @@ export function MoteurChemin(
       </div>
 
       <div
+        ref={panneau}
         data-message-chemin="oui"
         data-refus-texte={messageDeRefus === '' ? 'non' : 'oui'}
         style={{
           ...styleLecture,
           position: 'absolute',
-          insetBlockStart: '0.75rem',
+          insetBlockStart: 0,
           insetInlineStart: '50%',
           zIndex: 4,
-          maxInlineSize: 'min(88%, 42rem)',
+          inlineSize: regimeCompact ? '100%' : 'auto',
+          maxInlineSize: regimeCompact ? '100%' : 'min(88%, 42rem)',
           margin: 0,
-          padding: '0.65rem 1rem',
+          padding: regimeCompact ? '0.3rem 0.55rem' : '0.65rem 1rem',
           transform: 'translateX(-50%)',
           border: '3px solid var(--trait)',
-          borderRadius: '999px',
+          borderRadius: regimeCompact ? '0 0 var(--rayon-carte) var(--rayon-carte)' : '999px',
           background: 'color-mix(in srgb, var(--parchemin) 94%, transparent)',
           boxShadow: 'var(--ombre-bd)',
           display: 'grid',
           justifyItems: 'center',
-          gap: '0.15rem',
+          gap: regimeCompact ? 0 : '0.15rem',
           textAlign: 'center',
           pointerEvents: 'none',
         } as CSSProperties}
       >
-        <span style={{ fontSize: '0.78em', fontWeight: 700, opacity: 0.75 }}>
-          Étape {String(etat.indexEtape + 1)} sur {String(etat.etapes.length)}
+        <span data-regle-chemin="oui" style={{ fontSize: regimeCompact ? '0.68em' : '0.78em', fontWeight: 700, opacity: 0.75 }}>
+          La règle du chemin
         </span>
-        <strong>{consigneCourante?.texte ?? 'Suis le bon chemin.'}</strong>
+        <strong style={{ fontSize: regimeCompact ? '0.78em' : undefined }}>
+          {consigneCourante?.texte ?? 'Suis le bon chemin.'}
+        </strong>
+        <span data-cible-chemin="oui" style={{ fontSize: regimeCompact ? '0.68em' : '0.82em', fontWeight: 700 }}>
+          {caseCourante === null
+            ? 'Choisis la première case du chemin.'
+            : `Tu es sur « ${caseCourante.libelle} ». Choisis une case voisine.`}
+        </span>
         {retourChemin === '' ? null : (
           <span data-retour-chemin="oui" style={{ fontSize: '0.82em' }}>
             {retourChemin}

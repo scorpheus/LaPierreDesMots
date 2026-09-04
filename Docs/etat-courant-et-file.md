@@ -84,6 +84,24 @@ annulé, remplacé ou reporté.
   fiche 1/1, lint ciblé sans erreur, puis les **178 visites** des 89 écrans en téléphone portrait
   et paysage sans commande perdue ni garde de composition déclenchée. La validation globale reste
   à relancer après la fin du chantier PWA concurrent.
+- La passe suivante a recomposé `tri`, `assemble`, `chemin`, `histoire`, `trace` et `grave` : les
+  règles variables sont séparées des consignes stables, les constructions sont centrées et les
+  plateaux courts ne se recouvrent plus. Les captures ciblées téléphone ont révélé puis fermé les
+  recouvrements de `chemin`, `histoire` et `grave` que les tests DOM ne pouvaient pas détecter.
+- La zone parent tient désormais à 360 px sans sous-scroll interne ; le coffre laisse ses
+  collections prendre leur hauteur en portrait et affiche bien 25 formes, 6 éclats et 6 objets
+  raster, sans SVG nominal ni cercle parasite.
+- Les décors illustrés déjà produits sont enfin raccordés automatiquement aux scènes régionales :
+  47 correspondances PNG sont présentes. Le SVG demeure la géométrie interactive et le repli si
+  le raster manque. Quatre nouveaux fonds (`fresque-murale`, `tapis`, `brume`, `forge`) sont
+  préparés dans `bac-a-sable/assets-a-valider-2026-09-04/` et attendent la validation parent avant
+  toute promotion, conformément à D7.
+- La garde de composition vérifie aussi que l'écran racine ne crée pas son propre sous-scroll
+  horizontal. Le cas croisé 568 × 320 du campement conserve maintenant le rapport exact du PNG.
+- Le balayage des 89 écrans n'est plus un test monolithique de quatre minutes : chaque format est
+  découpé en trois lots indépendants et `RESPONSIVE_LOT=1|2|3` permet de rejouer seulement le tiers
+  concerné. Les six lots téléphone (portrait et paysage) passent en 1 min 24 s au total ; un lot
+  isolé prend 12 à 15 s.
 
 ## Dernier chantier terminé : audio
 
@@ -105,7 +123,8 @@ annulé, remplacé ou reporté.
 2. Examiner avec le parent les quatre divergences de références visuelles historiques. Ne jamais
    mettre les références à jour sans sa validation.
 3. Faire une passe de finition artistique sur les écrans que le test tablette jugera encore trop
-   légers, en commençant par les éléments réellement visibles dans le parcours enfant.
+   légers, en commençant par les éléments réellement visibles dans le parcours enfant. Valider et
+   promouvoir le lot des quatre fonds préparés avant d'en générer davantage.
 4. Produire de vraies animations articulées des compagnons dans un lot séparé : une planche de
    sprites par personnage, contrôlée avec le protocole `hatch-pet`. Les portraits actuels ne sont
    pas des sprites et ne doivent pas être artificiellement étirés en fausse animation.
@@ -126,6 +145,10 @@ annulé, remplacé ou reporté.
   apparaître sur la partie nommée.
 - Fin de sortie et fin de région : la victoire, le cadeau, la région suivante et l'action pour
   continuer doivent être immédiatement compréhensibles.
+- Les six récits du moteur `histoire` divergent encore de leurs scènes. Les remplacements CE1 sont
+  préparés dans `contenu/brouillons/histoire-*.json` et décrits dans
+  [proposition-audit-editorial-histoire-2026-09-04.md](proposition-audit-editorial-histoire-2026-09-04.md) ;
+  ils ne seront promus qu'après la relecture parent.
 
 Ces points ont reçu des corrections globales et des tests, mais restent dans la file tant que le
 parent ne les a pas validés sur l'appareil réel.

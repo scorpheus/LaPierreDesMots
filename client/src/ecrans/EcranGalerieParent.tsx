@@ -44,6 +44,7 @@ export function EcranGalerieParent({
     <main
       data-ecran="galerie-parent"
       data-parent="galerie"
+      className="galerie-parent-page"
       style={{
         padding: '2rem',
         display: 'grid',
@@ -52,7 +53,7 @@ export function EcranGalerieParent({
         marginInline: 'auto'
       }}
     >
-      <header style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
+      <header className="galerie-parent-entete" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
         <h1 className="titre" style={{ fontSize: '2rem', margin: 0 }}>
           Les exercices
         </h1>

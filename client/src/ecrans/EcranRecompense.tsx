@@ -64,11 +64,11 @@ export function texteProgressionRegionale(
   total: number
 ): string {
   if (finDeSortie) {
-    return termines === total
+    return termines >= total
       ? 'Ta sortie est terminée, et cette région aussi. '
       : 'Ta sortie est terminée. Cette région continue : ';
   }
-  return termines === total ? 'Cette région est terminée. ' : 'Exercice terminé. ';
+  return termines >= total ? 'Cette région est terminée. ' : 'Exercice terminé. ';
 }
 
 /** Une région est complète seulement quand son référentiel contient des nœuds et qu'ils sont tous faits. */
@@ -685,8 +685,8 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
             progressionRegionale.termines,
             progressionRegionale.total
           )}
-          {String(progressionRegionale.termines)}{' '}
-          {progressionRegionale.termines === 1 ? 'exercice terminé' : 'exercices terminés'} sur{' '}
+          {String(Math.min(progressionRegionale.termines, progressionRegionale.total))}{' '}
+          {Math.min(progressionRegionale.termines, progressionRegionale.total) === 1 ? 'exercice terminé' : 'exercices terminés'} sur{' '}
           {String(progressionRegionale.total)} dans cette région.
         </p>
       )}

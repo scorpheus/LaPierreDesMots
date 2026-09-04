@@ -561,6 +561,7 @@ body {
   }
 }
 
+
 /* La récompense reste spectaculaire sur grand écran, mais sa décision principale ne doit jamais
    se trouver deux écrans plus bas. Une petite hauteur déclenche le même gabarit compact qu'un
    téléphone étroit, y compris sur une tablette tenue en paysage avec les barres du navigateur. */
@@ -690,6 +691,113 @@ body {
   .reglages-grille > section {
     padding: 0.75rem;
   }
+
+  .dashboard-parent,
+  .galerie-parent-page {
+    inline-size: 100%;
+    max-inline-size: 100% !important;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem !important;
+    padding: 0.75rem !important;
+  }
+
+  .dashboard-parent > *,
+  .dashboard-parent [role="tabpanel"],
+  .dashboard-parent [role="tabpanel"] > *,
+  .dashboard-parent section {
+    min-inline-size: 0;
+    max-inline-size: 100%;
+  }
+
+  .dashboard-parent :is(p, h2, h3, li, td, th) {
+    overflow-wrap: anywhere;
+  }
+
+  .dashboard-parent-entete,
+  .galerie-parent-entete {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.5rem !important;
+  }
+
+  .dashboard-parent-entete > .titre,
+  .galerie-parent-entete > .titre {
+    min-inline-size: 0;
+    font-size: clamp(1.45rem, 7vw, 1.9rem) !important;
+    line-height: 1.08;
+  }
+
+  .dashboard-parent-entete > .cible,
+  .galerie-parent-entete > .cible {
+    min-inline-size: 0;
+    padding-inline: 0.75rem;
+  }
+
+  .dashboard-parent-entete > .cible:last-child {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+
+  .dashboard-parent-onglets {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.4rem !important;
+  }
+
+  .dashboard-parent-onglets > .cible {
+    min-inline-size: 0;
+    padding-inline: 0.35rem;
+    font-size: clamp(0.82rem, 3.8vw, 1rem);
+  }
+
+  .galerie-exercices,
+  .galerie-exercices-grille,
+  .galerie-exercice-fiche,
+  .galerie-exercice-details {
+    min-inline-size: 0;
+    max-inline-size: 100%;
+  }
+
+  .galerie-exercices-grille {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .galerie-exercice-fiche {
+    padding: 0.75rem !important;
+  }
+
+  .galerie-exercice-details {
+    grid-template-columns: minmax(4rem, auto) minmax(0, 1fr) !important;
+  }
+
+  .galerie-exercice-details dd,
+  .galerie-exercices-tableau :is(th, td) {
+    overflow-wrap: anywhere;
+  }
+
+  .galerie-exercices-tableau,
+  .galerie-exercices-tableau tbody,
+  .galerie-exercices-tableau tr,
+  .galerie-exercices-tableau :is(th, td) {
+    display: block;
+    inline-size: 100%;
+  }
+
+  .galerie-exercices-tableau thead {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  .galerie-exercices-tableau tr {
+    padding-block: 0.55rem;
+  }
+
+  .galerie-exercices-tableau td {
+    text-align: start !important;
+  }
 }
 
 /* En paysage de téléphone, ajuster le campement à la largeur montrerait seulement sa moitié
@@ -739,6 +847,17 @@ body {
     font-size: 0.9rem;
     line-height: 1.15;
     text-align: center;
+  }
+}
+
+@media (max-width: 460px) {
+  .dashboard-parent-entete {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .dashboard-parent-entete > .cible {
+    grid-column: auto !important;
+    inline-size: 100%;
   }
 }
 
@@ -2810,6 +2929,10 @@ html[data-animations='desactivees'] .compagnon-portrait--tuile {
   .collections-coffre {
     display: flex;
     flex-direction: column;
+    /* L'album devient la hauteur de ses trois sections : sinon son `flex: 1` à hauteur
+       minimale nulle laisse les Éclats commencer pendant les cartes de formes à 360 px. */
+    flex: 0 0 auto;
+    min-block-size: auto;
   }
 }
 
@@ -3528,5 +3651,18 @@ html[data-animations='desactivees'] .compagnon-portrait--tuile {
     min-inline-size: 0;
     font-size: clamp(1.1rem, 6vw, 1.5rem) !important;
     line-height: 1.1;
+  }
+}
+
+/* Le seuil étroit et le seuil paysage se croisent sur un téléphone 568 × 320. La règle mobile
+   de campement donne la largeur au décor ; le paysage court doit reprendre la hauteur, sinon la
+   case s'aplatit et ses prises ne correspondent plus à l'image. Placée en fin de cascade, cette
+   règle tranche volontairement le conflit des deux media queries. */
+@media (orientation: landscape) and (max-height: 520px) and (max-width: 600px) {
+  [data-scene="campement"] {
+    inline-size: auto !important;
+    block-size: calc(100svh - 7rem) !important;
+    max-inline-size: 100% !important;
+    max-block-size: calc(100svh - 7rem) !important;
   }
 }

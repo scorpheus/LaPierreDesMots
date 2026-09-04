@@ -123,6 +123,20 @@ describe('rien ne sort jamais du coffre, et le vide se montre (R14, D25)', () =>
     );
   });
 
+  it('laisse l’album prendre sa hauteur en portrait : les collections ne se chevauchent pas', () => {
+    const feuille = readFileSync(
+      join(RACINE_DEPOT, 'client', 'src', 'styles', 'global.css'),
+      'utf8',
+    );
+
+    // À 360 × 640, un album `flex: 1` à hauteur minimale nulle plaçait la rangée
+    // « Éclats » sur les cartes de formes. Le défilement doit appartenir à la page,
+    // jamais à un album qui écrase ses propres sections.
+    expect(feuille).toMatch(
+      /@media \(max-width: 900px\), \(orientation: portrait\) \{[\s\S]*?\.collections-coffre \{[\s\S]*?flex: 0 0 auto;[\s\S]*?min-block-size: auto;/u,
+    );
+  });
+
   it('accueille l’enfant avec le coffre illustré publié, pas un pictogramme technique', async () => {
     await monterEtAttendre();
     const illustration = document.querySelector<HTMLImageElement>(
@@ -132,6 +146,35 @@ describe('rien ne sort jamais du coffre, et le vide se montre (R14, D25)', () =>
     expect(illustration?.src).toContain('assets/coffre/coffre-ouvert-v1.png');
     expect(illustration?.classList.contains('coffre-en-tete-image')).toBe(true);
     expect(document.querySelector('.coffre-en-tete-illustration')).not.toBeNull();
+  });
+
+  it('emploie les images publiées pour les formes, les Éclats et le butin', async () => {
+    await monterEtAttendre();
+
+    await waitFor(() => {
+      expect(document.querySelectorAll('[data-case-etagere]')).toHaveLength(25);
+    });
+
+    const formes = [...document.querySelectorAll('[data-case-etagere]')];
+    expect(formes).toHaveLength(25);
+    for (const forme of formes) {
+      expect(forme.querySelector('img')?.getAttribute('src')).toMatch(
+        /assets\/coffre\/formes\/[^/]+\.png$/u,
+      );
+      expect(forme.querySelector('svg')).toBeNull();
+    }
+
+    const eclat = document.querySelector('[data-collection="eclat"]');
+    expect(eclat?.querySelector('img')?.getAttribute('src')).toMatch(
+      /assets\/coffre\/eclats\/[^/]+\.png$/u,
+    );
+    expect(eclat?.querySelector('svg')).toBeNull();
+
+    const objet = document.querySelector('[data-collection="objet"]');
+    expect(objet?.querySelector('img')?.getAttribute('src')).toMatch(
+      /assets\/coffre\/objets\/[^/]+\.png$/u,
+    );
+    expect(objet?.querySelector('svg')).toBeNull();
   });
 
   it('donne une carte lumineuse aux acquis sans modifier le creux des cases restantes', async () => {

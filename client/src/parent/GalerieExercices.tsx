@@ -52,6 +52,7 @@ export function GalerieExercices({
     <section
       data-indicateur="galerie"
       data-galerie-total={String(catalogue.entrees.length)}
+      className="galerie-exercices"
       style={{ display: 'grid', gap: '1rem' }}
     >
       <h2 className="titre" style={{ fontSize: '1.5rem', margin: 0 }}>
@@ -73,6 +74,7 @@ export function GalerieExercices({
         </p>
       ) : (
         <div
+          className="galerie-exercices-grille"
           style={{
             display: 'grid',
             gap: '1rem',
@@ -100,7 +102,7 @@ export function GalerieExercices({
       {competences.length === 0 ? (
         <p style={{ margin: 0 }}>Aucun exercice ne déclare de compétence.</p>
       ) : (
-        <table style={{ borderCollapse: 'collapse', inlineSize: '100%' }}>
+        <table className="galerie-exercices-tableau" style={{ borderCollapse: 'collapse', inlineSize: '100%' }}>
           <thead>
             <tr>
               <th scope="col" style={{ textAlign: 'left' }}>Compétence</th>
@@ -149,7 +151,7 @@ export function GalerieExercices({
       {moteurs.length === 0 ? (
         <p style={{ margin: 0 }}>Aucun exercice n’est installé.</p>
       ) : (
-        <table style={{ borderCollapse: 'collapse', inlineSize: '100%' }}>
+        <table className="galerie-exercices-tableau" style={{ borderCollapse: 'collapse', inlineSize: '100%' }}>
           <thead>
             <tr>
               <th scope="col" style={{ textAlign: 'left' }}>Jeu</th>

@@ -48,8 +48,8 @@ environ 313×208 px après correction.
 - **Réglages de lecture — corrigés, validation parent requise** : l'en-tête emploie maintenant
   une typographie fluide et garde ses deux commandes sur la même ligne compacte ; les cartes
   réduisent uniquement leurs marges sur petit écran.
-- **Dashboard et galerie parent** : onglets rognés, scrolls internes très longs et 46 px de
-  débordement dans la galerie à 360 px.
+- **Dashboard et galerie parent — corrigés** : en-têtes et onglets se recomposent à 360 px, les
+  cartes et tableaux suivent la largeur disponible et l'écran racine ne crée plus de sous-scroll.
 - **Fiche du coffre — corrigée, validation parent requise** : le focus de la sortie faisait
   défiler la modale jusqu'en bas dès son ouverture, donc coupait le titre. Le focus utilise
   désormais `preventScroll`; en paysage court, titre, objet, explication et sortie tiennent
@@ -60,17 +60,22 @@ environ 313×208 px après correction.
 - `eclair` — corrigé, validation visuelle à refaire : l'aide et la progression occupaient deux
   calques absolus au même sommet. Ils partagent désormais une bande structurée ; le téléphone
   conserve le rang d'étape et une commande courte « Voir/Revoir » de 64 px.
-- `tri` : règle, éléments et bacs ne restent pas visibles ensemble sur petits écrans.
-- `assemble`, `grave`, `trace`, `chemin`, `histoire` : la scène se comprime ou les contrôles sont
-  poussés sous le pli selon l'orientation.
+- `tri` — corrigé : règle, éléments et bacs restent visibles ensemble sur petits écrans.
+- `assemble`, `grave`, `trace`, `chemin`, `histoire` — corrigés sur les captures ciblées téléphone :
+  les assemblages et mots sont centrés, les règles variables sont isolées et aucun cartouche ne
+  recouvre désormais les choix.
 - Les grands écrans étirent trop certains exercices et diluent leur hiérarchie.
 
 La correction doit se faire **par moteur partagé**, jamais par 76 exceptions locales.
 
 ### P1 — dette artistique et éditoriale encore visible
 
-- Les 38 exercices de la Forêt, du Volcan et de la Cité utilisent encore un décor SVG de blockout.
-- 8 nœuds n'ont pas les assets d'images attendus pour leurs cartes, géodes ou vignettes.
+- Les PNG déjà produits sont désormais raccordés automatiquement aux scènes régionales : 47
+  correspondances existent, tandis que le SVG conserve les zones interactives et sert de repli.
+  Quatre décors encore absents sont préparés pour une validation parent en un seul lot.
+- L'inventaire mécanique ne trouve aucun chemin image cassé. Les 249 champs `asset: null` sont à
+  trier par famille : certains moteurs demandent volontairement du texte, les vrais besoins
+  picturaux doivent être mutualisés plutôt que générés un par un.
 - 6 nœuds parlent d'« images » alors que le contenu visible est constitué de phrases ; une consigne
   d'appariement décrit également une mécanique différente de celle rendue.
 
@@ -96,6 +101,7 @@ La correction doit se faire **par moteur partagé**, jamais par 76 exceptions lo
    correction implantée, validation parent encore requise.
 2. Gabarit `colorie` P0 — corrigé ; puis `eclair` et `tri`.
 3. Récompense, réglages, fiche coffre et outils parent.
-4. Autres gabarits de moteurs.
-5. Remplacement artistique des 38 blockouts et production des 8 familles d'assets manquants.
+4. Autres gabarits de moteurs — passe téléphone implantée ; validation tablette réelle à faire.
+5. Valider les quatre nouveaux fonds puis promouvoir uniquement ceux acceptés ; auditer ensuite
+   les familles d'objets réellement picturales.
 6. Nouvelle campagne complète sur les 540 états-formats, puis test parent sur téléphone et tablette.

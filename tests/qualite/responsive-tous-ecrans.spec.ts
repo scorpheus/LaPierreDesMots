@@ -71,6 +71,14 @@ async function defautsDe(page: Page, ecran: string): Promise<DefautResponsive[]>
       });
     }
 
+    const ecranCourant = document.querySelector<HTMLElement>('[data-ecran]');
+    if (ecranCourant !== null && ecranCourant.scrollWidth > ecranCourant.clientWidth + 1) {
+      defauts.push({
+        ecran: nomEcran,
+        raison: `écran avec sous-scroll horizontal (${String(ecranCourant.scrollWidth)} > ${String(ecranCourant.clientWidth)})`,
+      });
+    }
+
     const controles = [...document.querySelectorAll<HTMLElement>('button, [role="button"], a, input')];
     for (const controle of controles) {
       const style = getComputedStyle(controle);
@@ -155,26 +163,38 @@ async function defautsDe(page: Page, ecran: string): Promise<DefautResponsive[]>
 }
 
 test.describe('responsive — aucune commande ne disparaît', () => {
-  /* Chaque cas traverse les 89 écrans. Les quatre lancer en parallèle après les campagnes axe et
-     latence peut affamer un seul serveur jusqu'au délai de 240 s, alors qu'ils terminent ensemble
-     en moins d'une minute à froid. En série, chaque mesure dispose du navigateur qu'elle juge et
-     le résultat ne dépend plus de la contention laissée par la phase précédente. */
+  /* Les recettes sont découpées en lots : le raccordement des grands décors raster a rendu le cas
+     monolithique plus long que son délai, puis le test a accusé l'écran suivant sans même l'avoir
+     ouvert. Chaque lot garde un navigateur et une limite propres. La série reste séquentielle pour
+     ne pas affamer le serveur ; `RESPONSIVE_LOT=2` permet une itération courte sur un seul tiers. */
   test.describe.configure({ mode: 'serial' });
 
+  const tailleLot = 30;
+  const filtreLot = Number.parseInt(process.env.RESPONSIVE_LOT ?? '', 10);
+  const lots = Array.from(
+    { length: Math.ceil(recettesDEcrans().length / tailleLot) },
+    (_, index) => ({
+      numero: index + 1,
+      recettes: recettesDEcrans().slice(index * tailleLot, (index + 1) * tailleLot),
+    }),
+  ).filter((lot) => !Number.isFinite(filtreLot) || filtreLot === lot.numero);
+
   for (const format of FORMATS) {
-    test(`${format.nom} — tous les écrans restent utilisables`, async ({ page }) => {
-      test.setTimeout(240_000);
-      await page.setViewportSize({ width: format.largeur, height: format.hauteur });
-      const defauts: DefautResponsive[] = [];
-      for (const recette of recettesDEcrans()) {
-        await recette.aller(page);
-        await expect(page.locator(`[data-ecran="${recette.attendu}"]`)).toBeVisible();
-        defauts.push(...(await defautsDe(page, recette.nom)));
-      }
-      expect(
-        defauts,
-        `${format.nom} (${String(format.largeur)}×${String(format.hauteur)} CSS) : défauts responsive`,
-      ).toEqual([]);
+    lots.forEach((lot) => {
+      test(`${format.nom} — écrans du lot ${String(lot.numero)} restent utilisables`, async ({ page }) => {
+        test.setTimeout(150_000);
+        await page.setViewportSize({ width: format.largeur, height: format.hauteur });
+        const defauts: DefautResponsive[] = [];
+        for (const recette of lot.recettes) {
+          await recette.aller(page);
+          await expect(page.locator(`[data-ecran="${recette.attendu}"]`)).toBeVisible();
+          defauts.push(...(await defautsDe(page, recette.nom)));
+        }
+        expect(
+          defauts,
+          `${format.nom} (${String(format.largeur)}×${String(format.hauteur)} CSS), lot ${String(lot.numero)} : défauts responsive`,
+        ).toEqual([]);
+      });
     });
   }
 });

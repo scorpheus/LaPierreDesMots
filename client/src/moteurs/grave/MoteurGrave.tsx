@@ -50,6 +50,7 @@ import { ZoneDeLecture, styleDeLecture, useReglagesLecture } from '../../lecture
 import type { ProprietesMoteur } from '../types.js';
 import {
   cadreJeuEtBornes,
+  CIBLE_MIN,
   mesurerTexte,
   planifierCascade,
   regionsAllumeesDepuisAcquis,
@@ -144,10 +145,20 @@ export function MoteurGrave(
 
   // --- la mesure du cadre ------------------------------------------------------
   const { racine, bande, cadre, hauteurBande } = useMesureCadre();
+  const regimeTelephonePortrait = cadre.largeur <= 420 && cadre.hauteur > cadre.largeur;
   const { cadreJeu, bornes } = useMemo(() => cadreJeuEtBornes(cadre, hauteurBande), [cadre, hauteurBande]);
   const bornesClavier = useMemo(
-    () => ({ ...bornes, yMin: Math.max(bornes.yMin, 140) }),
-    [bornes],
+    () => ({
+      ...bornes,
+      // Le clavier vit sous le mot : sur un paysage court, réserver cette moitié évite que les
+      // touches soient dessinées par-dessus la case à trous. La borne reste dérivée du cadre,
+      // jamais d'une résolution particulière.
+      yMin: Math.min(
+        Math.max(bornes.yMin, cadreJeu.hauteur * (cadreJeu.hauteur < 420 ? 0.53 : 0.46)),
+        Math.max(bornes.yMin, bornes.yMax - CIBLE_MIN),
+      ),
+    }),
+    [bornes, cadreJeu.hauteur],
   );
 
   const regions = useMemo(() => regionsColoriables(habillage), [habillage]);
@@ -234,6 +245,22 @@ export function MoteurGrave(
         borderRadius: 'var(--rayon-carte)',
       }}
     >
+      <style>{`
+        [data-moteur="grave"] [data-mot-central="oui"] {
+          inset-block-start: 42%;
+          max-inline-size: min(88%, 30rem);
+        }
+        [data-moteur="grave"] [data-plateau="etape-grave"] {
+          max-inline-size: calc(100% - 1.5rem);
+          overflow-wrap: anywhere;
+        }
+        @media (max-height: 520px) {
+          [data-moteur="grave"] [data-mot-central="oui"] {
+            inset-block-start: 38%;
+            padding-block: 0.35rem;
+          }
+        }
+      `}</style>
       {/* La barre haute porte la règle générale. Ici, le repère concret change avec chaque
           mot et chaque case, sans révéler la lettre attendue. */}
       <div
@@ -255,14 +282,12 @@ export function MoteurGrave(
           ...styleLecture,
         } as CSSProperties}
       >
-        <span style={{ fontWeight: 700 }}>{`Étape ${String(etat.indexEtape + 1)} / ${String(etat.etapes.length)}`}</span>
-        <span aria-hidden="true" style={{ color: 'var(--soleil)', fontSize: '1.25em' }}>✦</span>
         <span style={{ fontWeight: 800 }}>
           {consigne === null
             ? 'Mot à compléter'
             : trouCourant === null
-              ? `Mot « ${consigne.mot} » complet`
-              : `Mot « ${consigne.mot} » · case ${String(trouCourant.position + 1)}`}
+              ? `Le mot « ${consigne.mot} » est complet`
+              : `Écris le mot « ${consigne.mot} »`}
         </span>
       </div>
 
@@ -280,26 +305,47 @@ export function MoteurGrave(
       {/* ------------------------------------------------------- le clavier, posé dessus */}
       <div
         data-plateau="clavier"
-        style={{ ...styleZoneDeJeu(hauteurBande), zIndex: 1, pointerEvents: 'none' }}
+        style={
+          regimeTelephonePortrait
+            ? {
+                position: 'absolute',
+                insetInlineStart: 0,
+                insetInlineEnd: 0,
+                insetBlockStart: '58%',
+                zIndex: 3,
+                display: 'flex',
+                flexWrap: 'wrap',
+                justifyContent: 'center',
+                gap: '0.75rem',
+                pointerEvents: 'none',
+              }
+            : { ...styleZoneDeJeu(hauteurBande), zIndex: 1, pointerEvents: 'none' }
+        }
       >
-        {emplacementsClavier.map((emplacement) => {
-          const refusee = lettreRefusee === emplacement.cle;
+        {(regimeTelephonePortrait ? contenu.clavier : emplacementsClavier.map((item) => item.cle)).map((cle) => {
+          const emplacement = emplacementsClavier.find((item) => item.cle === cle);
+          if (!regimeTelephonePortrait && emplacement === undefined) return null;
+          const refusee = lettreRefusee === cle;
           const classes = ['cible'];
           if (!animationsDesactivees && refusee) classes.push('oscillation');
-          return (
-            <PorteurPose key={emplacement.cle} x={emplacement.x} y={emplacement.y}>
+          const bouton = (
               <button
-                key={refusee ? `${emplacement.cle}-${String(marqueRefusCourante)}` : emplacement.cle}
+                key={refusee ? `${cle}-${String(marqueRefusCourante)}` : cle}
                 type="button"
                 className={classes.join(' ')}
-                data-lettre={emplacement.cle}
+                data-lettre={cle}
                 style={{ ...styleLecture, pointerEvents: 'auto', whiteSpace: 'nowrap' } as CSSProperties}
                 onClick={(evenement) => {
-                  jouer({ type: 'graver', lettre: emplacement.cle }, evenement);
+                  jouer({ type: 'graver', lettre: cle }, evenement);
                 }}
               >
-                {emplacement.cle}
+                {cle}
               </button>
+          );
+          if (regimeTelephonePortrait) return bouton;
+          return (
+            <PorteurPose key={cle} x={emplacement?.x ?? 0} y={emplacement?.y ?? 0}>
+              {bouton}
             </PorteurPose>
           );
         })}
@@ -310,9 +356,9 @@ export function MoteurGrave(
         data-corps-minimal="48"
         style={{
           position: 'absolute',
-          insetBlockStart: '4.5rem',
+          insetBlockStart: '42%',
           insetInlineStart: '50%',
-          transform: 'translateX(-50%)',
+          transform: 'translate(-50%, -50%)',
           zIndex: 2,
           minInlineSize: '12rem',
           padding: '0.5rem 1rem',
@@ -321,6 +367,7 @@ export function MoteurGrave(
           background: 'var(--parchemin)',
           boxShadow: 'var(--ombre-bd)',
           textAlign: 'center',
+          maxInlineSize: 'min(88%, 30rem)',
         }}
       >
         <ZoneDeLecture

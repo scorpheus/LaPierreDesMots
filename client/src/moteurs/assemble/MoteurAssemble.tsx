@@ -117,6 +117,17 @@ const PADDING_Y = 12;
 const BORDURE = 4;
 const CIBLE_MIN = 64;
 
+/** Le plateau assemble doit laisser l'écran porter le défilement : couper le moteur masque
+ * les derniers blocs ou la ligne de réponse sur téléphone court. */
+const FEUILLE_RESPONSIVE_ASSEMBLE = `
+  [data-moteur="assemble"] { overflow: visible !important; }
+  [data-moteur="assemble"] [data-plateau="blocs"] { overflow: visible; }
+  [data-moteur="assemble"] [data-plateau="mot"] { max-inline-size: 100%; }
+  @media (max-width: 600px) {
+    [data-moteur="assemble"] [data-plateau="mot"] { padding-inline: 0.5rem !important; }
+  }
+`;
+
 /**
  * Largeur moyenne d'un glyphe d'Andika, en fraction du corps. Reprise à l'identique de
  * `MoteurPhrase.tsx` — même police, même profil de lecture, même parti pris (se tromper du
@@ -631,7 +642,7 @@ export function MoteurAssemble(
         borderRadius: 'var(--rayon-carte)',
       }}
     >
-      <style>{FEUILLE_DU_VOL}</style>
+      <style>{FEUILLE_DU_VOL}{FEUILLE_RESPONSIVE_ASSEMBLE}</style>
 
       {/* ---------------------------------------------------------------- le décor, en fond */}
       <div style={{ position: 'absolute', ...ZONE_DE_JEU(hauteurBande), zIndex: 0 }}>

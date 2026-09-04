@@ -45,6 +45,7 @@ export function FicheExercice({ entree, surLancer }: ProprietesFicheExercice): R
       data-galerie-moteur={String(entree.moteur)}
       data-galerie-habillage={String(entree.habillage)}
       data-galerie-statut={entree.statut}
+      className="galerie-exercice-fiche"
       style={{
         display: 'grid',
         gap: '0.5rem',
@@ -56,6 +57,7 @@ export function FicheExercice({ entree, surLancer }: ProprietesFicheExercice): R
       <h3 style={{ fontSize: '1.25rem', margin: 0 }}>{entree.titre}</h3>
 
       <dl
+        className="galerie-exercice-details"
         style={{
           display: 'grid',
           gridTemplateColumns: 'auto 1fr',

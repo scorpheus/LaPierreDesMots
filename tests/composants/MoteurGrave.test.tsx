@@ -184,13 +184,23 @@ describe('moteur grave', () => {
     expect(container.querySelector('[data-plateau="mot"] [data-lecture="oui"]')).toBeNull();
   });
 
-  it('cartouche : le mot et la case courante sont identifiés avec l’étape', () => {
+  it('cartouche : le mot courant est annoncé sans jargon technique', () => {
     const { container } = render(<Harnais />);
     const cartouche = container.querySelector<HTMLElement>('[data-plateau="etape-grave"]');
-    expect(cartouche?.textContent).toContain('Étape 1 / 1');
-    expect(cartouche?.textContent).toContain('bal');
-    expect(cartouche?.textContent).toContain('case 1');
+    expect(cartouche?.textContent).toContain('Écris le mot « bal »');
+    expect(cartouche?.textContent).not.toContain('Étape');
+    expect(cartouche?.textContent).not.toContain('case');
     expect(cartouche?.querySelector('[data-attendu]')).toBeNull();
+  });
+
+  it('composition : le mot reste centré et les touches conservent une cible tactile', () => {
+    const { container } = render(<Harnais />);
+    const mot = container.querySelector<HTMLElement>('[data-mot-central="oui"]');
+    expect(mot?.style.insetBlockStart).toBe('42%');
+    expect(mot?.style.transform).toContain('-50%');
+    const touches = [...container.querySelectorAll<HTMLButtonElement>('[data-lettre]')];
+    expect(touches.length).toBeGreaterThan(0);
+    expect(touches.every((t) => t.classList.contains('cible'))).toBe(true);
   });
 
   it('mauvaise réponse : une erreur comptée, rien de rouge, la tentative reste réussie', () => {

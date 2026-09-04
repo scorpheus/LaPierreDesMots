@@ -127,6 +127,8 @@ export function MoteurHistoire(
 
   // --- la mesure du cadre -----------------------------------------------------
   const { racine, bande, cadre, hauteurBande } = useMesureCadre();
+  const regimeCompact = cadre.largeur <= 700 || cadre.hauteur <= 520;
+  const regimeTelephonePortrait = cadre.largeur <= 420 && cadre.hauteur > cadre.largeur;
 
   // Le récit n'est PAS un panneau exclusif qui bloquerait les options : R15 le rend
   // consultable pendant les questions, gratuitement, donc les deux doivent rester tapables
@@ -134,6 +136,8 @@ export function MoteurHistoire(
   // `phrase` (R60) — et le décor avec ses options se replient dans ce qui reste.
   const recit = useRef<HTMLDivElement | null>(null);
   const [hauteurRecit, fixerHauteurRecit] = useState(0);
+  const panneauQuestion = useRef<HTMLDivElement | null>(null);
+  const [hauteurQuestion, fixerHauteurQuestion] = useState(0);
   useEffect(() => {
     if (!etat.recitVisible) {
       fixerHauteurRecit(0);
@@ -154,19 +158,32 @@ export function MoteurHistoire(
     };
   }, [etat.recitVisible]);
 
+  useEffect(() => {
+    const noeud = panneauQuestion.current;
+    if (noeud === null) return undefined;
+    const relever = (): void => fixerHauteurQuestion(noeud.getBoundingClientRect().height);
+    relever();
+    if (typeof ResizeObserver !== 'function') return undefined;
+    const observateur = new ResizeObserver(relever);
+    observateur.observe(noeud);
+    return () => { observateur.disconnect(); };
+  }, [questionCourante?.texte, regimeCompact]);
+
+  const margeQuestion = regimeCompact ? 4 : 8;
+
   const { cadreJeu, bornes } = useMemo(
-    () => cadreJeuEtBornes(cadre, hauteurBande + hauteurRecit),
-    [cadre, hauteurBande, hauteurRecit],
+    () => cadreJeuEtBornes(cadre, hauteurBande + hauteurRecit + hauteurQuestion + margeQuestion),
+    [cadre, hauteurBande, hauteurRecit, hauteurQuestion, margeQuestion],
   );
   const styleZoneJeu = useMemo<CSSProperties>(
     () => ({
       position: 'absolute',
       insetInlineStart: 0,
       insetInlineEnd: 0,
-      insetBlockStart: `${String(hauteurRecit)}px`,
+      insetBlockStart: `${String(hauteurRecit + hauteurQuestion + margeQuestion)}px`,
       insetBlockEnd: `${String(hauteurBande)}px`,
     }),
-    [hauteurRecit, hauteurBande],
+    [hauteurRecit, hauteurQuestion, margeQuestion, hauteurBande],
   );
 
   const regions = useMemo(() => regionsColoriables(habillage), [habillage]);
@@ -221,6 +238,7 @@ export function MoteurHistoire(
       data-termine={etat.termineMs === null ? 'non' : 'oui'}
       data-aide={etat.niveauAide}
       data-etape={etape === undefined ? '' : etape.identifiant}
+      data-composition={regimeCompact ? 'compacte' : 'confort'}
       data-regions-allumees={String(allumees.length)}
       style={{
         position: 'relative',
@@ -244,18 +262,21 @@ export function MoteurHistoire(
           data-visible="oui"
           style={{
             position: 'absolute',
-            insetInlineStart: 0,
-            insetInlineEnd: 0,
+            insetInlineStart: '50%',
             insetBlockStart: 0,
+            inlineSize: 'min(100%, 52rem)',
+            transform: 'translateX(-50%)',
             zIndex: 2,
-            maxBlockSize: '45%',
+            maxBlockSize: regimeTelephonePortrait ? '24%' : regimeCompact ? '34%' : '45%',
             display: 'grid',
             alignContent: 'start',
-            padding: '0.75rem',
+            padding: regimeCompact ? '0.5rem 0.65rem' : '0.75rem',
             overflow: 'auto',
             backgroundColor: 'var(--parchemin)',
             border: 'var(--epaisseur-trait) solid var(--trait)',
             borderRadius: 'var(--rayon-carte)',
+            fontSize: regimeTelephonePortrait ? 'clamp(1rem, 5vw, 1.2rem)' : undefined,
+            lineHeight: regimeTelephonePortrait ? 1.35 : undefined,
           }}
         >
           <ZoneDeLecture texte={contenu.recit} motsCles={[]} etiquette={`L’histoire : ${contenu.titre}`} />
@@ -267,20 +288,21 @@ export function MoteurHistoire(
       )}
 
       {/* La règle générale reste dans la barre de `EcranNoeud`. La question, qui change à
-          chaque étape, reste ici au voisinage des réponses. La carte est superposée et
+          chaque réponse, reste ici au voisinage des réponses. La carte est superposée et
           descend sous le récit lorsqu'il est ouvert : ni doublon, ni décor rétréci. */}
       <div
+        ref={panneauQuestion}
         data-plateau="etape-histoire"
         data-etape-courante={String(Math.min(etat.indexEtape + 1, etat.etapes.length))}
         data-etapes-total={String(etat.etapes.length)}
-        aria-label={`Étape ${String(Math.min(etat.indexEtape + 1, etat.etapes.length))} sur ${String(etat.etapes.length)}`}
+        aria-label={`Question actuelle : ${questionCourante?.texte ?? 'Réponds à la question.'}`}
         style={{
           position: 'absolute',
-          insetBlockStart: `${String(hauteurRecit + 12)}px`,
+          insetBlockStart: `${String(hauteurRecit)}px`,
           insetInlineStart: '50%',
           transform: 'translateX(-50%)',
           zIndex: 4,
-          padding: '0.5rem 0.75rem',
+          padding: regimeCompact ? '0.25rem 0.5rem' : '0.5rem 0.75rem',
           backgroundColor: 'var(--parchemin, #FBF6EA)',
           border: 'var(--epaisseur-trait, 2px) solid var(--trait, #1B2440)',
           borderRadius: 'var(--rayon-carte, 1rem)',
@@ -288,12 +310,14 @@ export function MoteurHistoire(
           pointerEvents: 'none',
           ...styleLecture,
           fontWeight: 700,
+          fontSize: regimeTelephonePortrait ? '1rem' : undefined,
           textAlign: 'center',
-          maxInlineSize: 'min(88%, 42rem)',
+          inlineSize: regimeCompact ? '100%' : 'auto',
+          maxInlineSize: regimeCompact ? '100%' : 'min(88%, 42rem)',
         } as CSSProperties}
       >
-        <span style={{ display: 'block', fontSize: '0.85em', opacity: 0.72 }}>
-          Étape {String(Math.min(etat.indexEtape + 1, etat.etapes.length))} sur {String(etat.etapes.length)}
+        <span data-regle-histoire="oui" style={{ display: 'block', fontSize: '0.85em', opacity: 0.72 }}>
+          À toi de choisir
         </span>
         <span data-cible-histoire="oui">
           {questionCourante?.texte ?? 'Réponds à la question.'}
@@ -314,27 +338,50 @@ export function MoteurHistoire(
       {/* ------------------------------------------------------- les options, posées dessus
           TOUJOURS tapables — y compris pendant que le récit est ouvert au-dessus : R15 dit
           « gratuit », pas « exclusif ». */}
-      <div data-plateau="options" style={{ ...styleZoneJeu, zIndex: 1, pointerEvents: 'none' }}>
-        {emplacements.map((emplacement) => {
-          const option = optionParId.get(emplacement.cle);
+      <div
+        data-plateau="options"
+        style={
+          regimeTelephonePortrait
+            ? {
+                ...styleZoneJeu,
+                zIndex: 1,
+                pointerEvents: 'none',
+                display: 'flex',
+                flexWrap: 'wrap',
+                alignContent: 'center',
+                justifyContent: 'center',
+                gap: '0.5rem',
+                padding: '0.5rem',
+              }
+            : { ...styleZoneJeu, zIndex: 1, pointerEvents: 'none' }
+        }
+      >
+        {(regimeTelephonePortrait ? etape?.ordreAffichage ?? [] : emplacements.map((item) => item.cle)).map((cle) => {
+          const emplacement = emplacements.find((item) => item.cle === cle);
+          if (!regimeTelephonePortrait && emplacement === undefined) return null;
+          const option = optionParId.get(cle);
           if (option === undefined) return null;
-          const refusee = etiquetteRefusee === emplacement.cle;
+          const refusee = etiquetteRefusee === cle;
           const classes = ['cible'];
           if (!animationsDesactivees && refusee) classes.push('oscillation');
-          return (
-            <PorteurPose key={emplacement.cle} x={emplacement.x} y={emplacement.y}>
+          const bouton = (
               <button
-                key={refusee ? `${emplacement.cle}-${String(marqueRefusCourante)}` : emplacement.cle}
+                key={refusee ? `${cle}-${String(marqueRefusCourante)}` : cle}
                 type="button"
-                data-option={emplacement.cle}
+                data-option={cle}
                 className={classes.join(' ')}
                 style={{ ...styleLecture, pointerEvents: 'auto', whiteSpace: 'nowrap' } as CSSProperties}
                 onClick={(evenement) => {
-                  jouer({ type: 'repondre', option: emplacement.cle }, evenement);
+                  jouer({ type: 'repondre', option: cle }, evenement);
                 }}
               >
                 {option.libelle}
               </button>
+          );
+          if (regimeTelephonePortrait) return bouton;
+          return (
+            <PorteurPose key={cle} x={emplacement?.x ?? 0} y={emplacement?.y ?? 0}>
+              {bouton}
             </PorteurPose>
           );
         })}
@@ -351,8 +398,8 @@ export function MoteurHistoire(
           insetBlockEnd: 0,
           zIndex: 3,
           display: 'grid',
-          gap: '0.5rem',
-          padding: '0.75rem',
+          gap: regimeCompact ? '0.2rem' : '0.5rem',
+          padding: regimeCompact ? '0.35rem' : '0.75rem',
         }}
       >
         <button
@@ -372,7 +419,12 @@ export function MoteurHistoire(
           aria-live="polite"
           data-refus-texte={messageDeRefus === '' ? 'non' : 'oui'}
           data-animations={animationsDesactivees ? 'calmes' : 'vives'}
-          style={{ ...styleLecture, margin: 0, minBlockSize: '1.5em' } as CSSProperties}
+          style={{
+            ...styleLecture,
+            display: messageDeRefus === '' && etat.aide === null ? 'none' : undefined,
+            margin: 0,
+            minBlockSize: '1.5em',
+          } as CSSProperties}
         >
           {messageDeRefus === '' ? (etat.aide === null ? '' : (etat.aide.texte ?? '')) : messageDeRefus}
         </p>

@@ -467,6 +467,9 @@ describe('la récompense suit le plan pédagogique actif', () => {
     expect(texteProgressionRegionale(true, 13, 13)).toBe(
       'Ta sortie est terminée, et cette région aussi. '
     );
+    expect(texteProgressionRegionale(true, 14, 13)).toBe(
+      'Ta sortie est terminée, et cette région aussi. '
+    );
   });
 });
 

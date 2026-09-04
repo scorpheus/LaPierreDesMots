@@ -516,6 +516,22 @@ describe('branches défensives', () => {
     expect(plan.etapes.map((etape) => etape.noeud)).not.toContain('n2');
   });
 
+  it('ne perd jamais le dernier inédit quand il partage son habillage avec un acquis', () => {
+    const candidats: NoeudCandidat[] = [
+      { ...candidat(1), habillage: 'h-partage', difficulte: 1 },
+      { ...candidat(2), habillage: 'h-autre', difficulte: 2 },
+      { ...candidat(3), habillage: 'h-partage', difficulte: 3 },
+    ];
+    for (let graine = 0; graine < 100; graine += 1) {
+      const plan = composerSortie(
+        entreeAvec(candidats, { noeudsTermines: ['n1', 'n2'] }),
+        PARAMETRES,
+        creerAlea(graine),
+      );
+      expect(plan.etapes.map((etape) => etape.noeud), `graine ${graine}`).toContain('n3');
+    }
+  });
+
   it('garantit le dernier nœud inédit au lieu de le perdre parmi les reprises', () => {
     const plan = composerSortie(
       entreeAvec(

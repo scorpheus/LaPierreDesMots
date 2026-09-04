@@ -163,9 +163,10 @@ export function EcranDashboard({
     <main
       data-ecran="dashboard"
       data-parent="dashboard"
+      className="dashboard-parent"
       style={{ padding: '2rem', display: 'grid', gap: '2rem', maxInlineSize: '60rem', marginInline: 'auto' }}
     >
-      <header style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
+      <header className="dashboard-parent-entete" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
         <h1 className="titre" style={{ fontSize: '2rem', margin: 0 }}>
           {prenom === undefined ? 'Suivi' : `Suivi de ${prenom}`}
         </h1>
@@ -194,7 +195,7 @@ export function EcranDashboard({
           `role="tablist"` et `aria-selected` plutôt qu'un simple trio de boutons : axe-core en
           fait un critère `serious`, et `tests/qualite/a11y-galerie.spec.ts` le vérifie — en les
           NOMMANT, pour qu'un onglet perdu se voie au lieu de faire baisser un compte. */}
-      <div role="tablist" aria-label="Espace parent" style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+      <div className="dashboard-parent-onglets" role="tablist" aria-label="Espace parent" style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
         {(
           [
             ['suivi', 'Le suivi'],

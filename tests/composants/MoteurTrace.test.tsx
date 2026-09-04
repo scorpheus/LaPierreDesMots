@@ -162,6 +162,7 @@ describe('MoteurTrace — data-axe porte UN axe, jamais deux (D23)', () => {
     const cible = document.querySelector('[data-plateau="cible-trace"]');
     expect(cible?.getAttribute('data-cible-lettre')).toBe(contenuBd.lettres[0]!.lettre);
     expect(cible?.textContent).toContain(`Lettre : ${contenuBd.lettres[0]!.lettre}`);
+    expect((cible as HTMLElement | null)?.style.position).toBe('static');
   });
 
   it('l’exercice b/d annonce gauche-droite, et rien d’autre', () => {
