@@ -19,9 +19,17 @@
     "file": "assets/cahier-FRE2jHvp.png",
     "src": "../contenu/assets/cartes/cite/cahier.png"
   },
+  "../contenu/assets/cartes/cite/carotte.png": {
+    "file": "assets/carotte-C4DSRKqq.png",
+    "src": "../contenu/assets/cartes/cite/carotte.png"
+  },
   "../contenu/assets/cartes/cite/cartable.png": {
     "file": "assets/cartable-BHpZlkY-.png",
     "src": "../contenu/assets/cartes/cite/cartable.png"
+  },
+  "../contenu/assets/cartes/cite/citron.png": {
+    "file": "assets/citron-DI0YZEw5.png",
+    "src": "../contenu/assets/cartes/cite/citron.png"
   },
   "../contenu/assets/cartes/cite/cour.png": {
     "file": "assets/cour-DSCFZLPS.png",
@@ -42,6 +50,30 @@
   "../contenu/assets/cartes/cite/matin-gris.png": {
     "file": "assets/matin-gris-yjdIWu9M.png",
     "src": "../contenu/assets/cartes/cite/matin-gris.png"
+  },
+  "../contenu/assets/cartes/cite/olive.png": {
+    "file": "assets/olive-8F891d7z.png",
+    "src": "../contenu/assets/cartes/cite/olive.png"
+  },
+  "../contenu/assets/cartes/cite/pomme-panier.png": {
+    "file": "assets/pomme-panier-Duq_50L-.png",
+    "src": "../contenu/assets/cartes/cite/pomme-panier.png"
+  },
+  "../contenu/assets/cartes/cite/prune-bol.png": {
+    "file": "assets/prune-bol-Cdg8VIyS.png",
+    "src": "../contenu/assets/cartes/cite/prune-bol.png"
+  },
+  "../contenu/assets/cartes/cite/raisin.png": {
+    "file": "assets/raisin-CzguQ49o.png",
+    "src": "../contenu/assets/cartes/cite/raisin.png"
+  },
+  "../contenu/assets/cartes/cite/salade.png": {
+    "file": "assets/salade-CBE8xs4U.png",
+    "src": "../contenu/assets/cartes/cite/salade.png"
+  },
+  "../contenu/assets/cartes/cite/tomate.png": {
+    "file": "assets/tomate-DasGPkBv.png",
+    "src": "../contenu/assets/cartes/cite/tomate.png"
   },
   "../contenu/assets/cartes/foret/arbre-vert.png": {
     "file": "assets/arbre-vert-BsCleBnm.png",
@@ -319,6 +351,22 @@
     "file": "assets/nenuphar-marais-BgkbVIQh.png",
     "src": "../contenu/assets/coffre/objets/nenuphar-marais.png"
   },
+  "../contenu/assets/compagnons/animations/bulle-8.png": {
+    "file": "assets/bulle-8-B8FbU5M8.png",
+    "src": "../contenu/assets/compagnons/animations/bulle-8.png"
+  },
+  "../contenu/assets/compagnons/animations/filou-8.png": {
+    "file": "assets/filou-8-C34TIxBy.png",
+    "src": "../contenu/assets/compagnons/animations/filou-8.png"
+  },
+  "../contenu/assets/compagnons/animations/plume-8-v2.png": {
+    "file": "assets/plume-8-v2-C4Hz39jJ.png",
+    "src": "../contenu/assets/compagnons/animations/plume-8-v2.png"
+  },
+  "../contenu/assets/compagnons/animations/roc-8.png": {
+    "file": "assets/roc-8-ZxXTrrfi.png",
+    "src": "../contenu/assets/compagnons/animations/roc-8.png"
+  },
   "../contenu/assets/compagnons/bulle.png": {
     "file": "assets/bulle-4JfqYtLb.png",
     "src": "../contenu/assets/compagnons/bulle.png"
@@ -336,7 +384,7 @@
     "src": "../contenu/assets/compagnons/roc.png"
   },
   "../contenu/assets/decors/brume.png": {
-    "file": "assets/brume-BJf5N-Ke.png",
+    "file": "assets/brume-DuB9hMM3.png",
     "src": "../contenu/assets/decors/brume.png"
   },
   "../contenu/assets/decors/carte-six-regions.png": {
@@ -540,91 +588,91 @@
     "src": "../contenu/assets/decors/exercices/volcan-wagons.png"
   },
   "../contenu/assets/decors/forge.png": {
-    "file": "assets/forge-DRmle6YA.png",
+    "file": "assets/forge-BlQJzkVn.png",
     "src": "../contenu/assets/decors/forge.png"
   },
   "../contenu/assets/decors/fresque-murale.png": {
-    "file": "assets/fresque-murale-DAZL4yYP.png",
+    "file": "assets/fresque-murale-DAJFnzCw.png",
     "src": "../contenu/assets/decors/fresque-murale.png"
   },
   "../contenu/assets/decors/tapis.png": {
-    "file": "assets/tapis-CPhTcktA.png",
+    "file": "assets/tapis-7-MZ4tmB.png",
     "src": "../contenu/assets/decors/tapis.png"
   },
   "../contenu/assets/gobi/animation/aide.svg": {
-    "file": "assets/aide-CU5OSznF.svg",
+    "file": "assets/aide-p02K0_sd.svg",
     "src": "../contenu/assets/gobi/animation/aide.svg"
   },
   "../contenu/assets/gobi/animation/apparition.svg": {
-    "file": "assets/apparition-Dxv2y9UY.svg",
+    "file": "assets/apparition-B3Oqm2Q5.svg",
     "src": "../contenu/assets/gobi/animation/apparition.svg"
   },
   "../contenu/assets/gobi/animation/hesitation.svg": {
-    "file": "assets/hesitation-CaA19R5w.svg",
+    "file": "assets/hesitation-BBCjGqUA.svg",
     "src": "../contenu/assets/gobi/animation/hesitation.svg"
   },
   "../contenu/assets/gobi/animation/joie.svg": {
-    "file": "assets/joie-DrgxI_56.svg",
+    "file": "assets/joie-C4xsL_9o.svg",
     "src": "../contenu/assets/gobi/animation/joie.svg"
   },
   "../contenu/assets/gobi/animation/repos.svg": {
-    "file": "assets/repos-DGU2F7Q1.svg",
+    "file": "assets/repos-DBQqkFKN.svg",
     "src": "../contenu/assets/gobi/animation/repos.svg"
   },
   "../contenu/assets/gobi/stades/stade-1.svg": {
-    "file": "assets/stade-1-dCEDV_aI.svg",
+    "file": "assets/stade-1-CthjjCEp.svg",
     "src": "../contenu/assets/gobi/stades/stade-1.svg"
   },
   "../contenu/assets/gobi/stades/stade-10.svg": {
-    "file": "assets/stade-10-mDRcWkZQ.svg",
+    "file": "assets/stade-10-CZ7_Z-rx.svg",
     "src": "../contenu/assets/gobi/stades/stade-10.svg"
   },
   "../contenu/assets/gobi/stades/stade-2.svg": {
-    "file": "assets/stade-2-DF3Nn1OZ.svg",
+    "file": "assets/stade-2-Cqn-wJEu.svg",
     "src": "../contenu/assets/gobi/stades/stade-2.svg"
   },
   "../contenu/assets/gobi/stades/stade-3.svg": {
-    "file": "assets/stade-3-Bop4sxda.svg",
+    "file": "assets/stade-3-BX1TgdiU.svg",
     "src": "../contenu/assets/gobi/stades/stade-3.svg"
   },
   "../contenu/assets/gobi/stades/stade-4.svg": {
-    "file": "assets/stade-4-B-NfaQa_.svg",
+    "file": "assets/stade-4-BDV0NFIT.svg",
     "src": "../contenu/assets/gobi/stades/stade-4.svg"
   },
   "../contenu/assets/gobi/stades/stade-5.svg": {
-    "file": "assets/stade-5-w9Bsqibp.svg",
+    "file": "assets/stade-5-DGn9Kokz.svg",
     "src": "../contenu/assets/gobi/stades/stade-5.svg"
   },
   "../contenu/assets/gobi/stades/stade-6.svg": {
-    "file": "assets/stade-6-ec84P6CY.svg",
+    "file": "assets/stade-6-Kp2v33JV.svg",
     "src": "../contenu/assets/gobi/stades/stade-6.svg"
   },
   "../contenu/assets/gobi/stades/stade-7.svg": {
-    "file": "assets/stade-7-On0V3YuY.svg",
+    "file": "assets/stade-7-CG1WPJN5.svg",
     "src": "../contenu/assets/gobi/stades/stade-7.svg"
   },
   "../contenu/assets/gobi/stades/stade-8.svg": {
-    "file": "assets/stade-8-ClZ0LUhw.svg",
+    "file": "assets/stade-8-CB2Ros1z.svg",
     "src": "../contenu/assets/gobi/stades/stade-8.svg"
   },
   "../contenu/assets/gobi/stades/stade-9.svg": {
-    "file": "assets/stade-9-DxrRxKKy.svg",
+    "file": "assets/stade-9-BPM2raNh.svg",
     "src": "../contenu/assets/gobi/stades/stade-9.svg"
   },
   "../contenu/assets/objets/oiseau.svg": {
-    "file": "assets/oiseau-7DJ9hoJp.svg",
+    "file": "assets/oiseau-FBCoe-WG.svg",
     "src": "../contenu/assets/objets/oiseau.svg"
   },
   "../contenu/assets/objets/parapluie.svg": {
-    "file": "assets/parapluie-B88qSM1v.svg",
+    "file": "assets/parapluie-xj_jpAmg.svg",
     "src": "../contenu/assets/objets/parapluie.svg"
   },
   "../contenu/assets/objets/poisson.svg": {
-    "file": "assets/poisson-C4_DRyOt.svg",
+    "file": "assets/poisson-T3d7wgfp.svg",
     "src": "../contenu/assets/objets/poisson.svg"
   },
   "../contenu/assets/objets/soleil.svg": {
-    "file": "assets/soleil-DkQZHUY9.svg",
+    "file": "assets/soleil-CVU_LB_i.svg",
     "src": "../contenu/assets/objets/soleil.svg"
   },
   "../contenu/assets/ouverture/appel.png": {
@@ -648,192 +696,188 @@
     "src": "../contenu/assets/ouverture/pierre.png"
   },
   "../contenu/assets/vignettes/cite-pellicule-01/vignette-caillou.png": {
-    "file": "assets/vignette-caillou-GFDCB1tK.png",
+    "file": "assets/vignette-caillou-BJcaGMrp.png",
     "src": "../contenu/assets/vignettes/cite-pellicule-01/vignette-caillou.png"
   },
   "../contenu/assets/vignettes/cite-pellicule-01/vignette-danse.png": {
-    "file": "assets/vignette-danse-DQZNClLn.png",
+    "file": "assets/vignette-danse-BwuOy0pP.png",
     "src": "../contenu/assets/vignettes/cite-pellicule-01/vignette-danse.png"
   },
   "../contenu/assets/vignettes/cite-pellicule-01/vignette-grand.png": {
-    "file": "assets/vignette-grand-BQRdMF8O.png",
+    "file": "assets/vignette-grand-DKWxHiw0.png",
     "src": "../contenu/assets/vignettes/cite-pellicule-01/vignette-grand.png"
   },
   "../contenu/assets/vignettes/cite-pellicule-01/vignette-montre.png": {
-    "file": "assets/vignette-montre-DXchwXj9.png",
+    "file": "assets/vignette-montre-c5BIFUVZ.png",
     "src": "../contenu/assets/vignettes/cite-pellicule-01/vignette-montre.png"
   },
   "../contenu/assets/vignettes/cite-pellicule-01/vignette-petit.png": {
-    "file": "assets/vignette-petit-Bql3sCQ1.png",
+    "file": "assets/vignette-petit-CloWOb0p.png",
     "src": "../contenu/assets/vignettes/cite-pellicule-01/vignette-petit.png"
   },
   "../contenu/assets/vignettes/cite-pellicule-01/vignette-plage.png": {
-    "file": "assets/vignette-plage-DqGa4nyQ.png",
+    "file": "assets/vignette-plage-DxZTN4pm.png",
     "src": "../contenu/assets/vignettes/cite-pellicule-01/vignette-plage.png"
   },
   "../contenu/assets/vignettes/cite-pellicule-01/vignette-plume.png": {
-    "file": "assets/vignette-plume-Dj1ULJFC.png",
+    "file": "assets/vignette-plume-C3-Cdj9e.png",
     "src": "../contenu/assets/vignettes/cite-pellicule-01/vignette-plume.png"
   },
   "../contenu/assets/vignettes/cite-pellicule-01/vignette-sable.png": {
-    "file": "assets/vignette-sable-DZHNEN6z.png",
+    "file": "assets/vignette-sable-BPACcjEZ.png",
     "src": "../contenu/assets/vignettes/cite-pellicule-01/vignette-sable.png"
   },
   "../contenu/assets/vignettes/cite-pellicule-01/vignette-seau.png": {
-    "file": "assets/vignette-seau-DtaWT8wM.png",
+    "file": "assets/vignette-seau-Bo16GIMe.png",
     "src": "../contenu/assets/vignettes/cite-pellicule-01/vignette-seau.png"
   },
-  "../contenu/assets/vignettes/cite-pellicule-02/vignette-cahier.png": {
-    "file": "assets/vignette-cahier-BhTWLY_I.png",
-    "src": "../contenu/assets/vignettes/cite-pellicule-02/vignette-cahier.png"
+  "../contenu/assets/vignettes/cite-pellicule-02/vignette-cahier-ouvert.png": {
+    "file": "assets/vignette-cahier-ouvert-WutEW9vS.png",
+    "src": "../contenu/assets/vignettes/cite-pellicule-02/vignette-cahier-ouvert.png"
   },
-  "../contenu/assets/vignettes/cite-pellicule-02/vignette-compte.png": {
-    "file": "assets/vignette-compte-keGIj2fB.png",
-    "src": "../contenu/assets/vignettes/cite-pellicule-02/vignette-compte.png"
+  "../contenu/assets/vignettes/cite-pellicule-02/vignette-cahier-range.png": {
+    "file": "assets/vignette-cahier-range-CBoLu0VC.png",
+    "src": "../contenu/assets/vignettes/cite-pellicule-02/vignette-cahier-range.png"
   },
-  "../contenu/assets/vignettes/cite-pellicule-02/vignette-dessin.png": {
-    "file": "assets/vignette-dessin-Bph-_ExH.png",
-    "src": "../contenu/assets/vignettes/cite-pellicule-02/vignette-dessin.png"
+  "../contenu/assets/vignettes/cite-pellicule-02/vignette-cahier-termine.png": {
+    "file": "assets/vignette-cahier-termine-CIQOir1e.png",
+    "src": "../contenu/assets/vignettes/cite-pellicule-02/vignette-cahier-termine.png"
   },
-  "../contenu/assets/vignettes/cite-pellicule-02/vignette-jardin.png": {
-    "file": "assets/vignette-jardin-B6JPvU3P.png",
-    "src": "../contenu/assets/vignettes/cite-pellicule-02/vignette-jardin.png"
+  "../contenu/assets/vignettes/cite-pellicule-02/vignette-deux-cubes.png": {
+    "file": "assets/vignette-deux-cubes-DKI1eR1B.png",
+    "src": "../contenu/assets/vignettes/cite-pellicule-02/vignette-deux-cubes.png"
   },
   "../contenu/assets/vignettes/cite-pellicule-02/vignette-lit.png": {
-    "file": "assets/vignette-lit-D0zk_3lV.png",
+    "file": "assets/vignette-lit-DUYKp5dL.png",
     "src": "../contenu/assets/vignettes/cite-pellicule-02/vignette-lit.png"
   },
-  "../contenu/assets/vignettes/cite-pellicule-02/vignette-maison.png": {
-    "file": "assets/vignette-maison-DVW1sfMH.png",
-    "src": "../contenu/assets/vignettes/cite-pellicule-02/vignette-maison.png"
+  "../contenu/assets/vignettes/cite-pellicule-02/vignette-papa-aide.png": {
+    "file": "assets/vignette-papa-aide-D2H9GT2s.png",
+    "src": "../contenu/assets/vignettes/cite-pellicule-02/vignette-papa-aide.png"
   },
-  "../contenu/assets/vignettes/cite-pellicule-02/vignette-papa.png": {
-    "file": "assets/vignette-papa-6JD5-IzH.png",
-    "src": "../contenu/assets/vignettes/cite-pellicule-02/vignette-papa.png"
+  "../contenu/assets/vignettes/cite-pellicule-02/vignette-sac-ferme.png": {
+    "file": "assets/vignette-sac-ferme-COYLDLLZ.png",
+    "src": "../contenu/assets/vignettes/cite-pellicule-02/vignette-sac-ferme.png"
   },
-  "../contenu/assets/vignettes/cite-pellicule-02/vignette-sac.png": {
-    "file": "assets/vignette-sac-D7O3vBtI.png",
-    "src": "../contenu/assets/vignettes/cite-pellicule-02/vignette-sac.png"
+  "../contenu/assets/vignettes/cite-pellicule-02/vignette-trois-cubes.png": {
+    "file": "assets/vignette-trois-cubes-Cq9alnk_.png",
+    "src": "../contenu/assets/vignettes/cite-pellicule-02/vignette-trois-cubes.png"
   },
-  "../contenu/assets/vignettes/cite-pellicule-02/vignette-table.png": {
-    "file": "assets/vignette-table-ZMyJViXj.png",
-    "src": "../contenu/assets/vignettes/cite-pellicule-02/vignette-table.png"
+  "../contenu/assets/vignettes/cite-pellicule-02/vignette-troisieme-cube.png": {
+    "file": "assets/vignette-troisieme-cube-BP6Uy570.png",
+    "src": "../contenu/assets/vignettes/cite-pellicule-02/vignette-troisieme-cube.png"
   },
-  "../contenu/assets/vignettes/cite-vitrail/vignette-grand.png": {
-    "file": "assets/vignette-grand-dUJE1AG7.png",
-    "src": "../contenu/assets/vignettes/cite-vitrail/vignette-grand.png"
+  "../contenu/assets/vignettes/cite-vitrail/vignette-arc-en-ciel.png": {
+    "file": "assets/vignette-arc-en-ciel-Cx5lubwy.png",
+    "src": "../contenu/assets/vignettes/cite-vitrail/vignette-arc-en-ciel.png"
   },
-  "../contenu/assets/vignettes/cite-vitrail/vignette-gros.png": {
-    "file": "assets/vignette-gros-Q4MjsUUq.png",
-    "src": "../contenu/assets/vignettes/cite-vitrail/vignette-gros.png"
+  "../contenu/assets/vignettes/cite-vitrail/vignette-fleur-arrosee.png": {
+    "file": "assets/vignette-fleur-arrosee-BaOLsny7.png",
+    "src": "../contenu/assets/vignettes/cite-vitrail/vignette-fleur-arrosee.png"
   },
-  "../contenu/assets/vignettes/cite-vitrail/vignette-jardin.png": {
-    "file": "assets/vignette-jardin-CSqtQnvJ.png",
-    "src": "../contenu/assets/vignettes/cite-vitrail/vignette-jardin.png"
+  "../contenu/assets/vignettes/cite-vitrail/vignette-fleur-ouverte.png": {
+    "file": "assets/vignette-fleur-ouverte-CTCoeiJC.png",
+    "src": "../contenu/assets/vignettes/cite-vitrail/vignette-fleur-ouverte.png"
   },
-  "../contenu/assets/vignettes/cite-vitrail/vignette-lac.png": {
-    "file": "assets/vignette-lac-BJ58KKsa.png",
-    "src": "../contenu/assets/vignettes/cite-vitrail/vignette-lac.png"
+  "../contenu/assets/vignettes/cite-vitrail/vignette-fleur-seche.png": {
+    "file": "assets/vignette-fleur-seche-qpSyq2WO.png",
+    "src": "../contenu/assets/vignettes/cite-vitrail/vignette-fleur-seche.png"
   },
-  "../contenu/assets/vignettes/cite-vitrail/vignette-nuage.png": {
-    "file": "assets/vignette-nuage-CLeNfPmG.png",
-    "src": "../contenu/assets/vignettes/cite-vitrail/vignette-nuage.png"
+  "../contenu/assets/vignettes/cite-vitrail/vignette-nuage-gris.png": {
+    "file": "assets/vignette-nuage-gris-GNaEwvOJ.png",
+    "src": "../contenu/assets/vignettes/cite-vitrail/vignette-nuage-gris.png"
   },
-  "../contenu/assets/vignettes/cite-vitrail/vignette-petit.png": {
-    "file": "assets/vignette-petit-DfMKj2MQ.png",
-    "src": "../contenu/assets/vignettes/cite-vitrail/vignette-petit.png"
+  "../contenu/assets/vignettes/cite-vitrail/vignette-pluie-forte.png": {
+    "file": "assets/vignette-pluie-forte-Batanzv3.png",
+    "src": "../contenu/assets/vignettes/cite-vitrail/vignette-pluie-forte.png"
   },
-  "../contenu/assets/vignettes/cite-vitrail/vignette-pluie.png": {
-    "file": "assets/vignette-pluie-CuJMbWFq.png",
-    "src": "../contenu/assets/vignettes/cite-vitrail/vignette-pluie.png"
+  "../contenu/assets/vignettes/cite-vitrail/vignette-tonneau-plein.png": {
+    "file": "assets/vignette-tonneau-plein-BddlUXI7.png",
+    "src": "../contenu/assets/vignettes/cite-vitrail/vignette-tonneau-plein.png"
   },
-  "../contenu/assets/vignettes/cite-vitrail/vignette-riviere.png": {
-    "file": "assets/vignette-riviere-Cfrwv-7u.png",
-    "src": "../contenu/assets/vignettes/cite-vitrail/vignette-riviere.png"
+  "../contenu/assets/vignettes/cite-vitrail/vignette-tonneau-rempli.png": {
+    "file": "assets/vignette-tonneau-rempli-CtE4EW5l.png",
+    "src": "../contenu/assets/vignettes/cite-vitrail/vignette-tonneau-rempli.png"
   },
-  "../contenu/assets/vignettes/cite-vitrail/vignette-soleil.png": {
-    "file": "assets/vignette-soleil-NFh5Bv_u.png",
-    "src": "../contenu/assets/vignettes/cite-vitrail/vignette-soleil.png"
+  "../contenu/assets/vignettes/cite-vitrail/vignette-tonneau-vide.png": {
+    "file": "assets/vignette-tonneau-vide-BMRhYbVI.png",
+    "src": "../contenu/assets/vignettes/cite-vitrail/vignette-tonneau-vide.png"
   },
-  "../contenu/assets/vignettes/galeries-frise/vignette-bol.png": {
-    "file": "assets/vignette-bol-BKjKJWag.png",
-    "src": "../contenu/assets/vignettes/galeries-frise/vignette-bol.png"
+  "../contenu/assets/vignettes/galeries-frise/vignette-balle-lancee.png": {
+    "file": "assets/vignette-balle-lancee-KBXlrY5u.png",
+    "src": "../contenu/assets/vignettes/galeries-frise/vignette-balle-lancee.png"
   },
-  "../contenu/assets/vignettes/galeries-frise/vignette-dame.png": {
-    "file": "assets/vignette-dame-Dp0HFVt0.png",
-    "src": "../contenu/assets/vignettes/galeries-frise/vignette-dame.png"
+  "../contenu/assets/vignettes/galeries-frise/vignette-balle-rapportee.png": {
+    "file": "assets/vignette-balle-rapportee-DqHQoOmi.png",
+    "src": "../contenu/assets/vignettes/galeries-frise/vignette-balle-rapportee.png"
   },
-  "../contenu/assets/vignettes/galeries-frise/vignette-dos.png": {
-    "file": "assets/vignette-dos-CuGCPhxC.png",
-    "src": "../contenu/assets/vignettes/galeries-frise/vignette-dos.png"
+  "../contenu/assets/vignettes/galeries-frise/vignette-balle-tenue.png": {
+    "file": "assets/vignette-balle-tenue-BQmTNiq_.png",
+    "src": "../contenu/assets/vignettes/galeries-frise/vignette-balle-tenue.png"
   },
-  "../contenu/assets/vignettes/galeries-frise/vignette-four.png": {
-    "file": "assets/vignette-four-C0w_rhgN.png",
-    "src": "../contenu/assets/vignettes/galeries-frise/vignette-four.png"
+  "../contenu/assets/vignettes/galeries-frise/vignette-bol-range.png": {
+    "file": "assets/vignette-bol-range-B8OoZ3PS.png",
+    "src": "../contenu/assets/vignettes/galeries-frise/vignette-bol-range.png"
   },
-  "../contenu/assets/vignettes/galeries-frise/vignette-panier.png": {
-    "file": "assets/vignette-panier-D6gFdpd5.png",
-    "src": "../contenu/assets/vignettes/galeries-frise/vignette-panier.png"
+  "../contenu/assets/vignettes/galeries-frise/vignette-panier-porte.png": {
+    "file": "assets/vignette-panier-porte-BxZ3NQ88.png",
+    "src": "../contenu/assets/vignettes/galeries-frise/vignette-panier-porte.png"
   },
-  "../contenu/assets/vignettes/galeries-frise/vignette-pot.png": {
-    "file": "assets/vignette-pot-BdjCXwl5.png",
-    "src": "../contenu/assets/vignettes/galeries-frise/vignette-pot.png"
+  "../contenu/assets/vignettes/galeries-frise/vignette-panier-vide.png": {
+    "file": "assets/vignette-panier-vide-CCguprsk.png",
+    "src": "../contenu/assets/vignettes/galeries-frise/vignette-panier-vide.png"
+  },
+  "../contenu/assets/vignettes/galeries-frise/vignette-pot-bout.png": {
+    "file": "assets/vignette-pot-bout-DWblaS79.png",
+    "src": "../contenu/assets/vignettes/galeries-frise/vignette-pot-bout.png"
+  },
+  "../contenu/assets/vignettes/galeries-frise/vignette-pot-feu.png": {
+    "file": "assets/vignette-pot-feu-D7JWUv7J.png",
+    "src": "../contenu/assets/vignettes/galeries-frise/vignette-pot-feu.png"
+  },
+  "../contenu/assets/vignettes/galeries-frise/vignette-pot-rempli.png": {
+    "file": "assets/vignette-pot-rempli-CnEdnnN1.png",
+    "src": "../contenu/assets/vignettes/galeries-frise/vignette-pot-rempli.png"
   },
   "../contenu/assets/vignettes/galeries-frise/vignette-sac.png": {
     "file": "assets/vignette-sac-CUxszlE7.png",
     "src": "../contenu/assets/vignettes/galeries-frise/vignette-sac.png"
   },
-  "../contenu/assets/vignettes/galeries-frise/vignette-tas.png": {
-    "file": "assets/vignette-tas-DYuOyI3_.png",
-    "src": "../contenu/assets/vignettes/galeries-frise/vignette-tas.png"
+  "../contenu/assets/vignettes/volcan-fresque/vignette-abeille-nez.png": {
+    "file": "assets/vignette-abeille-nez-BnAt1hkV.png",
+    "src": "../contenu/assets/vignettes/volcan-fresque/vignette-abeille-nez.png"
   },
-  "../contenu/assets/vignettes/galeries-frise/vignette-verre.png": {
-    "file": "assets/vignette-verre-_1uhI9a4.png",
-    "src": "../contenu/assets/vignettes/galeries-frise/vignette-verre.png"
-  },
-  "../contenu/assets/vignettes/galeries-frise/vignette-zebre.png": {
-    "file": "assets/vignette-zebre-D2oNU86_.png",
-    "src": "../contenu/assets/vignettes/galeries-frise/vignette-zebre.png"
+  "../contenu/assets/vignettes/volcan-fresque/vignette-balle-lancee.png": {
+    "file": "assets/vignette-balle-lancee-DSznW7CH.png",
+    "src": "../contenu/assets/vignettes/volcan-fresque/vignette-balle-lancee.png"
   },
   "../contenu/assets/vignettes/volcan-fresque/vignette-champignon.png": {
-    "file": "assets/vignette-champignon-BA9fuoz9.png",
+    "file": "assets/vignette-champignon-BRKpsWRB.png",
     "src": "../contenu/assets/vignettes/volcan-fresque/vignette-champignon.png"
   },
-  "../contenu/assets/vignettes/volcan-fresque/vignette-cour.png": {
-    "file": "assets/vignette-cour-DdFDU3q7.png",
-    "src": "../contenu/assets/vignettes/volcan-fresque/vignette-cour.png"
+  "../contenu/assets/vignettes/volcan-fresque/vignette-cochon-court.png": {
+    "file": "assets/vignette-cochon-court-Cy9ZnVCr.png",
+    "src": "../contenu/assets/vignettes/volcan-fresque/vignette-cochon-court.png"
   },
-  "../contenu/assets/vignettes/volcan-fresque/vignette-danse.png": {
-    "file": "assets/vignette-danse-DhrT8_LP.png",
-    "src": "../contenu/assets/vignettes/volcan-fresque/vignette-danse.png"
+  "../contenu/assets/vignettes/volcan-fresque/vignette-cochon-ruche.png": {
+    "file": "assets/vignette-cochon-ruche-CjypZl5w.png",
+    "src": "../contenu/assets/vignettes/volcan-fresque/vignette-cochon-ruche.png"
   },
-  "../contenu/assets/vignettes/volcan-fresque/vignette-joue.png": {
-    "file": "assets/vignette-joue-CKnnG2_D.png",
-    "src": "../contenu/assets/vignettes/volcan-fresque/vignette-joue.png"
+  "../contenu/assets/vignettes/volcan-fresque/vignette-pierre-soulevee.png": {
+    "file": "assets/vignette-pierre-soulevee-BcccERTK.png",
+    "src": "../contenu/assets/vignettes/volcan-fresque/vignette-pierre-soulevee.png"
   },
-  "../contenu/assets/vignettes/volcan-fresque/vignette-ligne.png": {
-    "file": "assets/vignette-ligne-BsoEzXEF.png",
-    "src": "../contenu/assets/vignettes/volcan-fresque/vignette-ligne.png"
+  "../contenu/assets/vignettes/volcan-fresque/vignette-pierre.png": {
+    "file": "assets/vignette-pierre-CWKyRphu.png",
+    "src": "../contenu/assets/vignettes/volcan-fresque/vignette-pierre.png"
   },
-  "../contenu/assets/vignettes/volcan-fresque/vignette-montagne.png": {
-    "file": "assets/vignette-montagne-O2enZ1Kn.png",
-    "src": "../contenu/assets/vignettes/volcan-fresque/vignette-montagne.png"
+  "../contenu/assets/vignettes/volcan-fresque/vignette-quilles-placees.png": {
+    "file": "assets/vignette-quilles-placees-Dmuaw3uU.png",
+    "src": "../contenu/assets/vignettes/volcan-fresque/vignette-quilles-placees.png"
   },
-  "../contenu/assets/vignettes/volcan-fresque/vignette-mouche.png": {
-    "file": "assets/vignette-mouche-VoZbfw2Q.png",
-    "src": "../contenu/assets/vignettes/volcan-fresque/vignette-mouche.png"
-  },
-  "../contenu/assets/vignettes/volcan-fresque/vignette-quille.png": {
-    "file": "assets/vignette-quille-CjfhQHlm.png",
-    "src": "../contenu/assets/vignettes/volcan-fresque/vignette-quille.png"
-  },
-  "../contenu/assets/vignettes/volcan-fresque/vignette-ruche.png": {
-    "file": "assets/vignette-ruche-CmV_Z939.png",
-    "src": "../contenu/assets/vignettes/volcan-fresque/vignette-ruche.png"
-  },
-  "../contenu/assets/vignettes/volcan-fresque/vignette-sac.png": {
-    "file": "assets/vignette-sac-DIzFQhGJ.png",
-    "src": "../contenu/assets/vignettes/volcan-fresque/vignette-sac.png"
+  "../contenu/assets/vignettes/volcan-fresque/vignette-quilles-tombees.png": {
+    "file": "assets/vignette-quilles-tombees-BBUa1GMQ.png",
+    "src": "../contenu/assets/vignettes/volcan-fresque/vignette-quilles-tombees.png"
   },
   "../contenu/audio/aides-gobi/aide-gobi-montre-cible.normal.16d5cf94.opus": {
     "file": "assets/aide-gobi-montre-cible.normal.16d5cf94-D9FLCR52.opus",
@@ -3316,7 +3360,7 @@
     "src": "../contenu/audio/volcan/volcan-wagons-tri-02-wagon-milieu.normal.47942a5a.opus"
   },
   "../contenu/habillages/campement/campement.svg": {
-    "file": "assets/campement-Cn_RxpoW.svg",
+    "file": "assets/campement-B66OET3w.svg",
     "src": "../contenu/habillages/campement/campement.svg"
   },
   "../contenu/habillages/campement/chaudron-fond.png": {
@@ -3331,249 +3375,245 @@
     "file": "assets/chaudron-trait-Dq3NC921.png",
     "src": "../contenu/habillages/campement/chaudron-trait.png"
   },
-  "../contenu/habillages/carte/carte-monde-v2.svg": {
-    "file": "assets/carte-monde-v2-B_PAF7aZ.svg",
-    "src": "../contenu/habillages/carte/carte-monde-v2.svg"
-  },
   "../contenu/habillages/carte/carte-monde-v3.svg": {
-    "file": "assets/carte-monde-v3-Boxucnvf.svg",
+    "file": "assets/carte-monde-v3-3LKIB-1N.svg",
     "src": "../contenu/habillages/carte/carte-monde-v3.svg"
   },
   "../contenu/habillages/cite-des-histoires/banniere.svg": {
-    "file": "assets/banniere-B10anan6.svg",
+    "file": "assets/banniere-IwedCa9j.svg",
     "src": "../contenu/habillages/cite-des-histoires/banniere.svg"
   },
   "../contenu/habillages/cite-des-histoires/bibliotheque.svg": {
-    "file": "assets/bibliotheque-CGBCby8-.svg",
+    "file": "assets/bibliotheque-C3N8Fr2e.svg",
     "src": "../contenu/habillages/cite-des-histoires/bibliotheque.svg"
   },
   "../contenu/habillages/cite-des-histoires/cartes.svg": {
-    "file": "assets/cartes-BbB4ZhZq.svg",
+    "file": "assets/cartes-CZU4QRk9.svg",
     "src": "../contenu/habillages/cite-des-histoires/cartes.svg"
   },
   "../contenu/habillages/cite-des-histoires/enseigne.svg": {
-    "file": "assets/enseigne-DJn_mMs1.svg",
+    "file": "assets/enseigne-BH2kTI7w.svg",
     "src": "../contenu/habillages/cite-des-histoires/enseigne.svg"
   },
   "../contenu/habillages/cite-des-histoires/fresque-murale.svg": {
-    "file": "assets/fresque-murale-lZrfnBde.svg",
+    "file": "assets/fresque-murale-kvooSNiW.svg",
     "src": "../contenu/habillages/cite-des-histoires/fresque-murale.svg"
   },
   "../contenu/habillages/cite-des-histoires/pellicule.svg": {
-    "file": "assets/pellicule-Bk_NyJBD.svg",
+    "file": "assets/pellicule-dV3TP-hu.svg",
     "src": "../contenu/habillages/cite-des-histoires/pellicule.svg"
   },
   "../contenu/habillages/cite-des-histoires/ponts.svg": {
-    "file": "assets/ponts-BnXWFpvY.svg",
+    "file": "assets/ponts-DnMR1Jxq.svg",
     "src": "../contenu/habillages/cite-des-histoires/ponts.svg"
   },
   "../contenu/habillages/cite-des-histoires/rayonnages.svg": {
-    "file": "assets/rayonnages-BZFXdBYm.svg",
+    "file": "assets/rayonnages-BeJ6vWwN.svg",
     "src": "../contenu/habillages/cite-des-histoires/rayonnages.svg"
   },
   "../contenu/habillages/cite-des-histoires/theatre-ombres.svg": {
-    "file": "assets/theatre-ombres-B0TlncII.svg",
+    "file": "assets/theatre-ombres-sezFftCi.svg",
     "src": "../contenu/habillages/cite-des-histoires/theatre-ombres.svg"
   },
   "../contenu/habillages/cite-des-histoires/vitrail.svg": {
-    "file": "assets/vitrail-C9s-NMc7.svg",
+    "file": "assets/vitrail-D5w1Z3Hp.svg",
     "src": "../contenu/habillages/cite-des-histoires/vitrail.svg"
   },
   "../contenu/habillages/clairiere/collier.svg": {
-    "file": "assets/collier-40GXbQKB.svg",
+    "file": "assets/collier-Ab_KlpVI.svg",
     "src": "../contenu/habillages/clairiere/collier.svg"
   },
   "../contenu/habillages/clairiere/ecole-place.svg": {
-    "file": "assets/ecole-place-CAGLjWap.svg",
+    "file": "assets/ecole-place-jNX_q4hV.svg",
     "src": "../contenu/habillages/clairiere/ecole-place.svg"
   },
   "../contenu/habillages/clairiere/ecole-v2.svg": {
-    "file": "assets/ecole-v2-D8gm6NaM.svg",
+    "file": "assets/ecole-v2-CSuuvnpN.svg",
     "src": "../contenu/habillages/clairiere/ecole-v2.svg"
   },
   "../contenu/habillages/clairiere/ecole.svg": {
-    "file": "assets/ecole-BB9o7KGm.svg",
+    "file": "assets/ecole-BK-Txehm.svg",
     "src": "../contenu/habillages/clairiere/ecole.svg"
   },
   "../contenu/habillages/clairiere/guirlande.svg": {
-    "file": "assets/guirlande-BitvaoKL.svg",
+    "file": "assets/guirlande-BoZr2VSf.svg",
     "src": "../contenu/habillages/clairiere/guirlande.svg"
   },
   "../contenu/habillages/clairiere/lianes.svg": {
-    "file": "assets/lianes-Cu9xd5xJ.svg",
+    "file": "assets/lianes-Llw4yK2T.svg",
     "src": "../contenu/habillages/clairiere/lianes.svg"
   },
   "../contenu/habillages/clairiere/luciole.svg": {
-    "file": "assets/luciole-RetGUPwX.svg",
+    "file": "assets/luciole-DH4Solvz.svg",
     "src": "../contenu/habillages/clairiere/luciole.svg"
   },
   "../contenu/habillages/clairiere/lucioles.svg": {
-    "file": "assets/lucioles-D-vHwPvy.svg",
+    "file": "assets/lucioles-Cs67ijOd.svg",
     "src": "../contenu/habillages/clairiere/lucioles.svg"
   },
   "../contenu/habillages/clairiere/paniers.svg": {
-    "file": "assets/paniers-Z-p_U69r.svg",
+    "file": "assets/paniers-Ci1wActs.svg",
     "src": "../contenu/habillages/clairiere/paniers.svg"
   },
   "../contenu/habillages/clairiere/veillee.svg": {
-    "file": "assets/veillee-BsxB5CME.svg",
+    "file": "assets/veillee-DjFouPXW.svg",
     "src": "../contenu/habillages/clairiere/veillee.svg"
   },
   "../contenu/habillages/foret-muette/bestiaire.svg": {
-    "file": "assets/bestiaire-IYZGtitn.svg",
+    "file": "assets/bestiaire-BNo_WDm2.svg",
     "src": "../contenu/habillages/foret-muette/bestiaire.svg"
   },
   "../contenu/habillages/foret-muette/buee.svg": {
-    "file": "assets/buee-j06RHsRo.svg",
+    "file": "assets/buee-BFmoDiUk.svg",
     "src": "../contenu/habillages/foret-muette/buee.svg"
   },
   "../contenu/habillages/foret-muette/feuilles.svg": {
-    "file": "assets/feuilles-DE2M5XSy.svg",
+    "file": "assets/feuilles-DB99FsvZ.svg",
     "src": "../contenu/habillages/foret-muette/feuilles.svg"
   },
   "../contenu/habillages/foret-muette/message.svg": {
-    "file": "assets/message-BCfla2Nk.svg",
+    "file": "assets/message-B-MGyrbk.svg",
     "src": "../contenu/habillages/foret-muette/message.svg"
   },
   "../contenu/habillages/foret-muette/pas-japonais.svg": {
-    "file": "assets/pas-japonais-CkVfBC2g.svg",
+    "file": "assets/pas-japonais-tp6CkWy7.svg",
     "src": "../contenu/habillages/foret-muette/pas-japonais.svg"
   },
   "../contenu/habillages/foret-muette/souche.svg": {
-    "file": "assets/souche-DideBoCI.svg",
+    "file": "assets/souche-DCHNaS0B.svg",
     "src": "../contenu/habillages/foret-muette/souche.svg"
   },
   "../contenu/habillages/foret-muette/tapis.svg": {
-    "file": "assets/tapis-CPEkIbmu.svg",
+    "file": "assets/tapis-D6IUaJIc.svg",
     "src": "../contenu/habillages/foret-muette/tapis.svg"
   },
   "../contenu/habillages/foret-muette/veillee-automne.svg": {
-    "file": "assets/veillee-automne-Csnzg6JT.svg",
+    "file": "assets/veillee-automne-CS7C5A2G.svg",
     "src": "../contenu/habillages/foret-muette/veillee-automne.svg"
   },
   "../contenu/habillages/galeries/cristal.svg": {
-    "file": "assets/cristal--22YmxRZ.svg",
+    "file": "assets/cristal-L00bfdnI.svg",
     "src": "../contenu/habillages/galeries/cristal.svg"
   },
   "../contenu/habillages/galeries/echo-conte.svg": {
-    "file": "assets/echo-conte-DwVwfQA-.svg",
+    "file": "assets/echo-conte-DTHgHUJQ.svg",
     "src": "../contenu/habillages/galeries/echo-conte.svg"
   },
   "../contenu/habillages/galeries/echos.svg": {
-    "file": "assets/echos-Bf_a5u9B.svg",
+    "file": "assets/echos-BVVjzekT.svg",
     "src": "../contenu/habillages/galeries/echos.svg"
   },
   "../contenu/habillages/galeries/frise.svg": {
-    "file": "assets/frise-35Lwmv01.svg",
+    "file": "assets/frise-EQvAs4qp.svg",
     "src": "../contenu/habillages/galeries/frise.svg"
   },
   "../contenu/habillages/galeries/paroi-libre.svg": {
-    "file": "assets/paroi-libre-CqatkYBo.svg",
+    "file": "assets/paroi-libre-DBhH1Jh2.svg",
     "src": "../contenu/habillages/galeries/paroi-libre.svg"
   },
   "../contenu/habillages/galeries/passage.svg": {
-    "file": "assets/passage-osyd3Oui.svg",
+    "file": "assets/passage-BBo75E7t.svg",
     "src": "../contenu/habillages/galeries/passage.svg"
   },
   "../contenu/habillages/galeries/pierre.svg": {
-    "file": "assets/pierre-CWekHyq9.svg",
+    "file": "assets/pierre-gL_LryVd.svg",
     "src": "../contenu/habillages/galeries/pierre.svg"
   },
   "../contenu/habillages/galeries/stalagmites.svg": {
-    "file": "assets/stalagmites-D4U14nK7.svg",
+    "file": "assets/stalagmites-D7RvGHa5.svg",
     "src": "../contenu/habillages/galeries/stalagmites.svg"
   },
   "../contenu/habillages/galeries/veine.svg": {
-    "file": "assets/veine-Cz28IkPp.svg",
+    "file": "assets/veine-20F4Jbxj.svg",
     "src": "../contenu/habillages/galeries/veine.svg"
   },
   "../contenu/habillages/marais-jumeau/brume.svg": {
-    "file": "assets/brume-B84os3Bq.svg",
+    "file": "assets/brume-DVsCso5A.svg",
     "src": "../contenu/habillages/marais-jumeau/brume.svg"
   },
   "../contenu/habillages/marais-jumeau/coquillages.svg": {
-    "file": "assets/coquillages-aWtnwDRa.svg",
+    "file": "assets/coquillages-BM65uvex.svg",
     "src": "../contenu/habillages/marais-jumeau/coquillages.svg"
   },
   "../contenu/habillages/marais-jumeau/grenouilles.svg": {
-    "file": "assets/grenouilles-BOLsO8Em.svg",
+    "file": "assets/grenouilles-BuCMD2GP.svg",
     "src": "../contenu/habillages/marais-jumeau/grenouilles.svg"
   },
   "../contenu/habillages/marais-jumeau/nenuphars.svg": {
-    "file": "assets/nenuphars-__hrZb09.svg",
+    "file": "assets/nenuphars-D1XEdgCp.svg",
     "src": "../contenu/habillages/marais-jumeau/nenuphars.svg"
   },
   "../contenu/habillages/marais-jumeau/orage.svg": {
-    "file": "assets/orage-CpQCPhdi.svg",
+    "file": "assets/orage-2MJkMS12.svg",
     "src": "../contenu/habillages/marais-jumeau/orage.svg"
   },
   "../contenu/habillages/marais-jumeau/poissons.svg": {
-    "file": "assets/poissons-CSLkS7nr.svg",
+    "file": "assets/poissons-B2yEcocG.svg",
     "src": "../contenu/habillages/marais-jumeau/poissons.svg"
   },
   "../contenu/habillages/marais-jumeau/ponton.svg": {
-    "file": "assets/ponton-D7P_n7B7.svg",
+    "file": "assets/ponton-BAopEDcG.svg",
     "src": "../contenu/habillages/marais-jumeau/ponton.svg"
   },
   "../contenu/habillages/marais-jumeau/roseaux.svg": {
-    "file": "assets/roseaux-CkoiPZf9.svg",
+    "file": "assets/roseaux-D1etFX69.svg",
     "src": "../contenu/habillages/marais-jumeau/roseaux.svg"
   },
   "../contenu/habillages/volcan/coulee.svg": {
-    "file": "assets/coulee-B7WYiAXo.svg",
+    "file": "assets/coulee-DYHvFA3G.svg",
     "src": "../contenu/habillages/volcan/coulee.svg"
   },
   "../contenu/habillages/volcan/etoiles-filantes.svg": {
-    "file": "assets/etoiles-filantes-Bf-bPD0I.svg",
+    "file": "assets/etoiles-filantes-BB5-xaYc.svg",
     "src": "../contenu/habillages/volcan/etoiles-filantes.svg"
   },
   "../contenu/habillages/volcan/forge.svg": {
-    "file": "assets/forge-Djuw3Lkp.svg",
+    "file": "assets/forge-DXk0F_6V.svg",
     "src": "../contenu/habillages/volcan/forge.svg"
   },
   "../contenu/habillages/volcan/fresque.svg": {
-    "file": "assets/fresque-C95IsRU6.svg",
+    "file": "assets/fresque-yWpnM1i8.svg",
     "src": "../contenu/habillages/volcan/fresque.svg"
   },
   "../contenu/habillages/volcan/geodes.svg": {
-    "file": "assets/geodes-DFYu0py7.svg",
+    "file": "assets/geodes-D3RddT-c.svg",
     "src": "../contenu/habillages/volcan/geodes.svg"
   },
   "../contenu/habillages/volcan/sable.svg": {
-    "file": "assets/sable-DxAXyaGC.svg",
+    "file": "assets/sable-CvRf_qDg.svg",
     "src": "../contenu/habillages/volcan/sable.svg"
   },
   "../contenu/habillages/volcan/train.svg": {
-    "file": "assets/train-CvfSbYOg.svg",
+    "file": "assets/train-DUP2gaNd.svg",
     "src": "../contenu/habillages/volcan/train.svg"
   },
   "../contenu/habillages/volcan/wagons.svg": {
-    "file": "assets/wagons-CBS6n_4q.svg",
+    "file": "assets/wagons-DKqS6zvD.svg",
     "src": "../contenu/habillages/volcan/wagons.svg"
   },
   "../contenu/modeles-lettres/minuscules.json": {
-    "file": "assets/minuscules-tIUJP36i.json",
+    "file": "assets/minuscules-az1xqpei.json",
     "src": "../contenu/modeles-lettres/minuscules.json"
   },
   "../contenu/referentiel/competences.json": {
-    "file": "assets/competences-DFChJgbu.json",
+    "file": "assets/competences-OMAh9bxl.json",
     "src": "../contenu/referentiel/competences.json"
   },
   "../contenu/referentiel/ductus-minuscules.json": {
-    "file": "assets/ductus-minuscules-BFilAw6F.json",
+    "file": "assets/ductus-minuscules-BoEBbV4k.json",
     "src": "../contenu/referentiel/ductus-minuscules.json"
   },
-  "_index-BZLHfiQw.js": {
-    "file": "assets/index-BZLHfiQw.js",
+  "_index-BndqXbWJ.js": {
+    "file": "assets/index-BndqXbWJ.js",
     "name": "index"
   },
   "index.html": {
-    "file": "assets/index-CAt2MlLC.js",
+    "file": "assets/index-BQHmcpgw.js",
     "name": "index",
     "src": "index.html",
     "isEntry": true,
     "imports": [
-      "_index-BZLHfiQw.js"
+      "_index-BndqXbWJ.js"
     ],
     "dynamicImports": [
       "src/api/port-local.ts",
@@ -3581,92 +3621,91 @@
     ]
   },
   "src/api/port-local.ts": {
-    "file": "assets/port-local-KA0VcgQW.js",
+    "file": "assets/port-local-BcszWlUX.js",
     "name": "port-local",
     "src": "src/api/port-local.ts",
     "isDynamicEntry": true,
     "imports": [
-      "_index-BZLHfiQw.js"
+      "_index-BndqXbWJ.js"
     ],
     "dynamicImports": [
       "src/base/adaptateur-sqlite-wasm.ts"
     ],
     "assets": [
-      "assets/campement-Cn_RxpoW.svg",
-      "assets/carte-monde-v2-B_PAF7aZ.svg",
-      "assets/carte-monde-v3-Boxucnvf.svg",
-      "assets/banniere-B10anan6.svg",
-      "assets/bibliotheque-CGBCby8-.svg",
-      "assets/cartes-BbB4ZhZq.svg",
-      "assets/enseigne-DJn_mMs1.svg",
-      "assets/fresque-murale-lZrfnBde.svg",
-      "assets/pellicule-Bk_NyJBD.svg",
-      "assets/ponts-BnXWFpvY.svg",
-      "assets/rayonnages-BZFXdBYm.svg",
-      "assets/theatre-ombres-B0TlncII.svg",
-      "assets/vitrail-C9s-NMc7.svg",
-      "assets/collier-40GXbQKB.svg",
-      "assets/ecole-place-CAGLjWap.svg",
-      "assets/ecole-v2-D8gm6NaM.svg",
-      "assets/ecole-BB9o7KGm.svg",
-      "assets/guirlande-BitvaoKL.svg",
-      "assets/lianes-Cu9xd5xJ.svg",
-      "assets/luciole-RetGUPwX.svg",
-      "assets/lucioles-D-vHwPvy.svg",
-      "assets/paniers-Z-p_U69r.svg",
-      "assets/veillee-BsxB5CME.svg",
-      "assets/bestiaire-IYZGtitn.svg",
-      "assets/buee-j06RHsRo.svg",
-      "assets/feuilles-DE2M5XSy.svg",
-      "assets/message-BCfla2Nk.svg",
-      "assets/pas-japonais-CkVfBC2g.svg",
-      "assets/souche-DideBoCI.svg",
-      "assets/tapis-CPEkIbmu.svg",
-      "assets/veillee-automne-Csnzg6JT.svg",
-      "assets/cristal--22YmxRZ.svg",
-      "assets/echo-conte-DwVwfQA-.svg",
-      "assets/echos-Bf_a5u9B.svg",
-      "assets/frise-35Lwmv01.svg",
-      "assets/paroi-libre-CqatkYBo.svg",
-      "assets/passage-osyd3Oui.svg",
-      "assets/pierre-CWekHyq9.svg",
-      "assets/stalagmites-D4U14nK7.svg",
-      "assets/veine-Cz28IkPp.svg",
-      "assets/brume-B84os3Bq.svg",
-      "assets/coquillages-aWtnwDRa.svg",
-      "assets/grenouilles-BOLsO8Em.svg",
-      "assets/nenuphars-__hrZb09.svg",
-      "assets/orage-CpQCPhdi.svg",
-      "assets/poissons-CSLkS7nr.svg",
-      "assets/ponton-D7P_n7B7.svg",
-      "assets/roseaux-CkoiPZf9.svg",
-      "assets/coulee-B7WYiAXo.svg",
-      "assets/etoiles-filantes-Bf-bPD0I.svg",
-      "assets/forge-Djuw3Lkp.svg",
-      "assets/fresque-C95IsRU6.svg",
-      "assets/geodes-DFYu0py7.svg",
-      "assets/sable-DxAXyaGC.svg",
-      "assets/train-CvfSbYOg.svg",
-      "assets/wagons-CBS6n_4q.svg",
-      "assets/aide-CU5OSznF.svg",
-      "assets/apparition-Dxv2y9UY.svg",
-      "assets/hesitation-CaA19R5w.svg",
-      "assets/joie-DrgxI_56.svg",
-      "assets/repos-DGU2F7Q1.svg",
-      "assets/stade-1-dCEDV_aI.svg",
-      "assets/stade-10-mDRcWkZQ.svg",
-      "assets/stade-2-DF3Nn1OZ.svg",
-      "assets/stade-3-Bop4sxda.svg",
-      "assets/stade-4-B-NfaQa_.svg",
-      "assets/stade-5-w9Bsqibp.svg",
-      "assets/stade-6-ec84P6CY.svg",
-      "assets/stade-7-On0V3YuY.svg",
-      "assets/stade-8-ClZ0LUhw.svg",
-      "assets/stade-9-DxrRxKKy.svg",
-      "assets/oiseau-7DJ9hoJp.svg",
-      "assets/parapluie-B88qSM1v.svg",
-      "assets/poisson-C4_DRyOt.svg",
-      "assets/soleil-DkQZHUY9.svg",
+      "assets/campement-B66OET3w.svg",
+      "assets/carte-monde-v3-3LKIB-1N.svg",
+      "assets/banniere-IwedCa9j.svg",
+      "assets/bibliotheque-C3N8Fr2e.svg",
+      "assets/cartes-CZU4QRk9.svg",
+      "assets/enseigne-BH2kTI7w.svg",
+      "assets/fresque-murale-kvooSNiW.svg",
+      "assets/pellicule-dV3TP-hu.svg",
+      "assets/ponts-DnMR1Jxq.svg",
+      "assets/rayonnages-BeJ6vWwN.svg",
+      "assets/theatre-ombres-sezFftCi.svg",
+      "assets/vitrail-D5w1Z3Hp.svg",
+      "assets/collier-Ab_KlpVI.svg",
+      "assets/ecole-place-jNX_q4hV.svg",
+      "assets/ecole-v2-CSuuvnpN.svg",
+      "assets/ecole-BK-Txehm.svg",
+      "assets/guirlande-BoZr2VSf.svg",
+      "assets/lianes-Llw4yK2T.svg",
+      "assets/luciole-DH4Solvz.svg",
+      "assets/lucioles-Cs67ijOd.svg",
+      "assets/paniers-Ci1wActs.svg",
+      "assets/veillee-DjFouPXW.svg",
+      "assets/bestiaire-BNo_WDm2.svg",
+      "assets/buee-BFmoDiUk.svg",
+      "assets/feuilles-DB99FsvZ.svg",
+      "assets/message-B-MGyrbk.svg",
+      "assets/pas-japonais-tp6CkWy7.svg",
+      "assets/souche-DCHNaS0B.svg",
+      "assets/tapis-D6IUaJIc.svg",
+      "assets/veillee-automne-CS7C5A2G.svg",
+      "assets/cristal-L00bfdnI.svg",
+      "assets/echo-conte-DTHgHUJQ.svg",
+      "assets/echos-BVVjzekT.svg",
+      "assets/frise-EQvAs4qp.svg",
+      "assets/paroi-libre-DBhH1Jh2.svg",
+      "assets/passage-BBo75E7t.svg",
+      "assets/pierre-gL_LryVd.svg",
+      "assets/stalagmites-D7RvGHa5.svg",
+      "assets/veine-20F4Jbxj.svg",
+      "assets/brume-DVsCso5A.svg",
+      "assets/coquillages-BM65uvex.svg",
+      "assets/grenouilles-BuCMD2GP.svg",
+      "assets/nenuphars-D1XEdgCp.svg",
+      "assets/orage-2MJkMS12.svg",
+      "assets/poissons-B2yEcocG.svg",
+      "assets/ponton-BAopEDcG.svg",
+      "assets/roseaux-D1etFX69.svg",
+      "assets/coulee-DYHvFA3G.svg",
+      "assets/etoiles-filantes-BB5-xaYc.svg",
+      "assets/forge-DXk0F_6V.svg",
+      "assets/fresque-yWpnM1i8.svg",
+      "assets/geodes-D3RddT-c.svg",
+      "assets/sable-CvRf_qDg.svg",
+      "assets/train-DUP2gaNd.svg",
+      "assets/wagons-DKqS6zvD.svg",
+      "assets/aide-p02K0_sd.svg",
+      "assets/apparition-B3Oqm2Q5.svg",
+      "assets/hesitation-BBCjGqUA.svg",
+      "assets/joie-C4xsL_9o.svg",
+      "assets/repos-DBQqkFKN.svg",
+      "assets/stade-1-CthjjCEp.svg",
+      "assets/stade-10-CZ7_Z-rx.svg",
+      "assets/stade-2-Cqn-wJEu.svg",
+      "assets/stade-3-BX1TgdiU.svg",
+      "assets/stade-4-BDV0NFIT.svg",
+      "assets/stade-5-DGn9Kokz.svg",
+      "assets/stade-6-Kp2v33JV.svg",
+      "assets/stade-7-CG1WPJN5.svg",
+      "assets/stade-8-CB2Ros1z.svg",
+      "assets/stade-9-BPM2raNh.svg",
+      "assets/oiseau-FBCoe-WG.svg",
+      "assets/parapluie-xj_jpAmg.svg",
+      "assets/poisson-T3d7wgfp.svg",
+      "assets/soleil-CVU_LB_i.svg",
       "assets/chaudron-fond-BGKodKwu.png",
       "assets/chaudron-masque-Ci9-EJhn.png",
       "assets/chaudron-trait-Dq3NC921.png",
@@ -3675,12 +3714,20 @@
       "assets/campement-v6-DTCkjrW_.png",
       "assets/ami-ZWpmRz59.png",
       "assets/cahier-FRE2jHvp.png",
+      "assets/carotte-C4DSRKqq.png",
       "assets/cartable-BHpZlkY-.png",
+      "assets/citron-DI0YZEw5.png",
       "assets/cour-DSCFZLPS.png",
       "assets/ecole-CBTkiI_8.png",
       "assets/livre-DxWG-Ds4.png",
       "assets/maitresse-CO7m_HUa.png",
       "assets/matin-gris-yjdIWu9M.png",
+      "assets/olive-8F891d7z.png",
+      "assets/pomme-panier-Duq_50L-.png",
+      "assets/prune-bol-Cdg8VIyS.png",
+      "assets/raisin-CzguQ49o.png",
+      "assets/salade-CBE8xs4U.png",
+      "assets/tomate-DasGPkBv.png",
       "assets/arbre-vert-BsCleBnm.png",
       "assets/arbre-CxFiCEU3.png",
       "assets/enfants-B6yIK4Tv.png",
@@ -3750,11 +3797,15 @@
       "assets/geode-galeries-DX7Yy6DI.png",
       "assets/livre-cite-Cs_bBvx0.png",
       "assets/nenuphar-marais-BgkbVIQh.png",
+      "assets/bulle-8-B8FbU5M8.png",
+      "assets/filou-8-C34TIxBy.png",
+      "assets/plume-8-v2-C4Hz39jJ.png",
+      "assets/roc-8-ZxXTrrfi.png",
       "assets/bulle-4JfqYtLb.png",
       "assets/filou-BG7P5yiA.png",
       "assets/plume-CjfL7kNT.png",
       "assets/roc-De_trVJy.png",
-      "assets/brume-BJf5N-Ke.png",
+      "assets/brume-DuB9hMM3.png",
       "assets/carte-six-regions-CAU_EmLr.png",
       "assets/ecole-CSOx9k8X.png",
       "assets/cite-banniere-DBEtGIQb.png",
@@ -3805,61 +3856,60 @@
       "assets/volcan-sable-DLE4FP0j.png",
       "assets/volcan-train-B_xek_u6.png",
       "assets/volcan-wagons-Dl67Duap.png",
-      "assets/forge-DRmle6YA.png",
-      "assets/fresque-murale-DAZL4yYP.png",
-      "assets/tapis-CPhTcktA.png",
+      "assets/forge-BlQJzkVn.png",
+      "assets/fresque-murale-DAJFnzCw.png",
+      "assets/tapis-7-MZ4tmB.png",
       "assets/appel-C4SYKruv.png",
       "assets/grisaille-DqK2qfGj.png",
       "assets/habitants-lc5JSFiX.png",
       "assets/noms-P6NmectV.png",
       "assets/pierre-CjonYxw2.png",
-      "assets/vignette-caillou-GFDCB1tK.png",
-      "assets/vignette-danse-DQZNClLn.png",
-      "assets/vignette-grand-BQRdMF8O.png",
-      "assets/vignette-montre-DXchwXj9.png",
-      "assets/vignette-petit-Bql3sCQ1.png",
-      "assets/vignette-plage-DqGa4nyQ.png",
-      "assets/vignette-plume-Dj1ULJFC.png",
-      "assets/vignette-sable-DZHNEN6z.png",
-      "assets/vignette-seau-DtaWT8wM.png",
-      "assets/vignette-cahier-BhTWLY_I.png",
-      "assets/vignette-compte-keGIj2fB.png",
-      "assets/vignette-dessin-Bph-_ExH.png",
-      "assets/vignette-jardin-B6JPvU3P.png",
-      "assets/vignette-lit-D0zk_3lV.png",
-      "assets/vignette-maison-DVW1sfMH.png",
-      "assets/vignette-papa-6JD5-IzH.png",
-      "assets/vignette-sac-D7O3vBtI.png",
-      "assets/vignette-table-ZMyJViXj.png",
-      "assets/vignette-grand-dUJE1AG7.png",
-      "assets/vignette-gros-Q4MjsUUq.png",
-      "assets/vignette-jardin-CSqtQnvJ.png",
-      "assets/vignette-lac-BJ58KKsa.png",
-      "assets/vignette-nuage-CLeNfPmG.png",
-      "assets/vignette-petit-DfMKj2MQ.png",
-      "assets/vignette-pluie-CuJMbWFq.png",
-      "assets/vignette-riviere-Cfrwv-7u.png",
-      "assets/vignette-soleil-NFh5Bv_u.png",
-      "assets/vignette-bol-BKjKJWag.png",
-      "assets/vignette-dame-Dp0HFVt0.png",
-      "assets/vignette-dos-CuGCPhxC.png",
-      "assets/vignette-four-C0w_rhgN.png",
-      "assets/vignette-panier-D6gFdpd5.png",
-      "assets/vignette-pot-BdjCXwl5.png",
+      "assets/vignette-caillou-BJcaGMrp.png",
+      "assets/vignette-danse-BwuOy0pP.png",
+      "assets/vignette-grand-DKWxHiw0.png",
+      "assets/vignette-montre-c5BIFUVZ.png",
+      "assets/vignette-petit-CloWOb0p.png",
+      "assets/vignette-plage-DxZTN4pm.png",
+      "assets/vignette-plume-C3-Cdj9e.png",
+      "assets/vignette-sable-BPACcjEZ.png",
+      "assets/vignette-seau-Bo16GIMe.png",
+      "assets/vignette-cahier-ouvert-WutEW9vS.png",
+      "assets/vignette-cahier-range-CBoLu0VC.png",
+      "assets/vignette-cahier-termine-CIQOir1e.png",
+      "assets/vignette-deux-cubes-DKI1eR1B.png",
+      "assets/vignette-lit-DUYKp5dL.png",
+      "assets/vignette-papa-aide-D2H9GT2s.png",
+      "assets/vignette-sac-ferme-COYLDLLZ.png",
+      "assets/vignette-trois-cubes-Cq9alnk_.png",
+      "assets/vignette-troisieme-cube-BP6Uy570.png",
+      "assets/vignette-arc-en-ciel-Cx5lubwy.png",
+      "assets/vignette-fleur-arrosee-BaOLsny7.png",
+      "assets/vignette-fleur-ouverte-CTCoeiJC.png",
+      "assets/vignette-fleur-seche-qpSyq2WO.png",
+      "assets/vignette-nuage-gris-GNaEwvOJ.png",
+      "assets/vignette-pluie-forte-Batanzv3.png",
+      "assets/vignette-tonneau-plein-BddlUXI7.png",
+      "assets/vignette-tonneau-rempli-CtE4EW5l.png",
+      "assets/vignette-tonneau-vide-BMRhYbVI.png",
+      "assets/vignette-balle-lancee-KBXlrY5u.png",
+      "assets/vignette-balle-rapportee-DqHQoOmi.png",
+      "assets/vignette-balle-tenue-BQmTNiq_.png",
+      "assets/vignette-bol-range-B8OoZ3PS.png",
+      "assets/vignette-panier-porte-BxZ3NQ88.png",
+      "assets/vignette-panier-vide-CCguprsk.png",
+      "assets/vignette-pot-bout-DWblaS79.png",
+      "assets/vignette-pot-feu-D7JWUv7J.png",
+      "assets/vignette-pot-rempli-CnEdnnN1.png",
       "assets/vignette-sac-CUxszlE7.png",
-      "assets/vignette-tas-DYuOyI3_.png",
-      "assets/vignette-verre-_1uhI9a4.png",
-      "assets/vignette-zebre-D2oNU86_.png",
-      "assets/vignette-champignon-BA9fuoz9.png",
-      "assets/vignette-cour-DdFDU3q7.png",
-      "assets/vignette-danse-DhrT8_LP.png",
-      "assets/vignette-joue-CKnnG2_D.png",
-      "assets/vignette-ligne-BsoEzXEF.png",
-      "assets/vignette-montagne-O2enZ1Kn.png",
-      "assets/vignette-mouche-VoZbfw2Q.png",
-      "assets/vignette-quille-CjfhQHlm.png",
-      "assets/vignette-ruche-CmV_Z939.png",
-      "assets/vignette-sac-DIzFQhGJ.png",
+      "assets/vignette-abeille-nez-BnAt1hkV.png",
+      "assets/vignette-balle-lancee-DSznW7CH.png",
+      "assets/vignette-champignon-BRKpsWRB.png",
+      "assets/vignette-cochon-court-Cy9ZnVCr.png",
+      "assets/vignette-cochon-ruche-CjypZl5w.png",
+      "assets/vignette-pierre-soulevee-BcccERTK.png",
+      "assets/vignette-pierre-CWKyRphu.png",
+      "assets/vignette-quilles-placees-Dmuaw3uU.png",
+      "assets/vignette-quilles-tombees-BBUa1GMQ.png",
       "assets/aide-gobi-montre-cible.normal.16d5cf94-D9FLCR52.opus",
       "assets/aide-gobi-montre-couleur.normal.293474c6-DY6POJC6.opus",
       "assets/aide-gobi-relire-consigne.normal.6e817c2f-CRw15hbc.opus",
@@ -4480,9 +4530,9 @@
       "assets/volcan-wagons-tri-02-wagon-gauche.normal.2f8ba6b0-DPG3lilc.opus",
       "assets/volcan-wagons-tri-02-wagon-milieu.normal.47942a5a-C-mLs4va.opus",
       "assets/manifeste-CSRk6gFT.json",
-      "assets/minuscules-tIUJP36i.json",
-      "assets/competences-DFChJgbu.json",
-      "assets/ductus-minuscules-BFilAw6F.json"
+      "assets/minuscules-az1xqpei.json",
+      "assets/competences-OMAh9bxl.json",
+      "assets/ductus-minuscules-BoEBbV4k.json"
     ]
   },
   "src/base/adaptateur-sqlite-wasm.ts": {
@@ -4492,7 +4542,7 @@
     "isDynamicEntry": true
   },
   "style.css": {
-    "file": "assets/style-HFLXlG9E.css",
+    "file": "assets/style-CZn4X-qi.css",
     "src": "style.css"
   }
 }
