@@ -305,7 +305,16 @@ export async function preparerSansProfil(page: Page): Promise<void> {
     return present;
   });
   if (memorise !== null) await page.goto('/');
-  await page.waitForFunction(() => (window as unknown as FenetreTest).__test !== undefined);
+  // Un client sain expose ce crochet dès l'évaluation de son bundle. Sans borne locale,
+  // `waitForFunction` héritait des 270 s d'un `test.slow()` : un seul navigateur dont le bundle
+  // n'avait pas chargé immobilisait un travailleur pendant 4 min 30 et accusait ensuite une
+  // recette innocente. Dix secondes restent très au-dessus du démarrage mesuré et transforment
+  // cette panne d'infrastructure en diagnostic rapide, sans attente arbitraire dans le parcours.
+  await page.waitForFunction(
+    () => (window as unknown as FenetreTest).__test !== undefined,
+    undefined,
+    { timeout: 10_000 },
+  );
   await page.evaluate(
     ({ graine, instant }) => {
       const crochets = (window as unknown as FenetreTest).__test;

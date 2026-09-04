@@ -6,7 +6,7 @@
  * fonctionne sur le PC et disparaît dans l'APK est donc une régression spécifique au portage.
  */
 import { createHash } from 'node:crypto';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { inflateSync } from 'node:zlib';
 
@@ -23,7 +23,17 @@ interface EntreeVerrou {
 }
 
 const TABLEAUX = ['pierre', 'grisaille', 'noms', 'habitants', 'appel'] as const;
-const POSES_GOBI = ['aide', 'apparition', 'hesitation', 'joie', 'repos'] as const;
+const EXTENSIONS_VISUELLES = new Set(['.png', '.svg', '.webp']);
+
+function listerVisuels(dossier: string, prefixe: string): string[] {
+  return readdirSync(dossier, { withFileTypes: true }).flatMap((entree) => {
+    const cheminDisque = join(dossier, entree.name);
+    const cheminRelatif = `${prefixe}/${entree.name}`;
+    if (entree.isDirectory()) return listerVisuels(cheminDisque, cheminRelatif);
+    const extension = entree.name.slice(entree.name.lastIndexOf('.')).toLowerCase();
+    return EXTENSIONS_VISUELLES.has(extension) ? [cheminRelatif.replaceAll('\\', '/')] : [];
+  });
+}
 
 function predicteurPaeth(gauche: number, haut: number, diagonale: number): number {
   const estimation = gauche + haut - diagonale;
@@ -98,15 +108,17 @@ describe('assets raster du mode autonome', () => {
     expect(urlAssetAutonome('assets/campement/campement-v6.png')).not.toBeNull();
   });
 
-  it('embarque les dix stades et les cinq poses WebP de Gobi', () => {
+  it('embarque chaque visuel de production, quelle que soit sa famille', () => {
     const attendus = [
-      ...Array.from({ length: 10 }, (_, rang) => `assets/gobi/stades/stade-${String(rang + 1)}.webp`),
-      ...POSES_GOBI.map((pose) => `assets/gobi/animation/${pose}.webp`),
+      ...listerVisuels(join(process.cwd(), 'contenu', 'assets'), 'assets'),
+      ...listerVisuels(join(process.cwd(), 'contenu', 'habillages'), 'habillages'),
     ];
 
+    expect(attendus.length, 'la garde ne doit pas devenir verte sur un dossier vide')
+      .toBeGreaterThanOrEqual(300);
     expect(
       attendus.filter((chemin) => urlAssetAutonome(chemin) === null),
-      'un WebP absent du glob autonome disparaîtrait dans la PWA et dans l’APK',
+      'un visuel absent des globs autonomes disparaîtrait dans la PWA et dans l’APK',
     ).toEqual([]);
   });
 

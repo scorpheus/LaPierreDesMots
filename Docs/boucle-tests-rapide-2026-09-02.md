@@ -48,3 +48,9 @@ réelle par le projet `parcours`, dont le projet `couverture` dépend explicitem
 comparer cet ensemble aux `data-ecran` dérivés du code et de refuser tout écran orphelin. Aucune
 assertion fonctionnelle n’est retirée : une recette qui n’atteint pas son écran échoue dans la
 campagne préalable ; seul son quatrième rejeu identique disparaît.
+
+La même campagne a révélé qu’un client de test dont le bundle ne se chargeait pas laissait
+`page.waitForFunction(window.__test)` hériter du plafond de 270 secondes de `test.slow()`. Le
+crochet apparaît normalement dès l’évaluation du bundle ; cette attente porte désormais son propre
+garde-fou de 10 secondes. Un incident de navigateur reste rouge, mais ne monopolise plus un
+travailleur pendant quatre minutes et demie avant de le dire.

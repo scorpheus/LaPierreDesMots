@@ -154,10 +154,17 @@ un défaut visuel ou une seconde panne d’infrastructure.
 
 La publication exige que ces empreintes soient encore exactes, puis automatise le push, l’attente
 de l’Action officielle, le contrôle de l’état `built` et une recette HTTP de la racine, du manifeste,
-de son icône, du service worker, de la version et des quinze WebP de Gobi. Ce dernier contrôle est
-obligatoire depuis qu’une publication a révélé que le port autonome indexait SVG et PNG, mais pas
-WebP : les sources et les tests de Gobi étaient présents tandis que son image disparaissait sur
-GitHub Pages. La persistance réelle sur tablette reste une
+de son icône, du service worker, de la version et de tous les visuels de production (`PNG`, `SVG`,
+`WebP`) énumérés par le manifeste Vite. Ils sont sondés en `HEAD` par lots de seize, sans télécharger
+les quelque 200 Mo du livrable. Ce contrôle générique est obligatoire depuis qu’une publication a
+révélé que le port autonome indexait SVG et PNG, mais pas WebP : les sources et les tests de Gobi
+étaient présents tandis que son image disparaissait sur GitHub Pages. Un test local compare aussi
+l’ensemble des fichiers de `contenu/assets/` et `contenu/habillages/` aux URL du port autonome afin
+qu’une nouvelle extension oubliée échoue avant le build. Mesure du 4 septembre 2026 : 339 visuels
+résolus localement ; 46 petits SVG incorporés dans le JavaScript par Vite et 293 fichiers externes
+à sonder sur GitHub Pages. Le plancher distant est fixé à 250 pour refuser un manifeste
+anormalement amputé sans confondre l’incorporation normale des petits fichiers avec une absence.
+La persistance réelle sur tablette reste une
 recette humaine : le script ne supprime ni ne remplace les données OPFS du navigateur.
 
 ### Mesure du 2026-09-04

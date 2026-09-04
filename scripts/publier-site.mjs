@@ -241,25 +241,25 @@ export function extrairePremierAsset(manifeste) {
   return new URL(icone.src, URL_SITE).href;
 }
 
-const ASSETS_CRITIQUES_GOBI = [
-  ...Array.from({ length: 10 }, (_, rang) => `assets/gobi/stades/stade-${String(rang + 1)}.webp`),
-  ...['aide', 'apparition', 'hesitation', 'joie', 'repos'].map(
-    (pose) => `assets/gobi/animation/${pose}.webp`,
-  ),
-];
+const EXTENSION_VISUELLE = /\.(?:png|svg|webp)$/iu;
 
-export function extraireAssetsCritiquesGobi(manifeste) {
-  return ASSETS_CRITIQUES_GOBI.map((chemin) => {
-    const suffixe = `/contenu/${chemin}`;
-    const entree = Object.entries(manifeste).find(([source]) =>
-      source.replaceAll('\\', '/').endsWith(suffixe),
-    )?.[1];
-    exiger(
-      typeof entree === 'object' && entree !== null && typeof entree.file === 'string',
-      `Le build ne contient pas l asset critique ${chemin}.`,
-    );
-    return new URL(entree.file, URL_SITE).href;
-  });
+export function extraireAssetsVisuels(manifeste) {
+  const urls = Object.entries(manifeste)
+    .filter(([source]) => {
+      const normalise = source.replaceAll('\\', '/');
+      return /\/contenu\/(?:assets|habillages)\//u.test(normalise) && EXTENSION_VISUELLE.test(normalise);
+    })
+    .map(([source, entree]) => {
+      exiger(
+        typeof entree === 'object' && entree !== null && typeof entree.file === 'string',
+        `Le build ne donne aucune sortie au visuel ${source}.`,
+      );
+      return new URL(entree.file, URL_SITE).href;
+    });
+  // Mesuré le 4 septembre 2026 : 339 visuels résolus par le port autonome, dont 46 petits SVG
+  // incorporés directement dans le JavaScript par Vite, laissent 293 fichiers distants.
+  exiger(urls.length >= 250, `Le build ne porte que ${String(urls.length)} visuels distants.`);
+  return [...new Set(urls)].sort();
 }
 
 async function attendre(etiquette, lireEtat, accepter, delaiMs = 180_000) {
@@ -273,13 +273,22 @@ async function attendre(etiquette, lireEtat, accepter, delaiMs = 180_000) {
   throw new Error(`${etiquette} n a pas atteint l etat attendu. Dernier etat : ${JSON.stringify(dernier)}`);
 }
 
-async function fetchOk(url) {
-  const reponse = await fetch(url, { cache: 'no-store' });
+async function fetchOk(url, options = {}) {
+  const reponse = await fetch(url, { cache: 'no-store', ...options });
   exiger(reponse.ok, `${url} repond HTTP ${String(reponse.status)}.`);
   return reponse;
 }
 
-async function verifierSiteDistant(versionAttendue, assetsCritiques) {
+async function verifierVisuelsDistants(urls) {
+  const TAILLE_LOT = 16;
+  for (let debut = 0; debut < urls.length; debut += TAILLE_LOT) {
+    await Promise.all(
+      urls.slice(debut, debut + TAILLE_LOT).map((url) => fetchOk(url, { method: 'HEAD' })),
+    );
+  }
+}
+
+async function verifierSiteDistant(versionAttendue, assetsVisuels) {
   const suffixe = `?publication=${encodeURIComponent(versionAttendue)}`;
   await attendre(
     'La version publique',
@@ -292,7 +301,7 @@ async function verifierSiteDistant(versionAttendue, assetsCritiques) {
   exiger((await serviceWorker.text()).includes(versionAttendue), 'Le service worker public ne porte pas la version attendue.');
   const manifeste = await (await fetchOk(new URL(`manifest.webmanifest${suffixe}`, URL_SITE))).json();
   await fetchOk(extrairePremierAsset(manifeste));
-  for (const asset of assetsCritiques) await fetchOk(asset);
+  await verifierVisuelsDistants(assetsVisuels);
 }
 
 function nomDepotGithub() {
@@ -363,7 +372,7 @@ export async function preparerPublication() {
     pagesCommit: actuel.pagesCommit,
     version: actuel.version,
     rapport: bilan,
-    assetsCritiques: extraireAssetsCritiquesGobi(manifesteVite),
+    assetsVisuels: extraireAssetsVisuels(manifesteVite),
     url: URL_SITE,
     commandeDistante: 'git -C bac-a-sable/publication-gh-pages push origin gh-pages:gh-pages',
   };
@@ -399,8 +408,8 @@ export async function publier() {
   );
 
   console.log('\n[publication] Verification du site public et de ses caches...');
-  exiger(Array.isArray(etat.assetsCritiques), 'La préparation ne porte pas les assets critiques.');
-  await verifierSiteDistant(etat.version, etat.assetsCritiques);
+  exiger(Array.isArray(etat.assetsVisuels), 'La préparation ne porte pas l inventaire des visuels.');
+  await verifierSiteDistant(etat.version, etat.assetsVisuels);
   ecrireEtat({
     ...etat,
     publieLe: new Date().toISOString(),

@@ -126,6 +126,13 @@ annulé, remplacé ou reporté.
 - La PWA intégrée a été reconstruite avec les nouveaux décors, cartes et atlas : livrable
   `3489471b43cd49c6`, 197,8 Mio au total et 15,9 Mio de précache atomique. Elle n'est pas
   republiée avant la validation locale et visuelle.
+- Le test réel de la publication `02812949d95cbb7e` a révélé Gobi absent : les quinze WebP
+  existaient dans le dépôt mais n'entraient pas dans le glob autonome. Le glob est corrigé et la
+  garde est désormais générique : les 339 PNG/SVG/WebP de production doivent tous se résoudre
+  localement ; les 293 fichiers que Vite n'incorpore pas au JavaScript seront sondés en HTTP après
+  publication. Le campement et les quatre atlas de compagnons sont physiquement présents et
+  répondent 200 sur la version publique actuelle ; leur rendu doit être revérifié après purge du
+  cache par la prochaine version de service worker.
 
 ## Dernier chantier terminé : audio
 
@@ -153,7 +160,9 @@ annulé, remplacé ou reporté.
    légers, en commençant par les éléments réellement visibles dans le parcours enfant. Les quatre
    fonds régionaux validés sont désormais publiés ; ne pas en générer davantage avant ce test réel.
 4. La PWA du lot Chronologie est publiée : source `328079d`, livrable `02812949d95cbb7e`, Action
-   Pages `33895370041` réussie. Tester cette version HTTPS sur le téléphone et la tablette réels.
+   Pages `33895370041` réussie, mais le test réel a découvert les WebP de Gobi absents. Préparer,
+   publier puis tester la version corrigée ; vérifier aussi le campement, l'histoire et les
+   compagnons après activation du nouveau service worker.
 
 ## Retours parent à surveiller pendant le test
 

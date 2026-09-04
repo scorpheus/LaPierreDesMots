@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 import {
   depouillerRapportPlaywright,
   estIncidentReseauRelancable,
-  extraireAssetsCritiquesGobi,
+  extraireAssetsVisuels,
   extrairePremierAsset,
   identifierProcessusTests,
   verifierEtatPrepare,
@@ -104,23 +104,20 @@ describe('publication GitHub Pages automatisee', () => {
     );
   });
 
-  it('exige les quinze WebP de Gobi dans le manifeste de livraison', () => {
+  it('extrait tous les visuels de production et ignore les données non visuelles', () => {
     const manifeste = Object.fromEntries([
-      ...Array.from({ length: 10 }, (_, rang) => {
-        const numero = rang + 1;
-        return [
-          `../contenu/assets/gobi/stades/stade-${String(numero)}.webp`,
-          { file: `assets/stade-${String(numero)}.hash.webp` },
-        ];
-      }),
-      ...['aide', 'apparition', 'hesitation', 'joie', 'repos'].map((pose) => [
-        `../contenu/assets/gobi/animation/${pose}.webp`,
-        { file: `assets/${pose}.hash.webp` },
+      ...Array.from({ length: 300 }, (_, rang) => [
+        `../contenu/assets/famille/image-${String(rang)}.png`,
+        { file: `assets/image-${String(rang)}.hash.png` },
       ]),
+      ['../contenu/assets/gobi/repos.webp', { file: 'assets/repos.hash.webp' }],
+      ['../contenu/habillages/carte.svg', { file: 'assets/carte.hash.svg' }],
+      ['../contenu/audio/consigne.opus', { file: 'assets/consigne.hash.opus' }],
     ]);
 
-    expect(extraireAssetsCritiquesGobi(manifeste)).toHaveLength(15);
-    delete manifeste['../contenu/assets/gobi/animation/joie.webp'];
-    expect(() => extraireAssetsCritiquesGobi(manifeste)).toThrow(/animation\/joie\.webp/u);
+    const urls = extraireAssetsVisuels(manifeste);
+    expect(urls).toHaveLength(302);
+    expect(urls).toContain('https://scorpheus.github.io/LaPierreDesMots/assets/repos.hash.webp');
+    expect(urls.some((url) => url.endsWith('.opus'))).toBe(false);
   });
 });
