@@ -38,10 +38,8 @@ annulé, remplacé ou reporté.
   à quatre travailleurs et 274/274 contrôles qualité et responsive. Le contrat exhaustif rejoué
   seul couvre 15 écrans sur 15, 89 recettes et 76 nœuds, avec un écart nul. Lint, TypeScript,
   construction de production et budget du bundle réussissent également.
-- Seule porte encore rouge : sept divergences visuelles connues — six migrations volontaires de
-  blockouts SVG vers les rasters, plus la récompense. Les références n'ont pas été modifiées sans
-  validation parentale. La planche actuelle à valider est
-  `bac-a-sable/validation-references-visuelles-2026-09-04.png`.
+- Les sept divergences visuelles ont été montrées puis validées par le parent. Les références ont
+  été mises à jour explicitement et la recette repasse 13/13 avec une tolérance de 0,2 %.
 
 ## Chantier en cours : responsive multi-écrans et composition professionnelle
 
@@ -146,15 +144,15 @@ annulé, remplacé ou reporté.
 1. Faire tester la version responsive sur la tablette et le téléphone réels, et intégrer les
    nouveaux retours sans
    perdre les tâches déjà ouvertes.
-2. Examiner avec le parent les sept divergences de références visuelles historiques. Ne jamais
-   mettre les références à jour sans sa validation.
+2. Refaire les cinq planches des exercices de chronologie : les récits existants sont conservés,
+   mais les cartes doivent montrer une vraie action continue au lieu d'illustrations isolées. Les
+   cinq propositions sont réunies dans
+   `bac-a-sable/chronologies-2026-09-04/planche-validation.png` et attendent la validation parent
+   avant découpe et promotion.
 3. Faire une passe de finition artistique sur les écrans que le test tablette jugera encore trop
    légers, en commençant par les éléments réellement visibles dans le parcours enfant. Les quatre
    fonds régionaux validés sont désormais publiés ; ne pas en générer davantage avant ce test réel.
-4. Relire avec le parent les six récits CE1 réunis dans
-   `bac-a-sable/validation-histoires-2026-09-04.html`, puis seulement les promouvoir et régénérer
-   leurs répliques audio.
-5. La recette PWA du lot intégré est verte. Ne republier qu'une fois la version locale et les
+4. La recette PWA du lot intégré est verte. Ne republier qu'une fois la version locale et les
    références visuelles validées.
 
 ## Retours parent à surveiller pendant le test
@@ -170,10 +168,10 @@ annulé, remplacé ou reporté.
   apparaître sur la partie nommée.
 - Fin de sortie et fin de région : la victoire, le cadeau, la région suivante et l'action pour
   continuer doivent être immédiatement compréhensibles.
-- Les six récits du moteur `histoire` divergent encore de leurs scènes. Les remplacements CE1 sont
-  préparés dans `contenu/brouillons/histoire-*.json` et décrits dans
-  [proposition-audit-editorial-histoire-2026-09-04.md](proposition-audit-editorial-histoire-2026-09-04.md) ;
-  ils ne seront promus qu'après la relecture parent.
+- Clarification parentale du 4 septembre : les six récits du moteur `histoire` sont conservés. Le
+  défaut signalé concernait les cartes du moteur `chrono` à remettre dans l'ordre. Le texte seul
+  peut sembler logique alors que les images restent des scènes isolées ; la validation porte donc
+  sur la continuité visuelle de chacune des quinze séquences.
 - L'audit des 249 champs `asset: null` a séparé 241 cartes volontairement textuelles de huit
   images réellement manquantes dans `cite-des-histoires-cartes-paires-02`. Une unique planche a
   produit tomate, carotte, salade, citron, olive, raisin, pomme dans un panier et prune dans un bol.

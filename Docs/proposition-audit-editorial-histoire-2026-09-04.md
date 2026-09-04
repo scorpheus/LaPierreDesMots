@@ -1,8 +1,11 @@
 # Proposition éditoriale — moteur histoire (2026-09-04)
 
-Statut : **propositions non validées, non promues**. Aucun fichier de `contenu/exercices/` ni de
-`contenu/habillages/` n’a été modifié. Les six brouillons associés sont dans
-`contenu/brouillons/histoire-*.json`.
+Statut : **proposition abandonnée après clarification parentale**. Le parent confirme que les six
+récits du moteur `histoire` sont bons et ne demande pas leur remplacement. Le retour concernait
+les cartes du moteur `chrono` à remettre dans l’ordre, dont les illustrations isolées ne montrent
+pas toujours une suite narrative. Aucun fichier de `contenu/exercices/` ni de
+`contenu/habillages/` n’a été modifié par cette proposition ; ses brouillons ne doivent pas être
+promus.
 
 ## Inventaire
 
