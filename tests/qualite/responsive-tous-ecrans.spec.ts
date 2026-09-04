@@ -44,15 +44,16 @@ interface DefautResponsive {
 async function defautsDe(page: Page, ecran: string): Promise<DefautResponsive[]> {
   await page.evaluate(async () => {
     await document.fonts.ready;
-    await Promise.all(
-      [...document.images]
-        .filter((image) => !image.complete)
-        .map(async (image) => new Promise<void>((resoudre) => {
+    await Promise.all([...document.images].map(async (image) => {
+      if (!image.complete) {
+        await new Promise<void>((resoudre) => {
           image.addEventListener('load', () => resoudre(), { once: true });
           image.addEventListener('error', () => resoudre(), { once: true });
           if (image.complete) resoudre();
-        })),
-    );
+        });
+      }
+      if (image.naturalWidth > 0) await image.decode().catch(() => undefined);
+    }));
     // Deux frames garantissent que le redimensionnement consécutif au décodage des images a
     // traversé style, layout et peinture. Ce n'est pas une attente chronométrée : la sonde
     // attend l'état du navigateur qu'elle est précisément venue mesurer.
@@ -113,6 +114,42 @@ async function defautsDe(page: Page, ecran: string): Promise<DefautResponsive[]>
         }
       }
     }
+
+    const sceneColorie = document.querySelector<SVGSVGElement>('[data-moteur="colorie"] > svg.pierre-scene');
+    if (sceneColorie !== null && innerHeight <= 520) {
+      const boite = sceneColorie.getBoundingClientRect();
+      if (boite.height < 160 || boite.width < Math.min(200, innerWidth * 0.35)) {
+        defauts.push({
+          ecran: nomEcran,
+          raison: `dessin de coloriage illisible en paysage court (${String(Math.round(boite.width))}×${String(Math.round(boite.height))} px)`,
+        });
+      }
+    }
+
+    const recompense = document.querySelector<HTMLElement>('[data-ecran="recompense"]');
+    if (recompense !== null && (innerWidth <= 700 || innerHeight <= 700)) {
+      const actionPrincipale = recompense.querySelector<HTMLElement>('.action-recompense--principale');
+      const boite = actionPrincipale?.getBoundingClientRect();
+      if (boite === undefined || boite.top < 0 || boite.bottom > innerHeight + 1) {
+        defauts.push({
+          ecran: nomEcran,
+          raison: boite === undefined
+            ? 'récompense sans action principale'
+            : `action principale de récompense hors du premier écran (y=${String(Math.round(boite.top))}–${String(Math.round(boite.bottom))})`,
+        });
+      }
+    }
+
+    const enteteReglages = document.querySelector<HTMLElement>('[data-ecran="reglages-lecture"] .reglages-entete');
+    if (enteteReglages !== null && (innerWidth <= 700 || innerHeight <= 700)) {
+      const hauteurMaximale = innerWidth > innerHeight ? 90 : 150;
+      if (enteteReglages.getBoundingClientRect().height > hauteurMaximale) {
+        defauts.push({
+          ecran: nomEcran,
+          raison: `en-tête des réglages surdimensionné (${String(Math.round(enteteReglages.getBoundingClientRect().height))} px)`,
+        });
+      }
+    }
     return defauts;
   }, ecran);
 }
@@ -165,6 +202,32 @@ test.describe('responsive — la coque ne garde pas les proportions tablette sur
           return {
             hauteurEntete: entete?.getBoundingClientRect().height ?? 0,
             plusGrandePolice: Math.max(0, ...tailles),
+            campement: ecran === 'campement' ? (() => {
+              const scene = document.querySelector<HTMLElement>('[data-scene="campement"]');
+              const grille = document.querySelector<HTMLElement>('[data-campement-grille="oui"]');
+              const boite = scene?.getBoundingClientRect();
+              return {
+                largeurScene: boite?.width ?? 0,
+                basScene: boite?.bottom ?? 0,
+                rapportScene: boite === undefined || boite.height === 0 ? 0 : boite.width / boite.height,
+                debordementHorizontal:
+                  grille === null ? 0 : Math.max(0, grille.scrollWidth - grille.clientWidth),
+              };
+            })() : null,
+            carte: ecran === 'carte' ? (() => {
+              const scene = document.querySelector<HTMLElement>('[data-scene-adaptative="carte"]');
+              const destinations = document.querySelector<HTMLElement>('.destinations-carte');
+              const titreDestinations = destinations?.querySelector<HTMLElement>('h2');
+              return {
+                partCarte: (scene?.getBoundingClientRect().width ?? 0) / innerWidth,
+                sousScroll: destinations === null
+                  ? 0
+                  : Math.max(0, destinations.scrollHeight - destinations.clientHeight),
+                corpsTitre: titreDestinations === null
+                  ? 0
+                  : Number.parseFloat(getComputedStyle(titreDestinations).fontSize),
+              };
+            })() : null,
           };
         }, recette.attendu);
 
@@ -180,6 +243,44 @@ test.describe('responsive — la coque ne garde pas les proportions tablette sur
           mesure.plusGrandePolice,
           `${recette.nom} : la typographie de navigation reste dimensionnée pour une tablette`,
         ).toBeLessThanOrEqual(compact ? 32 : 68);
+
+        if (mesure.campement !== null) {
+          expect(
+            mesure.campement.debordementHorizontal,
+            `${recette.nom} : le campement ne doit pas devenir un panorama à faire défiler`,
+          ).toBe(0);
+          expect(
+            mesure.campement.largeurScene,
+            `${recette.nom} : la scène entière doit tenir dans le viewport`,
+          ).toBeLessThanOrEqual(format.largeur);
+          expect(
+            mesure.campement.rapportScene,
+            `${recette.nom} : la scène et ses zones tactiles doivent garder le rapport du PNG`,
+          ).toBeCloseTo(1586 / 992, 2);
+          if (format.largeur > format.hauteur && format.hauteur <= 520) {
+            expect(
+              mesure.campement.basScene,
+              `${recette.nom} : le campement entier doit rester visible en paysage court`,
+            ).toBeLessThanOrEqual(format.hauteur + 1);
+          }
+        }
+
+        if (mesure.carte !== null) {
+          expect(
+            mesure.carte.sousScroll,
+            `${recette.nom} : les destinations ne doivent pas capturer le scroll de la page`,
+          ).toBe(0);
+          if (format.largeur > format.hauteur) {
+            expect(
+              mesure.carte.partCarte,
+              `${recette.nom} : la carte doit rester le héros en paysage`,
+            ).toBeGreaterThanOrEqual(0.5);
+          }
+          expect(
+            mesure.carte.corpsTitre,
+            `${recette.nom} : « Où veux-tu aller ? » ne doit pas dominer la carte`,
+          ).toBeLessThanOrEqual(compact ? 20 : 28);
+        }
       }
     });
   }

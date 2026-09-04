@@ -221,6 +221,15 @@ describe('la fin de partie est une réussite, quoi qu’il arrive (R14)', () => 
     expect(document.querySelector('h1')?.closest('[data-texte-recompense]')).not.toBeNull();
   });
 
+  it('place les actions juste après la célébration, avant les détails secondaires', () => {
+    monter({ etoiles: 2, resume: resume(0, false) });
+    const scene = document.querySelector('[data-scene-recompense="gobi-joie"]');
+    const actions = document.querySelector('[data-actions-recompense="oui"]');
+    const details = document.querySelector('[data-detail-etoiles="oui"]');
+    expect(scene?.nextElementSibling).toBe(actions);
+    expect(actions?.nextElementSibling).toBe(details);
+  });
+
   it('porte `data-fin="reussite"` et aucun `data-etat="echec"`', () => {
     monter({ etoiles: 0 });
     expect(document.querySelector('[data-ecran="recompense"]')?.getAttribute('data-fin')).toBe(

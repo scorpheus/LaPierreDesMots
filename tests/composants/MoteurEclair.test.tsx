@@ -323,9 +323,12 @@ describe('moteur eclair', () => {
       const { container } = render(<Harnais />);
       const plateau = container.querySelector('[data-plateau="eclair"]');
       const commande = container.querySelector('[data-plateau="commande-eclair"]');
+      const etape = container.querySelector('[data-plateau="etape-eclair"]');
       const controles = container.querySelector('[data-plateau="controles"]');
 
       expect(commande?.querySelector('[data-action="pret"]')).not.toBeNull();
+      expect(commande?.parentElement).toBe(etape?.parentElement);
+      expect(commande?.parentElement?.classList.contains('eclair-barre-superieure')).toBe(true);
       expect(plateau?.querySelector('[data-action="pret"]')).toBeNull();
       expect(controles?.querySelector('[data-action="pret"]')).toBeNull();
 

@@ -278,81 +278,57 @@ export function MoteurEclair(
     >
       <style>{FEUILLE_DE_LUCIOLES}</style>
 
-      {/* Repère stable : la consigne de l'écran peut changer entre deux étapes, ce cartouche
-          rend le changement explicite sans faire bouger le texte de lecture. */}
-      {consigne === null ? null : (
-        <div
-          data-plateau="etape-eclair"
-          data-visible={eclairVisible ? 'non' : 'oui'}
-          aria-live="polite"
-          style={{
-            position: 'absolute',
-            insetBlockStart: '0.75rem',
-            insetInlineStart: '0.75rem',
-            zIndex: 3,
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.65rem',
-            padding: '0.55rem 0.9rem',
-            border: '3px solid var(--trait)',
-            borderRadius: '1rem',
-            background: 'var(--parchemin)',
-            boxShadow: 'var(--ombre-bd)',
-            color: 'var(--trait)',
-            opacity: eclairVisible ? 0 : 1,
-            pointerEvents: 'none',
-            transition: 'opacity 120ms ease-out',
-            ...styleLecture,
-          } as CSSProperties}
-        >
-          <span style={{ fontSize: '0.82em', fontWeight: 700, opacity: 0.78 }}>
-            Étape {String(etat.indexEtape + 1)} sur {String(etat.etapes.length)}
-          </span>
-          <span aria-hidden="true" style={{ color: 'var(--soleil)', fontSize: '1.25em' }}>✦</span>
-          <span style={{ fontWeight: 800 }}>
-            {tours === 0
-              ? 'Un nouveau mot t’attend.'
-              : chercheVoyelle
-                ? 'Quelle voyelle lis-tu dans ce mot ?'
-                : 'Retrouve le mot que tu viens de lire.'}
-          </span>
-        </div>
-      )}
-
-      {/* La commande n'est pas une réponse : elle garde donc sa propre place, au-dessus de
-          l'illustration, avec une silhouette différente des mots à choisir. */}
-      <div
-        data-plateau="commande-eclair"
-        style={{
-          position: 'absolute',
-          insetBlockStart: '0.75rem',
-          insetInlineStart: '50%',
-          translate: '-50% 0',
-          zIndex: 3,
-          display: 'grid',
-          justifyItems: 'center',
-          gap: '0.25rem',
-          pointerEvents: 'none',
-        }}
-      >
-        <button
-          type="button"
-          data-action={tours === 0 ? 'pret' : 'revoir'}
-          className="commande-eclair"
-          style={{ ...styleLecture, pointerEvents: 'auto' } as CSSProperties}
-          onClick={() => {
-            if (tours > 0) emettre({ type: 'revoirEclair' } as ActionEclair);
-            ouvrirLaPorte();
-          }}
-        >
-          <span aria-hidden="true">👁</span>
-          {tours === 0 ? 'Montre-moi le mot' : 'Revoir le mot'}
-        </button>
-        {tours === 0 ? null : (
-          <small data-note="revoir-gratuit" className="commande-eclair-note">
-            Tu peux le revoir autant que tu veux.
-          </small>
+      {/* Une seule bande supérieure : le repère d'étape et la commande ne peuvent plus se
+          superposer. Sur petit écran, le CSS condense les libellés sans réduire la cible. */}
+      <div className="eclair-barre-superieure">
+        {consigne === null ? null : (
+          <div
+            data-plateau="etape-eclair"
+            data-visible={eclairVisible ? 'non' : 'oui'}
+            aria-live="polite"
+            className="eclair-etape"
+            style={{ ...styleLecture } as CSSProperties}
+          >
+            <span className="eclair-rang-etape">
+              Étape {String(etat.indexEtape + 1)} sur {String(etat.etapes.length)}
+            </span>
+            <span aria-hidden="true" className="eclair-separateur-etape">✦</span>
+            <span className="eclair-detail-etape">
+              {tours === 0
+                ? 'Un nouveau mot t’attend.'
+                : chercheVoyelle
+                  ? 'Quelle voyelle lis-tu dans ce mot ?'
+                  : 'Retrouve le mot que tu viens de lire.'}
+            </span>
+          </div>
         )}
+
+        <div data-plateau="commande-eclair" className="eclair-commande-zone">
+          <button
+            type="button"
+            data-action={tours === 0 ? 'pret' : 'revoir'}
+            className="commande-eclair"
+            aria-label={tours === 0 ? 'Montre-moi le mot' : 'Revoir le mot'}
+            style={{ ...styleLecture, pointerEvents: 'auto' } as CSSProperties}
+            onClick={() => {
+              if (tours > 0) emettre({ type: 'revoirEclair' } as ActionEclair);
+              ouvrirLaPorte();
+            }}
+          >
+            <span aria-hidden="true">👁</span>
+            <span className="commande-eclair-libelle-long">
+              {tours === 0 ? 'Montre-moi le mot' : 'Revoir le mot'}
+            </span>
+            <span className="commande-eclair-libelle-court" aria-hidden="true">
+              {tours === 0 ? 'Voir' : 'Revoir'}
+            </span>
+          </button>
+          {tours === 0 ? null : (
+            <small data-note="revoir-gratuit" className="commande-eclair-note">
+              Tu peux le revoir autant que tu veux.
+            </small>
+          )}
+        </div>
       </div>
 
       {/* ------------------------------------------------------------- le décor, en fond */}

@@ -467,6 +467,8 @@ export function EcranCampement({
               data-decor-campement="v6-raster"
               src={urlAsset(String(campement.scene.fichier))}
               alt=""
+              decoding="sync"
+              fetchPriority="high"
               draggable={false}
             />
           )}

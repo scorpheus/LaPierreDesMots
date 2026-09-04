@@ -65,9 +65,11 @@ export function FicheObjet({
   surFermerRef.current = surFermer;
 
   // Le focus va sur la sortie : un panneau qui s'ouvre sans donner sa porte est un panneau dont
-  // on ne sait pas sortir au clavier, et la QA d'accessibilité le compte comme un piège.
+  // on ne sait pas sortir au clavier, et la QA d'accessibilité le compte comme un piège. Il ne
+  // doit toutefois pas faire défiler la fiche jusqu'en bas au moment de son ouverture : en
+  // paysage court, cela coupait le titre avant le premier geste de l'enfant.
   useEffect(() => {
-    refFermer.current?.focus();
+    refFermer.current?.focus({ preventScroll: true });
   }, []);
 
   useEffect(() => {

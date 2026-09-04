@@ -34,7 +34,7 @@ annulé, remplacé ou reporté.
 - Seule étape rouge : quatre divergences visuelles déjà connues sur la cour d'école et le moteur
   de coloriage. Les références n'ont pas été modifiées sans validation parentale.
 
-## Dernier chantier terminé : responsive multi-écrans
+## Chantier en cours : responsive multi-écrans et composition professionnelle
 
 - Matrice en pixels CSS réellement disponibles : tablette portrait `720 × 1017`, tablette paysage
   avec navigateur `1017 × 640`, téléphone portrait `360 × 640`, téléphone paysage `640 × 360`.
@@ -54,8 +54,9 @@ annulé, remplacé ou reporté.
 - La composition de la carte dépend également de l'orientation : flux vertical resserré en
   portrait ; carte et destinations côte à côte en paysage bas. L'ancienne piste de `72svh`, qui
   créait un grand vide sous l'introduction en portrait, n'est plus utilisée pour la carte.
-- Les cibles tactiles restent à 64 px. Sur petit écran, les scènes riches deviennent des plateaux
-  localement défilables au lieu d'être écrasées : campement, chaudron et moteur `place`.
+- Les cibles tactiles restent à 64 px. Le choix initial de transformer le campement en plateau
+  horizontalement défilable a été rejeté après essai parent : l'image entière doit rester visible
+  et le campement reçoit une composition propre, sans sous-scroll horizontal.
 - La hauteur disponible utilise `dvh`/`svh` et les seuils tiennent aussi compte d'une fenêtre
   courte, afin de couvrir les barres du navigateur et la barre des tâches.
 - `npm run test:responsive` est la boucle courte du chantier web. `npm run test:qualite` séquence
@@ -68,6 +69,21 @@ annulé, remplacé ou reporté.
   4/4 formats responsive et 6/6 contrôles de bundle. Passe de densité ajoutée ensuite : 16/16 cas
   verts en boucle courte ; dans la chaîne qualité complète, 265/265 cas et 6/6 contrôles de bundle
   sont verts (245,2 Kio gzip sur un budget de 250 Kio).
+- L'audit esthétique complémentaire couvre 76 exercices et 13 écrans persistants dans 6 formats,
+  plus la fiche coffre : **540 états-formats observés**. Il a révélé des défauts que les gardes de
+  rognage ne pouvaient pas voir. Le détail et l'ordre de correction sont dans
+  [audit-design-multiresolution-2026-09-04.md](audit-design-multiresolution-2026-09-04.md).
+- La garde renforcée a révélé que les six moteurs `colorie`, et pas seulement les trois captures
+  repérées, tombaient à 56 px de haut en paysage téléphone. Leur gabarit commun affiche désormais
+  la scène et le nuancier côte à côte, avec une scène d'au moins 160 px et des godets de 64 px.
+- Le campement tient désormais en entier dans le premier écran en paysage court ; le moteur
+  `eclair` sépare l'étape de la commande « Voir/Revoir » ; la récompense place son action
+  principale avant les détails ; les réglages ont un en-tête compact ; la fiche du coffre ne
+  s'ouvre plus déjà défilée et tient entièrement à `640×360`.
+- Vérification intermédiaire après ces corrections : 35/35 tests de composants ciblés, test de
+  fiche 1/1, lint ciblé sans erreur, puis les **178 visites** des 89 écrans en téléphone portrait
+  et paysage sans commande perdue ni garde de composition déclenchée. La validation globale reste
+  à relancer après la fin du chantier PWA concurrent.
 
 ## Dernier chantier terminé : audio
 

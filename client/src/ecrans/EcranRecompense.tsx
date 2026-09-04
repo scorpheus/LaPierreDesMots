@@ -510,6 +510,63 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
         </div>
       </section>
 
+      {/* La continuité de jeu vient immédiatement après la célébration. Les explications sur les
+          étoiles et les gains restent juste dessous, mais ne peuvent plus repousser l'action
+          principale hors du premier écran sur téléphone ou tablette. */}
+      <div className="actions-recompense" data-actions-recompense="oui">
+        {suivant === null ? null : (
+          <button
+            type="button"
+            className="cible action-recompense action-recompense--principale"
+            data-action="exercice-suivant"
+            data-noeud-suivant={String(suivant)}
+            disabled={chargementSuivant}
+            onClick={allerAuSuivant}
+          >
+            {chargementSuivant ? 'On y va…' : 'On y va !'}
+          </button>
+        )}
+        {continuerRegion === null ? null : (
+          <button
+            type="button"
+            className="cible action-recompense action-recompense--principale"
+            data-action="continuer-region"
+            data-noeud-suivant={String(continuerRegion)}
+            disabled={chargementSuivant}
+            onClick={continuerLaRegion}
+          >
+            {chargementSuivant ? 'On y va…' : `Continuer ${nomRegion}`}
+          </button>
+        )}
+        {finDeSortie ? (
+          <button
+            type="button"
+            className={`cible action-recompense${continuerRegion === null && !regionTerminee ? ' action-recompense--principale' : ''}`}
+            data-action="fin-sortie"
+            onClick={terminerSortie}
+          >
+            Au campement !
+          </button>
+        ) : null}
+        {regionTerminee ? null : (
+          <button
+            type="button"
+            className={`cible action-recompense${suivant === null && !finDeSortie ? ' action-recompense--principale' : ''}`}
+            onClick={rejouer}
+          >
+            Encore une fois
+          </button>
+        )}
+        <button
+          type="button"
+          data-action="voir-carte"
+          className={`cible action-recompense${regionTerminee ? ' action-recompense--principale' : ''}`}
+          onClick={retourCarte}
+        >
+          Voir la carte
+        </button>
+      </div>
+
       {/*
         ══════════════════════════════════════════════════════════════════════════════════════
         R4 — « j'ai eu qu'une seule étoile alors que tout est bon ppk ? »
@@ -634,62 +691,6 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
         </p>
       )}
 
-      <div className="actions-recompense" data-actions-recompense="oui">
-        {/* L'APPEL PRINCIPAL, quand il reste quelque chose à faire. « Rejouer » perd sa classe
-            d'appel dans ce cas : c'est « continuer » que l'enfant doit voir en premier, et
-            deux boutons qui appellent également n'appellent plus. */}
-        {suivant === null ? null : (
-          <button
-            type="button"
-            className="cible action-recompense action-recompense--principale"
-            data-action="exercice-suivant"
-            data-noeud-suivant={String(suivant)}
-            disabled={chargementSuivant}
-            onClick={allerAuSuivant}
-          >
-            {chargementSuivant ? 'On y va…' : 'On y va !'}
-          </button>
-        )}
-        {continuerRegion === null ? null : (
-          <button
-            type="button"
-            className="cible action-recompense action-recompense--principale"
-            data-action="continuer-region"
-            data-noeud-suivant={String(continuerRegion)}
-            disabled={chargementSuivant}
-            onClick={continuerLaRegion}
-          >
-            {chargementSuivant ? 'On y va…' : `Continuer ${nomRegion}`}
-          </button>
-        )}
-        {finDeSortie ? (
-          <button
-            type="button"
-            className={`cible action-recompense${continuerRegion === null && !regionTerminee ? ' action-recompense--principale' : ''}`}
-            data-action="fin-sortie"
-            onClick={terminerSortie}
-          >
-            Au campement !
-          </button>
-        ) : null}
-        {regionTerminee ? null : (
-          <button
-            type="button"
-            className={`cible action-recompense${suivant === null && !finDeSortie ? ' action-recompense--principale' : ''}`}
-            onClick={rejouer}
-          >
-            Encore une fois
-          </button>
-        )}
-        <button
-          type="button"
-          data-action="voir-carte"
-          className={`cible action-recompense${regionTerminee ? ' action-recompense--principale' : ''}`}
-          onClick={retourCarte}
-        >
-          Voir la carte
-        </button>
-      </div>
     </main>
     </>
   );
