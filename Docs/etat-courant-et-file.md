@@ -143,9 +143,13 @@ annulé, remplacé ou reporté.
 3. Faire une passe de finition artistique sur les écrans que le test tablette jugera encore trop
    légers, en commençant par les éléments réellement visibles dans le parcours enfant. Valider et
    promouvoir le lot des quatre fonds préparés avant d'en générer davantage.
-4. Produire de vraies animations articulées des compagnons dans un lot séparé : une planche de
-   sprites par personnage, contrôlée avec le protocole `hatch-pet`. Les portraits actuels ne sont
-   pas des sprites et ne doivent pas être artificiellement étirés en fausse animation.
+4. Faire valider puis intégrer les quatre planches d'animation préparées dans
+   `bac-a-sable/assets-a-valider-2026-09-04/sprites-compagnons/`. Filou, Roc, Plume et Bulle ont
+   chacun huit poses normalisées en cellules de 256 × 256 px, ancrées en bas au centre. La première
+   planche de Plume a été refusée visuellement malgré une porte technique verte (morceaux détachés) ;
+   sa version `plume-8-v2.png`, régénérée sur fond uniforme puis contrôlée visuellement, la remplace.
+   Aucune planche n'est encore dans les assets de production : la validation artistique parentale
+   reste la porte avant raccordement.
 5. Revoir l'histoire globale de la carte lorsque le parent souhaitera trancher la place de la
    Clairière : point de départ central actuel ou région périphérique menant à une résolution au
    centre.
