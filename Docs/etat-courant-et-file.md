@@ -144,11 +144,11 @@ annulé, remplacé ou reporté.
 1. Faire tester la version responsive sur la tablette et le téléphone réels, et intégrer les
    nouveaux retours sans
    perdre les tâches déjà ouvertes.
-2. Refaire les cinq planches des exercices de chronologie : les récits existants sont conservés,
-   mais les cartes doivent montrer une vraie action continue au lieu d'illustrations isolées. Les
-   cinq propositions sont réunies dans
-   `bac-a-sable/chronologies-2026-09-04/planche-validation.png` et attendent la validation parent
-   avant découpe et promotion.
+2. Refaire les planches des exercices de chronologie. `pellicule-chrono-01` est validé. Les quatre
+   autres premières propositions ont été refusées : leurs textes n'imposaient pas un ordre assez
+   évident, même lorsque les images partageaient le même style. Les douze nouveaux triplets sont
+   écrits avant toute nouvelle génération dans
+   `bac-a-sable/chronologies-2026-09-04/textes-a-valider.md` et attendent la validation parent.
 3. Faire une passe de finition artistique sur les écrans que le test tablette jugera encore trop
    légers, en commençant par les éléments réellement visibles dans le parcours enfant. Les quatre
    fonds régionaux validés sont désormais publiés ; ne pas en générer davantage avant ce test réel.
