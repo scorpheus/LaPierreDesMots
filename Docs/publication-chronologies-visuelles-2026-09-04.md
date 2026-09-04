@@ -51,3 +51,17 @@ rapportée.
 La première campagne globale a utilement refusé deux formulations contenant « vide » et trois
 consignes dont les apostrophes ne concordaient plus avec leurs clips. Les formulations ont été
 corrigées sans régénérer d’audio : les tests de couverture et d’empreinte des voix repassent.
+
+## Publication GitHub Pages
+
+Publication autorisée par le parent et réalisée le 4 septembre 2026 :
+
+- commit source : `328079df846feb21e648d491acdd903b75808d20` ;
+- commit `gh-pages` : `3f5c20622032f688d4f94626eafa1eb480ec42c9` ;
+- version du livrable : `02812949d95cbb7e` ;
+- contenu : 1 602 fichiers, 212 903 929 octets, dont 16 654 115 octets préchargés ;
+- Action officielle : exécution `33895370041`, construction, rapport et déploiement réussis ;
+- URL : `https://scorpheus.github.io/LaPierreDesMots/`.
+
+La recette distante a vérifié l’accueil, le fichier de version, le service worker portant cette
+version et le chargement HTTP 200 d’une nouvelle vignette du Volcan.

@@ -152,8 +152,8 @@ annulé, remplacé ou reporté.
 3. Faire une passe de finition artistique sur les écrans que le test tablette jugera encore trop
    légers, en commençant par les éléments réellement visibles dans le parcours enfant. Les quatre
    fonds régionaux validés sont désormais publiés ; ne pas en générer davantage avant ce test réel.
-4. Préparer la nouvelle PWA depuis le commit propre du lot Chronologie, puis publier `gh-pages`
-   uniquement après la recette globale et l’accord distant explicite du parent.
+4. La PWA du lot Chronologie est publiée : source `328079d`, livrable `02812949d95cbb7e`, Action
+   Pages `33895370041` réussie. Tester cette version HTTPS sur le téléphone et la tablette réels.
 
 ## Retours parent à surveiller pendant le test
 
