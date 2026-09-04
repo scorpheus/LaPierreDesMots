@@ -102,6 +102,17 @@ annulé, remplacé ou reporté.
   découpé en trois lots indépendants et `RESPONSIVE_LOT=1|2|3` permet de rejouer seulement le tiers
   concerné. Les six lots téléphone (portrait et paysage) passent en 1 min 24 s au total ; un lot
   isolé prend 12 à 15 s.
+- Le dernier contrôle complet a distingué deux défauts d'infrastructure d'un défaut produit : le
+  worker Vitest et le chargement du parcours d'ouverture ont expiré sous contention, sans aucune
+  assertion métier en échec. Le test d'ouverture repasse seul (1/1) puis avec toute sa spec (8/8).
+  Le plafond navigateur par défaut revient donc à la valeur documentée de 6 travailleurs, avec un
+  test de configuration, au lieu des 10 qui avaient réintroduit la saturation Windows.
+- Le seul débordement produit de ce contrôle concernait le chaudron à 1017 × 640 : `100vw`
+  comptait la barre de défilement et ajoutait 15 à 32 px. Le chaudron se borne désormais à son
+  conteneur ; son lot tablette paysage repasse en 19,7 s.
+- Les sept divergences visuelles sont expliquées : six remplacent volontairement les blockouts SVG
+  par la carte ou les décors raster ; la septième concerne la récompense et reste à montrer au
+  parent avant toute mise à jour de référence.
 
 ## Dernier chantier terminé : audio
 
@@ -149,6 +160,11 @@ annulé, remplacé ou reporté.
   préparés dans `contenu/brouillons/histoire-*.json` et décrits dans
   [proposition-audit-editorial-histoire-2026-09-04.md](proposition-audit-editorial-histoire-2026-09-04.md) ;
   ils ne seront promus qu'après la relecture parent.
+- L'audit des 249 champs `asset: null` a séparé 241 cartes volontairement textuelles de huit
+  images réellement manquantes dans `cite-des-histoires-cartes-paires-02`. Une unique planche a
+  produit tomate, carotte, salade, citron, olive, raisin, pomme dans un panier et prune dans un bol.
+  Les huit découpes carrées attendent la validation parent dans
+  `bac-a-sable/assets-a-valider-2026-09-04/cartes-cite-salade/`.
 
 Ces points ont reçu des corrections globales et des tests, mais restent dans la file tant que le
 parent ne les a pas validés sur l'appareil réel.

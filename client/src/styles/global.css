@@ -2806,6 +2806,7 @@ html[data-animations='desactivees'] .compagnon-portrait--tuile {
 .activite-chaudron > [data-moteur='libre'] {
   flex: 1 1 0;
   min-block-size: 0;
+  min-inline-size: 0;
 }
 
 /* Le coffre est un album borné : les formes occupent toute la largeur, puis les deux petites
@@ -3219,8 +3220,11 @@ html[data-animations='desactivees'] .compagnon-portrait--tuile {
 
   .activite-chaudron {
     display: block;
-    inline-size: calc(100vw - 2rem);
-    max-inline-size: calc(100vw - 2rem);
+    /* `100vw` inclut la largeur de la barre de défilement verticale. Dans une fenêtre basse,
+       le chaudron dépassait donc son propre écran de 15 à 32 px selon le navigateur. La largeur
+       utile est celle du conteneur déjà borné par le padding de `.ecran-chaudron`. */
+    inline-size: 100%;
+    max-inline-size: 100%;
     contain: inline-size;
     flex: 0 0 auto;
     block-size: max(30rem, 72svh);
