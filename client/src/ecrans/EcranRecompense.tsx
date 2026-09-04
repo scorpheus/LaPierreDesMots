@@ -475,7 +475,7 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
         gap: '1.35rem',
         alignItems: 'center',
         justifyContent: 'center',
-        minBlockSize: '100vh'
+        minBlockSize: '100dvh'
       }}
     >
       <section className="recompense-scene" data-scene-recompense="gobi-joie">

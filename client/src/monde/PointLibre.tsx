@@ -132,13 +132,17 @@ export function PointLibre({
       onAnimationEnd={finDeMouvement}
       style={{
         position: 'absolute',
-        insetInlineStart: `${String((x / largeurScene) * 100)}%`,
-        insetBlockStart: `${String((y / hauteurScene) * 100)}%`,
+        // La prise est centrée sur l'objet. L'ancien ancrage par le coin supérieur gauche
+        // faisait sortir le plancher tactile de 64 px pour les objets proches des bords
+        // (notamment le bocal et le papillon sur téléphone).
+        insetInlineStart: `${String(((x + largeur / 2) / largeurScene) * 100)}%`,
+        insetBlockStart: `${String(((y + hauteur / 2) / hauteurScene) * 100)}%`,
         inlineSize: `${String((largeur / largeurScene) * 100)}%`,
         blockSize: `${String((hauteur / hauteurScene) * 100)}%`,
         // R16 : le plancher de 64 px tient même si la scène est rendue très petite.
         minInlineSize: '64px',
         minBlockSize: '64px',
+        transform: 'translate(-50%, -50%)',
         padding: 0,
         background: 'transparent',
         border: 'none',

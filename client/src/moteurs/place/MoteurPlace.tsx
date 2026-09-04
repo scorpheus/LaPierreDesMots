@@ -263,18 +263,20 @@ export function MoteurPlace(
             la phrase en train de se construire. L'exigence d'AFFICHAGE n'a rien perdu — elle
             vit désormais dans `tests/composants/EcranNoeud.test.tsx`. La scène récupère
             l'espace : un enfant de plus pour la réserve et les zones, avant le pied. */}
-        <ScenePlace
-          contenu={contenu}
-          habillage={habillage}
-          places={etat.places}
-          elementSaisi={etat.elementSaisi}
-          zoneEnDemonstration={zoneEnDemonstration}
-          zoneEnRefus={etat.dernierRefus === null ? null : etat.dernierRefus.zone}
-          marqueRefus={etat.dernierRefus === null ? 0 : etat.dernierRefus.instantMs}
-          animationsDesactivees={animationsDesactivees}
-          svgMarkup={svgMarkup}
-          onDeposer={deposer}
-        />
+        <div className="scene-place-defilable">
+          <ScenePlace
+            contenu={contenu}
+            habillage={habillage}
+            places={etat.places}
+            elementSaisi={etat.elementSaisi}
+            zoneEnDemonstration={zoneEnDemonstration}
+            zoneEnRefus={etat.dernierRefus === null ? null : etat.dernierRefus.zone}
+            marqueRefus={etat.dernierRefus === null ? 0 : etat.dernierRefus.instantMs}
+            animationsDesactivees={animationsDesactivees}
+            svgMarkup={svgMarkup}
+            onDeposer={deposer}
+          />
+        </div>
 
         <Reserve
           elements={reserveMelangee}

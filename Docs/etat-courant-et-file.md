@@ -9,8 +9,7 @@ annulé, remplacé ou reporté.
 ## Point de reprise
 
 - Branche : `main`.
-- Dernier commit fonctionnel avant le chantier audio : `5000483` — choix et animation de la bande
-  avant une sortie.
+- Dernier commit fonctionnel avant le chantier responsive : `2172a91` — couverture audio complète.
 - Serveur de jeu : écoute sur `0.0.0.0:8080` ; adresse LAN mesurée le 4 septembre :
   `http://192.168.1.19:8080`.
 - Version de production compilée et servie.
@@ -35,6 +34,26 @@ annulé, remplacé ou reporté.
 - Seule étape rouge : quatre divergences visuelles déjà connues sur la cour d'école et le moteur
   de coloriage. Les références n'ont pas été modifiées sans validation parentale.
 
+## Dernier chantier terminé : responsive multi-écrans
+
+- Matrice en pixels CSS réellement disponibles : tablette portrait `720 × 1017`, tablette paysage
+  avec navigateur `1017 × 640`, téléphone portrait `360 × 640`, téléphone paysage `640 × 360`.
+- Les 89 recettes d'écran sont parcourues dans chaque format. La garde refuse tout débordement
+  horizontal de page, toute commande sans surface et toute commande rognée par un ancêtre.
+- Le chargement est stabilisé avant la mesure : polices prêtes, images chargées ou en erreur, puis
+  deux cycles de mise en page. Une capture partiellement chargée ne peut plus valider l'écran.
+- Résultat du 4 septembre : 4/4 formats verts, soit 356 visites d'écran. Le téléphone portrait a
+  en plus réussi trois répétitions concurrentes consécutives.
+- Les cibles tactiles restent à 64 px. Sur petit écran, les scènes riches deviennent des plateaux
+  localement défilables au lieu d'être écrasées : campement, chaudron et moteur `place`.
+- La hauteur disponible utilise `dvh`/`svh` et les seuils tiennent aussi compte d'une fenêtre
+  courte, afin de couvrir les barres du navigateur et la barre des tâches.
+- `npm run test:responsive` est la boucle courte du chantier web. `npm run test:qualite` séquence
+  désormais l'audit général, la latence isolée, la matrice responsive puis le budget du bundle ;
+  les lancer en concurrence faussait la mesure de latence par contention CPU.
+- Validation finale du lot : 247/247 contrôles qualité généraux, 2/2 contrôles de latence,
+  4/4 formats responsive et 6/6 contrôles de bundle.
+
 ## Dernier chantier terminé : audio
 
 - Population recensée : 667 objets audio, 674 clips avec les variantes.
@@ -49,7 +68,8 @@ annulé, remplacé ou reporté.
 
 ## À faire après l'audio
 
-1. Faire tester la version courante sur la tablette réelle et intégrer les nouveaux retours sans
+1. Faire tester la version responsive sur la tablette et le téléphone réels, et intégrer les
+   nouveaux retours sans
    perdre les tâches déjà ouvertes.
 2. Examiner avec le parent les quatre divergences de références visuelles historiques. Ne jamais
    mettre les références à jour sans sa validation.

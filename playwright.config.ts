@@ -28,6 +28,28 @@ const PORT = Number(process.env["PIERRE_PORT"] ?? 8080);
 const URL_BASE = `http://127.0.0.1:${PORT}`;
 
 /**
+ * Le format peut être resserré ponctuellement sans créer cinq configurations Playwright.
+ * La valeur exprime le viewport CSS réellement offert à la page, barres du navigateur déjà
+ * retranchées : `PIERRE_VIEWPORT=720x1017`. Sans variable, la recette historique reste inchangée.
+ */
+function viewportDeValidation(): { width: number; height: number } {
+  const valeur = process.env["PIERRE_VIEWPORT"]?.trim();
+  if (valeur === undefined || valeur === "") return { width: 1920, height: 1200 };
+  const resultat = /^(\d+)x(\d+)$/u.exec(valeur);
+  if (resultat === null) {
+    throw new Error(
+      `PIERRE_VIEWPORT doit avoir la forme LARGEURxHAUTEUR, reçu « ${valeur} »`
+    );
+  }
+  const width = Number(resultat[1]);
+  const height = Number(resultat[2]);
+  if (width < 320 || height < 320) {
+    throw new Error(`PIERRE_VIEWPORT est trop petit pour être un viewport jouable : ${valeur}`);
+  }
+  return { width, height };
+}
+
+/**
  * ── COMBIEN DE TRAVAILLEURS : LE CHIFFRE EST MESURÉ, PAS DÉDUIT DU NOMBRE DE CŒURS ─────────
  *
  * Le premier réglage de P1 disait « 50 % des cœurs », c'est-à-dire 16 sur cette machine. Ça
@@ -95,7 +117,7 @@ function travailleurs(): number | string {
  */
 const tabletteGalaxyTabS10FE = {
   ...devices["Desktop Chrome"],
-  viewport: { width: 1920, height: 1200 },
+  viewport: viewportDeValidation(),
   deviceScaleFactor: 2,
   hasTouch: true,
   isMobile: false,
@@ -252,6 +274,26 @@ export default defineConfig({
       name: "qualite",
       testDir: "tests/qualite",
       testMatch: /.*\.spec\.ts$/,
+      testIgnore: [/responsive-tous-ecrans\.spec\.ts$/, /gamefeel-latence\.spec\.ts$/],
+    },
+    {
+      // Une mesure de latence exécutée au milieu de dix audits axe/core ne mesure plus le jeu,
+      // mais la contention artificielle de la machine. Ce projet court est séquencé par npm.
+      name: "qualite-latence",
+      testDir: "tests/qualite",
+      testMatch: /gamefeel-latence\.spec\.ts$/,
+      dependencies: ["qualite"],
+    },
+    {
+      name: "responsive",
+      testDir: "tests/qualite",
+      testMatch: /responsive-tous-ecrans\.spec\.ts$/,
+      use: {
+        isMobile: true,
+        hasTouch: true,
+        deviceScaleFactor: 2,
+      },
+      dependencies: ["qualite-latence"],
     },
 
     {

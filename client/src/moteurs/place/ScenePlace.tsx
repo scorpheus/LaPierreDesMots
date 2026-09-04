@@ -194,7 +194,7 @@ export function ScenePlace(proprietes: ProprietesScenePlace): ReactElement {
       // l'étiquette du décor et rend ses enfants atteignables.
       role="group"
       aria-label={habillage.libelle}
-      style={{ width: '100%', height: 'auto', touchAction: 'none' }}
+      style={{ touchAction: 'none' }}
     >
       {svgMarkup === null ? null : (
         // Décor déclaratif de l'habillage. Nettoyé de tout script par l'hôte avant injection.

@@ -582,13 +582,13 @@ export function EcranNoeud(): ReactElement {
         `position: relative` porte le fond : sans lui, `inset: 0` se réfèrerait au bloc
         contenant le plus proche, qui n'est pas celui-ci.
       */}
-      <div style={{ flex: '1 1 auto', minBlockSize: 0, position: 'relative' }}>
+      <div className="scene-noeud" style={{ flex: '1 1 auto', minBlockSize: 0, position: 'relative' }}>
         <DecorDeFond habillage={paquet.habillage} moteur={codeMoteur} />
         {/* Le moteur passe DEVANT le fond. `zIndex` seul ne suffirait pas sur un élément non
             positionné : sans `position: relative`, il resterait dans le même plan que le fond
             et l'ordre du document déciderait — ce qui marche par accident aujourd'hui et
             cesserait de marcher au premier moteur qui positionne un de ses enfants. */}
-        <div style={{ position: 'relative', zIndex: 1, blockSize: '100%' }}>
+        <div className="porteur-moteur" style={{ position: 'relative', zIndex: 1, blockSize: '100%' }}>
           <ComposantMoteurMonte
             contenu={paquet.exercice.jeu.contenu}
             habillage={paquet.habillage}

@@ -153,6 +153,13 @@ body {
   height: 100%;
 }
 
+/* Les dimensions déclarées incluent toujours leur bordure et leur marge intérieure. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 /* ------------------------------------------------------- L'ÉCHELLE DE LECTURE (Q7, D19)
    Un `rem` se mesure ICI, sur `html`, et nulle part ailleurs. C'est ce qui fait que les 119
    tailles écrites en `rem` dans les composants suivent le réglage du parent SANS qu'aucune
@@ -788,14 +795,26 @@ html[data-animations='desactivees'] .compagnon-portrait--tuile {
 }
 
 @media (max-width: 900px), (orientation: portrait) {
+  .ecran-profils {
+    gap: 1rem !important;
+    padding: 1rem !important;
+  }
+
+  .liste-profils {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+    gap: 1rem !important;
+  }
+
   .ecran-carte {
     block-size: auto !important;
     min-block-size: 100dvh;
+    gap: 0.65rem !important;
+    padding: 0.75rem !important;
   }
 
   .corps-carte {
     grid-template-columns: 1fr;
-    grid-template-rows: minmax(22rem, 58vh) auto;
+    grid-template-rows: minmax(17rem, 50dvh) auto;
   }
 
   .destinations-carte > div {
@@ -1193,7 +1212,7 @@ html[data-animations='desactivees'] .compagnon-portrait--tuile {
   grid-column: 1 / -1;
 }
 
-@media (max-width: 760px) {
+@media (max-width: 620px) {
   .reglages-grille {
     grid-template-columns: 1fr;
   }
@@ -1813,6 +1832,24 @@ html[data-animations='desactivees'] .compagnon-portrait--tuile {
 
   .campement-titre {
     grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 900px), (max-height: 760px) {
+  .campement-entete {
+    gap: 0.5rem;
+    padding: 0.5rem;
+  }
+
+  .action-campement,
+  .campement-entete [data-pictogramme="sortie"] {
+    min-block-size: 6.4rem;
+    padding: 0.35rem;
+  }
+
+  .action-campement-vignette {
+    inline-size: 3.8rem;
+    block-size: 2.8rem;
   }
 }
 
@@ -2575,9 +2612,18 @@ html[data-animations='desactivees'] .compagnon-portrait--tuile {
   gap: 1rem;
 }
 
-.moteur-place > svg[data-scene="place"] {
+.scene-place-defilable {
+  display: contents;
+}
+
+.scene-place-defilable > svg[data-scene="place"] {
   grid-row: 1 / span 2;
   align-self: center;
+  inline-size: auto;
+  block-size: auto;
+  max-inline-size: 100%;
+  max-block-size: 100%;
+  margin-inline: auto;
 }
 
 .moteur-place > [data-reserve="place"] {
@@ -2657,5 +2703,239 @@ html[data-animations='desactivees'] .compagnon-portrait--tuile {
 
   .ouverture-tableau__texte {
     line-height: 1.42;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════════
+   RESPONSIVE RÉEL — pixels CSS d'Android, navigateur compris
+
+   Le premier banc utilisait 1920×1200 pixels CSS avec un DPR de 2 : il simulait donc une surface
+   deux fois plus large que celle réellement offerte par la tablette. Ces règles répondent à la
+   largeur ET à la hauteur disponible. Sur les cadres courts, le moteur reçoit une scène de jeu
+   stable et la page défile verticalement au lieu de rogner ses commandes.
+   ══════════════════════════════════════════════════════════════════════════════════════════════ */
+
+.porteur-moteur {
+  min-block-size: 0;
+  min-inline-size: 0;
+}
+
+@media (max-width: 1100px), (max-height: 800px) {
+  [data-ecran="noeud"] {
+    gap: 0.5rem !important;
+    padding: 0.5rem !important;
+  }
+
+  [data-ecran="noeud"] .barre-consigne {
+    display: grid !important;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 0.5rem !important;
+    padding: 0.5rem !important;
+  }
+
+  [data-ecran="noeud"] .barre-consigne > div {
+    min-inline-size: 0;
+  }
+
+  [data-ecran="noeud"] .barre-consigne [data-consigne] {
+    font-size: clamp(1.15rem, 3vw, 1.45rem) !important;
+    line-height: 1.25;
+  }
+
+  [data-ecran="noeud"] .barre-consigne > .jauge-palier {
+    grid-column: 2 / -1;
+    justify-self: end;
+  }
+
+  [data-ecran="noeud"] .barre-consigne .bouton-ecouter > span {
+    display: none;
+  }
+
+  [data-ecran="noeud"] > .gobi {
+    gap: 0.5rem !important;
+    padding: 0.25rem 0.5rem !important;
+  }
+
+  [data-ecran="noeud"] > .gobi > svg {
+    inline-size: 3rem;
+    block-size: 3rem;
+    flex: 0 0 3rem;
+  }
+
+  [data-ecran="noeud"] > .gobi .gobi-bulle {
+    padding: 0.35rem 0.6rem !important;
+  }
+
+  /* Les dix moteurs à mise en scène absolue ne doivent plus transformer un manque de hauteur
+     en commandes définitivement coupées. Le défilement reste local au plateau. */
+  [data-ecran="noeud"] [data-moteur] {
+    overflow: auto !important;
+  }
+
+  [data-moteur="chrono"] [data-cartouche-chrono="etape"] {
+    max-inline-size: min(88%, 36rem) !important;
+  }
+
+  .ecran-recompense {
+    gap: 0.7rem !important;
+    justify-content: flex-start !important;
+    padding: 0.75rem !important;
+  }
+
+  .recompense-scene {
+    gap: 0.65rem;
+    padding: 0.75rem;
+  }
+}
+
+@media (orientation: portrait) {
+  .recompense-scene {
+    grid-template-columns: 1fr;
+  }
+
+  .recompense-gobi {
+    min-block-size: 7rem;
+  }
+
+  .recompense-gobi img {
+    inline-size: 8rem;
+  }
+}
+
+/* Un téléphone ou une tablette en paysage avec les barres ouvertes n'a matériellement pas la
+   hauteur pour l'en-tête, la scène et Gobi. On conserve les cibles à 64 px et on fait défiler la
+   page : réduire les boutons les rendrait seulement plus difficiles à toucher. */
+@media (max-width: 600px), (max-height: 700px) {
+  [data-ecran="noeud"] {
+    block-size: auto !important;
+    max-block-size: none;
+    min-block-size: 100svh;
+  }
+
+  [data-ecran="noeud"] .scene-noeud {
+    flex: 0 0 auto !important;
+    block-size: max(30rem, 72svh);
+    min-block-size: 30rem;
+  }
+
+  [data-ecran="noeud"] .barre-consigne > .jauge-palier {
+    display: none;
+  }
+
+  [data-ecran="noeud"] > .gobi .gobi-bulle {
+    min-inline-size: 0;
+  }
+
+  .ecran-carte {
+    max-block-size: none;
+  }
+
+  .corps-carte {
+    grid-template-rows: minmax(18rem, 72svh) auto;
+  }
+
+  .ecran-chaudron {
+    block-size: auto;
+    max-block-size: none;
+    min-block-size: 100svh;
+  }
+
+  .activite-chaudron {
+    display: block;
+    inline-size: calc(100vw - 2rem);
+    max-inline-size: calc(100vw - 2rem);
+    contain: inline-size;
+    flex: 0 0 auto;
+    block-size: max(30rem, 72svh);
+    min-block-size: 30rem;
+  }
+}
+
+@media (max-width: 420px) {
+  [data-ecran="noeud"] .barre-consigne > .cible[data-vers="carte"] span:last-child {
+    display: none;
+  }
+
+  [data-ecran="noeud"] > .gobi > svg {
+    inline-size: 2.5rem;
+    block-size: 2.5rem;
+    flex-basis: 2.5rem;
+  }
+
+  .entete-carte {
+    gap: 0.5rem !important;
+  }
+
+  .entete-carte > h1 {
+    inline-size: 100%;
+    font-size: 1.75rem !important;
+  }
+}
+
+@media (max-width: 600px) {
+  /* Les scènes riches gardent leurs cibles de 64 px. Elles deviennent des plateaux que l'on
+     explore horizontalement, plutôt que des miniatures aux prises superposées ou rognées. */
+  .campement-grille,
+  .activite-chaudron {
+    inline-size: 100%;
+    max-inline-size: 100%;
+    min-inline-size: 0;
+    overflow-x: auto;
+  }
+
+  [data-scene="campement"] {
+    min-inline-size: 640px;
+  }
+
+  .activite-chaudron > [data-moteur="libre"] {
+    flex: 1 1 auto;
+    inline-size: 100%;
+    min-inline-size: 0;
+  }
+
+  .activite-chaudron [data-plateau="regions"] {
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+  }
+
+  .activite-chaudron [data-plateau="regions"] > [data-scene-libre] {
+    inline-size: 600px !important;
+    min-inline-size: 600px;
+  }
+
+  .scene-place-defilable {
+    display: block;
+    flex: 0 0 400px;
+    inline-size: 100%;
+    block-size: 400px;
+    min-inline-size: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  .scene-place-defilable > svg[data-scene="place"] {
+    inline-size: 600px !important;
+    block-size: 400px !important;
+    min-inline-size: 600px;
+    max-inline-size: none;
+    max-block-size: none;
+    margin-inline: 0;
+  }
+
+  .entete-chaudron {
+    gap: 0.5rem;
+    padding: 0.5rem;
+  }
+
+  .entete-chaudron > .cible {
+    min-inline-size: 0;
+    padding-inline: 0.6rem;
+    font-size: 0.85rem;
+  }
+
+  .entete-chaudron > h1 {
+    min-inline-size: 0;
+    font-size: clamp(1.1rem, 6vw, 1.5rem) !important;
+    line-height: 1.1;
   }
 }
