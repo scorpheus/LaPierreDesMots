@@ -84,11 +84,13 @@ release ou paramètre du dépôt — l’agent annonce exactement l’action au 
 accord. Aucun agent ne doit considérer l’authentification `gh` de cette machine comme une
 autorisation implicite d’écrire sur GitHub.
 
-Le script utilisateur à la racine est `publier-site.bat`. Il est sûr à relancer, s’arrête si la
-vérification ou la construction échoue et prépare uniquement un commit local `gh-pages`. Il
-n’exécute jamais de push et affiche la commande distante qui ne pourra être lancée qu’après
-l’annonce et l’accord du propriétaire. La procédure répétable validée est consignée dans
-`.agents/skills/publier-pwa-github-pages/SKILL.md`.
+Le script utilisateur à la racine est `publier-site.bat`. Son mode `--preparer` est sûr à relancer,
+refuse une campagne de tests concurrente, exécute une seule validation complète, construit la PWA,
+prépare le commit local `gh-pages` et enregistre ses empreintes dans le bac à sable. Il n’écrit
+jamais sur GitHub. Après l’annonce de l’action distante et l’accord du propriétaire, le mode
+`--publier` refuse toute divergence depuis cette préparation, pousse le commit exact, attend
+l’Action Pages puis vérifie la version et les ressources essentielles servies en HTTPS. La
+procédure répétable est consignée dans `.agents/skills/publier-pwa-github-pages/SKILL.md`.
 
 GitHub Pages est configuré sur la branche `gh-pages`, dossier racine, avec HTTPS forcé. Chaque
 nouveau push autorisé de cette branche déclenche l’Action gérée par GitHub
@@ -127,6 +129,28 @@ La publication n’est proposée que si les preuves suivantes sont vertes dans l
 6. second contexte écrivain refusé proprement, sans corruption ni écran sans issue ;
 7. export, suppression locale contrôlée, import : journal et progression restaurés ;
 8. `npm run verifier`, puis lecture de `tests/rapports/RAPPORT.md`.
+
+### Automatisation de la publication
+
+La procédure quotidienne ne recopie plus manuellement les commandes :
+
+```powershell
+publier-site.bat --preparer
+# arrêt obligatoire : annonce du push et accord explicite du propriétaire
+publier-site.bat --publier
+```
+
+La préparation contrôle d’abord le dépôt, les voix et les polices locales ainsi que l’absence de
+travailleurs Vitest, tinypool ou Playwright rattachés à ce dépôt. Elle échoue en nommant leurs PID
+au lieu de les arrêter : un processus peut appartenir à un autre chantier légitime. Une validation
+verte, le commit source, le commit de livraison et la version du build sont ensuite liés dans
+`bac-a-sable/publication-gh-pages-etat.json`. Ce fichier est ignoré par Git et ne constitue pas une
+autorisation distante.
+
+La publication exige que ces empreintes soient encore exactes, puis automatise le push, l’attente
+de l’Action officielle, le contrôle de l’état `built` et une recette HTTP de la racine, du manifeste,
+de son icône, du service worker et de la version. La persistance réelle sur tablette reste une
+recette humaine : le script ne supprime ni ne remplace les données OPFS du navigateur.
 
 ### Mesure du 2026-09-04
 

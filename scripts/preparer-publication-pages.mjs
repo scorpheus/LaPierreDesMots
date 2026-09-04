@@ -437,12 +437,17 @@ export function preparerBrancheLocale() {
   console.log('        automatiquement l Action Pages officielle.');
 }
 
-const arguments_ = new Set(process.argv.slice(2));
-try {
-  if (arguments_.has('--finaliser')) finaliserLivrable();
-  else if (arguments_.has('--branche')) preparerBrancheLocale();
-  else throw new Error('Usage : --finaliser ou --branche');
-} catch (cause) {
-  console.error(`[pages] ECHEC : ${cause instanceof Error ? cause.message : String(cause)}`);
-  process.exitCode = 1;
+const estAppeleDirectement =
+  process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+
+if (estAppeleDirectement) {
+  const arguments_ = new Set(process.argv.slice(2));
+  try {
+    if (arguments_.has('--finaliser')) finaliserLivrable();
+    else if (arguments_.has('--branche')) preparerBrancheLocale();
+    else throw new Error('Usage : --finaliser ou --branche');
+  } catch (cause) {
+    console.error(`[pages] ECHEC : ${cause instanceof Error ? cause.message : String(cause)}`);
+    process.exitCode = 1;
+  }
 }

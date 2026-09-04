@@ -17,10 +17,9 @@ effective est :
 
 ```text
 commit(s) source sur le PC
-→ publier-site.bat : vérification + compilation locale + commit local gh-pages
-→ push autorisé de gh-pages
-→ Action GitHub Pages officielle : livraison HTTPS
-→ recette sur https://scorpheus.github.io/LaPierreDesMots/
+→ `publier-site.bat --preparer` : garde de concurrence + vérification unique + build + commit local
+→ accord explicite du propriétaire
+→ `publier-site.bat --publier` : push + attente de l’Action + recette HTTPS
 ```
 
 Ne pas inventer un workflow qui compile sur un runner GitHub hébergé. Une automatisation depuis
@@ -57,25 +56,29 @@ Le cache initial est hybride : coquille, code, WASM, polices, SVG, JSON et voix 
 les PNG, WebP et JPEG sont conservés à leur première consultation. Ne pas promettre tout le jeu
 illustré hors connexion avant qu'un téléchargement complet explicite ait été implanté.
 
-## Préparation de la publication
+## Commande automatisée en deux temps
 
-1. Exécuter `npm run verifier`, puis lire `tests/rapports/RAPPORT.md`.
-2. Vérifier que le dépôt principal est propre. `publier-site.bat` refuse volontairement les
-   changements suivis ou non suivis afin que le livrable corresponde à un commit source connu.
-3. Exécuter `publier-site.bat`. Il reconstruit la PWA et prépare uniquement un commit local dans
-   le worktree ignoré `bac-a-sable/publication-gh-pages`.
-4. Inspecter le commit local et le fichier `SOURCE_COMMIT.txt`.
-5. S'arrêter, annoncer au propriétaire la commande distante affichée par le script ainsi que son
-   effet, puis attendre son accord. GitHub Pages est déjà configuré sur la branche `gh-pages`,
-   dossier racine, avec HTTPS forcé ; le push déclenche automatiquement l'Action Pages officielle.
-6. Après accord, exécuter exactement :
+1. Exécuter une seule fois `publier-site.bat --preparer`. Ne pas lancer `npm run verifier` avant :
+   cette commande le fait déjà et relit ses rapports. Elle refuse un dépôt sale, les assets locaux
+   absents et toute campagne Vitest/Playwright concurrente de ce dépôt avant d’engager les tests
+   longs. Elle ne tue jamais un processus automatiquement.
+2. Lire son résumé : commit source, commit `gh-pages`, version du build et nombre de preuves. Le
+   fichier ignoré `bac-a-sable/publication-gh-pages-etat.json` lie ces quatre valeurs. Toute
+   modification ultérieure invalide la publication au lieu d’envoyer d’autres octets.
+3. S'arrêter, annoncer que `--publier` poussera le commit indiqué vers la branche distante
+   `gh-pages` et déclenchera GitHub Pages, puis attendre l’accord explicite du propriétaire.
+4. Après accord, exécuter :
 
    ```powershell
-   git -C bac-a-sable/publication-gh-pages push origin gh-pages:gh-pages
+   publier-site.bat --publier
    ```
 
-7. Attendre la fin de l'Action `pages build and deployment`. Ne pas annoncer la publication sur un
-   simple push : exiger son statut `success` et l'état Pages `built`.
+   Cette commande revérifie les empreintes préparées, pousse exactement `gh-pages`, attend l’Action
+   `pages build and deployment`, exige son succès et l’état Pages `built`, puis contrôle en HTTPS
+   la page racine, `version-build.json`, le service worker, le manifeste et son icône.
 
-Après une publication autorisée, vérifier l'installation et la persistance sur
-`https://scorpheus.github.io/LaPierreDesMots/`, sans supprimer la base locale existante.
+Sans argument, un double-clic sur `publier-site.bat` équivaut à `--preparer` et conserve la fenêtre
+ouverte. En automatisation, toujours préciser le mode afin de ne pas introduire de pause.
+
+La recette technique distante est automatisée. La recette fonctionnelle d’installation et de
+persistance sur la tablette reste à faire sans supprimer la base locale existante.
