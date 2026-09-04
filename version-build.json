@@ -1,8 +1,8 @@
 {
-  "version": "02812949d95cbb7e",
+  "version": "9f8f443a14509441",
   "base": "/LaPierreDesMots/",
-  "fichiers": 1602,
-  "octetsTotal": 212903929,
-  "octetsPrecharges": 16654115,
+  "fichiers": 1617,
+  "octetsTotal": 213112818,
+  "octetsPrecharges": 16658644,
   "politiqueCache": "noyau atomique (HTML, JS, CSS, WASM, polices, SVG, JSON, Opus) ; images lourdes a la demande"
 }

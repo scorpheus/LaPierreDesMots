@@ -11,7 +11,7 @@
  */
 /* global self, caches */
 
-const VERSION = '02812949d95cbb7e';
+const VERSION = '9f8f443a14509441';
 const BASE = '/LaPierreDesMots/';
 const PRECACHE = [
   "/LaPierreDesMots/.vite/manifest.json",
@@ -406,8 +406,8 @@ const PRECACHE = [
   "/LaPierreDesMots/assets/guirlande-BoZr2VSf.svg",
   "/LaPierreDesMots/assets/hesitation-BBCjGqUA.svg",
   "/LaPierreDesMots/assets/index-BndqXbWJ.js",
-  "/LaPierreDesMots/assets/index-BQHmcpgw.js",
   "/LaPierreDesMots/assets/index-DRefDHMM.js",
+  "/LaPierreDesMots/assets/index-DSgj43mR.js",
   "/LaPierreDesMots/assets/joie-C4xsL_9o.svg",
   "/LaPierreDesMots/assets/lianes-Llw4yK2T.svg",
   "/LaPierreDesMots/assets/locuteur-bulle.normal.8dad8c39-B5CjukoM.opus",
@@ -597,7 +597,7 @@ const PRECACHE = [
   "/LaPierreDesMots/assets/poissons-B2yEcocG.svg",
   "/LaPierreDesMots/assets/ponton-BAopEDcG.svg",
   "/LaPierreDesMots/assets/ponts-DnMR1Jxq.svg",
-  "/LaPierreDesMots/assets/port-local-BcszWlUX.js",
+  "/LaPierreDesMots/assets/port-local-D_-cOZ_F.js",
   "/LaPierreDesMots/assets/rayonnages-BeJ6vWwN.svg",
   "/LaPierreDesMots/assets/repos-DBQqkFKN.svg",
   "/LaPierreDesMots/assets/roseaux-D1etFX69.svg",

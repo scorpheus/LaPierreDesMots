@@ -603,61 +603,121 @@
     "file": "assets/aide-p02K0_sd.svg",
     "src": "../contenu/assets/gobi/animation/aide.svg"
   },
+  "../contenu/assets/gobi/animation/aide.webp": {
+    "file": "assets/aide-BFnpgPrt.webp",
+    "src": "../contenu/assets/gobi/animation/aide.webp"
+  },
   "../contenu/assets/gobi/animation/apparition.svg": {
     "file": "assets/apparition-B3Oqm2Q5.svg",
     "src": "../contenu/assets/gobi/animation/apparition.svg"
+  },
+  "../contenu/assets/gobi/animation/apparition.webp": {
+    "file": "assets/apparition-BQALjAqQ.webp",
+    "src": "../contenu/assets/gobi/animation/apparition.webp"
   },
   "../contenu/assets/gobi/animation/hesitation.svg": {
     "file": "assets/hesitation-BBCjGqUA.svg",
     "src": "../contenu/assets/gobi/animation/hesitation.svg"
   },
+  "../contenu/assets/gobi/animation/hesitation.webp": {
+    "file": "assets/hesitation-DUeBQKb4.webp",
+    "src": "../contenu/assets/gobi/animation/hesitation.webp"
+  },
   "../contenu/assets/gobi/animation/joie.svg": {
     "file": "assets/joie-C4xsL_9o.svg",
     "src": "../contenu/assets/gobi/animation/joie.svg"
+  },
+  "../contenu/assets/gobi/animation/joie.webp": {
+    "file": "assets/joie-B-6mcJEL.webp",
+    "src": "../contenu/assets/gobi/animation/joie.webp"
   },
   "../contenu/assets/gobi/animation/repos.svg": {
     "file": "assets/repos-DBQqkFKN.svg",
     "src": "../contenu/assets/gobi/animation/repos.svg"
   },
+  "../contenu/assets/gobi/animation/repos.webp": {
+    "file": "assets/repos-CjVM6JSn.webp",
+    "src": "../contenu/assets/gobi/animation/repos.webp"
+  },
   "../contenu/assets/gobi/stades/stade-1.svg": {
     "file": "assets/stade-1-CthjjCEp.svg",
     "src": "../contenu/assets/gobi/stades/stade-1.svg"
+  },
+  "../contenu/assets/gobi/stades/stade-1.webp": {
+    "file": "assets/stade-1-CrZzeGw1.webp",
+    "src": "../contenu/assets/gobi/stades/stade-1.webp"
   },
   "../contenu/assets/gobi/stades/stade-10.svg": {
     "file": "assets/stade-10-CZ7_Z-rx.svg",
     "src": "../contenu/assets/gobi/stades/stade-10.svg"
   },
+  "../contenu/assets/gobi/stades/stade-10.webp": {
+    "file": "assets/stade-10-CCtZNz4h.webp",
+    "src": "../contenu/assets/gobi/stades/stade-10.webp"
+  },
   "../contenu/assets/gobi/stades/stade-2.svg": {
     "file": "assets/stade-2-Cqn-wJEu.svg",
     "src": "../contenu/assets/gobi/stades/stade-2.svg"
+  },
+  "../contenu/assets/gobi/stades/stade-2.webp": {
+    "file": "assets/stade-2-h4nWeByN.webp",
+    "src": "../contenu/assets/gobi/stades/stade-2.webp"
   },
   "../contenu/assets/gobi/stades/stade-3.svg": {
     "file": "assets/stade-3-BX1TgdiU.svg",
     "src": "../contenu/assets/gobi/stades/stade-3.svg"
   },
+  "../contenu/assets/gobi/stades/stade-3.webp": {
+    "file": "assets/stade-3-ChUobyY-.webp",
+    "src": "../contenu/assets/gobi/stades/stade-3.webp"
+  },
   "../contenu/assets/gobi/stades/stade-4.svg": {
     "file": "assets/stade-4-BDV0NFIT.svg",
     "src": "../contenu/assets/gobi/stades/stade-4.svg"
+  },
+  "../contenu/assets/gobi/stades/stade-4.webp": {
+    "file": "assets/stade-4-Clst67ay.webp",
+    "src": "../contenu/assets/gobi/stades/stade-4.webp"
   },
   "../contenu/assets/gobi/stades/stade-5.svg": {
     "file": "assets/stade-5-DGn9Kokz.svg",
     "src": "../contenu/assets/gobi/stades/stade-5.svg"
   },
+  "../contenu/assets/gobi/stades/stade-5.webp": {
+    "file": "assets/stade-5-5wNvsvtB.webp",
+    "src": "../contenu/assets/gobi/stades/stade-5.webp"
+  },
   "../contenu/assets/gobi/stades/stade-6.svg": {
     "file": "assets/stade-6-Kp2v33JV.svg",
     "src": "../contenu/assets/gobi/stades/stade-6.svg"
+  },
+  "../contenu/assets/gobi/stades/stade-6.webp": {
+    "file": "assets/stade-6-BL-i57--.webp",
+    "src": "../contenu/assets/gobi/stades/stade-6.webp"
   },
   "../contenu/assets/gobi/stades/stade-7.svg": {
     "file": "assets/stade-7-CG1WPJN5.svg",
     "src": "../contenu/assets/gobi/stades/stade-7.svg"
   },
+  "../contenu/assets/gobi/stades/stade-7.webp": {
+    "file": "assets/stade-7-Dgar74oJ.webp",
+    "src": "../contenu/assets/gobi/stades/stade-7.webp"
+  },
   "../contenu/assets/gobi/stades/stade-8.svg": {
     "file": "assets/stade-8-CB2Ros1z.svg",
     "src": "../contenu/assets/gobi/stades/stade-8.svg"
   },
+  "../contenu/assets/gobi/stades/stade-8.webp": {
+    "file": "assets/stade-8-cznxYYyZ.webp",
+    "src": "../contenu/assets/gobi/stades/stade-8.webp"
+  },
   "../contenu/assets/gobi/stades/stade-9.svg": {
     "file": "assets/stade-9-BPM2raNh.svg",
     "src": "../contenu/assets/gobi/stades/stade-9.svg"
+  },
+  "../contenu/assets/gobi/stades/stade-9.webp": {
+    "file": "assets/stade-9-Duo49qOx.webp",
+    "src": "../contenu/assets/gobi/stades/stade-9.webp"
   },
   "../contenu/assets/objets/oiseau.svg": {
     "file": "assets/oiseau-FBCoe-WG.svg",
@@ -3608,7 +3668,7 @@
     "name": "index"
   },
   "index.html": {
-    "file": "assets/index-BQHmcpgw.js",
+    "file": "assets/index-DSgj43mR.js",
     "name": "index",
     "src": "index.html",
     "isEntry": true,
@@ -3621,7 +3681,7 @@
     ]
   },
   "src/api/port-local.ts": {
-    "file": "assets/port-local-BcszWlUX.js",
+    "file": "assets/port-local-D_-cOZ_F.js",
     "name": "port-local",
     "src": "src/api/port-local.ts",
     "isDynamicEntry": true,
@@ -3910,6 +3970,21 @@
       "assets/vignette-pierre-CWKyRphu.png",
       "assets/vignette-quilles-placees-Dmuaw3uU.png",
       "assets/vignette-quilles-tombees-BBUa1GMQ.png",
+      "assets/aide-BFnpgPrt.webp",
+      "assets/apparition-BQALjAqQ.webp",
+      "assets/hesitation-DUeBQKb4.webp",
+      "assets/joie-B-6mcJEL.webp",
+      "assets/repos-CjVM6JSn.webp",
+      "assets/stade-1-CrZzeGw1.webp",
+      "assets/stade-10-CCtZNz4h.webp",
+      "assets/stade-2-h4nWeByN.webp",
+      "assets/stade-3-ChUobyY-.webp",
+      "assets/stade-4-Clst67ay.webp",
+      "assets/stade-5-5wNvsvtB.webp",
+      "assets/stade-6-BL-i57--.webp",
+      "assets/stade-7-Dgar74oJ.webp",
+      "assets/stade-8-cznxYYyZ.webp",
+      "assets/stade-9-Duo49qOx.webp",
       "assets/aide-gobi-montre-cible.normal.16d5cf94-D9FLCR52.opus",
       "assets/aide-gobi-montre-couleur.normal.293474c6-DY6POJC6.opus",
       "assets/aide-gobi-relire-consigne.normal.6e817c2f-CRw15hbc.opus",
