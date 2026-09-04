@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 922 615" width="922" height="615" role="img" aria-label="La cour de l’école">
+  <title>La cour de l’école</title>
+  <!--
+    LA MAÎTRESSE SE RECONNAÎT SANS QU'UN ADULTE L'EXPLIQUE (R18) — défaut n° 5, mesuré par
+    `tests/unitaires/decor-lisible.test.ts`.
+
+    Avant : les cinq personnages avaient la MÊME silhouette au point près (tête d'arc r=40,
+    corps 80 × 64, hauteur 148) ; seul l'identifiant SVG — que l'enfant ne lit pas — portait
+    le mot « maitresse ». Trois signes la distinguent maintenant, dans cet ordre de lisibilité :
+
+      1. LA TAILLE. Les quatre élèves sont des enfants : tête r=28, corps 56 × 45, hauteur
+         mesurée 104 (fille) et 73 (garçon) contre 148 pour la maîtresse — un rapport de 1,42
+         qui se voit d'un coup d'œil, sans comparaison point à point.
+      2. UN OBJET DE CLASSE. Le `tableau` sur ses pieds, à côté d'elle, avec deux lignes
+         d'écriture. Le décor ne portait aucun objet d'école : ni tableau, ni craie, ni bureau.
+      3. LE GESTE. Le bras (calque de trait) la relie au tableau : c'est elle qui y écrit.
+
+    PLACEHOLDER — question Q-R2 de `Docs/questions-en-attente.md`, non tranchée : quel signe
+    un enfant de 7 ans lit-il le plus vite, la taille seule ou l'objet ? Les trois sont posés
+    ensemble faute d'arbitrage ; en retirer un ne coûte que la suppression de sa forme.
+
+    Les élèves ont été décalés vers la droite (centres 510, 615, 730, 860) pour ouvrir la
+    place du tableau entre la maîtresse et le premier élève. Toutes les surfaces et tous les
+    centroïdes de `ecole.habillage.json` ont été recalculés en conséquence : ils font foi pour
+    la visée (contrat § 5.2), une valeur périmée ferait peindre la région voisine.
+  -->
+  <g id="calque-fond">
+    <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L922,0 L922,615 L0,615 Z"/>
+  </g>
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round">
+    <path id="ciel" class="zone" data-region-svg="ciel" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L922,0 L922,175 L0,175 Z"/>
+    <path id="herbe" class="zone" data-region-svg="herbe" fill="#8E97A8" fill-rule="evenodd" d="M0,420 L922,420 L922,615 L0,615 Z M250,464 A40,40 0 1 0 330,464 A40,40 0 1 0 250,464 Z M250,504 L330,504 L330,568 L250,568 Z M250,568 L330,568 L364,612 L216,612 Z M372,458 L464,458 L464,554 L372,554 Z M482,508 A28,28 0 1 0 538,508 A28,28 0 1 0 482,508 Z M482,536 L538,536 L538,581 L482,581 Z M587,508 A28,28 0 1 0 643,508 A28,28 0 1 0 587,508 Z M587,536 L643,536 L643,581 L587,581 Z M702,508 A28,28 0 1 0 758,508 A28,28 0 1 0 702,508 Z M702,536 L758,536 L758,581 L782,612 L678,612 L702,581 Z M832,508 A28,28 0 1 0 888,508 A28,28 0 1 0 832,508 Z M832,536 L888,536 L888,581 L912,612 L808,612 L832,581 Z M10,470 L180,470 L180,520 L10,520 Z M10,610 L16,570 L46,540 L105,528 L164,540 L194,570 L200,610 L168,610 L163,578 L140,556 L105,548 L70,556 L47,578 L42,610 Z"/>
+    <path id="toit-ecole" class="zone" data-region-svg="toit-ecole" fill="#8E97A8" fill-rule="evenodd" d="M270,175 L460,270 L80,270 Z M230,225 A40,40 0 1 0 310,225 A40,40 0 1 0 230,225 Z"/>
+    <path id="horloge-ecole" class="zone" data-region-svg="horloge-ecole" fill="#8E97A8" fill-rule="evenodd" d="M230,225 A40,40 0 1 0 310,225 A40,40 0 1 0 230,225 Z"/>
+    <path id="mur-ecole" class="zone" data-region-svg="mur-ecole" fill="#8E97A8" fill-rule="evenodd" d="M100,270 L440,270 L440,420 L306.5,420 L306.5,320 L233.5,320 L233.5,420 L100,420 Z M140,295 L220,295 L220,365 L140,365 Z M320,295 L400,295 L400,365 L320,365 Z"/>
+    <path id="porte-ecole" class="zone" data-region-svg="porte-ecole" fill="#8E97A8" fill-rule="evenodd" d="M233.5,320 L306.5,320 L306.5,420 L233.5,420 Z"/>
+    <path id="fenetre-ecole-1" class="zone" data-region-svg="fenetre-ecole-1" fill="#8E97A8" fill-rule="evenodd" d="M140,295 L220,295 L220,365 L140,365 Z"/>
+    <path id="fenetre-ecole-2" class="zone" data-region-svg="fenetre-ecole-2" fill="#8E97A8" fill-rule="evenodd" d="M320,295 L400,295 L400,365 L320,365 Z"/>
+    <path id="feuilles-arbre-1" class="zone" data-region-svg="feuilles-arbre-1" fill="#8E97A8" fill-rule="evenodd" d="M512,250 A48,48 0 1 0 608,250 A48,48 0 1 0 512,250 Z"/>
+    <path id="tronc-arbre-1" class="zone" data-region-svg="tronc-arbre-1" fill="#8E97A8" fill-rule="evenodd" d="M539,298 L581,298 L581,420 L539,420 Z"/>
+    <path id="feuilles-arbre-2" class="zone" data-region-svg="feuilles-arbre-2" fill="#8E97A8" fill-rule="evenodd" d="M617,250 A48,48 0 1 0 713,250 A48,48 0 1 0 617,250 Z"/>
+    <path id="tronc-arbre-2" class="zone" data-region-svg="tronc-arbre-2" fill="#8E97A8" fill-rule="evenodd" d="M644,298 L686,298 L686,420 L644,420 Z"/>
+    <path id="feuilles-arbre-3" class="zone" data-region-svg="feuilles-arbre-3" fill="#8E97A8" fill-rule="evenodd" d="M722,250 A48,48 0 1 0 818,250 A48,48 0 1 0 722,250 Z"/>
+    <path id="tronc-arbre-3" class="zone" data-region-svg="tronc-arbre-3" fill="#8E97A8" fill-rule="evenodd" d="M749,298 L791,298 L791,420 L749,420 Z"/>
+    <path id="feuilles-arbre-4" class="zone" data-region-svg="feuilles-arbre-4" fill="#8E97A8" fill-rule="evenodd" d="M824,250 A48,48 0 1 0 920,250 A48,48 0 1 0 824,250 Z"/>
+    <path id="tronc-arbre-4" class="zone" data-region-svg="tronc-arbre-4" fill="#8E97A8" fill-rule="evenodd" d="M851,298 L893,298 L893,420 L851,420 Z"/>
+    <!-- La maîtresse : adulte (tête r=40, hauteur mesurée 148), inchangée depuis la v1. -->
+    <path id="cheveux-maitresse" class="zone" data-region-svg="cheveux-maitresse" fill="#8E97A8" fill-rule="evenodd" d="M250,464 A40,40 0 1 0 330,464 A40,40 0 1 0 250,464 Z"/>
+    <path id="pull-maitresse" class="zone" data-region-svg="pull-maitresse" fill="#8E97A8" fill-rule="evenodd" d="M250,504 L330,504 L330,568 L250,568 Z"/>
+    <path id="jupe-maitresse" class="zone" data-region-svg="jupe-maitresse" fill="#8E97A8" fill-rule="evenodd" d="M250,568 L330,568 L364,612 L216,612 Z"/>
+    <!-- L'objet de classe : le tableau où elle écrit. 31e région — voir Q-R4. -->
+    <path id="tableau" class="zone" data-region-svg="tableau" fill="#8E97A8" fill-rule="evenodd" d="M372,458 L464,458 L464,554 L372,554 Z"/>
+    <!-- Les quatre élèves : enfants (tête r=28, hauteur mesurée 104 et 73). -->
+    <path id="cheveux-garcon-1" class="zone" data-region-svg="cheveux-garcon-1" fill="#8E97A8" fill-rule="evenodd" d="M482,508 A28,28 0 1 0 538,508 A28,28 0 1 0 482,508 Z"/>
+    <path id="tshirt-garcon-1" class="zone" data-region-svg="tshirt-garcon-1" fill="#8E97A8" fill-rule="evenodd" d="M482,536 L538,536 L538,581 L482,581 Z"/>
+    <path id="cheveux-garcon-2" class="zone" data-region-svg="cheveux-garcon-2" fill="#8E97A8" fill-rule="evenodd" d="M587,508 A28,28 0 1 0 643,508 A28,28 0 1 0 587,508 Z"/>
+    <path id="tshirt-garcon-2" class="zone" data-region-svg="tshirt-garcon-2" fill="#8E97A8" fill-rule="evenodd" d="M587,536 L643,536 L643,581 L587,581 Z"/>
+    <path id="cheveux-fille-1" class="zone" data-region-svg="cheveux-fille-1" fill="#8E97A8" fill-rule="evenodd" d="M702,508 A28,28 0 1 0 758,508 A28,28 0 1 0 702,508 Z"/>
+    <path id="robe-fille-1" class="zone" data-region-svg="robe-fille-1" fill="#8E97A8" fill-rule="evenodd" d="M702,536 L758,536 L758,581 L782,612 L678,612 L702,581 Z"/>
+    <path id="cheveux-fille-2" class="zone" data-region-svg="cheveux-fille-2" fill="#8E97A8" fill-rule="evenodd" d="M832,508 A28,28 0 1 0 888,508 A28,28 0 1 0 832,508 Z"/>
+    <path id="robe-fille-2" class="zone" data-region-svg="robe-fille-2" fill="#8E97A8" fill-rule="evenodd" d="M832,536 L888,536 L888,581 L912,612 L808,612 L832,581 Z"/>
+    <path id="banc" class="zone" data-region-svg="banc" fill="#8E97A8" fill-rule="evenodd" d="M10,470 L180,470 L180,520 L10,520 Z"/>
+    <path id="corde" class="zone" data-region-svg="corde" fill="#8E97A8" fill-rule="evenodd" d="M10,610 L16,570 L46,540 L105,528 L164,540 L194,570 L200,610 L168,610 L163,578 L140,556 L105,548 L70,556 L47,578 L42,610 Z"/>
+    <path id="ballon" class="zone" data-region-svg="ballon" fill="#8E97A8" fill-rule="evenodd" d="M450,375 A40,40 0 1 0 530,375 A40,40 0 1 0 450,375 Z"/>
+  </g>
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round">
+    <path class="trait" d="M223,420 L317,420"/>
+    <path class="trait" d="M228,412 L312,412"/>
+    <path class="trait" d="M180,295 L180,365"/>
+    <path class="trait" d="M140,330 L220,330"/>
+    <path class="trait" d="M360,295 L360,365"/>
+    <path class="trait" d="M320,330 L400,330"/>
+    <path class="trait" d="M296,372 L296,382"/>
+    <path class="trait" d="M270,225 L270,200"/>
+    <path class="trait" d="M270,225 L288,233"/>
+    <path class="trait" d="M539,420 L581,420"/>
+    <path class="trait" d="M644,420 L686,420"/>
+    <path class="trait" d="M749,420 L791,420"/>
+    <path class="trait" d="M851,420 L893,420"/>
+    <path class="trait" d="M274,452 L282,452"/>
+    <path class="trait" d="M298,452 L306,452"/>
+    <path class="trait" d="M280,478 L300,478"/>
+    <path class="trait" d="M330,522 L368,506"/>
+    <path class="trait" d="M386,554 L374,604"/>
+    <path class="trait" d="M450,554 L462,604"/>
+    <path class="trait" d="M382,584 L454,584"/>
+    <path class="trait" d="M392,490 L444,490"/>
+    <path class="trait" d="M392,516 L426,516"/>
+    <path class="trait" d="M498,500 L504,500"/>
+    <path class="trait" d="M516,500 L522,500"/>
+    <path class="trait" d="M503,518 L517,518"/>
+    <path class="trait" d="M495,581 L495,610"/>
+    <path class="trait" d="M525,581 L525,610"/>
+    <path class="trait" d="M603,500 L609,500"/>
+    <path class="trait" d="M621,500 L627,500"/>
+    <path class="trait" d="M608,518 L622,518"/>
+    <path class="trait" d="M600,581 L600,610"/>
+    <path class="trait" d="M630,581 L630,610"/>
+    <path class="trait" d="M718,500 L724,500"/>
+    <path class="trait" d="M736,500 L742,500"/>
+    <path class="trait" d="M723,518 L737,518"/>
+    <path class="trait" d="M848,500 L854,500"/>
+    <path class="trait" d="M866,500 L872,500"/>
+    <path class="trait" d="M853,518 L867,518"/>
+  </g>
+</svg>

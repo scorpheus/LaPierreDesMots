@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" width="960" height="600" role="img" aria-label="La buée sur la vitre">
+  <title>La buée sur la vitre</title>
+  <desc>Une fenêtre : le cadre en anneau, la vitre embuée à l’intérieur, le tracé qu’un doigt y a laissé, un rideau sur le côté, le rebord et un pot posé dessus. Dehors, la forêt.</desc>
+  <!--
+    DÉCOR — lot M6, contrat du monde v4 § 2. Trait noir sur blanc, la COULEUR VIENT DU CODE
+    (annexe P § 2) : les régions sortent d'ici en grisaille #8E97A8, qui est leur état
+    par défaut et non un choix graphique. Géométrie 100 % polygonale (M, L, Z — aucun arc) :
+    surface et centroïde sont donc calculables exactement et opposables aux valeurs déclarées
+    par le .habillage.json, que scripts/verifier-regions-fermees.mjs --strict recalcule.
+
+    Chaque région est un ENFANT DIRECT de #calque-zones : SceneSvg.tsx sélectionne
+    "#calque-zones > [id]", et un tracé niché dans un sous-groupe échapperait au tap sans
+    qu'aucun message ne le dise.
+
+    ÉCRIT PAR scripts/dessiner-decors.mjs — ne pas retoucher à la main : la scène est décrite
+    dans scripts/decors/decors.mjs, et l'émetteur refuse d'écrire si la mesure est mauvaise.
+  -->
+  <g id="calque-fond">
+    <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
+    <image data-fond-illustre="ecole" href="/LaPierreDesMots/assets/foret-buee-Bnv0vX5w.png" x="0" y="0" width="960" height="600" preserveAspectRatio="xMidYMid slice"/>
+  </g>
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round" opacity="0" aria-hidden="true">
+    <path id="foret-dehors" class="zone" data-region-svg="foret-dehors" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L960,0 L960,238 L933.3,246 L906.7,251.9 L880,254 L853.3,251.9 L826.7,246 L800,238 L773.3,230 L746.7,224.1 L720,222 L693.3,224.1 L666.7,230 L640,238 L613.3,246 L586.7,251.9 L560,254 L533.3,251.9 L506.7,246 L480,238 L453.3,230 L426.7,224.1 L400,222 L373.3,224.1 L346.7,230 L320,238 L293.3,246 L266.7,251.9 L240,254 L213.3,251.9 L186.7,246 L160,238 L133.3,230 L106.7,224.1 L80,222 L53.3,224.1 L26.7,230 L0,238 Z"/>
+    <path id="arbre-dehors" class="zone" data-region-svg="arbre-dehors" fill="#8E97A8" fill-rule="evenodd" d="M206.4,216.9 L196.5,224.1 L181.3,227.3 L167.4,228.7 L158.4,232.5 L152.6,240.6 L145.4,250.7 L134.3,257.8 L120.7,257.7 L108.3,251 L98.8,242.5 L90.3,237.1 L79.1,236.5 L64,237.5 L48.7,235.8 L39.2,228.8 L38.4,218.2 L43.5,207.4 L47.5,198.8 L45,191.5 L36.8,183.3 L29.3,173.2 L29.6,163.1 L39.5,155.9 L54.7,152.7 L68.6,151.3 L77.6,147.5 L83.4,139.4 L90.6,129.3 L101.7,122.2 L115.3,122.3 L127.7,129 L137.2,137.5 L145.7,142.9 L156.9,143.5 L172,142.5 L187.3,144.2 L196.8,151.2 L197.6,161.8 L192.5,172.6 L188.5,181.2 L191,188.5 L199.2,196.7 L206.7,206.8 Z"/>
+    <path id="rebord" class="zone" data-region-svg="rebord" fill="#8E97A8" fill-rule="evenodd" d="M60,470 L900,456 L912,516 L52,530 Z"/>
+    <path id="cadre" class="zone" data-region-svg="cadre" fill="#8E97A8" fill-rule="evenodd" d="M250,90 L900,90 L900,470 L250,470 Z M290,130 L860,130 L860,430 L290,430 Z"/>
+    <path id="vitre-embuee" class="zone" data-region-svg="vitre-embuee" fill="#8E97A8" fill-rule="evenodd" d="M290,130 L860,130 L860,430 L290,430 Z"/>
+    <path id="doigt-trace" class="zone" data-region-svg="doigt-trace" fill="#8E97A8" fill-rule="evenodd" d="M353.6,207.7 L470.2,302.2 L390.9,384.2 L529.6,421.7 L534.4,402.3 L409.1,375.8 L489.8,297.8 L366.4,192.3 Z"/>
+    <path id="rideau-fin" class="zone" data-region-svg="rideau-fin" fill="#8E97A8" fill-rule="evenodd" d="M790,118 L866,108 L882,460 L806,470 Z"/>
+    <path id="goutte-de-buee" class="zone" data-region-svg="goutte-de-buee" fill="#8E97A8" fill-rule="evenodd" d="M690,218 L700,262.7 L705,266.8 L708.5,272.3 L710,278.7 L709.3,285.2 L706.6,291.1 L702.2,295.9 L696.4,298.9 L690,300 L683.6,298.9 L677.8,295.9 L673.4,291.1 L670.7,285.2 L670,278.7 L671.5,272.3 L675,266.8 L680,262.7 Z"/>
+    <path id="pot-sur-le-rebord" class="zone" data-region-svg="pot-sur-le-rebord" fill="#8E97A8" fill-rule="evenodd" d="M144,400 L216,400 L206,468 L154,468 Z"/>
+  </g>
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0" aria-hidden="true">
+    <path class="trait" d="M52,530 L912,516"/>
+  </g>
+</svg>

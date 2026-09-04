@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" width="960" height="600" role="img" aria-label="Les wagons de la mine">
+  <title>Les wagons de la mine</title>
+  <desc>Trois wagons de trois tailles sur un rail, deux étais qui soutiennent la paroi, une lampe de mine accrochée, un tas de charbon et la braise qui rougeoie au sol.</desc>
+  <!--
+    DÉCOR — lot M6, contrat du monde v4 § 2. Trait noir sur blanc, la COULEUR VIENT DU CODE
+    (annexe P § 2) : les régions sortent d'ici en grisaille #8E97A8, qui est leur état
+    par défaut et non un choix graphique. Géométrie 100 % polygonale (M, L, Z — aucun arc) :
+    surface et centroïde sont donc calculables exactement et opposables aux valeurs déclarées
+    par le .habillage.json, que scripts/verifier-regions-fermees.mjs --strict recalcule.
+
+    Chaque région est un ENFANT DIRECT de #calque-zones : SceneSvg.tsx sélectionne
+    "#calque-zones > [id]", et un tracé niché dans un sous-groupe échapperait au tap sans
+    qu'aucun message ne le dise.
+
+    ÉCRIT PAR scripts/dessiner-decors.mjs — ne pas retoucher à la main : la scène est décrite
+    dans scripts/decors/decors.mjs, et l'émetteur refuse d'écrire si la mesure est mauvaise.
+  -->
+  <g id="calque-fond">
+    <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
+    <image data-fond-illustre="ecole" href="/LaPierreDesMots/assets/volcan-wagons-Dl67Duap.png" x="0" y="0" width="960" height="600" preserveAspectRatio="xMidYMid slice"/>
+  </g>
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round" opacity="0" aria-hidden="true">
+    <path id="paroi" class="zone" data-region-svg="paroi" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L960,0 L960,188 L933.3,193 L906.7,196.7 L880,198 L853.3,196.7 L826.7,193 L800,188 L773.3,183 L746.7,179.3 L720,178 L693.3,179.3 L666.7,183 L640,188 L613.3,193 L586.7,196.7 L560,198 L533.3,196.7 L506.7,193 L480,188 L453.3,183 L426.7,179.3 L400,178 L373.3,179.3 L346.7,183 L320,188 L293.3,193 L266.7,196.7 L240,198 L213.3,196.7 L186.7,193 L160,188 L133.3,183 L106.7,179.3 L80,178 L53.3,179.3 L26.7,183 L0,188 Z"/>
+    <path id="braise" class="zone" data-region-svg="braise" fill="#8E97A8" fill-rule="evenodd" d="M616.6,558.3 L605,563.6 L585.7,566.6 L566.6,568 L552.6,569.9 L543.3,573.9 L533.8,579.8 L519.9,585.2 L501.7,587.5 L483.3,585.4 L469,580.1 L459,574.3 L449.4,570.4 L435.3,568.6 L416,567.4 L396.5,564.6 L384.5,559.4 L384.7,552.8 L395.1,546.5 L408.1,541.5 L416.1,537.2 L416.7,532.1 L414.3,525.4 L416.1,518.3 L426.9,512.8 L445.4,510.8 L466.2,512.2 L484.2,514.9 L498.8,516.1 L513.2,514.8 L531,511.9 L551.6,510.3 L570.3,512.1 L581.5,517.5 L584,524.6 L582.1,531.3 L583.1,536.4 L591.5,540.6 L604.9,545.5 L615.8,551.7 Z"/>
+    <path id="rail" class="zone" data-region-svg="rail" fill="#8E97A8" fill-rule="evenodd" d="M0.2,482 L960.2,464 L959.8,440 L-0.2,458 Z"/>
+    <path id="wagon-un" class="zone" data-region-svg="wagon-un" fill="#8E97A8" fill-rule="evenodd" d="M87.7,320.4 L310.3,320.4 L286.1,404.6 L111.9,404.6 Z"/>
+    <path id="wagon-deux" class="zone" data-region-svg="wagon-deux" fill="#8E97A8" fill-rule="evenodd" d="M386.1,336.4 L571.9,336.4 L551.7,410.2 L406.3,410.2 Z"/>
+    <path id="wagon-trois" class="zone" data-region-svg="wagon-trois" fill="#8E97A8" fill-rule="evenodd" d="M648.9,328.4 L853.1,328.4 L830.9,407.4 L671.1,407.4 Z"/>
+    <path id="lampe-de-la-mine" class="zone" data-region-svg="lampe-de-la-mine" fill="#8E97A8" fill-rule="evenodd" d="M903.9,118 L924.1,118 L918.3,131.4 L934.2,140.4 L939.9,156.1 L935.6,203.1 L942.8,214.3 L942.8,225.5 L885.2,225.5 L885.2,214.3 L892.4,203.1 L888.1,156.1 L893.8,140.4 L909.7,131.4 Z"/>
+    <path id="tas-de-charbon" class="zone" data-region-svg="tas-de-charbon" fill="#8E97A8" fill-rule="evenodd" d="M224,531.9 L210,534.3 L194.9,532.6 L182.6,530.9 L171.3,532.2 L157.5,535 L142.4,535.2 L131.1,530.4 L127,522.3 L126.6,514.5 L123.3,508.6 L114.8,502.8 L107.1,495.5 L107.7,487.6 L118.1,481.7 L132.1,478.6 L143,475.8 L150.5,470.6 L159.2,463.8 L172,459.5 L186.2,461 L197.4,466.8 L205.7,472.6 L215.4,475.8 L229,477.7 L242.5,481.8 L248.5,488.9 L244.6,497 L236.5,503.7 L231.7,509.5 L231.9,516.5 L231.4,524.9 Z"/>
+    <path id="etai" class="zone" data-region-svg="etai" fill="#8E97A8" fill-rule="evenodd" d="M38,198 L74,198 L74,470 L38,470 Z M918,188 L952,188 L952,470 L918,470 Z"/>
+  </g>
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0" aria-hidden="true">
+    <path class="trait" d="M0,484 L960,466"/>
+  </g>
+</svg>

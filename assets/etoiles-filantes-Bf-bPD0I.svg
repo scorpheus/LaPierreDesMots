@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" width="960" height="600" role="img" aria-label="Les étoiles filantes du volcan">
+  <title>Les étoiles filantes du volcan</title>
+  <desc>Le cône du cratère fume ; une coulée descend sur le flanc. Deux étoiles filantes de deux tailles traversent le ciel rouge, une braise brille au sol.</desc>
+  <!--
+    DÉCOR — lot M6, contrat du monde v4 § 2. Trait noir sur blanc, la COULEUR VIENT DU CODE
+    (annexe P § 2) : les régions sortent d'ici en grisaille #8E97A8, qui est leur état
+    par défaut et non un choix graphique. Géométrie 100 % polygonale (M, L, Z — aucun arc) :
+    surface et centroïde sont donc calculables exactement et opposables aux valeurs déclarées
+    par le .habillage.json, que scripts/verifier-regions-fermees.mjs --strict recalcule.
+
+    Chaque région est un ENFANT DIRECT de #calque-zones : SceneSvg.tsx sélectionne
+    "#calque-zones > [id]", et un tracé niché dans un sous-groupe échapperait au tap sans
+    qu'aucun message ne le dise.
+
+    ÉCRIT PAR scripts/dessiner-decors.mjs — ne pas retoucher à la main : la scène est décrite
+    dans scripts/decors/decors.mjs, et l'émetteur refuse d'écrire si la mesure est mauvaise.
+  -->
+  <g id="calque-fond">
+    <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
+    <image data-fond-illustre="ecole" href="/LaPierreDesMots/assets/volcan-etoiles-filantes-D35yHbGM.png" x="0" y="0" width="960" height="600" preserveAspectRatio="xMidYMid slice"/>
+  </g>
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round" opacity="0" aria-hidden="true">
+    <path id="ciel-rouge" class="zone" data-region-svg="ciel-rouge" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L960,0 L960,318 L933.3,323.5 L906.7,328.3 L880,331.9 L853.3,333.8 L826.7,333.8 L800,331.9 L773.3,328.3 L746.7,323.5 L720,318 L693.3,312.5 L666.7,307.7 L640,304.1 L613.3,302.2 L586.7,302.2 L560,304.1 L533.3,307.7 L506.7,312.5 L480,318 L453.3,323.5 L426.7,328.3 L400,331.9 L373.3,333.8 L346.7,333.8 L320,331.9 L293.3,328.3 L266.7,323.5 L240,318 L213.3,312.5 L186.7,307.7 L160,304.1 L133.3,302.2 L106.7,302.2 L80,304.1 L53.3,307.7 L26.7,312.5 L0,318 Z"/>
+    <path id="pente-de-cendre" class="zone" data-region-svg="pente-de-cendre" fill="#8E97A8" fill-rule="evenodd" d="M0,430 L26.7,436.4 L53.3,439.8 L80,438.7 L106.7,433.4 L133.3,426.6 L160,421.3 L186.7,420.2 L213.3,423.6 L240,430 L266.7,436.4 L293.3,439.8 L320,438.7 L346.7,433.4 L373.3,426.6 L400,421.3 L426.7,420.2 L453.3,423.6 L480,430 L506.7,436.4 L533.3,439.8 L560,438.7 L586.7,433.4 L613.3,426.6 L640,421.3 L666.7,420.2 L693.3,423.6 L720,430 L746.7,436.4 L773.3,439.8 L800,438.7 L826.7,433.4 L853.3,426.6 L880,421.3 L906.7,420.2 L933.3,423.6 L960,430 L960,600 L0,600 Z"/>
+    <path id="cratere" class="zone" data-region-svg="cratere" fill="#8E97A8" fill-rule="evenodd" d="M240,432 L420,248 L542,248 L722,432 Z"/>
+    <path id="coulee" class="zone" data-region-svg="coulee" fill="#8E97A8" fill-rule="evenodd" d="M393.7,327.7 L349.2,433.5 L413.2,523.7 L374.3,586.5 L425.7,613.5 L470.8,516.3 L406.8,426.5 L446.3,352.3 Z"/>
+    <path id="fumee" class="zone" data-region-svg="fumee" fill="#8E97A8" fill-rule="evenodd" d="M587.1,173.1 L571.9,179.3 L549.5,179.7 L530.2,178.3 L519,180.8 L512.4,190.1 L503.3,202.4 L488.6,210.5 L471.5,209 L457.8,199.1 L449.3,187.3 L441.4,180.4 L427.4,180.1 L406.3,182.2 L385,180.7 L373.6,172.8 L377,161 L389.5,149.8 L398.8,141.5 L396.4,134.4 L383.9,125.5 L372.4,113.9 L372.9,102.9 L388.1,96.7 L410.5,96.3 L429.8,97.7 L441,95.2 L447.6,85.9 L456.7,73.6 L471.4,65.5 L488.5,67 L502.2,76.9 L510.7,88.7 L518.6,95.6 L532.6,95.9 L553.7,93.8 L575,95.3 L586.4,103.2 L583,115 L570.5,126.2 L561.2,134.5 L563.6,141.6 L576.1,150.5 L587.6,162.1 Z"/>
+    <path id="etoile-vive" class="zone" data-region-svg="etoile-vive" fill="#8E97A8" fill-rule="evenodd" d="M178,96 L190.9,130.2 L227.5,131.9 L198.9,154.8 L208.6,190.1 L178,170 L147.4,190.1 L157.1,154.8 L128.5,131.9 L165.1,130.2 Z"/>
+    <path id="etoile-lente" class="zone" data-region-svg="etoile-lente" fill="#8E97A8" fill-rule="evenodd" d="M800,162 L808.8,185.9 L834.2,186.9 L814.3,202.6 L821.2,227.1 L800,213 L778.8,227.1 L785.7,202.6 L765.8,186.9 L791.2,185.9 Z"/>
+    <path id="braise-au-sol" class="zone" data-region-svg="braise-au-sol" fill="#8E97A8" fill-rule="evenodd" d="M175.6,563.2 L165.6,565.6 L154.4,564.7 L145.2,563.7 L137.4,565.2 L127.9,568.4 L116.8,569.5 L108,566.1 L104.3,559.6 L103.5,553.4 L100.4,549 L93.1,544.9 L86.1,539.5 L85.3,533.2 L92.4,528.2 L102.5,525.3 L110.2,522.8 L114.6,518.3 L119.7,512.3 L128.3,508.2 L138.8,508.8 L147.6,513.2 L154,517.7 L161.4,519.7 L171.7,520.4 L182.3,522.8 L187.7,528.2 L185.6,534.8 L180,540.4 L177.2,545 L178.7,550.5 L179.9,557.3 Z"/>
+    <path id="eclat-de-lave" class="zone" data-region-svg="eclat-de-lave" fill="#8E97A8" fill-rule="evenodd" d="M862,428 L895,456.6 L887.7,515.7 L862,530 L836.3,515.7 L829,456.6 Z"/>
+  </g>
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0" aria-hidden="true">
+    <path class="trait" d="M420,248 L542,248"/>
+  </g>
+</svg>

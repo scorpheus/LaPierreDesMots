@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" width="960" height="600" role="img" aria-label="Le vitrail">
+  <title>Le vitrail</title>
+  <desc>La nef, le plomb en anneau qui cerne la baie, une rosace en anneau au sommet, et trois losanges de trois tailles à lire dans l’ordre. Un cierge, un banc.</desc>
+  <!--
+    DÉCOR — lot M6, contrat du monde v4 § 2. Trait noir sur blanc, la COULEUR VIENT DU CODE
+    (annexe P § 2) : les régions sortent d'ici en grisaille #8E97A8, qui est leur état
+    par défaut et non un choix graphique. Géométrie 100 % polygonale (M, L, Z — aucun arc) :
+    surface et centroïde sont donc calculables exactement et opposables aux valeurs déclarées
+    par le .habillage.json, que scripts/verifier-regions-fermees.mjs --strict recalcule.
+
+    Chaque région est un ENFANT DIRECT de #calque-zones : SceneSvg.tsx sélectionne
+    "#calque-zones > [id]", et un tracé niché dans un sous-groupe échapperait au tap sans
+    qu'aucun message ne le dise.
+
+    ÉCRIT PAR scripts/dessiner-decors.mjs — ne pas retoucher à la main : la scène est décrite
+    dans scripts/decors/decors.mjs, et l'émetteur refuse d'écrire si la mesure est mauvaise.
+  -->
+  <g id="calque-fond">
+    <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
+    <image data-fond-illustre="ecole" href="/LaPierreDesMots/assets/cite-vitrail-u13Evw3M.png" x="0" y="0" width="960" height="600" preserveAspectRatio="xMidYMid slice"/>
+  </g>
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round" opacity="0" aria-hidden="true">
+    <path id="nef" class="zone" data-region-svg="nef" fill="#8E97A8" fill-rule="evenodd" d="M60,138 L900,138 L862,520 L98,520 Z"/>
+    <path id="sol-de-la-nef" class="zone" data-region-svg="sol-de-la-nef" fill="#8E97A8" fill-rule="evenodd" d="M0,530 L26.7,536.1 L53.3,536.1 L80,530 L106.7,523.9 L133.3,523.9 L160,530 L186.7,536.1 L213.3,536.1 L240,530 L266.7,523.9 L293.3,523.9 L320,530 L346.7,536.1 L373.3,536.1 L400,530 L426.7,523.9 L453.3,523.9 L480,530 L506.7,536.1 L533.3,536.1 L560,530 L586.7,523.9 L613.3,523.9 L640,530 L666.7,536.1 L693.3,536.1 L720,530 L746.7,523.9 L773.3,523.9 L800,530 L826.7,536.1 L853.3,536.1 L880,530 L906.7,523.9 L933.3,523.9 L960,530 L960,600 L0,600 Z"/>
+    <path id="plomb" class="zone" data-region-svg="plomb" fill="#8E97A8" fill-rule="evenodd" d="M200,470 L200,330 L207,267.7 L227.7,208.5 L261.1,155.4 L305.4,111.1 L358.5,77.7 L417.7,57 L480,50 L542.3,57 L601.5,77.7 L654.6,111.1 L698.9,155.4 L732.3,208.5 L753,267.7 L760,330 L760,470 Z M245,470 L245,345 L250.9,292.7 L268.3,243 L296.3,198.5 L333.5,161.3 L378,133.3 L427.7,115.9 L480,110 L532.3,115.9 L582,133.3 L626.5,161.3 L663.7,198.5 L691.7,243 L709.1,292.7 L715,345 L715,470 Z"/>
+    <path id="rosace" class="zone" data-region-svg="rosace" fill="#8E97A8" fill-rule="evenodd" d="M592,180 L588.2,209 L577,236 L559.2,259.2 L536,277 L509,288.2 L480,292 L451,288.2 L424,277 L400.8,259.2 L383,236 L371.8,209 L368,180 L371.8,151 L383,124 L400.8,100.8 L424,83 L451,71.8 L480,68 L509,71.8 L536,83 L559.2,100.8 L577,124 L588.2,151 Z M540,180 L536.4,200.5 L526,218.6 L510,232 L490.4,239.1 L469.6,239.1 L450,232 L434,218.6 L423.6,200.5 L420,180 L423.6,159.5 L434,141.4 L450,128 L469.6,120.9 L490.4,120.9 L510,128 L526,141.4 L536.4,159.5 Z"/>
+    <path id="losange-un" class="zone" data-region-svg="losange-un" fill="#8E97A8" fill-rule="evenodd" d="M320,218 L390,330 L320,442 L250,330 Z"/>
+    <path id="losange-deux" class="zone" data-region-svg="losange-deux" fill="#8E97A8" fill-rule="evenodd" d="M480,228 L566,360 L480,492 L394,360 Z"/>
+    <path id="losange-trois" class="zone" data-region-svg="losange-trois" fill="#8E97A8" fill-rule="evenodd" d="M640,234 L700,330 L640,426 L580,330 Z"/>
+    <path id="cierge" class="zone" data-region-svg="cierge" fill="#8E97A8" fill-rule="evenodd" d="M149,378 L156.4,396.5 L154,412.3 L149,420.2 L144,412.3 L141.6,396.5 L145.3,422.9 L161.4,422.9 L161.4,502.1 L136.6,502.1 L136.6,422.9 L152.7,422.9 Z"/>
+    <path id="banc-de-la-nef" class="zone" data-region-svg="banc-de-la-nef" fill="#8E97A8" fill-rule="evenodd" d="M700,440 L900,428 L908,478 L706,490 Z"/>
+  </g>
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0" aria-hidden="true">
+    <path class="trait" d="M98,520 L862,520"/>
+  </g>
+</svg>

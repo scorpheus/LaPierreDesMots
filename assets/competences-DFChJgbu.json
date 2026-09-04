@@ -1,0 +1,189 @@
+[
+  {
+    "$commentaire": "LE RÉFÉRENTIEL DE COMPÉTENCES — 30 codes, gelés par le contrat du monde v4 § 2. Écrit par le lot M3, seul écrivain de ce fichier. ── LES CINQ PREMIERS SONT CONSERVÉS À L'IDENTIQUE : code, libellé, famille et prérequis inchangés, caractère pour caractère (seule la mise en page du JSON a bougé). Un code du référentiel ne se renomme ni ne disparaît JAMAIS — une consigne, un exercice ou un journal de tentatives qui cite un code disparu devient un état sans issue (R14), et le journal des tentatives est append-only : on ne réécrit pas le passé. ── LES VINGT-CINQ SUIVANTS sont ceux que le contrat v4 § 2 gèle pour que M1 et M2 puissent les citer dès leur première écriture sans coordination. Ils respectent tous le motif du schéma d'exercice `^(gph|syl|mot\\.outil|lex|flu|comp|enc)\\.[a-z0-9.\\-]+$`. ── LE GRAPHE DES PRÉREQUIS EST ACYCLIQUE, et c'est MESURÉ, jamais affirmé : `node scripts/generer-phonologie.mjs` soumet ce fichier à `croiserPrerequis` de scripts/verifier-prerequis.mjs — le même contrôle qui garde le graphe des nœuds — et refuse d'écrire un octet si un cycle, un prérequis inconnu ou un code jamais ouvrable apparaît. ── AVERTISSEMENT MESURÉ, à lire avant de s'étonner d'un rouge : `tests/unitaires/competences-trois-moteurs.test.ts` exige que tout code déclaré soit cité par un exercice livré. Les 25 codes neufs ne le seront qu'après M1 et M2. La chaîne rougit tant qu'ils n'ont pas déposé, et c'est le bon comportement (D39, contrat v4 § 5 point 3) : elle dit la vérité plutôt que d'être verte à bon compte.",
+    "code": "comp.consigne.simple",
+    "libelle": "Exécuter une consigne à une cible",
+    "famille": "comp",
+    "prerequis": []
+  },
+  {
+    "code": "comp.consigne.multiple",
+    "libelle": "Exécuter une consigne à plusieurs cibles",
+    "famille": "comp",
+    "prerequis": ["comp.consigne.simple"]
+  },
+  {
+    "code": "lex.couleur",
+    "libelle": "Reconnaître le nom écrit d’une couleur",
+    "famille": "lex",
+    "prerequis": []
+  },
+  {
+    "code": "gph.miroir.gauche-droite",
+    "libelle": "Distinguer b et d, p et q — miroir gauche-droite",
+    "famille": "gph",
+    "prerequis": []
+  },
+  {
+    "code": "gph.miroir.haut-bas",
+    "libelle": "Distinguer b et p, d et q — miroir haut-bas",
+    "famille": "gph",
+    "prerequis": []
+  },
+
+  {
+    "$commentaire": "LA CLAIRIÈRE — voyelles orales, syllabes CV, premiers mots outils (v2 § 3.3). La voyelle vient avant la syllabe, et la syllabe avant le mot lu sans hésiter : c'est l'ordre dans lequel un enfant qui déchiffre encore (D14) construit sa lecture, et c'est lui que portent les prérequis. `mot.outil.frequent` n'a AUCUN prérequis, et c'est délibéré : un mot outil ne se déchiffre pas, il se reconnaît d'un bloc — le faire attendre la syllabe reviendrait à interdire la première phrase.",
+    "code": "gph.voyelle.orale",
+    "libelle": "Reconnaître les voyelles orales",
+    "famille": "gph",
+    "prerequis": []
+  },
+  {
+    "code": "syl.cv",
+    "libelle": "Lire une syllabe consonne + voyelle",
+    "famille": "syl",
+    "prerequis": ["gph.voyelle.orale"]
+  },
+  {
+    "code": "mot.outil.frequent",
+    "libelle": "Reconnaître un mot outil sans le déchiffrer",
+    "famille": "mot.outil",
+    "prerequis": []
+  },
+  {
+    "code": "flu.mot.court",
+    "libelle": "Lire un mot d’une ou deux syllabes sans hésiter",
+    "famille": "flu",
+    "prerequis": ["syl.cv", "mot.outil.frequent"]
+  },
+
+  {
+    "$commentaire": "LES GALERIES — syllabes fermées, lettres miroir par axe, sons proches. Les deux codes miroir gardent leurs prérequis vides d'origine, et c'est délibéré (D23) : la confusion b/p est le besoin rapporté par le père AUJOURD'HUI ; la faire attendre la maîtrise de la syllabe fermée repousserait le seul travail dont l'enfant a besoin tout de suite.",
+    "code": "syl.cvc",
+    "libelle": "Lire une syllabe fermée consonne + voyelle + consonne",
+    "famille": "syl",
+    "prerequis": ["syl.cv"]
+  },
+  {
+    "code": "gph.confusion.sourde-sonore",
+    "libelle": "Distinguer p et b, t et d, f et v, s et z, ch et j",
+    "famille": "gph",
+    "prerequis": ["syl.cvc"]
+  },
+
+  {
+    "$commentaire": "LE MARAIS JUMEAU — les nasales et les digrammes. « Jumeau » parce que deux lettres n'y font qu'un seul son : c'est la région où l'enfant cesse de lire lettre à lettre. L'ordre on → an → in suit la fréquence et la stabilité de la graphie ; `ou` et `oi` partent de la syllabe simple et non des nasales, parce qu'ils n'en dépendent pas — les enchaîner aurait fait un couloir là où il y a deux chemins.",
+    "code": "gph.nasale.on",
+    "libelle": "Le son on et ses graphies",
+    "famille": "gph",
+    "prerequis": ["syl.cvc"]
+  },
+  {
+    "code": "gph.nasale.an",
+    "libelle": "Le son an et ses graphies (an, en)",
+    "famille": "gph",
+    "prerequis": ["gph.nasale.on"]
+  },
+  {
+    "code": "gph.nasale.in",
+    "libelle": "Le son in et ses graphies (in, ain, ein)",
+    "famille": "gph",
+    "prerequis": ["gph.nasale.an"]
+  },
+  {
+    "code": "gph.digramme.ou",
+    "libelle": "Le digramme ou",
+    "famille": "gph",
+    "prerequis": ["syl.cv"]
+  },
+  {
+    "code": "gph.digramme.oi",
+    "libelle": "Le digramme oi",
+    "famille": "gph",
+    "prerequis": ["gph.digramme.ou"]
+  },
+
+  {
+    "$commentaire": "LA FORÊT MUETTE — ce qui s'écrit et ne se dit pas. La lettre finale muette vient d'abord ; le s du pluriel en est un cas particulier ; et la liaison est ce qui arrive quand cette lettre muette se réveille devant une voyelle. L'ordre des prérequis est celui du raisonnement, pas celui d'un programme scolaire.",
+    "code": "gph.finale.muette",
+    "libelle": "Reconnaître une lettre finale qui ne se dit pas",
+    "famille": "gph",
+    "prerequis": ["syl.cvc"]
+  },
+  {
+    "code": "enc.pluriel.s",
+    "libelle": "Le s du pluriel qui ne s’entend pas",
+    "famille": "enc",
+    "prerequis": ["gph.finale.muette"]
+  },
+  {
+    "code": "flu.liaison",
+    "libelle": "Lire une liaison sans buter",
+    "famille": "flu",
+    "prerequis": ["gph.finale.muette", "flu.mot.court"]
+  },
+
+  {
+    "$commentaire": "LE VOLCAN — les graphèmes rares, ceux qu'on ne croise que quelques fois par page et qui arrêtent la lecture à chaque fois. Ils dépendent des digrammes du Marais : savoir que deux lettres font un son est le préalable ; ici il s'agit d'apprendre lesquelles. `ph` et `ch-qu` s'accrochent directement à la syllabe fermée — ce sont des consonnes, pas des voyelles complexes, et rien dans le Marais n'y prépare.",
+    "code": "gph.rare.eau",
+    "libelle": "Le graphème eau",
+    "famille": "gph",
+    "prerequis": ["gph.digramme.ou"]
+  },
+  {
+    "code": "gph.rare.ill",
+    "libelle": "Le graphème ill",
+    "famille": "gph",
+    "prerequis": ["gph.digramme.oi"]
+  },
+  {
+    "code": "gph.rare.gn",
+    "libelle": "Le graphème gn",
+    "famille": "gph",
+    "prerequis": ["gph.nasale.in"]
+  },
+  {
+    "code": "gph.rare.ph",
+    "libelle": "Le graphème ph",
+    "famille": "gph",
+    "prerequis": ["syl.cvc"]
+  },
+  {
+    "code": "gph.rare.ch-qu",
+    "libelle": "Les graphèmes ch et qu",
+    "famille": "gph",
+    "prerequis": ["syl.cvc"]
+  },
+
+  {
+    "$commentaire": "LA CITÉ DES HISTOIRES — la compréhension. Tout y part de `comp.litteral` : répondre à une question dont la réponse est écrite noir sur blanc. Déduire, ordonner, juger, choisir une image et compléter une phrase sont cinq façons d'aller plus loin que la lettre du texte, et aucune ne s'apprend avant elle. `comp.phrase.completee` exige en plus le s du pluriel : l'enfant y ÉCRIT, et ce qu'il écrit s'accorde.",
+    "code": "comp.litteral",
+    "libelle": "Répondre à une question dont la réponse est écrite",
+    "famille": "comp",
+    "prerequis": ["flu.mot.court"]
+  },
+  {
+    "code": "comp.inference",
+    "libelle": "Répondre à une question dont la réponse se déduit",
+    "famille": "comp",
+    "prerequis": ["comp.litteral"]
+  },
+  {
+    "code": "comp.chronologie",
+    "libelle": "Remettre un récit dans l’ordre",
+    "famille": "comp",
+    "prerequis": ["comp.litteral"]
+  },
+  {
+    "code": "comp.image",
+    "libelle": "Choisir l’image qui correspond à la phrase",
+    "famille": "comp",
+    "prerequis": ["comp.litteral"]
+  },
+  {
+    "code": "comp.phrase.completee",
+    "libelle": "Compléter une phrase réponse",
+    "famille": "comp",
+    "prerequis": ["comp.litteral", "enc.pluriel.s"]
+  }
+]

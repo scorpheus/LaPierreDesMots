@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" width="960" height="600" role="img" aria-label="La luciole qui clignote">
+  <title>La luciole qui clignote</title>
+  <desc>La nuit, une lune fine, une étoile, une tige qui monte du sol, la feuille large qu’elle porte, et le halo rayonnant de la luciole posée dessus.</desc>
+  <!--
+    DÉCOR — lot M6, contrat du monde v4 § 2. Trait noir sur blanc, la COULEUR VIENT DU CODE
+    (annexe P § 2) : les régions sortent d'ici en grisaille #8E97A8, qui est leur état
+    par défaut et non un choix graphique. Géométrie 100 % polygonale (M, L, Z — aucun arc) :
+    surface et centroïde sont donc calculables exactement et opposables aux valeurs déclarées
+    par le .habillage.json, que scripts/verifier-regions-fermees.mjs --strict recalcule.
+
+    Chaque région est un ENFANT DIRECT de #calque-zones : SceneSvg.tsx sélectionne
+    "#calque-zones > [id]", et un tracé niché dans un sous-groupe échapperait au tap sans
+    qu'aucun message ne le dise.
+
+    ÉCRIT PAR scripts/dessiner-decors.mjs — ne pas retoucher à la main : la scène est décrite
+    dans scripts/decors/decors.mjs, et l'émetteur refuse d'écrire si la mesure est mauvaise.
+  -->
+  <g id="calque-fond">
+    <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
+    <image data-fond-illustre="ecole" href="/LaPierreDesMots/assets/clairiere-luciole-BfieGSDG.png" x="0" y="0" width="960" height="600" preserveAspectRatio="xMidYMid slice"/>
+  </g>
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round" opacity="0" aria-hidden="true">
+    <path id="nuit" class="zone" data-region-svg="nuit" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L960,0 L960,300 L933.3,306.2 L906.7,311.6 L880,315.6 L853.3,317.7 L826.7,317.7 L800,315.6 L773.3,311.6 L746.7,306.2 L720,300 L693.3,293.8 L666.7,288.4 L640,284.4 L613.3,282.3 L586.7,282.3 L560,284.4 L533.3,288.4 L506.7,293.8 L480,300 L453.3,306.2 L426.7,311.6 L400,315.6 L373.3,317.7 L346.7,317.7 L320,315.6 L293.3,311.6 L266.7,306.2 L240,300 L213.3,293.8 L186.7,288.4 L160,284.4 L133.3,282.3 L106.7,282.3 L80,284.4 L53.3,288.4 L26.7,293.8 L0,300 Z"/>
+    <path id="herbe-courte" class="zone" data-region-svg="herbe-courte" fill="#8E97A8" fill-rule="evenodd" d="M0,554 L12,543.7 L25.2,535.3 L34.8,535.3 L48,543.7 L60,554 L72,537.4 L85.2,523.8 L94.8,523.8 L108,537.4 L120,554 L132,541.6 L145.2,531.5 L154.8,531.5 L168,541.6 L180,554 L192,535.3 L205.2,520 L214.8,520 L228,535.3 L240,554 L252,539.5 L265.2,527.7 L274.8,527.7 L288,539.5 L300,554 L312,543.7 L325.2,535.3 L334.8,535.3 L348,543.7 L360,554 L372,537.4 L385.2,523.8 L394.8,523.8 L408,537.4 L420,554 L432,541.6 L445.2,531.5 L454.8,531.5 L468,541.6 L480,554 L492,535.3 L505.2,520 L514.8,520 L528,535.3 L540,554 L552,539.5 L565.2,527.7 L574.8,527.7 L588,539.5 L600,554 L612,543.7 L625.2,535.3 L634.8,535.3 L648,543.7 L660,554 L672,537.4 L685.2,523.8 L694.8,523.8 L708,537.4 L720,554 L732,541.6 L745.2,531.5 L754.8,531.5 L768,541.6 L780,554 L792,535.3 L805.2,520 L814.8,520 L828,535.3 L840,554 L852,539.5 L865.2,527.7 L874.8,527.7 L888,539.5 L900,554 L912,543.7 L925.2,535.3 L934.8,535.3 L948,543.7 L960,554 L960,580 L0,580 Z"/>
+    <path id="rocher-plat" class="zone" data-region-svg="rocher-plat" fill="#8E97A8" fill-rule="evenodd" d="M600,470 L822,452 L860,506 L560,516 Z"/>
+    <path id="tige" class="zone" data-region-svg="tige" fill="#8E97A8" fill-rule="evenodd" d="M307,539.3 L297,440.4 L319,350.5 L306.8,298.4 L293.2,301.6 L305,349.5 L283,439.6 L293,540.7 Z"/>
+    <path id="feuille-large" class="zone" data-region-svg="feuille-large" fill="#8E97A8" fill-rule="evenodd" d="M423,268 L441.2,277.1 L459.4,292.3 L474,298.4 L484.9,313.6 L495.8,322.7 L492.2,337.9 L499.4,353.1 L488.5,365.3 L484.9,383.5 L466.7,392.6 L448.5,404.8 L430.3,410.9 L430.3,420 L415.7,420 L415.7,410.9 L397.5,404.8 L379.3,392.6 L361.1,383.5 L357.5,365.3 L346.6,353.1 L353.8,337.9 L350.2,322.7 L361.1,313.6 L372,298.4 L386.6,292.3 L404.8,277.1 Z"/>
+    <path id="halo" class="zone" data-region-svg="halo" fill="#8E97A8" fill-rule="evenodd" d="M300,164 L312.4,212 L350.5,180.4 L332.4,226.5 L381.8,223.4 L340,250 L381.8,276.6 L332.4,273.5 L350.5,319.6 L312.4,288 L300,336 L287.6,288 L249.5,319.6 L267.6,273.5 L218.2,276.6 L260,250 L218.2,223.4 L267.6,226.5 L249.5,180.4 L287.6,212 Z"/>
+    <path id="luciole" class="zone" data-region-svg="luciole" fill="#8E97A8" fill-rule="evenodd" d="M290.4,198.8 L307.2,193.7 L319.2,203.9 L319.2,216.7 L343.2,206.5 L360,219.3 L350.4,232.1 L326.4,229.5 L333.6,247.4 L331.2,270.5 L316.8,291 L326.4,301.2 L316.8,314 L283.2,314 L273.6,301.2 L283.2,291 L268.8,270.5 L266.4,247.4 L273.6,229.5 L249.6,232.1 L240,219.3 L256.8,206.5 L280.8,216.7 L280.8,203.9 Z"/>
+    <path id="lune-fine" class="zone" data-region-svg="lune-fine" fill="#8E97A8" fill-rule="evenodd" d="M842,180 L831.9,179.1 L822.2,176.5 L813,172.2 L804.7,166.4 L797.6,159.3 L791.8,151 L787.5,141.8 L784.9,132.1 L784,122 L784.9,111.9 L787.5,102.2 L791.8,93 L797.6,84.7 L804.7,77.6 L813,71.8 L822.2,67.5 L831.9,64.9 L842,64 L868,67.5 L858.5,68.3 L849.4,70.8 L840.7,74.8 L833,80.2 L826.2,87 L820.8,94.7 L816.8,103.4 L814.3,112.5 L813.5,122 L814.3,131.5 L816.8,140.6 L820.8,149.3 L826.2,157 L833,163.8 L840.7,169.2 L849.4,173.2 L858.5,175.7 L868,176.5 Z"/>
+    <path id="etoile-du-soir" class="zone" data-region-svg="etoile-du-soir" fill="#8E97A8" fill-rule="evenodd" d="M140,80 L147.6,99.5 L168.5,100.7 L152.4,114 L157.6,134.3 L140,123 L122.4,134.3 L127.6,114 L111.5,100.7 L132.4,99.5 Z"/>
+    <path id="souche-basse" class="zone" data-region-svg="souche-basse" fill="#8E97A8" fill-rule="evenodd" d="M70.2,492.9 L98.6,481.7 L127,488.4 L158.2,479.4 L183.8,492.9 L189.5,562.3 L166.8,573.5 L127,566.8 L87.2,573.5 L64.5,562.3 Z M98.6,504.1 L155.4,504.1 L155.4,528.7 L98.6,528.7 Z"/>
+  </g>
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0" aria-hidden="true">
+    <path class="trait" d="M420,344 L500,330"/>
+    <path class="trait" d="M420,366 L492,356"/>
+  </g>
+</svg>

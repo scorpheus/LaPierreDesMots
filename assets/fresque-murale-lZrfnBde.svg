@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" width="960" height="600" role="img" aria-label="La fresque du mur de la Cité">
+  <title>La fresque du mur de la Cité</title>
+  <desc>Une grande fresque en trois arches anime le mur de la Cité ; fleurs, feuillage, fanions, pots de peinture, arbre, porte et ciel restent faciles à montrer du doigt.</desc>
+  <!--
+    DÉCOR — lot M6, contrat du monde v4 § 2. Trait noir sur blanc, la COULEUR VIENT DU CODE
+    (annexe P § 2) : les régions sortent d'ici en grisaille #8E97A8, qui est leur état
+    par défaut et non un choix graphique. Géométrie 100 % polygonale (M, L, Z — aucun arc) :
+    surface et centroïde sont donc calculables exactement et opposables aux valeurs déclarées
+    par le .habillage.json, que scripts/verifier-regions-fermees.mjs --strict recalcule.
+
+    Chaque région est un ENFANT DIRECT de #calque-zones : SceneSvg.tsx sélectionne
+    "#calque-zones > [id]", et un tracé niché dans un sous-groupe échapperait au tap sans
+    qu'aucun message ne le dise.
+
+    ÉCRIT PAR scripts/dessiner-decors.mjs — ne pas retoucher à la main : la scène est décrite
+    dans scripts/decors/decors.mjs, et l'émetteur refuse d'écrire si la mesure est mauvaise.
+  -->
+  <g id="calque-fond">
+    <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
+    <image data-fond-illustre="ecole" href="/LaPierreDesMots/assets/fresque-murale-DAZL4yYP.png" x="0" y="0" width="960" height="600" preserveAspectRatio="xMidYMid slice"/>
+  </g>
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round" opacity="0" aria-hidden="true">
+    <path id="mur-de-pierre" class="zone" data-region-svg="mur-de-pierre" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L960,0 L960,60 L933.3,63 L906.7,65.2 L880,66 L853.3,65.2 L826.7,63 L800,60 L773.3,57 L746.7,54.8 L720,54 L693.3,54.8 L666.7,57 L640,60 L613.3,63 L586.7,65.2 L560,66 L533.3,65.2 L506.7,63 L480,60 L453.3,57 L426.7,54.8 L400,54 L373.3,54.8 L346.7,57 L320,60 L293.3,63 L266.7,65.2 L240,66 L213.3,65.2 L186.7,63 L160,60 L133.3,57 L106.7,54.8 L80,54 L53.3,54.8 L26.7,57 L0,60 Z"/>
+    <path id="pave-de-la-rue" class="zone" data-region-svg="pave-de-la-rue" fill="#8E97A8" fill-rule="evenodd" d="M0,500 L26.7,506.1 L53.3,506.1 L80,500 L106.7,493.9 L133.3,493.9 L160,500 L186.7,506.1 L213.3,506.1 L240,500 L266.7,493.9 L293.3,493.9 L320,500 L346.7,506.1 L373.3,506.1 L400,500 L426.7,493.9 L453.3,493.9 L480,500 L506.7,506.1 L533.3,506.1 L560,500 L586.7,493.9 L613.3,493.9 L640,500 L666.7,506.1 L693.3,506.1 L720,500 L746.7,493.9 L773.3,493.9 L800,500 L826.7,506.1 L853.3,506.1 L880,500 L906.7,493.9 L933.3,493.9 L960,500 L960,600 L0,600 Z"/>
+    <path id="cadre-de-la-fresque" class="zone" data-region-svg="cadre-de-la-fresque" fill="#8E97A8" fill-rule="evenodd" d="M60,70 L900,70 L900,470 L60,470 Z M100,110 L860,110 L860,430 L100,430 Z"/>
+    <path id="ciel" class="zone" data-region-svg="ciel" fill="#8E97A8" fill-rule="evenodd" d="M384,0 L684,0 L676,94 L420,92 Z"/>
+    <path id="soleil" class="zone" data-region-svg="soleil" fill="#8E97A8" fill-rule="evenodd" d="M526,80 L524.4,91.9 L519.8,103 L512.5,112.5 L503,119.8 L491.9,124.4 L480,126 L468.1,124.4 L457,119.8 L447.5,112.5 L440.2,103 L435.6,91.9 L434,80 L435.6,68.1 L440.2,57 L447.5,47.5 L457,40.2 L468.1,35.6 L480,34 L491.9,35.6 L503,40.2 L512.5,47.5 L519.8,57 L524.4,68.1 Z"/>
+    <path id="arbre" class="zone" data-region-svg="arbre" fill="#8E97A8" fill-rule="evenodd" d="M422,146 L530,142 L548,260 L504,322 L428,300 L400,224 Z"/>
+    <path id="feuille" class="zone" data-region-svg="feuille" fill="#8E97A8" fill-rule="evenodd" d="M28,480 L94,454 L146,488 L130,552 L62,572 L8,536 Z"/>
+    <path id="scene-du-haut" class="zone" data-region-svg="scene-du-haut" fill="#8E97A8" fill-rule="evenodd" d="M250,232 L372,232 L372,306 L250,306 Z"/>
+    <path id="scene-du-bas" class="zone" data-region-svg="scene-du-bas" fill="#8E97A8" fill-rule="evenodd" d="M250,336 L372,336 L372,402 L250,402 Z"/>
+    <path id="scene-de-droite" class="zone" data-region-svg="scene-de-droite" fill="#8E97A8" fill-rule="evenodd" d="M392,210 L510,210 L510,362 L392,362 Z"/>
+    <path id="mur" class="zone" data-region-svg="mur" fill="#8E97A8" fill-rule="evenodd" d="M572,330 L740,330 L724,430 L566,424 Z"/>
+    <path id="porte" class="zone" data-region-svg="porte" fill="#8E97A8" fill-rule="evenodd" d="M905,374 L905,275 L905.7,269 L907.7,263.3 L910.9,258.2 L915.2,253.9 L920.3,250.7 L926,248.7 L932,248 L938,248.7 L943.7,250.7 L948.8,253.9 L953.1,258.2 L956.3,263.3 L958.3,269 L959,275 L959,374 Z"/>
+    <path id="fleur" class="zone" data-region-svg="fleur" fill="#8E97A8" fill-rule="evenodd" d="M109.6,512.8 L99.1,515.9 L85.6,515.1 L84.7,519.9 L89.1,531.3 L84.4,536.7 L72.9,530.4 L65.2,525.3 L61,532.5 L54,542.2 L46.8,538.9 L44.7,527.1 L41.2,523.2 L29.5,528.5 L18.4,529.4 L20.3,520.5 L27.8,511.6 L23.1,508.6 L8.6,505.9 L5.1,500 L17.7,495.1 L27,492.3 L21.3,485.8 L14.3,476.1 L21.4,472.8 L35.3,477.2 L41.3,476.8 L41.4,466 L46,457.9 L54.6,463.6 L60.5,473.3 L66.1,471.6 L76.3,462.8 L84.5,463.3 L83.5,474.5 L81.8,482.4 L91.7,481.6 L105.7,481.7 L105.7,488.3 L94.1,495.7 L91.5,500 L103.1,505.5 Z"/>
+    <path id="echafaudage" class="zone" data-region-svg="echafaudage" fill="#8E97A8" fill-rule="evenodd" d="M890,100 L942,100 L942,480 L890,480 Z M18,100 L62,100 L62,480 L18,480 Z"/>
+    <path id="pot-de-couleur" class="zone" data-region-svg="pot-de-couleur" fill="#8E97A8" fill-rule="evenodd" d="M258,508 L342,508 L332,582 L268,582 Z"/>
+    <path id="pot" class="zone" data-region-svg="pot" fill="#8E97A8" fill-rule="evenodd" d="M790,520 L858,520 L849,590 L799,590 Z"/>
+    <path id="pinceau" class="zone" data-region-svg="pinceau" fill="#8E97A8" fill-rule="evenodd" d="M606.1,533.5 L708.1,479.5 L695.9,456.5 L593.9,510.5 Z"/>
+  </g>
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0" aria-hidden="true">
+    <path class="trait" d="M0,502 L960,494"/>
+  </g>
+</svg>

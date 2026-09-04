@@ -1,0 +1,28 @@
+{
+  "id": "/LaPierreDesMots/",
+  "name": "La Pierre des Mots",
+  "short_name": "Pierre des Mots",
+  "description": "Un monde gris à rallumer en lisant.",
+  "lang": "fr",
+  "dir": "ltr",
+  "start_url": "/LaPierreDesMots/",
+  "scope": "/LaPierreDesMots/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#FFF6E3",
+  "theme_color": "#1B2440",
+  "icons": [
+    {
+      "src": "icones/gobi-gardien-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icones/gobi-gardien-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

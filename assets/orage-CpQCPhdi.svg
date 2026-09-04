@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" width="960" height="600" role="img" aria-label="L’orage sur le marais">
+  <title>L’orage sur le marais</title>
+  <desc>Un nuage lourd et lobé, l’éclair blanc en zigzag qui en sort, le rideau de pluie oblique, le saule et son tronc, la barque au premier plan, des roseaux courbés.</desc>
+  <!--
+    DÉCOR — lot M6, contrat du monde v4 § 2. Trait noir sur blanc, la COULEUR VIENT DU CODE
+    (annexe P § 2) : les régions sortent d'ici en grisaille #8E97A8, qui est leur état
+    par défaut et non un choix graphique. Géométrie 100 % polygonale (M, L, Z — aucun arc) :
+    surface et centroïde sont donc calculables exactement et opposables aux valeurs déclarées
+    par le .habillage.json, que scripts/verifier-regions-fermees.mjs --strict recalcule.
+
+    Chaque région est un ENFANT DIRECT de #calque-zones : SceneSvg.tsx sélectionne
+    "#calque-zones > [id]", et un tracé niché dans un sous-groupe échapperait au tap sans
+    qu'aucun message ne le dise.
+
+    ÉCRIT PAR scripts/dessiner-decors.mjs — ne pas retoucher à la main : la scène est décrite
+    dans scripts/decors/decors.mjs, et l'émetteur refuse d'écrire si la mesure est mauvaise.
+  -->
+  <g id="calque-fond">
+    <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
+    <image data-fond-illustre="ecole" href="/LaPierreDesMots/assets/marais-orage-DSRg5KQU.png" x="0" y="0" width="960" height="600" preserveAspectRatio="xMidYMid slice"/>
+  </g>
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round" opacity="0" aria-hidden="true">
+    <path id="ciel-d-orage" class="zone" data-region-svg="ciel-d-orage" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L960,0 L960,218 L933.3,223.5 L906.7,228.3 L880,231.9 L853.3,233.8 L826.7,233.8 L800,231.9 L773.3,228.3 L746.7,223.5 L720,218 L693.3,212.5 L666.7,207.7 L640,204.1 L613.3,202.2 L586.7,202.2 L560,204.1 L533.3,207.7 L506.7,212.5 L480,218 L453.3,223.5 L426.7,228.3 L400,231.9 L373.3,233.8 L346.7,233.8 L320,231.9 L293.3,228.3 L266.7,223.5 L240,218 L213.3,212.5 L186.7,207.7 L160,204.1 L133.3,202.2 L106.7,202.2 L80,204.1 L53.3,207.7 L26.7,212.5 L0,218 Z"/>
+    <path id="marais-sombre" class="zone" data-region-svg="marais-sombre" fill="#8E97A8" fill-rule="evenodd" d="M0,430 L26.7,439.2 L53.3,441.8 L80,436 L106.7,425.9 L133.3,418.7 L160,419.6 L186.7,427.9 L213.3,437.7 L240,442 L266.7,437.7 L293.3,427.9 L320,419.6 L346.7,418.7 L373.3,425.9 L400,436 L426.7,441.8 L453.3,439.2 L480,430 L506.7,420.8 L533.3,418.2 L560,424 L586.7,434.1 L613.3,441.3 L640,440.4 L666.7,432.1 L693.3,422.3 L720,418 L746.7,422.3 L773.3,432.1 L800,440.4 L826.7,441.3 L853.3,434.1 L880,424 L906.7,418.2 L933.3,420.8 L960,430 L960,600 L0,600 Z"/>
+    <path id="nuage-lourd" class="zone" data-region-svg="nuage-lourd" fill="#8E97A8" fill-rule="evenodd" d="M512,174.6 L495.9,183.8 L468,188.3 L440.7,189.8 L423.2,192.9 L415.6,201.4 L410.5,214.9 L399.6,228.4 L379.9,235.8 L355.9,233.4 L334.2,223.5 L318,212.5 L303.8,206.5 L285.4,207.4 L259.5,212 L230.4,214 L208,209.2 L200,197.6 L206.3,183.3 L217.3,170.7 L220.6,161.6 L209.7,154.1 L188.9,145.1 L170.9,133.6 L168,121.4 L184.1,112.2 L212,107.7 L239.3,106.2 L256.8,103.1 L264.4,94.6 L269.5,81.1 L280.4,67.6 L300.1,60.2 L324.1,62.6 L345.8,72.5 L362,83.5 L376.2,89.5 L394.6,88.6 L420.5,84 L449.6,82 L472,86.8 L480,98.4 L473.7,112.7 L462.7,125.3 L459.4,134.4 L470.3,141.9 L491.1,150.9 L509.1,162.4 Z"/>
+    <path id="eclair-blanc" class="zone" data-region-svg="eclair-blanc" fill="#8E97A8" fill-rule="evenodd" d="M570.8,168 L507.3,297.9 L551.2,297.9 L517.1,400 L622,256.2 L573.2,256.2 L617.1,168 Z"/>
+    <path id="pluie" class="zone" data-region-svg="pluie" fill="#8E97A8" fill-rule="evenodd" d="M642,190 L900,178 L830,430 L570,442 Z"/>
+    <path id="saule" class="zone" data-region-svg="saule" fill="#8E97A8" fill-rule="evenodd" d="M869.1,384.8 L850.6,381.8 L832.8,368.8 L820.2,357.7 L809.2,358.1 L793.4,368.6 L772.5,378.7 L754.7,377.7 L748.4,364.2 L752.8,346.4 L756.3,333.7 L746.9,328.9 L723.9,326.7 L700.7,320.8 L693.6,309.8 L707.3,298.2 L730.1,290.1 L744.4,284.2 L741.6,275.2 L729.2,260.6 L723.2,244.5 L733.4,235.2 L756,236.9 L778.6,244.6 L792.8,247.4 L800.6,238.6 L809.8,222.3 L824.8,210.3 L841.3,212.3 L852.4,227.1 L857.4,243.7 L863.9,251.6 L880.2,249.3 L904.9,244.5 L926.2,246.5 L931.5,258 L920.1,273.3 L905.2,285.7 L903,293.8 L917.8,301.5 L938.3,312.5 L946.6,325.4 L934.4,334.6 L909.3,337.1 L887.4,336.8 L879,341.7 L880.5,355.8 L879.9,373.9 Z"/>
+    <path id="tronc-du-saule" class="zone" data-region-svg="tronc-du-saule" fill="#8E97A8" fill-rule="evenodd" d="M816.2,400.3 L828,469.6 L812.4,528.5 L839.6,535.5 L856,470.4 L843.8,395.7 Z"/>
+    <path id="barque" class="zone" data-region-svg="barque" fill="#8E97A8" fill-rule="evenodd" d="M118,471.4 L360,471.4 L335.8,487 L326.1,536.3 L151.9,536.3 L142.2,487 Z"/>
+    <path id="roseau-courbe" class="zone" data-region-svg="roseau-courbe" fill="#8E97A8" fill-rule="evenodd" d="M420,560 L431,531 L443.1,507.2 L451.9,507.2 L464,531 L475,560 L486,513.1 L498.1,474.8 L506.9,474.8 L519,513.1 L530,560 L541,525 L553.1,496.4 L561.9,496.4 L574,525 L585,560 L596,507.2 L608.1,464 L616.9,464 L629,507.2 L640,560 L640,576 L420,576 Z"/>
+  </g>
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0" aria-hidden="true">
+    <path class="trait" d="M660,210 L600,420"/>
+    <path class="trait" d="M740,202 L680,412"/>
+  </g>
+</svg>

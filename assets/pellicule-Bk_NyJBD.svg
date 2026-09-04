@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" width="960" height="600" role="img" aria-label="La pellicule">
+  <title>La pellicule</title>
+  <desc>Une bande de pellicule perforée traverse la scène ; trois images de trois tailles s’y suivent. Une loupe en anneau et une bobine en anneau sur la table de montage.</desc>
+  <!--
+    DÉCOR — lot M6, contrat du monde v4 § 2. Trait noir sur blanc, la COULEUR VIENT DU CODE
+    (annexe P § 2) : les régions sortent d'ici en grisaille #8E97A8, qui est leur état
+    par défaut et non un choix graphique. Géométrie 100 % polygonale (M, L, Z — aucun arc) :
+    surface et centroïde sont donc calculables exactement et opposables aux valeurs déclarées
+    par le .habillage.json, que scripts/verifier-regions-fermees.mjs --strict recalcule.
+
+    Chaque région est un ENFANT DIRECT de #calque-zones : SceneSvg.tsx sélectionne
+    "#calque-zones > [id]", et un tracé niché dans un sous-groupe échapperait au tap sans
+    qu'aucun message ne le dise.
+
+    ÉCRIT PAR scripts/dessiner-decors.mjs — ne pas retoucher à la main : la scène est décrite
+    dans scripts/decors/decors.mjs, et l'émetteur refuse d'écrire si la mesure est mauvaise.
+  -->
+  <g id="calque-fond">
+    <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
+    <image data-fond-illustre="ecole" href="/LaPierreDesMots/assets/cite-pellicule-_oEUz1If.png" x="0" y="0" width="960" height="600" preserveAspectRatio="xMidYMid slice"/>
+  </g>
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round" opacity="0" aria-hidden="true">
+    <path id="mur-blanc" class="zone" data-region-svg="mur-blanc" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L960,0 L960,178 L933.3,182 L906.7,184.9 L880,186 L853.3,184.9 L826.7,182 L800,178 L773.3,174 L746.7,171.1 L720,170 L693.3,171.1 L666.7,174 L640,178 L613.3,182 L586.7,184.9 L560,186 L533.3,184.9 L506.7,182 L480,178 L453.3,174 L426.7,171.1 L400,170 L373.3,171.1 L346.7,174 L320,178 L293.3,182 L266.7,184.9 L240,186 L213.3,184.9 L186.7,182 L160,178 L133.3,174 L106.7,171.1 L80,170 L53.3,171.1 L26.7,174 L0,178 Z"/>
+    <path id="bande" class="zone" data-region-svg="bande" fill="#8E97A8" fill-rule="evenodd" d="M40,200 L920,188 L932,470 L28,482 Z"/>
+    <path id="perforation" class="zone" data-region-svg="perforation" fill="#8E97A8" fill-rule="evenodd" d="M90,214 L132,214 L132,244 L90,244 Z M290,212 L332,212 L332,242 L290,242 Z M490,210 L532,210 L532,240 L490,240 Z M690,208 L732,208 L732,238 L690,238 Z"/>
+    <path id="image-un" class="zone" data-region-svg="image-un" fill="#8E97A8" fill-rule="evenodd" d="M110,260 L332,260 L332,432 L110,432 Z"/>
+    <path id="image-deux" class="zone" data-region-svg="image-deux" fill="#8E97A8" fill-rule="evenodd" d="M368,254 L610,254 L610,436 L368,436 Z"/>
+    <path id="image-trois" class="zone" data-region-svg="image-trois" fill="#8E97A8" fill-rule="evenodd" d="M650,264 L852,264 L852,426 L650,426 Z"/>
+    <path id="table-de-montage" class="zone" data-region-svg="table-de-montage" fill="#8E97A8" fill-rule="evenodd" d="M0,500 L960,484 L960,600 L0,600 Z"/>
+    <path id="loupe" class="zone" data-region-svg="loupe" fill="#8E97A8" fill-rule="evenodd" d="M192,530 L189.5,546.1 L182.1,560.6 L170.6,572.1 L156.1,579.5 L140,582 L123.9,579.5 L109.4,572.1 L97.9,560.6 L90.5,546.1 L88,530 L90.5,513.9 L97.9,499.4 L109.4,487.9 L123.9,480.5 L140,478 L156.1,480.5 L170.6,487.9 L182.1,499.4 L189.5,513.9 Z M174,530 L171.9,541.6 L166,551.9 L157,559.4 L145.9,563.5 L134.1,563.5 L123,559.4 L114,551.9 L108.1,541.6 L106,530 L108.1,518.4 L114,508.1 L123,500.6 L134.1,496.5 L145.9,496.5 L157,500.6 L166,508.1 L171.9,518.4 Z"/>
+    <path id="bobine" class="zone" data-region-svg="bobine" fill="#8E97A8" fill-rule="evenodd" d="M898,540 L895.3,557.3 L887.3,572.9 L874.9,585.3 L859.3,593.3 L842,596 L824.7,593.3 L809.1,585.3 L796.7,572.9 L788.7,557.3 L786,540 L788.7,522.7 L796.7,507.1 L809.1,494.7 L824.7,486.7 L842,484 L859.3,486.7 L874.9,494.7 L887.3,507.1 L895.3,522.7 Z M862,540 L860,548.7 L854.5,555.6 L846.5,559.5 L837.5,559.5 L829.5,555.6 L824,548.7 L822,540 L824,531.3 L829.5,524.4 L837.5,520.5 L846.5,520.5 L854.5,524.4 L860,531.3 Z"/>
+  </g>
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0" aria-hidden="true">
+    <path class="trait" d="M0,500 L960,484"/>
+  </g>
+</svg>

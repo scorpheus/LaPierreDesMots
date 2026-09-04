@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" width="960" height="600" role="img" aria-label="Le collier de perles">
+  <title>Le collier de perles</title>
+  <desc>Un coffret ouvert dans la mousse, un fil tendu qui retombe, et trois perles de trois tailles enfilées dessus. Les trois perles diffèrent par le diamètre : « la deuxième » se désigne sans compter.</desc>
+  <!--
+    DÉCOR — lot M6, contrat du monde v4 § 2. Trait noir sur blanc, la COULEUR VIENT DU CODE
+    (annexe P § 2) : les régions sortent d'ici en grisaille #8E97A8, qui est leur état
+    par défaut et non un choix graphique. Géométrie 100 % polygonale (M, L, Z — aucun arc) :
+    surface et centroïde sont donc calculables exactement et opposables aux valeurs déclarées
+    par le .habillage.json, que scripts/verifier-regions-fermees.mjs --strict recalcule.
+
+    Chaque région est un ENFANT DIRECT de #calque-zones : SceneSvg.tsx sélectionne
+    "#calque-zones > [id]", et un tracé niché dans un sous-groupe échapperait au tap sans
+    qu'aucun message ne le dise.
+
+    ÉCRIT PAR scripts/dessiner-decors.mjs — ne pas retoucher à la main : la scène est décrite
+    dans scripts/decors/decors.mjs, et l'émetteur refuse d'écrire si la mesure est mauvaise.
+  -->
+  <g id="calque-fond">
+    <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
+    <image data-fond-illustre="ecole" href="/LaPierreDesMots/assets/clairiere-collier-D__M-2d-.png" x="0" y="0" width="960" height="600" preserveAspectRatio="xMidYMid slice"/>
+  </g>
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round" opacity="0" aria-hidden="true">
+    <path id="ciel-du-matin" class="zone" data-region-svg="ciel-du-matin" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L960,0 L960,152 L933.3,159 L906.7,164.1 L880,166 L853.3,164.1 L826.7,159 L800,152 L773.3,145 L746.7,139.9 L720,138 L693.3,139.9 L666.7,145 L640,152 L613.3,159 L586.7,164.1 L560,166 L533.3,164.1 L506.7,159 L480,152 L453.3,145 L426.7,139.9 L400,138 L373.3,139.9 L346.7,145 L320,152 L293.3,159 L266.7,164.1 L240,166 L213.3,164.1 L186.7,159 L160,152 L133.3,145 L106.7,139.9 L80,138 L53.3,139.9 L26.7,145 L0,152 Z"/>
+    <path id="mousse" class="zone" data-region-svg="mousse" fill="#8E97A8" fill-rule="evenodd" d="M228.4,558.7 L219,563.8 L204.1,566.2 L188.9,566.7 L177.2,567.2 L169.4,569.9 L162.9,575.3 L154.5,581.9 L142.7,586.8 L129.1,587.6 L116.9,583.9 L108.6,577.1 L103.5,570.2 L98.6,565.3 L90.1,562.9 L77,561.5 L61.9,559.2 L50,554.6 L46,548.1 L51.1,541.3 L62.1,535.5 L73.2,531.2 L79.9,527.3 L80.9,522.2 L79.3,515.2 L79.9,507.2 L86.2,500.6 L98.3,497.5 L113.1,498.6 L127,502.4 L138.1,506.2 L147.5,507.5 L158,505.9 L171.4,502.9 L186.8,501.2 L200.7,502.9 L208.9,508.4 L210.1,516 L206.6,523.6 L203.4,529.7 L204.9,534.4 L212.3,539 L222.3,544.7 L229.2,551.7 Z"/>
+    <path id="herbe-du-bord" class="zone" data-region-svg="herbe-du-bord" fill="#8E97A8" fill-rule="evenodd" d="M520,566 L530.8,552.1 L542.6,540.7 L551.2,540.7 L563,552.1 L573.8,566 L584.5,543.5 L596.3,525.2 L604.9,525.2 L616.8,543.5 L627.5,566 L638.3,549.2 L650.1,535.5 L658.7,535.5 L670.5,549.2 L681.3,566 L692,540.7 L703.8,520 L712.4,520 L724.3,540.7 L735,566 L745.8,546.4 L757.6,530.4 L766.2,530.4 L778,546.4 L788.8,566 L799.5,552.1 L811.3,540.7 L819.9,540.7 L831.8,552.1 L842.5,566 L853.3,543.5 L865.1,525.2 L873.7,525.2 L885.5,543.5 L896.3,566 L907,549.2 L918.8,535.5 L927.4,535.5 L939.3,549.2 L950,566 L950,588 L520,588 Z"/>
+    <path id="coffret" class="zone" data-region-svg="coffret" fill="#8E97A8" fill-rule="evenodd" d="M300,486 L344,440 L618,440 L662,486 L662,564 L300,564 Z"/>
+    <path id="fil" class="zone" data-region-svg="fil" fill="#8E97A8" fill-rule="evenodd" d="M176.5,222.3 L277.2,304.7 L398.4,355.3 L480,367.5 L561.6,355.3 L682.8,304.7 L783.5,222.3 L776.5,213.7 L677.2,295.3 L558.4,344.7 L480,356.5 L401.6,344.7 L282.8,295.3 L183.5,213.7 Z"/>
+    <path id="perle-un" class="zone" data-region-svg="perle-un" fill="#8E97A8" fill-rule="evenodd" d="M337,302 L334.8,314.7 L328.3,325.8 L318.5,334 L306.4,338.4 L293.6,338.4 L281.5,334 L271.7,325.8 L265.2,314.7 L263,302 L265.2,289.3 L271.7,278.2 L281.5,270 L293.6,265.6 L306.4,265.6 L318.5,270 L328.3,278.2 L334.8,289.3 Z"/>
+    <path id="perle-deux" class="zone" data-region-svg="perle-deux" fill="#8E97A8" fill-rule="evenodd" d="M527,364 L524.7,378.5 L518,391.6 L507.6,402 L494.5,408.7 L480,411 L465.5,408.7 L452.4,402 L442,391.6 L435.3,378.5 L433,364 L435.3,349.5 L442,336.4 L452.4,326 L465.5,319.3 L480,317 L494.5,319.3 L507.6,326 L518,336.4 L524.7,349.5 Z"/>
+    <path id="perle-trois" class="zone" data-region-svg="perle-trois" fill="#8E97A8" fill-rule="evenodd" d="M687,302 L684.9,312.3 L679.1,321.1 L670.3,326.9 L660,329 L649.7,326.9 L640.9,321.1 L635.1,312.3 L633,302 L635.1,291.7 L640.9,282.9 L649.7,277.1 L660,275 L670.3,277.1 L679.1,282.9 L684.9,291.7 Z"/>
+    <path id="feuille-posee" class="zone" data-region-svg="feuille-posee" fill="#8E97A8" fill-rule="evenodd" d="M787,452 L799.2,457.9 L811.4,467.7 L821.2,471.6 L828.5,481.4 L835.8,487.3 L833.4,497.1 L838.2,506.9 L830.9,514.7 L828.5,526.5 L816.3,532.4 L804.1,540.2 L791.9,544.1 L791.9,550 L782.1,550 L782.1,544.1 L769.9,540.2 L757.7,532.4 L745.5,526.5 L743.1,514.7 L735.8,506.9 L740.6,497.1 L738.2,487.3 L745.5,481.4 L752.8,471.6 L762.6,467.7 L774.8,457.9 Z"/>
+    <path id="caillou" class="zone" data-region-svg="caillou" fill="#8E97A8" fill-rule="evenodd" d="M877.1,569.5 L868.2,571.9 L858.4,572 L849.4,570.8 L841.4,569.8 L833.3,569.7 L824.1,569.6 L814.6,568.2 L806.8,564.6 L802.8,559.3 L802.7,553.4 L804.7,548 L806.3,543.3 L806.5,538.4 L806.7,532.9 L809,527.2 L814.9,522.5 L823.8,520.1 L833.6,520 L842.6,521.2 L850.6,522.2 L858.7,522.3 L867.9,522.4 L877.4,523.8 L885.2,527.4 L889.2,532.7 L889.3,538.6 L887.3,544 L885.7,548.7 L885.5,553.6 L885.3,559.1 L883,564.8 Z"/>
+  </g>
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0" aria-hidden="true">
+    <path class="trait" d="M300,486 L662,486"/>
+    <path class="trait" d="M481,440 L481,486"/>
+    <path class="trait" d="M180,218 L180,250"/>
+    <path class="trait" d="M780,218 L780,250"/>
+  </g>
+</svg>

@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" width="960" height="600" role="img" aria-label="La guirlande de fanions">
+  <title>La guirlande de fanions</title>
+  <desc>Une corde tendue entre un piquet et le bord, trois fanions triangulaires de trois tailles qui y pendent, un lampion, et la pelouse dessous.</desc>
+  <!--
+    DÉCOR — lot M6, contrat du monde v4 § 2. Trait noir sur blanc, la COULEUR VIENT DU CODE
+    (annexe P § 2) : les régions sortent d'ici en grisaille #8E97A8, qui est leur état
+    par défaut et non un choix graphique. Géométrie 100 % polygonale (M, L, Z — aucun arc) :
+    surface et centroïde sont donc calculables exactement et opposables aux valeurs déclarées
+    par le .habillage.json, que scripts/verifier-regions-fermees.mjs --strict recalcule.
+
+    Chaque région est un ENFANT DIRECT de #calque-zones : SceneSvg.tsx sélectionne
+    "#calque-zones > [id]", et un tracé niché dans un sous-groupe échapperait au tap sans
+    qu'aucun message ne le dise.
+
+    ÉCRIT PAR scripts/dessiner-decors.mjs — ne pas retoucher à la main : la scène est décrite
+    dans scripts/decors/decors.mjs, et l'émetteur refuse d'écrire si la mesure est mauvaise.
+  -->
+  <g id="calque-fond">
+    <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
+    <image data-fond-illustre="ecole" href="/LaPierreDesMots/assets/clairiere-guirlande-DzAoxgPR.png" x="0" y="0" width="960" height="600" preserveAspectRatio="xMidYMid slice"/>
+  </g>
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round" opacity="0" aria-hidden="true">
+    <path id="ciel-de-fete" class="zone" data-region-svg="ciel-de-fete" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L960,0 L960,140 L933.3,145.5 L906.7,150.3 L880,153.9 L853.3,155.8 L826.7,155.8 L800,153.9 L773.3,150.3 L746.7,145.5 L720,140 L693.3,134.5 L666.7,129.7 L640,126.1 L613.3,124.2 L586.7,124.2 L560,126.1 L533.3,129.7 L506.7,134.5 L480,140 L453.3,145.5 L426.7,150.3 L400,153.9 L373.3,155.8 L346.7,155.8 L320,153.9 L293.3,150.3 L266.7,145.5 L240,140 L213.3,134.5 L186.7,129.7 L160,126.1 L133.3,124.2 L106.7,124.2 L80,126.1 L53.3,129.7 L26.7,134.5 L0,140 Z"/>
+    <path id="pelouse" class="zone" data-region-svg="pelouse" fill="#8E97A8" fill-rule="evenodd" d="M0,500 L26.7,506 L53.3,510.4 L80,512 L106.7,510.4 L133.3,506 L160,500 L186.7,494 L213.3,489.6 L240,488 L266.7,489.6 L293.3,494 L320,500 L346.7,506 L373.3,510.4 L400,512 L426.7,510.4 L453.3,506 L480,500 L506.7,494 L533.3,489.6 L560,488 L586.7,489.6 L613.3,494 L640,500 L666.7,506 L693.3,510.4 L720,512 L746.7,510.4 L773.3,506 L800,500 L826.7,494 L853.3,489.6 L880,488 L906.7,489.6 L933.3,494 L960,500 L960,600 L0,600 Z"/>
+    <path id="corde-tendue" class="zone" data-region-svg="corde-tendue" fill="#8E97A8" fill-rule="evenodd" d="M57,156.9 L238,237.2 L480,275.5 L722,237.2 L903,156.9 L897,143.1 L718,222.8 L480,260.5 L242,222.8 L63,143.1 Z"/>
+    <path id="fanion-un" class="zone" data-region-svg="fanion-un" fill="#8E97A8" fill-rule="evenodd" d="M200,216 L312,216 L256,348 Z"/>
+    <path id="fanion-deux" class="zone" data-region-svg="fanion-deux" fill="#8E97A8" fill-rule="evenodd" d="M420,256 L546,256 L483,408 Z"/>
+    <path id="fanion-trois" class="zone" data-region-svg="fanion-trois" fill="#8E97A8" fill-rule="evenodd" d="M652,234 L748,234 L700,350 Z"/>
+    <path id="piquet" class="zone" data-region-svg="piquet" fill="#8E97A8" fill-rule="evenodd" d="M878,148 L906,148 L906,510 L878,510 Z"/>
+    <path id="lampion" class="zone" data-region-svg="lampion" fill="#8E97A8" fill-rule="evenodd" d="M111.1,178 L136.9,178 L129.5,192.6 L149.8,202.4 L157.1,219.5 L151.6,270.7 L160.8,282.9 L160.8,295.1 L87.2,295.1 L87.2,282.9 L96.4,270.7 L90.9,219.5 L98.2,202.4 L118.5,192.6 Z"/>
+    <path id="fleur" class="zone" data-region-svg="fleur" fill="#8E97A8" fill-rule="evenodd" d="M152,494 L162,522.7 L191.8,517 L172,540 L191.8,563 L162,557.3 L152,586 L142,557.3 L112.2,563 L132,540 L112.2,517 L142,522.7 Z"/>
+    <path id="caillou-du-pre" class="zone" data-region-svg="caillou-du-pre" fill="#8E97A8" fill-rule="evenodd" d="M777.9,577.4 L769.2,577.4 L761.2,574.7 L754.7,572.3 L747.9,571.9 L739.2,572.2 L730.5,570.7 L725.6,566.4 L725.9,560.7 L728.2,555.7 L728.2,551.5 L725.2,546.9 L723.1,541.4 L726,536.4 L733.8,533.8 L742.8,533.3 L749.9,532.7 L755.8,530.1 L762.9,526.7 L771.5,525.4 L779.1,527.9 L783.6,532.9 L786.4,537.5 L791,540.6 L798.1,543.3 L804.5,547.4 L805.6,552.6 L800.8,557.3 L794,560.7 L789.5,563.9 L787.4,568.4 L784.4,573.8 Z"/>
+  </g>
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0" aria-hidden="true">
+    <path class="trait" d="M860,512 L924,512"/>
+    <path class="trait" d="M124,300 L124,340"/>
+  </g>
+</svg>

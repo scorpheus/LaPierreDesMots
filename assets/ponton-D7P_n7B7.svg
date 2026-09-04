@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" width="960" height="600" role="img" aria-label="Le ponton à reconstruire">
+  <title>Le ponton à reconstruire</title>
+  <desc>Trois planches de trois longueurs à remettre bout à bout, les deux pilotis qui les portent, l’eau calme dessous, la brume au fond et une barque amarrée.</desc>
+  <!--
+    DÉCOR — lot M6, contrat du monde v4 § 2. Trait noir sur blanc, la COULEUR VIENT DU CODE
+    (annexe P § 2) : les régions sortent d'ici en grisaille #8E97A8, qui est leur état
+    par défaut et non un choix graphique. Géométrie 100 % polygonale (M, L, Z — aucun arc) :
+    surface et centroïde sont donc calculables exactement et opposables aux valeurs déclarées
+    par le .habillage.json, que scripts/verifier-regions-fermees.mjs --strict recalcule.
+
+    Chaque région est un ENFANT DIRECT de #calque-zones : SceneSvg.tsx sélectionne
+    "#calque-zones > [id]", et un tracé niché dans un sous-groupe échapperait au tap sans
+    qu'aucun message ne le dise.
+
+    ÉCRIT PAR scripts/dessiner-decors.mjs — ne pas retoucher à la main : la scène est décrite
+    dans scripts/decors/decors.mjs, et l'émetteur refuse d'écrire si la mesure est mauvaise.
+  -->
+  <g id="calque-fond">
+    <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
+    <image data-fond-illustre="ecole" href="/LaPierreDesMots/assets/marais-ponton-B0a-XLjY.png" x="0" y="0" width="960" height="600" preserveAspectRatio="xMidYMid slice"/>
+  </g>
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round" opacity="0" aria-hidden="true">
+    <path id="ciel-du-ponton" class="zone" data-region-svg="ciel-du-ponton" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L960,0 L960,148 L933.3,152 L906.7,154.9 L880,156 L853.3,154.9 L826.7,152 L800,148 L773.3,144 L746.7,141.1 L720,140 L693.3,141.1 L666.7,144 L640,148 L613.3,152 L586.7,154.9 L560,156 L533.3,154.9 L506.7,152 L480,148 L453.3,144 L426.7,141.1 L400,140 L373.3,141.1 L346.7,144 L320,148 L293.3,152 L266.7,154.9 L240,156 L213.3,154.9 L186.7,152 L160,148 L133.3,144 L106.7,141.1 L80,140 L53.3,141.1 L26.7,144 L0,148 Z"/>
+    <path id="brume" class="zone" data-region-svg="brume" fill="#8E97A8" fill-rule="evenodd" d="M-8,265.1 L24.6,272.6 L58.6,279 L93.5,283 L128.9,283.9 L164.1,281.4 L198.6,276 L231.9,268.9 L263.9,261.4 L294.6,254.8 L324.1,250.2 L352.9,248.1 L381.5,248.8 L410.6,252.2 L440.6,257.9 L472,265.1 L504.6,272.6 L538.6,279 L573.5,283 L608.9,283.9 L644.1,281.4 L678.6,276 L711.9,268.9 L743.9,261.4 L774.6,254.8 L804.1,250.2 L832.9,248.1 L861.5,248.8 L890.6,252.2 L920.6,257.9 L952,265.1 L968,194.9 L935.4,187.4 L901.4,181 L866.5,177 L831.1,176.1 L795.9,178.6 L761.4,184 L728.1,191.1 L696.1,198.6 L665.4,205.2 L635.9,209.8 L607.1,211.9 L578.5,211.2 L549.4,207.8 L519.4,202.1 L488,194.9 L455.4,187.4 L421.4,181 L386.5,177 L351.1,176.1 L315.9,178.6 L281.4,184 L248.1,191.1 L216.1,198.6 L185.4,205.2 L155.9,209.8 L127.1,211.9 L98.5,211.2 L69.4,207.8 L39.4,202.1 L8,194.9 Z"/>
+    <path id="eau-calme" class="zone" data-region-svg="eau-calme" fill="#8E97A8" fill-rule="evenodd" d="M0,400 L26.7,406.1 L53.3,406.1 L80,400 L106.7,393.9 L133.3,393.9 L160,400 L186.7,406.1 L213.3,406.1 L240,400 L266.7,393.9 L293.3,393.9 L320,400 L346.7,406.1 L373.3,406.1 L400,400 L426.7,393.9 L453.3,393.9 L480,400 L506.7,406.1 L533.3,406.1 L560,400 L586.7,393.9 L613.3,393.9 L640,400 L666.7,406.1 L693.3,406.1 L720,400 L746.7,393.9 L773.3,393.9 L800,400 L826.7,406.1 L853.3,406.1 L880,400 L906.7,393.9 L933.3,393.9 L960,400 L960,600 L0,600 Z"/>
+    <path id="planche-un" class="zone" data-region-svg="planche-un" fill="#8E97A8" fill-rule="evenodd" d="M120,380 L420,366 L426,412 L124,426 Z"/>
+    <path id="planche-deux" class="zone" data-region-svg="planche-deux" fill="#8E97A8" fill-rule="evenodd" d="M440,370 L720,360 L728,410 L446,420 Z"/>
+    <path id="planche-trois" class="zone" data-region-svg="planche-trois" fill="#8E97A8" fill-rule="evenodd" d="M740,364 L930,356 L938,404 L746,412 Z"/>
+    <path id="pilotis" class="zone" data-region-svg="pilotis" fill="#8E97A8" fill-rule="evenodd" d="M190,412 L222,412 L222,534 L190,534 Z M620,408 L648,408 L648,540 L620,540 Z"/>
+    <path id="roseau-du-ponton" class="zone" data-region-svg="roseau-du-ponton" fill="#8E97A8" fill-rule="evenodd" d="M38,430 L47.5,405.2 L57.9,384.9 L65.5,384.9 L75.9,405.2 L85.3,430 L94.8,390 L105.2,357.2 L112.8,357.2 L123.2,390 L132.7,430 L142.1,400.1 L152.5,375.7 L160.1,375.7 L170.5,400.1 L180,430 L180,446 L38,446 Z"/>
+    <path id="barque-amarree" class="zone" data-region-svg="barque-amarree" fill="#8E97A8" fill-rule="evenodd" d="M760,467.8 L942,467.8 L923.8,480.6 L916.5,521.1 L785.5,521.1 L778.2,480.6 Z"/>
+  </g>
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0" aria-hidden="true">
+    <path class="trait" d="M0,402 L960,396"/>
+  </g>
+</svg>

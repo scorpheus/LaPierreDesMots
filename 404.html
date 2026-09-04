@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>La Pierre des Mots</title>
+  </head>
+  <body>
+    <p>La Pierre retrouve ton chemin…</p>
+    <script>
+      (() => {
+        const base = '/LaPierreDesMots/';
+        const route = location.pathname + location.search + location.hash;
+        if (location.pathname.startsWith(base)) {
+          sessionStorage.setItem('pierre-route-pages', route);
+          location.replace(base);
+        }
+      })();
+    </script>
+  </body>
+</html>

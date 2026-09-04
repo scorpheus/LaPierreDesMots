@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" width="960" height="600" role="img" aria-label="Les cristaux qui se répondent">
+  <title>Les cristaux qui se répondent</title>
+  <desc>Une niche en anneau creusée dans la paroi, quatre cristaux de quatre hauteurs qui s’y répondent, une goutte suspendue et le tapis de sable au sol.</desc>
+  <!--
+    DÉCOR — lot M6, contrat du monde v4 § 2. Trait noir sur blanc, la COULEUR VIENT DU CODE
+    (annexe P § 2) : les régions sortent d'ici en grisaille #8E97A8, qui est leur état
+    par défaut et non un choix graphique. Géométrie 100 % polygonale (M, L, Z — aucun arc) :
+    surface et centroïde sont donc calculables exactement et opposables aux valeurs déclarées
+    par le .habillage.json, que scripts/verifier-regions-fermees.mjs --strict recalcule.
+
+    Chaque région est un ENFANT DIRECT de #calque-zones : SceneSvg.tsx sélectionne
+    "#calque-zones > [id]", et un tracé niché dans un sous-groupe échapperait au tap sans
+    qu'aucun message ne le dise.
+
+    ÉCRIT PAR scripts/dessiner-decors.mjs — ne pas retoucher à la main : la scène est décrite
+    dans scripts/decors/decors.mjs, et l'émetteur refuse d'écrire si la mesure est mauvaise.
+  -->
+  <g id="calque-fond">
+    <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
+    <image data-fond-illustre="ecole" href="/LaPierreDesMots/assets/galeries-echos-Bdf6LJTF.png" x="0" y="0" width="960" height="600" preserveAspectRatio="xMidYMid slice"/>
+  </g>
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round" opacity="0" aria-hidden="true">
+    <path id="paroi-du-fond" class="zone" data-region-svg="paroi-du-fond" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L960,0 L960,148 L933.3,153 L906.7,156.7 L880,158 L853.3,156.7 L826.7,153 L800,148 L773.3,143 L746.7,139.3 L720,138 L693.3,139.3 L666.7,143 L640,148 L613.3,153 L586.7,156.7 L560,158 L533.3,156.7 L506.7,153 L480,148 L453.3,143 L426.7,139.3 L400,138 L373.3,139.3 L346.7,143 L320,148 L293.3,153 L266.7,156.7 L240,158 L213.3,156.7 L186.7,153 L160,148 L133.3,143 L106.7,139.3 L80,138 L53.3,139.3 L26.7,143 L0,148 Z"/>
+    <path id="tapis-de-sable" class="zone" data-region-svg="tapis-de-sable" fill="#8E97A8" fill-rule="evenodd" d="M0,500 L26.7,507.8 L53.3,507.8 L80,500 L106.7,492.2 L133.3,492.2 L160,500 L186.7,507.8 L213.3,507.8 L240,500 L266.7,492.2 L293.3,492.2 L320,500 L346.7,507.8 L373.3,507.8 L400,500 L426.7,492.2 L453.3,492.2 L480,500 L506.7,507.8 L533.3,507.8 L560,500 L586.7,492.2 L613.3,492.2 L640,500 L666.7,507.8 L693.3,507.8 L720,500 L746.7,492.2 L773.3,492.2 L800,500 L826.7,507.8 L853.3,507.8 L880,500 L906.7,492.2 L933.3,492.2 L960,500 L960,600 L0,600 Z"/>
+    <path id="niche-des-echos" class="zone" data-region-svg="niche-des-echos" fill="#8E97A8" fill-rule="evenodd" d="M100,420 L100,420 L109.5,335.4 L137.6,255.1 L182.9,183.1 L243.1,122.9 L315.1,77.6 L395.4,49.5 L480,40 L564.6,49.5 L644.9,77.6 L716.9,122.9 L777.1,183.1 L822.4,255.1 L850.5,335.4 L860,420 L860,420 Z M169,420 L169,420 L176.8,350.8 L199.8,285.1 L236.9,226.1 L286.1,176.9 L345.1,139.8 L410.8,116.8 L480,109 L549.2,116.8 L614.9,139.8 L673.9,176.9 L723.1,226.1 L760.2,285.1 L783.2,350.8 L791,420 L791,420 Z"/>
+    <path id="cristal-echo-un" class="zone" data-region-svg="cristal-echo-un" fill="#8E97A8" fill-rule="evenodd" d="M200,200 L261,267.8 L247.6,408.1 L200,442 L152.4,408.1 L139,267.8 Z"/>
+    <path id="cristal-echo-deux" class="zone" data-region-svg="cristal-echo-deux" fill="#8E97A8" fill-rule="evenodd" d="M380,250 L428,306.6 L417.4,423.7 L380,452 L342.6,423.7 L332,306.6 Z"/>
+    <path id="cristal-echo-trois" class="zone" data-region-svg="cristal-echo-trois" fill="#8E97A8" fill-rule="evenodd" d="M580,230 L636,292.2 L623.7,420.9 L580,452 L536.3,420.9 L524,292.2 Z"/>
+    <path id="cristal-echo-quatre" class="zone" data-region-svg="cristal-echo-quatre" fill="#8E97A8" fill-rule="evenodd" d="M762,270 L804,321 L794.8,426.5 L762,452 L729.2,426.5 L720,321 Z"/>
+    <path id="goutte-suspendue" class="zone" data-region-svg="goutte-suspendue" fill="#8E97A8" fill-rule="evenodd" d="M480,78 L491,148.9 L496.5,153.5 L500.3,159.6 L502,166.6 L501.3,173.7 L498.3,180.2 L493.4,185.5 L487.1,188.8 L480,190 L472.9,188.8 L466.6,185.5 L461.7,180.2 L458.7,173.7 L458,166.6 L459.7,159.6 L463.5,153.5 L469,148.9 Z"/>
+    <path id="galet-plat" class="zone" data-region-svg="galet-plat" fill="#8E97A8" fill-rule="evenodd" d="M130.2,563.7 L118.5,563.4 L108,561.3 L99.4,558.6 L91.6,556.1 L83.2,554 L73.8,551.7 L65.5,548.4 L60.9,544.1 L61.6,539.4 L66.7,535.2 L73.6,531.7 L79.8,528.7 L85,525.3 L90.8,521.5 L99,518.2 L109.8,516.3 L121.5,516.6 L132,518.7 L140.6,521.4 L148.4,523.9 L156.8,526 L166.2,528.3 L174.5,531.6 L179.1,535.9 L178.4,540.6 L173.3,544.8 L166.4,548.3 L160.2,551.3 L155,554.7 L149.2,558.5 L141,561.8 Z"/>
+  </g>
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0" aria-hidden="true">
+    <path class="trait" d="M200,260 L200,436"/>
+    <path class="trait" d="M580,292 L580,446"/>
+  </g>
+</svg>

@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" width="960" height="600" role="img" aria-label="La paroi qu’on peint comme on veut">
+  <title>La paroi qu’on peint comme on veut</title>
+  <desc>Deux pans de paroi de deux tailles, la veine de cristal qui les traverse, une goutte de pluie, une pierre ronde, une niche vide et un cristal oublié.</desc>
+  <!--
+    DÉCOR — lot M6, contrat du monde v4 § 2. Trait noir sur blanc, la COULEUR VIENT DU CODE
+    (annexe P § 2) : les régions sortent d'ici en grisaille #8E97A8, qui est leur état
+    par défaut et non un choix graphique. Géométrie 100 % polygonale (M, L, Z — aucun arc) :
+    surface et centroïde sont donc calculables exactement et opposables aux valeurs déclarées
+    par le .habillage.json, que scripts/verifier-regions-fermees.mjs --strict recalcule.
+
+    Chaque région est un ENFANT DIRECT de #calque-zones : SceneSvg.tsx sélectionne
+    "#calque-zones > [id]", et un tracé niché dans un sous-groupe échapperait au tap sans
+    qu'aucun message ne le dise.
+
+    ÉCRIT PAR scripts/dessiner-decors.mjs — ne pas retoucher à la main : la scène est décrite
+    dans scripts/decors/decors.mjs, et l'émetteur refuse d'écrire si la mesure est mauvaise.
+  -->
+  <g id="calque-fond">
+    <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
+  </g>
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round">
+    <path id="ombre-du-fond" class="zone" data-region-svg="ombre-du-fond" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L960,0 L960,228 L933.3,232.8 L906.7,237 L880,240.1 L853.3,241.8 L826.7,241.8 L800,240.1 L773.3,237 L746.7,232.8 L720,228 L693.3,223.2 L666.7,219 L640,215.9 L613.3,214.2 L586.7,214.2 L560,215.9 L533.3,219 L506.7,223.2 L480,228 L453.3,232.8 L426.7,237 L400,240.1 L373.3,241.8 L346.7,241.8 L320,240.1 L293.3,237 L266.7,232.8 L240,228 L213.3,223.2 L186.7,219 L160,215.9 L133.3,214.2 L106.7,214.2 L80,215.9 L53.3,219 L26.7,223.2 L0,228 Z"/>
+    <path id="sol-de-la-paroi" class="zone" data-region-svg="sol-de-la-paroi" fill="#8E97A8" fill-rule="evenodd" d="M0,540 L26.7,545.8 L53.3,548.9 L80,547.8 L106.7,543.1 L133.3,536.9 L160,532.2 L186.7,531.1 L213.3,534.2 L240,540 L266.7,545.8 L293.3,548.9 L320,547.8 L346.7,543.1 L373.3,536.9 L400,532.2 L426.7,531.1 L453.3,534.2 L480,540 L506.7,545.8 L533.3,548.9 L560,547.8 L586.7,543.1 L613.3,536.9 L640,532.2 L666.7,531.1 L693.3,534.2 L720,540 L746.7,545.8 L773.3,548.9 L800,547.8 L826.7,543.1 L853.3,536.9 L880,532.2 L906.7,531.1 L933.3,534.2 L960,540 L960,600 L0,600 Z"/>
+    <path id="grande-paroi" class="zone" data-region-svg="grande-paroi" fill="#8E97A8" fill-rule="evenodd" d="M60,180 L520,158 L542,470 L40,492 Z"/>
+    <path id="petite-paroi" class="zone" data-region-svg="petite-paroi" fill="#8E97A8" fill-rule="evenodd" d="M600,240 L900,228 L912,450 L590,462 Z"/>
+    <path id="veine-de-cristal" class="zone" data-region-svg="veine-de-cristal" fill="#8E97A8" fill-rule="evenodd" d="M83.1,308.4 L219.4,257 L359.4,329 L503.1,276.4 L496.9,259.6 L360.6,311 L220.6,239 L76.9,291.6 Z"/>
+    <path id="goutte-de-pluie" class="zone" data-region-svg="goutte-de-pluie" fill="#8E97A8" fill-rule="evenodd" d="M700,148 L712,205.2 L718,210.2 L722.2,216.8 L723.9,224.4 L723.2,232.2 L720,239.3 L714.6,245 L707.7,248.7 L700,250 L692.3,248.7 L685.4,245 L680,239.3 L676.8,232.2 L676.1,224.4 L677.8,216.8 L682,210.2 L688,205.2 Z"/>
+    <path id="pierre-ronde" class="zone" data-region-svg="pierre-ronde" fill="#8E97A8" fill-rule="evenodd" d="M361.1,557.2 L350.4,564.1 L336.8,567.5 L323.3,568.7 L311.2,569.7 L299.3,571.8 L286.1,574.1 L271.7,574.4 L258.2,570.8 L248.5,563.3 L243.6,553.8 L241.9,544.3 L240.4,535.8 L237.4,527.5 L234.1,518.3 L233.7,508.2 L238.9,498.8 L249.6,491.9 L263.2,488.5 L276.7,487.3 L288.8,486.3 L300.7,484.2 L313.9,481.9 L328.3,481.6 L341.8,485.2 L351.5,492.7 L356.4,502.2 L358.1,511.7 L359.6,520.2 L362.6,528.5 L365.9,537.7 L366.3,547.8 Z"/>
+    <path id="niche-vide" class="zone" data-region-svg="niche-vide" fill="#8E97A8" fill-rule="evenodd" d="M671,430 L671,369 L673.3,348.8 L680,329.5 L690.9,312.3 L705.3,297.9 L722.5,287 L741.8,280.3 L762,278 L782.2,280.3 L801.5,287 L818.7,297.9 L833.1,312.3 L844,329.5 L850.7,348.8 L853,369 L853,430 Z"/>
+    <path id="cristal-oublie" class="zone" data-region-svg="cristal-oublie" fill="#8E97A8" fill-rule="evenodd" d="M866,300 L906,337 L897.2,413.5 L866,432 L834.8,413.5 L826,337 Z"/>
+  </g>
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path class="trait" d="M80,240 L500,220"/>
+    <path class="trait" d="M620,300 L880,292"/>
+  </g>
+</svg>

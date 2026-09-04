@@ -1,0 +1,338 @@
+<svg data-direction="campement-v5-enfant" data-composition="ilots-naturels" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800" role="img" aria-label="Le campement">
+  <title>Le campement</title>
+  <desc>Le repaire forestier V5 destiné aux enfants de 7 ans : trente objets vectoriels en îlots naturels autour d’une grande tente-cabane. Chaque groupe objet porte l’identifiant du point tactile correspondant et s’anime réellement au toucher.</desc>
+  <g id="calque-fond">
+    <path d="M0,0 L1200,0 L1200,800 L0,800 Z" fill="#BFE2F2"/>
+    <path d="M0,225 L145,105 L260,210 L390,70 L535,220 L690,95 L850,225 L1010,115 L1200,230 L1200,430 L0,430 Z" fill="#76979A"/>
+    <path d="M0,270 L95,165 L170,260 L280,135 L355,270 L465,155 L555,270 L665,145 L755,275 L870,150 L955,270 L1070,145 L1200,260 L1200,470 L0,470 Z" fill="#466F68"/>
+    <path d="M0,305 C170,260 300,300 420,285 C600,265 740,305 900,275 C1030,250 1120,270 1200,300 L1200,800 L0,800 Z" fill="#769B66"/>
+    <path d="M535,260 C605,335 680,405 720,520 C755,625 735,710 690,800 L390,800 C455,710 500,640 505,550 C510,440 470,350 440,285 Z" fill="#C7AD7F"/>
+    <path d="M0,660 C190,620 335,675 480,650 C690,615 830,675 1010,640 C1095,625 1155,635 1200,650 L1200,800 L0,800 Z" fill="#577C50"/>
+  </g>
+  <g id="calque-decor" fill="#355B4E" stroke="#1B2440" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M0,0 L125,0 L112,170 L95,325 L48,430 L0,455 Z" fill="#31574D"/>
+    <path d="M1200,0 L1080,0 L1095,170 L1110,315 L1160,435 L1200,455 Z" fill="#31574D"/>
+    <path d="M0,0 L250,0 L205,45 L118,70 L45,110 L0,125 Z"/>
+    <path d="M1200,0 L950,0 L995,45 L1082,70 L1155,110 L1200,125 Z"/>
+    <path d="M340,505 L700,505 L745,625 L675,715 L390,715 L315,620 Z" fill="#617F91" stroke="#314354"/>
+    <path d="M355,520 L688,520 L715,605 L660,685 L405,685 L345,605 Z" fill="#7896A5" stroke="none"/>
+    <path d="M50,770 C160,720 245,750 325,790 L50,800 Z" fill="#355B4E"/>
+    <path d="M875,790 C970,735 1085,735 1200,775 L1200,800 Z" fill="#355B4E"/>
+    <path d="M410,285 C470,260 520,265 565,290" fill="none" stroke="#FFF6E3" stroke-width="5" stroke-dasharray="9 13" opacity=".55"/>
+  </g>
+  <g id="calque-points" stroke="#1B2440" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+    <g id="placement-tente" transform="translate(377.917 51.875) scale(2.60417)"><g id="objet-tente" data-objet-campement="tente">
+<path d="M64,38 L72,38 L72,96 L64,96 Z" fill="#7A5230"/>
+      <path d="M72,33 L98,41 L72,49 Z" fill="#FFC93C"/>
+      <path id="tente" d="M26,122 L39,84 L54,52 L68,37 L82,52 L97,84 L110,122 L88,124 L68,117 L48,124 Z" fill="#3DDC97"/>
+      <path d="M42,92 L94,92 L99,106 L37,106 Z" fill="#FF5D8F"/>
+      <path d="M58,122 L68,70 L78,122 L68,114 Z" fill="#7A5230"/>
+      <path d="M68,37 L68,114" fill="none"/>
+    </g></g>
+    <g id="placement-feu" transform="translate(345.417 369.375) scale(1.35417)"><g id="objet-feu" data-objet-campement="feu">
+<path d="M150,116 L186,92 L195,102 L160,123 Z" fill="#7A5230"/>
+      <path d="M226,116 L190,92 L181,102 L216,123 Z" fill="#7A5230"/>
+      <path id="feu" d="M188,38 L198,54 L193,59 L207,72 L202,82 L211,98 L188,110 L165,98 L174,82 L169,72 L183,59 L178,54 Z" fill="#F5821F"/>
+      <path d="M188,56 L198,80 L192,92 L188,102 L184,92 L178,80 Z" fill="#FFC93C"/>
+      <path d="M214,31 L219,38 L214,45 L209,38 Z" fill="#FFC93C"/>
+      <path d="M160,46 L164,52 L160,58 L156,52 Z" fill="#FFC93C"/>
+      <circle cx="170" cy="118" r="6" fill="#8E97A8"/>
+      <circle cx="206" cy="118" r="6" fill="#8E97A8"/>
+    </g></g>
+    <g id="placement-carte" transform="translate(-307.708 144.688) scale(1.51042)"><g id="objet-carte" data-objet-campement="carte">
+<path d="M278,70 L287,70 L287,122 L278,122 Z" fill="#7A5230"/>
+      <path d="M329,70 L338,70 L338,122 L329,122 Z" fill="#7A5230"/>
+      <path d="M304,33 L308,33 L308,46 L304,46 Z" fill="#7A5230"/>
+      <path d="M308,33 L326,38 L308,43 Z" fill="#FF5D8F"/>
+      <path id="carte" d="M270,46 L294,42 L320,44 L348,41 L352,60 L349,78 L352,98 L322,102 L294,100 L268,103 L265,80 L268,62 Z" fill="#FFF6E3"/>
+      <path d="M278,90 L290,74 L306,82 L318,64 L336,56" fill="none"/>
+      <circle cx="278" cy="90" r="5" fill="#3DDC97"/>
+      <circle cx="306" cy="82" r="5" fill="#2FA8E0"/>
+      <circle cx="336" cy="56" r="5" fill="#FF5D8F"/>
+      <path d="M322,82 L332,78 L334,88 L324,92 Z" fill="#FFC93C"/>
+    </g></g>
+    <g id="placement-coffre" transform="translate(-349.792 465.938) scale(1.30208)"><g id="objet-coffre" data-objet-campement="coffre">
+<path d="M388,82 L392,60 L402,49 L456,44 L467,58 L470,78 L428,85 Z" fill="#7A5230"/>
+      <path d="M442,32 L447,38 L442,44 L437,38 Z" fill="#FFC93C"/>
+      <path id="coffre" d="M388,80 L470,76 L473,104 L468,120 L428,123 L390,120 L385,104 Z" fill="#7A5230"/>
+      <path d="M394,78 L468,74 L466,86 L396,90 Z" fill="#FFC93C"/>
+      <path d="M402,88 L412,87 L414,121 L404,121 Z" fill="#FFC93C"/>
+      <path d="M446,85 L456,84 L458,120 L448,120 Z" fill="#FFC93C"/>
+      <path d="M422,90 L436,89 L438,106 L424,107 Z" fill="#FFC93C"/>
+      <path d="M428,59 L430.94,65.95 L438.46,66.6 L432.76,71.55 L434.47,78.9 L428,75 L421.53,78.9 L423.24,71.55 L417.54,66.6 L425.06,65.95 Z" fill="#FFC93C"/>
+      <circle cx="408" cy="68" r="7" fill="#2FA8E0"/>
+      <circle cx="450" cy="66" r="7" fill="#FF5D8F"/>
+    </g></g>
+    <g id="placement-mur-des-noms" transform="translate(-610.000 312.500) scale(1.25000)"><g id="objet-mur-des-noms" data-objet-campement="mur-des-noms">
+<path d="M504,118 L510,108 L522,110 L520,122 L506,123 Z" fill="#8E97A8"/>
+      <path id="mur-des-noms" d="M516,120 L511,88 L515,62 L528,42 L550,34 L570,42 L582,64 L586,92 L580,120 Z" fill="#8E97A8"/>
+      <path d="M524,58 L572,54" fill="none"/>
+      <path d="M522,72 L576,68" fill="none"/>
+      <path d="M522,86 L576,83" fill="none"/>
+      <path d="M524,100 L572,98" fill="none"/>
+      <path d="M562,104 L580,100 L590,110 L578,122 L564,118 Z" fill="#3DDC97"/>
+      <path d="M550,38 L552.35,42.76 L557.61,43.53 L553.8,47.24 L554.7,52.47 L550,50 L545.3,52.47 L546.2,47.24 L542.39,43.53 L547.65,42.76 Z" fill="#FFC93C"/>
+    </g></g>
+    <g id="placement-chaudron" transform="translate(-407.708 354.063) scale(1.19792)"><g id="objet-chaudron" data-objet-campement="chaudron">
+<path d="M666,35 L672,35 L636,120 L628,118 Z" fill="#7A5230"/>
+      <path d="M666,35 L672,35 L672,120 L664,120 Z" fill="#7A5230"/>
+      <path d="M666,35 L672,35 L710,118 L702,120 Z" fill="#7A5230"/>
+      <circle cx="680" cy="38" r="4" fill="#FFC93C"/>
+      <path id="chaudron" d="M634,80 L704,80 L708,94 L700,112 L678,121 L660,121 L637,112 L630,94 Z" fill="#8E97A8"/>
+      <path d="M628,74 L710,74 L710,84 L628,84 Z" fill="#8E97A8"/>
+      <circle cx="650" cy="66" r="8" fill="#FF5D8F"/>
+      <circle cx="670" cy="58" r="7" fill="#2FA8E0"/>
+      <circle cx="688" cy="64" r="6" fill="#3DDC97"/>
+      <circle cx="660" cy="50" r="5" fill="#FFC93C"/>
+      <circle cx="682" cy="92" r="9" fill="#8B5CF6"/>
+    </g></g>
+    <g id="placement-lunette" transform="translate(-195.625 202.813) scale(1.40625)"><g id="objet-lunette" data-objet-campement="lunette">
+<path d="M782,86 L790,86 L758,122 L750,120 Z" fill="#7A5230"/>
+      <path d="M782,86 L790,86 L790,122 L782,122 Z" fill="#7A5230"/>
+      <path d="M782,86 L790,86 L824,120 L816,122 Z" fill="#7A5230"/>
+      <path id="lunette" d="M750,100 L762,82 L810,42 L824,34 L833,46 L822,56 L776,96 L762,110 Z" fill="#2FA8E0"/>
+      <path d="M766,90 L778,78 L786,86 L774,98 Z" fill="#FFC93C"/>
+      <path d="M794,70 L806,58 L814,66 L802,78 Z" fill="#FFC93C"/>
+      <path d="M820,38 L830,44 L826,52 L817,46 Z" fill="#FFF6E3"/>
+      <path d="M748,96 L762,108 L754,118 L743,106 Z" fill="#8E97A8"/>
+    </g></g>
+    <g id="placement-hamac-de-gobi" transform="translate(-328.958 124.688) scale(1.51042)"><g id="objet-hamac-de-gobi" data-objet-campement="hamac-de-gobi">
+<path d="M866,34 L882,34 L882,42 L866,42 Z" fill="#7A5230"/>
+      <path d="M869,42 L879,42 L879,122 L869,122 Z" fill="#7A5230"/>
+      <path d="M934,34 L950,34 L950,42 L934,42 Z" fill="#7A5230"/>
+      <path d="M937,42 L947,42 L947,122 L937,122 Z" fill="#7A5230"/>
+      <path id="hamac-de-gobi" d="M874,60 L890,72 L908,77 L926,72 L942,60 L948,70 L928,86 L908,91 L888,86 L868,70 Z" fill="#FF5D8F"/>
+      <path d="M890,73 L898,76 L898,88 L890,85 Z" fill="#FFC93C"/>
+      <path d="M918,76 L926,73 L926,85 L918,88 Z" fill="#FFC93C"/>
+      <path d="M898,64 L918,64 L920,74 L896,74 Z" fill="#FFF6E3"/>
+      <path d="M874,96 L888,100 L908,102 L928,100 L942,96" fill="none"/>
+    </g></g>
+    <g id="placement-banniere" transform="translate(-822.917 0.625) scale(1.14583)"><g id="objet-banniere" data-objet-campement="banniere">
+<path d="M1024,38 L1032,38 L1032,122 L1024,122 Z" fill="#7A5230"/>
+      <path id="banniere" d="M1032,42 L1072,37 L1060,57 L1072,77 L1032,82 Z" fill="#2FA8E0"/>
+      <path d="M1050,47 L1052.94,54.95 L1061.41,55.29 L1054.76,60.55 L1057.05,68.71 L1050,64 L1042.95,68.71 L1045.24,60.55 L1038.59,55.29 L1047.06,54.95 Z" fill="#FFC93C"/>
+      <path d="M1024,50 L992,57 L1001,67 L990,78 L1024,84 Z" fill="#FF5D8F"/>
+      <path d="M1028,32 L1034,39 L1028,46 L1022,39 Z" fill="#FFC93C"/>
+      <circle cx="1008" cy="67" r="5" fill="#FFF6E3"/>
+    </g></g>
+    <g id="placement-carillon" transform="translate(-368.542 65.313) scale(0.98958)"><g id="objet-carillon" data-objet-campement="carillon">
+<path d="M1104,36 L1192,36 L1192,47 L1104,47 Z" fill="#7A5230"/>
+      <path d="M1109,47 L1119,47 L1119,121 L1109,121 Z" fill="#7A5230"/>
+      <path d="M1177,47 L1187,47 L1187,121 L1177,121 Z" fill="#7A5230"/>
+      <path d="M1134,47 L1134,62" fill="none"/>
+      <path d="M1148,47 L1148,62" fill="none"/>
+      <path d="M1162,47 L1162,62" fill="none"/>
+      <path id="carillon" d="M1124,60 L1172,60 L1172,69 L1163,69 L1163,106 L1153,106 L1153,69 L1143,69 L1143,114 L1133,114 L1133,69 L1124,69 Z" fill="#FFC93C"/>
+      <circle cx="1148" cy="90" r="8" fill="#FF5D8F"/>
+      <path d="M1144,96 L1152,96 L1158,118 L1138,118 Z" fill="#3DDC97"/>
+      <path d="M1124,64 L1172,64" fill="none"/>
+    </g></g>
+    <g id="placement-marmite" transform="translate(717.917 231.458) scale(0.85417)"><g id="objet-marmite" data-objet-campement="marmite">
+<path d="M60,254 L68,262 L62,272 L70,282 L64,292 L54,282 L60,272 L52,262 Z" fill="#FFF6E3"/>
+      <path d="M82,262 L88,270 L82,278 L90,288 L84,298 L76,288 L82,278 L76,270 Z" fill="#FFF6E3"/>
+      <path id="marmite" d="M36,302 L100,302 L106,316 L97,335 L75,342 L61,342 L39,335 L30,316 Z" fill="#8E97A8"/>
+      <path d="M32,298 L104,298 L104,307 L32,307 Z" fill="#8E97A8"/>
+      <path d="M26,310 L32,308 L35,318 L32,328 L26,326 L29,318 Z" fill="#8E97A8"/>
+      <path d="M44,334 L58,342 L44,344 L34,338 Z" fill="#F5821F"/>
+      <path d="M78,334 L92,338 L86,344 L72,342 Z" fill="#F5821F"/>
+      <path d="M46,316 L90,316" fill="none"/>
+    </g></g>
+    <g id="placement-tas-de-bois" transform="translate(726.458 192.604) scale(0.98958)"><g id="objet-tas-de-bois" data-objet-campement="tas-de-bois">
+<path d="M202,254 L212,258 L180,310 L172,306 Z" fill="#7A5230"/>
+      <path id="tas-de-bois" d="M145,340 L149,316 L164,302 L186,296 L210,301 L227,314 L232,340 L188,343 Z" fill="#7A5230"/>
+      <circle cx="164" cy="324" r="9" fill="#FFF6E3"/>
+      <circle cx="188" cy="313" r="9" fill="#FFF6E3"/>
+      <circle cx="211" cy="324" r="9" fill="#FFF6E3"/>
+      <circle cx="188" cy="334" r="8" fill="#FFF6E3"/>
+      <path d="M196,256 L218,252 L226,264 L204,270 Z" fill="#8E97A8"/>
+      <path d="M164,324 L164,316" fill="none"/>
+      <path d="M188,313 L188,305" fill="none"/>
+    </g></g>
+    <g id="placement-seau" transform="translate(579.167 357.083) scale(0.79167)"><g id="objet-seau" data-objet-campement="seau">
+<path d="M302,255 L346,255 L346,264 L310,264 L310,342 L300,342 Z" fill="#7A5230"/>
+      <path d="M306,264 L306,280" fill="none"/>
+      <path id="seau" d="M279,288 L337,288 L332,312 L327,335 L318,342 L298,342 L289,335 L284,312 Z" fill="#2FA8E0"/>
+      <path d="M286,300 L296,296 L308,300 L320,296 L330,300 L328,310 L288,310 Z" fill="#FFF6E3"/>
+      <path d="M286,294 L296,280 L308,276 L320,280 L330,294" fill="none"/>
+      <path d="M300,312 L298,338" fill="none"/>
+      <path d="M316,312 L318,338" fill="none"/>
+    </g></g>
+    <g id="placement-lanterne" transform="translate(384.167 72.083) scale(0.79167)"><g id="objet-lanterne" data-objet-campement="lanterne">
+<path d="M388,342 L400,342 L400,266 L442,266 L442,255 L388,255 Z" fill="#7A5230"/>
+      <path d="M428,266 L428,276" fill="none"/>
+      <path id="lanterne" d="M414,284 L442,284 L446,296 L446,318 L438,328 L418,328 L410,318 L410,296 Z" fill="#FFC93C"/>
+      <path d="M410,276 L446,276 L450,285 L406,285 Z" fill="#8E97A8"/>
+      <path d="M414,328 L442,328 L446,338 L410,338 Z" fill="#8E97A8"/>
+      <path d="M422,294 L434,294 L436,316 L420,316 Z" fill="#F5821F"/>
+      <path d="M458,289 L463,296 L458,303 L453,296 Z" fill="#FFC93C"/>
+      <path d="M400,301 L405,308 L400,315 L395,308 Z" fill="#FFC93C"/>
+    </g></g>
+    <g id="placement-corde-a-linge" transform="translate(-646.250 -335.625) scale(1.56250)"><g id="objet-corde-a-linge" data-objet-campement="corde-a-linge">
+<path d="M503,254 L517,254 L517,262 L503,262 Z" fill="#7A5230"/>
+      <path d="M505,262 L515,262 L515,342 L505,342 Z" fill="#7A5230"/>
+      <path d="M579,254 L593,254 L593,262 L579,262 Z" fill="#7A5230"/>
+      <path d="M581,262 L591,262 L591,342 L581,342 Z" fill="#7A5230"/>
+      <path d="M510,266 L548,278 L586,266" fill="none"/>
+      <path id="corde-a-linge" d="M520,274 L548,279 L553,302 L548,324 L538,333 L525,326 L517,302 Z" fill="#FF5D8F"/>
+      <path d="M556,282 L578,276 L584,296 L578,316 L562,320 L554,300 Z" fill="#3DDC97"/>
+      <path d="M530,274 L536,272 L538,282 L532,284 Z" fill="#FFC93C"/>
+      <path d="M564,274 L570,276 L566,286 L560,284 Z" fill="#FFC93C"/>
+      <path d="M526,294 L546,296" fill="none"/>
+      <path d="M558,296 L580,292" fill="none"/>
+    </g></g>
+    <g id="placement-tabouret" transform="translate(-61.667 356.667) scale(0.83333)"><g id="objet-tabouret" data-objet-campement="tabouret">
+<path d="M690,254 L698,256 L682,308 L674,306 Z" fill="#7A5230"/>
+      <path id="tabouret" d="M626,291 L710,291 L710,305 L691,305 L699,341 L685,341 L679,305 L657,305 L651,341 L637,341 L645,305 L626,305 Z" fill="#7A5230"/>
+      <path d="M632,288 L704,288 L708,295 L628,295 Z" fill="#F5821F"/>
+      <path d="M676,258 L702,254 L708,266 L682,272 Z" fill="#FF5D8F"/>
+      <path d="M651,320 L685,320" fill="none"/>
+    </g></g>
+    <g id="placement-panier-de-pommes" transform="translate(199.167 249.583) scale(1.04167)"><g id="objet-panier-de-pommes" data-objet-campement="panier-de-pommes">
+<path d="M743,258 L780,264 L806,272 L804,280 L778,272 L743,266 Z" fill="#7A5230"/>
+      <path d="M770,258 L784,254 L790,264 L776,268 Z" fill="#3DDC97"/>
+      <path d="M808,276 L808,284" fill="none"/>
+      <circle cx="808" cy="290" r="8" fill="#E4342B"/>
+      <path id="panier-de-pommes" d="M754,302 L822,302 L818,322 L812,337 L798,342 L778,342 L764,337 L758,322 Z" fill="#7A5230"/>
+      <circle cx="772" cy="296" r="10" fill="#E4342B"/>
+      <circle cx="792" cy="291" r="10" fill="#E4342B"/>
+      <circle cx="810" cy="298" r="9" fill="#E4342B"/>
+      <path d="M790,280 L802,276 L800,284 L790,286 Z" fill="#3DDC97"/>
+      <path d="M764,316 L816,316" fill="none"/>
+      <path d="M774,304 L778,340" fill="none"/>
+      <path d="M802,304 L798,340" fill="none"/>
+    </g></g>
+    <g id="placement-sac-de-graines" transform="translate(363.333 241.667) scale(0.83333)"><g id="objet-sac-de-graines" data-objet-campement="sac-de-graines">
+<path d="M930,272 L938,274 L932,316 L926,314 Z" fill="#2FAE4E"/>
+      <path d="M934,254 L942,262 L938,270 L944,276 L936,284 L928,276 L932,268 L926,260 Z" fill="#FFC93C"/>
+      <path id="sac-de-graines" d="M883,291 L896,280 L913,284 L926,278 L932,296 L938,317 L927,338 L895,341 L880,322 L876,305 Z" fill="#FFF6E3"/>
+      <path d="M886,290 L924,282 L928,294 L886,300 Z" fill="#7A5230"/>
+      <path d="M896,306 L920,303 L922,320 L898,323 Z" fill="#F5821F"/>
+      <path d="M872,331 L876,336 L872,341 L868,336 Z" fill="#FFC93C"/>
+      <path d="M884,338 L888,342 L884,346 L880,342 Z" fill="#FFC93C"/>
+      <path d="M942,333 L946,338 L942,343 L938,338 Z" fill="#FFC93C"/>
+    </g></g>
+    <g id="placement-bocal-de-lucioles" transform="translate(-96.250 386.875) scale(0.81250)"><g id="objet-bocal-de-lucioles" data-objet-campement="bocal-de-lucioles">
+<path d="M1068,342 L1056,342 L1056,266 L1016,266 L1016,255 L1068,255 Z" fill="#7A5230"/>
+      <path d="M1028,266 L1028,276" fill="none"/>
+      <path id="bocal-de-lucioles" d="M1014,285 L1042,285 L1049,299 L1051,320 L1041,338 L1015,338 L1005,320 L1007,299 Z" fill="#2FA8E0"/>
+      <path d="M1010,276 L1046,276 L1046,285 L1010,285 Z" fill="#8E97A8"/>
+      <circle cx="1020" cy="300" r="5" fill="#FFC93C"/>
+      <circle cx="1038" cy="310" r="5" fill="#FFC93C"/>
+      <circle cx="1026" cy="322" r="5" fill="#FFC93C"/>
+      <circle cx="1042" cy="294" r="4" fill="#FFC93C"/>
+      <path d="M1064,298 L1068,304 L1064,310 L1060,304 Z" fill="#FFC93C"/>
+    </g></g>
+    <g id="placement-livre-ouvert" transform="translate(-797.708 300.521) scale(1.19792)"><g id="objet-livre-ouvert" data-objet-campement="livre-ouvert">
+<path d="M1128,308 L1168,308 L1176,342 L1120,342 Z" fill="#7A5230"/>
+      <path d="M1162,251 L1164.35,256.76 L1170.56,257.22 L1165.8,261.24 L1167.29,267.28 L1162,264 L1156.71,267.28 L1158.2,261.24 L1153.44,257.22 L1159.65,256.76 Z" fill="#FFC93C"/>
+      <path d="M1128,258 L1132,264 L1128,270 L1124,264 Z" fill="#FF5D8F"/>
+      <path id="livre-ouvert" d="M1104,294 L1126,286 L1146,288 L1148,294 L1150,288 L1170,286 L1192,294 L1188,314 L1150,308 L1146,308 L1108,314 Z" fill="#FFF6E3"/>
+      <path d="M1144,290 L1152,290 L1152,310 L1144,310 Z" fill="#7A5230"/>
+      <path d="M1114,298 L1140,294" fill="none"/>
+      <path d="M1115,304 L1140,300" fill="none"/>
+      <path d="M1156,294 L1182,298" fill="none"/>
+      <path d="M1156,300 L1181,304" fill="none"/>
+      <path d="M1130,316 L1166,316 L1164,324 L1132,324 Z" fill="#F5821F"/>
+    </g></g>
+    <g id="placement-plume-et-encrier" transform="translate(625.417 332.292) scale(0.72917)"><g id="objet-plume-et-encrier" data-objet-campement="plume-et-encrier">
+<path id="plume-et-encrier" d="M100,474 L108,486 L100,502 L86,518 L72,534 L58,548 L46,552 L48,538 L62,524 L74,508 L84,492 L90,480 Z" fill="#FFF6E3"/>
+      <path d="M102,478 L50,548" fill="none"/>
+      <path d="M26,532 L62,532 L64,548 L57,561 L34,561 L24,548 Z" fill="#2FA8E0"/>
+      <path d="M22,526 L66,526 L66,535 L22,535 Z" fill="#8E97A8"/>
+      <path d="M44,510 L50,516 L44,524 L38,516 Z" fill="#8B5CF6"/>
+    </g></g>
+    <g id="placement-galets-empiles" transform="translate(-10.000 297.500) scale(0.75000)"><g id="objet-galets-empiles" data-objet-campement="galets-empiles">
+<path id="galets-empiles" d="M150,540 L164,530 L194,528 L218,535 L228,548 L216,560 L180,562 L154,554 Z" fill="#8E97A8"/>
+      <path d="M160,528 L174,518 L198,517 L214,525 L206,534 L174,535 Z" fill="#7A5230"/>
+      <path d="M168,516 L180,506 L198,506 L208,515 L196,522 L176,522 Z" fill="#FFF6E3"/>
+      <path d="M174,504 L184,495 L198,496 L204,504 L194,510 L180,509 Z" fill="#8E97A8"/>
+      <path d="M180,494 L188,486 L198,488 L200,495 L190,499 L182,498 Z" fill="#7A5230"/>
+      <path d="M184,484 L190,474 L198,478 L196,486 L188,488 Z" fill="#FFF6E3"/>
+    </g></g>
+    <g id="placement-champignon" transform="translate(-148.333 381.667) scale(0.66667)"><g id="objet-champignon" data-objet-campement="champignon">
+<path d="M346,474 L352,480 L346,512 L340,532 L334,530 L340,508 Z" fill="#2FAE4E"/>
+      <path d="M296,518 L318,518 L322,558 L292,558 Z" fill="#FFF6E3"/>
+      <path id="champignon" d="M268,516 L276,496 L292,482 L310,476 L328,482 L344,498 L350,516 L322,524 L294,524 Z" fill="#E4342B"/>
+      <circle cx="288" cy="502" r="7" fill="#FFF6E3"/>
+      <circle cx="312" cy="492" r="8" fill="#FFF6E3"/>
+      <circle cx="332" cy="506" r="6" fill="#FFF6E3"/>
+      <circle cx="304" cy="512" r="5" fill="#FFF6E3"/>
+      <path d="M288,522 L326,522 L324,530 L290,530 Z" fill="#FFF6E3"/>
+      <path d="M322,538 L330,530 L340,532 L342,542 L332,548 L322,546 Z" fill="#E4342B"/>
+    </g></g>
+    <g id="placement-buisson" transform="translate(684.167 -204.583) scale(1.04167)"><g id="objet-buisson" data-objet-campement="buisson">
+<path d="M422,540 L434,540 L436,562 L420,562 Z" fill="#7A5230"/>
+      <path id="buisson" d="M387,548 L385,528 L396,512 L408,498 L422,488 L434,475 L446,488 L460,498 L470,514 L472,534 L466,552 L428,558 Z" fill="#2FAE4E"/>
+      <path d="M400,530 L410,514 L424,510 L428,526 L418,538 L404,540 Z" fill="#3DDC97"/>
+      <path d="M436,510 L450,508 L460,520 L454,534 L438,534 L432,522 Z" fill="#3DDC97"/>
+      <circle cx="410" cy="504" r="5" fill="#FF5D8F"/>
+      <circle cx="446" cy="498" r="5" fill="#FF5D8F"/>
+      <circle cx="428" cy="540" r="5" fill="#FF5D8F"/>
+      <circle cx="462" cy="536" r="5" fill="#FF5D8F"/>
+    </g></g>
+    <g id="placement-fleur-bleue" transform="translate(740.417 267.292) scale(0.72917)"><g id="objet-fleur-bleue" data-objet-campement="fleur-bleue">
+<path d="M545,508 L553,508 L556,560 L542,560 Z" fill="#2FAE4E"/>
+      <path d="M508,528 L530,522 L544,532 L526,540 Z" fill="#3DDC97"/>
+      <path d="M588,538 L570,530 L554,540 L572,550 Z" fill="#3DDC97"/>
+      <path id="fleur-bleue" d="M548,473 L559,485 L576,480 L571,497 L589,505 L571,514 L576,531 L559,526 L548,540 L537,526 L520,531 L525,514 L507,505 L525,497 L520,480 L537,485 Z" fill="#2FA8E0"/>
+      <circle cx="548" cy="505" r="11" fill="#FFC93C"/>
+      <circle cx="548" cy="505" r="5" fill="#F5821F"/>
+    </g></g>
+    <g id="placement-papillon" transform="translate(-164.167 -77.917) scale(0.70833)"><g id="objet-papillon" data-objet-campement="papillon">
+<path d="M665,532 L671,532 L674,558 L662,558 Z" fill="#2FAE4E"/>
+      <circle cx="668" cy="544" r="9" fill="#FF5D8F"/>
+      <path id="papillon" d="M668,490 L678,476 L696,474 L709,486 L705,502 L686,508 L700,520 L694,534 L676,532 L668,520 L660,532 L642,534 L636,520 L650,508 L631,502 L627,486 L640,474 L658,476 Z" fill="#8B5CF6"/>
+      <circle cx="650" cy="488" r="5" fill="#FFC93C"/>
+      <circle cx="686" cy="488" r="5" fill="#FFC93C"/>
+      <circle cx="650" cy="522" r="4" fill="#FFF6E3"/>
+      <circle cx="686" cy="522" r="4" fill="#FFF6E3"/>
+      <path d="M665,484 L671,484 L670,528 L666,528 Z" fill="#8E97A8"/>
+      <path d="M667,486 L656,474" fill="none"/>
+      <path d="M669,486 L680,474" fill="none"/>
+    </g></g>
+    <g id="placement-escargot" transform="translate(426.667 376.667) scale(0.66667)"><g id="objet-escargot" data-objet-campement="escargot">
+<path d="M820,476 L828,480 L816,514 L808,540 L802,538 L810,512 Z" fill="#2FAE4E"/>
+      <path d="M750,524 L772,512 L800,514 L814,524 L794,538 L766,538 Z" fill="#3DDC97"/>
+      <path d="M746,532 L770,528 L786,534 L784,544 L756,546 L744,540 Z" fill="#FFF6E3"/>
+      <path id="escargot" d="M766,504 L774,492 L790,487 L804,494 L810,508 L805,522 L792,530 L777,528 L766,517 Z" fill="#F5821F"/>
+      <path d="M788,508 L796,504 L798,512 L790,517 L782,512 L786,504 L794,508" fill="none"/>
+      <path d="M746,530 L758,526 L762,536 L750,540 Z" fill="#FFF6E3"/>
+      <path d="M750,528 L744,516" fill="none"/>
+      <path d="M756,527 L754,514" fill="none"/>
+      <circle cx="744" cy="514" r="3" fill="#1B2440"/>
+      <circle cx="754" cy="512" r="3" fill="#1B2440"/>
+    </g></g>
+    <g id="placement-grenouille" transform="translate(375.000 312.500) scale(0.75000)"><g id="objet-grenouille" data-objet-campement="grenouille">
+<path d="M944,474 L950,478 L946,510 L942,536 L936,534 L940,508 Z" fill="#2FAE4E"/>
+      <path d="M938,476 L948,480 L946,496 L936,492 Z" fill="#7A5230"/>
+      <path d="M866,542 L884,532 L908,530 L934,535 L950,544 L930,555 L900,557 L874,552 Z" fill="#3DDC97"/>
+      <path d="M906,530 L918,536 L906,542 L900,536 Z" fill="#2FAE4E"/>
+      <path id="grenouille" d="M877,516 L889,502 L908,496 L927,502 L939,516 L941,533 L927,544 L908,548 L889,544 L875,533 Z" fill="#2FAE4E"/>
+      <circle cx="894" cy="498" r="9" fill="#FFF6E3"/>
+      <circle cx="922" cy="498" r="9" fill="#FFF6E3"/>
+      <circle cx="894" cy="498" r="4" fill="#1B2440"/>
+      <circle cx="922" cy="498" r="4" fill="#1B2440"/>
+      <path d="M894,530 L908,536 L922,530" fill="none"/>
+      <path d="M874,532 L884,530 L886,546 L870,546 Z" fill="#2FAE4E"/>
+      <path d="M942,532 L932,530 L930,546 L946,546 Z" fill="#2FAE4E"/>
+    </g></g>
+    <g id="placement-pierre-gravee" transform="translate(-853.333 89.167) scale(0.91667)"><g id="objet-pierre-gravee" data-objet-campement="pierre-gravee">
+<path id="pierre-gravee" d="M1004,560 L995,534 L999,506 L1010,484 L1027,474 L1043,481 L1055,502 L1060,532 L1052,560 Z" fill="#8E97A8"/>
+      <path d="M1028,493 L1032.7,503.53 L1044.17,504.75 L1035.61,512.47 L1037.99,523.75 L1028,518 L1018.01,523.75 L1020.39,512.47 L1011.83,504.75 L1023.3,503.53 Z" fill="#FFC93C"/>
+      <circle cx="1028" cy="510" r="6" fill="#F5821F"/>
+      <path d="M1010,532 L1046,530" fill="none"/>
+      <path d="M1012,542 L1044,541" fill="none"/>
+      <path d="M996,546 L1010,542 L1016,554 L1002,560 L992,556 Z" fill="#3DDC97"/>
+      <path d="M1050,490 L1062,486 L1066,498 L1054,502 Z" fill="#3DDC97"/>
+    </g></g>
+    <g id="placement-etoile-filante" transform="translate(163.333 -336.667) scale(0.83333)"><g id="objet-etoile-filante" data-objet-campement="etoile-filante">
+<path d="M1104,476 L1114,473 L1150,500 L1144,512 L1107,486 Z" fill="#FFF6E3"/>
+      <path d="M1110,490 L1120,486 L1146,508 L1138,518 Z" fill="#FFC93C"/>
+      <path id="etoile-filante" d="M1162,492 L1169.64,511.48 L1190.53,512.73 L1174.36,526.02 L1179.63,546.27 L1162,535 L1144.37,546.27 L1149.64,526.02 L1133.47,512.73 L1154.36,511.48 Z" fill="#FFC93C"/>
+      <circle cx="1162" cy="522" r="10" fill="#FFF6E3"/>
+      <path d="M1190,489 L1195,496 L1190,503 L1185,496 Z" fill="#FFC93C"/>
+      <path d="M1124,539 L1129,546 L1124,553 L1119,546 Z" fill="#FFC93C"/>
+      <path d="M1188,546 L1192,552 L1188,558 L1184,552 Z" fill="#FFC93C"/>
+    </g></g>
+  </g>
+</svg>

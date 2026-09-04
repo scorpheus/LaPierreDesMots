@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" width="960" height="600" role="img" aria-label="La frise gravée de la grotte">
+  <title>La frise gravée de la grotte</title>
+  <desc>Un bandeau creusé dans la paroi, quatre cases gravées de quatre tailles à lire de gauche à droite, une torche qui les éclaire et un éclat tombé au sol.</desc>
+  <!--
+    DÉCOR — lot M6, contrat du monde v4 § 2. Trait noir sur blanc, la COULEUR VIENT DU CODE
+    (annexe P § 2) : les régions sortent d'ici en grisaille #8E97A8, qui est leur état
+    par défaut et non un choix graphique. Géométrie 100 % polygonale (M, L, Z — aucun arc) :
+    surface et centroïde sont donc calculables exactement et opposables aux valeurs déclarées
+    par le .habillage.json, que scripts/verifier-regions-fermees.mjs --strict recalcule.
+
+    Chaque région est un ENFANT DIRECT de #calque-zones : SceneSvg.tsx sélectionne
+    "#calque-zones > [id]", et un tracé niché dans un sous-groupe échapperait au tap sans
+    qu'aucun message ne le dise.
+
+    ÉCRIT PAR scripts/dessiner-decors.mjs — ne pas retoucher à la main : la scène est décrite
+    dans scripts/decors/decors.mjs, et l'émetteur refuse d'écrire si la mesure est mauvaise.
+  -->
+  <g id="calque-fond">
+    <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
+    <image data-fond-illustre="ecole" href="/LaPierreDesMots/assets/galeries-frise-7H2du2aN.png" x="0" y="0" width="960" height="600" preserveAspectRatio="xMidYMid slice"/>
+  </g>
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round" opacity="0" aria-hidden="true">
+    <path id="paroi-du-haut" class="zone" data-region-svg="paroi-du-haut" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L960,0 L960,120 L933.3,125.1 L906.7,127.9 L880,126.9 L853.3,122.7 L826.7,117.3 L800,113.1 L773.3,112.1 L746.7,114.9 L720,120 L693.3,125.1 L666.7,127.9 L640,126.9 L613.3,122.7 L586.7,117.3 L560,113.1 L533.3,112.1 L506.7,114.9 L480,120 L453.3,125.1 L426.7,127.9 L400,126.9 L373.3,122.7 L346.7,117.3 L320,113.1 L293.3,112.1 L266.7,114.9 L240,120 L213.3,125.1 L186.7,127.9 L160,126.9 L133.3,122.7 L106.7,117.3 L80,113.1 L53.3,112.1 L26.7,114.9 L0,120 Z"/>
+    <path id="sol-de-la-frise" class="zone" data-region-svg="sol-de-la-frise" fill="#8E97A8" fill-rule="evenodd" d="M0,520 L26.7,525.4 L53.3,526.9 L80,523.5 L106.7,517.6 L133.3,513.4 L160,513.9 L186.7,518.8 L213.3,524.5 L240,527 L266.7,524.5 L293.3,518.8 L320,513.9 L346.7,513.4 L373.3,517.6 L400,523.5 L426.7,526.9 L453.3,525.4 L480,520 L506.7,514.6 L533.3,513.1 L560,516.5 L586.7,522.4 L613.3,526.6 L640,526.1 L666.7,521.2 L693.3,515.5 L720,513 L746.7,515.5 L773.3,521.2 L800,526.1 L826.7,526.6 L853.3,522.4 L880,516.5 L906.7,513.1 L933.3,514.6 L960,520 L960,600 L0,600 Z"/>
+    <path id="bandeau-de-frise" class="zone" data-region-svg="bandeau-de-frise" fill="#8E97A8" fill-rule="evenodd" d="M60,200 L900,188 L908,432 L52,444 Z"/>
+    <path id="case-de-frise-un" class="zone" data-region-svg="case-de-frise-un" fill="#8E97A8" fill-rule="evenodd" d="M90,230 L260,230 L260,402 L90,402 Z"/>
+    <path id="case-de-frise-deux" class="zone" data-region-svg="case-de-frise-deux" fill="#8E97A8" fill-rule="evenodd" d="M288,220 L470,220 L470,412 L288,412 Z"/>
+    <path id="case-de-frise-trois" class="zone" data-region-svg="case-de-frise-trois" fill="#8E97A8" fill-rule="evenodd" d="M500,236 L660,236 L660,394 L500,394 Z"/>
+    <path id="case-de-frise-quatre" class="zone" data-region-svg="case-de-frise-quatre" fill="#8E97A8" fill-rule="evenodd" d="M690,222 L886,222 L886,400 L690,400 Z"/>
+    <path id="torche-de-frise" class="zone" data-region-svg="torche-de-frise" fill="#8E97A8" fill-rule="evenodd" d="M912,60 L925,84 L920.6,105 L929.3,102 L920.6,126 L923.5,210 L900.5,210 L903.4,126 L894.7,102 L903.4,105 L899,84 Z"/>
+    <path id="eclat-tombe" class="zone" data-region-svg="eclat-tombe" fill="#8E97A8" fill-rule="evenodd" d="M140,466 L175,491.8 L167.3,545.1 L140,558 L112.7,545.1 L105,491.8 Z"/>
+  </g>
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0" aria-hidden="true">
+    <path class="trait" d="M120,300 L230,300"/>
+    <path class="trait" d="M120,340 L200,340"/>
+    <path class="trait" d="M320,300 L440,300"/>
+    <path class="trait" d="M320,350 L400,350"/>
+    <path class="trait" d="M530,300 L630,300"/>
+    <path class="trait" d="M720,300 L850,300"/>
+  </g>
+</svg>

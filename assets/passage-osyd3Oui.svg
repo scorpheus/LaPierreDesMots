@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" width="960" height="600" role="img" aria-label="Le passage aux pierres plates">
+  <title>Le passage aux pierres plates</title>
+  <desc>Un ruisseau qui traverse en serpentant, trois pierres plates de trois tailles pour le franchir, les deux rives, une lanterne accrochée et une stalactite au-dessus.</desc>
+  <!--
+    DÉCOR — lot M6, contrat du monde v4 § 2. Trait noir sur blanc, la COULEUR VIENT DU CODE
+    (annexe P § 2) : les régions sortent d'ici en grisaille #8E97A8, qui est leur état
+    par défaut et non un choix graphique. Géométrie 100 % polygonale (M, L, Z — aucun arc) :
+    surface et centroïde sont donc calculables exactement et opposables aux valeurs déclarées
+    par le .habillage.json, que scripts/verifier-regions-fermees.mjs --strict recalcule.
+
+    Chaque région est un ENFANT DIRECT de #calque-zones : SceneSvg.tsx sélectionne
+    "#calque-zones > [id]", et un tracé niché dans un sous-groupe échapperait au tap sans
+    qu'aucun message ne le dise.
+
+    ÉCRIT PAR scripts/dessiner-decors.mjs — ne pas retoucher à la main : la scène est décrite
+    dans scripts/decors/decors.mjs, et l'émetteur refuse d'écrire si la mesure est mauvaise.
+  -->
+  <g id="calque-fond">
+    <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
+    <image data-fond-illustre="ecole" href="/LaPierreDesMots/assets/galeries-passage-DFw_IRN9.png" x="0" y="0" width="960" height="600" preserveAspectRatio="xMidYMid slice"/>
+  </g>
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round" opacity="0" aria-hidden="true">
+    <path id="paroi-du-passage" class="zone" data-region-svg="paroi-du-passage" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L960,0 L960,200 L933.3,206 L906.7,210.4 L880,212 L853.3,210.4 L826.7,206 L800,200 L773.3,194 L746.7,189.6 L720,188 L693.3,189.6 L666.7,194 L640,200 L613.3,206 L586.7,210.4 L560,212 L533.3,210.4 L506.7,206 L480,200 L453.3,194 L426.7,189.6 L400,188 L373.3,189.6 L346.7,194 L320,200 L293.3,206 L266.7,210.4 L240,212 L213.3,210.4 L186.7,206 L160,200 L133.3,194 L106.7,189.6 L80,188 L53.3,189.6 L26.7,194 L0,200 Z"/>
+    <path id="ruisseau" class="zone" data-region-svg="ruisseau" fill="#8E97A8" fill-rule="evenodd" d="M-14.2,543.7 L27.5,557.3 L72.6,567.9 L120,572 L167.4,567.9 L212.5,557.3 L254.2,543.7 L292.5,531.3 L327.4,522.9 L360,520 L392.6,522.9 L427.5,531.3 L465.8,543.7 L507.5,557.3 L552.6,567.9 L600,572 L647.4,567.9 L692.5,557.3 L734.2,543.7 L772.5,531.3 L807.4,522.9 L840,520 L872.6,522.9 L907.5,531.3 L945.8,543.7 L974.2,456.3 L932.5,442.7 L887.4,432.1 L840,428 L792.6,432.1 L747.5,442.7 L705.8,456.3 L667.5,468.7 L632.6,477.1 L600,480 L567.4,477.1 L532.5,468.7 L494.2,456.3 L452.5,442.7 L407.4,432.1 L360,428 L312.6,432.1 L267.5,442.7 L225.8,456.3 L187.5,468.7 L152.6,477.1 L120,480 L87.4,477.1 L52.5,468.7 L14.2,456.3 Z"/>
+    <path id="rive-gauche" class="zone" data-region-svg="rive-gauche" fill="#8E97A8" fill-rule="evenodd" d="M0,540 L240,518 L200,600 L0,600 Z"/>
+    <path id="rive-droite" class="zone" data-region-svg="rive-droite" fill="#8E97A8" fill-rule="evenodd" d="M760,518 L960,540 L960,600 L740,600 Z"/>
+    <path id="pierre-plate-un" class="zone" data-region-svg="pierre-plate-un" fill="#8E97A8" fill-rule="evenodd" d="M268.8,508.9 L260.4,514.7 L247.6,518.6 L234.4,521.2 L222.3,523.9 L209.6,527 L194.7,529.2 L178.7,528.9 L165,525.4 L155.8,520 L149.5,514.4 L143.2,509.3 L135.8,504 L130.4,497.8 L131.2,491.1 L139.6,485.3 L152.4,481.4 L165.6,478.8 L177.7,476.1 L190.4,473 L205.3,470.8 L221.3,471.1 L235,474.6 L244.2,480 L250.5,485.6 L256.8,490.7 L264.2,496 L269.6,502.2 Z"/>
+    <path id="pierre-plate-deux" class="zone" data-region-svg="pierre-plate-deux" fill="#8E97A8" fill-rule="evenodd" d="M489.9,501.4 L470.9,503.2 L451.8,502.2 L434.7,499.9 L418.4,497.8 L401.2,495.6 L384.2,492 L371.6,486 L366.9,478.4 L369.6,470.7 L375.3,463.9 L380.6,457.4 L386,450.5 L395.1,443.7 L410.1,438.6 L429.1,436.8 L448.2,437.8 L465.3,440.1 L481.6,442.2 L498.8,444.4 L515.8,448 L528.4,454 L533.1,461.6 L530.4,469.3 L524.7,476.1 L519.4,482.6 L514,489.5 L504.9,496.3 Z"/>
+    <path id="pierre-plate-trois" class="zone" data-region-svg="pierre-plate-trois" fill="#8E97A8" fill-rule="evenodd" d="M673.4,532.2 L662.5,528 L656.8,522.1 L653.7,516.5 L649.7,511.6 L643.8,506.5 L639.7,500.4 L641.8,494 L651.1,489.1 L664.1,486.5 L676.6,485.2 L687.5,483.4 L698.9,480.7 L712.5,478.9 L726.6,479.8 L737.5,484 L743.2,489.9 L746.3,495.5 L750.3,500.4 L756.2,505.5 L760.3,511.6 L758.2,518 L748.9,522.9 L735.9,525.5 L723.4,526.8 L712.5,528.6 L701.1,531.3 L687.5,533.1 Z"/>
+    <path id="lanterne-du-passage" class="zone" data-region-svg="lanterne-du-passage" fill="#8E97A8" fill-rule="evenodd" d="M860.3,138 L891.7,138 L882.7,157.4 L907.4,170.4 L916.3,193.1 L909.6,261.1 L920.8,277.3 L920.8,293.5 L831.2,293.5 L831.2,277.3 L842.4,261.1 L835.7,193.1 L844.6,170.4 L869.3,157.4 Z"/>
+    <path id="stalactite-du-passage" class="zone" data-region-svg="stalactite-du-passage" fill="#8E97A8" fill-rule="evenodd" d="M560,58 L573,141.5 L579.5,146.9 L584,154.1 L585.9,162.3 L585.1,170.7 L581.6,178.4 L575.8,184.6 L568.4,188.6 L560,190 L551.6,188.6 L544.2,184.6 L538.4,178.4 L534.9,170.7 L534.1,162.3 L536,154.1 L540.5,146.9 L547,141.5 Z"/>
+  </g>
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0" aria-hidden="true">
+    <path class="trait" d="M876,60 L876,140"/>
+  </g>
+</svg>

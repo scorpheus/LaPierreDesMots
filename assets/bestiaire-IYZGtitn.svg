@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" width="960" height="600" role="img" aria-label="Le bestiaire de la forêt">
+  <title>Le bestiaire de la forêt</title>
+  <desc>Trois animaux qu’on distingue à la silhouette : le renard à museau pointu et queue touffue, le hibou à deux aigrettes, l’écureuil à queue relevée. Un terrier en anneau, du lichen, un champignon, un gland tombé.</desc>
+  <!--
+    DÉCOR — lot M6, contrat du monde v4 § 2. Trait noir sur blanc, la COULEUR VIENT DU CODE
+    (annexe P § 2) : les régions sortent d'ici en grisaille #8E97A8, qui est leur état
+    par défaut et non un choix graphique. Géométrie 100 % polygonale (M, L, Z — aucun arc) :
+    surface et centroïde sont donc calculables exactement et opposables aux valeurs déclarées
+    par le .habillage.json, que scripts/verifier-regions-fermees.mjs --strict recalcule.
+
+    Chaque région est un ENFANT DIRECT de #calque-zones : SceneSvg.tsx sélectionne
+    "#calque-zones > [id]", et un tracé niché dans un sous-groupe échapperait au tap sans
+    qu'aucun message ne le dise.
+
+    ÉCRIT PAR scripts/dessiner-decors.mjs — ne pas retoucher à la main : la scène est décrite
+    dans scripts/decors/decors.mjs, et l'émetteur refuse d'écrire si la mesure est mauvaise.
+  -->
+  <g id="calque-fond">
+    <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
+    <image data-fond-illustre="ecole" href="/LaPierreDesMots/assets/foret-bestiaire-5DNNSg4Y.png" x="0" y="0" width="960" height="600" preserveAspectRatio="xMidYMid slice"/>
+  </g>
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round" opacity="0" aria-hidden="true">
+    <path id="canopee-du-bestiaire" class="zone" data-region-svg="canopee-du-bestiaire" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L960,0 L960,148 L933.3,155 L906.7,160.1 L880,162 L853.3,160.1 L826.7,155 L800,148 L773.3,141 L746.7,135.9 L720,134 L693.3,135.9 L666.7,141 L640,148 L613.3,155 L586.7,160.1 L560,162 L533.3,160.1 L506.7,155 L480,148 L453.3,141 L426.7,135.9 L400,134 L373.3,135.9 L346.7,141 L320,148 L293.3,155 L266.7,160.1 L240,162 L213.3,160.1 L186.7,155 L160,148 L133.3,141 L106.7,135.9 L80,134 L53.3,135.9 L26.7,141 L0,148 Z"/>
+    <path id="sous-bois" class="zone" data-region-svg="sous-bois" fill="#8E97A8" fill-rule="evenodd" d="M0,430 L26.7,437.7 L53.3,441.8 L80,440.4 L106.7,434.1 L133.3,425.9 L160,419.6 L186.7,418.2 L213.3,422.3 L240,430 L266.7,437.7 L293.3,441.8 L320,440.4 L346.7,434.1 L373.3,425.9 L400,419.6 L426.7,418.2 L453.3,422.3 L480,430 L506.7,437.7 L533.3,441.8 L560,440.4 L586.7,434.1 L613.3,425.9 L640,419.6 L666.7,418.2 L693.3,422.3 L720,430 L746.7,437.7 L773.3,441.8 L800,440.4 L826.7,434.1 L853.3,425.9 L880,419.6 L906.7,418.2 L933.3,422.3 L960,430 L960,600 L0,600 Z"/>
+    <path id="lichen" class="zone" data-region-svg="lichen" fill="#8E97A8" fill-rule="evenodd" d="M200.4,247.8 L190.1,253 L172,254.5 L159.9,255.4 L159.3,260.9 L162.9,271.4 L160,280.5 L148.3,281.6 L134.3,275 L124.3,268.3 L117,269 L107,276.6 L93.3,282.9 L82.4,280.7 L80.1,271 L82.9,260.9 L80.5,256.3 L66.9,256 L48.9,254.6 L40.3,249.1 L47.9,241.7 L63.4,236.1 L71.8,232.1 L66.6,226.6 L56,217.7 L53.8,209.1 L65.3,206.1 L82.8,209 L95.5,211.9 L100.7,208.3 L104.6,198.3 L113.1,189.9 L124.5,190.4 L133,199.4 L137.4,208.7 L143.7,211.1 L157.2,207.3 L174.4,204.4 L184.4,208.2 L181.1,217.3 L171.1,226.1 L168.1,231.3 L178.6,235 L194.3,240.6 Z"/>
+    <path id="terrier" class="zone" data-region-svg="terrier" fill="#8E97A8" fill-rule="evenodd" d="M651,470 L651,429 L653.8,404.3 L662,380.8 L675.2,359.8 L692.8,342.2 L713.8,329 L737.3,320.8 L762,318 L786.7,320.8 L810.2,329 L831.2,342.2 L848.8,359.8 L862,380.8 L870.2,404.3 L873,429 L873,470 Z M701,470 L701,439 L702.5,425.4 L707,412.5 L714.3,401 L724,391.3 L735.5,384 L748.4,379.5 L762,378 L775.6,379.5 L788.5,384 L800,391.3 L809.7,401 L817,412.5 L821.5,425.4 L823,439 L823,470 Z"/>
+    <path id="renard" class="zone" data-region-svg="renard" fill="#8E97A8" fill-rule="evenodd" d="M168,350 L187.7,321.8 L207.4,339.4 L227,311.3 L246.7,339.4 L281.2,343 L315.6,339.4 L345.1,318.3 L364.8,339.4 L394.3,300.7 L414,339.4 L394.3,367.6 L369.7,374.6 L364.8,431 L340.2,431 L335.3,385.2 L276.2,388.7 L271.3,431 L246.7,431 L246.7,381.7 L202.4,371.1 L182.8,371.1 Z"/>
+    <path id="hibou" class="zone" data-region-svg="hibou" fill="#8E97A8" fill-rule="evenodd" d="M453.2,204.6 L473.6,234.4 L520.4,234.4 L540.8,204.6 L552.5,256.7 L561.2,308.8 L537.9,353.4 L511.6,360.8 L508.7,372 L497,357.1 L485.3,372 L482.4,360.8 L456.1,353.4 L432.8,308.8 L441.5,256.7 Z"/>
+    <path id="ecureuil" class="zone" data-region-svg="ecureuil" fill="#8E97A8" fill-rule="evenodd" d="M615.6,295 L624.4,274.8 L633.2,291.6 L647.8,291.6 L656.5,274.8 L665.3,298.3 L674,328.6 L679.9,368.9 L691.6,402.5 L691.6,419.3 L639,419.3 L633.2,402.5 L615.6,409.2 L589.4,392.4 L574.8,352.1 L580.6,308.4 L601,284.9 L609.8,315.1 Z"/>
+    <path id="champignon-du-sous-bois" class="zone" data-region-svg="champignon-du-sous-bois" fill="#8E97A8" fill-rule="evenodd" d="M112,444.7 L138.9,453.7 L159,476.1 L168,494 L132.2,498.5 L129.9,534.3 L136.6,545.5 L87.4,545.5 L94.1,534.3 L91.8,498.5 L56,494 L65,476.1 L85.1,453.7 Z"/>
+    <path id="gland-tombe" class="zone" data-region-svg="gland-tombe" fill="#8E97A8" fill-rule="evenodd" d="M384,468 L401.3,474.1 L412.8,488.4 L412.8,502.7 L407,510.8 L405.6,539.4 L392.6,565.9 L375.4,565.9 L362.4,539.4 L361,510.8 L355.2,502.7 L355.2,488.4 L366.7,474.1 Z"/>
+  </g>
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0" aria-hidden="true">
+    <path class="trait" d="M0,432 L960,424"/>
+  </g>
+</svg>

@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <!-- `viewport-fit=cover` pour la Galaxy Tab S10 FE. Le zoom N'EST PAS bloqué :
+         `user-scalable=no` est un défaut d'accessibilité qu'`axe-core` relève (T5). -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#1B2440" />
+    <meta name="description" content="La Pierre des Mots — un monde gris à rallumer en lisant." />
+    <link rel="manifest" href="/LaPierreDesMots/manifest.webmanifest" />
+    <!-- Application entièrement hors-ligne : aucune ressource distante, jamais.
+         Les polices sont servies en WOFF2 depuis `client/public/polices/` (v2 § 9.3). -->
+    <title>La Pierre des Mots</title>
+    <script type="module" crossorigin src="/LaPierreDesMots/assets/index-CAt2MlLC.js"></script>
+    <link rel="modulepreload" crossorigin href="/LaPierreDesMots/assets/index-BZLHfiQw.js">
+    <link rel="stylesheet" crossorigin href="/LaPierreDesMots/assets/style-HFLXlG9E.css">
+    <link rel="preload" as="font" type="font/woff2" href="/LaPierreDesMots/polices/andika-regular.woff2" crossorigin="">
+  </head>
+  <body>
+    <div id="racine"></div>
+    <noscript>
+      Cette application a besoin de JavaScript. Demande à un adulte de l’activer.
+    </noscript>
+    <script>
+      // GitHub Pages sert `404.html` pour une route profonde. Ce repli depose l'URL
+      // demandee ici ; elle est restauree avant le montage de React et du routeur.
+      (() => {
+        const cle = 'pierre-route-pages';
+        const route = sessionStorage.getItem(cle);
+        sessionStorage.removeItem(cle);
+        if (route?.startsWith('/LaPierreDesMots/')) {
+          history.replaceState(null, '', route);
+        }
+      })();
+    </script>
+    <!-- Cette seconde entree est eliminee presque entierement hors du mode `pwa`.
+         Elle garde l'enregistrement du service worker hors de la racine React. -->
+  </body>
+</html>
