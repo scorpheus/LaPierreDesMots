@@ -1168,14 +1168,19 @@ body {
   align-items: center;
   justify-content: center;
   gap: 0.65rem;
-  min-block-size: 3.75rem;
+  /* R16 est exprimé en pixels CSS, pas dans le corps de lecture du profil. À 16 px, 3,75 rem
+     ne faisait que 60 px et la commande échouait sur tous les nœuds `eclair`. */
+  min-block-size: var(--cible-min);
   padding: 0.7rem 1.25rem;
   border: 3px solid var(--trait, #1b2440);
   border-radius: 999px;
   background: linear-gradient(180deg, #fff8d8 0%, #ffd86b 100%);
   box-shadow: 0 5px 0 var(--trait, #1b2440), 0 9px 20px rgb(27 36 64 / 22%);
   color: var(--trait, #1b2440);
+  font-family: var(--font-interface);
+  font-size: clamp(1rem, 2vw, 1.3rem);
   font-weight: 800;
+  line-height: 1.2;
   cursor: pointer;
 }
 
@@ -1202,6 +1207,9 @@ body {
   background: var(--parchemin);
   box-shadow: var(--ombre-bd);
   color: var(--trait);
+  font-family: var(--font-interface);
+  font-size: clamp(1rem, 1.8vw, 1.2rem);
+  line-height: 1.2;
   transition: opacity 120ms ease-out;
 }
 
@@ -1254,6 +1262,35 @@ body {
   background: rgb(255 248 216 / 92%);
   color: var(--trait, #1b2440);
   font-weight: 700;
+}
+
+/* À 800 px CSS, la Galaxy Tab reste une tablette portrait compacte. Les réglages de lecture
+   agrandissent les MOTS à déchiffrer, pas les repères d'interface. Le détail reste dans le DOM
+   et dans la région live, mais le plateau n'a pas besoin de le redire au-dessus du décor. */
+@media (max-width: 900px) {
+  .eclair-barre-superieure {
+    inset-block-start: 0.5rem;
+    inset-inline: 0.5rem;
+    grid-template-columns: auto auto;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .eclair-etape {
+    min-block-size: var(--cible-min);
+    padding: 0.4rem 0.7rem;
+  }
+
+  .eclair-detail-etape,
+  .eclair-separateur-etape,
+  .commande-eclair-note {
+    display: none;
+  }
+
+  .commande-eclair {
+    min-block-size: var(--cible-min);
+    padding: 0.55rem 0.85rem;
+  }
 }
 
 /* La ligne devient une cible SEULEMENT quand la règle ou le surlignage sont actifs : une cible
@@ -3051,6 +3088,125 @@ body {
 }
 
 /* ══════════════════════════════════════════════════════════════════════════════════════════════
+   RÉCIT À REMETTRE EN ORDRE — une frise, pas trois affiches vides
+
+   Le moteur `chrono` porte des phrases complètes. Trois colonnes de 240 px sont lisibles sur un
+   bureau, mais pas sur les 720 px CSS réellement offerts par la Galaxy Tab en portrait, surtout
+   quand le profil augmente le corps et l'interligne. Le plateau a donc trois zones de flux
+   disjointes : repère court, cartes à choisir, puis miniatures numérotées de l'histoire.
+   ══════════════════════════════════════════════════════════════════════════════════════════════ */
+
+.moteur-chrono {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: clamp(0.45rem, 1.2dvh, 0.8rem);
+  padding: clamp(0.45rem, 1.2vw, 0.8rem);
+  isolation: isolate;
+}
+
+.chrono-decor {
+  opacity: 0.28;
+  pointer-events: none;
+}
+
+.chrono-cartouche {
+  justify-self: center;
+}
+
+.chrono-vignettes {
+  min-block-size: 0;
+  min-inline-size: 0;
+  display: grid;
+  align-items: center;
+  gap: clamp(0.5rem, 1.4vw, 1rem);
+  padding: 0.25rem;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.chrono-porte-vignette {
+  min-inline-size: 0;
+  align-self: stretch;
+  justify-content: center;
+}
+
+.chrono-vignette {
+  inline-size: min(100%, 15rem) !important;
+  block-size: auto !important;
+  min-block-size: var(--cible-min);
+  max-inline-size: 100% !important;
+  align-self: center;
+  padding: clamp(0.45rem, 1vw, 0.8rem) !important;
+}
+
+.chrono-vignette > img {
+  block-size: auto;
+}
+
+.chrono-histoire {
+  min-inline-size: 0;
+}
+
+.chrono-fente__numero {
+  font-family: var(--font-titre);
+  font-size: clamp(1.4rem, 4vw, 2.4rem);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.chrono-fente__rang {
+  position: absolute;
+  inset-block-start: 0.3rem;
+  inset-inline-start: 0.3rem;
+  display: grid;
+  place-items: center;
+  inline-size: 2rem;
+  block-size: 2rem;
+  border: 2px solid var(--trait);
+  border-radius: 999px;
+  background: var(--soleil);
+  color: var(--trait);
+  font-family: var(--font-titre);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.chrono-retour {
+  min-block-size: 2.25rem;
+  font-family: var(--font-interface);
+  font-size: clamp(1rem, 1.5vw, 1.25rem);
+  line-height: 1.3;
+  text-align: center;
+}
+
+@media (max-width: 900px) and (orientation: portrait) {
+  .chrono-vignettes {
+    grid-template-columns: minmax(0, 1fr) !important;
+    align-content: start;
+  }
+
+  .chrono-porte-vignette {
+    inline-size: 100%;
+  }
+
+  .chrono-vignette {
+    inline-size: 100% !important;
+    flex-direction: row !important;
+    justify-content: flex-start !important;
+    text-align: start !important;
+  }
+
+  .chrono-vignette > img {
+    inline-size: clamp(6rem, 24%, 8.5rem) !important;
+    max-inline-size: 8.5rem !important;
+    flex: 0 0 auto;
+    margin-block-end: 0 !important;
+    margin-inline-end: clamp(0.6rem, 2vw, 1rem);
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════════
    RESPONSIVE RÉEL — pixels CSS d'Android, navigateur compris
 
    Le premier banc utilisait 1920×1200 pixels CSS avec un DPR de 2 : il simulait donc une surface
@@ -3162,6 +3318,21 @@ body {
     min-block-size: 30rem;
   }
 
+  /* Une histoire illustrée porte trois phrases complètes ET sa frise. À 640 px de hauteur utile,
+     les comprimer dans les 30 rem génériques superposait les cartes et les réceptacles. Le
+     paysage court défile donc sur une scène cohérente, au lieu d'afficher tout à la fois mais
+     l'un sur l'autre. `:has` lie la hauteur au moteur réellement monté, sans pénaliser les treize
+     autres mécaniques. */
+  [data-ecran="noeud"] .scene-noeud:has([data-moteur="chrono"]) {
+    block-size: max(40rem, 100svh);
+    min-block-size: 40rem;
+  }
+
+  [data-ecran="noeud"] .scene-noeud:has([data-moteur="tri"]) {
+    block-size: max(42rem, 110svh);
+    min-block-size: 42rem;
+  }
+
   [data-ecran="noeud"] .barre-consigne > .jauge-palier {
     display: none;
   }
@@ -3199,6 +3370,22 @@ body {
 }
 
 @media (max-width: 420px) {
+  /* Sur un téléphone portrait, la liste des trois cartes doit appartenir au défilement naturel
+     de la page, pas devenir un minuscule sous-scroll pris entre la consigne et la frise. */
+  [data-ecran="noeud"] .scene-noeud:has([data-moteur="chrono"]) {
+    block-size: max(54rem, 130svh);
+    min-block-size: 54rem;
+  }
+
+  [data-ecran="noeud"] .scene-noeud:has([data-moteur="tri"]) {
+    block-size: max(72rem, 180svh);
+    min-block-size: 72rem;
+  }
+
+  [data-moteur="chrono"] .chrono-vignettes {
+    overflow: visible;
+  }
+
   [data-ecran="noeud"] .barre-consigne > .cible[data-vers="carte"] span:last-child {
     display: none;
   }

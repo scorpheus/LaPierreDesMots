@@ -73,6 +73,14 @@ const alias = {
 
 const preparation = racine('./tests/configuration/preparation.ts');
 
+/*
+ * La couverture V8 rend chaque ouvrier beaucoup plus lourd qu'un test Vitest ordinaire. Sans
+ * plafond, la machine à 32 fils lançait assez de processus pour affamer SQLite et le canal RPC :
+ * 28 délais dépassés sans défaut d'assertion, puis `Timeout calling onTaskUpdate`. Quatre ouvriers
+ * gardent du parallélisme tout en laissant le serveur et Playwright respirer pendant `verifier`.
+ */
+const PLAFOND_TRAVAILLEURS_VITEST = 4;
+
 /**
  * Seuils de couverture PAR ZONE — annexe T § 7.
  *
@@ -128,6 +136,7 @@ export default defineConfig({
      * qu'avant, ce qui a été vérifié en faisant échouer un test exprès.
      */
     silent: 'passed-only',
+    maxWorkers: PLAFOND_TRAVAILLEURS_VITEST,
     coverage: {
       provider: 'v8',
       // `--coverage` l'active ; sans ce drapeau, `npm run test` reste rapide.

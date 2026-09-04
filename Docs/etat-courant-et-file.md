@@ -9,8 +9,8 @@ annulé, remplacé ou reporté.
 ## Point de reprise
 
 - Branche : `main`.
-- Base du présent lot : `afedbe5` — responsive du chaudron et fiabilisation initiale des campagnes.
-  Le plafond à quatre travailleurs a depuis validé les 521 parcours E2E.
+- Base du présent lot : `cfb544f` — automatisation de publication et vérification exhaustive des
+  visuels PWA. Le plafond à quatre travailleurs a depuis validé les 521 parcours E2E.
 - Serveur de jeu : écoute sur `0.0.0.0:8080` ; adresse LAN mesurée le 4 septembre :
   `http://192.168.1.19:8080`.
 - Version de production compilée et servie.
@@ -133,6 +133,40 @@ annulé, remplacé ou reporté.
   publication. Le campement et les quatre atlas de compagnons sont physiquement présents et
   répondent 200 sur la version publique actuelle ; leur rendu doit être revérifié après purge du
   cache par la prochaine version de service worker.
+- La photo réelle de la Galaxy Tab du 4 septembre a invalidé le vert responsive du moteur
+  `chrono`. La cause est mesurée : la matrice générale jouait au corps par défaut et ne vérifiait
+  que l'atteignabilité ; le profil réel (`27 px`, interligne `2`) rendait trois cartes de 240 px,
+  un cartouche superposé et des fentes hautes de près de 400 px. Le moteur utilise maintenant des
+  cartes horizontales pleine largeur en portrait et une frise 4:3 compacte numérotée. Le garde
+  rejoue exactement `720×1017` avec les réglages du profil et mesure largeur, hauteur et
+  recouvrements. Il a rougi sur l'ancien rendu, puis la campagne complète a trouvé et fermé les
+  variantes paysage et petit téléphone. Résultat ciblé : 1/1 ; matrice responsive : 26/26 en
+  2 min 12 s ; détecteur de tests trompeurs : 0 bloquant, plafond historique 93 avertissements.
+- Deux nouvelles photos à `800 × 1100` CSS ont révélé le même biais sur `tri` et `eclair` avec le
+  profil réel. Dans `tri`, les douze mots recevaient tous la même ordonnée : six semblaient tenir,
+  les autres se superposaient derrière eux. Une grille calculée de une à quatre colonnes remplace
+  désormais ce repli sur les cadres jusqu'à 900 px et repousse les paniers après le dernier rang.
+  Dans `eclair`, le statut héritait à tort du corps 27 et de l'interligne 2 du texte à déchiffrer ;
+  les repères d'interface gardent maintenant une métrique compacte et leur détail secondaire est
+  masqué sur tablette étroite. Les deux gardes ont rougi sur l'ancien rendu puis passent 2/2 ; la
+  matrice étendue à tous les exercices concernés passe **28/28 en 3 min 36 s**.
+- Le contrôle responsive possède maintenant un contrat de composition pour chacun des **14
+  moteurs**. La table de sondes est comparée à l'union `CodeMoteur`, puis un nœud représentatif par
+  moteur est joué à `800 × 1100` avec le profil réel (corps 27, interligne 2). Les deux écrans de
+  l'école avec la maîtresse ont leurs cas nommés (`clairiere-01` colorie et `clairiere-04` place).
+  Résultats mesurés : 15/15 pour l'inventaire et les moteurs en 4,8 s, puis **45/45** pour la
+  matrice responsive complète en 2 min 18 s. Vitest est désormais plafonné à quatre ouvriers :
+  les 2 422 cas passent en 90,81 s, là où le lancement sans plafond avait produit 28 délais RPC et
+  SQLite sans défaut d'assertion.
+- La campagne qui enchaîne les nœuds attend désormais l'identifiant exact de l'exercice, remet son
+  témoin de préparation à zéro à chaque paquet et exige une géométrie stable sur trois images. Avant
+  ce garde, elle pouvait mesurer le cadre de repli de `tri` puis capturer sa géométrie finale : un
+  faux rouge et, inversement, un risque de juger un écran pas encore chargé. La campagne stabilisée
+  passe les **150 écrans** (75 nœuds × 2 vues) en 51,9 s.
+- Recette de clôture du 4 septembre : **VERT, 12/12 étapes en 700,7 s** — 2 422 tests unitaires,
+  645 validations de contenu, 521 parcours E2E, 13 références visuelles, 294 contrôles qualité et
+  11 contrôles de bundle, zéro échec. La charge initiale mesure 232,2 Kio gzip sur 250 : Andika reste
+  embarquée et se charge à la première zone de lecture au lieu d'être préchargée sur l'accueil.
 
 ## Dernier chantier terminé : audio
 
@@ -149,9 +183,9 @@ annulé, remplacé ou reporté.
 
 ## File ouverte
 
-1. Faire tester la version responsive sur la tablette et le téléphone réels, et intégrer les
-   nouveaux retours sans
-   perdre les tâches déjà ouvertes.
+1. Faire tester sur la tablette les nouveaux rendus `chrono`, `tri`, `eclair` et les deux écrans de
+   l'école avec la maîtresse sur le serveur local reconstruit. Intégrer les retours sans perdre les
+   tâches ouvertes.
 2. Tester sur l’appareil réel les cinq exercices de chronologie reconstruits. Les quinze triplets
    ont été validés par le parent puis publiés sous forme de 45 cartes 4:3 ; le verrou de pixels et
    les gardes de correspondance texte/image sont décrits dans
@@ -160,9 +194,10 @@ annulé, remplacé ou reporté.
    légers, en commençant par les éléments réellement visibles dans le parcours enfant. Les quatre
    fonds régionaux validés sont désormais publiés ; ne pas en générer davantage avant ce test réel.
 4. La PWA du lot Chronologie est publiée : source `328079d`, livrable `02812949d95cbb7e`, Action
-   Pages `33895370041` réussie, mais le test réel a découvert les WebP de Gobi absents. Préparer,
-   publier puis tester la version corrigée ; vérifier aussi le campement, l'histoire et les
-   compagnons après activation du nouveau service worker.
+   Pages `33895370041` réussie, mais le test réel a découvert les WebP de Gobi absents. La
+   préparation locale précédente est invalidée par le correctif responsive : refaire
+   `publier-site.bat --preparer`, demander l'autorisation explicite, publier puis vérifier Gobi,
+   le campement, l'histoire et les compagnons après activation du nouveau service worker.
 
 ## Retours parent à surveiller pendant le test
 

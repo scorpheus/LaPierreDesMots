@@ -8,10 +8,11 @@
 //   3. le dossier de sortie choisi PAR MODE : `dist/` en production, `dist-test/` en mode test.
 //      Les deux ne se croisent jamais (§ 7.3) : `verifier-bundle.mjs` inspecte le premier,
 //      Playwright sert le second ;
-//   4. `publicDir` et le préchargement de l'Andika régulière (v2 § 9.3, D19).
+//   4. `publicDir` pour les polices locales, chargées au premier vrai texte de lecture
+//      (v2 § 9.3, D19).
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
-import type { HtmlTagDescriptor, Plugin } from 'vite';
+import type { Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwind from '@tailwindcss/vite';
 
@@ -72,48 +73,8 @@ const PROXY_API = {
   }
 };
 
-/**
- * Le fichier préchargé : Andika en 400, nécessaire au premier texte de lecture.
- *
- * Pas la graisse 700 ni les quatre autres familles : `prechargerPolice` charge les deux graisses
- * dès qu'une `ZoneDeLecture` monte. Les imposer avant même le choix du profil consommerait le
- * budget initial pour une ressource dont l'accueil ne se sert pas.
- */
-const POLICES_PRECHARGEES = ['andika-regular.woff2'];
-
-/**
- * Injecte les `<link rel="preload">` dans `index.html`.
- *
- * `crossorigin` est OBLIGATOIRE sur un préchargement de police, même en même origine : sans
- * lui le navigateur télécharge le fichier DEUX FOIS, une fois pour le préchargement et une
- * fois pour le `@font-face`, et le préchargement devient une perte nette.
- *
- * Aucun domaine tiers n'apparaît ici, et c'est mesurable : `tests/visuel/polices.spec.ts`
- * compte les requêtes sortantes pendant le rendu des cinq polices, et le seuil est zéro
- * (v2 § 9.3, « aucun appel à Google Fonts »).
- */
 function joindreBase(base: string, chemin: string): string {
   return `${base}${chemin.replace(/^\/+/, '')}`;
-}
-
-function prechargerPolices(base: string): Plugin {
-  return {
-    name: 'pierre-precharger-polices',
-    transformIndexHtml() {
-      const balises: HtmlTagDescriptor[] = POLICES_PRECHARGEES.map((fichier) => ({
-        tag: 'link',
-        attrs: {
-          rel: 'preload',
-          as: 'font',
-          type: 'font/woff2',
-          href: joindreBase(base, `polices/${fichier}`),
-          crossorigin: ''
-        },
-        injectTo: 'head' as const
-      }));
-      return balises;
-    }
-  };
 }
 
 /**
@@ -223,9 +184,9 @@ export default defineConfig(({ mode }) => {
     // Vite, depuis Fastify ou depuis un `file://` de dépannage ». Le motif est VOID et la
     // conséquence était un écran blanc sans issue :
     //
-    //  1. le motif ne tient pas — `prechargerPolices()` (plus haut dans ce fichier) émet
-    //     déjà `href: '/polices/…'`, un chemin ABSOLU. Un `file://` ne résolvait donc déjà
-    //     aucune police. On payait le prix d'une portabilité qui n'existait pas.
+    //  1. le motif ne tenait déjà pas pour les polices : leurs URL locales sont absolues.
+    //     Un `file://` ne les résolvait donc pas. On payait le prix d'une portabilité qui
+    //     n'existait pas.
     //
     //  2. le prix, lui, était réel. Sous `base: './'`, `index.html` porte
     //     `src="./assets/index-*.js"`. Le navigateur le résout contre le RÉPERTOIRE de l'URL
@@ -252,14 +213,15 @@ export default defineConfig(({ mode }) => {
     plugins: [
       react(),
       tailwind(),
-      prechargerPolices(base),
       ...(estPwa ? [adapterCheminsPwa(base)] : [])
     ],
 
     // Les cinq WOFF2 vivent dans `client/public/polices/` et sont copiés tels quels à la
-    // racine du bundle : `/polices/andika-regular.woff2`. Ils ne sont PAS versionnés — ils
-    // sont téléchargés à l'installation par `scripts/telecharger-polices.mjs`, empreintes
-    // SHA-256 épinglées (D9 : rien ne s'installe hors du dossier du projet).
+    // racine du bundle : `/polices/andika-regular.woff2`. `prechargerPolice` charge Andika
+    // dès la première `ZoneDeLecture`, au lieu de faire peser 18,9 Kio sur l'accueil qui ne
+    // s'en sert pas. Les fichiers ne sont PAS versionnés — ils sont téléchargés à
+    // l'installation par `scripts/telecharger-polices.mjs`, empreintes SHA-256 épinglées
+    // (D9 : rien ne s'installe hors du dossier du projet).
     publicDir: 'public',
 
     resolve: { alias: ALIAS_PARTAGE },

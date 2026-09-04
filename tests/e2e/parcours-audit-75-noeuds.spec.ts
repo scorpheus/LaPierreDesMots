@@ -39,7 +39,32 @@ async function stabiliserEtMesurer(page: Page, noeud: (typeof NOEUDS)[number], v
     crochets.sauterAnimations();
     await crochets.allerAuNoeud(id);
   }, noeud.id);
-  await expect(page.locator('[data-ecran="noeud"]')).toBeVisible();
+  const ecran = page.locator(`[data-ecran="noeud"][data-noeud="${noeud.id}"]`);
+  await expect(ecran).toBeVisible();
+  await expect(ecran).toHaveAttribute('data-test-pret', 'oui');
+
+  // `document.fonts.ready` ne suffit pas aux moteurs qui dérivent leurs coordonnées d'un
+  // ResizeObserver. On attend ici une GÉOMÉTRIE inchangée sur trois images consécutives : aucune
+  // durée arbitraire, et surtout aucune mesure prise sur le cadre de repli du premier rendu.
+  await ecran.evaluate((racine) => new Promise<void>((resoudre) => {
+    let precedente = '';
+    let identiques = 0;
+    const relever = (): void => {
+      const elements = [racine, ...racine.querySelectorAll<HTMLElement>('[data-moteur], [data-plateau], button')];
+      const signature = elements.map((element) => {
+        const r = element.getBoundingClientRect();
+        return `${Math.round(r.left)},${Math.round(r.top)},${Math.round(r.width)},${Math.round(r.height)}`;
+      }).join('|');
+      identiques = signature === precedente ? identiques + 1 : 0;
+      precedente = signature;
+      if (identiques >= 2) {
+        resoudre();
+      } else {
+        requestAnimationFrame(relever);
+      }
+    };
+    requestAnimationFrame(relever);
+  }));
   const mesure = await page.evaluate(({ id, moteur, vue }) => {
     const largeur = window.innerWidth;
     const hauteur = window.innerHeight;
@@ -59,7 +84,19 @@ async function stabiliserEtMesurer(page: Page, noeud: (typeof NOEUDS)[number], v
         return r.right > largeur + 1 || r.bottom > hauteur + 1 || r.left < -1 || r.top < -1;
       })
       .slice(0, 12)
-      .map((element) => `${element.tagName.toLowerCase()}${element.dataset.moteur ? `[${element.dataset.moteur}]` : ''}`);
+      .map((element) => {
+        const r = element.getBoundingClientRect();
+        const identifiant =
+          element.dataset.receptacle ??
+          element.dataset.element ??
+          element.dataset.plateau ??
+          element.getAttribute('aria-label') ??
+          element.textContent?.trim().slice(0, 36) ??
+          '';
+        return `${element.tagName.toLowerCase()}[${identifiant}] ` +
+          `(${String(Math.round(r.left))},${String(Math.round(r.top))} → ` +
+          `${String(Math.round(r.right))},${String(Math.round(r.bottom))})`;
+      });
     const attr = (selector: string): string => document.querySelector(selector)?.textContent?.trim() ?? '';
     const selecteurCible: Readonly<Record<string, string>> = {
       assemble: '[data-plateau="mot"]',

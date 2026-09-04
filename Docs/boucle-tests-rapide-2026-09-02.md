@@ -19,6 +19,53 @@ npm run test:contenu
 Une capture navigateur ciblée complète cette boucle lorsqu’un rendu change. La chaîne entière est
 relancée une seule fois quand le lot est prêt à être committé.
 
+Pour une régression de mise en page vue sur un appareil réel, la reproduction doit croiser le
+viewport CSS utile, l’orientation **et les réglages de lecture enregistrés pour le profil**. Le
+cas du 4 septembre a démontré la différence : la matrice à corps 24 px restait verte, tandis que
+la Galaxy Tab avec `corpsPx=27` et `interligne=2` tassait les phrases de `chrono` dans trois
+colonnes de 240 px et réservait des cases vides de près de 400 px de haut.
+
+La boucle courte est désormais :
+
+```powershell
+node scripts/playwright.mjs test --project=responsive --no-deps --grep "photo tablette"
+npm run test:responsive
+```
+
+Le premier cas mesure la composition sémantique du récit (largeur des cartes, hauteur de la frise,
+absence de recouvrement). Le second rejoue la même garde sur toutes les recettes et quatre formats.
+Le 4 septembre, ce second étage a trouvé trois récits encore superposés en paysage, puis deux sur
+petit téléphone : preuve observée que la garde sait échouer au-delà de la capture initiale.
+
+Deux autres photos du même appareil ont ajouté un point de matrice indispensable : `800 × 1100`
+CSS avec les mêmes réglages de lecture. Elles ont fait rougir deux nouveaux cas avant correction :
+les douze mots de `tri` partageaient une ligne et se superposaient ; le statut de `eclair` héritait
+de l'interligne pédagogique et mangeait le décor. La sonde générique vérifie maintenant ces
+propriétés sur toutes les recettes qui montent ces moteurs, tandis que les cas photo gardent la
+combinaison exacte appareil + profil.
+
+La visite de toutes les recettes ne remplace pas une vérification de composition par type de jeu.
+La campagne porte donc maintenant une table `SONDES_PAR_MOTEUR` comparée automatiquement à
+`CodeMoteur` : **14 moteurs déclarés, 14 sondes et 14 nœuds représentatifs**. Chaque sonde nomme
+les plateaux structurants qui doivent exister, être visibles au premier écran et rester dans la
+largeur du moteur à `800 × 1100`, corps 27 et interligne 2. Les deux usages du décor de l'école ont
+en plus leur régression dédiée : `clairiere-01` (`colorie`) et `clairiere-04` (`place`). La matrice
+complète compte désormais 45 cas et passe en 2 min 18 s à quatre travailleurs.
+
+Le même lot a plafonné Vitest à quatre ouvriers. Sans plafond, la couverture V8 lançait assez de
+processus pour affamer SQLite et le canal RPC (`Timeout calling onTaskUpdate`) : 28 faux échecs par
+dépassement de délai. Avec le plafond, les **2 422 tests** unitaires, composants et API passent en
+90,81 s. Ce plafond ne change ni assertion ni délai ; il retire seulement la contention qui
+empêchait les assertions de rendre leur verdict.
+
+Une navigation réussie ne signifie pas encore que le moteur a fini sa première mise en page. La
+campagne des 75 nœuds a mesuré une fois le cadre de repli `900 × 1000` de `tri`, alors que la capture
+prise juste après montrait déjà sa géométrie finale. Le contrat de préparation impose donc désormais
+trois états observables avant toute mesure : le `data-noeud` exact, `data-test-pret="oui"` remis à
+zéro à chaque paquet, puis une géométrie inchangée sur trois images du navigateur. Ce n'est pas une
+attente en millisecondes. Après ce correctif, les 150 écrans de la campagne (75 nœuds × 2 vues)
+passent en 51,9 s sans confondre chargement et défaut responsive.
+
 ## Parallélisme de la recette navigateur
 
 Dix travailleurs ont produit `ERR_NO_BUFFER_SPACE` sur Windows. Un seul travailleur a évité la

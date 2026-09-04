@@ -1,6 +1,12 @@
 ---
 name: banc-de-mutation
-description: Mesurer ce que la QA du projet attrape réellement, et détecter les tests qui rassurent sans rien prouver. À utiliser dès qu'il s'agit de tester la QA elle-même — taux de survie des mutations, tests sans assertion, tests désactivés, assertions tautologiques, écrans ou moteurs sans garde, tableau de bord de la QA. Couvre aussi les pièges qui rendent une mesure de mutation FAUSSE : contrôles négatifs absents, campagne parallèle qui écrit dans tests/, rapport partiel écrasant le rapport complet, restauration qui écrase le travail d'un autre.
+description: >-
+  Mesurer ce que la QA du projet attrape réellement, et détecter les tests qui rassurent sans rien
+  prouver. À utiliser dès qu'il s'agit de tester la QA elle-même — taux de survie des mutations,
+  tests sans assertion, tests désactivés, assertions tautologiques, écrans ou moteurs sans garde,
+  tableau de bord de la QA. Couvre aussi les pièges qui rendent une mesure de mutation fausse :
+  contrôles négatifs absents, campagne parallèle qui écrit dans tests/, rapport partiel écrasant
+  le rapport complet, restauration qui écrase le travail d'un autre.
 ---
 
 # Le banc de mutation, et le détecteur de tests trompeurs
@@ -198,6 +204,32 @@ npm run qa:mutations -- --recettes=<chemin>/recettes-de-preuve.mjs
 # 3. le tableau de bord — le pointer sur un dossier vide
 npm run qa:tableau -- --racine=<un dossier vide>                     → ROUGE, 4 populations nulles
 ```
+
+---
+
+## Auditer une régression responsive vue sur un appareil réel
+
+Une capture laide peut rester verte si la sonde ne mesure que « aucun bouton coupé ». Reproduire
+alors les **trois dimensions de l'état réel**, pas seulement la largeur de l'écran :
+
+1. le viewport CSS utile, barres du navigateur déjà retranchées ;
+2. l'orientation ;
+3. les réglages de lecture du profil (`corpsPx`, interlettrage et interligne).
+
+Écrire d'abord un cas ciblé dans `tests/qualite/responsive-tous-ecrans.spec.ts` et constater le
+rouge sur l'ancien rendu. Les assertions doivent nommer la composition attendue : zones qui ne se
+recouvrent pas, largeur minimale du texte, proportion maximale d'un réceptacle, absence de
+sous-scroll indésirable. Une simple assertion de visibilité ou de débordement de page ne prouve
+pas cela.
+
+Après correction : cas ciblé, puis `npm run test:responsive`. Cette campagne reste la boucle
+courte ; `npm run verifier` ne vient qu'à la clôture du lot. Si le nouveau garde ne rougit jamais
+sur l'ancien rendu, il n'explique pas la photo et ne doit pas être présenté comme sa régression.
+
+Le balayage de toutes les recettes ne suffit toujours pas : il prouve l'atteignabilité, pas que
+chaque famille de jeu garde sa composition. Maintenir une table de sondes indexée par moteur,
+comparer exactement ses clés à l'union déclarée dans le code, puis ouvrir au moins un nœud de
+chaque moteur avec le profil réel. Un moteur ajouté sans sonde doit faire rougir l'inventaire.
 
 ---
 

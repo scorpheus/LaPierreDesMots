@@ -334,8 +334,11 @@ export function EcranNoeud(): ReactElement {
   // que le contrat `data-region-svg`, jamais une classe ni une durée : c'est ce qui rend les
   // captures T4 stables sans `waitForTimeout`.
   useEffect(() => {
+    // Chaque changement de paquet invalide la préparation précédente. Sans cette remise à zéro,
+    // une campagne qui enchaîne les nœuds lisait encore « oui » pendant la première image du
+    // moteur suivant et mesurait parfois son cadre de repli 900 × 1000.
+    fixerPret(false);
     if (paquet === null) {
-      fixerPret(false);
       return undefined;
     }
 
@@ -443,6 +446,7 @@ export function EcranNoeud(): ReactElement {
     <main
       ref={racine}
       data-ecran="noeud"
+      data-noeud={paquet.noeud.id}
       data-test-pret={pret ? 'oui' : 'non'}
       data-aide={niveauAide}
       // Longueur de la série de bonnes réponses en cours — contrat des features v2 § 7.

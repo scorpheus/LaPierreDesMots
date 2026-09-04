@@ -662,7 +662,9 @@ export async function entrerDansLeNoeud(
     async (id) => (window as unknown as FenetreTest).__test.allerAuNoeud(id),
     noeud,
   );
-  await expect(page.locator('[data-ecran="noeud"]')).toBeVisible();
+  const ecran = page.locator(`[data-ecran="noeud"][data-noeud="${noeud}"]`);
+  await expect(ecran).toBeVisible();
+  await expect(ecran).toHaveAttribute('data-test-pret', 'oui');
 }
 
 /**

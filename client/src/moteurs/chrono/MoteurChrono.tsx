@@ -55,10 +55,8 @@ import type { ProprietesMoteur } from '../types.js';
 // LE MODULE GÉNÉRIQUE — écrit pour `phrase`, adopté ici tel quel. Ne rien recopier.
 import {
   FEUILLE_DU_VOL,
-  Fente,
   JetonEnVol,
   centreDuReceptacle,
-  decalageEntre,
 } from '../phrase/receptacles.js';
 import { ZoneDeGlisser, useJetonGlissable } from '../commun/glisser.js';
 import type { VolDuJeton } from '../phrase/receptacles.js';
@@ -128,19 +126,6 @@ export function alignerEmplacementsChrono(
       boite: { ...e.boite, hauteur: hauteurCommune },
     };
   });
-}
-
-/**
- * Le rectangle occupé par le décor ET par les vignettes : tout, sauf la bande de lecture. Sans
- * bandeau modèle (R49, deuxième passe), il n'y a plus qu'une seule hauteur à retrancher.
- */
-function ZONE_DE_JEU(hauteurBande: number): CSSProperties {
-  return {
-    insetInlineStart: 0,
-    insetInlineEnd: 0,
-    insetBlockStart: 0,
-    insetBlockEnd: `${String(hauteurBande)}px`,
-  };
 }
 
 /** Durée du vol de la vignette vers sa fente — identique à `phrase`. */
@@ -222,7 +207,6 @@ function VignetteSaisissable({
   region,
   placee,
   largeurMax,
-  hauteur,
   styleTexte,
   surTap,
 }: {
@@ -234,7 +218,6 @@ function VignetteSaisissable({
   readonly region: string;
   readonly placee: boolean;
   readonly largeurMax: number;
-  readonly hauteur: number;
   readonly styleTexte: CSSProperties;
   readonly surTap: (evenement: { clientX: number; clientY: number }) => void;
 }): ReactElement {
@@ -245,7 +228,7 @@ function VignetteSaisissable({
       {...prise.ecouteurs}
       ref={prise.brancher}
       type="button"
-      className={classes.join(' ')}
+      className={[...classes, 'chrono-vignette'].join(' ')}
       data-vignette={cle}
       data-numero={numero}
       data-pose={placee ? 'oui' : 'non'}
@@ -266,8 +249,6 @@ function VignetteSaisissable({
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          inlineSize: asset === null ? undefined : '240px',
-          blockSize: `${String(hauteur)}px`,
           boxSizing: 'border-box',
         } as CSSProperties
       }
@@ -293,6 +274,79 @@ function VignetteSaisissable({
       )}
       <span>{libelle}</span>
     </button>
+  );
+}
+
+/**
+ * La frise de `chrono` reçoit des IMAGES, pas des phrases entières.
+ *
+ * L'ancienne version réutilisait la fente textuelle de `phrase` et lui donnait la boîte complète
+ * de la carte (illustration + cinq lignes possibles). Sur la tablette portrait, trois cases vides
+ * de 240 × 390 px mangeaient donc la moitié du plateau avant même le premier geste. Ici la place
+ * promet exactement ce qui viendra : une miniature 4:3, avec son rang toujours visible.
+ */
+function FenteChrono({
+  cle,
+  rang,
+  libelle,
+  asset,
+  placee,
+  prochaine,
+  boite,
+  brancher,
+}: {
+  readonly cle: string;
+  readonly rang: number;
+  readonly libelle: string;
+  readonly asset: string | null;
+  readonly placee: boolean;
+  readonly prochaine: boolean;
+  readonly boite: Boite;
+  readonly brancher: (noeud: HTMLElement | null) => void;
+}): ReactElement {
+  return (
+    <span
+      ref={brancher}
+      className="chrono-fente"
+      role="img"
+      data-fente={cle}
+      data-placee={placee ? 'oui' : 'non'}
+      data-prochaine={prochaine ? 'oui' : 'non'}
+      aria-label={placee ? `${String(rang)}. ${libelle}` : `Place ${String(rang)}`}
+      style={{
+        position: 'relative',
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        inlineSize: `${String(boite.largeur)}px`,
+        blockSize: `${String(boite.hauteur)}px`,
+        flex: `0 1 ${String(boite.largeur)}px`,
+        overflow: 'hidden',
+        borderRadius: 'clamp(0.75rem, 1.8vw, var(--rayon-carte))',
+        border: `var(--epaisseur-trait) ${placee ? 'solid' : 'dashed'} var(--trait)`,
+        backgroundColor: placee
+          ? 'var(--parchemin)'
+          : prochaine
+            ? 'var(--soleil)'
+            : 'color-mix(in srgb, var(--grisaille) 12%, var(--parchemin))',
+        boxShadow: placee ? 'var(--ombre-bd)' : 'var(--ombre-bd-appui)',
+      }}
+    >
+      {placee && asset !== null ? (
+        <img
+          src={urlAsset(asset)}
+          alt=""
+          aria-hidden="true"
+          draggable={false}
+          style={{ inlineSize: '100%', blockSize: '100%', objectFit: 'cover' }}
+        />
+      ) : (
+        <span className="chrono-fente__numero" aria-hidden="true">{rang}</span>
+      )}
+      {placee ? (
+        <span className="chrono-fente__rang" aria-hidden="true">{rang}</span>
+      ) : null}
+    </span>
   );
 }
 
@@ -373,7 +427,7 @@ export function MoteurChrono(
   // --- la mesure du cadre ---------------------------------------------------
   const racine = useRef<HTMLDivElement | null>(null);
   const bande = useRef<HTMLDivElement | null>(null);
-  const coucheVignettes = useRef<HTMLDivElement | null>(null);
+  const refVignettes = useRef(new Map<string, HTMLElement | null>());
   const [cadre, fixerCadre] = useState<Cadre>(CADRE_DE_REPLI);
   const [hauteurBande, fixerHauteurBande] = useState(HAUTEUR_BANDE_DE_REPLI);
 
@@ -532,23 +586,29 @@ export function MoteurChrono(
   const consigne = contenu.consignes[etat.indexEtape] ?? null;
   const ordre = consigne === null ? [] : consigne.ordre;
   const restants = ordre.filter((id) => etat.acquis[id] === undefined);
-  const imagesRangees = ordre.length - restants.length;
+
+  const boiteFente = useMemo<Boite>(() => {
+    const nb = Math.max(ordre.length, 1);
+    const largeurDisponible = Math.max(cadre.largeur - 2 * MARGE - (nb - 1) * 10, CIBLE_MIN * nb);
+    const largeur = Math.max(CIBLE_MIN, Math.min(168, Math.floor(largeurDisponible / nb)));
+    return { largeur, hauteur: Math.max(CIBLE_MIN, Math.round(largeur * 0.75)) };
+  }, [cadre.largeur, ordre.length]);
 
   const messageDeRefus =
     etat.dernierRefus === null ? '' : (MESSAGES_DE_REFUS[etat.dernierRefus.motif] ?? '');
 
   /** Vise la fente où cette vignette ira, AVANT d'émettre l'action. */
-  const viser = (emplacement: Emplacement, libelle: string): void => {
+  const viser = (cle: string, libelle: string): void => {
     volVise.current = null;
     const cible = restants[0];
     if (cible === undefined) return;
     const arrivee = centreDuReceptacle(racine.current, refFentes.current.get(cible) ?? null);
-    if (arrivee === null) return;
-    const [decX, decY] = decalageEntre(racine.current, coucheVignettes.current);
+    const depart = centreDuReceptacle(racine.current, refVignettes.current.get(cle) ?? null);
+    if (arrivee === null || depart === null) return;
     volVise.current = {
-      cle: emplacement.cle,
+      cle,
       texte: libelle,
-      depart: [emplacement.x + decX, emplacement.y + decY],
+      depart,
       arrivee,
     };
   };
@@ -568,7 +628,7 @@ export function MoteurChrono(
       if (emplacement === undefined) return;
       const libelle = vignetteParId.get(cle)?.libelle ?? '';
       fixerVol(null);
-      viser(emplacement, libelle);
+      viser(emplacement.cle, libelle);
       jouer({ type: 'numeroter', vignette: cle }, { clientX: emplacement.x, clientY: emplacement.y });
     },
     // `viser` est une fonction de rendu, pas un `useCallback` : la lister la rendrait instable.
@@ -579,6 +639,7 @@ export function MoteurChrono(
     <ZoneDeGlisser surDepot={(jeton) => { deposerLaVignette(jeton); }}>
     <div
       ref={racine}
+      className="moteur-chrono"
       data-moteur="chrono"
       data-habillage={habillage.id}
       data-termine={etat.termineMs === null ? 'non' : 'oui'}
@@ -601,12 +662,11 @@ export function MoteurChrono(
           plateau. */}
       {consigne === null ? null : (
         <div
+          className="chrono-cartouche"
           data-cartouche-chrono="etape"
           aria-live="polite"
           style={{
-            position: 'absolute',
-            insetBlockStart: '0.75rem',
-            insetInlineStart: '0.75rem',
+            position: 'relative',
             zIndex: 3,
             display: 'inline-flex',
             flexWrap: 'wrap',
@@ -619,8 +679,7 @@ export function MoteurChrono(
             color: 'var(--trait)',
             boxShadow: 'var(--ombre-bd)',
             pointerEvents: 'none',
-            maxInlineSize: 'min(28rem, 30vw)',
-            ...styleLecture,
+            maxInlineSize: 'min(100%, 36rem)',
           } as CSSProperties}
         >
           <span style={{ fontWeight: 800 }}>Remets les images dans l’ordre.</span>
@@ -634,7 +693,7 @@ export function MoteurChrono(
       )}
 
       {/* ---------------------------------------------------------------- le décor, en fond */}
-      <div style={{ position: 'absolute', ...ZONE_DE_JEU(hauteurBande), zIndex: 0 }}>
+      <div className="chrono-decor" style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
         <SceneDecor
           habillage={habillage}
           allumees={allumees}
@@ -646,13 +705,13 @@ export function MoteurChrono(
 
       {/* ------------------------------------------------------- les vignettes, devant */}
       <div
-        ref={coucheVignettes}
+        className="chrono-vignettes"
         data-plateau="vignettes"
         style={{
-          position: 'absolute',
-          ...ZONE_DE_JEU(hauteurBande),
+          position: 'relative',
           zIndex: 1,
           pointerEvents: 'none',
+          gridTemplateColumns: `repeat(${String(Math.max(ordre.length, 1))}, minmax(0, 1fr))`,
         }}
       >
         {planCourant === null
@@ -674,12 +733,13 @@ export function MoteurChrono(
               return (
                 <span
                   key={emplacement.cle}
+                  ref={(noeud) => {
+                    refVignettes.current.set(emplacement.cle, noeud);
+                  }}
+                  className="chrono-porte-vignette"
                   data-porte-vignette={emplacement.cle}
                   style={{
-                    position: 'absolute',
-                    insetInlineStart: `${String(emplacement.x)}px`,
-                    insetBlockStart: `${String(emplacement.y)}px`,
-                    transform: 'translate(-50%, -50%)',
+                    position: 'relative',
                     display: 'inline-flex',
                     pointerEvents: 'none',
                   }}
@@ -698,11 +758,10 @@ export function MoteurChrono(
                     region={emplacement.region ?? ''}
                     placee={placee}
                     largeurMax={LARGEUR_MAX_PASTILLE}
-                    hauteur={emplacement.boite.hauteur}
                     styleTexte={styleLecture as CSSProperties}
                     surTap={(evenement) => {
                       fixerVol(null);
-                      viser(emplacement, vignette.libelle);
+                      viser(emplacement.cle, vignette.libelle);
                       jouer({ type: 'numeroter', vignette: emplacement.cle }, evenement);
                     }}
                   />
@@ -726,12 +785,10 @@ export function MoteurChrono(
           l'en-tête de `EcranNoeud`, R49). */}
       <div
         ref={bande}
+        className="chrono-histoire"
         data-plateau="histoire"
         style={{
-          position: 'absolute',
-          insetInlineStart: 0,
-          insetInlineEnd: 0,
-          insetBlockEnd: 0,
+          position: 'relative',
           zIndex: 2,
         }}
       >
@@ -741,23 +798,26 @@ export function MoteurChrono(
           data-restantes={String(restants.length)}
           style={{
             display: 'flex',
-            flexWrap: 'wrap',
+            flexWrap: 'nowrap',
             justifyContent: 'center',
             alignItems: 'center',
             gap: '0.5rem',
             marginBlockEnd: '0.6rem',
           }}
         >
-          {ordre.map((id) => {
+          {ordre.map((id, index) => {
             const placee = etat.acquis[id] !== undefined;
+            const vignette = vignetteParId.get(id);
             return (
-              <Fente
+              <FenteChrono
                 key={id}
                 cle={id}
-                texte={placee ? (vignetteParId.get(id)?.libelle ?? '') : null}
-                boite={mesurer(id)}
+                rang={index + 1}
+                libelle={vignette?.libelle ?? ''}
+                asset={vignette?.asset === null || vignette?.asset === undefined ? null : String(vignette.asset)}
+                placee={placee}
+                boite={boiteFente}
                 prochaine={!placee && restants[0] === id}
-                styleTexte={styleLecture as CSSProperties}
                 brancher={(noeud) => {
                   refFentes.current.set(id, noeud);
                 }}
@@ -772,7 +832,8 @@ export function MoteurChrono(
           aria-live="polite"
           data-refus-texte={messageDeRefus === '' ? 'non' : 'oui'}
           data-animations={animationsDesactivees ? 'calmes' : 'vives'}
-          style={{ ...styleLecture, margin: 0, minBlockSize: '1.5em' } as CSSProperties}
+          className="chrono-retour"
+          style={{ margin: 0 } as CSSProperties}
         >
           {messageDeRefus === '' ? (etat.aide === null ? '' : (etat.aide.texte ?? '')) : messageDeRefus}
         </p>

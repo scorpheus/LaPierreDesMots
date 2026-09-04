@@ -287,7 +287,6 @@ export function MoteurEclair(
             data-visible={eclairVisible ? 'non' : 'oui'}
             aria-live="polite"
             className="eclair-etape"
-            style={{ ...styleLecture } as CSSProperties}
           >
             <span className="eclair-rang-etape">
               Étape {String(etat.indexEtape + 1)} sur {String(etat.etapes.length)}
@@ -309,7 +308,7 @@ export function MoteurEclair(
             data-action={tours === 0 ? 'pret' : 'revoir'}
             className="commande-eclair"
             aria-label={tours === 0 ? 'Montre-moi le mot' : 'Revoir le mot'}
-            style={{ ...styleLecture, pointerEvents: 'auto' } as CSSProperties}
+            style={{ pointerEvents: 'auto' }}
             onClick={() => {
               if (tours > 0) emettre({ type: 'revoirEclair' } as ActionEclair);
               ouvrirLaPorte();

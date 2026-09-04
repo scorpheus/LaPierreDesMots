@@ -145,7 +145,10 @@ const FENTE_MIN = 40;
  */
 const LARGEUR_RECEPTACLE_MAX = 420;
 const HAUTEUR_RECEPTACLE_MAX = 156;
-const HAUTEUR_CRITERE_RECEPTACLE = 42;
+/* Le critère est une vraie `ZoneDeLecture`, avec sa hauteur tactile et non une simple ligne de
+ * 42 px. À 1920×1080, sous-estimer cette réserve poussait les deux boutons de panier derrière la
+ * bande de Gobi. Le panneau entier garde désormais la hauteur d'une cible avant d'être borné. */
+const HAUTEUR_CRITERE_RECEPTACLE = CIBLE_MIN + 8;
 const ZOOM_DECOR_TRI = 1.2;
 
 const DUREE_VOL_MS = 320;
@@ -212,6 +215,61 @@ interface PanneauReceptacleGeometrie {
   readonly y: number;
   readonly largeur: number;
   readonly hauteur: number;
+}
+
+/**
+ * Sur un cadre compact, les régions du décor ne sont pas assez nombreuses pour porter douze
+ * mots : la cascade finit alors par leur donner le même point de repli. Une grille calculée
+ * garde la lecture et le toucher disjoints, tout en conservant sur chaque mot la région/couleur
+ * issue de l'habillage pour la progression visuelle.
+ */
+function emplacementsCompacts(
+  emplacements: readonly Emplacement[],
+  cadre: Cadre,
+  mesurer: (cle: string) => Boite,
+): readonly Emplacement[] {
+  if (emplacements.length === 0) return emplacements;
+  const espace = 12;
+  const largeurUtile = Math.max(CIBLE_MIN, cadre.largeur - 2 * MARGE);
+  const largeurMax = Math.max(...emplacements.map((emplacement) => mesurer(emplacement.cle).largeur));
+  const colonnes = Math.max(
+    1,
+    Math.min(4, Math.floor((largeurUtile + espace) / (largeurMax + espace))),
+  );
+  const largeurColonne = (largeurUtile - espace * (colonnes - 1)) / colonnes;
+  const hauteurLigne =
+    Math.max(...emplacements.map((emplacement) => mesurer(emplacement.cle).hauteur)) + espace;
+
+  return emplacements.map((emplacement, index) => ({
+    ...emplacement,
+    x: MARGE + largeurColonne / 2 + (index % colonnes) * (largeurColonne + espace),
+    y: MARGE + hauteurLigne / 2 + Math.floor(index / colonnes) * hauteurLigne,
+  }));
+}
+
+function panneauxCompacts(
+  panneaux: readonly PanneauReceptacleGeometrie[],
+  cadre: Cadre,
+  basDesMots: number,
+): readonly PanneauReceptacleGeometrie[] {
+  if (panneaux.length === 0) return panneaux;
+  const espace = 12;
+  const largeurUtile = Math.max(CIBLE_MIN, cadre.largeur - 2 * MARGE);
+  const largeur = Math.min(
+    LARGEUR_RECEPTACLE_MAX,
+    (largeurUtile - espace * (panneaux.length - 1)) / panneaux.length,
+  );
+  const largeurTotale = largeur * panneaux.length + espace * (panneaux.length - 1);
+  const xDepart = Math.max(MARGE, (cadre.largeur - largeurTotale) / 2);
+  const y = basDesMots + ESPACE_AVANT_RECEPTACLES;
+
+  return panneaux.map((panneau, index) => ({
+    ...panneau,
+    x: xDepart + index * (largeur + espace),
+    y,
+    largeur,
+    hauteur: Math.min(panneau.hauteur, HAUTEUR_RECEPTACLE_MAX),
+  }));
 }
 
 /** Les panneaux des réceptacles, dérivés de `receptacle.zone` — AUCUNE coordonnée écrite ici. */
@@ -671,15 +729,36 @@ export function MoteurTri(
     [habillage, cles, regions, cadreJeu, bornes, mesurer],
   );
 
+  const modeCompact = cadre.largeur <= 900;
+  const emplacementsRendus = useMemo(
+    () => modeCompact
+      ? emplacementsCompacts(resultat.emplacements, cadreJeu, mesurer)
+      : resultat.emplacements,
+    [modeCompact, resultat.emplacements, cadreJeu, mesurer],
+  );
+  const basDesMots = useMemo(
+    () => Math.max(
+      MARGE,
+      ...emplacementsRendus.map((emplacement) =>
+        emplacement.y + mesurer(emplacement.cle).hauteur / 2,
+      ),
+    ),
+    [emplacementsRendus, mesurer],
+  );
+  const panneauxRendus = useMemo(
+    () => modeCompact ? panneauxCompacts(panneaux, cadreJeu, basDesMots) : panneaux,
+    [modeCompact, panneaux, cadreJeu, basDesMots],
+  );
+
   const emplacementParElement = useMemo(
-    () => new Map(resultat.emplacements.map((e) => [e.cle, e] as const)),
-    [resultat],
+    () => new Map(emplacementsRendus.map((e) => [e.cle, e] as const)),
+    [emplacementsRendus],
   );
 
   const allumees = useMemo<readonly RegionAllumee[]>(() => {
     const centroideParRegion = new Map(regions.map((r) => [r.id, r.centroide] as const));
     const liste: RegionAllumee[] = [];
-    for (const emplacement of resultat.emplacements) {
+    for (const emplacement of emplacementsRendus) {
       if (emplacement.region === null) continue;
       if (etat.acquis[emplacement.cle] === undefined) continue;
       liste.push({
@@ -689,7 +768,7 @@ export function MoteurTri(
       });
     }
     return liste;
-  }, [resultat, etat.acquis, regions]);
+  }, [emplacementsRendus, etat.acquis, regions]);
 
   const [derniere, fixerDerniere] = useState<RegionAllumee | null>(null);
   const empreinteAllumees = allumees.map((a) => a.id).join('|');
@@ -805,6 +884,7 @@ export function MoteurTri(
         data-aide={etat.niveauAide}
         data-etape={etape === undefined ? '' : etape.identifiant}
         data-regions-allumees={String(allumees.length)}
+        data-disposition={modeCompact ? 'grille' : 'decor'}
         style={{
           position: 'relative',
           blockSize: '100%',
@@ -913,7 +993,7 @@ export function MoteurTri(
             pointerEvents: 'none',
           }}
         >
-          {panneaux.map((geometrie, rang) => (
+          {panneauxRendus.map((geometrie, rang) => (
             <PanneauReceptacle
               key={geometrie.receptacle.id}
               geometrie={geometrie}

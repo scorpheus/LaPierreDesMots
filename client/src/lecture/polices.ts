@@ -40,8 +40,8 @@ export function familleDe(police: CodePolice): string {
 /**
  * Les fichiers WOFF2 embarqués, par code de police, avec leur graisse.
  *
- * Servis depuis `client/public/polices/`, sous la base publique du build. Cette table est ce que
- * `vite.config.ts` précharge et ce que `polices.css` déclare.
+ * Servis depuis `client/public/polices/`, sous la base publique du build. Cette table alimente le
+ * chargement à la première `ZoneDeLecture` et reste alignée avec les déclarations de `polices.css`.
  * `verdana` n'y figure pas, et c'est le fait mesurable de l'écart n° 5.
  */
 export const FICHIERS_EMBARQUES: readonly {
