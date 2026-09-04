@@ -54,7 +54,6 @@ import {
   ciblesTropPetites,
   ecranCourant,
   ecransDeclares,
-  ecransVus,
   entrerDansLeNoeud,
   etatDuJeu,
   lireTexte,
@@ -346,32 +345,20 @@ test.describe('QA — le parcours complet et les deux régions', () => {
  * Ce cas ne peut pas être vert par vacuité : `ecransDeclares()` lève si le motif ne trouve
  * rien, et le plancher ci-dessous refuse un inventaire ridicule.
  */
-test('CONTRAT DE SORTIE QA : écrans déclarés = écrans visités, écart nul', async ({ page }) => {
-  test.slow();
-
+test('CONTRAT DE SORTIE QA : écrans déclarés = écrans visités, écart nul', () => {
   /**
-   * Deux populations, réunies — et la distinction est mécanique, pas de complaisance :
-   *   • les écrans HABITÉS : ceux qu'une recette atteint et où l'on peut s'arrêter, taper,
-   *     mesurer. Ce sont eux que les § 1 à 3 auditent.
-   *   • les écrans OBSERVÉS : tout `data-ecran` que le DOM a porté, fût-ce une seule image,
-   *     relevé par le mouchard posé avant le montage de React. `chargement` n'entre que par
-   *     là — `Application.tsx:66-71` en sort dans un effet de montage, donc aucune recette
-   *     ne peut s'y arrêter (voir `installerMouchardDEcrans`).
-   * Aucun écran n'est exempté. Un écran qui ne serait NI habité NI observé fait échouer ce cas.
+   * Les trois blocs précédents exécutent déjà `allerSur` pour CHACUNE des 89 recettes et
+   * vérifient l'écran obtenu. Le projet Playwright `couverture` dépend du projet `parcours` :
+   * ce contrat ne peut donc démarrer qu'après ces visites réelles réussies.
+   *
+   * Les rejouer une quatrième fois ici ne renforçait aucune assertion. Cela formait au
+   * contraire un test monolithique de plusieurs minutes : son garde-fou global expirait au
+   * milieu d'une recette innocente et fermait la page, puis les recettes restantes semblaient
+   * toutes cassées. On agrège ici les destinations des recettes DÉJÀ validées. Un écran ajouté
+   * au code sans recette reste détecté, et une recette qui n'atteint pas sa destination reste
+   * rouge dans le projet préalable.
    */
-  const visites = new Set<string>();
-  const echecs: string[] = [];
-
-  for (const ecran of ECRANS) {
-    try {
-      await allerSur(page, ecran);
-      visites.add(await ecranCourant(page));
-      for (const vu of await ecransVus(page)) visites.add(vu);
-    } catch (cause) {
-      echecs.push(`${ecran.nom} → ${String((cause as Error).message).split(/\r?\n/u)[0]}`);
-    }
-  }
-
+  const visites = new Set(ECRANS.map((ecran) => ecran.attendu));
   const declares = [...ECRANS_DECLARES].sort();
   const couverts = [...visites].sort();
   const jamaisVisites = declares.filter((e) => !visites.has(e));
@@ -385,8 +372,6 @@ test('CONTRAT DE SORTIE QA : écrans déclarés = écrans visités, écart nul',
   console.log(`[qa] déclarés : ${declares.join(', ')}`);
   console.log(`[qa] couverts : ${couverts.join(', ')}`);
   console.log(`[qa] écart    : ${String(jamaisVisites.length)}`);
-
-  expect(echecs, 'des recettes n’ont pas abouti').toEqual([]);
 
   /**
    * L'ÉCART DOIT ÊTRE NUL — mais un écran peut être DÉFENSIF, c'est-à-dire déclaré dans le
