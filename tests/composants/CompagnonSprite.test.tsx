@@ -14,13 +14,15 @@ const compagnon: CompagnonDuMonde = {
   rallieLe: '2026-09-01T08:00:00.000Z'
 };
 
-describe('atlas animés des compagnons', () => {
-  it('sert l’atlas normalisé et conserve une empreinte statique pour le repli', () => {
+describe('portrait canonique des compagnons', () => {
+  it('ne masque jamais le portrait validé derrière un ancien atlas', () => {
     const { container } = render(<Compagnon compagnon={compagnon} />);
-    const portrait = container.querySelector('.compagnon-sprite--atlas') as HTMLElement;
+    const portrait = container.querySelector('.compagnon-sprite') as HTMLElement;
 
-    expect(portrait.style.backgroundImage).toContain('assets/compagnons/animations/filou-8.png');
+    expect(portrait.classList.contains('compagnon-sprite--atlas')).toBe(false);
+    expect(portrait.style.backgroundImage).toBe('');
     expect(portrait.querySelector('img')?.getAttribute('src'))
       .toContain('assets/compagnons/filou.png');
+    expect(getComputedStyle(portrait.querySelector('img')!).visibility).not.toBe('hidden');
   });
 });

@@ -1,5 +1,14 @@
 # Production visuelle — vague du 2 septembre 2026
 
+## Rectification des compagnons — 5 septembre 2026
+
+Les portraits décrits plus bas comme Filou V3 et Bulle, Roc, Plume V2 ont été remplacés après que
+le parent a identifié la planche réellement validée. La référence qui fait désormais foi est
+`production/personnages/reference-compagnons-validee-2026-09-04.png` : Bulle y possède une
+silhouette féminine et une longue chevelure d'eau ; Roc porte de la mousse et de petites plantes.
+Les quatre PNG publiés sont des découpes exactes de cette planche, pas des régénérations. Les
+anciens atlas animés ont été désactivés jusqu'à leur déclinaison depuis ces nouvelles canoniques.
+
 ## État de publication
 
 Le générateur d'images intégré à Codex a produit cette vague à partir du campement V6. Le parent a
@@ -9,8 +18,9 @@ Les cinq tableaux sont donc publiés dans `contenu/assets/ouverture/` : `pierre.
 les cinq PNG sont également embarqués dans l’APK autonome. Le verrou consigne l’empreinte des
 pixels des quatre nouvelles publications et laisse intacte l’entrée Pierre déjà validée.
 
-Le parent a ensuite validé Filou V3 — le compromis plus soutenu entre les deux propositions — et
-les V2 de Bulle, Roc et Plume. Ils sont publiés dans `contenu/assets/compagnons/`.
+Le 2 septembre, le parent avait retenu Filou V3 et les V2 de Bulle, Roc et Plume. Cette première
+publication est désormais remplacée par la référence rectifiée du 5 septembre décrite en tête de
+ce document.
 
 La carte illustrée validée est le tableau `contenu/assets/ouverture/pierre.png`. Son sujet est la
 carte complète — la Pierre au centre et les six régions qui en partent — et elle est également
@@ -64,19 +74,27 @@ loupe et le foulard turquoise de la V2 ; rendre seulement le pelage environ 15 %
 orangé sable et un peu plus contrasté ; mêmes aplats mats et contours organiques ; personnage entier
 centré sur fond blanc pur, sans halo, ombre, décor, texte, peinture, 3D ni esthétique Disney/Pixar.
 
-Les trois autres compagnons reprennent le même contrat de personnage entier sur fond blanc : Bulle,
-ondine bleu lagon avec son livre ; Roc, golem gris chaud moussu avec burin et tablier bleu pétrole ;
-Plume, oiseau bleu à poitrine crème avec sacoche. Leur V2 impose de petits yeux noirs mats, une
-bouche simple, aucune proportion chibi et trois valeurs maximum par couleur. Les V1 aux grands yeux
-restent rejetées ; les V2 ont été validées et publiées le 2 septembre 2026.
+Ce paragraphe décrivait les versions du 2 septembre désormais remplacées. Le contrat courant est
+celui de la planche canonique rectifiée : Bulle a une silhouette féminine et une chevelure d'eau,
+Roc porte de la mousse et des feuilles, Filou conserve sa loupe et Plume sa sacoche.
 
 ## Publication technique des compagnons
 
-Les sources validées avaient un fond blanc opaque. Elles ont été détourées mécaniquement avec
-`scripts/images/detourer-fond-blanc.mjs` : seul le fond clair connecté aux bords devient transparent,
-avec une transition alpha sur l’anticrénelage. Les quatre sorties restent à leur définition native
-de 1086 × 1448. Le test `assets-compagnons-raster.test.ts` bloque le retour d’un fond opaque, une
-sortie vide ou une modification de dimensions.
+La référence validée possède un fond crème texturé. Chaque quadrant de 627 × 627 est découpé sans
+redessin, puis détouré avec `scripts/images/detourer-fond-clair-connecte.mjs` : seul le fond clair
+relié aux bords devient transparent, avec une transition alpha sur l’anticrénelage. Le cadrage
+transparent conserve 24 px autour du sujet afin que le personnage reste grand et entier dans ses
+cartes. La procédure repart directement de la planche suivie du quadrant :
+
+```text
+node scripts/images/detourer-fond-clair-connecte.mjs production/personnages/reference-compagnons-validee-2026-09-04.png contenu/assets/compagnons/filou.png haut-gauche
+node scripts/images/detourer-fond-clair-connecte.mjs production/personnages/reference-compagnons-validee-2026-09-04.png contenu/assets/compagnons/bulle.png haut-droit
+node scripts/images/detourer-fond-clair-connecte.mjs production/personnages/reference-compagnons-validee-2026-09-04.png contenu/assets/compagnons/roc.png bas-gauche
+node scripts/images/detourer-fond-clair-connecte.mjs production/personnages/reference-compagnons-validee-2026-09-04.png contenu/assets/compagnons/plume.png bas-droit
+```
+
+Le test `assets-compagnons-raster.test.ts` bloque le retour d’un fond opaque, une sortie vide ou
+une modification de dimensions et d’empreinte.
 
 Le référentiel `contenu/monde/compagnons.json` porte désormais les PNG. `Compagnon.tsx` lit ce
 chemin au lieu de redessiner une silhouette géométrique. Le même portrait est utilisé dans la tuile

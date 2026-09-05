@@ -585,8 +585,15 @@ body {
 }
 
 .compagnon-portrait--fiche {
-  inline-size: min(12rem, 42vw);
-  block-size: min(15rem, 52vw);
+  inline-size: min(12rem, 42vw, 28vh);
+  block-size: min(12rem, 42vw, 28vh);
+}
+
+/* La taille explicite casse la boucle de pourcentage entre le cadre, le sprite et l'image.
+   Sans elle, Chromium reprenait le ratio naturel du PNG puis coupait les jambes dans la fiche. */
+.compagnon-portrait--fiche .compagnon-sprite {
+  inline-size: min(12rem, 42vw, 28vh);
+  block-size: min(12rem, 42vw, 28vh);
 }
 
 /* Dans l'aide, le compagnon remplace Gobi : il ne réutilise surtout pas le grand format des

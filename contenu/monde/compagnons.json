@@ -1,5 +1,5 @@
 {
-  "$commentaire": "Les quatre compagnons de la v2 § 4.3. La v2 dit « chacun est rencontré au bout d'une région » mais n'assigne aucune région nommément — il y a six régions et quatre compagnons. L'assignation ci-dessous suit le DOMAINE de chacun, seul critère écrit dans la v2 ; le Marais Jumeau et le Volcan n'ont donc pas de compagnon. Question consignée dans Docs/questions-en-attente.md. Changer une région ne touche aucune ligne de code. Les portraits raster ont été validés par le parent le 2 septembre 2026.",
+  "$commentaire": "Les quatre compagnons de la v2 § 4.3. La v2 dit « chacun est rencontré au bout d'une région » mais n'assigne aucune région nommément — il y a six régions et quatre compagnons. L'assignation ci-dessous suit le DOMAINE de chacun, seul critère écrit dans la v2 ; le Marais Jumeau et le Volcan n'ont donc pas de compagnon. Question consignée dans Docs/questions-en-attente.md. Changer une région ne touche aucune ligne de code. Les portraits raster ont été rectifiés le 5 septembre 2026 depuis la planche explicitement validée : Bulle féminine et Roc couvert de mousse.",
   "compagnons": [
     {
       "code": "filou",

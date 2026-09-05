@@ -3,13 +3,6 @@ import type { ReactElement } from 'react';
 import type { CodeCompagnon } from '@pierre/partage';
 import { urlAsset } from '../api/client.js';
 
-const ATLAS: Partial<Record<CodeCompagnon, string>> = {
-  filou: 'assets/compagnons/animations/filou-8.png',
-  roc: 'assets/compagnons/animations/roc-8.png',
-  plume: 'assets/compagnons/animations/plume-8-v2.png',
-  bulle: 'assets/compagnons/animations/bulle-8.png'
-};
-
 export interface ProprietesSpriteCompagnon {
   readonly code: CodeCompagnon;
   readonly assetStatique: string;
@@ -22,12 +15,11 @@ export function SpriteCompagnon({
   assetStatique,
   classe = ''
 }: ProprietesSpriteCompagnon): ReactElement {
-  const atlas = ATLAS[code];
   return (
     <span
-      className={`compagnon-sprite${atlas === undefined ? '' : ' compagnon-sprite--atlas'} ${classe}`.trim()}
+      className={`compagnon-sprite compagnon-sprite--canonique ${classe}`.trim()}
       aria-hidden="true"
-      style={atlas === undefined ? undefined : { backgroundImage: `url(${urlAsset(atlas)})` }}
+      data-compagnon-sprite={code}
     >
       <img
         src={urlAsset(assetStatique)}

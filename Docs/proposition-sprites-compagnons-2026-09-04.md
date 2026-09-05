@@ -18,6 +18,13 @@ mousse, a été rejetée par le parent. Elle ne doit servir ni à l'intégration
 génération. Les planches animées mentionnées ci-dessous ne sont donc pas validées : elles devront
 être refaites à partir de la référence canonique avant toute publication dans le jeu.
 
+Le 5 septembre, les quatre portraits statiques ont été remplacés par des découpes exactes des
+quadrants de cette référence, puis détourés avec
+`scripts/images/detourer-fond-clair-connecte.mjs`. Ce script repart directement de la planche
+versionnée et cadre le sujet sans en changer un pixel. Les anciens atlas restent présents comme
+archives de travail, mais `SpriteCompagnon` ne les affiche plus : une animation au mauvais design
+ne doit jamais masquer le portrait canonique.
+
 ## But
 
 Remplacer les mouvements CSS des portraits par de petites animations raster cohérentes avec les

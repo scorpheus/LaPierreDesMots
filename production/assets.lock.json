@@ -269,116 +269,116 @@
       "valide_le": "2026-09-02"
     },
     {
-      "id": "compagnon.filou.v3",
+      "id": "compagnon.filou.v4",
       "fichier": "contenu/assets/compagnons/filou.png",
-      "empreinte": "sha256:D3024E046D3CCEF452A80F45C0DB7762A01E7D41C4BB2C408AD8F6193FC7F731",
+      "empreinte": "sha256:CD87961EDB6C37C479CB5EA91C8BA2D4FAAFE3BE9969F528A735D2AC18B18961",
       "generation": {
-        "outil": "générateur d’images intégré à Codex",
+        "outil": "découpe et détourage déterministes Node.js",
         "workflow": null,
         "checkpoint": null,
         "graine": null,
         "resolution": [
-          1086,
-          1448
+          422,
+          596
         ],
         "prompt": null,
-        "source_prompt": "Le verbatim original n’est pas embarqué ; le brief fidèle est consigné dans Docs/production-visuelle-vague-2026-09-02.md.",
-        "brief_documente": "Conserver presque à l’identique l’identité, la pose, les yeux simples, la loupe et le foulard turquoise de la V2 ; rendre seulement le pelage environ 15 % plus soutenu, plus orangé sable et un peu plus contrasté ; mêmes aplats mats et contours organiques ; personnage entier centré sur fond blanc pur, sans halo, ombre, décor, texte, peinture, 3D ni esthétique Disney/Pixar.",
-        "source": "contenu/brouillons/personnages/filou/filou-v3-entre-deux.png",
-        "transformation": "scripts/images/detourer-fond-blanc.mjs"
+        "source_prompt": "Le personnage est repris sans régénération depuis la planche explicitement validée et verrouillée dans Docs/proposition-sprites-compagnons-2026-09-04.md.",
+        "brief_documente": "Filou est le fennec explorateur du quadrant supérieur gauche : fourrure dorée, foulard turquoise, sacoche et loupe.",
+        "source": "production/personnages/reference-compagnons-validee-2026-09-04.png#quadrant-haut-gauche",
+        "transformation": "découpe exacte du quadrant puis détourage et cadrage transparent par scripts/images/detourer-fond-clair-connecte.mjs"
       },
       "qc": {
-        "technique": "ok — PNG RGBA 1086 × 1448, fond extérieur transparent",
-        "semantique": "validé — compromis entre les deux Filou, V2 jugée un peu pâle",
-        "integration": "ok — portrait déclaré par le référentiel, grisaille par filtre CSS",
-        "tentatives": 3
+        "technique": "ok — PNG RGBA 422 × 596, fond extérieur transparent, frange anticrénelée",
+        "semantique": "validé — personnage exact de la planche canonique",
+        "integration": "ok — portrait déclaré par le référentiel, anciens atlas incompatibles désactivés",
+        "tentatives": 1
       },
       "valide_par": "parent",
-      "valide_le": "2026-09-02"
+      "valide_le": "2026-09-05"
     },
     {
-      "id": "compagnon.bulle.v2",
+      "id": "compagnon.bulle.v3",
       "fichier": "contenu/assets/compagnons/bulle.png",
-      "empreinte": "sha256:4C3F051496FE1C9C40660FF36D9C33B1B61C7305725C72093A37276BE0F538EA",
+      "empreinte": "sha256:A19CD952912D833BB1AE3EC33E8643077C0C7DB92B6DE4C61248E79941C698F3",
       "generation": {
-        "outil": "générateur d’images intégré à Codex",
+        "outil": "découpe et détourage déterministes Node.js",
         "workflow": null,
         "checkpoint": null,
         "graine": null,
         "resolution": [
-          1086,
-          1448
+          454,
+          598
         ],
         "prompt": null,
-        "source_prompt": "Le verbatim original n’est pas embarqué ; le brief fidèle est consigné dans Docs/production-visuelle-vague-2026-09-02.md.",
-        "brief_documente": "Bulle, ondine bleu lagon avec son livre, personnage entier sur fond blanc ; petits yeux noirs mats, bouche simple, aucune proportion chibi et trois valeurs maximum par couleur.",
-        "source": "contenu/brouillons/personnages/bulle/bulle-v2-editorial.png",
-        "transformation": "scripts/images/detourer-fond-blanc.mjs"
+        "source_prompt": "Le personnage est repris sans régénération depuis la planche explicitement validée et verrouillée dans Docs/proposition-sprites-compagnons-2026-09-04.md.",
+        "brief_documente": "Bulle est l’ondine féminine du quadrant supérieur droit : visage délicat, longue chevelure d’eau turquoise, bulles et livre bleu.",
+        "source": "production/personnages/reference-compagnons-validee-2026-09-04.png#quadrant-haut-droit",
+        "transformation": "découpe exacte du quadrant puis détourage et cadrage transparent par scripts/images/detourer-fond-clair-connecte.mjs"
       },
       "qc": {
-        "technique": "ok — PNG RGBA 1086 × 1448, fond extérieur transparent",
-        "semantique": "validé",
-        "integration": "ok — portrait déclaré par le référentiel, grisaille par filtre CSS",
-        "tentatives": 2
+        "technique": "ok — PNG RGBA 454 × 598, fond extérieur transparent, frange anticrénelée",
+        "semantique": "validé — personnage exact de la planche canonique, silhouette féminine conservée",
+        "integration": "ok — portrait déclaré par le référentiel, anciens atlas incompatibles désactivés",
+        "tentatives": 1
       },
       "valide_par": "parent",
-      "valide_le": "2026-09-02"
+      "valide_le": "2026-09-05"
     },
     {
-      "id": "compagnon.roc.v2",
+      "id": "compagnon.roc.v3",
       "fichier": "contenu/assets/compagnons/roc.png",
-      "empreinte": "sha256:40D7BD92460C9F7F26354DD0755F7FA1B5F5BF372B1FB30E009044C364FDA601",
+      "empreinte": "sha256:7BCF9A9659D44E6838792DE6781F8185F5EFB8252649A071AEE09B9767FD5108",
       "generation": {
-        "outil": "générateur d’images intégré à Codex",
+        "outil": "découpe et détourage déterministes Node.js",
         "workflow": null,
         "checkpoint": null,
         "graine": null,
         "resolution": [
-          1086,
-          1448
+          426,
+          582
         ],
         "prompt": null,
-        "source_prompt": "Le verbatim original n’est pas embarqué ; le brief fidèle est consigné dans Docs/production-visuelle-vague-2026-09-02.md.",
-        "brief_documente": "Roc, golem gris chaud moussu avec burin et tablier bleu pétrole, personnage entier sur fond blanc ; petits yeux noirs mats, bouche simple, aucune proportion chibi et trois valeurs maximum par couleur.",
-        "source": "contenu/brouillons/personnages/roc/roc-v2-editorial.png",
-        "transformation": "scripts/images/detourer-fond-blanc.mjs"
+        "source_prompt": "Le personnage est repris sans régénération depuis la planche explicitement validée et verrouillée dans Docs/proposition-sprites-compagnons-2026-09-04.md.",
+        "brief_documente": "Roc est le gardien de pierre du quadrant inférieur gauche : corps segmenté, spirale gravée, sangles, sacoche et mousse vivante avec petites feuilles.",
+        "source": "production/personnages/reference-compagnons-validee-2026-09-04.png#quadrant-bas-gauche",
+        "transformation": "découpe exacte du quadrant puis détourage et cadrage transparent par scripts/images/detourer-fond-clair-connecte.mjs"
       },
       "qc": {
-        "technique": "ok — PNG RGBA 1086 × 1448, fond extérieur transparent",
-        "semantique": "validé",
-        "integration": "ok — portrait déclaré par le référentiel, grisaille par filtre CSS",
-        "tentatives": 2
+        "technique": "ok — PNG RGBA 426 × 582, fond extérieur transparent, frange anticrénelée",
+        "semantique": "validé — personnage exact de la planche canonique, mousse conservée",
+        "integration": "ok — portrait déclaré par le référentiel, anciens atlas incompatibles désactivés",
+        "tentatives": 1
       },
       "valide_par": "parent",
-      "valide_le": "2026-09-02"
+      "valide_le": "2026-09-05"
     },
     {
-      "id": "compagnon.plume.v2",
+      "id": "compagnon.plume.v3",
       "fichier": "contenu/assets/compagnons/plume.png",
-      "empreinte": "sha256:86C63A2BE826A961D0B8B09A75723C2B45B09997E2FEED34BE09F22BCA289A58",
+      "empreinte": "sha256:B40E79DD6425D319650EB3C55194A97C25796B51AF4089BE0906D0135018F90B",
       "generation": {
-        "outil": "générateur d’images intégré à Codex",
+        "outil": "découpe et détourage déterministes Node.js",
         "workflow": null,
         "checkpoint": null,
         "graine": null,
         "resolution": [
-          1086,
-          1448
+          432,
+          589
         ],
         "prompt": null,
-        "source_prompt": "Le verbatim original n’est pas embarqué ; le brief fidèle est consigné dans Docs/production-visuelle-vague-2026-09-02.md.",
-        "brief_documente": "Plume, oiseau bleu à poitrine crème avec sacoche, personnage entier sur fond blanc ; petits yeux noirs mats, bouche simple, aucune proportion chibi et trois valeurs maximum par couleur.",
-        "source": "contenu/brouillons/personnages/plume/plume-v2-editorial.png",
-        "transformation": "scripts/images/detourer-fond-blanc.mjs"
+        "source_prompt": "Le personnage est repris sans régénération depuis la planche explicitement validée et verrouillée dans Docs/proposition-sprites-compagnons-2026-09-04.md.",
+        "brief_documente": "Plume est l’oiseau bleu du quadrant inférieur droit : poitrine crème, huppe, aile levée, longue queue et sacoche de messager.",
+        "source": "production/personnages/reference-compagnons-validee-2026-09-04.png#quadrant-bas-droit",
+        "transformation": "découpe exacte du quadrant puis détourage et cadrage transparent par scripts/images/detourer-fond-clair-connecte.mjs"
       },
       "qc": {
-        "technique": "ok — PNG RGBA 1086 × 1448, fond extérieur transparent",
-        "semantique": "validé",
-        "integration": "ok — portrait déclaré par le référentiel, grisaille par filtre CSS",
-        "tentatives": 2
+        "technique": "ok — PNG RGBA 432 × 589, fond extérieur transparent, frange anticrénelée",
+        "semantique": "validé — personnage exact de la planche canonique",
+        "integration": "ok — portrait déclaré par le référentiel, anciens atlas incompatibles désactivés",
+        "tentatives": 1
       },
       "valide_par": "parent",
-      "valide_le": "2026-09-02"
+      "valide_le": "2026-09-05"
     },
     {
       "id": "decor.ecole.v3",

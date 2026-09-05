@@ -1,28 +1,23 @@
 {
-  "$commentaire": "VERROU DE FILOU — cloture de l'etape (A) de D31 le 2026-08-08. Le pere a choisi la graine g4004 parmi six propositions rendues aux MEMES graines pour les quatre compagnons : les memes graines partout sont le TEMOIN, sans lequel on ne sait pas si deux compagnons se ressemblent a cause de la graine ou de leur description. Ce fichier porte la provenance exacte ; sans lui la bibliotheque devient un cimetiere d'images irregenerables (annexe P 3.6).",
+  "$commentaire": "VERROU DE FILOU — rectifié le 2026-09-05 après identification par le parent de la planche réellement validée. Le personnage est une découpe exacte du quadrant supérieur gauche, jamais une nouvelle interprétation.",
   "canonique": {
     "fichier": "production/personnages/filou/canonique.png",
-    "largeur": 1024,
-    "hauteur": 1024,
-    "empreintePixels": "sha256:ce283c4182c1366483ed3a8119d3710a72ef82343a974cb3cbadcd64b08db3ce",
-    "empreinteFichier": "sha256:ca19ceef583d669a6ef5f96fed38b34d9cdbf1882b7ca462b30129606d931528",
-    "$empreinte": "L'empreinte qui fait foi est celle des PIXELS. ComfyUI ecrit le graphe dans un bloc de texte du PNG : trois images identiques au pixel pres ont trois sha256 de fichier differents. Les deux valeurs ci-dessus different, ce qui le montre.",
+    "largeur": 422,
+    "hauteur": 596,
+    "empreintePixels": "sha256:cd87961edb6c37c479cb5ea91c8ba2d4faafe3be9969f528a735d2ac18b18961",
+    "empreinteFichier": "sha256:0311d8cd0e553689d7db43b2fa48b0fb9af736a067ad18a078eaa8fcdf008679",
+    "$empreinte": "L'empreinte qui fait foi est celle des pixels RGBA décodés.",
     "produitePar": {
-      "workflow": "production/workflows/personnage-exploration.api.json",
-      "graine": 4004,
-      "ckpt_name": "flux1-schnell-fp8.safetensors",
-      "steps": 8,
-      "cfg": 1.0,
-      "sampler_name": "euler",
-      "scheduler": "simple",
-      "denoise": 1.0,
-      "source": "production/personnages/filou/exploration/g4004.png"
+      "workflow": "découpe exacte puis détourage mécanique",
+      "graine": null,
+      "source": "production/personnages/reference-compagnons-validee-2026-09-04.png#quadrant-haut-gauche",
+      "transformation": "scripts/images/detourer-fond-clair-connecte.mjs"
     }
   },
   "validation": {
-    "decision": "D7 / D31 etape A",
-    "choisiPar": "le pere, sur planche de six propositions",
-    "date": "2026-08-08",
-    "$ecartConnu": "Cette canonique est en TRAIT NOIR (saturation mesuree sous 9), alors que la canonique de Gobi est en couleur (57,45). D29 pose que le trait noir ne concerne que les DECORS. Une passe de colorisation par declinaison, a profondeur de chaine 1, est donc due — et elle partira d'ICI, jamais du texte."
+    "decision": "référence artistique clarifiée par le parent",
+    "choisiPar": "le père, dans la conversation principale",
+    "date": "2026-09-05",
+    "$ecartConnu": "Les anciens atlas animés ne représentent pas cette canonique et restent désactivés jusqu'à leur régénération."
   }
 }

@@ -9,12 +9,18 @@ import { urlAssetAutonome } from '@client/base/depot-contenu-autonome';
 
 const COMPAGNONS = ['filou', 'bulle', 'roc', 'plume'] as const;
 const EMPREINTES = {
-  filou: 'D3024E046D3CCEF452A80F45C0DB7762A01E7D41C4BB2C408AD8F6193FC7F731',
-  bulle: '4C3F051496FE1C9C40660FF36D9C33B1B61C7305725C72093A37276BE0F538EA',
-  roc: '40D7BD92460C9F7F26354DD0755F7FA1B5F5BF372B1FB30E009044C364FDA601',
-  plume: '86C63A2BE826A961D0B8B09A75723C2B45B09997E2FEED34BE09F22BCA289A58'
+  filou: 'CD87961EDB6C37C479CB5EA91C8BA2D4FAAFE3BE9969F528A735D2AC18B18961',
+  bulle: 'A19CD952912D833BB1AE3EC33E8643077C0C7DB92B6DE4C61248E79941C698F3',
+  roc: '7BCF9A9659D44E6838792DE6781F8185F5EFB8252649A071AEE09B9767FD5108',
+  plume: 'B40E79DD6425D319650EB3C55194A97C25796B51AF4089BE0906D0135018F90B'
 } as const;
-const VERSIONS = { filou: 'v3', bulle: 'v2', roc: 'v2', plume: 'v2' } as const;
+const DIMENSIONS = {
+  filou: [422, 596],
+  bulle: [454, 598],
+  roc: [426, 582],
+  plume: [432, 589]
+} as const;
+const VERSIONS = { filou: 'v4', bulle: 'v3', roc: 'v3', plume: 'v3' } as const;
 
 interface EntreeVerrou {
   readonly id: string;
@@ -33,7 +39,7 @@ describe('les portraits raster validés des compagnons', () => {
       (_, index) => image.pixels[index * 4 + 3] ?? 0
     );
 
-    expect([image.largeur, image.hauteur]).toEqual([1086, 1448]);
+    expect([image.largeur, image.hauteur]).toEqual(DIMENSIONS[code]);
     const minimum = alphas.reduce((courant, alpha) => Math.min(courant, alpha), 255);
     const maximum = alphas.reduce((courant, alpha) => Math.max(courant, alpha), 0);
     expect(minimum, 'le fond blanc est encore opaque').toBe(0);
@@ -77,7 +83,7 @@ describe('les portraits raster validés des compagnons', () => {
         fichier: `contenu/${relatif}`,
         empreinte: `sha256:${EMPREINTES[code]}`,
         valide_par: 'parent',
-        generation: { resolution: [1086, 1448] },
+        generation: { resolution: DIMENSIONS[code] },
       });
       expect(urlAssetAutonome(relatif), `${code} absent de l’APK`).not.toBeNull();
     }
