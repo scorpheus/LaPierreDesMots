@@ -2,6 +2,22 @@
 
 Date : 4 septembre 2026.
 
+## Référence artistique validée — rectification du 5 septembre
+
+La référence canonique des quatre compagnons est
+`production/personnages/reference-compagnons-validee-2026-09-04.png` (SHA-256
+`F34CD33DB577EBC084D7DA612C65800A853F7926B17AA9930E6B66136C9F7AC8`). Elle montre :
+
+- Filou, le fennec explorateur avec sa loupe ;
+- Bulle, personnage d'eau aux traits féminins et aux cheveux faits d'eau, avec son livre ;
+- Roc, gardien de pierre dont la silhouette porte clairement de la mousse et de petites plantes ;
+- Plume, l'oiseau bleu messager avec sa sacoche.
+
+La planche générée juste après cette référence, où Bulle est moins féminine et Roc dépourvu de
+mousse, a été rejetée par le parent. Elle ne doit servir ni à l'intégration ni à une nouvelle
+génération. Les planches animées mentionnées ci-dessous ne sont donc pas validées : elles devront
+être refaites à partir de la référence canonique avant toute publication dans le jeu.
+
 ## But
 
 Remplacer les mouvements CSS des portraits par de petites animations raster cohérentes avec les
