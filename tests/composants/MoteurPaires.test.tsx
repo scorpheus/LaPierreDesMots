@@ -164,10 +164,10 @@ describe('moteur paires', () => {
     expect(carte?.textContent).not.toContain('un loup');
     expect(carte?.getAttribute('aria-label')).toBe('un loup');
   });
-  it('affiche une règle stable et la progression des paires sans révéler la réponse', () => {
+  it('affiche la progression sans répéter la consigne de l’en-tête ni révéler la réponse', () => {
     const { container } = render(<Harnais />);
     const cartouche = container.querySelector('[data-cartouche-paires="etape"]');
-    expect(cartouche?.textContent).toContain('Trouve les paires.');
+    expect(cartouche?.textContent).not.toContain('Trouve les paires.');
     expect(cartouche?.textContent).not.toContain('Étape');
     expect(cartouche?.textContent).toContain('0 / 1 paires');
     expect(cartouche?.textContent).not.toContain('loup');

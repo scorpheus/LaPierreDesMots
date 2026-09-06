@@ -14,26 +14,20 @@
  * règle (R52, v2 lignes 70 et 79) : le décor COUVRE la zone de jeu, il se RALLUME à mesure que
  * l'exercice avance, et ce qu'on touche est posé DESSUS, à des emplacements DÉRIVÉS.
  *
- * Deux populations, deux dérivations, sur le MÊME jeu de régions (`client/src/moteurs/eclair/
- * mise-en-scene.ts`, qui ne connaît ni clavier ni trou) :
- *   1. **le clavier** — les touches offertes sont CONSTANTES du début à la fin de l'exercice
- *      (une lettre peut servir à plusieurs trous), donc une seule dérivation, calculée une fois,
- *      donne à chaque touche une place stable ;
- *   2. **les trous** — un par consigne, dans l'ordre des consignes, en cascade comme les mots de
- *      `phrase` : c'est cette cascade, croisée avec `etat.acquis`, qui dit quelles régions se
- *      rallument. Rien n'y est posé visuellement : le trou vit dans le mot affiché, qui reste
- *      dans la bande de lecture, immobile.
+ * Reprise du 5 septembre : le clavier est une rangée centrée sous le mot, dans tous les
+ * formats. Les lettres ne flottent plus à des hauteurs différentes. La cascade des trous
+ * sert seulement à rallumer le décor ; elle ne décide pas de la position des touches.
  *
  * ── LA CASE À TROUS RESTE DANS LE CHAMP DE LECTURE ────────────────────────────────────────────
  * « Le décor s'agite, le texte jamais » (v2 § 9.3). Le mot à compléter est ce qu'il y a de plus
- * précisément à déchiffrer dans ce moteur ; il reste donc dans la bande statique du bas, jamais
- * sur le décor animé.
+ * précisément à déchiffrer dans ce moteur ; il reste dans un grand cartouche statique au
+ * centre, sur parchemin opaque. Le modèle se trouve au-dessus, hors de la zone des touches.
  *
  * ── LA CONSIGNE N'EST PLUS RÉPÉTÉE ICI ────────────────────────────────────────────────────────
  * R49 : `EcranNoeud` affiche déjà `consigne.texte` dans sa barre de consigne (il lit
  * `jeu.contenu.consignes[].texte`, générique à tous les moteurs). La répéter ici faisait lire
  * deux fois la même ligne à un enfant qui déchiffre — « il cherche la différence entre les
- * deux ». Ce moteur ne montre donc que ce qu'AUCUN autre endroit ne montre : le mot à trous.
+ * deux ». Le moteur porte le modèle et le mot incomplet, pas la règle générale du geste.
  *
  * TROIS INVARIANTS DE RENDU, inchangés et opposables :
  *   - **aucun `data-etat="echec"` n'est émis ici, ni ailleurs** (R14) ;
@@ -50,8 +44,6 @@ import { ZoneDeLecture, styleDeLecture, useReglagesLecture } from '../../lecture
 import type { ProprietesMoteur } from '../types.js';
 import {
   cadreJeuEtBornes,
-  CIBLE_MIN,
-  mesurerTexte,
   planifierCascade,
   regionsAllumeesDepuisAcquis,
   regionsColoriables,
@@ -59,7 +51,6 @@ import {
   useDerniereAllumee,
   useMesureCadre,
 } from '../eclair/mise-en-scene.js';
-import { PorteurPose } from '../eclair/porteur-pose.js';
 
 /** Cadence du `battementHorloge`. Le moteur ne connaît aucun `setTimeout` : c'est ici. */
 const PERIODE_BATTEMENT_MS = 1000;
@@ -145,47 +136,13 @@ export function MoteurGrave(
 
   // --- la mesure du cadre ------------------------------------------------------
   const { racine, bande, cadre, hauteurBande } = useMesureCadre();
-  const regimeTelephonePortrait = cadre.largeur <= 420 && cadre.hauteur > cadre.largeur;
   const { cadreJeu, bornes } = useMemo(() => cadreJeuEtBornes(cadre, hauteurBande), [cadre, hauteurBande]);
-  const bornesClavier = useMemo(
-    () => ({
-      ...bornes,
-      // Le clavier vit sous le mot : sur un paysage court, réserver cette moitié évite que les
-      // touches soient dessinées par-dessus la case à trous. La borne reste dérivée du cadre,
-      // jamais d'une résolution particulière.
-      yMin: Math.min(
-        Math.max(bornes.yMin, cadreJeu.hauteur * (cadreJeu.hauteur < 420 ? 0.53 : 0.46)),
-        Math.max(bornes.yMin, bornes.yMax - CIBLE_MIN),
-      ),
-    }),
-    [bornes, cadreJeu.hauteur],
-  );
 
   const regions = useMemo(() => regionsColoriables(habillage), [habillage]);
   const centroideParRegion = useMemo(
     () => new Map(regions.map((r) => [r.id, r.centroide] as const)),
     [regions],
   );
-
-  const mesurerLettre = useCallback(
-    (cle: string) => mesurerTexte(cle, reglages),
-    [reglages],
-  );
-
-  // --- le clavier : population CONSTANTE, une seule dérivation -----------------
-  const plansClavier = useMemo(
-    () =>
-      planifierCascade({
-        habillage,
-        listesParEtape: [contenu.clavier],
-        regions,
-        cadre: cadreJeu,
-        bornes: bornesClavier,
-        mesurer: mesurerLettre,
-      }),
-    [habillage, contenu.clavier, regions, cadreJeu, bornesClavier, mesurerLettre],
-  );
-  const emplacementsClavier = plansClavier[0]?.resultat.emplacements ?? [];
 
   // --- les trous : cascade par consigne, pour la seule RECOLORATION ------------
   const listesTrous = useMemo(
@@ -217,20 +174,25 @@ export function MoteurGrave(
   const messageDeRefus =
     etat.dernierRefus === null ? '' : (MESSAGES_DE_REFUS[etat.dernierRefus.motif] ?? '');
 
-  const motAffiche =
-    consigne === null
-      ? ''
-      : [...consigne.mot]
-          .map((caractere, rang) => {
-            const trou = consigne.trous.find((t) => t.position === rang);
-            if (trou === undefined) return caractere;
-            return etat.acquis[trou.id] ?? '_';
-          })
-          .join('');
+  // Un trou peut porter tout un groupe (« eau », « ill »), pas seulement un caractère.
+  // Sauter sa longueur évite « bat_au » avant réponse et « bateauau » après réponse.
+  const motAffiche = useMemo(() => {
+    if (consigne === null) return '';
+    const caracteres = [...consigne.mot];
+    const morceaux: string[] = [];
+    let position = 0;
+    for (const trou of [...consigne.trous].sort((a, b) => a.position - b.position)) {
+      const longueur = [...trou.attendu].length;
+      morceaux.push(caracteres.slice(position, trou.position).join(''));
+      morceaux.push(etat.acquis[trou.id] ?? '_'.repeat(longueur));
+      position = trou.position + longueur;
+    }
+    morceaux.push(caracteres.slice(position).join(''));
+    return morceaux.join('');
+  }, [consigne, etat.acquis]);
 
   return (
     <div
-      ref={racine}
       data-moteur="grave"
       data-habillage={habillage.id}
       data-termine={etat.termineMs === null ? 'non' : 'oui'}
@@ -241,36 +203,33 @@ export function MoteurGrave(
         position: 'relative',
         blockSize: '100%',
         minBlockSize: 0,
-        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column',
+        overflowX: 'hidden',
+        overflowY: 'auto',
         borderRadius: 'var(--rayon-carte)',
       }}
     >
       <style>{`
         [data-moteur="grave"] [data-mot-central="oui"] {
-          inset-block-start: 42%;
+          inset-block-start: 27%;
           max-inline-size: min(88%, 30rem);
         }
         [data-moteur="grave"] [data-plateau="etape-grave"] {
           max-inline-size: calc(100% - 1.5rem);
           overflow-wrap: anywhere;
         }
-        @media (max-height: 520px) {
-          [data-moteur="grave"] [data-mot-central="oui"] {
-            inset-block-start: 38%;
-            padding-block: 0.35rem;
-          }
-        }
       `}</style>
-      {/* La barre haute porte la règle générale. Ici, le repère concret change avec chaque
-          mot et chaque case, sans révéler la lettre attendue. */}
+      {/* Le modèle est explicite : on reconstitue son orthographe avec les touches.
+          Ce n'est ni un exercice de tracé, ni une devinette sonore sans contexte. */}
       <div
         data-plateau="etape-grave"
         aria-live="polite"
         style={{
-          position: 'absolute',
-          insetBlockStart: '0.75rem',
-          insetInlineStart: '0.75rem',
-          zIndex: 3,
+          position: 'relative',
+          alignSelf: 'center',
+          flex: '0 0 auto',
+          margin: '0.75rem 0.75rem 0',
           display: 'inline-flex',
           alignItems: 'center',
           gap: '0.65rem',
@@ -287,9 +246,23 @@ export function MoteurGrave(
             ? 'Mot à compléter'
             : trouCourant === null
               ? `Le mot « ${consigne.mot} » est complet`
-              : `Écris le mot « ${consigne.mot} »`}
+              : `Modèle : ${consigne.mot}`}
         </span>
       </div>
+
+      {/* Le cartouche est dans le flux, hors du cadre qui contient les prises. Si ce cadre ne
+          tient plus (petit paysage ou gros profil de lecture), le parent le fait défiler au
+          lieu de poser une lettre derrière un texte. */}
+      <div
+        ref={racine}
+        data-zone-jeu="grave"
+        style={{
+          position: 'relative',
+          flex: '1 0 30rem',
+          minBlockSize: '30rem',
+          overflow: 'hidden',
+        }}
+      >
 
       {/* ------------------------------------------------------------- le décor, en fond */}
       <div style={styleZoneDeJeu(hauteurBande)}>
@@ -305,9 +278,7 @@ export function MoteurGrave(
       {/* ------------------------------------------------------- le clavier, posé dessus */}
       <div
         data-plateau="clavier"
-        style={
-          regimeTelephonePortrait
-            ? {
+        style={{
                 position: 'absolute',
                 insetInlineStart: 0,
                 insetInlineEnd: 0,
@@ -317,18 +288,15 @@ export function MoteurGrave(
                 flexWrap: 'wrap',
                 justifyContent: 'center',
                 gap: '0.75rem',
+                paddingInline: '0.75rem',
                 pointerEvents: 'none',
-              }
-            : { ...styleZoneDeJeu(hauteurBande), zIndex: 1, pointerEvents: 'none' }
-        }
+        }}
       >
-        {(regimeTelephonePortrait ? contenu.clavier : emplacementsClavier.map((item) => item.cle)).map((cle) => {
-          const emplacement = emplacementsClavier.find((item) => item.cle === cle);
-          if (!regimeTelephonePortrait && emplacement === undefined) return null;
+        {contenu.clavier.map((cle) => {
           const refusee = lettreRefusee === cle;
           const classes = ['cible'];
           if (!animationsDesactivees && refusee) classes.push('oscillation');
-          const bouton = (
+          return (
               <button
                 key={refusee ? `${cle}-${String(marqueRefusCourante)}` : cle}
                 type="button"
@@ -342,12 +310,6 @@ export function MoteurGrave(
                 {cle}
               </button>
           );
-          if (regimeTelephonePortrait) return bouton;
-          return (
-            <PorteurPose key={cle} x={emplacement?.x ?? 0} y={emplacement?.y ?? 0}>
-              {bouton}
-            </PorteurPose>
-          );
         })}
       </div>
 
@@ -356,7 +318,7 @@ export function MoteurGrave(
         data-corps-minimal="48"
         style={{
           position: 'absolute',
-          insetBlockStart: '42%',
+          insetBlockStart: '27%',
           insetInlineStart: '50%',
           transform: 'translate(-50%, -50%)',
           zIndex: 2,
@@ -368,6 +330,7 @@ export function MoteurGrave(
           boxShadow: 'var(--ombre-bd)',
           textAlign: 'center',
           maxInlineSize: 'min(88%, 30rem)',
+          pointerEvents: 'none',
         }}
       >
         <ZoneDeLecture
@@ -422,6 +385,7 @@ export function MoteurGrave(
       </div>
 
       {/* ── LES DEUX CONTRÔLES SONT PORTÉS PAR L'ÉCRAN, PAS PAR LE MOTEUR (R10) ────────────── */}
+      </div>
     </div>
   );
 }

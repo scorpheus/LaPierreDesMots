@@ -58,6 +58,35 @@ illustré hors connexion avant qu'un téléchargement complet explicite ait ét�
 
 ## Commande automatisée en deux temps
 
+### Garde fonctionnelle locale avant préparation
+
+Avec le build PWA courant et `npm run servir:pwa` déjà ouvert, lancer `npm run qa:pwa`.
+Cette commande ne publie rien. Elle conserve un profil Chromium dédié sous
+`bac-a-sable/profil-recette-pwa-opfs`, y ajoute un joueur de recette, termine un exercice par
+les entrées tactiles natives, le rejoue hors connexion avec ses images et un clip Opus, puis
+contrôle SQLite après fermeture, export/import, second onglet et route profonde.
+
+Elle vérifie le nom exact du module JavaScript servi : un ancien onglet peut encore exécuter
+l'ancien build, même si le nouveau service worker est installé. Fermer les anciens contextes
+pour laisser l'activation normale se produire ; ne pas forcer `skipWaiting` pendant une partie,
+ni effacer OPFS/caches pour obtenir artificiellement un vert.
+
+Le test des images ne suffit pas : les fichiers `monde/*.json` sont aussi lus par URL dans
+les récompenses et le coffre. Une importation JSON comme objet ne les inscrit pas dans
+`urlAssetAutonome`. Conserver la garde d'inventaire JSON de
+`tests/unitaires/depot-contenu-autonome-assets.test.ts`, en plus des visuels.
+
+Contrôler aussi les `<image href>` à l'intérieur des SVG : un fichier présent dans le paquet
+peut rester introuvable si son chargeur omet la réécriture commune des URL. Les moteurs de
+placement et de coloriage ont exposé ce défaut en recette autonome. Attendre l'image SVG
+illustrée avant son décodage : son décor de repli apparaît plus tôt et ne prouve aucun chargement.
+
+`qa:pwa` couvre le parcours de démarrage, pas les 76 exercices : ceux-ci appartiennent à
+`test:tactile` et à la matrice responsive. Un jeu passé par `__test.repondre` ne remplace pas
+la tentative réellement écrite par le port SQLite du livrable autonome.
+
+### Préparation et publication
+
 1. Exécuter une seule fois `publier-site.bat --preparer`. Ne pas lancer `npm run verifier` avant :
    cette commande le fait déjà et relit ses rapports. Elle refuse un dépôt sale, les assets locaux
    absents et toute campagne Vitest/Playwright concurrente de ce dépôt avant d’engager les tests

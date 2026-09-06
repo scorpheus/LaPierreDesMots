@@ -3,11 +3,11 @@
   "moteurs": [
     "colorie"
   ],
-  "libelle": "Le tapis de feuilles",
+  "libelle": "Le tapis de la forêt",
   "region": "foret-muette",
   "scene": {
     "fichier": "habillages/foret-muette/tapis.svg",
-    "viewBox": "0 0 960 600",
+    "viewBox": "0 0 960 640",
     "calques": [
       {
         "id": "calque-fond",
@@ -110,66 +110,66 @@
           },
           {
             "id": "gland-du-tapis",
-            "libelle": "le centre du tapis",
+            "libelle": "le tapis",
             "centroide": [
-              480,
-              391
+              502.09,
+              355.36
             ],
-            "surface": 28028
+            "surface": 60539.77
           },
           {
             "id": "feuille-du-tapis-un",
-            "libelle": "la feuille en haut à gauche",
+            "libelle": "le chat",
             "centroide": [
-              305,
-              324
+              792.92,
+              301.22
             ],
-            "surface": 1751.6
+            "surface": 13511.65
           },
           {
             "id": "feuille-du-tapis-deux",
-            "libelle": "la feuille en haut, au milieu",
+            "libelle": "le bol",
             "centroide": [
-              498.2,
-              323.6
+              273.13,
+              536.57
             ],
-            "surface": 1824.4
+            "surface": 13011.31
           },
           {
             "id": "feuille-du-tapis-trois",
-            "libelle": "la feuille en haut à droite",
+            "libelle": "le sac",
             "centroide": [
-              701.5,
-              324.9
+              189.24,
+              412.29
             ],
-            "surface": 1842.5
+            "surface": 15821.57
           },
           {
             "id": "feuille-haute",
-            "libelle": "la feuille de gauche",
+            "libelle": "le pot",
             "centroide": [
-              249,
-              385.3
+              828.28,
+              456.04
             ],
-            "surface": 1960.4
+            "surface": 13203.22
           },
           {
             "id": "feuille-basse",
-            "libelle": "la feuille du bas, au milieu",
+            "libelle": "le ballon",
             "centroide": [
-              488.4,
-              462.8
+              617.19,
+              510.94
             ],
-            "surface": 1952.4
+            "surface": 5910.27
           },
           {
             "id": "feuille-du-tapis-quatre",
-            "libelle": "la feuille de droite",
+            "libelle": "le banc",
             "centroide": [
-              756.8,
-              387
+              117.73,
+              274.34
             ],
-            "surface": 2067.2
+            "surface": 33668.93
           }
         ]
       },
@@ -203,5 +203,6 @@
   "sons": {
     "ambiance": null,
     "effets": {}
-  }
+  },
+  "$commentaire": "Lot local du 5 septembre 2026 : silhouettes recalées sur les objets du raster. Voir Docs/lot-coloriages-jouables-locaux-2026-09-05.md. IDs historiques conservés."
 }

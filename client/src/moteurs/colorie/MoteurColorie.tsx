@@ -15,9 +15,11 @@ import type { CouleurColoriage, IdRegionSvg } from '@pierre/partage';
 import { DELAIS_AIDE } from '@pierre/partage';
 import type { ActionColorie, ContenuColorie, EtatColorie } from '@pierre/partage';
 import type { ProprietesMoteur } from '../types.js';
+import { CadreColoriage } from './CadreColoriage.js';
 import { PaletteConsigne } from './PaletteConsigne.js';
 import { SceneSvg } from './SceneSvg.js';
 import { urlAsset } from '../../api/client.js';
+import { reecrireLiensAssetsDuSvg } from '../../habillages/chargeur.js';
 
 /** Cadence du `battementHorloge`. Le moteur ne connaît aucun `setTimeout` : c'est ici. */
 const PERIODE_BATTEMENT_MS = 1000;
@@ -56,7 +58,7 @@ export function MoteurColorie(
       .then((reponse) => (reponse.ok ? reponse.text() : null))
       .then((texte) => {
         if (annule || texte === null) return;
-        const corps = extraireCorpsSvg(texte);
+        const corps = extraireCorpsSvg(reecrireLiensAssetsDuSvg(texte));
         if (corps !== null) setSvgMarkup(corps);
       })
       .catch(() => {
@@ -171,17 +173,22 @@ export function MoteurColorie(
         overflowY: 'auto'
       }}
     >
-      <SceneSvg
-        habillage={habillage}
-        remplissages={etat.remplissages}
-        regionEnDemonstration={regionEnDemonstration}
-        regionEnRefus={etat.dernierRefus === null ? null : etat.dernierRefus.region}
-        marqueRefus={etat.dernierRefus === null ? 0 : etat.dernierRefus.instantMs}
-        animationsDesactivees={animationsDesactivees}
-        nombreRegionsAttendues={nombreRegionsAttendues}
-        regionsActives={etatConsigne?.ciblesRestantes.map((cible) => cible.region) ?? []}
-        svgMarkup={svgMarkup}
-        onPeindre={peindre}
+      <CadreColoriage
+        enfants={(loupeActive) => (
+          <SceneSvg
+            habillage={habillage}
+            remplissages={etat.remplissages}
+            regionEnDemonstration={regionEnDemonstration}
+            regionEnRefus={etat.dernierRefus === null ? null : etat.dernierRefus.region}
+            marqueRefus={etat.dernierRefus === null ? 0 : etat.dernierRefus.instantMs}
+            animationsDesactivees={animationsDesactivees}
+            nombreRegionsAttendues={nombreRegionsAttendues}
+            regionsActives={etatConsigne?.ciblesRestantes.map((cible) => cible.region) ?? []}
+            loupeActive={loupeActive}
+            svgMarkup={svgMarkup}
+            onPeindre={peindre}
+          />
+        )}
       />
 
       <PaletteConsigne

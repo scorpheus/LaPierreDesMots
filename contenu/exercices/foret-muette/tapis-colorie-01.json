@@ -1,8 +1,8 @@
 {
-  "$commentaire": "Les sept cibles suivent le raster publié : le centre uni du tapis et six motifs de feuilles distincts sur sa bordure. Le mot tapis porte la consonne finale muette travaillée ; les repères spatiaux désignent les motifs réellement visibles. Aucune région n'est peinte deux fois et aucune cible n'est grise.",
+  "$commentaire": "Tapis v2 validé par le parent le 5 septembre : sept objets distincts reconnaissables en gris, aux silhouettes recalées sur le raster. Identifiants historiques conservés, libellés et consignes cohérents. Les finales muettes de tapis/chat/pot/banc restent travaillées.",
   "id": "foret-muette-tapis-colorie-01",
   "version": 1,
-  "titre": "Le tapis de feuilles",
+  "titre": "Le tapis de la forêt",
   "competences": [
     "gph.finale.muette",
     "lex.couleur",
@@ -26,7 +26,7 @@
       "consignes": [
         {
           "id": "c1",
-          "texte": "Colorie le centre du tapis en brun.",
+          "texte": "Colorie le tapis en brun.",
           "forme": "imperative",
           "audio": null,
           "cibles": [
@@ -38,13 +38,12 @@
           "motsCles": [
             "colorie",
             "tapis",
-            "centre",
             "brun"
           ]
         },
         {
           "id": "c2",
-          "texte": "Colorie la feuille en haut à gauche en noir.",
+          "texte": "Colorie le chat en noir.",
           "forme": "imperative",
           "audio": null,
           "cibles": [
@@ -55,15 +54,13 @@
           ],
           "motsCles": [
             "colorie",
-            "feuille",
-            "haut",
-            "gauche",
+            "chat",
             "noir"
           ]
         },
         {
           "id": "c3",
-          "texte": "Colorie la feuille en haut, au milieu, en violet.",
+          "texte": "Colorie le bol en violet.",
           "forme": "imperative",
           "audio": null,
           "cibles": [
@@ -74,15 +71,13 @@
           ],
           "motsCles": [
             "colorie",
-            "haut",
-            "feuille",
-            "milieu",
+            "bol",
             "violet"
           ]
         },
         {
           "id": "c4",
-          "texte": "Colorie la feuille en haut à droite en vert.",
+          "texte": "Colorie le sac en vert.",
           "forme": "imperative",
           "audio": null,
           "cibles": [
@@ -93,15 +88,13 @@
           ],
           "motsCles": [
             "colorie",
-            "haut",
-            "feuille",
-            "droite",
+            "sac",
             "vert"
           ]
         },
         {
           "id": "c5",
-          "texte": "Colorie la feuille de gauche en rouge.",
+          "texte": "Colorie le pot en rouge.",
           "forme": "imperative",
           "audio": null,
           "cibles": [
@@ -112,14 +105,13 @@
           ],
           "motsCles": [
             "colorie",
-            "feuille",
-            "gauche",
+            "pot",
             "rouge"
           ]
         },
         {
           "id": "c6",
-          "texte": "Colorie la feuille du bas, au milieu, en jaune.",
+          "texte": "Colorie le ballon en jaune.",
           "forme": "imperative",
           "audio": null,
           "cibles": [
@@ -130,15 +122,13 @@
           ],
           "motsCles": [
             "colorie",
-            "feuille",
-            "bas",
-            "milieu",
+            "ballon",
             "jaune"
           ]
         },
         {
           "id": "c7",
-          "texte": "Colorie la feuille de droite en orange.",
+          "texte": "Colorie le banc en orange.",
           "forme": "imperative",
           "audio": null,
           "cibles": [
@@ -149,8 +139,7 @@
           ],
           "motsCles": [
             "colorie",
-            "feuille",
-            "droite",
+            "banc",
             "orange"
           ]
         }

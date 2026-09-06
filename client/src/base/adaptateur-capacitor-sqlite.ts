@@ -20,6 +20,9 @@ import type { Base, ResultatEcriture } from '@pierre/partage/base';
 /** Nom de la base sur l'appareil — un seul enfant, une seule base, jamais choisi par l'usager. */
 export const NOM_BASE_AUTONOME = 'pierre';
 
+// Le registre appartient à la page, pas à chaque appel d'ouverture.
+const sqlite = new SQLiteConnection(CapacitorSQLite);
+
 /**
  * Ouvre (ou retrouve) la connexion SQLite native sur l'appareil.
  *
@@ -28,7 +31,9 @@ export const NOM_BASE_AUTONOME = 'pierre';
  * remontage de l'app (rotation d'écran, retour au premier plan).
  */
 export async function ouvrirBaseCapacitor(): Promise<SQLiteDBConnection> {
-  const sqlite = new SQLiteConnection(CapacitorSQLite);
+  // Une WebView rechargée perd son registre JS mais conserve le plugin Android. Le contrôle
+  // officiel ferme alors ses connexions orphelines, sans supprimer les fichiers SQLite.
+  await sqlite.checkConnectionsConsistency();
   const dejaOuverte = (await sqlite.isConnection(NOM_BASE_AUTONOME, false)).result === true;
   const connexion = dejaOuverte
     ? await sqlite.retrieveConnection(NOM_BASE_AUTONOME, false)

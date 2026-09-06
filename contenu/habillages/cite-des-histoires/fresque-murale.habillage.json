@@ -1,13 +1,14 @@
 {
+  "$commentaire": "Lot local du 5 septembre 2026 : silhouettes recalées sur les objets du raster. Voir Docs/lot-coloriages-jouables-locaux-2026-09-05.md. IDs historiques conservés.",
   "id": "cite.fresque-murale",
   "moteurs": [
     "colorie"
   ],
-  "libelle": "La fresque du mur de la Cité",
+  "libelle": "Le mur des histoires",
   "region": "cite-des-histoires",
   "scene": {
     "fichier": "habillages/cite-des-histoires/fresque-murale.svg",
-    "viewBox": "0 0 960 600",
+    "viewBox": "0 0 960 640",
     "calques": [
       {
         "id": "calque-fond",
@@ -20,156 +21,156 @@
         "regions": [
           {
             "id": "mur-de-pierre",
-            "libelle": "le mur de pierre",
+            "libelle": "la pierre du haut",
             "centroide": [
-              240,
-              33
+              450.5,
+              19
             ],
-            "surface": 57600
+            "surface": 6430
           },
           {
             "id": "pave-de-la-rue",
-            "libelle": "le pavé de la rue",
+            "libelle": "les pavés de la rue",
             "centroide": [
-              120,
-              547
+              228.8,
+              558
             ],
-            "surface": 96000
+            "surface": 119992
           },
           {
             "id": "cadre-de-la-fresque",
-            "libelle": "le cadre de la fresque",
+            "libelle": "le cadre des images",
             "centroide": [
-              86.3,
-              95
+              117.7,
+              155.2
             ],
-            "surface": 92800
+            "surface": 41320
           },
           {
             "id": "ciel",
-            "libelle": "le ciel",
+            "libelle": "le ciel de la montagne",
             "centroide": [
-              632.4,
-              47
+              175.01,
+              219.76
             ],
-            "surface": 25840
+            "surface": 7958.59
           },
           {
             "id": "soleil",
-            "libelle": "le médaillon",
+            "libelle": "le grand rond en haut",
             "centroide": [
-              480,
-              80
+              480.31,
+              113.44
             ],
-            "surface": 6563.9
+            "surface": 6681.45
           },
           {
             "id": "arbre",
-            "libelle": "l’arbre",
+            "libelle": "le grand arbre à droite de la tente",
             "centroide": [
-              471.7,
-              220.8
+              602.12,
+              216.05
             ],
-            "surface": 20536
+            "surface": 4664.45
           },
           {
             "id": "feuille",
-            "libelle": "la grande feuille",
+            "libelle": "les feuilles du bas",
             "centroide": [
-              87.8,
-              511.2
+              923.3,
+              565.7
             ],
-            "surface": 10978
+            "surface": 6767
           },
           {
             "id": "scene-du-haut",
-            "libelle": "la scène du haut",
+            "libelle": "la montagne",
             "centroide": [
-              311,
-              269
+              223.4,
+              248.06
             ],
-            "surface": 9028
+            "surface": 7620.51
           },
           {
             "id": "scene-du-bas",
-            "libelle": "la scène du bas",
+            "libelle": "la tente",
             "centroide": [
-              311,
-              369
+              536.09,
+              259.91
             ],
-            "surface": 8052
+            "surface": 9118.95
           },
           {
             "id": "scene-de-droite",
-            "libelle": "la scène de droite",
+            "libelle": "la pierre ronde",
             "centroide": [
-              451,
-              286
+              721.71,
+              305.57
             ],
-            "surface": 17936
+            "surface": 7353.32
           },
           {
             "id": "mur",
-            "libelle": "le mur",
+            "libelle": "le mur du milieu",
             "centroide": [
-              644.8,
-              378.4
+              378,
+              405
             ],
-            "surface": 15844
+            "surface": 23379
           },
           {
             "id": "porte",
-            "libelle": "la porte de droite",
+            "libelle": "la porte de gauche",
             "centroide": [
-              932,
-              277.5
+              16.88,
+              350.66
             ],
-            "surface": 6479.5
+            "surface": 4418.16
           },
           {
             "id": "fleur",
-            "libelle": "la grande fleur blanche",
+            "libelle": "la grande fleur du bas à gauche",
             "centroide": [
-              55.7,
-              500.1
+              44.1,
+              558.2
             ],
-            "surface": 4705.8
+            "surface": 6264
           },
           {
             "id": "echafaudage",
-            "libelle": "l’échafaudage",
+            "libelle": "l’échafaudage de gauche",
             "centroide": [
-              913.1,
-              123.8
+              152,
+              417.9
             ],
-            "surface": 36480
+            "surface": 17218.5
           },
           {
             "id": "pot-de-couleur",
-            "libelle": "le pot de couleur",
+            "libelle": "la porte de droite",
             "centroide": [
-              300,
-              545
+              936.56,
+              359.56
             ],
-            "surface": 5476
+            "surface": 4031.84
           },
           {
             "id": "pot",
-            "libelle": "le pot de peinture brun",
+            "libelle": "le grand pot de peinture",
             "centroide": [
-              824,
-              550.6
+              684.5,
+              565.7
             ],
-            "surface": 4130
+            "surface": 4648.5
           },
           {
             "id": "pinceau",
             "libelle": "le pinceau",
             "centroide": [
-              651,
-              495
+              830.9,
+              608.3
             ],
-            "surface": 3004.8
+            "surface": 1451
           }
         ]
       },

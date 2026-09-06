@@ -1,0 +1,66 @@
+{
+  "date": "2026-09-05",
+  "perimetre": "local, pas de publication GitHub ni APK",
+  "sources": [
+    {
+      "noeud": "foret-muette-08",
+      "image": "contenu/assets/decors/tapis-objets-v2.png",
+      "empreintePng": "cd7c1200bd753fab478c4880911ec7f63aa47dd898d96804c5ff27f87b558fc3",
+      "svg": "contenu/habillages/foret-muette/tapis.svg",
+      "empreinteSvg": "3258913636456182c0b95c3a72e02065d12e877be412be488c1db35458c65c79",
+      "cibles": 7,
+      "source": "contenu/brouillons/coloriage-tapis-2026-09-05/tapis-objets-v2.png",
+      "validation": "parent : proposition tapis v2 acceptée pour intégration locale"
+    },
+    {
+      "noeud": "clairiere-01",
+      "image": "contenu/assets/decors/ecole.png",
+      "empreintePng": "e60ef6da6177aea9b2426757f06d91d253e0e9c11d3061326a51a0d1ed132d0e",
+      "svg": "contenu/habillages/clairiere/ecole-v2.svg",
+      "empreinteSvg": "cef4fb67612fba7c2fe6f8fcf7974778b3f532320ee25dc5cedc31e001934a0b",
+      "cibles": 6,
+      "source": "contenu/assets/decors/ecole.png",
+      "validation": "image déjà approuvée et conservée, deux masques ajustés"
+    },
+    {
+      "noeud": "clairiere-10",
+      "image": "contenu/assets/decors/ecole.png",
+      "empreintePng": "e60ef6da6177aea9b2426757f06d91d253e0e9c11d3061326a51a0d1ed132d0e",
+      "svg": "contenu/habillages/clairiere/ecole-v2.svg",
+      "empreinteSvg": "cef4fb67612fba7c2fe6f8fcf7974778b3f532320ee25dc5cedc31e001934a0b",
+      "cibles": 7,
+      "source": "contenu/assets/decors/ecole.png",
+      "validation": "image déjà approuvée et conservée, deux masques ajustés"
+    },
+    {
+      "noeud": "marais-jumeau-08",
+      "image": "contenu/assets/decors/brume-coloriage-v3.png",
+      "empreintePng": "5b5c2634653aa3fe483efc8cf673fbed634b7af5b15dbfbc07d5cf969c1ff51f",
+      "svg": "contenu/habillages/marais-jumeau/brume.svg",
+      "empreinteSvg": "6aec5aad789780e256ce542dabd675def9adf7303c097984521343766494e8fc",
+      "cibles": 7,
+      "source": "contenu/brouillons/coloriages-locaux-2026-09-05/marais-jumeau-08/brume-v3.png",
+      "validation": "mandat parent de finition pour essai local ; visa esthétique final après essai"
+    },
+    {
+      "noeud": "volcan-08",
+      "image": "contenu/assets/decors/forge-coloriage-v3.png",
+      "empreintePng": "69530231e593fca3f9be59cee5631952bbbfd26c856fdd019ba2ef97b63a1be9",
+      "svg": "contenu/habillages/volcan/forge.svg",
+      "empreinteSvg": "f6cf16d0bc44c4926f32e2c868b0b48454b9616d0e054fdfb31ea9746fa28fb1",
+      "cibles": 8,
+      "source": "contenu/brouillons/coloriages-locaux-2026-09-05/forge/image/forge-couleur-v1.png",
+      "validation": "mandat parent de finition pour essai local ; visa esthétique final après essai"
+    },
+    {
+      "noeud": "cite-des-histoires-10",
+      "image": "contenu/assets/decors/fresque-coloriage-v3.png",
+      "empreintePng": "3be0677fd16210650b9af6469a40c12db4199865880115c2dfbd0d2f538c5c2a",
+      "svg": "contenu/habillages/cite-des-histoires/fresque-murale.svg",
+      "empreinteSvg": "1bb8de47df664b30cf2638ce3c9885bc077ebebc9c995b32bbac85f0548edc1b",
+      "cibles": 8,
+      "source": "contenu/brouillons/coloriages-locaux-2026-09-05/fresque-murale/image/fresque-murale-v2.png",
+      "validation": "réemploi du décor couleur existant pour essai local"
+    }
+  ]
+}

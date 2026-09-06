@@ -108,7 +108,7 @@ async function etatMoteur(page: Page): Promise<EtatColorieLu> {
 async function pointDeTap(page: Page, region: string): Promise<{ x: number; y: number }> {
   const resultat = await page.evaluate((identifiant) => {
     const element = document.querySelector(
-      `[data-region-svg="${identifiant}"]`
+      `[data-region-source="${identifiant}"]`
     ) as SVGGeometryElement | null;
     if (element === null) return { point: null, diagnostic: 'aucun élément ne porte cet id' };
     if (typeof element.isPointInFill !== 'function') {
@@ -172,9 +172,9 @@ async function pointDeTap(page: Page, region: string): Promise<{ x: number; y: n
  * points du toit étaient bien dans son remplissage, et tous « hors de la fenêtre ».
  */
 async function taperLaRegion(page: Page, region: string): Promise<void> {
-  await page.locator(`[data-region-svg="${region}"]`).scrollIntoViewIfNeeded();
+  await page.locator(`[data-region-source="${region}"]`).scrollIntoViewIfNeeded();
   const point = await pointDeTap(page, region);
-  await page.mouse.click(point.x, point.y);
+  await page.touchscreen.tap(point.x, point.y);
 }
 
 async function entrerDansLeNoeud(page: Page): Promise<void> {

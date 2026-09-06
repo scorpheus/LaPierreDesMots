@@ -102,6 +102,10 @@ export function grisailleDuRaster(nombreAllume: number, nombreTotal: number): nu
  * dérivation ne sert qu'à choisir le fond visuel, sans modifier le contenu.
  */
 export function cheminRasterDuScene(cheminScene: string): string | null {
+  // La v2 versionne les prises SVG, pas l'illustration approuvée qu'elles recouvrent.
+  if (cheminScene === 'habillages/galeries/grottes-v2.svg') {
+    return 'assets/decors/exercices/galeries-grottes.png';
+  }
   const correspondance = /^habillages\/([^/]+)\/([^/]+)\.svg$/u.exec(cheminScene);
   if (correspondance === null) return null;
   const region = correspondance[1];

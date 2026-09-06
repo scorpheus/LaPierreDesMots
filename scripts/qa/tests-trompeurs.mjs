@@ -638,10 +638,15 @@ function analyser(chemin) {
       //     compare DEUX exécutions : c'est le test de déterminisme d'`Alea`, la propriété la
       //     plus importante du fichier. Le signaler aurait discrédité le détecteur d'un coup.
       const sujetEstUnChemin = !gauche.includes('(') && gauche.length > 2;
+      // Un nom dans 'data-aide-cible', /cible/ ou un commentaire n'est pas une référence
+      // à la variable cible. Le masquage actuel efface aussi les interpolations : conserver
+      // par prudence l'ancien traitement si l'attendu contient ${...}, plutôt que rendre
+      // aveugle le témoin expect(cible).toBe(`${cible}`).
+      const codeAttendu = a.attendu.includes('${') ? droite : noyau(masquer(a.attendu));
       const memeJeton =
         sujetEstUnChemin &&
         droite.length > 0 &&
-        new RegExp(`(?<![.\\w$])${gauche.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?![\\w$])`).test(droite);
+        new RegExp(`(?<![.\\w$])${gauche.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?![\\w$])`).test(codeAttendu);
       const tautologie =
         memeJeton ||
         (estLitteral(a.sujet) && estLitteral(a.attendu) && a.matcher !== '(aucun)') ||

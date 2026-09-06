@@ -91,6 +91,8 @@ export interface EtatChemin {
   readonly departs: readonly IdCase[];
   /** La case où se trouve le pion. Détermine les voisines atteignables. */
   readonly position: IdCase | null;
+  /** Visites du chemin courant uniquement ; les acquis de lecture restent permanents. */
+  readonly visiteesEtape: readonly IdCase[];
   readonly niveauAide: NiveauAide;
   readonly aide: AideProposee | null;
   readonly dernierRefus: RefusChemin | null;

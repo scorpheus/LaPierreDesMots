@@ -47,15 +47,16 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { CSSProperties, ReactElement } from 'react';
-import { DndContext, PointerSensor, useDraggable, useDroppable, useSensor, useSensors } from '@dnd-kit/core';
-import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
+import { DndContext, MouseSensor, TouchSensor, pointerWithin, useDraggable, useDroppable, useSensor, useSensors } from '@dnd-kit/core';
+import type { CollisionDetection, DragEndEvent, DragStartEvent, Modifier } from '@dnd-kit/core';
 import type { ActionPaires, ContenuPaires, EtatPaires } from '@pierre/partage';
 
 import { urlAsset } from '../../api/client.js';
 import { SceneDecor } from '../../habillages/SceneDecor.js';
 import type { RegionAllumee } from '../../habillages/SceneDecor.js';
 import { deriverEmplacements, regionsColoriables } from '../../habillages/emplacements.js';
-import type { Boite, Bornes, Cadre, Emplacement } from '../../habillages/emplacements.js';
+import type { Boite, Bornes, Cadre } from '../../habillages/emplacements.js';
+import { composerCartesPaires } from './composition.js';
 import { styleDeLecture, useReglagesLecture } from '../../lecture/ZoneDeLecture.js';
 import type { ProprietesMoteur } from '../types.js';
 
@@ -69,6 +70,27 @@ type CartePaires = ContenuPaires['cartes'][number];
 
 /** Cadence du `battementHorloge`. Le moteur ne connaît aucun `setTimeout` : c'est ici. */
 const PERIODE_BATTEMENT_MS = 1000;
+
+/** Une grande carte-phrase ne doit pas choisir sa voisine à la place de l'image sous le doigt. */
+const carteSousLePointeur: CollisionDetection = (argumentsCollision) => pointerWithin({
+  ...argumentsCollision,
+  droppableContainers: argumentsCollision.droppableContainers.filter(
+    (cible) => cible.id !== argumentsCollision.active.id,
+  ),
+});
+
+/** Garder le carton dans la largeur utile sans changer la cible désignée par le doigt.
+ * Le défilement vertical reste possible sur téléphone ; un auto-scroll horizontal ferait
+ * changer les coordonnées de toutes les cibles pendant le dépôt. */
+const contenirGlisseHorizontal: Modifier = ({ transform, draggingNodeRect, windowRect }) => {
+  if (draggingNodeRect === null || windowRect === null) return transform;
+  return {
+    ...transform,
+    x: Math.max(8 - draggingNodeRect.left,
+      Math.min(transform.x, windowRect.width - draggingNodeRect.right - 8)),
+  };
+};
+const MODIFICATEURS_GLISSE = [contenirGlisseHorizontal];
 
 /** Cadre servi tant que rien n'est mesuré — premier rendu, `happy-dom`, `ResizeObserver` absent. */
 const CADRE_DE_REPLI: Cadre = { largeur: 900, hauteur: 1000 };
@@ -111,7 +133,6 @@ const MESSAGES_DE_REFUS: Readonly<Record<string, string>> = {
 
 interface ProprietesCarteFlottante {
   readonly carte: CartePaires;
-  readonly emplacement: Emplacement;
   readonly retournee: boolean;
   readonly appariee: boolean;
   readonly enRefus: boolean;
@@ -122,7 +143,6 @@ interface ProprietesCarteFlottante {
 
 function CarteFlottante({
   carte,
-  emplacement,
   retournee,
   appariee,
   enRefus,
@@ -135,7 +155,7 @@ function CarteFlottante({
     id: carte.id,
     disabled: appariee,
   });
-  const { setNodeRef: brancherCible, isOver } = useDroppable({ id: carte.id });
+  const { setNodeRef: brancherCible, isOver } = useDroppable({ id: carte.id, disabled: appariee });
 
   const brancher = useCallback(
     (noeud: HTMLButtonElement | null) => {
@@ -155,15 +175,12 @@ function CarteFlottante({
     <span
       data-porte-carte={carte.id}
       style={{
-        position: 'absolute',
-        insetInlineStart: `${String(emplacement.x)}px`,
-        insetBlockStart: `${String(emplacement.y)}px`,
-        // Le SEUL rôle de ce porteur : centrer. Aucune classe, donc aucune animation ne peut lui
-        // reprendre cette transformation (R54).
-        transform: `translate(-50%, -50%)${glisse}`,
+        position: 'relative',
+        transform: glisse || undefined,
         display: 'inline-flex',
         pointerEvents: 'none',
         zIndex: retournee ? 1 : 0,
+        minInlineSize: 0,
       }}
     >
       <button
@@ -187,11 +204,13 @@ function CarteFlottante({
           {
             ...styleTexte,
             pointerEvents: 'auto',
-            touchAction: 'none',
-            whiteSpace: 'nowrap',
+            touchAction: 'manipulation',
+            whiteSpace: 'normal',
+            inlineSize: '100%',
+            boxSizing: 'border-box',
             outline: retournee || isOver ? '4px solid var(--soleil, #FFC93C)' : undefined,
             outlineOffset: retournee || isOver ? '3px' : undefined,
-            fontWeight: retournee ? 700 : undefined,
+            fontWeight: 400,
             // Appariée : elle ne s'efface JAMAIS (R14), elle se calme.
             opacity: appariee ? 0.55 : 1,
           } as CSSProperties
@@ -382,10 +401,7 @@ export function MoteurPaires(
     [habillage, cles, regions, cadreJeu, bornes, mesurer],
   );
 
-  const emplacementParCarte = useMemo(
-    () => new Map(resultat.emplacements.map((e) => [e.cle, e] as const)),
-    [resultat],
-  );
+  const composition = useMemo(() => composerCartesPaires(etat.cartes), [etat.cartes]);
 
   const allumees = useMemo<readonly RegionAllumee[]>(() => {
     const centroideParRegion = new Map(regions.map((r) => [r.id, r.centroide] as const));
@@ -441,7 +457,12 @@ export function MoteurPaires(
   );
 
   // --- le glisser, chemin second : amener une carte SUR une autre --------------
-  const capteurs = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
+  // Un balayage immédiat appartient à la page, même s'il commence sur une carte.
+  // Le maintien distingue le glisser intentionnel ; les deux taps restent le geste principal.
+  const capteurs = useSensors(
+    useSensor(MouseSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 5 } }),
+  );
 
   const auDebutDuGlisse = useCallback(
     (evenement: DragStartEvent) => {
@@ -467,7 +488,7 @@ export function MoteurPaires(
   );
 
   return (
-    <DndContext sensors={capteurs} onDragStart={auDebutDuGlisse} onDragEnd={auBoutDuGlisse}>
+    <DndContext sensors={capteurs} modifiers={MODIFICATEURS_GLISSE} collisionDetection={carteSousLePointeur} onDragStart={auDebutDuGlisse} onDragEnd={auBoutDuGlisse}>
       <div
         ref={racine}
         data-moteur="paires"
@@ -475,44 +496,49 @@ export function MoteurPaires(
         data-termine={etat.termineMs === null ? 'non' : 'oui'}
         data-aide={etat.niveauAide}
         data-etape={etape === undefined ? '' : etape.identifiant}
+        data-plateau-defilant="oui"
         data-regions-allumees={String(allumees.length)}
         style={{
           position: 'relative',
-          blockSize: '100%',
           minBlockSize: 0,
-          overflow: 'hidden',
+          overflow: 'visible',
           borderRadius: 'var(--rayon-carte)',
         }}
       >
         {/* Repère local stable : la barre haute porte la consigne parlée ; ce cartouche garde la
             règle du plateau et le nombre de paires trouvées, sans nommer la réponse attendue. */}
+        <div className="paires-reperes" ref={pied}>
         {etape === undefined ? null : (
           <div
             data-cartouche-paires="etape"
             aria-live="polite"
             style={{
-              position: 'absolute',
-              insetBlockStart: '0.75rem',
-              insetInlineEnd: '0.75rem',
+              position: 'relative',
               zIndex: 3,
               display: 'inline-flex',
               alignItems: 'center',
               gap: '0.65rem',
-              padding: '0.45rem 0.8rem',
+              padding: '0 0.8rem',
               border: '2px solid var(--trait)',
               borderRadius: '999px',
               background: 'color-mix(in srgb, var(--soleil, #ffc93c) 28%, var(--parchemin) 72%)',
               color: 'var(--trait)',
               boxShadow: 'var(--ombre-bd)',
               pointerEvents: 'none',
-              ...styleLecture,
             } as CSSProperties}
           >
-            <span style={{ fontWeight: 800 }}>Trouve les paires.</span>
-            <span aria-hidden="true" style={{ opacity: 0.72 }}>·</span>
             <span>{`${String(pairesTrouvees)} / ${String(pairesAttendues.length)} paires`}</span>
           </div>
         )}
+          <p
+            role="status"
+            aria-live="polite"
+            data-refus-texte={messageDeRefus === '' ? 'non' : 'oui'}
+            data-animations={animationsDesactivees ? 'calmes' : 'vives'}
+          >
+            {messageDeRefus === '' ? (etat.aide === null ? '' : (etat.aide.texte ?? '')) : messageDeRefus}
+          </p>
+        </div>
 
         {/* ── le décor, en fond : couvre la zone de jeu, se recolorie à mesure ────────────── */}
         <div style={{ position: 'absolute', ...ZONE_DE_JEU(hauteurPied), zIndex: 0 }}>
@@ -528,21 +554,18 @@ export function MoteurPaires(
         {/* ── les cartes, devant, à des emplacements dérivés de `etat.cartes` ─────────────── */}
         <div
           data-plateau="cartes"
+          data-composition={composition.mixte ? 'mixte' : 'textes'}
           style={{
-            position: 'absolute',
-            ...ZONE_DE_JEU(hauteurPied),
+            position: 'relative',
             zIndex: 1,
             pointerEvents: 'none',
           }}
         >
-          {etat.cartes.map((carte) => {
-            const emplacement = emplacementParCarte.get(carte.id);
-            if (emplacement === undefined) return null;
+          {composition.cartes.map((carte) => {
             return (
               <CarteFlottante
                 key={carte.id}
                 carte={carte}
-                emplacement={emplacement}
                 retournee={etat.carteRetournee === carte.id}
                 appariee={etat.acquis[carte.paire] !== undefined}
                 enRefus={!animationsDesactivees && carteRefusee === carte.id}
@@ -554,28 +577,6 @@ export function MoteurPaires(
           })}
         </div>
 
-        {/* ── le pied de page : le refus ou l'aide, jamais les deux, aucune animation ─────── */}
-        <div
-          ref={pied}
-          data-plateau="messages"
-          style={{
-            position: 'absolute',
-            insetInlineStart: 0,
-            insetInlineEnd: 0,
-            insetBlockEnd: 0,
-            zIndex: 2,
-          }}
-        >
-          <p
-            role="status"
-            aria-live="polite"
-            data-refus-texte={messageDeRefus === '' ? 'non' : 'oui'}
-            data-animations={animationsDesactivees ? 'calmes' : 'vives'}
-            style={{ margin: 0, minBlockSize: '1.5em' }}
-          >
-            {messageDeRefus === '' ? (etat.aide === null ? '' : (etat.aide.texte ?? '')) : messageDeRefus}
-          </p>
-        </div>
       </div>
     </DndContext>
   );

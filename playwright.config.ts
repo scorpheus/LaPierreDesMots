@@ -277,7 +277,7 @@ export default defineConfig({
       name: "qualite",
       testDir: "tests/qualite",
       testMatch: /.*\.spec\.ts$/,
-      testIgnore: [/responsive-tous-ecrans\.spec\.ts$/, /gamefeel-latence\.spec\.ts$/],
+      testIgnore: [/(responsive-tous-ecrans|composition-exercices)\.spec\.ts$/, /gamefeel-latence\.spec\.ts$/],
     },
     {
       // Une mesure de latence exécutée au milieu de dix audits axe/core ne mesure plus le jeu,
@@ -290,7 +290,7 @@ export default defineConfig({
     {
       name: "responsive",
       testDir: "tests/qualite",
-      testMatch: /responsive-tous-ecrans\.spec\.ts$/,
+      testMatch: /(responsive-tous-ecrans|composition-exercices)\.spec\.ts$/,
       use: {
         isMobile: true,
         hasTouch: true,

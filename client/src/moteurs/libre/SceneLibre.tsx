@@ -60,6 +60,7 @@ import { hexDeCouleur } from '@pierre/partage';
 import { chargerSceneHabillage } from '../../habillages/chargeur.js';
 import { corpsDuSvg } from '../../habillages/SceneDecor.js';
 import { SceneRasterIndexee } from './SceneRasterIndexee.js';
+import { CercleAccessible } from '../../composants/CercleAccessible.js';
 
 /** Région non encore peinte. Même jeton que `colorie/SceneSvg.tsx`. */
 const REMPLISSAGE_VIDE = 'var(--region-vide, #D9DEE7)';
@@ -296,12 +297,12 @@ function SceneLibreSvg({
         {regionsDeclarees
           .filter((region) => offertes.has(region.id))
           .map((region) => (
-            <circle
+            <CercleAccessible
               key={region.id}
               className="pierre-prise-libre"
               cx={region.centroide[0]}
               cy={region.centroide[1]}
-              r={DIAMETRE_PRISE_MINIMAL / 2}
+              rayonMinimal={DIAMETRE_PRISE_MINIMAL / 2}
               data-cible-frappe="oui"
               data-region-svg={region.id}
               data-peinte={remplissages[region.id] === undefined ? 'non' : 'oui'}

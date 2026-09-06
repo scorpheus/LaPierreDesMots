@@ -1,8 +1,10 @@
 /**
- * Campagne de jouabilité exhaustive des nœuds pédagogiques.
+ * Campagne exhaustive des transitions logiques des nœuds pédagogiques.
  *
  * L'audit visuel ouvre les 75 écrans ; il ne prouve pas que l'on peut jouer. Cette recette
- * complète ce manque : pour chaque nœud de progression, elle dérive chaque prochain geste juste
+ * injecte les actions par `__test.repondre` : elle ne valide ni les hit-tests ni le responsive.
+ * La campagne `parcours-tactile-exhaustif.spec.ts` couvre les gestes du navigateur réel.
+ * Pour chaque nœud de progression, celle-ci dérive chaque prochain geste juste
  * de l'état que le moteur expose et poursuit jusqu'à la récompense. Elle tente aussi un refus au
  * départ quand un voisin incorrect est identifiable, puis mesure chaque transition produite.
  *

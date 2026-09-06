@@ -1,5 +1,5 @@
 {
-  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Les huit cibles suivent désormais le raster publié : seau, marteau, enclume, billot, deux cristaux, lanterne et feu. Seau et marteau portent le graphème eau ; les six anciens objets absents de la forge ne sont plus demandés.",
+  "$commentaire": "BROUILLON — à relire par le parent avant toute promotion. Les huit cibles décrivent les objets visibles de forge-couleur-v1.png.",
   "id": "volcan-forge-colorie-01",
   "version": 1,
   "titre": "La forge et ses braises",
@@ -129,7 +129,7 @@
         },
         {
           "id": "c7",
-          "texte": "Colorie le cristal de gauche en rose.",
+          "texte": "Colorie le grand cristal de gauche en rose.",
           "forme": "imperative",
           "audio": null,
           "cibles": [
@@ -140,6 +140,7 @@
           ],
           "motsCles": [
             "colorie",
+            "grand",
             "cristal",
             "gauche",
             "rose"

@@ -408,7 +408,7 @@
     },
     {
       "id": "decor.tapis.v2",
-      "fichier": "contenu/assets/decors/tapis.png",
+      "fichier": "contenu/assets/decors/archives-2026-09-05/tapis.png",
       "empreinte": "sha256:DCD578C9AFEDD91BD09C75F8CB59686300F111331AAE0F3FEF8840B9122A0442",
       "generation": {
         "outil": "générateur d’images intégré à Codex",
@@ -431,11 +431,16 @@
         "tentatives": 2
       },
       "valide_par": "parent",
-      "valide_le": "2026-09-04"
+      "valide_le": "2026-09-04",
+      "archive": {
+        "ancienChemin": "contenu/assets/decors/tapis.png",
+        "remplacePar": "contenu/assets/decors/tapis-objets-v2.png",
+        "date": "2026-09-05"
+      }
     },
     {
       "id": "decor.brume.v2",
-      "fichier": "contenu/assets/decors/brume.png",
+      "fichier": "contenu/assets/decors/archives-2026-09-05/brume.png",
       "empreinte": "sha256:23A041B2916B21BA7FF33F7CE24297E48FDF7BFB8FD82A4FDCA4A16263BA09B8",
       "generation": {
         "outil": "générateur d’images intégré à Codex",
@@ -458,11 +463,16 @@
         "tentatives": 2
       },
       "valide_par": "parent",
-      "valide_le": "2026-09-04"
+      "valide_le": "2026-09-04",
+      "archive": {
+        "ancienChemin": "contenu/assets/decors/brume.png",
+        "remplacePar": "contenu/assets/decors/brume-coloriage-v3.png",
+        "date": "2026-09-05"
+      }
     },
     {
       "id": "decor.forge.v2",
-      "fichier": "contenu/assets/decors/forge.png",
+      "fichier": "contenu/assets/decors/archives-2026-09-05/forge.png",
       "empreinte": "sha256:8462082C874DCD04DB3150D966F21A7AF6DADAE0AA684A8967F8CDB139FF8ABD",
       "generation": {
         "outil": "générateur d’images intégré à Codex",
@@ -485,7 +495,12 @@
         "tentatives": 2
       },
       "valide_par": "parent",
-      "valide_le": "2026-09-04"
+      "valide_le": "2026-09-04",
+      "archive": {
+        "ancienChemin": "contenu/assets/decors/forge.png",
+        "remplacePar": "contenu/assets/decors/forge-coloriage-v3.png",
+        "date": "2026-09-05"
+      }
     },
     {
       "id": "coloriage.chaudron.v3",
@@ -527,7 +542,7 @@
     },
     {
       "id": "decor.fresque-murale.v2",
-      "fichier": "contenu/assets/decors/fresque-murale.png",
+      "fichier": "contenu/assets/decors/archives-2026-09-05/fresque-murale.png",
       "empreinte": "sha256:9AC15DFBFF64DE9F831664D767F655267055F3C27989BCF82F8DAB7B891518D5",
       "generation": {
         "outil": "générateur d’images intégré à Codex",
@@ -550,7 +565,12 @@
         "tentatives": 2
       },
       "valide_par": "parent",
-      "valide_le": "2026-09-04"
+      "valide_le": "2026-09-04",
+      "archive": {
+        "ancienChemin": "contenu/assets/decors/fresque-murale.png",
+        "remplacePar": "contenu/assets/decors/fresque-coloriage-v3.png",
+        "date": "2026-09-05"
+      }
     },
     {
       "id": "objet.place.soleil.v1",
@@ -1056,6 +1076,114 @@
       },
       "valide_par": "parent",
       "valide_le": "2026-09-04"
+    },
+    {
+      "id": "coloriage.tapis.2026-09-05",
+      "fichier": "contenu/assets/decors/tapis-objets-v2.png",
+      "empreinte": "sha256:cd7c1200bd753fab478c4880911ec7f63aa47dd898d96804c5ff27f87b558fc3",
+      "$empreinte": "SHA-256 des octets du fichier PNG ; ne pas comparer à un ancien hash de pixels RGB.",
+      "generation": {
+        "outil": "générateur intégré",
+        "source": "contenu/brouillons/coloriage-tapis-2026-09-05/tapis-objets-v2.png",
+        "prompt": "Cas d'usage : illustration-story, nouvelle scène de jeu en 2D.\nImages d'entrée : image 1 (l'école) et image 2 (l'ancien tapis forestier) sont UNIQUEMENT les références de direction artistique APPROUVÉES. Reprendre exactement leur langage de dessin, leurs contours fins irréguliers, leurs surfaces peintes mates, leur végétation et leur lumière. Créer une nouvelle scène, ne pas copier leur composition ni leurs personnages. Le résultat doit sembler être la page voisine du MÊME livre illustré par la même main, jamais une scène 3D.\nScène : le coin pique-nique d'une forêt accueillante, cadrage proche en légère plongée, format paysage 3:2. Quelques troncs et fougères encadrent le bord, un petit chemin invite à entrer, végétation moins dense autour des objets jouables. Une vraie scène habitée, pas sept produits sur un plateau ni une grille de catalogue.\nSept sujets EXACTEMENT, tous entiers, grands et identifiables à 500 pixels de largeur : un tapis brun tissé UNI, sans motifs, au centre ; un banc rustique de bois orange à gauche ; un chat noir ordinaire, amical, proportions naturelles, à droite près du tapis ; un sac à dos vert en toile avec rabat et bretelles près du banc mais séparé de lui ; au premier plan un grand bol violet sans anse ; à droite un pot de fleurs rouge vide, haut et évasé, clairement différent du bol ; un ballon jaune rond sur le chemin près du tapis. Répartir naturellement ces objets en profondeur légère et en diagonales, silhouettes distinctes et sol visible entre elles, aucun objet ne recouvre le tapis ni un autre objet. Garder des tailles jouables généreuses, pas de petits accessoires cachés. Pas de duplication.\nRendu PRIORITAIRE : illustration 2D dessinée exactement comme les références jointes, contours fins dessinés à la main, ombrages peints en quelques valeurs, grain délicat et matières suggérées par de petites touches maîtrisées. Le chat est dessiné dans ce même trait, pas en fourrure réaliste ni en mascotte 3D. Banc avec bois dessiné, pas rendu de meuble photographié. Sac en toile rustique, pas sac de randonnée photoréaliste. Palette végétale naturelle, lumière du jour claire et neutre, pas de filtre jaune ou sépia. Ne pas employer de volumes sculptés lisses, éclairage de studio, plastique brillant, occlusion ambiante 3D, flou photographique, gros yeux de jouet, ni bords vectoriels plats. Pas de lavis flou ni de taches de couleur parasites. Zéro texte, lettres, flèches, cercles, UI ou watermark.\nFinalité : lire une consigne puis reconnaître et toucher le bon objet, même lorsque toute la scène est affichée en gris.\n",
+        "workflow": null,
+        "checkpoint": null,
+        "graine": null,
+        "etapes": null,
+        "cfg": null,
+        "sampler": null,
+        "resolution": [
+          1536,
+          1024
+        ]
+      },
+      "qc": {
+        "semantique": "Objets examinés en gris et masques superposés, repères raster séparés, puis recette tactile réelle. Voir rapport du lot.",
+        "technique": "PNG 1536×1024, ratio 3:2, empreinte et chemins fermés contrôlés."
+      },
+      "valide_par": "parent : proposition tapis v2 acceptée pour intégration locale",
+      "valide_le": "2026-09-05"
+    },
+    {
+      "id": "coloriage.marais-jumeau-08.2026-09-05",
+      "fichier": "contenu/assets/decors/brume-coloriage-v3.png",
+      "empreinte": "sha256:5b5c2634653aa3fe483efc8cf673fbed634b7af5b15dbfbc07d5cf969c1ff51f",
+      "$empreinte": "SHA-256 des octets du fichier PNG ; ne pas comparer à un ancien hash de pixels RGB.",
+      "generation": {
+        "outil": "générateur intégré",
+        "source": "contenu/brouillons/coloriages-locaux-2026-09-05/marais-jumeau-08/brume-v3.png",
+        "prompt": "Use case: illustration-story\nAsset type: décor raster de coloriage à consigne pour une application de lecture enfant (7 ans), paysage 3:2.\nInput images: Image 1 is composition/reference only: use its calm marsh layout, but do not copy its black-and-white line-art style. Image 2 is style reference only: match its approved French children’s adventure-book illustration, fine organic navy contours, soft matte textured color planes, readable natural materials and friendly scale.\nPrimary request: create one clear early-day misty marsh scene for a color-instruction game. Exactly seven large, separate, unmistakable target subjects, all fully visible and easy to distinguish in grayscale: (1) one very large rounded boulder on the near left bank, (2) one single willow tree with a wide trunk and hanging branches on the far left, (3) one clearly visible friendly snail with large spiral shell on a dry path in the near foreground, (4) one open water-lily flower on one distinct lily pad near the lower center, (5) one wooden pontoon/dock with planks and posts on the right, (6) one small wooden rowboat moored on the left-center bank, (7) a broad uncluttered visible daytime sky in the upper right. The river, soft distant reeds, and two thin layers of mist form only background atmosphere; do not obscure targets.\nScene/backdrop: calm children’s storybook marsh, water, sparse reeds at far edges, distant soft woods. No character people.\nComposition/framing: wide 3:2 landscape, slightly elevated front view, targets separated by clear pale water/ground gaps; all seven target silhouettes at least finger-size at a 500px-wide rendering. The boulder, willow, snail, water-lily flower, pontoon and rowboat must not overlap. The right-upper sky must remain visually clear.\nLighting/mood: fresh calm daytime, light mist, gentle and safe.\nColor palette: fresh blue water and sky, mossy greens, warm aged wood, neutral stone; no sepia or yellow filter.\nMaterials/textures: matte editorial digital paint, subtle paper-like texture, clean fine linework, soft rounded forms.\nText (verbatim): none.\nConstraints: no duplicate boats, docks, snails, willow trees, large boulders or water-lily flowers; no chicken, mouse, fly, wheel, bridge, road, signs, letters, numbers, labels, circles, interface, watermark. Avoid hiding any target behind mist, foliage, reeds or foreground props. Keep every target a simple, closed-looking, easily traceable silhouette for a later SVG mask.\n",
+        "workflow": null,
+        "checkpoint": null,
+        "graine": null,
+        "etapes": null,
+        "cfg": null,
+        "sampler": null,
+        "resolution": [
+          1536,
+          1024
+        ]
+      },
+      "qc": {
+        "semantique": "Objets examinés en gris et masques superposés, repères raster séparés, puis recette tactile réelle. Voir rapport du lot.",
+        "technique": "PNG 1536×1024, ratio 3:2, empreinte et chemins fermés contrôlés."
+      },
+      "valide_par": "mandat parent de finition pour essai local ; visa esthétique final après essai",
+      "valide_le": "2026-09-05"
+    },
+    {
+      "id": "coloriage.forge.2026-09-05",
+      "fichier": "contenu/assets/decors/forge-coloriage-v3.png",
+      "empreinte": "sha256:69530231e593fca3f9be59cee5631952bbbfd26c856fdd019ba2ef97b63a1be9",
+      "$empreinte": "SHA-256 des octets du fichier PNG ; ne pas comparer à un ancien hash de pixels RGB.",
+      "generation": {
+        "outil": "générateur intégré",
+        "source": "contenu/brouillons/coloriages-locaux-2026-09-05/forge/image/forge-couleur-v1.png",
+        "prompt": "Create one finished 3:2 landscape children's educational game illustration, matching the approved reference's warm painterly textured storybook style: richly colored but calm, soft daylight, visible brush texture, no labels, no text, no interface. Use the second reference ONLY for this exact readable forge composition, but replace its monochrome line-art finish with the same full-color painterly style as the first reference. A welcoming magical mountain forge inside an open rock cave. Make EIGHT large, separate, unmistakable objects on the grey-neutral/colorful scene, each with generous clear space: (1) a blue metal water bucket at the lower right; (2) a black blacksmith hammer lying diagonally on a low work surface; (3) a large red anvil on a brown wooden chopping block in the center; (4) a tall purple crystal at the lower right; (5) a yellow hanging lantern at upper left; (6) one single distinct pink crystal at the far left, clearly separate from other crystals; (7) a bright orange fire in a round stone hearth at lower center; (8) retain a few small non-target tools and crystals only as background texture, never competing with targets. Child-friendly 7-year-old reading game, objects easy to name when colors are muted, realistic solid silhouettes, no characters, no words.\n",
+        "workflow": null,
+        "checkpoint": null,
+        "graine": null,
+        "etapes": null,
+        "cfg": null,
+        "sampler": null,
+        "resolution": [
+          1536,
+          1024
+        ]
+      },
+      "qc": {
+        "semantique": "Objets examinés en gris et masques superposés, repères raster séparés, puis recette tactile réelle. Voir rapport du lot.",
+        "technique": "PNG 1536×1024, ratio 3:2, empreinte et chemins fermés contrôlés."
+      },
+      "valide_par": "mandat parent de finition pour essai local ; visa esthétique final après essai",
+      "valide_le": "2026-09-05"
+    },
+    {
+      "id": "coloriage.fresque-murale.2026-09-05",
+      "fichier": "contenu/assets/decors/fresque-coloriage-v3.png",
+      "empreinte": "sha256:3be0677fd16210650b9af6469a40c12db4199865880115c2dfbd0d2f538c5c2a",
+      "$empreinte": "SHA-256 des octets du fichier PNG ; ne pas comparer à un ancien hash de pixels RGB.",
+      "generation": {
+        "outil": "réemploi d’un rendu intégré existant",
+        "source": "contenu/brouillons/coloriages-locaux-2026-09-05/fresque-murale/image/fresque-murale-v2.png",
+        "prompt": null,
+        "workflow": null,
+        "checkpoint": null,
+        "graine": null,
+        "etapes": null,
+        "cfg": null,
+        "sampler": null,
+        "resolution": [
+          1536,
+          1024
+        ]
+      },
+      "qc": {
+        "semantique": "Objets examinés en gris et masques superposés, repères raster séparés, puis recette tactile réelle. Voir rapport du lot.",
+        "technique": "PNG 1536×1024, ratio 3:2, empreinte et chemins fermés contrôlés."
+      },
+      "valide_par": "réemploi du décor couleur existant pour essai local",
+      "valide_le": "2026-09-05"
     }
   ]
 }

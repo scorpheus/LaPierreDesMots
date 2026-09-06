@@ -26,7 +26,7 @@
         {
           "id": "c1",
           "mot": "rouge",
-          "texte": "Touche la luciole qui porte le mot « rouge ».",
+          "texte": "Retrouve le mot que tu viens de lire.",
           "forme": "imperative",
           "audio": null,
           "expositionMs": 1800,
@@ -45,7 +45,7 @@
         {
           "id": "c2",
           "mot": "bleu",
-          "texte": "Touche la luciole qui porte le mot « bleu ».",
+          "texte": "Retrouve le mot que tu viens de lire.",
           "forme": "imperative",
           "audio": null,
           "expositionMs": 1800,
@@ -64,7 +64,7 @@
         {
           "id": "c3",
           "mot": "vert",
-          "texte": "Touche la luciole qui porte le mot « vert ».",
+          "texte": "Retrouve le mot que tu viens de lire.",
           "forme": "imperative",
           "audio": null,
           "expositionMs": 1800,
@@ -83,7 +83,7 @@
         {
           "id": "c4",
           "mot": "jaune",
-          "texte": "Touche la luciole qui porte le mot « jaune ».",
+          "texte": "Retrouve le mot que tu viens de lire.",
           "forme": "imperative",
           "audio": null,
           "expositionMs": 1800,
@@ -102,7 +102,7 @@
         {
           "id": "c5",
           "mot": "rose",
-          "texte": "Touche la luciole qui porte le mot « rose ».",
+          "texte": "Retrouve le mot que tu viens de lire.",
           "forme": "imperative",
           "audio": null,
           "expositionMs": 1800,
@@ -121,7 +121,7 @@
         {
           "id": "c6",
           "mot": "brun",
-          "texte": "Touche la luciole qui porte le mot « brun ».",
+          "texte": "Retrouve le mot que tu viens de lire.",
           "forme": "imperative",
           "audio": null,
           "expositionMs": 1800,

@@ -1,0 +1,29 @@
+{
+  "raison": "Dessins remplacés pour le coloriage, originaux conservés et non livrés comme scènes actives.",
+  "fichiers": [
+    {
+      "source": "contenu/assets/decors/tapis.png",
+      "destination": "contenu/assets/decors/archives-2026-09-05/tapis.png",
+      "remplacePar": "contenu/assets/decors/tapis-objets-v2.png",
+      "empreinte": "4a17b2c55121d2cacc46411e812e027842e7d1c3a98f4cfcc9d9905db67f8eea"
+    },
+    {
+      "source": "contenu/assets/decors/brume.png",
+      "destination": "contenu/assets/decors/archives-2026-09-05/brume.png",
+      "remplacePar": "contenu/assets/decors/brume-coloriage-v3.png",
+      "empreinte": "c6963af174d5a16c9ff5ca3e375c6cf31b04498936e48e109c0521ce92fd6169"
+    },
+    {
+      "source": "contenu/assets/decors/forge.png",
+      "destination": "contenu/assets/decors/archives-2026-09-05/forge.png",
+      "remplacePar": "contenu/assets/decors/forge-coloriage-v3.png",
+      "empreinte": "c00c473e829690db08deb6fa49c7e8a83d9ed3a3c3785be6bf28a1e29cc56e2e"
+    },
+    {
+      "source": "contenu/assets/decors/fresque-murale.png",
+      "destination": "contenu/assets/decors/archives-2026-09-05/fresque-murale.png",
+      "remplacePar": "contenu/assets/decors/fresque-coloriage-v3.png",
+      "empreinte": "974c802adb95864a0fb74fdbd494e6786259005023202639c7636723f8bcabd2"
+    }
+  ]
+}

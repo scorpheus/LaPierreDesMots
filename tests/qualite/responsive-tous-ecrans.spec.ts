@@ -6,12 +6,14 @@
  * commande, de la rogner dans un ancêtre non défilable ou de faire déborder la page sur le côté.
  */
 import { expect, test } from '../harnais-serveur.js';
+import { attendreGeometrieStable } from './aides-composition.js';
 
 import {
   appliquerReglagesLectureReels,
   entrerDansLeNoeud,
   moteursDeclares,
   noeudsLivres,
+  preparer,
   recettesDEcrans,
 } from '../e2e/qa-outils.js';
 
@@ -47,6 +49,38 @@ interface DefautResponsive {
   readonly raison: string;
 }
 
+test('chemin étroit — le repli reste stable après rotation et redimensionnement', async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 640 });
+  await preparer(page, 'CheminEtroit');
+  await entrerDansLeNoeud(page, 'foret-muette-05', 'CheminEtroit');
+  for (const format of [{ width: 360, height: 640 }, { width: 640, height: 360 },
+    { width: 1920, height: 1080 }, { width: 360, height: 640 }]) {
+    await page.setViewportSize(format);
+    await page.evaluate(async () => {
+      await document.fonts.ready;
+      await Promise.all([...document.images].map((image) => image.decode()));
+    });
+    // Une alternance grille/plateau peut se cacher derrière une capture isolée. On garde
+    // les cadres consécutifs, sans temporisation, pour rendre cette boucle observable.
+    const cadres = await page.locator('[data-moteur="chemin"]').evaluate(async (moteur) => {
+      const resultat = [];
+      for (let image = 0; image < 30; image += 1) {
+        await new Promise<void>((resoudre) => requestAnimationFrame(() => resoudre()));
+        const boite = moteur.getBoundingClientRect();
+        resultat.push({ largeur: boite.width, hauteur: boite.height,
+          repli: moteur.getAttribute('data-plateau-defilant'),
+          page: document.documentElement.scrollWidth, viewport: innerWidth,
+          client: document.documentElement.clientWidth });
+      }
+      return resultat;
+    });
+    expect(new Set(cadres.slice(-10).map((cadre) => JSON.stringify(cadre))).size,
+      JSON.stringify({ format, cadres })).toBe(1);
+    expect(cadres.at(-1)!.page, 'aucune expansion du viewport mobile par débordement').toBeLessThanOrEqual(format.width);
+    await attendreGeometrieStable(page);
+  }
+});
+
 /**
  * Un parcours qui ouvre 89 recettes prouve leur atteignabilité, pas leur composition. Chaque
  * moteur déclare donc ici ses pièces indispensables. L'inventaire est comparé à `CodeMoteur` :
@@ -71,32 +105,19 @@ const SONDES_PAR_MOTEUR: Readonly<Record<string, readonly string[]>> = {
 };
 
 async function defautsDe(page: Page, ecran: string): Promise<DefautResponsive[]> {
-  await page.evaluate(async () => {
-    await document.fonts.ready;
-    await Promise.all([...document.images].map(async (image) => {
-      if (!image.complete) {
-        await new Promise<void>((resoudre) => {
-          image.addEventListener('load', () => resoudre(), { once: true });
-          image.addEventListener('error', () => resoudre(), { once: true });
-          if (image.complete) resoudre();
-        });
-      }
-      if (image.naturalWidth > 0) await image.decode().catch(() => undefined);
-    }));
-    // Deux frames garantissent que le redimensionnement consécutif au décodage des images a
-    // traversé style, layout et peinture. Ce n'est pas une attente chronométrée : la sonde
-    // attend l'état du navigateur qu'elle est précisément venue mesurer.
-    await new Promise<void>((resoudre) => {
-      requestAnimationFrame(() => requestAnimationFrame(() => resoudre()));
-    });
-  });
+  // Un ResizeObserver peut encore changer le repli après deux frames. La sonde commune
+  // exige trois cadres identiques et refuse les images cassées, sans masquer leurs erreurs.
+  await attendreGeometrieStable(page);
   return page.evaluate((nomEcran) => {
     const defauts: DefautResponsive[] = [];
     const racine = document.documentElement;
     if (racine.scrollWidth > racine.clientWidth + 1) {
       defauts.push({
         ecran: nomEcran,
-        raison: `page plus large que le viewport (${String(racine.scrollWidth)} > ${String(racine.clientWidth)})`,
+        raison: `page plus large que le viewport (${String(racine.scrollWidth)} > ${String(racine.clientWidth)}) : ` +
+          [...document.querySelectorAll<HTMLElement>('[data-moteur] *')]
+            .filter((element) => element.getBoundingClientRect().right > racine.clientWidth + 1)
+            .slice(0, 5).map((element) => element.outerHTML.slice(0, 220)).join(' · '),
       });
     }
 

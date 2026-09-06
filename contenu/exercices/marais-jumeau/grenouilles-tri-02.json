@@ -110,7 +110,7 @@
         {
           "id": "feuille-gauche",
           "libelle": "la feuille de gauche",
-          "critere": "le son de trou",
+          "critere": "le même son que dans « trou »",
           "zone": [
             [
               60,
@@ -133,7 +133,7 @@
         {
           "id": "feuille-droite",
           "libelle": "la feuille de droite",
-          "critere": "le son de noir",
+          "critere": "le même son que dans « noir »",
           "zone": [
             [
               540,

@@ -1,8 +1,8 @@
 {
-  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. ORIGINE : NIVEAU 3, fiche 3, « Comment pousse une graine ? ». Les huit cibles suivent le raster publié : fleur, feuille, médaillon, pot, mur, arbre, porte et ciel. Le médaillon remplace le soleil absent de cette image ; aucune consigne ne dépend d'un objet invisible.",
+  "$commentaire": "BROUILLON NON JOUABLE — à relire puis promouvoir par le principal. Les huit consignes gardent le nœud, l’exercice, les compétences, l’ordre des couleurs et le nombre d’étapes ; elles nomment les objets réellement visibles dans fresque-murale-v2.png.",
   "id": "cite-des-histoires-fresque-murale-colorie-01",
   "version": 1,
-  "titre": "La fresque de la graine",
+  "titre": "Le mur des histoires",
   "origine": {
     "source": "fiches-origine/NIVEAU 3.pdf",
     "niveau": 3,
@@ -31,41 +31,41 @@
       "consignes": [
         {
           "id": "c1",
-          "texte": "Colorie la fleur en rouge.",
+          "texte": "Colorie la montagne en rouge.",
           "forme": "imperative",
           "audio": null,
           "cibles": [
             {
-              "region": "fleur",
+              "region": "scene-du-haut",
               "couleur": "rouge"
             }
           ],
           "motsCles": [
             "colorie",
-            "fleur",
+            "montagne",
             "rouge"
           ]
         },
         {
           "id": "c2",
-          "texte": "Colorie la feuille en vert.",
+          "texte": "Colorie la tente en vert.",
           "forme": "imperative",
           "audio": null,
           "cibles": [
             {
-              "region": "feuille",
+              "region": "scene-du-bas",
               "couleur": "vert"
             }
           ],
           "motsCles": [
             "colorie",
-            "feuille",
+            "tente",
             "vert"
           ]
         },
         {
           "id": "c3",
-          "texte": "Colorie le médaillon en jaune.",
+          "texte": "Colorie le grand rond en haut en jaune.",
           "forme": "imperative",
           "audio": null,
           "cibles": [
@@ -76,81 +76,88 @@
           ],
           "motsCles": [
             "colorie",
-            "médaillon",
+            "grand",
+            "rond",
+            "haut",
             "jaune"
           ]
         },
         {
           "id": "c4",
-          "texte": "Colorie le pot en brun.",
+          "texte": "Colorie la porte de droite en brun.",
           "forme": "imperative",
           "audio": null,
           "cibles": [
             {
-              "region": "pot",
+              "region": "pot-de-couleur",
               "couleur": "brun"
             }
           ],
           "motsCles": [
             "colorie",
-            "pot",
+            "porte",
+            "droite",
             "brun"
           ]
         },
         {
           "id": "c5",
-          "texte": "Colorie le mur en rose.",
-          "forme": "imperative",
-          "audio": null,
-          "cibles": [
-            {
-              "region": "mur",
-              "couleur": "rose"
-            }
-          ],
-          "motsCles": [
-            "colorie",
-            "mur",
-            "rose"
-          ]
-        },
-        {
-          "id": "c6",
-          "texte": "Colorie l'arbre en orange.",
+          "texte": "Colorie le grand arbre à droite de la tente en rose.",
           "forme": "imperative",
           "audio": null,
           "cibles": [
             {
               "region": "arbre",
-              "couleur": "orange"
+              "couleur": "rose"
             }
           ],
           "motsCles": [
             "colorie",
+            "grand",
             "arbre",
-            "orange"
+            "droite",
+            "tente",
+            "rose"
           ]
         },
         {
-          "id": "c7",
-          "texte": "Colorie la porte en violet.",
+          "id": "c6",
+          "texte": "Colorie la porte de gauche en orange.",
           "forme": "imperative",
           "audio": null,
           "cibles": [
             {
               "region": "porte",
-              "couleur": "violet"
+              "couleur": "orange"
             }
           ],
           "motsCles": [
             "colorie",
             "porte",
+            "gauche",
+            "orange"
+          ]
+        },
+        {
+          "id": "c7",
+          "texte": "Colorie la pierre en violet.",
+          "forme": "imperative",
+          "audio": null,
+          "cibles": [
+            {
+              "region": "scene-de-droite",
+              "couleur": "violet"
+            }
+          ],
+          "motsCles": [
+            "colorie",
+            "pierre",
             "violet"
           ]
         },
         {
           "id": "c8",
-          "texte": "Le ciel du matin est bleu.",
+          "texte": "Le ciel de la montagne est bleu.",
           "forme": "affirmative",
           "audio": null,
           "cibles": [
@@ -161,7 +168,7 @@
           ],
           "motsCles": [
             "ciel",
-            "matin",
+            "montagne",
             "bleu"
           ]
         }

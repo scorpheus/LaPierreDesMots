@@ -729,7 +729,7 @@ export function MoteurTri(
     [habillage, cles, regions, cadreJeu, bornes, mesurer],
   );
 
-  const modeCompact = cadre.largeur <= 900;
+  const modeCompact = cadre.largeur <= 900 || resultat.chevauchements > 0 || resultat.horsBornes > 0;
   const emplacementsRendus = useMemo(
     () => modeCompact
       ? emplacementsCompacts(resultat.emplacements, cadreJeu, mesurer)

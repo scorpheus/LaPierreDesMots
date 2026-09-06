@@ -4,13 +4,13 @@ import { expect, test } from './invariants.js';
 import { appliquerReglagesLectureReels, entrerDansLeNoeud } from './qa-outils.js';
 
 const ETAPES = [
-  { region: 'gland-du-tapis', texte: 'centre du tapis', couleur: 'brun', point: [480, 391] },
-  { region: 'feuille-du-tapis-un', texte: 'haut à gauche', couleur: 'noir', point: [310, 324] },
-  { region: 'feuille-du-tapis-deux', texte: 'haut, au milieu', couleur: 'violet', point: [500, 324] },
-  { region: 'feuille-du-tapis-trois', texte: 'haut à droite', couleur: 'vert', point: [700, 324] },
-  { region: 'feuille-haute', texte: 'feuille de gauche', couleur: 'rouge', point: [252, 386] },
-  { region: 'feuille-basse', texte: 'bas, au milieu', couleur: 'jaune', point: [490, 463] },
-  { region: 'feuille-du-tapis-quatre', texte: 'feuille de droite', couleur: 'orange', point: [755, 386] },
+  { region: 'gland-du-tapis', texte: 'le tapis', couleur: 'brun', point: [0.51, 0.56] },
+  { region: 'feuille-du-tapis-un', texte: 'le chat', couleur: 'noir', point: [0.842, 0.48] },
+  { region: 'feuille-du-tapis-deux', texte: 'le bol', couleur: 'violet', point: [0.282, 0.842] },
+  { region: 'feuille-du-tapis-trois', texte: 'le sac', couleur: 'vert', point: [0.2, 0.66] },
+  { region: 'feuille-haute', texte: 'le pot', couleur: 'rouge', point: [0.853, 0.76] },
+  { region: 'feuille-basse', texte: 'le ballon', couleur: 'jaune', point: [0.64, 0.802] },
+  { region: 'feuille-du-tapis-quatre', texte: 'le banc', couleur: 'orange', point: [0.23, 0.36] },
 ] as const;
 
 test('foret-muette-08 — les sept objets visibles du tapis se colorient sur tablette', async ({ page }) => {
@@ -39,11 +39,13 @@ test('foret-muette-08 — les sept objets visibles du tapis se colorient sur tab
     await expect(prise).toHaveAttribute('data-active', 'oui');
     await moteur.locator(`[data-godet="${etape.couleur}"]`).click();
 
-    const boite = await scene.boundingBox();
-    expect(boite, 'la scène du tapis doit avoir une boîte mesurable').not.toBeNull();
-    const x = boite!.x + (etape.point[0] / 960) * boite!.width;
-    const y = boite!.y + (etape.point[1] / 600) * boite!.height;
-    await page.mouse.click(x, y);
+    // Le SVG peut avoir des marges : sa boîte DOM n'est pas celle du dessin.
+    const point = await scene.evaluate((element, relatif) => {
+      const svg = element as SVGSVGElement;
+      const ecran = new DOMPoint(relatif[0] * 960, relatif[1] * 640).matrixTransform(svg.getScreenCTM()!);
+      return { x: ecran.x, y: ecran.y };
+    }, etape.point);
+    await page.mouse.click(point.x, point.y);
 
     if (index === ETAPES.length - 1) {
       await expect(page.locator('[data-ecran="recompense"]')).toBeVisible();

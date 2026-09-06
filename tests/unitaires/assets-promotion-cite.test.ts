@@ -10,10 +10,10 @@ const racine = process.cwd();
 describe('promotion des assets validés de la Cité', () => {
   it('raccorde les scènes régionales aux quatre fonds publiés', () => {
     const scenes = [
-      ['cite-des-histoires/fresque-murale.svg', '/api/contenu/assets/assets/decors/fresque-murale.png'],
-      ['foret-muette/tapis.svg', '/api/contenu/assets/assets/decors/tapis.png'],
-      ['marais-jumeau/brume.svg', '/api/contenu/assets/assets/decors/brume.png'],
-      ['volcan/forge.svg', '/api/contenu/assets/assets/decors/forge.png'],
+      ['cite-des-histoires/fresque-murale.svg', '/api/contenu/assets/assets/decors/fresque-coloriage-v3.png'],
+      ['foret-muette/tapis.svg', '/api/contenu/assets/assets/decors/tapis-objets-v2.png'],
+      ['marais-jumeau/brume.svg', '/api/contenu/assets/assets/decors/brume-coloriage-v3.png'],
+      ['volcan/forge.svg', '/api/contenu/assets/assets/decors/forge-coloriage-v3.png'],
     ] as const;
     for (const [scene, fond] of scenes) {
       const svg = readFileSync(join(racine, 'contenu', 'habillages', scene), 'utf8');

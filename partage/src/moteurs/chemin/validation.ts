@@ -54,7 +54,7 @@ export function evaluerChemin(etat: EtatChemin, caseVisee: IdCase): DecisionChem
 
   const declaree = etat.cases.find((c) => c.id === caseVisee);
   if (declaree === undefined) return REFUS('case-inconnue');
-  if (etat.acquis[caseVisee] !== undefined) return REFUS('case-deja-franchie');
+  if (etat.visiteesEtape.includes(caseVisee)) return REFUS('case-deja-franchie');
 
   const courante = etat.cases.find((c) => c.id === etat.position);
   if (courante === undefined || !courante.voisines.includes(caseVisee)) {

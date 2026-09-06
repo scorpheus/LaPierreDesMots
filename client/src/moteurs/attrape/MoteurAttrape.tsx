@@ -9,14 +9,14 @@
  * le retour sensoriel, et donne à voir l'état.
  *
  * ══════════════════════════════════════════════════════════════════════════════════════════════
- * OÙ SONT POSÉES LES CIBLES, ET POURQUOI CE N'EST PAS UNE DÉRIVATION DE RÉGIONS
+ * OÙ SONT POSÉES LES CIBLES
  *
  * `CibleAttrape.depart` est en coordonnées `viewBox` (le type le dit : « Position de départ en
- * coordonnées viewBox. Le mouvement appartient au rendu. ») — contrairement aux mots de
- * `phrase`, une cible a déjà sa place, choisie par le contenu. La bonne dérivation n'est donc
- * pas `deriverEmplacements` (qui invente une place) mais la MÊME transformation que le décor
- * applique déjà à son `viewBox` (`transformeMeet` / `versPixels`, `mise-en-scene.ts`) : décor
- * et cibles partagent alors un seul référentiel — la leçon de R40, déjà appliquée à `phrase`.
+ * coordonnées viewBox. Le mouvement appartient au rendu. »). Elle reste le repli quand un
+ * habillage n'offre aucune région, mais ne peut pas être une position absolue : deux positions
+ * publiées peuvent se rejoindre après réduction sur un téléphone. Les boîtes tactiles réelles
+ * sont donc rangées par le planificateur commun ; la lisibilité et le tap l'emportent sur une
+ * position décorative (R52).
  *
  * ── LE MOUVEMENT, ET POURQUOI IL N'EST PAS UNE TROISIÈME `transform` SUR LE BOUTON ────────────
  * R54 (`Docs/decision-decor-de-fond-et-mots-poses.md`) : une image-clé qui touche `transform`
@@ -50,7 +50,7 @@
  *   - **toute cible fait au moins 64 px** — la classe `.cible` le pose, jamais un nombre recopié.
  */
 
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import type { CSSProperties, ReactElement } from 'react';
 import type { ActionAttrape, ContenuAttrape, EtatAttrape } from '@pierre/partage';
 import { styleDeLecture, useReglagesLecture } from '../../lecture/ZoneDeLecture.js';
@@ -60,6 +60,8 @@ import {
   CIBLE_MIN,
   cadreJeuEtBornes,
   lireViewBox,
+  MARGE,
+  mesurerTexte,
   planifierCascade,
   regionsAllumeesDepuisAcquis,
   regionsColoriables,
@@ -110,10 +112,150 @@ function hacher(texte: string): number {
   return h;
 }
 
+/*
+ * Le mélange appartient à la SESSION, pas à un rendu. `useState` garde la permutation pendant
+ * les aides et les rerenders ; la clé `useId` mémorise le premier tirage pendant les deux
+ * invocations de développement de StrictMode. Sans cette courte mémoire, StrictMode avancerait
+ * deux fois le même Alea injecté et le rejeu dépendrait de l'environnement de rendu.
+ */
+const ORDRES_DE_SESSION = new WeakMap<object, Map<string, readonly string[]>>();
+
+function tirerOrdreDeSession(
+  alea: ProprietesMoteur<ContenuAttrape, EtatAttrape, ActionAttrape>['services']['alea'],
+  identifiantSession: string,
+  cibles: ContenuAttrape['cibles'],
+): readonly string[] {
+  let ordres = ORDRES_DE_SESSION.get(alea);
+  if (ordres === undefined) {
+    ordres = new Map<string, readonly string[]>();
+    ORDRES_DE_SESSION.set(alea, ordres);
+  }
+  const connu = ordres.get(identifiantSession);
+  if (connu !== undefined) return connu;
+
+  // L'ordre du JSON est éditorial. Le tirer tel quel ferait de son rangement par le rédacteur
+  // une variable cachée du jeu ; l'Alea reçoit donc toujours le même catalogue canonique.
+  const ordre = alea
+    .melanger([...cibles].sort((gauche, droite) => gauche.id.localeCompare(droite.id)))
+    .map((cible) => cible.id);
+  ordres.set(identifiantSession, ordre);
+  return ordre;
+}
+
+function oublierOrdreDeSession(
+  alea: ProprietesMoteur<ContenuAttrape, EtatAttrape, ActionAttrape>['services']['alea'],
+  identifiantSession: string,
+): void {
+  const ordres = ORDRES_DE_SESSION.get(alea);
+  if (ordres === undefined) return;
+  ordres.delete(identifiantSession);
+  if (ordres.size === 0) ORDRES_DE_SESSION.delete(alea);
+}
+
+interface BoiteCible {
+  readonly id: string;
+  /** Boîte CSS du bouton, bordure et remplissage compris. */
+  readonly largeurBouton: number;
+  readonly hauteurBouton: number;
+  /** Pixels réellement alloués au raster, sans taille intrinsèque non bornée. */
+  readonly largeurRaster: number;
+  readonly hauteurRaster: number;
+  /** Emprise de la boîte pendant la dérive, employée par la grille. */
+  readonly largeur: number;
+  readonly hauteur: number;
+}
+
+/** `.cible` : padding 20 × 12 px et trait 4 px, comme `mesurerTexte`. */
+const GARNITURE_CIBLE_X = 20 + 4;
+const GARNITURE_CIBLE_Y = 12 + 4;
+
+/**
+ * Le repli d'`attrape` est une vraie grille intrinsèque, pas un simple drapeau de collision.
+ * La hauteur retournée est celle dont le plateau a besoin : l'appelant l'ajoute donc au flux
+ * vertical avant de poser les boutons. Une boîte ne sera jamais ensuite re-clampée sur une autre.
+ */
+export function composerGrilleCibles(
+  boites: readonly BoiteCible[],
+  largeurCadre: number,
+): {
+  readonly positions: ReadonlyMap<string, readonly [number, number]>;
+  readonly hauteur: number;
+  readonly chevauchements: number;
+  readonly horsBornes: number;
+} {
+  const largeurUtile = Math.max(CIBLE_MIN, largeurCadre - 2 * MARGE);
+  const lignes: BoiteCible[][] = [];
+  let ligne: BoiteCible[] = [];
+  let largeurLigne = 0;
+  for (const boite of boites) {
+    const largeurSuivante = ligne.length === 0 ? boite.largeur : largeurLigne + MARGE + boite.largeur;
+    if (ligne.length > 0 && largeurSuivante > largeurUtile) {
+      lignes.push(ligne);
+      ligne = [boite];
+      largeurLigne = boite.largeur;
+    } else {
+      ligne.push(boite);
+      largeurLigne = largeurSuivante;
+    }
+  }
+  if (ligne.length > 0) lignes.push(ligne);
+
+  const positions = new Map<string, readonly [number, number]>();
+  let y = MARGE;
+  for (const courante of lignes) {
+    const hauteurLigne = Math.max(...courante.map((boite) => boite.hauteur));
+    const largeurDeLaLigne = courante.reduce((somme, boite) => somme + boite.largeur, 0) + MARGE * (courante.length - 1);
+    let x = MARGE + Math.max(0, (largeurUtile - largeurDeLaLigne) / 2);
+    for (const boite of courante) {
+      positions.set(boite.id, [x + boite.largeur / 2, y + hauteurLigne / 2]);
+      x += boite.largeur + MARGE;
+    }
+    y += hauteurLigne + MARGE;
+  }
+  let chevauchements = 0;
+  let horsBornes = 0;
+  for (let i = 0; i < boites.length; i += 1) {
+    const boite = boites[i] as BoiteCible;
+    const position = positions.get(boite.id) as readonly [number, number];
+    if (
+      position[0] - boite.largeur / 2 < MARGE || position[0] + boite.largeur / 2 > largeurCadre - MARGE ||
+      position[1] - boite.hauteur / 2 < MARGE || position[1] + boite.hauteur / 2 > y - MARGE
+    ) horsBornes += 1;
+    for (let j = i + 1; j < boites.length; j += 1) {
+      const autre = boites[j] as BoiteCible;
+      const autrePosition = positions.get(autre.id) as readonly [number, number];
+      if (
+        (Math.abs(position[0] - autrePosition[0]) < (boite.largeur + autre.largeur) / 2) &&
+        (Math.abs(position[1] - autrePosition[1]) < (boite.hauteur + autre.hauteur) / 2)
+      ) chevauchements += 1;
+    }
+  }
+  return { positions, hauteur: y, chevauchements, horsBornes };
+}
+
 export function MoteurAttrape(
   proprietes: ProprietesMoteur<ContenuAttrape, EtatAttrape, ActionAttrape>,
 ): ReactElement {
   const { contenu, habillage, etat, emettre, services, animationsDesactivees } = proprietes;
+  const identifiantSession = useId();
+  const [ordreCibles] = useState(() =>
+    tirerOrdreDeSession(services.alea, identifiantSession, contenu.cibles),
+  );
+  const ciblesParId = useMemo(
+    () => new Map(contenu.cibles.map((cible) => [cible.id, cible] as const)),
+    [contenu.cibles],
+  );
+  const ciblesAffichees = useMemo(
+    () => ordreCibles
+      .map((id) => ciblesParId.get(id))
+      .filter((cible): cible is ContenuAttrape['cibles'][number] => cible !== undefined),
+    [ordreCibles, ciblesParId],
+  );
+
+  useEffect(
+    () => () => oublierOrdreDeSession(services.alea, identifiantSession),
+    [services.alea, identifiantSession],
+  );
 
   // --- le battement ---------------------------------------------------------
   useEffect(() => {
@@ -187,6 +329,55 @@ export function MoteurAttrape(
   const vb = useMemo(() => lireViewBox(habillage.scene.viewBox), [habillage]);
   const t = useMemo(() => transformeMeet(vb, cadreJeu), [vb, cadreJeu]);
 
+  /*
+   * Toutes les cibles restent visibles : les cibles des étapes suivantes sont aussi de vrais
+   * distracteurs. Elles ne peuvent donc pas simplement disparaître pour « résoudre » une
+   * collision. On les range avec les mêmes boîtes que celles réellement tapées. Quand un
+   * téléphone manque de hauteur, le plateau devient plus haut et le parent défile : jamais une
+   * prise n'est empilée sous une autre.
+   */
+  const boitesCibles = useMemo<readonly BoiteCible[]>(() => {
+    const margeDerive = animationsDesactivees ? 0 : 30;
+    return ciblesAffichees.map((cible) => {
+      const texte = mesurerTexte(cible.libelle, reglages);
+      // La grille définit sa hauteur : ses images ne peuvent donc pas être dimensionnées
+      // depuis cette même hauteur (boucle ResizeObserver après rotation). La largeur seule
+      // règle le raster ; les cibles textuelles n'ont pas de boîte d'image fictive.
+      const echelleRaster = Math.max(0, Math.min(
+        // Le grand écran ajoute de l'espace, pas des dessins plus grands que leur taille prévue.
+        1,
+        cadre.largeur / vb.largeur,
+        (cadre.largeur - 2 * MARGE - 2 * margeDerive - 2 * GARNITURE_CIBLE_X) / Math.max(1, cible.taille[0]),
+      ));
+      const illustree = cible.asset !== null && cible.asset !== undefined;
+      const largeurRaster = illustree ? cible.taille[0] * echelleRaster : 0;
+      const hauteurRaster = illustree ? cible.taille[1] * echelleRaster : 0;
+      const largeurBouton = Math.max(CIBLE_MIN, texte.largeur, largeurRaster + 2 * GARNITURE_CIBLE_X);
+      const hauteurBouton = Math.max(CIBLE_MIN, texte.hauteur, hauteurRaster + 2 * GARNITURE_CIBLE_Y);
+      return {
+        id: cible.id,
+        largeurBouton,
+        hauteurBouton,
+        largeurRaster,
+        hauteurRaster,
+        largeur: largeurBouton + 2 * margeDerive,
+        hauteur: hauteurBouton + 2 * margeDerive,
+      };
+    });
+  }, [animationsDesactivees, ciblesAffichees, reglages, cadre.largeur, vb.largeur]);
+  const grilleCibles = useMemo(
+    () => composerGrilleCibles(boitesCibles, cadre.largeur),
+    [boitesCibles, cadre.largeur],
+  );
+  const boiteCibleParId = useMemo(
+    () => new Map(boitesCibles.map((boite) => [boite.id, boite])),
+    [boitesCibles],
+  );
+  const hauteurMinimumScene = useMemo(() => {
+    // La bande basse est hors de la grille, mais dans le cadre mesuré par le moteur.
+    return `${String(grilleCibles.hauteur + hauteurBande)}px`;
+  }, [grilleCibles.hauteur, hauteurBande]);
+
   // --- la recoloration : cascade des cibles BONNES, par étape --------------------
   const listesParEtape = useMemo(
     () => contenu.consignes.map((c) => [...c.aAttraper]),
@@ -218,7 +409,6 @@ export function MoteurAttrape(
 
   return (
     <div
-      ref={racine}
       data-moteur="attrape"
       data-habillage={habillage.id}
       data-termine={etat.termineMs === null ? 'non' : 'oui'}
@@ -227,9 +417,12 @@ export function MoteurAttrape(
       data-regions-allumees={String(allumees.length)}
       style={{
         position: 'relative',
-        blockSize: '100%',
+        blockSize: 'auto',
+        flex: '1 0 auto',
         minBlockSize: 0,
-        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'visible',
         borderRadius: 'var(--rayon-carte)',
       }}
     >
@@ -241,10 +434,10 @@ export function MoteurAttrape(
         data-plateau="etape-attrape"
         aria-live="polite"
         style={{
-          position: 'absolute',
-          insetBlockStart: '0.75rem',
-          insetInlineStart: '0.75rem',
-          zIndex: 3,
+          position: 'relative',
+          alignSelf: 'flex-start',
+          flex: '0 0 auto',
+          margin: '0.75rem 0.75rem 0',
           display: 'inline-flex',
           alignItems: 'center',
           gap: '0.65rem',
@@ -265,6 +458,19 @@ export function MoteurAttrape(
         </span>
       </div>
 
+      {/* Le cartouche est dans le flux, hors de ce cadre mesuré : aucune cible ne peut être
+          masquée par une règle ou par un changement de profil de lecture. */}
+      <div
+        ref={racine}
+        data-zone-jeu="attrape"
+        style={{
+          position: 'relative',
+          flex: `1 0 ${hauteurMinimumScene}`,
+          minBlockSize: hauteurMinimumScene,
+          overflow: 'hidden',
+        }}
+      >
+
       {/* ------------------------------------------------------------- le décor, en fond */}
       <div style={styleZoneDeJeu(hauteurBande)}>
         <SceneDecor
@@ -279,11 +485,17 @@ export function MoteurAttrape(
       {/* --------------------------------------------------------- les cibles, MOBILES */}
       <div
         data-plateau="cibles"
+        data-chevauchements={String(grilleCibles.chevauchements)}
+        data-hors-bornes={String(grilleCibles.horsBornes)}
+        data-disposition="grille-intrinseque"
         style={{ ...styleZoneDeJeu(hauteurBande), zIndex: 1, pointerEvents: 'none' }}
       >
-        {contenu.cibles.map((cible) => {
+        {ciblesAffichees.map((cible) => {
           const largeur = Math.max(CIBLE_MIN, cible.taille[0] * t.echelle);
           const hauteur = Math.max(CIBLE_MIN, cible.taille[1] * t.echelle);
+          const boite = boiteCibleParId.get(cible.id);
+          const largeurBouton = boite?.largeurBouton ?? largeur;
+          const hauteurBouton = boite?.hauteurBouton ?? hauteur;
           // ── LE DÉCOR EST COUVERT, PAS CONTENU (R52) — UNE CIBLE PEUT DONC TOMBER DANS LA
           //     PARTIE ROGNÉE, EXACTEMENT COMME UNE RÉGION PEUT TOMBER HORS ÉCRAN ────────────
           //
@@ -309,6 +521,7 @@ export function MoteurAttrape(
             Math.max(yBrut, bornes.yMin + demiH),
             Math.max(bornes.yMax - demiH, bornes.yMin + demiH),
           );
+          const emplacement = grilleCibles.positions.get(cible.id);
           const attrapee = etat.acquis[cible.id] !== undefined;
           const refusee = etiquetteRefusee === cible.id;
           // Les lucioles portent directement le mot utile : la classe dédiée renforce sa
@@ -328,7 +541,7 @@ export function MoteurAttrape(
               } as CSSProperties);
 
           return (
-            <PorteurPose key={cible.id} x={x} y={y}>
+            <PorteurPose key={cible.id} x={emplacement?.[0] ?? x} y={emplacement?.[1] ?? y}>
               <div data-derive={animationsDesactivees ? 'non' : 'oui'} style={derive}>
                 <button
                   key={refusee ? `${cible.id}-${String(marqueRefusCourante)}` : cible.id}
@@ -343,8 +556,11 @@ export function MoteurAttrape(
                       ...styleLecture,
                       pointerEvents: 'auto',
                       whiteSpace: 'nowrap',
-                      minInlineSize: `${String(largeur)}px`,
-                      minBlockSize: `${String(hauteur)}px`,
+                      boxSizing: 'border-box',
+                      inlineSize: `${String(largeurBouton)}px`,
+                      blockSize: `${String(hauteurBouton)}px`,
+                      minInlineSize: `${String(largeurBouton)}px`,
+                      minBlockSize: `${String(hauteurBouton)}px`,
                     } as CSSProperties
                   }
                   onClick={(evenement) => {
@@ -360,8 +576,10 @@ export function MoteurAttrape(
                       data-illustration-cible="oui"
                       style={{
                         display: 'block',
-                        inlineSize: '72%',
-                        blockSize: '72%',
+                        inlineSize: `${String(boite?.largeurRaster ?? largeur)}px`,
+                        blockSize: `${String(boite?.hauteurRaster ?? hauteur)}px`,
+                        maxInlineSize: '100%',
+                        maxBlockSize: '100%',
                         objectFit: 'contain',
                         pointerEvents: 'none',
                       }}
@@ -435,6 +653,7 @@ export function MoteurAttrape(
       </div>
 
       {/* ── LES DEUX CONTRÔLES SONT PORTÉS PAR L'ÉCRAN, PAS PAR LE MOTEUR (R10) ────────────── */}
+      </div>
     </div>
   );
 }

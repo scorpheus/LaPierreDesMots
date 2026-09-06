@@ -20,7 +20,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import Ajv2020 from 'ajv/dist/2020.js';
 
 import { moteurAttrape } from '@partage/moteurs/attrape/moteur';
-import { MoteurAttrape } from '@client/moteurs/attrape/MoteurAttrape';
+import { MoteurAttrape, composerGrilleCibles } from '@client/moteurs/attrape/MoteurAttrape';
 import type {
   ActionAttrape,
   EtatAttrape,
@@ -67,9 +67,9 @@ import { contenuAttrape as contenu } from '../fixtures/moteurs/attrape.js';
  * assertions portent alors sur ce que le composant DONNE À VOIR et sur ce que le moteur
  * CALCULE, jamais sur un état interne qu'aucun écran ne montrerait.
  */
-function Harnais(): ReactElement {
+function Harnais({ contenuTeste = contenu }: { readonly contenuTeste?: typeof contenu }): ReactElement {
   const [etat, setEtat] = useState<EtatAttrape>(() =>
-    moteurAttrape.creerEtat({ contenu, habillage, alea, horloge }),
+    moteurAttrape.creerEtat({ contenu: contenuTeste, habillage, alea, horloge }),
   );
   const emettre = useCallback((action: ActionAttrape) => {
     setEtat((precedent) => moteurAttrape.reduire(precedent, action, { alea, horloge }));
@@ -118,7 +118,7 @@ function Harnais(): ReactElement {
         }}
       />
       <MoteurAttrape
-        contenu={contenu}
+        contenu={contenuTeste}
         habillage={habillage}
         etat={etat}
         emettre={emettre}
@@ -153,6 +153,43 @@ afterEach(() => {
 });
 
 describe('moteur attrape', () => {
+  it('la grille intrinsèque augmente sa hauteur avant de superposer deux cibles', () => {
+    const grille = composerGrilleCibles([
+      { id: 'a', largeurBouton: 64, hauteurBouton: 64, largeurRaster: 64, hauteurRaster: 64, largeur: 112, hauteur: 124 },
+      { id: 'b', largeurBouton: 64, hauteurBouton: 64, largeurRaster: 64, hauteurRaster: 64, largeur: 112, hauteur: 124 },
+      { id: 'c', largeurBouton: 64, hauteurBouton: 64, largeurRaster: 64, hauteurRaster: 64, largeur: 112, hauteur: 124 },
+    ], 260);
+    const positions = ['a', 'b', 'c'].map((id) => grille.positions.get(id) as readonly [number, number]);
+    // 232 px utiles ne peuvent contenir qu'une boîte de 112 px avec sa respiration : trois
+    // rangées sont donc nécessaires. Les centres ne partagent jamais une même boîte tactile.
+    expect(grille.hauteur).toBeGreaterThanOrEqual(3 * 124 + 4 * 14);
+    expect(grille.chevauchements).toBe(0);
+    expect(grille.horsBornes).toBe(0);
+    for (let i = 0; i < positions.length; i += 1) for (let j = i + 1; j < positions.length; j += 1) {
+      expect(Math.abs((positions[i] as readonly [number, number])[1] - (positions[j] as readonly [number, number])[1])).toBeGreaterThanOrEqual(124 + 14);
+    }
+  });
+
+  it('borne le raster à la boîte calculée, remplissage et trait compris', () => {
+    const contenuAvecRaster = {
+      ...contenu,
+      cibles: contenu.cibles.map((cible) =>
+        cible.id === 'lettre-b'
+          ? { ...cible, asset: 'assets/test/cheval.png', taille: [160, 120] as const }
+          : cible,
+      ),
+    } as typeof contenu;
+    const { container } = render(<Harnais contenuTeste={contenuAvecRaster} />);
+    const image = container.querySelector<HTMLImageElement>('[data-cible="lettre-b"] [data-illustration-cible="oui"]');
+    const bouton = image?.closest<HTMLButtonElement>('[data-cible="lettre-b"]');
+    expect(image?.style.inlineSize).toMatch(/px$/u);
+    expect(image?.style.blockSize).toMatch(/px$/u);
+    expect(image?.style.inlineSize).not.toBe('72%');
+    expect(bouton?.style.boxSizing).toBe('border-box');
+    expect(Number.parseFloat(bouton?.style.inlineSize ?? '0')).toBeGreaterThan(Number.parseFloat(image?.style.inlineSize ?? '0'));
+    expect(Number.parseFloat(bouton?.style.blockSize ?? '0')).toBeGreaterThan(Number.parseFloat(image?.style.blockSize ?? '0'));
+  });
+
   it('le contenu de ce test est conforme au schéma que le moteur publie', () => {
     const ajv = new (Ajv2020 as unknown as {
       new (options?: Record<string, unknown>): { compile(s: unknown): (d: unknown) => boolean };
@@ -185,6 +222,19 @@ describe('moteur attrape', () => {
     expect(cartouche()?.textContent).toContain('p');
     expect(cartouche()?.textContent).not.toContain('aussi');
     expect(cartouche()?.textContent).not.toContain('derniers');
+  });
+
+  it('composition : le cartouche reste dans le flux et les prises publiées ne se recouvrent pas', () => {
+    const { container } = render(<Harnais />);
+    const cartouche = container.querySelector<HTMLElement>('[data-plateau="etape-attrape"]');
+    const zone = container.querySelector<HTMLElement>('[data-zone-jeu="attrape"]');
+    const cibles = container.querySelector<HTMLElement>('[data-plateau="cibles"]');
+    expect(cartouche?.style.position).toBe('relative');
+    expect(zone?.contains(cartouche ?? null)).toBe(false);
+    expect(zone?.style.minBlockSize).not.toBe('');
+    expect(cibles?.getAttribute('data-disposition')).toBe('grille-intrinseque');
+    expect(cibles?.getAttribute('data-chevauchements')).toBe('0');
+    expect(cibles?.getAttribute('data-hors-bornes')).toBe('0');
   });
 
   it('mauvaise réponse : une erreur comptée, rien de rouge, la tentative reste réussie', () => {

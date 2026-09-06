@@ -45,6 +45,7 @@ import type {
 } from '@pierre/partage';
 import { hexDeCouleur, regionSousLeDoigt } from '@pierre/partage';
 import { jouerRecoloration } from './recoloration.js';
+import { CercleAccessible } from '../../composants/CercleAccessible.js';
 
 /** Couleur d'une région non encore conquise. Surchargeable par L-D dans `global.css`. */
 const REMPLISSAGE_VIDE = 'var(--region-vide, #D9DEE7)';
@@ -84,6 +85,9 @@ const STYLES_SCENE = `
   transition: fill 120ms linear, transform 400ms cubic-bezier(.34, 1.56, .64, 1);
 }
 .pierre-region:active { transform: scale(.94); transition: transform 60ms ease-out; }
+/* Le masque du vrai dessin reste sous le doigt pendant l'appui. Le réduire pouvait
+   déplacer une porte ou un banc fin hors du contact avant le pointerdown tactile. */
+.pierre-region[data-region-source]:active { transform: none; filter: brightness(1.08); }
 .pierre-region:focus-visible { outline: 3px solid var(--soleil, #FFC93C); outline-offset: 2px; }
 .pierre-region--refus { animation: pierre-oscille 180ms ease-in-out 1; }
 .pierre-region--demonstration { animation: pierre-halo 900ms ease-in-out infinite; }
@@ -139,9 +143,22 @@ export interface ProprietesSceneSvg {
   readonly nombreRegionsAttendues?: number;
   /** Seules les cibles de la consigne courante doivent prendre le doigt. */
   readonly regionsActives?: readonly IdRegionSvg[];
+  /** Loupe de confort volontaire : un glissement défile, il ne peint jamais. */
+  readonly loupeActive?: boolean;
   /** Le SVG déclaratif de l'habillage. `null` → décor de repli dérivé. */
   readonly svgMarkup: string | null;
   onPeindre(region: IdRegionSvg): void;
+}
+
+/** Le mouvement au moins égal à 10 px appartient au défilement de la loupe. */
+export const SEUIL_DEFILEMENT_LOUPE_PX = 10;
+
+interface GesteLoupe {
+  readonly pointerId: number;
+  readonly departX: number;
+  readonly departY: number;
+  readonly region: IdRegionSvg;
+  deplace: boolean;
 }
 
 function pointViewBox(
@@ -182,12 +199,14 @@ export function SceneSvg(proprietes: ProprietesSceneSvg): ReactElement {
     marqueRefus,
     animationsDesactivees,
     regionsActives,
+    loupeActive = false,
     svgMarkup,
     onPeindre
   } = proprietes;
 
   const refSvg = useRef<SVGSVGElement | null>(null);
   const refDernierPoint = useRef<readonly [number, number]>([0, 0]);
+  const refGesteLoupe = useRef<GesteLoupe | null>(null);
   const refRemplissagesPrecedents = useRef<Readonly<Record<string, CouleurColoriage>>>({});
 
   const viewBox = habillage.scene.viewBox || VIEWBOX_PAR_DEFAUT;
@@ -270,7 +289,11 @@ export function SceneSvg(proprietes: ProprietesSceneSvg): ReactElement {
     return table;
   }, [regionsDeclarees]);
 
-  /** Désignation : le DOM d'abord (exact), la tolérance de visée ensuite (contrat § 5.2). */
+  /**
+   * Désignation : le vrai chemin du décor d'abord. La tolérance circulaire n'existe que pour
+   * le repli qui dessine précisément ces disques ; sur le décor réel elle transformerait les
+   * trous et les interstices du SVG en réponses voisines.
+   */
   const designer = useCallback(
     (cible: Element | null, point: readonly [number, number]): IdRegionSvg | null => {
       const noeud = cible !== null && typeof cible.closest === 'function'
@@ -283,6 +306,7 @@ export function SceneSvg(proprietes: ProprietesSceneSvg): ReactElement {
         direct.length > 0 &&
         (identifiantsActifs === null || identifiantsActifs.has(direct))
       ) return direct;
+      if (svgMarkup !== null) return null;
       const approchee = regionSousLeDoigt(habillage, point);
       if (
         approchee === null ||
@@ -290,21 +314,88 @@ export function SceneSvg(proprietes: ProprietesSceneSvg): ReactElement {
       ) return null;
       return approchee;
     },
-    [habillage, identifiantsActifs]
+    [habillage, identifiantsActifs, svgMarkup]
+  );
+
+  /** Résout la région du geste sans jamais s'approcher d'une cible inactive. */
+  const regionDuGeste = useCallback(
+    (evenement: PointerEventReact<SVGSVGElement>): { region: IdRegionSvg; point: readonly [number, number] } | null => {
+      const svg = refSvg.current;
+      if (svg === null) return null;
+      const point = pointViewBox(svg, evenement.clientX, evenement.clientY, viewBox);
+      let region = designer(evenement.target as Element | null, point);
+      // Chromium tactile peut rediriger le contact d'un chemin fin vers le SVG parent.
+      // Reprendre alors le pixel exact sous le doigt, jamais une proximité de centroïde.
+      if (region === null && typeof document.elementFromPoint === 'function') {
+        const sousDoigt = document.elementFromPoint(evenement.clientX, evenement.clientY);
+        if (sousDoigt !== null && svg.contains(sousDoigt)) region = designer(sousDoigt, point);
+      }
+      return region === null ? null : { region, point };
+    },
+    [designer, viewBox]
   );
 
   const surPointerDown = useCallback(
     (evenement: PointerEventReact<SVGSVGElement>): void => {
-      const svg = refSvg.current;
-      if (svg === null) return;
-      const point = pointViewBox(svg, evenement.clientX, evenement.clientY, viewBox);
-      refDernierPoint.current = point;
-      const region = designer(evenement.target as Element | null, point);
+      const geste = regionDuGeste(evenement);
       // `null` : le doigt est hors du dessin. Le tap est ignoré — pas de refus, pas
       // d'erreur, pas de son. Un doigt qui glisse ne coûte rien (contrat § 5.2).
-      if (region !== null) onPeindre(region);
+      if (geste === null) return;
+      if (!loupeActive) {
+        refDernierPoint.current = geste.point;
+        onPeindre(geste.region);
+        return;
+      }
+      // En loupe, le navigateur doit pouvoir transformer ce contact en défilement. La
+      // peinture est donc différée au pointerup et ne survit pas à un geste de 10 px ou plus.
+      refGesteLoupe.current = {
+        pointerId: evenement.pointerId,
+        departX: evenement.clientX,
+        departY: evenement.clientY,
+        region: geste.region,
+        deplace: false
+      };
     },
-    [designer, onPeindre, viewBox]
+    [loupeActive, onPeindre, regionDuGeste]
+  );
+
+  const surPointerMove = useCallback(
+    (evenement: PointerEventReact<SVGSVGElement>): void => {
+      const geste = refGesteLoupe.current;
+      if (!loupeActive || geste === null || geste.pointerId !== evenement.pointerId || geste.deplace) return;
+      const distance = Math.hypot(evenement.clientX - geste.departX, evenement.clientY - geste.departY);
+      if (distance >= SEUIL_DEFILEMENT_LOUPE_PX) geste.deplace = true;
+    },
+    [loupeActive]
+  );
+
+  const surPointerUp = useCallback(
+    (evenement: PointerEventReact<SVGSVGElement>): void => {
+      const geste = refGesteLoupe.current;
+      if (!loupeActive || geste === null || geste.pointerId !== evenement.pointerId) return;
+      refGesteLoupe.current = null;
+      const distanceFinale = Math.hypot(
+        evenement.clientX - geste.departX,
+        evenement.clientY - geste.departY
+      );
+      // Certains navigateurs cèdent le pointeur au défilement avant de livrer le dernier
+      // `pointermove`. Le contrôle final garde la règle < 10 px même dans ce cas.
+      if (geste.deplace || distanceFinale >= SEUIL_DEFILEMENT_LOUPE_PX) return;
+      const svg = refSvg.current;
+      if (svg !== null) {
+        refDernierPoint.current = pointViewBox(svg, evenement.clientX, evenement.clientY, viewBox);
+      }
+      onPeindre(geste.region);
+    },
+    [loupeActive, onPeindre, viewBox]
+  );
+
+  const surPointerCancel = useCallback(
+    (evenement: PointerEventReact<SVGSVGElement>): void => {
+      const geste = refGesteLoupe.current;
+      if (geste !== null && geste.pointerId === evenement.pointerId) refGesteLoupe.current = null;
+    },
+    []
   );
 
   /**
@@ -425,6 +516,8 @@ export function SceneSvg(proprietes: ProprietesSceneSvg): ReactElement {
       // soit annoncée qu'une fois aux technologies d'assistance et aux gardes de QA.
       noeud.removeAttribute('data-region-svg');
       noeud.setAttribute('data-region-source', identifiant);
+      const active = identifiantsActifs === null || identifiantsActifs.has(identifiant);
+      noeud.setAttribute('data-active', active ? 'oui' : 'non');
       noeud.setAttribute('data-peinte', couleur === undefined ? 'non' : 'oui');
       noeud.setAttribute('fill', couleur === undefined ? REMPLISSAGE_VIDE : hexDeCouleur(couleur));
       // Sur les décors illustrés, seules les régions déjà réussies reçoivent un aplat. Le
@@ -433,7 +526,13 @@ export function SceneSvg(proprietes: ProprietesSceneSvg): ReactElement {
       // Avant la réussite, seul le contour de la prise guide le doigt. Afficher ici le gris
       // bleuté de `REMPLISSAGE_VIDE` donnait l'impression que la réponse était déjà coloriée.
       (noeud as SVGGraphicsElement).style.opacity = couleur !== undefined ? '0.92' : '0';
-      (noeud as SVGGraphicsElement).style.mixBlendMode = 'color';
+      // « color » conserve la luminosité du raster : sur le gris, peindre en noir/blanc
+      // pouvait donc ne rien changer. Les couleurs neutres modifient aussi la valeur.
+      (noeud as SVGGraphicsElement).style.mixBlendMode = couleur === 'noir' ? 'multiply'
+        : couleur === 'blanc' ? 'screen' : couleur === 'gris' ? 'normal' : 'color';
+      // `fill` respecte la géométrie exacte du path, y compris `fill-rule="evenodd"` et ses
+      // trous. Les prises circulaires accessibles, rendues plus bas, ne reçoivent pas le doigt.
+      (noeud as SVGGraphicsElement).style.pointerEvents = active ? 'fill' : 'none';
       // Le trait technique d'un masque ne fait pas partie du PNG. Le laisser visible après
       // la réussite dessinait une bordure vectorielle bleue autour du motif peint.
       if (fondEstIllustre) (noeud as SVGGraphicsElement).style.stroke = 'none';
@@ -496,6 +595,9 @@ export function SceneSvg(proprietes: ProprietesSceneSvg): ReactElement {
       data-habillage={habillage.id}
       data-decor={svgMarkup === null ? 'repli' : 'habillage'}
       onPointerDown={surPointerDown}
+      onPointerMove={loupeActive ? surPointerMove : undefined}
+      onPointerUp={loupeActive ? surPointerUp : undefined}
+      onPointerCancel={loupeActive ? surPointerCancel : undefined}
       style={{
         width: '100%',
         height: 'auto',
@@ -503,7 +605,7 @@ export function SceneSvg(proprietes: ProprietesSceneSvg): ReactElement {
         maxHeight: 'calc(100dvh - 19rem)',
         alignSelf: 'center',
         flex: '0 1 auto',
-        touchAction: 'manipulation'
+        touchAction: loupeActive ? 'pan-x pan-y' : 'manipulation'
       }}
     >
       <style>{STYLES_SCENE}</style>
@@ -523,7 +625,7 @@ export function SceneSvg(proprietes: ProprietesSceneSvg): ReactElement {
               const couleur = remplissages[region.id];
               const active = regionsActives === undefined || regionsActives.includes(region.id);
               return (
-                <circle
+                <CercleAccessible
                   key={`prise-${region.id}`}
                   className={`pierre-prise-colorie${
                     region.id === regionEnRefus ? ' pierre-region--refus' : ''
@@ -534,7 +636,7 @@ export function SceneSvg(proprietes: ProprietesSceneSvg): ReactElement {
                   }`}
                   cx={region.centroide[0]}
                   cy={region.centroide[1]}
-                  r={rayonPrise}
+                  rayonMinimal={rayonPrise}
                   data-region-svg={region.id}
                   data-active={active ? 'oui' : 'non'}
                   data-peinte={couleur === undefined ? 'non' : 'oui'}
@@ -543,10 +645,10 @@ export function SceneSvg(proprietes: ProprietesSceneSvg): ReactElement {
                   aria-label={region.libelle}
                   role="button"
                   tabIndex={active ? 0 : -1}
-                  style={{ pointerEvents: active ? 'all' : 'none' }}
-                  onPointerDown={(evenement) => {
-                    evenement.stopPropagation();
-                    evenement.currentTarget.blur();
+                  style={{ pointerEvents: 'none' }}
+                  // Un lecteur d'écran active un bouton par un `click` synthétique. Le doigt,
+                  // lui, traverse cette prise et atteint exclusivement le vrai path dessous.
+                  onClick={() => {
                     refDernierPoint.current = region.centroide;
                     onPeindre(region.id);
                   }}
@@ -592,12 +694,6 @@ export function SceneSvg(proprietes: ProprietesSceneSvg): ReactElement {
                       data-couleur={couleur}
                       role="button"
                       tabIndex={0}
-                      onPointerDown={(evenement) => {
-                        evenement.stopPropagation();
-                        evenement.currentTarget.blur();
-                        refDernierPoint.current = region.centroide;
-                        onPeindre(region.id);
-                      }}
                       aria-label={region.libelle}
                       onKeyDown={surClavier}
                     />

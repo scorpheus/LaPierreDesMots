@@ -163,6 +163,7 @@ export type { ContenuAttrape, EtatAttrape, ActionAttrape } from './moteurs/attra
 export type { ContenuTri, EtatTri, ActionTri } from './moteurs/tri/types.js';
 export type { ContenuAssemble, EtatAssemble, ActionAssemble } from './moteurs/assemble/types.js';
 export type { ContenuChemin, EtatChemin, ActionChemin } from './moteurs/chemin/types.js';
+export { preparerPlateauChemin } from './moteurs/chemin/plateau.js';
 export type { ContenuEclair, EtatEclair, ActionEclair } from './moteurs/eclair/types.js';
 export type { ContenuPaires, EtatPaires, ActionPaires } from './moteurs/paires/types.js';
 export type { ContenuPhrase, EtatPhrase, ActionPhrase } from './moteurs/phrase/types.js';

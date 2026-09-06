@@ -36,8 +36,12 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { describe, expect, test } from 'vitest';
+import { moteursEnregistres } from '@pierre/partage';
+import type { MoteurQuelconque } from '@pierre/partage';
 
 import { RACINE_DEPOT } from '../configuration/preparation.js';
+import { DELAIS_AIDE_PAR_DEFAUT } from '../../partage/src/moteurs/commun/delais.js';
+import { CAS_MOTEURS, monter, reduire, resumeDe } from './propriete-outils.js';
 
 const DOSSIER = join(RACINE_DEPOT, 'partage', 'src', 'moteurs');
 
@@ -54,6 +58,16 @@ const source = (moteur: string, fichier: string): string =>
 
 /** `libre` n'a aucune aide, par conception : « il n'y a rien à aider ». */
 const SANS_AIDE = new Set(['libre']);
+const CAS_AVEC_AIDE = CAS_MOTEURS.filter((cas) => !SANS_AIDE.has(cas.code));
+
+/** Le journal et l'état public font foi, pas l'ordre des clauses d'une garde dans la source. */
+function verifierDemandeExplicite(moteur: MoteurQuelconque, avant: unknown, apres: unknown): void {
+  const resume = resumeDe(moteur, apres);
+  expect(resume.aideUtilisee, 'la demande explicite doit entrer dans le journal').toBe('indice');
+  expect(resume.etapes.some((etape) => etape.aideUtilisee === 'indice')).toBe(true);
+  expect(resume.nbErreurs).toBe(resumeDe(moteur, avant).nbErreurs);
+  expect(apres, 'la demande change bien l’état même après une aide automatique').not.toBe(avant);
+}
 
 describe('R15 — le journal retient ce que l’enfant a DEMANDÉ, pas ce que Gobi a proposé', () => {
   test('CONTRÔLE POSITIF — les quatorze moteurs sont trouvés', () => {
@@ -84,25 +98,35 @@ describe('R15 — le journal retient ce que l’enfant a DEMANDÉ, pas ce que Go
     }
   });
 
-  test('R17 — la demande est enregistrée MÊME quand le palier ne bouge pas', () => {
-    // La garde `if (niveau === etat.niveauAide) return etat;` seule rendait le tap inerte dès
-    // que l'aide était déjà montée. La condition doit maintenant regarder LES DEUX, sinon on
-    // retombe exactement sur le défaut que le père a signalé.
-    const sansGarde: string[] = [];
-    for (const moteur of moteurs()) {
-      if (SANS_AIDE.has(moteur)) continue;
-      const code = source(moteur, 'moteur.ts');
-      if (!code.includes("aideLaPlusHaute(") || !code.includes("'demanderAide'")) continue;
-      if (!/demandee === \w+\.aideDemandee\) return etat;/u.test(code)) {
-        sansGarde.push(moteur);
-      }
-    }
-    expect(
-      sansGarde,
-      'ces moteurs rendent l’état inchangé quand le palier est déjà monté : taper sur Gobi n’y ' +
-        'fait rien, et le journal retient une aide jamais demandée'
-    ).toEqual([]);
+  test('R17 — les scénarios exécutables couvrent tous les moteurs qui proposent une aide', () => {
+    expect(CAS_AVEC_AIDE.length).toBeGreaterThan(0);
+    expect(CAS_AVEC_AIDE.map((cas) => cas.code).sort()).toEqual(
+      moteursEnregistres().filter((code) => !SANS_AIDE.has(code)).sort(),
+    );
   });
+
+  for (const palier of ['indice', 'demonstration'] as const) {
+    test.each(CAS_AVEC_AIDE)(`R15/R17 — $code : demande après ${palier} automatique`, (cas) => {
+      const { moteur, etatInitial, contexte } = monter(cas);
+      contexte.horloge.avancer({ secondes: (DELAIS_AIDE_PAR_DEFAUT.indiceMs + 1) / 1_000 });
+      let automatique = reduire(moteur, etatInitial, { type: 'battementHorloge' }, contexte);
+      if (palier === 'demonstration') {
+        contexte.horloge.avancer({ secondes: (DELAIS_AIDE_PAR_DEFAUT.demonstrationMs + 1) / 1_000 });
+        automatique = reduire(moteur, automatique, { type: 'battementHorloge' }, contexte);
+      }
+      expect(moteur.aideProposee(automatique)?.niveau, 'le scénario atteint réellement le palier automatique').toBe(palier);
+      expect(resumeDe(moteur, automatique).aideUtilisee, 'attendre ne compte pas comme demander de l’aide').toBe('aucune');
+      expect(resumeDe(moteur, automatique).etapes.every((etape) => etape.aideUtilisee === 'aucune')).toBe(true);
+
+      const demandee = reduire(moteur, automatique, { type: 'demanderAide' }, contexte);
+      verifierDemandeExplicite(moteur, automatique, demandee);
+      expect(moteur.aideProposee(demandee)?.niveau, 'le palier déjà proposé n’est pas retiré').toBe(palier);
+
+      // Témoin négatif : simule l'ancienne garde qui rendait l'état automatique inchangé.
+      // Le même oracle doit la refuser pour sa demande absente, pas pour sa syntaxe.
+      expect(() => verifierDemandeExplicite(moteur, automatique, automatique)).toThrow(/demande explicite/u);
+    });
+  }
 
   test('et la demande est bien REPORTÉE dans l’étape mise à jour', () => {
     const sansReport: string[] = [];

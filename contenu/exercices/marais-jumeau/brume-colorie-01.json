@@ -1,5 +1,5 @@
 {
-  "$commentaire": "À VALIDER PAR LE PARENT AVANT D'ÊTRE JOUÉ. Les sept cibles suivent désormais le raster publié : caillou, saule, escargot, nénuphar, ponton, barque et ciel. Le digramme ou reste travaillé par caillou ; aucune consigne ne nomme plus un animal ou un objet absent de l'image.",
+  "$commentaire": "BROUILLON — image, texte et masques à relire ensemble par le parent avant promotion. Les identifiants des sept cibles publiées sont conservés.",
   "id": "marais-jumeau-brume-colorie-01",
   "version": 1,
   "titre": "La berge que la brume quitte",
@@ -44,7 +44,7 @@
         },
         {
           "id": "c2",
-          "texte": "Colorie le saule en noir.",
+          "texte": "Colorie le tronc du saule en noir.",
           "forme": "imperative",
           "audio": null,
           "cibles": [
@@ -55,6 +55,7 @@
           ],
           "motsCles": [
             "colorie",
+            "tronc",
             "saule",
             "noir"
           ]

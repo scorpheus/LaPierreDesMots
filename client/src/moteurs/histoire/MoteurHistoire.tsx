@@ -38,7 +38,7 @@
  *   - **toute cible fait au moins 64 px** — la classe `.cible` le pose, jamais un nombre recopié.
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { CSSProperties, ReactElement } from 'react';
 import type { ActionHistoire, ContenuHistoire, EtatHistoire } from '@pierre/partage';
 import { ZoneDeLecture, styleDeLecture, useReglagesLecture } from '../../lecture/ZoneDeLecture.js';
@@ -53,7 +53,6 @@ import {
   useDerniereAllumee,
   useMesureCadre,
 } from '../eclair/mise-en-scene.js';
-import { PorteurPose } from '../eclair/porteur-pose.js';
 
 /** Cadence du `battementHorloge`. Le moteur ne connaît aucun `setTimeout` : c'est ici. */
 const PERIODE_BATTEMENT_MS = 1000;
@@ -128,62 +127,14 @@ export function MoteurHistoire(
   // --- la mesure du cadre -----------------------------------------------------
   const { racine, bande, cadre, hauteurBande } = useMesureCadre();
   const regimeCompact = cadre.largeur <= 700 || cadre.hauteur <= 520;
-  const regimeTelephonePortrait = cadre.largeur <= 420 && cadre.hauteur > cadre.largeur;
 
   // Le récit n'est PAS un panneau exclusif qui bloquerait les options : R15 le rend
   // consultable pendant les questions, gratuitement, donc les deux doivent rester tapables
   // en même temps. Il occupe une bande en HAUT — même schéma que la phrase modèle de
   // `phrase` (R60) — et le décor avec ses options se replient dans ce qui reste.
-  const recit = useRef<HTMLDivElement | null>(null);
-  const [hauteurRecit, fixerHauteurRecit] = useState(0);
-  const panneauQuestion = useRef<HTMLDivElement | null>(null);
-  const [hauteurQuestion, fixerHauteurQuestion] = useState(0);
-  useEffect(() => {
-    if (!etat.recitVisible) {
-      fixerHauteurRecit(0);
-      return undefined;
-    }
-    const noeud = recit.current;
-    if (noeud === null) return undefined;
-    const relever = (): void => {
-      const h = noeud.getBoundingClientRect().height;
-      if (h > 0) fixerHauteurRecit(h);
-    };
-    relever();
-    if (typeof ResizeObserver !== 'function') return undefined;
-    const observateur = new ResizeObserver(relever);
-    observateur.observe(noeud);
-    return () => {
-      observateur.disconnect();
-    };
-  }, [etat.recitVisible]);
-
-  useEffect(() => {
-    const noeud = panneauQuestion.current;
-    if (noeud === null) return undefined;
-    const relever = (): void => fixerHauteurQuestion(noeud.getBoundingClientRect().height);
-    relever();
-    if (typeof ResizeObserver !== 'function') return undefined;
-    const observateur = new ResizeObserver(relever);
-    observateur.observe(noeud);
-    return () => { observateur.disconnect(); };
-  }, [questionCourante?.texte, regimeCompact]);
-
-  const margeQuestion = regimeCompact ? 4 : 8;
-
   const { cadreJeu, bornes } = useMemo(
-    () => cadreJeuEtBornes(cadre, hauteurBande + hauteurRecit + hauteurQuestion + margeQuestion),
-    [cadre, hauteurBande, hauteurRecit, hauteurQuestion, margeQuestion],
-  );
-  const styleZoneJeu = useMemo<CSSProperties>(
-    () => ({
-      position: 'absolute',
-      insetInlineStart: 0,
-      insetInlineEnd: 0,
-      insetBlockStart: `${String(hauteurRecit + hauteurQuestion + margeQuestion)}px`,
-      insetBlockEnd: `${String(hauteurBande)}px`,
-    }),
-    [hauteurRecit, hauteurQuestion, margeQuestion, hauteurBande],
+    () => cadreJeuEtBornes(cadre, hauteurBande),
+    [cadre, hauteurBande],
   );
 
   const regions = useMemo(() => regionsColoriables(habillage), [habillage]);
@@ -216,8 +167,6 @@ export function MoteurHistoire(
       }),
     [habillage, listesParEtape, regions, cadreJeu, bornes, mesurer],
   );
-  const planCourant = plans[etat.indexEtape] ?? null;
-  const emplacements = planCourant?.resultat.emplacements ?? [];
 
   const allumees = useMemo(
     () => regionsAllumeesDepuisAcquis(plans, etat.acquis, centroideParRegion),
@@ -242,9 +191,12 @@ export function MoteurHistoire(
       data-regions-allumees={String(allumees.length)}
       style={{
         position: 'relative',
-        blockSize: '100%',
-        minBlockSize: 0,
-        overflow: 'hidden',
+        display: 'grid',
+        gridTemplateRows: 'auto auto minmax(220px, 1fr) auto',
+        gap: '0.5rem',
+        blockSize: 'auto',
+        minBlockSize: '100%',
+        overflow: 'visible',
         borderRadius: 'var(--rayon-carte)',
       }}
     >
@@ -257,26 +209,19 @@ export function MoteurHistoire(
           le décor avec ses options se replient dans ce qui reste — jamais l'inverse. */}
       {etat.recitVisible ? (
         <div
-          ref={recit}
           data-plateau="recit"
           data-visible="oui"
           style={{
-            position: 'absolute',
-            insetInlineStart: '50%',
-            insetBlockStart: 0,
+            gridArea: '1 / 1',
+            justifySelf: 'center',
             inlineSize: 'min(100%, 52rem)',
-            transform: 'translateX(-50%)',
             zIndex: 2,
-            maxBlockSize: regimeTelephonePortrait ? '24%' : regimeCompact ? '34%' : '45%',
             display: 'grid',
             alignContent: 'start',
             padding: regimeCompact ? '0.5rem 0.65rem' : '0.75rem',
-            overflow: 'auto',
             backgroundColor: 'var(--parchemin)',
             border: 'var(--epaisseur-trait) solid var(--trait)',
             borderRadius: 'var(--rayon-carte)',
-            fontSize: regimeTelephonePortrait ? 'clamp(1rem, 5vw, 1.2rem)' : undefined,
-            lineHeight: regimeTelephonePortrait ? 1.35 : undefined,
           }}
         >
           <ZoneDeLecture texte={contenu.recit} motsCles={[]} etiquette={`L’histoire : ${contenu.titre}`} />
@@ -291,16 +236,13 @@ export function MoteurHistoire(
           chaque réponse, reste ici au voisinage des réponses. La carte est superposée et
           descend sous le récit lorsqu'il est ouvert : ni doublon, ni décor rétréci. */}
       <div
-        ref={panneauQuestion}
         data-plateau="etape-histoire"
         data-etape-courante={String(Math.min(etat.indexEtape + 1, etat.etapes.length))}
         data-etapes-total={String(etat.etapes.length)}
         aria-label={`Question actuelle : ${questionCourante?.texte ?? 'Réponds à la question.'}`}
         style={{
-          position: 'absolute',
-          insetBlockStart: `${String(hauteurRecit)}px`,
-          insetInlineStart: '50%',
-          transform: 'translateX(-50%)',
+          gridArea: '2 / 1',
+          justifySelf: 'center',
           zIndex: 4,
           padding: regimeCompact ? '0.25rem 0.5rem' : '0.5rem 0.75rem',
           backgroundColor: 'var(--parchemin, #FBF6EA)',
@@ -310,7 +252,6 @@ export function MoteurHistoire(
           pointerEvents: 'none',
           ...styleLecture,
           fontWeight: 700,
-          fontSize: regimeTelephonePortrait ? '1rem' : undefined,
           textAlign: 'center',
           inlineSize: regimeCompact ? '100%' : 'auto',
           maxInlineSize: regimeCompact ? '100%' : 'min(88%, 42rem)',
@@ -325,7 +266,7 @@ export function MoteurHistoire(
       </div>
 
       {/* ------------------------------------------------------------- le décor, en fond */}
-      <div style={styleZoneJeu}>
+      <div style={{ gridArea: '3 / 1', position: 'relative', minBlockSize: 220 }}>
         <SceneDecor
           habillage={habillage}
           allumees={allumees}
@@ -340,49 +281,38 @@ export function MoteurHistoire(
           « gratuit », pas « exclusif ». */}
       <div
         data-plateau="options"
-        style={
-          regimeTelephonePortrait
-            ? {
-                ...styleZoneJeu,
+        style={{
+                gridArea: '3 / 1',
+                position: 'relative',
                 zIndex: 1,
                 pointerEvents: 'none',
                 display: 'flex',
                 flexWrap: 'wrap',
                 alignContent: 'center',
                 justifyContent: 'center',
-                gap: '0.5rem',
-                padding: '0.5rem',
-              }
-            : { ...styleZoneJeu, zIndex: 1, pointerEvents: 'none' }
-        }
+                gap: '1rem',
+                padding: '1rem',
+              }}
       >
-        {(regimeTelephonePortrait ? etape?.ordreAffichage ?? [] : emplacements.map((item) => item.cle)).map((cle) => {
-          const emplacement = emplacements.find((item) => item.cle === cle);
-          if (!regimeTelephonePortrait && emplacement === undefined) return null;
+        {(etape?.ordreAffichage ?? []).map((cle) => {
           const option = optionParId.get(cle);
           if (option === undefined) return null;
           const refusee = etiquetteRefusee === cle;
           const classes = ['cible'];
           if (!animationsDesactivees && refusee) classes.push('oscillation');
-          const bouton = (
+          return (
               <button
                 key={refusee ? `${cle}-${String(marqueRefusCourante)}` : cle}
                 type="button"
                 data-option={cle}
                 className={classes.join(' ')}
-                style={{ ...styleLecture, pointerEvents: 'auto', whiteSpace: 'nowrap' } as CSSProperties}
+                style={{ ...styleLecture, pointerEvents: 'auto', whiteSpace: 'normal', maxInlineSize: '100%', overflowWrap: 'anywhere' } as CSSProperties}
                 onClick={(evenement) => {
                   jouer({ type: 'repondre', option: cle }, evenement);
                 }}
               >
                 {option.libelle}
               </button>
-          );
-          if (regimeTelephonePortrait) return bouton;
-          return (
-            <PorteurPose key={cle} x={emplacement?.x ?? 0} y={emplacement?.y ?? 0}>
-              {bouton}
-            </PorteurPose>
           );
         })}
       </div>
@@ -392,10 +322,8 @@ export function MoteurHistoire(
         ref={bande}
         data-plateau="controles"
         style={{
-          position: 'absolute',
-          insetInlineStart: 0,
-          insetInlineEnd: 0,
-          insetBlockEnd: 0,
+          gridArea: '4 / 1',
+          position: 'relative',
           zIndex: 3,
           display: 'grid',
           gap: regimeCompact ? '0.2rem' : '0.5rem',

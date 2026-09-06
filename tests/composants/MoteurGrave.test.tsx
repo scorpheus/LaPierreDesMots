@@ -184,20 +184,27 @@ describe('moteur grave', () => {
     expect(container.querySelector('[data-plateau="mot"] [data-lecture="oui"]')).toBeNull();
   });
 
-  it('cartouche : le mot courant est annoncé sans jargon technique', () => {
+  it('cartouche : le mot complet est explicitement présenté comme un modèle', () => {
     const { container } = render(<Harnais />);
     const cartouche = container.querySelector<HTMLElement>('[data-plateau="etape-grave"]');
-    expect(cartouche?.textContent).toContain('Écris le mot « bal »');
+    // Refonte demandée le 5 septembre : plus de fausse consigne de tracé/écriture.
+    expect(cartouche?.textContent).toContain('Modèle : bal');
     expect(cartouche?.textContent).not.toContain('Étape');
     expect(cartouche?.textContent).not.toContain('case');
     expect(cartouche?.querySelector('[data-attendu]')).toBeNull();
   });
 
-  it('composition : le mot reste centré et les touches conservent une cible tactile', () => {
+  it('composition : le mot reste au-dessus du clavier et les touches conservent une cible tactile', () => {
     const { container } = render(<Harnais />);
     const mot = container.querySelector<HTMLElement>('[data-mot-central="oui"]');
-    expect(mot?.style.insetBlockStart).toBe('42%');
+    const cartouche = container.querySelector<HTMLElement>('[data-plateau="etape-grave"]');
+    const zone = container.querySelector<HTMLElement>('[data-zone-jeu="grave"]');
+    expect(mot?.style.insetBlockStart).toBe('27%');
     expect(mot?.style.transform).toContain('-50%');
+    expect(mot?.style.pointerEvents).toBe('none');
+    expect(cartouche?.style.position).toBe('relative');
+    expect(zone?.contains(cartouche ?? null)).toBe(false);
+    expect(zone?.style.minBlockSize).toBe('30rem');
     const touches = [...container.querySelectorAll<HTMLButtonElement>('[data-lettre]')];
     expect(touches.length).toBeGreaterThan(0);
     expect(touches.every((t) => t.classList.contains('cible'))).toBe(true);

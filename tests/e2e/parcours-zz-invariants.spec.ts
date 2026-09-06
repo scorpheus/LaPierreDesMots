@@ -301,6 +301,36 @@ test.describe("CONTRÔLES POSITIFS — chaque invariant sait rendre rouge", () =
     await page.close();
   });
 
+  test("`cible` attend le chargement mais mord aussi quand une prise existante rétrécit", async ({ context }, info) => {
+    const { page, sentinelle } = await pageSousSentinelle(context);
+    await preparer(page);
+    await page.evaluate(async () => {
+      const bouton = document.createElement("button");
+      bouton.id = "controle-redimensionnement";
+      bouton.textContent = "Test";
+      bouton.style.cssText = "width:20px;height:20px;position:fixed;left:0;top:0";
+      document.body.append(bouton);
+      await new Promise<void>((resoudre) => requestAnimationFrame(() => {
+        bouton.style.width = "80px";
+        bouton.style.height = "80px";
+        resoudre();
+      }));
+    });
+    await deuxImages(page);
+    await deuxImages(page);
+    expect(decrireLesViolations(sentinelle.bilan().violations)).toEqual([]);
+    await page.locator('#controle-redimensionnement').evaluate((bouton) => {
+      bouton.style.width = "20px";
+      bouton.style.height = "20px";
+    });
+    const rapport = await attendreLaMorsure(page, sentinelle, "cible");
+    await info.attach('redimensionnement', { body: JSON.stringify({
+      cadre: await page.locator('#controle-redimensionnement').boundingBox(), releves: sentinelle.releves,
+    }), contentType: 'application/json' });
+    expect(rapport.join(" | ")).toContain("20×20");
+    await page.close();
+  });
+
   test("`issue` mord : un écran dont on a retiré toute prise est rapporté (défaut n° 1)", async ({
     context,
   }) => {

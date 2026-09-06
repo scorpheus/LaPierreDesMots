@@ -8,6 +8,7 @@ import { resolve } from 'node:path';
 
 import { expect, test } from './invariants.js';
 import { choisirLeProfil, etatDuJeu, preparer } from './qa-outils.js';
+import { toucherForme } from './gestes-dom.js';
 
 const NOEUDS_COLORIE = [
   'clairiere-01',
@@ -73,9 +74,9 @@ test('les six coloriages montrent leur prise et appliquent la couleur par un vra
     }
 
     await page.locator(`[data-godet="${cible!.couleur}"]`).click();
-    const boite = await prise.boundingBox();
+    const boite = await regionVisible.boundingBox();
     expect(boite, `${noeud}/${cible!.region} doit avoir une boîte tactile`).not.toBeNull();
-    await page.mouse.click(boite!.x + boite!.width / 2, boite!.y + boite!.height / 2);
+    await toucherForme(regionVisible);
 
     await expect(
       regionVisible,

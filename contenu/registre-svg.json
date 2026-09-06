@@ -366,6 +366,36 @@
       "encoreLuPar": [
         "tests/unitaires/svg-remplissage.test.ts"
       ]
+    },
+    {
+      "fichier": "brouillons/coloriages-locaux-2026-09-05/tapis/scene.svg",
+      "remplacePar": "habillages/foret-muette/tapis.svg",
+      "raison": "Source de la reprise locale du 5 septembre 2026, conservée après intégration. Le contrôle structurel reste actif.",
+      "decision": "Demande parent du 5 septembre 2026 : finaliser les six coloriages pour essai sur le site local."
+    },
+    {
+      "fichier": "brouillons/coloriages-locaux-2026-09-05/ecole/scene.svg",
+      "remplacePar": "habillages/clairiere/ecole-v2.svg",
+      "raison": "Source de la reprise locale du 5 septembre 2026, conservée après intégration. Le contrôle structurel reste actif.",
+      "decision": "Demande parent du 5 septembre 2026 : finaliser les six coloriages pour essai sur le site local."
+    },
+    {
+      "fichier": "brouillons/coloriages-locaux-2026-09-05/marais-jumeau-08/scene.svg",
+      "remplacePar": "habillages/marais-jumeau/brume.svg",
+      "raison": "Source de la reprise locale du 5 septembre 2026, conservée après intégration. Le contrôle structurel reste actif.",
+      "decision": "Demande parent du 5 septembre 2026 : finaliser les six coloriages pour essai sur le site local."
+    },
+    {
+      "fichier": "brouillons/coloriages-locaux-2026-09-05/forge/scene.svg",
+      "remplacePar": "habillages/volcan/forge.svg",
+      "raison": "Source de la reprise locale du 5 septembre 2026, conservée après intégration. Le contrôle structurel reste actif.",
+      "decision": "Demande parent du 5 septembre 2026 : finaliser les six coloriages pour essai sur le site local."
+    },
+    {
+      "fichier": "brouillons/coloriages-locaux-2026-09-05/fresque-murale/scene.svg",
+      "remplacePar": "habillages/cite-des-histoires/fresque-murale.svg",
+      "raison": "Source de la reprise locale du 5 septembre 2026, conservée après intégration. Le contrôle structurel reste actif.",
+      "decision": "Demande parent du 5 septembre 2026 : finaliser les six coloriages pour essai sur le site local."
     }
   ]
 }

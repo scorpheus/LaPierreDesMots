@@ -107,15 +107,6 @@ const LARGEUR_GLYPHE = 0.66;
  * Écrit une fois, employé deux fois — deux littéraux qui doivent rester égaux finiraient par
  * diverger, et le décor se décalerait de ses mots sans que rien ne le dise.
  */
-function ZONE_DE_JEU(hauteurModele: number, hauteurBande: number): CSSProperties {
-  return {
-    insetInlineStart: 0,
-    insetInlineEnd: 0,
-    insetBlockStart: `${String(hauteurModele)}px`,
-    insetBlockEnd: `${String(hauteurBande)}px`,
-  };
-}
-
 /**
  * Assez long pour être suivi de l'œil, assez court pour ne jamais retarder le geste suivant —
  * et de toute façon **le geste suivant l'interrompt** (v2 § 8 : aucune animation bloquante).
@@ -634,10 +625,12 @@ export function MoteurPhrase(
     // `hauteurModele` pixels trop haut. C'est le défaut de R40, mot pour mot — et on le mesure
     // au lieu de l'écrire en dur, pour qu'il reste juste à la prochaine mise en page.
     const [decX, decY] = decalageEntre(racine.current, coucheMots.current);
+    const prise = racine.current?.querySelector(`[data-etiquette="${CSS.escape(emplacement.cle)}"]`) ?? null;
+    const departReel = centreDuReceptacle(racine.current, prise as HTMLElement | null);
     volVise.current = {
       cle: emplacement.cle,
       texte: mot,
-      depart: [emplacement.x + decX, emplacement.y + decY],
+      depart: departReel ?? [emplacement.x + decX, emplacement.y + decY],
       arrivee,
     };
   };
@@ -682,9 +675,12 @@ export function MoteurPhrase(
       data-mots-affiches={String(ordre.length)}
       style={{
         position: 'relative',
-        blockSize: '100%',
-        minBlockSize: 0,
-        overflow: 'hidden',
+        display: 'grid',
+        gridTemplateRows: 'auto minmax(220px, 1fr) auto auto',
+        gap: '0.75rem',
+        blockSize: 'auto',
+        minBlockSize: '100%',
+        overflow: 'visible',
         borderRadius: 'var(--rayon-carte)',
       }}
     >
@@ -710,10 +706,8 @@ export function MoteurPhrase(
         data-plateau="modele"
         className="modele-phrase-centre"
         style={{
-          position: 'absolute',
-          insetInlineStart: 0,
-          insetInlineEnd: 0,
-          insetBlockStart: 0,
+          gridArea: '1 / 1',
+          position: 'relative',
           zIndex: 2,
           display: 'grid',
           justifyItems: 'center',
@@ -757,7 +751,7 @@ export function MoteurPhrase(
           sont positionnés dans le même rectangle : un décor et ses prises doivent partager UN
           SEUL référentiel (la leçon de R40). */}
       <div
-        style={{ position: 'absolute', ...ZONE_DE_JEU(hauteurModele, hauteurBande), zIndex: 0 }}
+        style={{ gridArea: '2 / 1', position: 'relative', minBlockSize: 220, zIndex: 0 }}
       >
         <SceneDecor
           habillage={habillage}
@@ -776,8 +770,14 @@ export function MoteurPhrase(
         ref={coucheMots}
         data-plateau="etiquettes"
         style={{
-          position: 'absolute',
-          ...ZONE_DE_JEU(hauteurModele, hauteurBande),
+          gridArea: '3 / 1',
+          position: 'relative',
+          display: 'flex',
+          flexWrap: 'wrap',
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: '0.75rem',
+          padding: '0.5rem',
           zIndex: 1,
           pointerEvents: 'none',
         }}
@@ -839,14 +839,11 @@ export function MoteurPhrase(
                 <span
                   key={emplacement.cle}
                   data-porte-etiquette={emplacement.cle}
+                  hidden={placee}
                   style={{
-                    position: 'absolute',
-                    insetInlineStart: `${String(emplacement.x)}px`,
-                    insetBlockStart: `${String(emplacement.y)}px`,
-                    // Le SEUL rôle de ce porteur : centrer. Il ne reçoit aucune classe, donc
-                    // aucune animation ne peut lui reprendre cette transformation.
-                    transform: 'translate(-50%, -50%)',
-                    display: 'inline-flex',
+                    position: 'relative',
+                    display: placee ? 'none' : 'inline-flex',
+                    maxInlineSize: '100%',
                     pointerEvents: 'none',
                   }}
                 >
@@ -907,10 +904,8 @@ export function MoteurPhrase(
         ref={bande}
         data-plateau="phrase"
         style={{
-          position: 'absolute',
-          insetInlineStart: 0,
-          insetInlineEnd: 0,
-          insetBlockEnd: 0,
+          gridArea: '4 / 1',
+          position: 'relative',
           zIndex: 2,
         }}
       >

@@ -424,7 +424,11 @@ function sentinelleDansLaPage(config: ConfigurationSentinelle): void {
   let gesteEnAttente: string | null = null;
   let ecranAuMomentDuGeste = "aucun";
   let auditPlanifie = false;
-  let nbInteractifsPrecedent = -1;
+  let signatureCiblesPrecedente = "";
+  let signatureCiblesAuditee = "";
+  let imagesCiblesStables = 0;
+  const ciblesObservees = new Set<Element>();
+  const observateurTailles = new ResizeObserver(() => planifierAudit());
   /**
    * Le dernier geste reçu sur l'écran courant, remis à `null` dès que l'écran change.
    * Voir `Releve.gesteResponsable` pour la mesure qui a rendu ce champ nécessaire.
@@ -493,6 +497,7 @@ function sentinelleDansLaPage(config: ConfigurationSentinelle): void {
     signaler("sante", `promesse rejetée sans capture : ${String(evenement.reason)}`);
     planifierAudit();
   });
+  window.addEventListener("resize", () => planifierAudit(), { passive: true });
 
   // ── les gestes ───────────────────────────────────────────────────────────────────────────
   //
@@ -645,6 +650,16 @@ function sentinelleDansLaPage(config: ConfigurationSentinelle): void {
       }
 
       const interactifs = elementsInteractifs();
+      for (const ancien of ciblesObservees) {
+        if (ancien.isConnected) continue;
+        observateurTailles.unobserve(ancien);
+        ciblesObservees.delete(ancien);
+      }
+      for (const element of interactifs) {
+        if (ciblesObservees.has(element)) continue;
+        ciblesObservees.add(element);
+        observateurTailles.observe(element);
+      }
 
       // ── ARMEMENT. Tant que l'application n'a rien monté, il n'y a rien à auditer et un
       // « écran blanc » n'en serait pas un : c'est le document vide d'avant React.
@@ -707,15 +722,23 @@ function sentinelleDansLaPage(config: ConfigurationSentinelle): void {
 
       // ── I5 · R16 ────────────────────────────────────────────────────────────────────────
       //
-      // Mesurée quand la POPULATION change (écran ou nombre de cibles), pas à chaque image :
-      // `getBoundingClientRect()` force un calcul de mise en page, et le moteur `colorie`
-      // produit des dizaines d'images par seconde sur 33 régions. Une mesure à chaque image
-      // aurait rendu la suite inutilisable ; l'audit par écran de
-      // `parcours-audit-tout-le-site.spec.ts` reste le filet exhaustif.
-      if (ecran !== ecranPrecedent || interactifs.length !== nbInteractifsPrecedent) {
+      // Attendre la composition, pas seulement l'existence des boutons. Le premier calcul
+      // peut précéder les polices ou le ResizeObserver qui convertit les unités SVG en px.
+      // Trois images identiques remplacent cette première mesure transitoire ; les contrôles
+      // d'erreur, de sauvegarde et d'impasse restent actifs pendant tout le chargement.
+      // Inclure les dimensions détecte AUSSI un bouton qui rétrécit sans changer la population.
+      const signatureCibles = `${ecran}|${interactifs.map((element) => {
+        const boite = element.getBoundingClientRect();
+        return `${decrire(element)}:${Math.round(boite.width * 10)},${Math.round(boite.height * 10)}`;
+      }).join("|")}`;
+      imagesCiblesStables = signatureCibles === signatureCiblesPrecedente ? imagesCiblesStables + 1 : 1;
+      signatureCiblesPrecedente = signatureCibles;
+      if (document.fonts.status !== "loaded" || imagesCiblesStables < 3) {
+        planifierAudit();
+      } else if (signatureCibles !== signatureCiblesAuditee) {
         auditerLesCibles(interactifs);
+        signatureCiblesAuditee = signatureCibles;
       }
-      nbInteractifsPrecedent = interactifs.length;
 
       // ── I6 · le serveur ─────────────────────────────────────────────────────────────────
       //

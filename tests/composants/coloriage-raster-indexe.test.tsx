@@ -15,14 +15,15 @@ const REGIONS = [
   {
     id: 'ventre-du-chaudron',
     libelle: 'le ventre du chaudron',
-    centroide: [300, 250],
+    // Reproduction de `galeries-12` : les deux prises de 96 px se chevauchent.
+    centroide: [460, 302],
     surface: 24_000,
     couleurMasque: '#1248A0',
   },
   {
     id: 'mousse-de-couleurs',
     libelle: 'la mousse de couleurs',
-    centroide: [340, 140],
+    centroide: [454, 308],
     surface: 8_000,
     couleurMasque: '#EA3290',
   },
@@ -131,6 +132,7 @@ describe('contrat du coloriage raster indexé', () => {
     for (const prise of prises) {
       expect(prise.getAttribute('role')).toBe('button');
       expect(prise.getAttribute('aria-label')).toBeTruthy();
+      expect((prise as SVGElement).style.pointerEvents).toBe('none');
     }
     fireEvent.click(prises[0]!);
     expect(colorier).toHaveBeenCalledWith(
@@ -144,6 +146,87 @@ describe('contrat du coloriage raster indexé', () => {
     fireEvent.keyDown(prises[0]!, { key: 'Échap' });
     expect(colorier).not.toHaveBeenCalled();
     cleanup();
+  });
+
+  it('attend le masque puis nomme deux pixels voisins depuis le canvas, jamais depuis les cercles', async () => {
+    class ImageChargee {
+      onload: (() => void) | null = null;
+      onerror: (() => void) | null = null;
+
+      set src(_url: string) {
+        queueMicrotask(() => this.onload?.());
+      }
+    }
+    vi.stubGlobal('Image', ImageChargee);
+
+    const largeur = HABILLAGE_RASTER.scene.rasterIndexe.largeur;
+    const hauteur = HABILLAGE_RASTER.scene.rasterIndexe.hauteur;
+    const pixels = new Uint8ClampedArray(largeur * hauteur * 4);
+    const poserPixel = (x: number, y: number, rgb: readonly [number, number, number]): void => {
+      const index = (y * largeur + x) * 4;
+      pixels[index] = rgb[0];
+      pixels[index + 1] = rgb[1];
+      pixels[index + 2] = rgb[2];
+      pixels[index + 3] = 255;
+    };
+    poserPixel(460, 302, [0x12, 0x48, 0xa0]);
+    poserPixel(454, 308, [0xea, 0x32, 0x90]);
+
+    const contexte = {
+      drawImage: vi.fn(),
+      getImageData: vi.fn(() => ({ data: pixels, width: largeur, height: hauteur } as ImageData)),
+      createImageData: vi.fn((l: number, h: number) => ({
+        data: new Uint8ClampedArray(l * h * 4),
+        width: l,
+        height: h,
+      } as ImageData)),
+      putImageData: vi.fn(),
+    } as unknown as CanvasRenderingContext2D;
+    vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(
+      (() => contexte) as typeof HTMLCanvasElement.prototype.getContext,
+    );
+
+    const colorier = vi.fn();
+    const { container } = render(
+      <SceneLibre
+        habillage={HABILLAGE_RASTER}
+        regionsOffertes={['ventre-du-chaudron', 'mousse-de-couleurs']}
+        remplissages={{}}
+        animationsDesactivees
+        onColorier={colorier}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(container.querySelector('[data-masque-raster="pret"]')).not.toBeNull();
+    });
+    const canvas = container.querySelector<HTMLCanvasElement>('[data-raster-couche="couleurs"]');
+    expect(canvas).not.toBeNull();
+    Object.defineProperty(canvas!, 'getBoundingClientRect', {
+      configurable: true,
+      value: () => ({
+        x: 0,
+        y: 0,
+        left: 0,
+        top: 0,
+        right: 600,
+        bottom: 400,
+        width: 600,
+        height: 400,
+        toJSON: () => ({}),
+      }),
+    });
+
+    fireEvent.click(canvas!, { clientX: 230, clientY: 151 });
+    expect(colorier).toHaveBeenLastCalledWith(
+      'ventre-du-chaudron',
+      expect.objectContaining({ clientX: 230, clientY: 151 }),
+    );
+    fireEvent.click(canvas!, { clientX: 227, clientY: 154 });
+    expect(colorier).toHaveBeenLastCalledWith(
+      'mousse-de-couleurs',
+      expect.objectContaining({ clientX: 227, clientY: 154 }),
+    );
   });
 
   it('revient au décor SVG jouable dès qu’une des couches raster ne charge pas', async () => {

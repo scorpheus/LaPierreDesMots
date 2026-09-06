@@ -32,6 +32,7 @@ import { mondeDeTest, profilDeTest } from './donnees-ecrans.js';
 
 const paquetsDemandes: string[] = [];
 const demandesDeSortie: { region: string; compagnon: string | null }[] = [];
+let compositionEchoue = false;
 
 /** Le monde servi par le bouchon. Une variable, pour qu'un cas puisse en poser un autre. */
 let mondeServi: ReturnType<typeof mondeDeTest> = mondeDeTest();
@@ -56,6 +57,9 @@ vi.mock('@client/api/client', async (importOriginal) => {
     lireMonde: () => Promise.resolve(mondeServi),
     composerSortie: (_profil: unknown, demande: { region: string; compagnon: string | null }) => {
       demandesDeSortie.push(demande);
+      if (compositionEchoue) {
+        return Promise.reject(new Error('Le contenu ne permet pas de composer cette sortie.'));
+      }
       return Promise.resolve({
         profil: 'prf-1',
         region: demande.region,
@@ -184,6 +188,7 @@ function prise(region: string): Element | null {
 beforeEach(() => {
   paquetsDemandes.length = 0;
   demandesDeSortie.length = 0;
+  compositionEchoue = false;
   mondeServi = mondeDeTest();
   installerFetchLocal();
 });
@@ -294,6 +299,41 @@ describe('une prise n’existe que si elle répond (M23)', () => {
     });
     expect(demandesDeSortie).toEqual([{ region: 'galeries', compagnon: 'filou' }]);
   });
+
+  it.each([
+    { compagnon: null, libelle: 'Gobi' },
+    { compagnon: 'filou', libelle: 'Filou' }
+  ] as const)(
+    'le repli de composition conserve $libelle jusqu’au nœud isolé',
+    async ({ compagnon }) => {
+      compositionEchoue = true;
+      const { magasin } = await monterEtAttendre();
+      fireEvent.click(prise('galeries')!);
+      fireEvent.click(
+        document.querySelector(`[data-choisir-compagnon="${compagnon ?? 'gobi'}"]`)!
+      );
+      fireEvent.click(document.querySelector('[data-confirmer-depart]')!);
+
+      await waitFor(() => {
+        expect(magasin.getState().ecran).toBe('noeud');
+      });
+      const sortie = magasin.getState().sortie;
+      expect(sortie?.compagnon).toBe(compagnon);
+      expect(sortie?.etapes).toHaveLength(1);
+      expect(sortie?.etapes[0]).toMatchObject({
+        rang: 1,
+        role: 'synthese',
+        noeud: 'clairiere-01',
+        habillage: 'clairiere.ecole'
+      });
+      expect(sortie?.etapes[0]?.competences).toEqual([
+        'comp.consigne.simple',
+        'comp.consigne.multiple',
+        'lex.couleur'
+      ]);
+      expect(demandesDeSortie).toEqual([{ region: 'galeries', compagnon }]);
+    }
+  );
 
   it('taper une région voilée ne demande RIEN, et n’affiche aucun reproche', async () => {
     await monterEtAttendre();

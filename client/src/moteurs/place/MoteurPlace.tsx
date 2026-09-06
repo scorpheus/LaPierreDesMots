@@ -25,6 +25,7 @@ import type { ProprietesMoteur } from '../types.js';
 import { ScenePlace } from './ScenePlace.js';
 import { Reserve } from './Reserve.js';
 import { urlAsset } from '../../api/client.js';
+import { reecrireLiensAssetsDuSvg } from '../../habillages/chargeur.js';
 
 /** Cadence du `battementHorloge`. Le moteur ne connaît aucun `setTimeout` : c'est ici. */
 const PERIODE_BATTEMENT_MS = 1000;
@@ -68,7 +69,7 @@ export function MoteurPlace(
       .then((reponse) => (reponse.ok ? reponse.text() : null))
       .then((texte) => {
         if (annule || texte === null) return;
-        const corps = extraireCorpsSvg(texte);
+        const corps = extraireCorpsSvg(reecrireLiensAssetsDuSvg(texte));
         if (corps !== null) setSvgMarkup(corps);
       })
       .catch(() => {
@@ -216,28 +217,18 @@ export function MoteurPlace(
         data-habillage={habillage.id}
         data-termine={etat.termineMs === null ? 'non' : 'oui'}
         data-consigne={etatConsigne?.id ?? ''}
-        // R20 — COLONNE SOUPLE, ET NON GRILLE. En grille, la scène n'est la première rangée que
-        // pour `colorie` ; `place` la met en deuxième, et une règle qui borne « la première
-        // rangée » ne la touchait donc pas. Mesuré : SVG de 1 259 px dans un moteur de 931,
-        // cinq cibles coupées hors du cadre.
-        //
-        // En colonne, la scène est le seul enfant SOUPLE (`flex: 1 1 auto; min-block-size: 0`,
-        // posé par `global.css`) : elle prend ce qui reste et rétrécit quand il en manque, pendant
-        // que les commandes gardent leur taille. Le style est EN LIGNE parce qu'un style en ligne
-        // bat la feuille — c'est précisément ce qui rendait la première correction inerte.
+        // Paysage large : scène à gauche, étape et réserve à droite. En cadre compact,
+        // global.css rétablit un flux de hauteur naturelle : aucune scène écrasée pour
+        // forcer les commandes dans une fenêtre trop courte, aucun carton sur le dessin.
         style={{ blockSize: '100%', minBlockSize: 0 }}
       >
         <div
           data-plateau="etape-place"
           aria-live="polite"
           style={{
-            position: 'absolute',
-            insetBlockStart: '0.75rem',
-            // Centré dans le moteur pour rester lisible en paysage comme en portrait ; le
-            // cartouche n'entre pas dans la grille et ne réduit donc jamais l'illustration.
-            insetInlineStart: '50%',
-            transform: 'translateX(-50%)',
-            zIndex: 4,
+            position: 'relative',
+            // Une vraie case de la composition : jamais devant une cible du dessin.
+            alignSelf: 'center',
             display: 'grid',
             justifyItems: 'center',
             gap: '0.15rem',

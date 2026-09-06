@@ -49,6 +49,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { CSSProperties, ReactElement } from 'react';
 import type { ActionChemin, ContenuChemin, EtatChemin } from '@pierre/partage';
+import { preparerPlateauChemin } from '@pierre/partage';
 import { styleDeLecture, useReglagesLecture } from '../../lecture/ZoneDeLecture.js';
 import { SceneDecor } from '../../habillages/SceneDecor.js';
 import type { ProprietesMoteur } from '../types.js';
@@ -61,10 +62,96 @@ import {
   useDerniereAllumee,
   useMesureCadre,
 } from '../eclair/mise-en-scene.js';
+import type { Boite } from '../eclair/mise-en-scene.js';
 import { PorteurPose } from '../eclair/porteur-pose.js';
 
 /** Cadence du `battementHorloge`. Le moteur ne connaît aucun `setTimeout` : c'est ici. */
 const PERIODE_BATTEMENT_MS = 1000;
+const CIBLE_MIN = 64;
+const MARGE_GRILLE = 14;
+const ECART_GRILLE = 16;
+
+/** Le repère désigne le groupe étudié, pas n'importe quel son du mot « fille ». */
+function RegleCourte({ texte, repere }: { texte: string; repere?: { mot: string; groupe: string } }): ReactElement {
+  const lettre = /^(?:Avec|Sans) la lettre ([a-z])$/u.exec(texte)?.[1];
+  const debutMot = repere === undefined ? -1 : texte.indexOf(repere.mot);
+  const debutGroupe = repere === undefined ? -1 : repere.mot.indexOf(repere.groupe);
+  const debut = lettre !== undefined ? texte.length - 1
+    : debutMot < 0 || debutGroupe < 0 ? -1 : debutMot + debutGroupe;
+  const longueur = lettre?.length ?? repere?.groupe.length ?? 0;
+  return <strong data-regle-courte="oui">{debut < 0 ? texte : <>
+    {texte.slice(0, debut)}<span data-grapheme-repere="oui" style={{
+      textDecorationLine: 'underline', textDecorationColor: 'var(--lagon)',
+      textDecorationThickness: '0.16em', textUnderlineOffset: '0.18em',
+    }}>{texte.slice(debut, debut + longueur)}</span>{texte.slice(debut + longueur)}
+  </>}</strong>;
+}
+
+export interface CaseDeGrilleChemin {
+  readonly x: number;
+  readonly y: number;
+  readonly largeur: number;
+  readonly hauteur: number;
+}
+
+export interface GrilleChemin {
+  readonly cases: readonly CaseDeGrilleChemin[];
+  readonly hauteur: number;
+}
+
+export interface DiagnosticDerivationChemin {
+  readonly chevauchements: number;
+  readonly horsBornes: number;
+  readonly deborde: boolean;
+}
+
+/** Un chevauchement dérivé impose la grille, quel que soit le format du cadre. */
+export function derivationImposeGrilleChemin(diagnostic: DiagnosticDerivationChemin): boolean {
+  return diagnostic.chevauchements > 0 || diagnostic.horsBornes > 0 || diagnostic.deborde;
+}
+
+/** Voir l'équivalent paires : la hauteur produite par la grille ne doit pas désactiver son repli. */
+function useRepliDerivationStable(cleComposition: string, derivationImpossible: boolean): boolean {
+  const clePrecedente = useRef(cleComposition);
+  const repliVerrouille = useRef(false);
+  if (clePrecedente.current !== cleComposition) {
+    clePrecedente.current = cleComposition;
+    repliVerrouille.current = false;
+  }
+  if (derivationImpossible) repliVerrouille.current = true;
+  return repliVerrouille.current;
+}
+
+/**
+ * Quand les centroïdes ne peuvent plus contenir les phrases, on les range dans une grille qui
+ * GRANDIT verticalement. Les coordonnées servent aussi aux traits SVG : ils restent attachés à
+ * leurs deux cases au lieu de survivre, faux, au-dessus d'un repli CSS.
+ */
+export function composerGrilleCompacteChemin(boites: readonly Boite[], largeurCadre: number): GrilleChemin {
+  const colonnes = largeurCadre >= 560 ? 2 : 1;
+  const largeurUtile = Math.max(CIBLE_MIN, largeurCadre - 2 * MARGE_GRILLE);
+  const largeurCase = Math.max(CIBLE_MIN, (largeurUtile - (colonnes - 1) * ECART_GRILLE) / colonnes);
+  const hauteurs = boites.map((boite) =>
+    Math.max(boite.hauteur, boite.hauteur * Math.max(1, Math.ceil(boite.largeur / largeurCase))),
+  );
+  const cases: CaseDeGrilleChemin[] = [];
+  let y = MARGE_GRILLE;
+  for (let debut = 0; debut < boites.length; debut += colonnes) {
+    const fin = Math.min(boites.length, debut + colonnes);
+    const hauteurLigne = Math.max(...hauteurs.slice(debut, fin));
+    for (let index = debut; index < fin; index += 1) {
+      const colonne = index - debut;
+      cases.push({
+        x: MARGE_GRILLE + colonne * (largeurCase + ECART_GRILLE) + largeurCase / 2,
+        y: y + hauteurLigne / 2,
+        largeur: largeurCase,
+        hauteur: hauteurs[index]!,
+      });
+    }
+    y += hauteurLigne + ECART_GRILLE;
+  }
+  return { cases, hauteur: Math.max(CIBLE_MIN, y - ECART_GRILLE + MARGE_GRILLE) };
+}
 
 /**
  * CE QUE LE REFUS DIT — jamais la case attendue. `case-non-adjacente` n'est PAS un motif de
@@ -136,6 +223,8 @@ export function MoteurChemin(
 
   const etape = etat.etapes[etat.indexEtape];
   const consigneCourante = contenu.consignes[etat.indexEtape] ?? null;
+  const plateau = useMemo(() => preparerPlateauChemin(contenu, etat.indexEtape), [contenu, etat.indexEtape]);
+  const casesAffichees = plateau.cases;
 
   // --- la typographie de lecture ---------------------------------------------
   const reglages = useReglagesLecture();
@@ -143,7 +232,12 @@ export function MoteurChemin(
 
   // --- la mesure du cadre -----------------------------------------------------
   const { racine, bande, cadre, hauteurBande } = useMesureCadre();
-  const regimeCompact = cadre.largeur <= 700 || cadre.hauteur <= 520;
+  // Sur mobile, un débordement transitoire agrandit innerWidth ET innerHeight :
+  // prendre cette hauteur réarmait le repli à chaque image (grille → plateau → grille).
+  // clientHeight décrit le viewport CSS, indépendant de ce débordement du contenu.
+  const hauteurViewport = typeof document === 'undefined'
+    ? cadre.hauteur : document.documentElement.clientHeight || window.innerHeight;
+  const regimeCompact = cadre.largeur <= 700 || hauteurViewport <= 520;
 
   const panneau = useRef<HTMLDivElement | null>(null);
   const [hauteurPanneau, fixerHauteurPanneau] = useState(0);
@@ -189,7 +283,7 @@ export function MoteurChemin(
   );
 
   // --- le plateau : population STABLE, une seule dérivation --------------------
-  const idsCases = useMemo(() => contenu.cases.map((c) => c.id), [contenu.cases]);
+  const idsCases = useMemo(() => casesAffichees.map((c) => c.id), [casesAffichees]);
   const plans = useMemo(
     () =>
       planifierCascade({
@@ -203,14 +297,47 @@ export function MoteurChemin(
     [habillage, idsCases, regions, cadrePlateau, bornesPlateau, mesurer],
   );
   const emplacements = plans[0]?.resultat.emplacements ?? [];
-  const positionParCase = useMemo(
-    () => new Map(emplacements.map((e) => [e.cle, { x: e.x, y: e.y }] as const)),
-    [emplacements],
+  const derivationImpossible = derivationImposeGrilleChemin({
+    chevauchements: plans[0]?.resultat.chevauchements ?? 0,
+    horsBornes: plans[0]?.resultat.horsBornes ?? 0,
+    deborde: plans[0]?.resultat.deborde === true,
+  });
+  const repliDerivation = useRepliDerivationStable(
+    [
+      habillage.id,
+      idsCases.join('|'),
+      reglages.corpsPx,
+      reglages.interlettrageEm,
+      reglages.interligne,
+      cadre.largeur,
+      hauteurViewport,
+    ].join('|'),
+    derivationImpossible,
   );
+  const repliCompact = repliDerivation || (regimeCompact && casesAffichees.length * CIBLE_MIN > hauteurViewport);
+  const grilleCompacte = useMemo(
+    () => composerGrilleCompacteChemin(idsCases.map((id) => mesurer(id)), cadrePlateau.largeur),
+    [idsCases, mesurer, cadrePlateau.largeur],
+  );
+  const positionParCase = useMemo(() => {
+    if (repliCompact) {
+      return new Map(idsCases.map((id, index) => {
+        const caseGrille = grilleCompacte.cases[index];
+        return [id, { x: caseGrille?.x ?? MARGE_GRILLE, y: caseGrille?.y ?? MARGE_GRILLE }] as const;
+      }));
+    }
+    return new Map(emplacements.map((e) => [e.cle, { x: e.x, y: e.y }] as const));
+  }, [repliCompact, idsCases, grilleCompacte, emplacements]);
 
+  // La recoloration conserve le plan complet ; masquer un mot d'une ancienne étape
+  // ne doit jamais reprendre la couleur déjà gagnée sur le décor.
+  const plansDecor = useMemo(() => planifierCascade({
+    habillage, listesParEtape: [contenu.cases.map((c) => c.id)], regions,
+    cadre: cadrePlateau, bornes: bornesPlateau, mesurer,
+  }), [habillage, contenu.cases, regions, cadrePlateau, bornesPlateau, mesurer]);
   const allumees = useMemo(
-    () => regionsAllumeesDepuisAcquis(plans, etat.acquis, centroideParRegion),
-    [plans, etat.acquis, centroideParRegion],
+    () => regionsAllumeesDepuisAcquis(plansDecor, etat.acquis, centroideParRegion),
+    [plansDecor, etat.acquis, centroideParRegion],
   );
   const derniere = useDerniereAllumee(allumees);
 
@@ -226,7 +353,7 @@ export function MoteurChemin(
       readonly x2: number;
       readonly y2: number;
     }[] = [];
-    for (const c of contenu.cases) {
+    for (const c of casesAffichees) {
       const depart = positionParCase.get(c.id);
       if (depart === undefined) continue;
       for (const voisine of c.voisines) {
@@ -247,20 +374,20 @@ export function MoteurChemin(
       }
     }
     return lignes;
-  }, [contenu.cases, positionParCase]);
+  }, [casesAffichees, positionParCase]);
 
   const departEtape = contenu.consignes[etat.indexEtape]?.depart ?? null;
   const casesConsommees = useMemo(() => {
-    const consommees = new Set(Object.keys(etat.acquis));
+    const consommees = new Set(etat.visiteesEtape);
     if (departEtape !== null && etat.position !== departEtape) consommees.add(departEtape);
     if (etat.position !== null) consommees.delete(etat.position);
     return consommees;
-  }, [departEtape, etat.acquis, etat.position]);
+  }, [departEtape, etat.visiteesEtape, etat.position]);
 
   const casesAtteignables = useMemo(() => {
-    const courante = contenu.cases.find((c) => c.id === etat.position);
+    const courante = casesAffichees.find((c) => c.id === etat.position);
     return new Set((courante?.voisines ?? []).filter((id) => !casesConsommees.has(id)));
-  }, [casesConsommees, contenu.cases, etat.position]);
+  }, [casesConsommees, casesAffichees, etat.position]);
 
   const cibleAide = etat.aide?.cible ?? null;
 
@@ -291,12 +418,15 @@ export function MoteurChemin(
       data-aide={etat.niveauAide}
       data-etape={etape === undefined ? '' : etape.identifiant}
       data-composition={regimeCompact ? 'compacte' : 'confort'}
+      data-plateau-defilant={repliCompact ? 'oui' : 'non'}
       data-regions-allumees={String(allumees.length)}
       style={{
         position: 'relative',
-        blockSize: '100%',
+        blockSize: repliCompact
+          ? `${String(hauteurPanneau + grilleCompacte.hauteur + hauteurBande)}px`
+          : '100%',
         minBlockSize: 0,
-        overflow: 'hidden',
+        overflow: repliCompact ? 'visible' : 'hidden',
         borderRadius: 'var(--rayon-carte)',
       }}
     >
@@ -363,12 +493,14 @@ export function MoteurChemin(
         data-plateau="cases"
         style={{ ...stylePlateau, zIndex: 2, pointerEvents: 'none' }}
       >
-        {contenu.cases.map((caseChemin) => {
+        {casesAffichees.map((caseChemin) => {
           const pos = positionParCase.get(caseChemin.id);
           if (pos === undefined) return null;
+          const index = idsCases.indexOf(caseChemin.id);
+          const caseGrille = repliCompact ? (grilleCompacte.cases[index] ?? null) : null;
           const surPion = etat.position === caseChemin.id;
           const atteignable = casesAtteignables.has(caseChemin.id);
-          const franchie = etat.acquis[caseChemin.id] !== undefined;
+          const franchie = etat.visiteesEtape.includes(caseChemin.id) && caseChemin.id !== departEtape;
           const consommee = casesConsommees.has(caseChemin.id);
           const aidee = cibleAide === caseChemin.id;
           const refusee = etiquetteRefusee === caseChemin.id && etat.dernierRefus?.motif !== 'case-non-adjacente';
@@ -416,10 +548,12 @@ export function MoteurChemin(
                     position: 'relative',
                     minInlineSize: '4rem',
                     minBlockSize: '4rem',
-                    maxInlineSize: regimeCompact ? '8.5rem' : '12rem',
+                    inlineSize: caseGrille === null ? undefined : `${String(caseGrille.largeur)}px`,
+                    blockSize: caseGrille === null ? undefined : `${String(caseGrille.hauteur)}px`,
+                    boxSizing: caseGrille === null ? undefined : 'border-box',
+                    maxInlineSize: caseGrille === null ? (regimeCompact ? '8.5rem' : '12rem') : undefined,
                     padding: regimeCompact ? '0.35rem 0.5rem' : undefined,
                     whiteSpace: 'normal',
-                    lineHeight: 1.05,
                     // Atteignable : un halo STATIQUE (aucune image-clé), pour que les captures
                     // T4 restent stables — seule la couleur de fond diffère, jamais l'ombre de
                     // `.cible:active`.
@@ -487,6 +621,7 @@ export function MoteurChemin(
       <div
         ref={panneau}
         data-message-chemin="oui"
+        data-critere-reconnu={plateau.critereReconnu ? 'oui' : 'non'}
         data-refus-texte={messageDeRefus === '' ? 'non' : 'oui'}
         style={{
           ...styleLecture,
@@ -498,11 +633,12 @@ export function MoteurChemin(
           inlineSize: 'auto',
           maxInlineSize: 'none',
           margin: 0,
-          padding: regimeCompact ? '0.3rem 0.55rem' : '0.65rem 1rem',
-          border: '3px solid var(--trait)',
-          borderRadius: regimeCompact ? '0 0 var(--rayon-carte) var(--rayon-carte)' : 'var(--rayon-carte)',
+          padding: '0.3rem 0.65rem',
+          border: '2px solid var(--trait)',
+          borderInlineStart: `8px solid var(--${etat.indexEtape % 2 === 0 ? 'soleil' : 'lagon'})`,
+          borderRadius: '0.8rem',
           background: 'var(--parchemin)',
-          boxShadow: 'var(--ombre-bd)',
+          boxShadow: '0 3px 0 var(--trait)',
           display: 'grid',
           justifyItems: 'center',
           gap: regimeCompact ? 0 : '0.15rem',
@@ -511,22 +647,25 @@ export function MoteurChemin(
         } as CSSProperties}
         data-fond-opaque="oui"
       >
-        <span data-regle-chemin="oui" style={{ fontSize: regimeCompact ? '0.68em' : '0.78em', fontWeight: 700, opacity: 0.75 }}>
+        <div key={etape?.identifiant} data-annonce="chemin" role="status" aria-live="polite" aria-atomic="true"
+          style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'baseline', columnGap: '1rem' }}>
+          <span style={{ fontSize: '0.68em', fontWeight: 700 }}>
+            {etat.indexEtape === 0 ? 'Chemin' : 'Nouveau chemin'} {etat.indexEtape + 1} / {contenu.consignes.length}
+          </span>
+          <RegleCourte texte={plateau.regleCourte} {...(plateau.repere === undefined ? {} : { repere: plateau.repere })} />
+        </div>
+        <span data-regle-chemin="oui" className="sr-only">
           À chercher maintenant
         </span>
-        <strong style={{ fontSize: regimeCompact ? '0.78em' : undefined }}>
-          {consigneCourante?.texte ?? 'Suis le bon chemin.'}
-        </strong>
+        <span className="sr-only">{consigneCourante?.texte}</span>
         <span data-cible-chemin="oui" style={{ fontSize: regimeCompact ? '0.68em' : '0.82em', fontWeight: 700 }}>
           {caseCourante === null
             ? 'Choisis la première case du chemin.'
-            : `Départ : « ${caseCourante.libelle} ». Touche une case reliée en jaune.`}
+            : `${etat.position === departEtape ? 'Départ' : 'Tu es sur'} : « ${caseCourante.libelle} ».`}
         </span>
-        {retourChemin === '' ? null : (
-          <span data-retour-chemin="oui" style={{ fontSize: '0.82em' }}>
-            {retourChemin}
-          </span>
-        )}
+        <span data-retour-chemin="oui" style={{ fontSize: '0.68em', minBlockSize: '2lh' }}>
+          {retourChemin || 'Touche une case reliée en jaune.'}
+        </span>
       </div>
 
       {/* ------------------------------------------------------------ la bande statique */}

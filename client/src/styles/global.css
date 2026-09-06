@@ -1186,6 +1186,7 @@ body {
   /* R16 est exprimé en pixels CSS, pas dans le corps de lecture du profil. À 16 px, 3,75 rem
      ne faisait que 60 px et la commande échouait sur tous les nœuds `eclair`. */
   min-block-size: var(--cible-min);
+  min-inline-size: var(--cible-min);
   padding: 0.7rem 1.25rem;
   border: 3px solid var(--trait, #1b2440);
   border-radius: 999px;
@@ -1412,10 +1413,10 @@ body {
 
 /* L'appui : le bouton s'enfonce de 3 px et son ombre maigrit d'autant. Le bas de l'objet ne
    bouge donc pas — un bouton qui descend sans que son ombre suive « glisse » au lieu de
-   s'enfoncer. Le `scale` d'origine est conservé : c'est lui que la v2 § 8 demande, et le
-   retour sous 100 ms en dépend. */
+   s'enfoncer. Garder sa taille : réduire une cible de 64 px à 96 % ne laisse que 61 px
+   pendant l'appui. Le relief fournit le retour immédiat sans rétrécir la prise tactile. */
 .cible:active {
-  transform: scale(0.96) translateY(3px);
+  transform: translateY(3px);
   box-shadow: var(--ombre-bd-appui);
 }
 
@@ -1449,6 +1450,8 @@ body {
 .cible-luciole::before,
 .cible-luciole::after {
   position: absolute;
+  /* Les ailes sont décoratives : elles ne capturent pas le toucher de la luciole voisine. */
+  pointer-events: none;
   z-index: -1;
   inset-block-start: 50%;
   inline-size: 2.4rem;
@@ -2983,8 +2986,28 @@ body {
    « la première rangée de la grille » — vrai pour `colorie`, faux pour `place`, qui met sa
    consigne devant. Un sélecteur qui vise l'OBJET plutôt que sa position ne se trompe plus. */
 [data-ecran="noeud"] [data-moteur] > svg.pierre-scene,
+[data-ecran="noeud"] [data-moteur="colorie"] > .pierre-cadre-coloriage,
 [data-ecran="noeud"] [data-moteur] > svg[data-scene] {
   flex: 1 1 auto;
+}
+
+/* La fenêtre, et non l'image agrandie, occupe la place restant au-dessus des godets. */
+[data-ecran="noeud"] .pierre-cadre-coloriage__fenetre {
+  flex: 1 1 auto;
+  display: grid;
+  grid-template: minmax(0, 1fr) / minmax(0, 1fr);
+  place-items: center;
+}
+
+[data-ecran="noeud"] .pierre-cadre-coloriage[data-loupe="oui"] .pierre-cadre-coloriage__fenetre {
+  display: block;
+}
+
+[data-ecran="noeud"] .pierre-cadre-coloriage[data-loupe="non"] .pierre-scene {
+  inline-size: 100% !important;
+  block-size: 100% !important;
+  max-inline-size: 100% !important;
+  max-block-size: 100% !important;
 }
 
 [data-ecran="noeud"] svg.pierre-scene,
@@ -3004,32 +3027,66 @@ body {
 .moteur-place {
   display: grid;
   grid-template-columns: minmax(0, 3fr) minmax(360px, 2fr);
-  grid-template-rows: minmax(0, 1fr) auto;
+  /* Une réserve qui dépasse une rangée comprimée peut faire remonter son titre sous
+     le cartouche. Toute la colonne garde sa hauteur réelle et devient défilable si besoin. */
+  grid-template-rows: auto auto auto;
+  block-size: auto !important;
+  min-block-size: 100% !important;
+  align-content: start;
   gap: 1rem;
 }
 
 .scene-place-defilable {
-  display: contents;
+  display: block;
+  grid-column: 1;
+  grid-row: 1 / span 3;
+  align-self: center;
 }
 
 .scene-place-defilable > svg[data-scene="place"] {
-  grid-row: 1 / span 2;
-  align-self: center;
-  inline-size: auto;
-  block-size: auto;
+  display: block;
+  inline-size: 100%;
+  block-size: auto !important;
   max-inline-size: 100%;
-  max-block-size: 100%;
+  max-block-size: none !important;
   margin-inline: auto;
 }
 
+.moteur-place > [data-plateau="etape-place"] {
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: center;
+}
+
 .moteur-place > [data-reserve="place"] {
+  grid-column: 2;
+  grid-row: 2;
   align-content: center;
+}
+
+.moteur-place > [data-rappel] { grid-column: 2; grid-row: 3; }
+
+@media (min-width: 901px) and (orientation: landscape) {
+  .moteur-place > [data-reserve="place"] {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: stretch;
+    gap: 0.5rem !important;
+  }
+
+  .moteur-place [data-place-compteur] { grid-column: 1 / -1; }
+  .moteur-place [data-reserve="place"] > button {
+    max-inline-size: 100%;
+    padding-inline: 0.3rem !important;
+  }
 }
 
 @media (max-width: 900px), (orientation: portrait) {
   .moteur-place {
     display: flex;
     flex-direction: column;
+    block-size: auto !important;
+    min-block-size: 100% !important;
   }
 
   /* Sur tablette, l'étape variable suit l'image au lieu de flotter devant le ciel et le toit.
@@ -3041,19 +3098,20 @@ body {
     flex: 0 0 auto;
     align-self: center;
     transform: none !important;
-    margin-block: 0.35rem;
+    /* L'espacement appartient au gap du moteur, pas à une seconde marge cumulée. */
+    margin-block: 0;
   }
 
   .moteur-place .scene-place-defilable {
     order: 1;
     display: block;
-    flex: 1 1 auto;
-    min-block-size: 0;
+    flex: 0 0 auto;
+    inline-size: 100%;
   }
 
   .moteur-place .scene-place-defilable > svg[data-scene="place"] {
     inline-size: 100%;
-    block-size: 100%;
+    block-size: auto;
   }
 
   .moteur-place > [data-reserve="place"] {
@@ -3145,7 +3203,10 @@ body {
 
 .moteur-chrono {
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-rows: auto auto auto;
+  block-size: auto !important;
+  min-block-size: 100% !important;
+  align-content: start;
   gap: clamp(0.45rem, 1.2dvh, 0.8rem);
   padding: clamp(0.45rem, 1.2vw, 0.8rem);
   isolation: isolate;
@@ -3161,14 +3222,14 @@ body {
 }
 
 .chrono-vignettes {
-  min-block-size: 0;
+  min-block-size: min-content;
   min-inline-size: 0;
   display: grid;
   align-items: center;
   gap: clamp(0.5rem, 1.4vw, 1rem);
   padding: 0.25rem;
-  overflow: auto;
-  overscroll-behavior: contain;
+  /* Une longue légende agrandit cette rangée ; la frise suivante ne peut pas la couvrir. */
+  overflow: visible;
 }
 
 .chrono-porte-vignette {
@@ -3265,6 +3326,50 @@ body {
 .porteur-moteur {
   min-block-size: 0;
   min-inline-size: 0;
+}
+
+/* Les grilles longues annoncent leur hauteur réelle. L'ancien parent conservait 30 rem
+   même quand son enfant mesurait 80 rem : les pierres recouvraient le bouton d'aide.
+   Le défilement appartient ici à la page, sans sous-scroll et sans cacher de commandes. */
+[data-ecran="noeud"]:has([data-moteur][data-plateau-defilant="oui"]) {
+  block-size: auto !important;
+  max-block-size: none;
+  overflow: visible;
+  min-block-size: 100dvh;
+}
+
+[data-ecran="noeud"] .scene-noeud:has([data-moteur][data-plateau-defilant="oui"]) {
+  flex: 0 0 auto !important;
+  block-size: auto !important;
+  min-block-size: 0 !important;
+}
+
+.porteur-moteur:has(> [data-moteur][data-plateau-defilant="oui"]) {
+  block-size: auto !important;
+}
+
+/* Attrape porte déjà la hauteur intrinsèque de sa grille. Toute la chaîne reste
+   dans le flux : le pied d'aide suit la dernière rangée, sans sous-scroll.
+   Le flex occupe l'espace restant sur grand écran sans agrandir les dessins. */
+[data-ecran="noeud"]:has([data-moteur="attrape"]) {
+  block-size: auto !important;
+  max-block-size: none;
+  overflow: visible;
+  min-block-size: 100dvh;
+}
+
+[data-ecran="noeud"] .scene-noeud:has([data-moteur="attrape"]),
+.porteur-moteur:has(> [data-moteur="attrape"]) {
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto !important;
+  block-size: auto !important;
+  min-block-size: 0 !important;
+}
+
+[data-ecran="noeud"] .porteur-moteur > [data-moteur="attrape"],
+[data-ecran="noeud"] .porteur-moteur > [data-moteur][data-plateau-defilant="oui"] {
+  overflow: visible !important;
 }
 
 @media (max-width: 1100px), (max-height: 800px) {
@@ -3667,13 +3772,14 @@ body {
     overflow: visible !important;
   }
 
-  [data-ecran="noeud"] [data-moteur="colorie"] > svg.pierre-scene {
+  [data-ecran="noeud"] [data-moteur="colorie"] > .pierre-cadre-coloriage {
     grid-column: 1;
     grid-row: 1 / span 2;
     inline-size: 100% !important;
     max-inline-size: 100% !important;
     min-block-size: 160px;
-    max-block-size: min(58svh, 240px) !important;
+    block-size: min(78svh, 330px);
+    max-block-size: none;
   }
 
   [data-ecran="noeud"] [data-moteur="colorie"] > .pierre-palette {
@@ -3836,24 +3942,21 @@ body {
     min-inline-size: 600px;
   }
 
-  /* La règle tablette `.moteur-place .scene-place-defilable` est plus spécifique. On reprend
-     ici la même portée : sinon Flexbox réduisait cette scène à 0 px sur un téléphone, tandis
-     que le SVG de 400 px continuait à dépasser visuellement hors de son parent. */
+  /* La hauteur vient du rapport du vrai dessin ; pas de panorama de 600 px à faire défiler. */
   .moteur-place .scene-place-defilable {
     display: block;
-    flex: 0 0 400px;
+    flex: 0 0 auto;
     inline-size: 100%;
-    block-size: 400px;
+    block-size: auto;
     min-inline-size: 0;
-    overflow-x: auto;
-    overflow-y: hidden;
+    overflow: visible;
   }
 
   .moteur-place .scene-place-defilable > svg[data-scene="place"] {
-    inline-size: 600px !important;
-    block-size: 400px !important;
-    min-inline-size: 600px;
-    max-inline-size: none;
+    inline-size: 100% !important;
+    block-size: auto !important;
+    min-inline-size: 0;
+    max-inline-size: 100%;
     max-block-size: none;
     margin-inline: 0;
   }
@@ -3896,4 +3999,103 @@ html[data-animations='desactivees'] .compagnon-portrait--tuile .compagnon-sprite
 }
 @media (prefers-reduced-motion: reduce) {
   .compagnon-sprite { animation: none !important; }
+}
+
+/* Paires : la collection entière, et non une liste de cartes géantes à faire défiler.
+   Le texte garde les réglages de lecture ; les images prennent seulement la place nécessaire.
+   Le flux reste naturel pour les téléphones et les réglages de lecture exceptionnels. */
+main[data-ecran='noeud']:has([data-moteur='paires'][data-plateau-defilant='oui']) {
+  gap: 4px !important;
+  padding: 8px !important;
+  block-size: 100dvh !important;
+}
+.scene-noeud:has([data-moteur='paires'][data-plateau-defilant='oui']) {
+  flex: 1 0 auto !important;
+  min-block-size: 0 !important;
+  display: flex;
+  align-items: center;
+}
+.scene-noeud:has([data-moteur='paires']) > .porteur-moteur { inline-size: 100%; }
+[data-moteur='paires'] {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 4px;
+}
+[data-moteur='paires'] [data-cartouche-paires] { align-self: center; }
+.paires-reperes {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-block-size: 48px;
+  font-size: 1rem;
+  line-height: 1.3;
+}
+.paires-reperes > [data-cartouche-paires] { flex-shrink: 0; }
+.paires-reperes > p { margin: 0; }
+.paires-reperes > p:empty { display: none; }
+[data-moteur='paires'] [data-plateau='cartes'] {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  align-items: stretch;
+}
+[data-moteur='paires'] [data-composition='mixte'] {
+  grid-template-columns: repeat(2, minmax(0, 1fr) clamp(80px, 11vw, 128px));
+}
+[data-moteur='paires'] [data-carte] {
+  min-inline-size: 64px;
+  min-block-size: 64px;
+  padding: 4px 6px;
+  border-width: 3px;
+  border-radius: 16px;
+  box-shadow: 0 3px 0 var(--trait);
+  overflow-wrap: anywhere;
+}
+[data-moteur='paires'] [data-illustration-carte] {
+  inline-size: 100% !important;
+  max-inline-size: 112px;
+  block-size: auto !important;
+  aspect-ratio: 1;
+}
+main[data-ecran='noeud']:has([data-moteur='paires']) .barre-consigne {
+  padding: 6px !important;
+  gap: 8px !important;
+}
+main[data-ecran='noeud']:has([data-moteur='paires']) .barre-consigne > .cible {
+  padding: 4px 8px;
+}
+main[data-ecran='noeud']:has([data-moteur='paires']) [data-progression-sortie] {
+  font-size: 1rem;
+  line-height: 1.25;
+  margin: 0 !important;
+}
+main[data-ecran='noeud']:has([data-moteur='paires']) .gobi {
+  padding: 4px !important;
+  gap: 8px !important;
+}
+main[data-ecran='noeud']:has([data-moteur='paires']) .gobi-bulle {
+  padding: 4px 8px !important;
+}
+@media (max-width: 619px) {
+  [data-moteur='paires'] [data-plateau='cartes'] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  [data-moteur='paires'] [data-composition='mixte'] {
+    grid-template-columns: minmax(0, 1fr) 88px;
+  }
+}
+@media (min-width: 900px) and (max-height: 800px) {
+  [data-moteur='paires'] [data-composition='mixte'] {
+    grid-template-columns: repeat(2, minmax(0, 1fr) 72px);
+  }
+  [data-moteur='paires'] [data-plateau='cartes'] { gap: 6px; }
+  main[data-ecran='noeud']:has([data-moteur='paires']) .gobi { padding: 0 !important; }
+  main[data-ecran='noeud']:has([data-moteur='paires']) .barre-consigne {
+    padding: 4px !important;
+    border-width: 2px !important;
+  }
 }

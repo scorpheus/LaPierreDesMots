@@ -15,6 +15,11 @@ const DECORS = {
   'fresque-murale': 'decor.fresque-murale.v2'
 } as const;
 
+const SUCCESSEURS: Readonly<Record<string, string>> = {
+  tapis: 'tapis-objets-v2', brume: 'brume-coloriage-v3',
+  forge: 'forge-coloriage-v3', 'fresque-murale': 'fresque-coloriage-v3',
+};
+
 function paeth(gauche: number, haut: number, diagonale: number): number {
   const estimation = gauche + haut - diagonale;
   const a = Math.abs(estimation - gauche);
@@ -70,7 +75,7 @@ function pixelsRgbPng(octets: Buffer): { largeur: number; hauteur: number; pixel
 }
 
 describe('décors raster validés', () => {
-  it('verrouille les pixels et les embarque dans le mode autonome', () => {
+  it('conserve les pixels approuvés et embarque leur successeur lorsque le décor est remplacé', () => {
     const verrou = JSON.parse(
       readFileSync(join(process.cwd(), 'production/assets.lock.json'), 'utf8')
     ) as {
@@ -79,11 +84,12 @@ describe('décors raster validés', () => {
         fichier: string;
         empreinte: string;
         valide_par: string;
+        archive?: { ancienChemin: string; remplacePar: string; date: string };
       }[];
     };
 
     for (const [nom, id] of Object.entries(DECORS)) {
-      const relatif = `assets/decors/${nom}.png`;
+      const relatif = `assets/decors/${nom === 'ecole' ? '' : 'archives-2026-09-05/'}${nom}.png`;
       const image = pixelsRgbPng(readFileSync(join(process.cwd(), 'contenu', relatif)));
       const entrees = verrou.assets.filter((candidate) => candidate.id === id);
       const entree = entrees[0];
@@ -101,7 +107,11 @@ describe('décors raster validés', () => {
         `sha256:${createHash('sha256').update(image.pixels).digest('hex').toUpperCase()}`
       );
       expect(entree?.valide_par).toBe('parent');
-      expect(urlAssetAutonome(relatif), `${nom} absent de l’APK`).not.toBeNull();
+      const actif = `assets/decors/${SUCCESSEURS[nom] ?? nom}.png`;
+      if (nom !== 'ecole') {
+        expect(entree?.archive).toEqual({ ancienChemin: `contenu/assets/decors/${nom}.png`, remplacePar: `contenu/${actif}`, date: '2026-09-05' });
+      }
+      expect(urlAssetAutonome(actif), `${nom} absent du contenu autonome`).not.toBeNull();
     }
   });
 });

@@ -1,0 +1,572 @@
+[
+  {
+    "noeud": "foret-muette-08",
+    "habillage": "contenu/habillages/foret-muette/tapis.habillage.json",
+    "image": "contenu/assets/decors/tapis-objets-v2.png",
+    "empreinteImage": "cd7c1200bd753fab478c4880911ec7f63aa47dd898d96804c5ff27f87b558fc3",
+    "methode": "Points choisis sur le raster couleur et gris approuvé, avant tracé des masques ; normalisés sur l'image entière.",
+    "cibles": [
+      {
+        "region": "gland-du-tapis",
+        "objet": "tapis",
+        "interieur": [
+          0.51,
+          0.56
+        ],
+        "exterieur": [
+          0.45,
+          0.84
+        ]
+      },
+      {
+        "region": "feuille-du-tapis-un",
+        "objet": "chat",
+        "interieur": [
+          0.842,
+          0.48
+        ],
+        "exterieur": [
+          0.76,
+          0.5
+        ]
+      },
+      {
+        "region": "feuille-du-tapis-deux",
+        "objet": "bol",
+        "interieur": [
+          0.282,
+          0.842
+        ],
+        "exterieur": [
+          0.39,
+          0.84
+        ]
+      },
+      {
+        "region": "feuille-du-tapis-trois",
+        "objet": "sac",
+        "interieur": [
+          0.2,
+          0.66
+        ],
+        "exterieur": [
+          0.31,
+          0.67
+        ]
+      },
+      {
+        "region": "feuille-haute",
+        "objet": "pot",
+        "interieur": [
+          0.853,
+          0.76
+        ],
+        "exterieur": [
+          0.75,
+          0.77
+        ]
+      },
+      {
+        "region": "feuille-basse",
+        "objet": "ballon",
+        "interieur": [
+          0.64,
+          0.802
+        ],
+        "exterieur": [
+          0.58,
+          0.8
+        ]
+      },
+      {
+        "region": "feuille-du-tapis-quatre",
+        "objet": "banc",
+        "interieur": [
+          0.23,
+          0.36
+        ],
+        "exterieur": [
+          0.43,
+          0.3
+        ]
+      }
+    ]
+  },
+  {
+    "noeud": "clairiere-01",
+    "habillage": "contenu/habillages/clairiere/ecole.habillage.json",
+    "image": "contenu/assets/decors/ecole.png",
+    "empreinteImage": "e60ef6da6177aea9b2426757f06d91d253e0e9c11d3061326a51a0d1ed132d0e",
+    "methode": "Points observés sur le raster, séparément des masques ; revue visuelle du lot avant intégration.",
+    "cibles": [
+      {
+        "region": "pull-maitresse",
+        "objet": "le pull de la maîtresse",
+        "interieur": [
+          0.415,
+          0.357
+        ],
+        "exterieur": [
+          0.377,
+          0.357
+        ]
+      },
+      {
+        "region": "feuilles-arbre-1",
+        "objet": "les feuilles du premier arbre",
+        "interieur": [
+          0.134,
+          0.086
+        ],
+        "exterieur": [
+          0.133,
+          0.257
+        ]
+      },
+      {
+        "region": "feuilles-arbre-2",
+        "objet": "les feuilles du deuxième arbre",
+        "interieur": [
+          0.94,
+          0.087
+        ],
+        "exterieur": [
+          0.813,
+          0.087
+        ]
+      },
+      {
+        "region": "banc",
+        "objet": "le banc",
+        "interieur": [
+          0.1953125,
+          0.64453125
+        ],
+        "exterieur": [
+          0.121,
+          0.504
+        ]
+      },
+      {
+        "region": "porte-ecole",
+        "objet": "la porte de l’école",
+        "interieur": [
+          0.436,
+          0.291
+        ],
+        "exterieur": [
+          0.485,
+          0.292
+        ]
+      },
+      {
+        "region": "toit-ecole",
+        "objet": "le toit de l’école",
+        "interieur": [
+          0.38,
+          0.18
+        ],
+        "exterieur": [
+          0.38,
+          0.06
+        ]
+      }
+    ]
+  },
+  {
+    "noeud": "clairiere-10",
+    "habillage": "contenu/habillages/clairiere/ecole.habillage.json",
+    "image": "contenu/assets/decors/ecole.png",
+    "empreinteImage": "e60ef6da6177aea9b2426757f06d91d253e0e9c11d3061326a51a0d1ed132d0e",
+    "methode": "Points observés sur le raster, séparément des masques ; revue visuelle du lot avant intégration.",
+    "cibles": [
+      {
+        "region": "toit-ecole",
+        "objet": "le toit de l’école",
+        "interieur": [
+          0.38,
+          0.18
+        ],
+        "exterieur": [
+          0.38,
+          0.06
+        ]
+      },
+      {
+        "region": "porte-ecole",
+        "objet": "la porte de l’école",
+        "interieur": [
+          0.436,
+          0.291
+        ],
+        "exterieur": [
+          0.485,
+          0.292
+        ]
+      },
+      {
+        "region": "fenetre-ecole-1",
+        "objet": "la première fenêtre de l’école",
+        "interieur": [
+          0.332,
+          0.326
+        ],
+        "exterieur": [
+          0.271,
+          0.326
+        ]
+      },
+      {
+        "region": "fenetre-ecole-2",
+        "objet": "la deuxième fenêtre de l’école",
+        "interieur": [
+          0.592,
+          0.33
+        ],
+        "exterieur": [
+          0.651,
+          0.331
+        ]
+      },
+      {
+        "region": "pull-maitresse",
+        "objet": "le pull de la maîtresse",
+        "interieur": [
+          0.415,
+          0.357
+        ],
+        "exterieur": [
+          0.377,
+          0.357
+        ]
+      },
+      {
+        "region": "banc",
+        "objet": "le banc",
+        "interieur": [
+          0.1953125,
+          0.64453125
+        ],
+        "exterieur": [
+          0.121,
+          0.504
+        ]
+      },
+      {
+        "region": "tableau",
+        "objet": "le tableau de la maîtresse",
+        "interieur": [
+          0.208,
+          0.405
+        ],
+        "exterieur": [
+          0.315,
+          0.405
+        ]
+      }
+    ]
+  },
+  {
+    "noeud": "marais-jumeau-08",
+    "habillage": "contenu/habillages/marais-jumeau/brume.habillage.json",
+    "image": "contenu/assets/decors/brume-coloriage-v3.png",
+    "empreinteImage": "5b5c2634653aa3fe483efc8cf673fbed634b7af5b15dbfbc07d5cf969c1ff51f",
+    "methode": "Points observés sur le raster, séparément des masques ; revue visuelle du lot avant intégration.",
+    "cibles": [
+      {
+        "region": "caillou",
+        "objet": "le gros caillou",
+        "interieur": [
+          0.1576,
+          0.6475
+        ],
+        "exterieur": [
+          0.2962,
+          0.6445
+        ]
+      },
+      {
+        "region": "saule-de-la-berge",
+        "objet": "le tronc du saule",
+        "interieur": [
+          0.1576,
+          0.3848
+        ],
+        "exterieur": [
+          0.6862,
+          0.1445
+        ]
+      },
+      {
+        "region": "roue",
+        "objet": "l’escargot",
+        "interieur": [
+          0.3685,
+          0.8574
+        ],
+        "exterieur": [
+          0.444,
+          0.7432
+        ]
+      },
+      {
+        "region": "nenuphar-perdu",
+        "objet": "le nénuphar",
+        "interieur": [
+          0.5736,
+          0.833
+        ],
+        "exterieur": [
+          0.5781,
+          0.6758
+        ]
+      },
+      {
+        "region": "route",
+        "objet": "le ponton",
+        "interieur": [
+          0.7813,
+          0.6504
+        ],
+        "exterieur": [
+          0.7878,
+          0.8623
+        ]
+      },
+      {
+        "region": "barque-echouee",
+        "objet": "la barque",
+        "interieur": [
+          0.3867,
+          0.5869
+        ],
+        "exterieur": [
+          0.3906,
+          0.7354
+        ]
+      },
+      {
+        "region": "ciel",
+        "objet": "le ciel du jour",
+        "interieur": [
+          0.7031,
+          0.1416
+        ],
+        "exterieur": [
+          0.7096,
+          0.4014
+        ]
+      }
+    ]
+  },
+  {
+    "noeud": "volcan-08",
+    "habillage": "contenu/habillages/volcan/forge.habillage.json",
+    "image": "contenu/assets/decors/forge-coloriage-v3.png",
+    "empreinteImage": "69530231e593fca3f9be59cee5631952bbbfd26c856fdd019ba2ef97b63a1be9",
+    "methode": "Points observés sur le raster, séparément des masques ; revue visuelle du lot avant intégration.",
+    "cibles": [
+      {
+        "region": "seau",
+        "objet": "le seau",
+        "interieur": [
+          0.84,
+          0.692
+        ],
+        "exterieur": [
+          0.741,
+          0.664
+        ]
+      },
+      {
+        "region": "marteau-de-forge",
+        "objet": "le marteau",
+        "interieur": [
+          0.175,
+          0.705
+        ],
+        "exterieur": [
+          0.174,
+          0.598
+        ]
+      },
+      {
+        "region": "enclume",
+        "objet": "l’enclume",
+        "interieur": [
+          0.429,
+          0.469
+        ],
+        "exterieur": [
+          0.379,
+          0.374
+        ]
+      },
+      {
+        "region": "billot",
+        "objet": "le billot",
+        "interieur": [
+          0.422,
+          0.639
+        ],
+        "exterieur": [
+          0.58,
+          0.62
+        ]
+      },
+      {
+        "region": "rideau",
+        "objet": "le grand cristal violet",
+        "interieur": [
+          0.924,
+          0.844
+        ],
+        "exterieur": [
+          0.834,
+          0.906
+        ]
+      },
+      {
+        "region": "tableau",
+        "objet": "la lanterne",
+        "interieur": [
+          0.139,
+          0.213
+        ],
+        "exterieur": [
+          0.203,
+          0.195
+        ]
+      },
+      {
+        "region": "drapeau",
+        "objet": "le grand cristal de gauche",
+        "interieur": [
+          0.064,
+          0.471
+        ],
+        "exterieur": [
+          0.139,
+          0.492
+        ]
+      },
+      {
+        "region": "feu",
+        "objet": "le feu",
+        "interieur": [
+          0.63,
+          0.78
+        ],
+        "exterieur": [
+          0.626,
+          0.604
+        ]
+      }
+    ]
+  },
+  {
+    "noeud": "cite-des-histoires-10",
+    "habillage": "contenu/habillages/cite-des-histoires/fresque-murale.habillage.json",
+    "image": "contenu/assets/decors/fresque-coloriage-v3.png",
+    "empreinteImage": "3be0677fd16210650b9af6469a40c12db4199865880115c2dfbd0d2f538c5c2a",
+    "methode": "Points observés sur le raster, séparément des masques ; revue visuelle du lot avant intégration.",
+    "cibles": [
+      {
+        "region": "scene-du-haut",
+        "objet": "la montagne",
+        "interieur": [
+          0.234,
+          0.342
+        ],
+        "exterieur": [
+          0.49,
+          0.56
+        ]
+      },
+      {
+        "region": "scene-du-bas",
+        "objet": "la tente",
+        "interieur": [
+          0.477,
+          0.409
+        ],
+        "exterieur": [
+          0.3,
+          0.43
+        ]
+      },
+      {
+        "region": "soleil",
+        "objet": "le grand rond en haut",
+        "interieur": [
+          0.501,
+          0.142
+        ],
+        "exterieur": [
+          0.5,
+          0.28
+        ]
+      },
+      {
+        "region": "pot-de-couleur",
+        "objet": "la porte de droite",
+        "interieur": [
+          0.971,
+          0.61
+        ],
+        "exterieur": [
+          0.85,
+          0.62
+        ]
+      },
+      {
+        "region": "arbre",
+        "objet": "le grand arbre à droite de la tente",
+        "interieur": [
+          0.624,
+          0.306
+        ],
+        "exterieur": [
+          0.689,
+          0.34
+        ]
+      },
+      {
+        "region": "porte",
+        "objet": "la porte de gauche",
+        "interieur": [
+          0.029,
+          0.605
+        ],
+        "exterieur": [
+          0.1,
+          0.61
+        ]
+      },
+      {
+        "region": "scene-de-droite",
+        "objet": "la pierre ronde",
+        "interieur": [
+          0.794,
+          0.488
+        ],
+        "exterieur": [
+          0.69,
+          0.48
+        ]
+      },
+      {
+        "region": "ciel",
+        "objet": "le ciel de la montagne",
+        "interieur": [
+          0.2,
+          0.325
+        ],
+        "exterieur": [
+          0.28,
+          0.5
+        ]
+      }
+    ]
+  }
+]

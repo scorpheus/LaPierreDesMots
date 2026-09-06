@@ -35,6 +35,7 @@ const exercice = JSON.parse(readFileSync(chemin('contenu/exercices/clairiere/eco
 const monde = JSON.parse(readFileSync(chemin('contenu/monde/compagnons.json'), 'utf8'));
 const svgScene = readFileSync(chemin('contenu/habillages/clairiere/ecole-place.svg'), 'utf8');
 const sourceCompagnon = readFileSync(chemin('client/src/composants/Compagnon.tsx'), 'utf8');
+const sourceSpriteCompagnon = readFileSync(chemin('client/src/composants/SpriteCompagnon.tsx'), 'utf8');
 const sourceGobi = readFileSync(chemin('client/src/composants/Gobi.tsx'), 'utf8');
 const sourceReserve = readFileSync(chemin('client/src/moteurs/place/Reserve.tsx'), 'utf8');
 const sourceAide = readFileSync(chemin('client/src/composants/aide-de-gobi.ts'), 'utf8');
@@ -425,8 +426,11 @@ verifier(
 verifier(
   'Gobi et compagnons : les composants branchent les rasters validés',
   () => {
-    exiger(sourceCompagnon.includes('src={urlAsset(String(compagnon.asset))}'), 'portrait compagnon non résolu via urlAsset');
-    exiger(sourceCompagnon.includes('data-portrait-compagnon'), 'portrait compagnon sans marqueur DOM');
+    // Le portrait canonique est maintenant délégué à SpriteCompagnon : suivre les deux
+    // maillons, sans exiger que l'URL soit construite dans l'ancien composant hôte.
+    exiger(sourceCompagnon.includes('<SpriteCompagnon') && sourceCompagnon.includes('assetStatique={String(compagnon.asset)}'), 'portrait déclaré non transmis au composant de rendu');
+    exiger(sourceSpriteCompagnon.includes('src={urlAsset(assetStatique)}'), 'portrait compagnon non résolu via urlAsset');
+    exiger(sourceSpriteCompagnon.includes('data-portrait-compagnon'), 'portrait compagnon sans marqueur DOM');
     exiger(codeGobi.includes('data-dessin-gobi-raster'), 'Gobi ne monte pas le raster validé');
     exiger(codeGobi.includes('assets/gobi/animation/${animation}.webp'), 'les poses raster de Gobi ne sont pas reliées à son animation');
     exiger(!codeGobi.includes('fill="var(--framboise)"'), 'ancien Gobi circulaire encore présent');

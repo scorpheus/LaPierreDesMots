@@ -52,6 +52,11 @@ const DOSSIER_JOURNAUX = join(DOSSIER_RAPPORTS, 'artefacts', 'journaux');
  * plantage avant l'écriture, par exemple.
  */
 const CHAINE = [
+  // Hors des tests appelés par le banc : vérifier l'ancrage pendant une mutation ferait
+  // passer l'absence du texte d'origine pour une détection du défaut applicatif.
+  { cle: 'qa:ancrages', script: 'qa:ancrages' },
+  { cle: 'ressources:verifier', script: 'ressources:verifier' },
+  { cle: 'qa:coherence', script: 'qa:coherence', propreRapport: true },
   { cle: 'lint', script: 'lint' },
   { cle: 'typescript', script: 'typescript' },
   {

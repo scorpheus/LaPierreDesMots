@@ -141,6 +141,9 @@ export default defineConfig({
       provider: 'v8',
       // `--coverage` l'active ; sans ce drapeau, `npm run test` reste rapide.
       enabled: false,
+      // Un test rouge ne doit pas supprimer les mesures des autres : conserver la couverture
+      // pour que verifier puisse encore évaluer ses seuils, sans masquer l'échec initial.
+      reportOnFailure: true,
       reportsDirectory: 'tests/rapports/couverture',
       reporter: ['text-summary', 'json-summary', 'html'],
       include: [

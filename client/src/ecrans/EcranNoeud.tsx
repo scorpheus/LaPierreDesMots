@@ -75,7 +75,7 @@ function texteCadreDeConsigne(moteur: string, exercice: string, texteDetaille: s
     chemin: 'Pars de l’épingle. Suis le bon chemin.',
     chrono: 'Range les images dans le bon ordre.',
     colorie: 'Choisis une couleur, puis touche la bonne partie du dessin.',
-    grave: 'Trace la lettre qui manque pour écrire le mot.',
+    grave: 'Touche les lettres pour compléter le mot.',
     histoire: 'Lis l’histoire, puis réponds à la question.',
     paires: 'Trouve les paires.',
     phrase: 'Touche les mots dans l’ordre pour construire la phrase.',

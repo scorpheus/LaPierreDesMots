@@ -24,7 +24,7 @@
       "consignes": [
         {
           "id": "c1",
-          "texte": "Attrape les poissons où tu entends le son de gant.",
+          "texte": "Attrape les poissons où tu entends le même son que dans « gant ».",
           "forme": "imperative",
           "audio": null,
           "aAttraper": [
@@ -40,7 +40,7 @@
         },
         {
           "id": "c2",
-          "texte": "Attrape aussi les poissons où tu entends le son de gant.",
+          "texte": "Attrape aussi les poissons où tu entends le même son que dans « gant ».",
           "forme": "imperative",
           "audio": null,
           "aAttraper": [

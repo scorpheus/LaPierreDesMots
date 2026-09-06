@@ -36,7 +36,7 @@
  */
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { dirname, resolve } from 'node:path';
+import { dirname, relative, resolve } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
@@ -58,6 +58,50 @@ function chargerMasquer(): (source: string) => string {
   const extrait = source.slice(debut, finMasquer + 2);
   return new Function(`${extrait}; return masquer;`)() as (source: string) => string;
 }
+
+/** Exerce les vrais détecteurs sans lancer leur CLI ni écrire un rapport global. */
+function analyserSource(sourceAnalysee: string): {
+  nbCas: number;
+  constats: { code: string }[];
+} {
+  const source = readFileSync(SCRIPT, 'utf8');
+  const debut = source.indexOf('function positionDExpression');
+  const fin = source.indexOf('\nconst fichiers = fichiersSous(DOSSIER_TESTS');
+  expect(debut).toBeGreaterThan(0);
+  expect(fin).toBeGreaterThan(debut);
+  const analyser = new Function('readFileSync', 'relative', 'RACINE',
+    `${source.slice(debut, fin)}; return analyser;`)(
+      () => sourceAnalysee, relative, RACINE,
+    ) as (chemin: string) => { nbCas: number; constats: { code: string }[] };
+  return analyser(resolve(RACINE, 'preuve-virtuelle.test.ts'));
+}
+
+describe('auto-comparaisons du détecteur, avec noms dans les littéraux', () => {
+  it.each([
+    ['attribut du vrai parcours', "expect(cible).toHaveAttribute('data-aide-cible', 'oui');"],
+    ['texte attendu', "expect(cible).toBe('cible');"],
+    ['expression régulière', 'expect(cible).toMatch(/cible/u);'],
+    ['commentaire', 'expect(cible).toEqual(/* cible */ reponse);'],
+    ['autre identifiant', 'expect(rang).toBeGreaterThanOrEqual(rangAide);'],
+    ['déterminisme', 'expect(suite(42, 64)).toEqual(suite(42, 64));'],
+  ])('ne confond pas une référence et %s', (_nom, assertion) => {
+    const resultat = analyserSource(`it('preuve', () => { ${assertion} });`);
+    expect(resultat.nbCas).toBe(1);
+    expect(resultat.constats).toEqual([]);
+  });
+
+  it.each([
+    ['même variable', 'expect(cible).toEqual(cible);'],
+    ['attendu dérivé du sujet', 'expect(dus).toEqual(complete.slice(0, dus.length));'],
+    ['interpolation conservée', 'expect(cible).toBe(`${cible}`);'],
+    ['constantes', 'expect(1).toBe(1);'],
+    ['borne vide', 'expect(cartes.length).toBeGreaterThanOrEqual(0);'],
+  ])('conserve le témoin détecté : %s', (_nom, assertion) => {
+    const resultat = analyserSource(`it('preuve', () => { ${assertion} });`);
+    expect(resultat.nbCas).toBe(1);
+    expect(resultat.constats.map(constat => constat.code)).toEqual(['ASSERTION-TAUTOLOGIQUE']);
+  });
+});
 
 describe('masquer() du détecteur de tests trompeurs', () => {
   const masquer = chargerMasquer();

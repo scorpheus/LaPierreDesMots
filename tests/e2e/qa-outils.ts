@@ -46,8 +46,9 @@
  *
  * `client/src/moteurs/colorie/SceneSvg.tsx` peint sur `onPointerDown`. Un `MouseEvent('click')`
  * synthétique ne le déclenche jamais : l'audit relevait 33 régions « mortes » sur
- * `clairiere-01` alors que toutes répondent au doigt. `taper()` émet désormais la séquence
- * complète — `pointerdown`, `pointerup`, `click` —, c'est-à-dire ce que fait un doigt.
+ * `clairiere-01` alors que toutes répondent au doigt. `taper()` émet la séquence synthétique
+ * `pointerdown`, `pointerup`, `click`. Elle vérifie les gestionnaires, PAS l'atteignabilité :
+ * elle contourne les recouvrements. La campagne tactile exhaustive utilise `locator.tap()`.
  *
  * **3. La population « interactive » comptait du décor.**
  *
@@ -265,6 +266,11 @@ export async function ecransVus(page: Page): Promise<readonly string[]> {
  * test ne prenait**, et c'est écrit noir sur blanc dans `client/src/routeur.tsx`.
  */
 export async function preparerSansProfil(page: Page): Promise<void> {
+  // Effacer AVANT la navigation : au chargement suivant la restauration asynchrone du joueur
+  // pouvait courir en parallèle de l'effacement et remémoriser le profil après celui-ci.
+  if (/^https?:/u.test(page.url())) {
+    await page.evaluate(() => globalThis.localStorage.removeItem('pierre.joueur'));
+  }
   // Toute interception posee par une recette precedente est LEVEE ici. Sans cela, la recette
   // qui retient le paquet d'un noeud pour observer l'ecran d'attente le retiendrait aussi pour
   // les vingt recettes suivantes — mesure a l'appui : la couverture etait tombee de 12 ecrans
@@ -696,6 +702,11 @@ export async function appliquerReglagesLectureReels(
     },
   });
   expect(reponse.ok(), 'les réglages réels de la capture doivent être appliqués').toBe(true);
+  // La liste déjà montée garde l'ancien objet Profil dans son cache React Query.
+  // Relire les profils avant de cliquer : un PUT réussi ne prouve pas que l'écran utilise 27 px.
+  await preparerSansProfil(page);
+  await expect(page.locator('[data-ecran="profils"]')).toBeVisible();
+  await expect(page.locator('[data-profil]').filter({ hasText: prenom }).first()).toBeVisible();
 }
 
 /**

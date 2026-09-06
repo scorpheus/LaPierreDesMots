@@ -16,6 +16,7 @@ import { lireProfilMemorise, oublierProfil } from './etat/profil-memorise.js';
 import type { IdProfil } from '@pierre/partage';
 import { FournisseurReglagesDuProfil } from './lecture/reglages-du-profil.js';
 import { Routeur } from './routeur.js';
+import { protegerChangementEcran } from './interaction/proteger-changement-ecran.js';
 
 /**
  * Réglages de TanStack Query pour une application HORS-LIGNE servie sur le LAN.
@@ -66,6 +67,7 @@ export function Application({
 }: ProprietesApplication): ReactElement {
   const [file] = useState(() => fileDAttente ?? creerFileDAttente());
   const [contexte] = useState<ContexteJeu>(() => ({ magasin, services }));
+  useEffect(() => protegerChangementEcran(document), []);
 
   // ══════════════════════════════════════════════════════════════════════════════════════════
   // R21 — ON REPREND AVEC LE MÊME JOUEUR APRÈS UN RAFRAÎCHISSEMENT

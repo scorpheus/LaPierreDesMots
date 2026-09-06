@@ -35,6 +35,7 @@ import type {
   ResumeTentative,
 } from '../types.js';
 import { SCHEMA_CONTENU_CHEMIN } from './schema-contenu.js';
+import { preparerPlateauChemin } from './plateau.js';
 import { evaluerChemin, modeReponseChemin } from './validation.js';
 import type { DecisionChemin } from './validation.js';
 import type {
@@ -165,8 +166,8 @@ function appliquerDecision(
           ? etat.acquis
           : { ...etat.acquis, [decision.acquis[0]]: decision.acquis[1] },
       dernierRefus: null,
-      // L'aide affichée appartient à l'étape qui vient de se clore.
-      aide: decision.etapeSatisfaite ? null : etat.aide,
+      // La pierre indiquée vient d'être visitée ; le niveau d'aide acquis reste enregistré.
+      aide: null,
       termineMs: decision.exerciceTermine ? instant : etat.termineMs,
     },
     instant,
@@ -199,7 +200,10 @@ export const moteurChemin: Moteur<ContenuChemin, EtatChemin, ActionChemin> = {
         premiereActionMs: null,
         derniereActionMs: instant,
         instantIndiceMs: null,
-        modeReponse: modeReponseChemin(entree.contenu),
+        modeReponse: modeReponseChemin({
+          ...entree.contenu,
+          cases: preparerPlateauChemin(entree.contenu, index).cases,
+        }),
         // Mode à `p_devinette` tabulée : aucun nombre d'éléments à transmettre (D13).
         nbElements: null,
         confusion: null,
@@ -214,6 +218,7 @@ export const moteurChemin: Moteur<ContenuChemin, EtatChemin, ActionChemin> = {
       competence: entree.contenu.competence,
       acquis: {},
       position: entree.contenu.consignes[0]?.depart ?? null,
+      visiteesEtape: entree.contenu.consignes[0] === undefined ? [] : [entree.contenu.consignes[0].depart],
       niveauAide: 'aucune',
       aide: null,
       dernierRefus: null,
@@ -240,11 +245,15 @@ export const moteurChemin: Moteur<ContenuChemin, EtatChemin, ActionChemin> = {
             instantMs: instant,
           },
           instant,
-          decision.acceptee ? { position: action.caseVisee } : {},
+          decision.acceptee ? {
+            position: action.caseVisee,
+            visiteesEtape: [...etat.visiteesEtape, action.caseVisee],
+          } : {},
         );
         // Changement d'étape : le pion repart du départ déclaré par la consigne suivante.
         if (suivant.indexEtape === etat.indexEtape) return suivant;
-        return { ...suivant, position: suivant.departs[suivant.indexEtape] ?? null };
+        const depart = suivant.departs[suivant.indexEtape] ?? null;
+        return { ...suivant, position: depart, visiteesEtape: depart === null ? [] : [depart] };
       }
 
       case 'ecouterConsigne': {
@@ -274,7 +283,8 @@ export const moteurChemin: Moteur<ContenuChemin, EtatChemin, ActionChemin> = {
         // l'écran, et le journal retenait quand même une aide jamais demandée. Deux défauts
         // signalés séparément par le père, une seule cause.
         const demandee = aideLaPlusHaute(etape.aideDemandee, 'indice');
-        if (niveau === etape.niveauAide && demandee === etape.aideDemandee) return etat;
+        if (niveau === etape.niveauAide && demandee === etape.aideDemandee &&
+            etat.aide?.cible === (etape.restantes[0] ?? null)) return etat;
         const maj: EtatEtapeChemin = {
           ...etape,
           niveauAide: niveau,

@@ -67,10 +67,10 @@
             "id": "porte-ecole",
             "libelle": "la porte de l’école",
             "centroide": [
-              447,
-              219
+              416.47771875,
+              199.41534375
             ],
-            "surface": 5215
+            "surface": 3172.731897000027
           },
           {
             "id": "fenetre-ecole-1",
@@ -193,10 +193,10 @@
             "id": "tableau",
             "libelle": "le tableau de la maîtresse",
             "centroide": [
-              194,
-              241
+              196.41405583972718,
+              234.75069266837167
             ],
-            "surface": 14484
+            "surface": 12512
           },
           {
             "id": "cheveux-garcon-1",
@@ -274,10 +274,10 @@
             "id": "banc",
             "libelle": "le banc",
             "centroide": [
-              145,
-              360
+              115.30646875,
+              407.59375
             ],
-            "surface": 10205
+            "surface": 10830.859458000019
           },
           {
             "id": "corde",
@@ -332,5 +332,6 @@
   "sons": {
     "ambiance": null,
     "effets": {}
-  }
+  },
+  "$commentaire": "Lot local du 5 septembre 2026 : silhouettes recalées sur les objets du raster. Voir Docs/lot-coloriages-jouables-locaux-2026-09-05.md. IDs historiques conservés."
 }

@@ -1,13 +1,26 @@
 {
+  "$commentaire": "Lot local du 5 septembre 2026 : silhouettes recalées sur les objets du raster. Voir Docs/lot-coloriages-jouables-locaux-2026-09-05.md. IDs historiques conservés.",
   "id": "marais.brume",
   "moteurs": [
     "colorie"
   ],
   "libelle": "La berge que la brume quitte",
   "region": "marais-jumeau",
+  "identifiantsHistoriquesInutilises": [
+    "ciel-pale",
+    "brume-haute",
+    "brume-basse",
+    "eau-du-fond",
+    "berge",
+    "tronc-du-saule",
+    "poule",
+    "souris",
+    "mouche"
+  ],
   "scene": {
     "fichier": "habillages/marais-jumeau/brume.svg",
-    "viewBox": "0 0 960 600",
+    "viewBox": "0 0 960 640",
+    "imageRaster": "brouillons/coloriages-locaux-2026-09-05/marais-jumeau-08/brume-v3.png",
     "calques": [
       {
         "id": "calque-fond",
@@ -19,148 +32,67 @@
         "role": "coloriable",
         "regions": [
           {
-            "id": "ciel-pale",
-            "libelle": "le ciel pâle",
-            "centroide": [
-              360,
-              40
-            ],
-            "surface": 69120
-          },
-          {
             "id": "ciel",
-            "libelle": "le ciel",
+            "libelle": "le ciel du jour",
             "centroide": [
-              547.5,
-              58
+              727.3,
+              97.7
             ],
-            "surface": 29680
-          },
-          {
-            "id": "brume-haute",
-            "libelle": "la brume du haut",
-            "centroide": [
-              862.9,
-              231
-            ],
-            "surface": 79993
-          },
-          {
-            "id": "brume-basse",
-            "libelle": "la brume du bas",
-            "centroide": [
-              480,
-              360
-            ],
-            "surface": 56587.7
-          },
-          {
-            "id": "eau-du-fond",
-            "libelle": "l’eau du fond",
-            "centroide": [
-              120,
-              511.6
-            ],
-            "surface": 163200
-          },
-          {
-            "id": "berge",
-            "libelle": "la berge",
-            "centroide": [
-              474.2,
-              407.7
-            ],
-            "surface": 39934
+            "surface": 93933
           },
           {
             "id": "saule-de-la-berge",
-            "libelle": "le saule de la berge",
-            "centroide": [
-              188.2,
-              134.7
-            ],
-            "surface": 79672
-          },
-          {
-            "id": "tronc-du-saule",
             "libelle": "le tronc du saule",
             "centroide": [
-              231.4,
-              86
+              158.8,
+              184.3
             ],
-            "surface": 21048
-          },
-          {
-            "id": "poule",
-            "libelle": "la poule",
-            "centroide": [
-              407.1,
-              353.4
-            ],
-            "surface": 6774.6
-          },
-          {
-            "id": "souris",
-            "libelle": "la souris",
-            "centroide": [
-              586.3,
-              371.5
-            ],
-            "surface": 5644
-          },
-          {
-            "id": "mouche",
-            "libelle": "la mouche",
-            "centroide": [
-              746,
-              277.1
-            ],
-            "surface": 3097.6
+            "surface": 17478.4
           },
           {
             "id": "barque-echouee",
-            "libelle": "la barque échouée",
+            "libelle": "la barque",
             "centroide": [
-              198.8,
-              358
+              381.1,
+              382.2
             ],
-            "surface": 27938
-          },
-          {
-            "id": "nenuphar-perdu",
-            "libelle": "le nénuphar blanc",
-            "centroide": [
-              750,
-              472
-            ],
-            "surface": 3183.7
+            "surface": 16707.5
           },
           {
             "id": "route",
             "libelle": "le ponton",
             "centroide": [
-              796.3,
-              335.9
+              747.34,
+              412.76
             ],
-            "surface": 14340
+            "surface": 20507.42
+          },
+          {
+            "id": "caillou",
+            "libelle": "le gros caillou",
+            "centroide": [
+              156.4,
+              446.2
+            ],
+            "surface": 32159
           },
           {
             "id": "roue",
             "libelle": "l’escargot",
             "centroide": [
-              248,
-              536
+              334.33,
+              552.16
             ],
-            "surface": 6376.5
+            "surface": 6744.14
           },
           {
-            "id": "caillou",
-            "libelle": "le gros caillou au bord de l’eau",
+            "id": "nenuphar-perdu",
+            "libelle": "le nénuphar",
             "centroide": [
-              430,
-              458
+              552.26,
+              533.3
             ],
-            "surface": 7755.4
+            "surface": 5064.84
           }
         ]
       },

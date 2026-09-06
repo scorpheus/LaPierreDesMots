@@ -4,6 +4,7 @@ import type { CouleurColoriage, IdRegionSvg, RegionColoriable } from '@pierre/pa
 import { hexDeCouleur } from '@pierre/partage';
 
 import { urlAsset } from '../../api/client.js';
+import { CercleAccessible } from '../../composants/CercleAccessible.js';
 import type { ProprietesSceneLibre } from './SceneLibre.js';
 import { indexerRegionsDuMasque, regionAuPixel } from './raster-indexe.js';
 
@@ -55,10 +56,13 @@ export function SceneRasterIndexee({
   const masqueRef = useRef<ImageData | null>(null);
   const toileRef = useRef<HTMLCanvasElement | null>(null);
   const [revisionMasque, fixerRevisionMasque] = useState(0);
+  const [masquePretPour, fixerMasquePretPour] = useState<string | null>(null);
   const [rasterIndisponible, fixerRasterIndisponible] = useState(false);
 
   useEffect(() => {
     let vivant = true;
+    masqueRef.current = null;
+    fixerMasquePretPour(null);
     fixerRasterIndisponible(false);
     void Promise.all([
       chargerImage(String(raster.fond)),
@@ -74,9 +78,12 @@ export function SceneRasterIndexee({
       contexte.drawImage(image, 0, 0, raster.largeur, raster.hauteur);
       masqueRef.current = contexte.getImageData(0, 0, raster.largeur, raster.hauteur);
       fixerRevisionMasque((revision) => revision + 1);
+      fixerMasquePretPour(String(raster.masque));
     }).catch(() => {
+      if (!vivant) return;
       masqueRef.current = null;
-      if (vivant) fixerRasterIndisponible(true);
+      fixerMasquePretPour(null);
+      fixerRasterIndisponible(true);
     });
     return () => { vivant = false; };
   }, [raster]);
@@ -143,6 +150,7 @@ export function SceneRasterIndexee({
       aria-label={habillage.libelle}
       data-scene-libre={habillage.id}
       data-decor="raster-indexe"
+      data-masque-raster={masquePretPour === String(raster.masque) ? 'pret' : 'chargement'}
       style={{ position: 'relative', inlineSize: '100%', blockSize: '100%', overflow: 'hidden' }}
     >
       <img data-raster-couche="fond" src={urlAsset(String(raster.fond))} alt="" aria-hidden="true" style={{ position: 'absolute', inset: 0, inlineSize: '100%', blockSize: '100%', objectFit: 'contain' }} />
@@ -155,11 +163,11 @@ export function SceneRasterIndexee({
         style={{ position: 'absolute', inset: 0, inlineSize: '100%', blockSize: '100%', pointerEvents: 'none' }}
       >
         {regions.filter((region) => offertes.has(String(region.id))).map((region) => (
-          <circle
+          <CercleAccessible
             key={region.id}
             cx={region.centroide[0]}
             cy={region.centroide[1]}
-            r={DIAMETRE_PRISE_MINIMAL / 2}
+            rayonMinimal={DIAMETRE_PRISE_MINIMAL / 2}
             fill="transparent"
             data-cible-frappe="oui"
             data-region-svg={region.id}
@@ -168,7 +176,9 @@ export function SceneRasterIndexee({
             aria-label={region.libelle}
             onClick={(evenement) => onColorier(region.id, { clientX: evenement.clientX, clientY: evenement.clientY })}
             onKeyDown={(evenement) => surClavier(region.id, evenement)}
-            style={{ pointerEvents: 'all', cursor: 'pointer' }}
+            // La prise reste un bouton pour le clavier et les technologies d'assistance.
+            // Elle ne reçoit jamais le doigt : le canvas nomme la vraie couleur du masque.
+            style={{ pointerEvents: 'none', cursor: 'pointer' }}
           />
         ))}
       </svg>

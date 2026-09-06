@@ -42,6 +42,18 @@ function monter(surRetour: () => void): void {
 afterEach(() => cleanup());
 
 describe('activité libre du chaudron', () => {
+  it('interdit aussi la journalisation lorsque l’ancien nœud libre est lancé directement', () => {
+    const base = servicesDeTest();
+    const haptique = creerHaptiqueMuette();
+    const magasin = creerMagasin({ ...base, haptique, retour: creerRetourSensoriel({
+      audio: base.audio, haptique, animationsDesactivees: true, emettreParticules: () => undefined,
+    }) });
+    magasin.getState().demarrerNoeud(paquet);
+    expect(magasin.getState().journalise).toBe(false);
+    magasin.getState().demarrerNoeud({ ...paquet, noeud: { ...paquet.noeud, progression: true } });
+    expect(magasin.getState().journalise).toBe(true);
+  });
+
   it('donne une hauteur résoluble à la toile sans séparer ses commandes de la scène', async () => {
     monter(vi.fn());
     await waitFor(() => expect(screen.getByRole('button', { name: 'J’ai fini' })).toBeDefined());

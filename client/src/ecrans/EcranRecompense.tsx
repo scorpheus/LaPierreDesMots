@@ -19,11 +19,13 @@ import {
   lireProgression,
   urlAsset
 } from '../api/client.js';
-import { regionsDuDocument, stadesDuDocument } from '@pierre/partage/monde';
+import { compagnonsDuDocument, regionsDuDocument, stadesDuDocument } from '@pierre/partage/monde';
+import compagnonsDocument from '../../../contenu/monde/compagnons.json' with { type: 'json' };
 import { CascadeRecompense } from '../composants/CascadeRecompense.js';
 import { detailDesEtoiles } from '../composants/detail-etoiles.js';
 import { Etoiles } from '../composants/Etoiles.js';
 import { EvolutionGobi } from '../composants/EvolutionGobi.js';
+import { SpriteCompagnon } from '../composants/SpriteCompagnon.js';
 import { DessinButin } from '../monde/Butin.js';
 import { useEtatJeu, useMagasin, useServices } from '../etat/services.js';
 import { noeudSuivant, repriseDeRegion } from '../monde/reprise.js';
@@ -105,6 +107,14 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
   const envoiEnCours = useRef(false);
 
   const nombreEtoiles = etoiles ?? 1;
+  // Le choix est porté par le plan de sortie, déjà lu par EcranNoeud pour l'aide. Le résultat
+  // le relit ici depuis le même référentiel canonique : il ne dépend ni d'une requête du monde
+  // encore en vol, ni d'un atlas brouillon. Sans sortie ou sans choix, Gobi reste le compagnon.
+  const compagnonDeSortie = useMemo(() => {
+    const code = sortie?.compagnon ?? null;
+    if (code === null) return null;
+    return compagnonsDuDocument(compagnonsDocument).find((compagnon) => compagnon.code === code) ?? null;
+  }, [sortie?.compagnon]);
 
   // `fin-noeud`, et non plus `exercice-termine` : ce code-là n'appartenait pas à `CodeEffet` et
   // n'était donc jamais joué sous son nom — c'est le défaut 1 du contrat des features v2 § 1.5,
@@ -483,12 +493,28 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
         minBlockSize: '100dvh'
       }}
     >
-      <section className="recompense-scene" data-scene-recompense="gobi-joie">
+      <section
+        className="recompense-scene"
+        data-scene-recompense={compagnonDeSortie === null ? 'gobi-joie' : 'compagnon-joie'}
+        data-compagnon-recompense={compagnonDeSortie?.code ?? 'gobi'}
+        aria-label={
+          compagnonDeSortie === null
+            ? 'Gobi fête ta réussite avec toi.'
+            : `${compagnonDeSortie.libelle} fête ta réussite avec toi.`
+        }
+      >
         <div className="recompense-gobi" aria-hidden="true">
           <span className="recompense-eclat recompense-eclat--un">✦</span>
           <span className="recompense-eclat recompense-eclat--deux">✦</span>
           <span className="recompense-eclat recompense-eclat--trois">✦</span>
-          <img src={urlAsset('assets/gobi/animation/joie.webp')} alt="" draggable={false} />
+          {compagnonDeSortie === null ? (
+            <img src={urlAsset('assets/gobi/animation/joie.webp')} alt="" draggable={false} />
+          ) : (
+            <SpriteCompagnon
+              code={compagnonDeSortie.code}
+              assetStatique={String(compagnonDeSortie.asset)}
+            />
+          )}
         </div>
 
         <div className="recompense-texte" data-texte-recompense="immobile">

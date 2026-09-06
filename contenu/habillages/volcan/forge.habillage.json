@@ -1,4 +1,5 @@
 {
+  "$commentaire": "Lot local du 5 septembre 2026 : silhouettes recalées sur les objets du raster. Voir Docs/lot-coloriages-jouables-locaux-2026-09-05.md. IDs historiques conservés.",
   "id": "volcan.forge",
   "moteurs": [
     "colorie"
@@ -7,7 +8,7 @@
   "region": "volcan",
   "scene": {
     "fichier": "habillages/volcan/forge.svg",
-    "viewBox": "0 0 960 600",
+    "viewBox": "0 0 960 640",
     "calques": [
       {
         "id": "calque-fond",
@@ -20,147 +21,147 @@
         "regions": [
           {
             "id": "mur-de-la-forge",
-            "libelle": "le mur de la forge",
+            "libelle": "la roche de la grotte",
             "centroide": [
-              240,
-              79.5
+              912,
+              84.8
             ],
-            "surface": 144000
+            "surface": 72851.91124035556
           },
           {
             "id": "sol-de-la-forge",
             "libelle": "le sol de la forge",
             "centroide": [
-              720,
-              535
+              704,
+              494.4
             ],
-            "surface": 117120
+            "surface": 285176.0356620444
           },
           {
             "id": "rideau",
             "libelle": "le grand cristal violet",
             "centroide": [
-              874,
-              520.3
+              917.699999828125,
+              590.5
             ],
-            "surface": 13429.8
+            "surface": 13220.40887271121
           },
           {
             "id": "tableau",
             "libelle": "la lanterne",
             "centroide": [
-              109,
-              163
+              136.5,
+              161.59375
             ],
-            "surface": 7260
+            "surface": 10387
           },
           {
             "id": "drapeau",
-            "libelle": "le cristal rose",
+            "libelle": "le grand cristal de gauche",
             "centroide": [
-              112,
-              143.6
+              64.53333315625,
+              295.46666681249997
             ],
-            "surface": 7125
+            "surface": 7797.19107982222
           },
           {
             "id": "oiseau",
-            "libelle": "l’oiseau",
+            "libelle": "le petit cristal bleu",
             "centroide": [
-              638.2,
-              147.7
+              544.69999984375,
+              79.333333
             ],
-            "surface": 5985.5
+            "surface": 1592.88889831111
           },
           {
             "id": "chapeau",
-            "libelle": "le chapeau",
+            "libelle": "la table à outils",
             "centroide": [
-              856,
-              173.7
+              725.749999765625,
+              222.39999999999998
             ],
-            "surface": 6227.7
+            "surface": 29540.693218133325
           },
           {
             "id": "enclume",
             "libelle": "l’enclume",
             "centroide": [
-              413.1,
-              277
+              386.875,
+              317.84375
             ],
-            "surface": 26662
+            "surface": 25241.5
           },
           {
             "id": "billot",
             "libelle": "le billot",
             "centroide": [
-              389.5,
-              371
+              373.390625,
+              423.5
             ],
-            "surface": 18210
+            "surface": 32901.5
           },
           {
             "id": "marteau-de-forge",
-            "libelle": "le marteau de forge",
+            "libelle": "le marteau",
             "centroide": [
-              532.6,
-              390
+              154.90625,
+              429.75
             ],
-            "surface": 7936
+            "surface": 9737.5
           },
           {
             "id": "etincelle",
-            "libelle": "l’étincelle",
+            "libelle": "le petit cristal bleu",
             "centroide": [
-              520,
-              300
+              511.50000017187506,
+              217.13333346874998
             ],
-            "surface": 2269.7
+            "surface": 868.1244483555565
           },
           {
             "id": "foyer",
-            "libelle": "le foyer",
+            "libelle": "le cercle de pierres",
             "centroide": [
-              690.6,
-              263
+              555.583333171875,
+              518.4
             ],
-            "surface": 36261.7
+            "surface": 37496.03556604443
           },
           {
             "id": "braises-du-foyer",
-            "libelle": "les braises du foyer",
+            "libelle": "les braises",
             "centroide": [
-              691.1,
-              436.5
+              561.5279402131355,
+              522.0057370593643
             ],
-            "surface": 4579.2
+            "surface": 10576.782188977813
           },
           {
             "id": "feu",
-            "libelle": "le feu du foyer",
+            "libelle": "le feu",
             "centroide": [
-              647.7,
-              482.8
+              613.53125,
+              519.875
             ],
-            "surface": 17030.4
+            "surface": 7399.5
           },
           {
             "id": "seau",
             "libelle": "le seau",
             "centroide": [
-              876,
-              399.8
+              829.8666665000001,
+              465.93333299999995
             ],
-            "surface": 9296
+            "surface": 13907.057725155522
           },
           {
             "id": "seau-d-eau",
-            "libelle": "le seau d’eau",
+            "libelle": "l’eau du seau",
             "centroide": [
-              500,
-              513
+              851.26666653125,
+              461.8666665
             ],
-            "surface": 7396
+            "surface": 1070.6488967111218
           }
         ]
       },

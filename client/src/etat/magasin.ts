@@ -302,7 +302,9 @@ export function creerMagasin(
         demarreLe: maintenantIso(services.horloge),
         termineLe: null,
         tentativeEnvoyee: false,
-        journalise: options.journalise,
+        // Même un ancien lien direct vers l'activité libre ne peut promettre un acquis
+        // que le serveur refusera (progression:false). La règle appartient au lancement.
+        journalise: options.journalise && paquet.noeud.progression !== false,
         ecran: 'noeud',
         // Nouveau nœud, nouvelle série : la hauteur du son repart de la tonique (v2 § 8).
         serie: 0

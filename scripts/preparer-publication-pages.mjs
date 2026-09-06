@@ -22,6 +22,8 @@ import { spawnSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { verifierRessourcesLocales } from './verifier-ressources-locales.mjs';
+
 export const RACINE = path.resolve(fileURLToPath(new URL('../', import.meta.url)));
 export const BASE_PAGES = '/LaPierreDesMots/';
 export const DIST_PWA = path.join(RACINE, 'client', 'dist-pwa');
@@ -43,15 +45,6 @@ const ICONE_SOURCE = path.join(
   'stades',
   'stade-10.svg'
 );
-
-const POLICES_REQUISES = [
-  'andika-regular.woff2',
-  'andika-bold.woff2',
-  'opendyslexic-regular.woff2',
-  'atkinson-hyperlegible-regular.woff2',
-  'atkinson-hyperlegible-bold.woff2',
-  'fredoka-variable.woff2'
-];
 
 function exiger(condition, message) {
   if (!condition) throw new Error(message);
@@ -85,39 +78,9 @@ function listerFichiers(racine) {
 
 /** Les artefacts ignores par git doivent exister sur la machine qui construit. */
 export function verifierEntreesLocales() {
-  const absentes = [];
-  let manifesteAudioLu = null;
-  for (const police of POLICES_REQUISES) {
-    const fichier = path.join(RACINE, 'client', 'public', 'polices', police);
-    if (!existsSync(fichier) || statSync(fichier).size === 0) absentes.push(relatifPosix(RACINE, fichier));
-  }
-
+  verifierRessourcesLocales(RACINE);
   const manifesteAudio = path.join(RACINE, 'contenu', 'audio', 'manifeste.json');
-  if (!existsSync(manifesteAudio)) {
-    absentes.push('contenu/audio/manifeste.json');
-  } else {
-    const manifeste = JSON.parse(readFileSync(manifesteAudio, 'utf8'));
-    manifesteAudioLu = manifeste;
-    exiger(Array.isArray(manifeste.clips), 'Le manifeste audio ne porte pas de tableau `clips`.');
-    for (const clip of manifeste.clips) {
-      exiger(
-        typeof clip === 'object' && clip !== null && typeof clip.fichier === 'string',
-        'Une entree du manifeste audio ne porte pas de fichier.'
-      );
-      const fichier = resoudreSousRacine(path.join(RACINE, 'contenu'), clip.fichier);
-      if (!existsSync(fichier) || statSync(fichier).size === 0) {
-        absentes.push(relatifPosix(RACINE, fichier));
-      }
-    }
-  }
-
-  if (absentes.length > 0) {
-    throw new Error(
-      `Le build local est incomplet : ${String(absentes.length)} artefact(s) ignore(s) absent(s).\n` +
-        absentes.slice(0, 20).map((fichier) => `  - ${fichier}`).join('\n')
-    );
-  }
-  return manifesteAudioLu;
+  return JSON.parse(readFileSync(manifesteAudio, 'utf8'));
 }
 
 function copierAudioPublie(manifeste) {

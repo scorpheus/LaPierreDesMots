@@ -363,10 +363,10 @@ export const MUTATIONS = [
   },
   {
     id: 'M23',
-    titre: 'La pastille de région passe de 46 à 20 de rayon — la carte devient intapable',
+    titre: 'La pastille de région passe de 50 à 20 de rayon — la carte devient intapable',
     regle: 'R16',
     fichier: 'client/src/ecrans/EcranCarte.tsx',
-    ancrage: 'const RAYON_PRISE = 46;',
+    ancrage: 'const RAYON_PRISE = 50;',
     remplacement: 'const RAYON_PRISE = 20;',
     attendu: 'SURVIT',
     couvertPar: 'e2e',

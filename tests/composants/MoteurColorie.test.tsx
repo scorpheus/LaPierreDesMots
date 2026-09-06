@@ -128,6 +128,15 @@ function region(id: string): HTMLElement {
   return element as HTMLElement;
 }
 
+/** La forme qui reçoit réellement le doigt ; la prise ronde reste réservée à l'accessibilité. */
+function regionTactile(id: string): HTMLElement {
+  const element =
+    document.querySelector(`[data-region-source="${id}"][data-active="oui"]`) ??
+    document.querySelector(`[data-region-svg="${id}"]`);
+  if (!element) throw new Error(`aucune forme tactile « ${id} » dans la scène rendue`);
+  return element as HTMLElement;
+}
+
 const premiereCible = contenu.consignes[0]!.cibles[0]!;
 
 /** Une couleur du nuancier qui n'est pas celle attendue par la première cible. */
@@ -248,7 +257,7 @@ describe('MoteurColorie — bonne réponse', () => {
     await utilisateur.click(godet(premiereCible.couleur));
     expect(godet(premiereCible.couleur).getAttribute('data-choisie')).toBe('oui');
 
-    await utilisateur.click(region(premiereCible.region));
+    await utilisateur.click(regionTactile(premiereCible.region));
 
     const peinte = region(premiereCible.region);
     expect(peinte.getAttribute('data-peinte')).toBe('oui');
@@ -264,7 +273,7 @@ describe('MoteurColorie — bonne réponse', () => {
 
     for (const cible of contenu.consignes[0]!.cibles) {
       await utilisateur.click(godet(cible.couleur));
-      await utilisateur.click(region(cible.region));
+      await utilisateur.click(regionTactile(cible.region));
     }
 
     expect(dernier).not.toBeNull();
@@ -282,7 +291,7 @@ describe('MoteurColorie — mauvaise réponse', () => {
     await attendreLaScene();
 
     await utilisateur.click(godet(couleurFausse));
-    await utilisateur.click(region(premiereCible.region));
+    await utilisateur.click(regionTactile(premiereCible.region));
 
     expect(region(premiereCible.region).getAttribute('data-peinte')).toBe('non');
     expect(document.querySelector('[data-etat="echec"]')).toBeNull();
@@ -298,7 +307,7 @@ describe('MoteurColorie — mauvaise réponse', () => {
     // Le moteur écoute le début du geste afin de répondre en moins de 100 ms. Émettre
     // directement l'événement réellement consommé évite que `userEvent.click` dépende du
     // support partiel des pointeurs SVG de happy-dom.
-    fireEvent.pointerDown(region(premiereCible.region));
+    fireEvent.pointerDown(regionTactile(premiereCible.region));
     await waitFor(() => expect(dernier).not.toBeNull());
 
     const etat = dernier as unknown as EtatColorie;
@@ -315,8 +324,8 @@ describe('MoteurColorie — aide de Gobi', () => {
     await attendreLaScene();
 
     await utilisateur.click(godet(couleurFausse));
-    await utilisateur.click(region(premiereCible.region));
-    await utilisateur.click(region(premiereCible.region));
+    await utilisateur.click(regionTactile(premiereCible.region));
+    await utilisateur.click(regionTactile(premiereCible.region));
 
     expect((dernier as unknown as EtatColorie).niveauAide).toBe('indice');
     expect(document.querySelector('[data-etat="echec"]')).toBeNull();
@@ -329,11 +338,11 @@ describe('MoteurColorie — aide de Gobi', () => {
     await attendreLaScene();
 
     await utilisateur.click(godet(couleurFausse));
-    await utilisateur.click(region(premiereCible.region));
-    await utilisateur.click(region(premiereCible.region));
+    await utilisateur.click(regionTactile(premiereCible.region));
+    await utilisateur.click(regionTactile(premiereCible.region));
     // Puis on répond juste : le niveau ne redescend pas.
     await utilisateur.click(godet(premiereCible.couleur));
-    await utilisateur.click(region(premiereCible.region));
+    await utilisateur.click(regionTactile(premiereCible.region));
 
     expect((dernier as unknown as EtatColorie).niveauAide).not.toBe('aucune');
   });
@@ -347,7 +356,7 @@ describe('MoteurColorie — double-tap rapide', () => {
     await attendreLaScene();
 
     await utilisateur.click(godet(premiereCible.couleur));
-    const cible = region(premiereCible.region);
+    const cible = regionTactile(premiereCible.region);
     await utilisateur.dblClick(cible);
 
     const etat = dernier as unknown as EtatColorie;
@@ -375,14 +384,14 @@ describe('MoteurColorie — désordre de rendu', () => {
       if (consigne.id === consigneMultiple.id) break;
       for (const cible of consigne.cibles) {
         await utilisateur.click(godet(cible.couleur));
-        await utilisateur.click(region(cible.region));
+        await utilisateur.click(regionTactile(cible.region));
       }
     }
 
     // Puis peindre ses cibles à l'envers.
     for (const cible of [...consigneMultiple.cibles].reverse()) {
       await utilisateur.click(godet(cible.couleur));
-      await utilisateur.click(region(cible.region));
+      await utilisateur.click(regionTactile(cible.region));
     }
 
     const etat = dernier as unknown as EtatColorie;
@@ -469,7 +478,7 @@ describe('MoteurColorie — le décor réel', () => {
     await attendreDecorReel();
 
     await utilisateur.click(godet(couleurFausse));
-    await utilisateur.click(region(premiereCible.region));
+    await utilisateur.click(regionTactile(premiereCible.region));
 
     // Le seul retour d'erreur du jeu (v2 § 8) : 6 px d'oscillation, pas de rouge, pas de
     // son négatif. Sans cette classe, l'enfant qui se trompe ne reçoit RIEN.
@@ -536,6 +545,72 @@ describe('MoteurColorie — le décor réel', () => {
     fireEvent.pointerDown(forme!);
 
     expect(onPeindre).toHaveBeenCalledWith(premiereCible.region);
+  });
+
+  it('réserve la prise ronde au clavier et exige le vrai chemin sous le doigt', async () => {
+    const onPeindre = vi.fn();
+    const corpsSvgReel = lireTexte(CHEMIN_SVG_ECOLE)
+      .replace(/^[\s\S]*?<svg[^>]*>/i, '')
+      .replace(/<\/svg>[\s\S]*$/i, '');
+    const { container } = render(
+      <SceneSvg
+        habillage={habillage}
+        remplissages={{}}
+        regionEnDemonstration={null}
+        regionEnRefus={null}
+        marqueRefus={0}
+        animationsDesactivees
+        regionsActives={[premiereCible.region]}
+        svgMarkup={corpsSvgReel}
+        onPeindre={onPeindre}
+      />,
+    );
+
+    const prise = container.querySelector<SVGCircleElement>(
+      `[data-calque="prises"] [data-region-svg="${premiereCible.region}"]`,
+    );
+    const forme = container.querySelector<SVGGraphicsElement>(
+      `[data-region-source="${premiereCible.region}"]`,
+    );
+    const scene = container.querySelector<SVGSVGElement>('svg');
+    expect(prise).not.toBeNull();
+    expect(forme).not.toBeNull();
+    expect(scene).not.toBeNull();
+    expect(prise!.style.pointerEvents).toBe('none');
+    expect(forme!.style.pointerEvents).toBe('fill');
+
+    // Un trou de la forme cible le SVG racine. Son point peut être proche du centroïde :
+    // il ne doit pourtant déclencher aucun repli géométrique arbitraire.
+    const regionDeclaree = habillage.scene.calques
+      .flatMap((calque) => calque.regions)
+      .find((candidate) => candidate.id === premiereCible.region)!;
+    Object.defineProperty(scene!, 'getBoundingClientRect', {
+      configurable: true,
+      value: () => ({
+        x: 0,
+        y: 0,
+        left: 0,
+        top: 0,
+        right: 960,
+        bottom: 600,
+        width: 960,
+        height: 600,
+        toJSON: () => ({}),
+      }),
+    });
+    fireEvent.pointerDown(scene!, {
+      clientX: regionDeclaree.centroide[0],
+      clientY: regionDeclaree.centroide[1],
+    });
+    expect(onPeindre).not.toHaveBeenCalled();
+
+    fireEvent.pointerDown(forme!);
+    expect(onPeindre).toHaveBeenLastCalledWith(premiereCible.region);
+
+    // Activation virtuelle d'un lecteur d'écran : le bouton accessible reste opérant.
+    onPeindre.mockClear();
+    fireEvent.click(prise!);
+    expect(onPeindre).toHaveBeenLastCalledWith(premiereCible.region);
   });
 });
 
@@ -726,6 +801,29 @@ describe('SceneSvg — le décor de repli est DÉRIVÉ de l’habillage', () => 
     );
     fireEvent.keyDown(region('zone-sud'), { key: 'Enter' });
     expect(peinte).toBe('zone-sud');
+  });
+});
+
+describe('SceneSvg — toucher redirigé par le navigateur vers la racine SVG', () => {
+  it('peint le vrai chemin sous le doigt, mais jamais une zone extérieure au dessin', () => {
+    const peindre = vi.fn();
+    render(<SceneSvg habillage={habillageEssai} remplissages={{}}
+      regionEnDemonstration={null} regionEnRefus={null} marqueRefus={0}
+      animationsDesactivees svgMarkup='<g id="calque-zones"><path id="zone-nord" d="M30 20H70V60H30Z" /></g>'
+      onPeindre={peindre} />);
+    const svg = document.querySelector('svg')!;
+    const chemin = document.querySelector('[data-region-source="zone-nord"]')!;
+    const sousDoigt = vi.spyOn(document, 'elementFromPoint').mockReturnValue(chemin);
+    fireEvent.pointerDown(svg, { clientX: 50, clientY: 40, pointerType: 'touch' });
+    expect(peindre).toHaveBeenCalledExactlyOnceWith('zone-nord');
+
+    peindre.mockClear();
+    const externe = document.createElement('div');
+    externe.setAttribute('data-region-source', 'zone-nord');
+    sousDoigt.mockReturnValue(externe);
+    fireEvent.pointerDown(svg, { clientX: 50, clientY: 40, pointerType: 'touch' });
+    expect(peindre).not.toHaveBeenCalled();
+    sousDoigt.mockRestore();
   });
 });
 

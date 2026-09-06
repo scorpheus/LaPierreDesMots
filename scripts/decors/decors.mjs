@@ -777,7 +777,7 @@ const MARAIS = [
       'un escargot et des cailloux restent nettement reconnaissables sous la brume.',
     region: 'marais-jumeau',
     moteurs: ['colorie'],
-    fondIllustre: '/api/contenu/assets/assets/decors/brume.png',
+    fondIllustre: '/api/contenu/assets/assets/decors/archives-2026-09-05/brume.png',
     masquerGeometrie: true,
     nuancier: ['brun', 'noir', 'rose', 'jaune', 'rouge', 'orange', 'bleu', 'vert'],
     zones: [
@@ -979,7 +979,7 @@ const FORET = [
       'sur la bordure servent de cibles au coloriage.',
     region: 'foret-muette',
     moteurs: ['colorie'],
-    fondIllustre: '/api/contenu/assets/assets/decors/tapis.png',
+    fondIllustre: '/api/contenu/assets/assets/decors/archives-2026-09-05/tapis.png',
     masquerGeometrie: true,
     nuancier: ['brun', 'noir', 'violet', 'vert', 'rouge', 'jaune', 'orange', 'rose'],
     zones: [
@@ -1136,7 +1136,7 @@ const VOLCAN = [
       'plein de braises, un seau, une lanterne et des cristaux.',
     region: 'volcan',
     moteurs: ['colorie'],
-    fondIllustre: '/api/contenu/assets/assets/decors/forge.png',
+    fondIllustre: '/api/contenu/assets/assets/decors/archives-2026-09-05/forge.png',
     masquerGeometrie: true,
     nuancier: ['bleu', 'noir', 'rouge', 'brun', 'violet', 'jaune', 'rose', 'orange'],
     zones: [
@@ -1431,7 +1431,7 @@ const CITE = [
       'pots de peinture, arbre, porte et ciel restent faciles à montrer du doigt.',
     region: 'cite-des-histoires',
     moteurs: ['colorie'],
-    fondIllustre: '/api/contenu/assets/assets/decors/fresque-murale.png',
+    fondIllustre: '/api/contenu/assets/assets/decors/archives-2026-09-05/fresque-murale.png',
     masquerGeometrie: true,
     nuancier: ['rouge', 'vert', 'jaune', 'brun', 'rose', 'orange', 'violet', 'bleu'],
     zones: [

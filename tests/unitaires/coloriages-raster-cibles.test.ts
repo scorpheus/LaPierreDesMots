@@ -1,214 +1,90 @@
 /**
- * Les masques de coloriage doivent suivre les objets réellement visibles dans les rasters.
- *
- * Ce test ne juge pas l'esthétique de l'image. Il verrouille les quatre erreurs mesurables qui
- * rendaient ces scènes injouables : objet absent de la consigne, cible hors de son repère raster,
- * centroïde hors du tracé et couleur annoncée différente de la couleur attendue.
+ * Contrat des coloriages repris sur demande parent du 5 septembre.
+ * Les anciennes « feuilles » du tapis ont été remplacées par des objets distincts.
+ * Le contraste autour d'un centroïde ne prouvait que de la texture (et trois cas
+ * ne portaient aucune assertion). On contrôle maintenant les repères du PNG,
+ * indépendants des chemins, pour chaque scène, ainsi que les noms et couleurs exacts.
  */
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-
 import { describe, expect, it } from 'vitest';
+import { elementsDessines, pointDansRegion, polygonesDuChemin } from '../../scripts/verifier-regions-fermees.mjs';
+import reperes from '../fixtures/coloriages-reperes.json';
 
-import {
-  elementsDessines,
-  pointDansRegion,
-  polygonesDuChemin,
-} from '../../scripts/verifier-regions-fermees.mjs';
-import { decoderPng } from '../../scripts/sprites/png.mjs';
-import { lireJson, lireTexte } from '../configuration/preparation.js';
-
-type Boite = readonly [xmin: number, ymin: number, xmax: number, ymax: number];
-
-interface RegionHabillage {
-  readonly id: string;
-  readonly centroide: readonly [number, number];
-}
-
-interface HabillageColorie {
-  readonly scene: {
-    readonly calques: readonly {
-      readonly regions: readonly RegionHabillage[];
-    }[];
-  };
+const SCENES = [
+  { noeud: 'foret-muette-08', fiche: 'foret-muette/tapis-colorie-01.json', cibles: [
+    ['gland-du-tapis', 'tapis', 'brun'], ['feuille-du-tapis-un', 'chat', 'noir'],
+    ['feuille-du-tapis-deux', 'bol', 'violet'], ['feuille-du-tapis-trois', 'sac', 'vert'],
+    ['feuille-haute', 'pot', 'rouge'], ['feuille-basse', 'ballon', 'jaune'],
+    ['feuille-du-tapis-quatre', 'banc', 'orange'],
+  ] },
+  { noeud: 'marais-jumeau-08', fiche: 'marais-jumeau/brume-colorie-01.json', cibles: [
+    ['caillou', 'caillou', 'brun'], ['saule-de-la-berge', 'tronc du saule', 'noir'],
+    ['roue', 'escargot', 'rose'], ['nenuphar-perdu', 'nénuphar', 'jaune'],
+    ['route', 'ponton', 'rouge'], ['barque-echouee', 'barque', 'orange'], ['ciel', 'ciel', 'bleu'],
+  ] },
+  { noeud: 'volcan-08', fiche: 'volcan/forge-colorie-01.json', cibles: [
+    ['seau', 'seau', 'bleu'], ['marteau-de-forge', 'marteau', 'noir'],
+    ['enclume', 'enclume', 'rouge'], ['billot', 'billot', 'brun'],
+    ['rideau', 'cristal', 'violet'], ['tableau', 'lanterne', 'jaune'],
+    ['drapeau', 'grand cristal de gauche', 'rose'], ['feu', 'feu', 'orange'],
+  ] },
+  { noeud: 'cite-des-histoires-10', fiche: 'cite-des-histoires/fresque-murale-colorie-01.json', cibles: [
+    ['scene-du-haut', 'montagne', 'rouge'], ['scene-du-bas', 'tente', 'vert'],
+    ['soleil', 'grand rond en haut', 'jaune'], ['pot-de-couleur', 'porte de droite', 'brun'],
+    ['arbre', 'arbre à droite de la tente', 'rose'], ['porte', 'porte de gauche', 'orange'],
+    ['scene-de-droite', 'pierre', 'violet'], ['ciel', 'ciel de la montagne', 'bleu'],
+  ] },
+] as const;
+interface Region { readonly id: string; readonly centroide: readonly [number, number] }
+interface Habillage {
+  readonly scene: { readonly fichier: string; readonly viewBox: string; readonly calques: readonly { readonly regions: readonly Region[] }[] };
   readonly palette: { readonly nuancier: readonly string[] };
 }
-
-interface ExerciceColorie {
-  readonly jeu: {
-    readonly contenu: {
-      readonly consignes: readonly {
-        readonly texte: string;
-        readonly cibles: readonly { readonly region: string; readonly couleur: string }[];
-      }[];
-    };
-  };
+interface Exercice {
+  readonly jeu: { readonly contenu: { readonly consignes: readonly {
+    readonly texte: string; readonly cibles: readonly { readonly region: string; readonly couleur: string }[];
+  }[] } };
 }
+const lire = <T,>(fichier: string): T => JSON.parse(readFileSync(resolve(fichier), 'utf8')) as T;
 
-interface CibleAttendue {
-  readonly region: string;
-  readonly mot: string;
-  readonly couleur: string;
-  readonly boite: Boite;
-  readonly motifRasterVisible?: boolean;
-}
-
-interface SceneAttendue {
-  readonly nom: string;
-  readonly exercice: string;
-  readonly habillage: string;
-  readonly svg: string;
-  readonly raster?: string;
-  readonly cibles: readonly CibleAttendue[];
-}
-
-const SCENES: readonly SceneAttendue[] = [
-  {
-    nom: 'le tapis de feuilles',
-    exercice: 'contenu/exercices/foret-muette/tapis-colorie-01.json',
-    habillage: 'contenu/habillages/foret-muette/tapis.habillage.json',
-    svg: 'contenu/habillages/foret-muette/tapis.svg',
-    raster: 'contenu/assets/decors/tapis.png',
-    cibles: [
-      { region: 'gland-du-tapis', mot: 'tapis', couleur: 'brun', boite: [440, 360, 520, 430] },
-      { region: 'feuille-du-tapis-un', mot: 'feuille', couleur: 'noir', boite: [280, 295, 345, 355], motifRasterVisible: true },
-      { region: 'feuille-du-tapis-deux', mot: 'feuille', couleur: 'violet', boite: [470, 295, 535, 355], motifRasterVisible: true },
-      { region: 'feuille-du-tapis-trois', mot: 'feuille', couleur: 'vert', boite: [670, 295, 735, 355], motifRasterVisible: true },
-      { region: 'feuille-haute', mot: 'feuille', couleur: 'rouge', boite: [220, 355, 285, 415], motifRasterVisible: true },
-      { region: 'feuille-basse', mot: 'feuille', couleur: 'jaune', boite: [455, 435, 525, 495], motifRasterVisible: true },
-      { region: 'feuille-du-tapis-quatre', mot: 'feuille', couleur: 'orange', boite: [725, 355, 790, 415], motifRasterVisible: true },
-    ],
-  },
-  {
-    nom: 'la berge dans la brume',
-    exercice: 'contenu/exercices/marais-jumeau/brume-colorie-01.json',
-    habillage: 'contenu/habillages/marais-jumeau/brume.habillage.json',
-    svg: 'contenu/habillages/marais-jumeau/brume.svg',
-    cibles: [
-      { region: 'caillou', mot: 'caillou', couleur: 'brun', boite: [360, 400, 500, 520] },
-      { region: 'saule-de-la-berge', mot: 'saule', couleur: 'noir', boite: [0, 0, 390, 300] },
-      { region: 'roue', mot: 'escargot', couleur: 'rose', boite: [190, 490, 310, 580] },
-      { region: 'nenuphar-perdu', mot: 'nénuphar', couleur: 'jaune', boite: [700, 420, 800, 520] },
-      { region: 'route', mot: 'ponton', couleur: 'rouge', boite: [500, 290, 850, 380] },
-      { region: 'barque-echouee', mot: 'barque', couleur: 'orange', boite: [80, 270, 370, 450] },
-      { region: 'ciel', mot: 'ciel', couleur: 'bleu', boite: [400, 0, 780, 130] },
-    ],
-  },
-  {
-    nom: 'la forge',
-    exercice: 'contenu/exercices/volcan/forge-colorie-01.json',
-    habillage: 'contenu/habillages/volcan/forge.habillage.json',
-    svg: 'contenu/habillages/volcan/forge.svg',
-    cibles: [
-      { region: 'seau', mot: 'seau', couleur: 'bleu', boite: [820, 340, 930, 480] },
-      { region: 'marteau-de-forge', mot: 'marteau', couleur: 'noir', boite: [470, 330, 610, 450] },
-      { region: 'enclume', mot: 'enclume', couleur: 'rouge', boite: [270, 200, 590, 350] },
-      { region: 'billot', mot: 'billot', couleur: 'brun', boite: [300, 300, 540, 440] },
-      { region: 'rideau', mot: 'cristal', couleur: 'violet', boite: [800, 430, 950, 600] },
-      { region: 'tableau', mot: 'lanterne', couleur: 'jaune', boite: [50, 100, 170, 260] },
-      { region: 'drapeau', mot: 'cristal', couleur: 'rose', boite: [60, 70, 160, 230] },
-      { region: 'feu', mot: 'feu', couleur: 'orange', boite: [580, 430, 720, 550] },
-    ],
-  },
-  {
-    nom: 'la fresque murale',
-    exercice: 'contenu/exercices/cite-des-histoires/fresque-murale-colorie-01.json',
-    habillage: 'contenu/habillages/cite-des-histoires/fresque-murale.habillage.json',
-    svg: 'contenu/habillages/cite-des-histoires/fresque-murale.svg',
-    cibles: [
-      { region: 'fleur', mot: 'fleur', couleur: 'rouge', boite: [0, 450, 120, 560] },
-      { region: 'feuille', mot: 'feuille', couleur: 'vert', boite: [0, 440, 160, 590] },
-      { region: 'soleil', mot: 'médaillon', couleur: 'jaune', boite: [420, 20, 540, 140] },
-      { region: 'pot', mot: 'pot', couleur: 'brun', boite: [780, 500, 870, 590] },
-      { region: 'mur', mot: 'mur', couleur: 'rose', boite: [550, 320, 750, 440] },
-      { region: 'arbre', mot: 'arbre', couleur: 'orange', boite: [390, 120, 560, 340] },
-      { region: 'porte', mot: 'porte', couleur: 'violet', boite: [900, 200, 960, 450] },
-      { region: 'ciel', mot: 'ciel', couleur: 'bleu', boite: [370, 0, 700, 120] },
-    ],
-  },
-];
-
-function dansBoite([x, y]: readonly [number, number], [xmin, ymin, xmax, ymax]: Boite): boolean {
-  return x >= xmin && x <= xmax && y >= ymin && y <= ymax;
-}
-
-function ecartTypeLuminositeAutour(
-  fichier: string,
-  [xViewBox, yViewBox]: readonly [number, number],
-): number {
-  const image = decoderPng(readFileSync(resolve(process.cwd(), fichier)));
-  const echelle = Math.max(960 / image.largeur, 600 / image.hauteur);
-  const margeX = (960 - image.largeur * echelle) / 2;
-  const margeY = (600 - image.hauteur * echelle) / 2;
-  const centreX = Math.round((xViewBox - margeX) / echelle);
-  const centreY = Math.round((yViewBox - margeY) / echelle);
-  const rayon = Math.max(8, Math.round(15 / echelle));
-  const luminosites: number[] = [];
-  for (let y = Math.max(0, centreY - rayon); y <= Math.min(image.hauteur - 1, centreY + rayon); y += 1) {
-    for (let x = Math.max(0, centreX - rayon); x <= Math.min(image.largeur - 1, centreX + rayon); x += 1) {
-      const index = (y * image.largeur + x) * 4;
-      const rouge = image.pixels[index] ?? 0;
-      const vert = image.pixels[index + 1] ?? 0;
-      const bleu = image.pixels[index + 2] ?? 0;
-      luminosites.push(0.2126 * rouge + 0.7152 * vert + 0.0722 * bleu);
-    }
-  }
-  const moyenne = luminosites.reduce((somme, valeur) => somme + valeur, 0) / luminosites.length;
-  const variance = luminosites.reduce((somme, valeur) => somme + (valeur - moyenne) ** 2, 0) / luminosites.length;
-  return Math.sqrt(variance);
-}
-
-describe.each(SCENES)('$nom : les cibles suivent le raster', (scene) => {
-  const exercice = lireJson<ExerciceColorie>(scene.exercice);
-  const habillage = lireJson<HabillageColorie>(scene.habillage);
-  const regions = new Map(
-    habillage.scene.calques.flatMap((calque) => calque.regions).map((region) => [region.id, region]),
-  );
-  const traces = new Map(
-    (elementsDessines(lireTexte(scene.svg)) as readonly { id: string | null; d: string | null }[])
-      .filter((element): element is { id: string; d: string } => element.id !== null && element.d !== null)
-      .map((element) => [element.id, element.d]),
-  );
+describe.each(SCENES)('$noeud : contrat objets, couleurs et vraies silhouettes', scene => {
+  const reference = reperes.find(r => r.noeud === scene.noeud)!;
+  const exercice = lire<Exercice>(`contenu/exercices/${scene.fiche}`);
+  const habillage = lire<Habillage>(reference.habillage);
+  const svg = readFileSync(resolve('contenu', habillage.scene.fichier), 'utf8');
+  const regions = new Map(habillage.scene.calques.flatMap(c => c.regions).map(r => [r.id, r]));
+  const traces = new Map((elementsDessines(svg) as { id: string | null; d: string | null }[])
+    .filter((e): e is { id: string; d: string } => e.id !== null && e.d !== null).map(e => [e.id, e.d]));
   const consignes = exercice.jeu.contenu.consignes;
 
-  it('nomme exactement les objets visibles et leur couleur', () => {
+  it('nomme exactement les nouveaux objets et leur couleur, sans changer leur nombre', () => {
     expect(consignes).toHaveLength(scene.cibles.length);
-    expect(consignes.flatMap((consigne) => consigne.cibles).map((cible) => cible.region)).toEqual(
-      scene.cibles.map((cible) => cible.region),
-    );
-
-    scene.cibles.forEach((attendue, index) => {
+    expect(consignes.flatMap(c => c.cibles).map(c => c.region)).toEqual(scene.cibles.map(c => c[0]));
+    scene.cibles.forEach(([region, mot, couleur], index) => {
       const consigne = consignes[index]!;
-      expect(consigne.texte.toLocaleLowerCase('fr-FR')).toContain(attendue.mot);
-      expect(consigne.texte.toLocaleLowerCase('fr-FR')).toContain(attendue.couleur);
-      expect(consigne.cibles).toEqual([{ region: attendue.region, couleur: attendue.couleur }]);
-      expect(habillage.palette.nuancier).toContain(attendue.couleur);
+      expect(consigne.texte.toLocaleLowerCase('fr-FR')).toContain(mot);
+      expect(consigne.texte.toLocaleLowerCase('fr-FR')).toContain(couleur);
+      expect(consigne.cibles).toEqual([{ region, couleur }]);
+      expect(habillage.palette.nuancier).toContain(couleur);
     });
   });
 
-  it('place chaque centroïde dans le tracé et sur le repère raster audité', () => {
-    for (const attendue of scene.cibles) {
-      const region = regions.get(attendue.region);
-      const d = traces.get(attendue.region);
-      expect(region, attendue.region).toBeDefined();
-      expect(d, attendue.region).toBeDefined();
-      expect(dansBoite(region!.centroide, attendue.boite), attendue.region).toBe(true);
-      expect(
-        pointDansRegion(polygonesDuChemin(d!)!, region!.centroide),
-        attendue.region,
-      ).toBe(true);
+  it('place chaque point représentatif dans son vrai contour', () => {
+    for (const [id] of scene.cibles) {
+      expect(regions.has(id), id).toBe(true);
+      expect(traces.has(id), id).toBe(true);
+      expect(pointDansRegion(polygonesDuChemin(traces.get(id)!)!, regions.get(id)!.centroide), id).toBe(true);
     }
   });
 
-  it('place les petites cibles sur un motif réellement visible du PNG', () => {
-    if (scene.raster === undefined) return;
-    for (const attendue of scene.cibles.filter((cible) => cible.motifRasterVisible === true)) {
-      const region = regions.get(attendue.region);
-      expect(region, attendue.region).toBeDefined();
-      expect(
-        ecartTypeLuminositeAutour(scene.raster, region!.centroide),
-        `${attendue.region} tombe sur une zone uniforme du raster`,
-      ).toBeGreaterThan(20);
+  it('contient les objets repérés sur le PNG, mais pas leurs voisins extérieurs', () => {
+    expect(reference.cibles.map(c => c.region)).toEqual(scene.cibles.map(c => c[0]));
+    const [, , largeur, hauteur] = habillage.scene.viewBox.split(/\s+/u).map(Number);
+    for (const cible of reference.cibles) {
+      const polygones = polygonesDuChemin(traces.get(cible.region)!)!;
+      expect(pointDansRegion(polygones, [cible.interieur[0]! * largeur!, cible.interieur[1]! * hauteur!]), cible.objet).toBe(true);
+      expect(pointDansRegion(polygones, [cible.exterieur[0]! * largeur!, cible.exterieur[1]! * hauteur!]), cible.objet).toBe(false);
     }
   });
 });

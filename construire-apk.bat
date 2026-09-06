@@ -25,6 +25,10 @@ if errorlevel 1 goto :pas_de_node
 
 if not exist "node_modules\" goto :pas_installe
 
+rem Refuser un paquet incomplet (polices ou voix absentes) avant tout travail Gradle.
+call npm run ressources:verifier
+if errorlevel 1 goto :echec
+
 if not exist "outils\jdk-21\bin\java.exe" goto :pas_de_jdk
 set "JAVA_HOME=%~dp0outils\jdk-21"
 

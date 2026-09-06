@@ -29,7 +29,7 @@
       "consignes": [
         {
           "id": "c1",
-          "texte": "Marche sur les images dans l'ordre de l'histoire.",
+          "texte": "Marche sur les phrases dans l'ordre de l'histoire.",
           "forme": "imperative",
           "audio": null,
           "depart": "pont-un",
@@ -40,14 +40,14 @@
           ],
           "motsCles": [
             "marche",
-            "image",
+            "phrase",
             "ordre",
             "histoire"
           ]
         },
         {
           "id": "c2",
-          "texte": "Marche aussi sur les images dans l'ordre de l'histoire.",
+          "texte": "Marche aussi sur les phrases dans l'ordre de l'histoire.",
           "forme": "imperative",
           "audio": null,
           "depart": "pont-cinq",
@@ -58,14 +58,14 @@
           ],
           "motsCles": [
             "marche",
-            "image",
+            "phrase",
             "ordre",
             "histoire"
           ]
         },
         {
           "id": "c3",
-          "texte": "Marche sur les dernières images dans l'ordre.",
+          "texte": "Marche sur les dernières phrases dans l'ordre.",
           "forme": "imperative",
           "audio": null,
           "depart": "pont-neuf",
@@ -76,7 +76,7 @@
           ],
           "motsCles": [
             "marche",
-            "image",
+            "phrase",
             "ordre"
           ]
         }

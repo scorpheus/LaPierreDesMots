@@ -301,6 +301,78 @@ describe('la fin de partie est une réussite, quoi qu’il arrive (R14)', () => 
   });
 });
 
+describe('le compagnon de la sortie reste présent jusqu’au résultat', () => {
+  const compagnons = [
+    { code: 'filou', libelle: 'Filou', asset: 'assets/compagnons/filou.png' },
+    { code: 'roc', libelle: 'Roc', asset: 'assets/compagnons/roc.png' },
+    { code: 'plume', libelle: 'Plume', asset: 'assets/compagnons/plume.png' },
+    { code: 'bulle', libelle: 'Bulle', asset: 'assets/compagnons/bulle.png' }
+  ] as const;
+
+  function sortieAvec(compagnon: (typeof compagnons)[number]['code'] | null) {
+    return { ...PLAN_DE_SORTIE, compagnon };
+  }
+
+  it.each(compagnons)(
+    'salue $libelle avec son portrait canonique après un exercice de sortie',
+    ({ code, asset }) => {
+      monter({
+        etoiles: 2,
+        sortie: sortieAvec(code),
+        paquet: { noeud: { id: 'clairiere-03', region: 'clairiere' }, habillage: { timings: {} } }
+      });
+
+      const scene = document.querySelector(`[data-compagnon-recompense="${code}"]`);
+      expect(scene).not.toBeNull();
+      expect(scene?.querySelector(`[data-compagnon-sprite="${code}"]`)).not.toBeNull();
+      expect(scene?.querySelector<HTMLImageElement>('img')?.getAttribute('src')).toContain(asset);
+    }
+  );
+
+  it('garde Gobi quand aucune sortie ne porte de compagnon', () => {
+    monter({ etoiles: 2, sortie: sortieAvec(null) });
+
+    const scene = document.querySelector('[data-compagnon-recompense="gobi"]');
+    expect(scene).not.toBeNull();
+    expect(scene?.getAttribute('data-scene-recompense')).toBe('gobi-joie');
+    expect(scene?.querySelector<HTMLImageElement>('img')?.getAttribute('src')).toContain(
+      'assets/gobi/animation/joie.webp'
+    );
+  });
+
+  it('conserve Roc à la reprise puis à la clôture de la sortie', () => {
+    const reprise = monter({
+      etoiles: 2,
+      sortie: sortieAvec('roc'),
+      paquet: { noeud: { id: 'clairiere-04', region: 'clairiere' }, habillage: { timings: {} } }
+    });
+    expect(document.querySelector('[data-compagnon-recompense="roc"]')).not.toBeNull();
+    cleanup();
+
+    const dernier = monter({
+      etoiles: 2,
+      sortie: sortieAvec('roc'),
+      paquet: { noeud: { id: 'clairiere-06', region: 'clairiere' }, habillage: { timings: {} } }
+    });
+    expect(document.querySelector('[data-compagnon-recompense="roc"]')).not.toBeNull();
+    expect(document.querySelector('[data-action="fin-sortie"]')).not.toBeNull();
+    expect(reprise.getState().sortie?.compagnon).toBe('roc');
+    expect(dernier.getState().sortie?.compagnon).toBe('roc');
+  });
+
+  it('ne confond pas le compagnon de sortie avec une évolution de Gobi', () => {
+    monter({
+      etoiles: 2,
+      sortie: sortieAvec('roc'),
+      paquet: { noeud: { id: 'clairiere-03', region: 'clairiere' }, habillage: { timings: {} } }
+    });
+
+    expect(document.querySelector('[data-compagnon-recompense="roc"]')).not.toBeNull();
+    expect(document.querySelector('[data-scene-recompense="gobi-joie"]')).toBeNull();
+    expect(document.querySelector('[data-evolution-gobi]')).toBeNull();
+  });
+});
+
 describe('les annonces correspondent à ce qui est réellement remis', () => {
   it('rend observables les trois paliers quand une réussite les franchit ensemble', () => {
     render(

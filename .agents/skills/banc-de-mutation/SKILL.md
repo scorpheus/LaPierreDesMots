@@ -11,7 +11,8 @@ description: >-
 
 # Le banc de mutation, et le détecteur de tests trompeurs
 
-**Sources qui font foi, à lire, jamais à recalculer :**
+**Sources à lire : historique, recettes et dernière mesure sont distincts.** Ne pas recopier
+un ancien nombre comme état du jour ; ne pas modifier une référence pour rendre un résultat vert.
 
 | Fichier | Ce qu'il porte |
 |---|---|
@@ -233,7 +234,168 @@ chaque moteur avec le profil réel. Un moteur ajouté sans sonde doit faire roug
 
 ---
 
+## Jouabilité tactile : les preuves ne sont pas interchangeables
+
+Trois chemins coexistent :
+
+- `parcours-campagne-gestes-75.spec.ts` injecte `__test.repondre` : transitions logiques seulement.
+- `npm run test:tactile` termine tous les nœuds par les entrées natives du navigateur, avec
+  rotation après le premier geste et réglages de lecture agrandis. L'oracle peut lire la réponse,
+  mais ne doit jamais l'injecter au moteur. Tri et paires sont parcourus à rebours.
+- `tests/qualite/composition-exercices.spec.ts` mesure les vrais pixels accessibles, les textes
+  coupés et les occlusions ; ses contrôles injectent une image cassée, une prise masquée et une
+  géométrie instable. Il appartient à `npm run test:responsive`.
+
+`qa-outils.taper` emploie des événements DOM synthétiques : ne pas l'utiliser comme preuve de
+hit-testing. Pour isoler une régression, filtrer `test:tactile` avec `-- --grep <noeud>` puis
+relancer tous les nœuds de la mécanique après une correction commune. Un seul orchestrateur
+construit et lance Playwright ; aucune reconstruction concurrente de `dist-test`.
+
+Pièges reproduits le 5 septembre 2026 :
+
+- Une mise à jour API du profil ne renouvelle pas l'objet déjà conservé par React Query. Recharger
+  les profils avant la recette et mesurer le corps/interligne CSS ; une intention « 27 px » peut
+  sinon tester réellement 24 px. Effacer la sélection locale **avant** le rechargement, pas
+  seulement après : le démarrage peut restaurer un ancien joueur.
+- `scrollIntoView` sait déplacer un conteneur `overflow:hidden`, contrairement au doigt. La sonde
+  restaure ces déplacements avant de mesurer ; conserver son contrôle négatif de rognage.
+- Un tap natif Playwright peut encore faire défiler la page **par code avant le tap**. Il ne
+  prouve pas le balayage d'une liste. Pour une grille longue, utiliser `balayerAuDoigt` dans
+  `tests/e2e/gestes-defilement.ts`, depuis une carte visible : événements CDP touchStart/Move/End,
+  puis vérifier scroll de page, dernière carte atteinte et absence de sélection/erreur parasite.
+  Le témoin de `parcours-paires-defilement.spec.ts` doit rester immobile sous `touch-action:none`
+  puis défiler sous `manipulation`. `synthesizeScrollGesture` ne passait même pas ce témoin
+  positif sur le Chromium local : ne pas utiliser son retour réussi comme preuve de geste.
+  Tester aussi le maintien-glisser si le composant distingue ce geste du balayage. Ne pas
+  appliquer aveuglément cette règle à une ardoise de dessin qui doit capturer le doigt.
+- Pour un coloriage, cliquer un cercle invisible ou le centre d'un rectangle ne prouve rien.
+  Tester les pixels du vrai chemin SVG, ou le masque Canvas après son état `pret`. Les prises
+  réservées au clavier ne remplacent pas les régions dessinées.
+- Le dernier tap peut terminer l'exercice puis activer un bouton du nouvel écran. Exiger la
+  récompense et l'absence de remise à zéro, pas seulement un changement quelconque de l'état.
+- Les dimensions calculées d'une grille ne prouvent pas ses dimensions rendues : une image en
+  pourcentage d'un bouton sans taille définie peut déborder malgré le calcul. Mesurer le DOM.
+- Mesurer aussi l'appui maintenu : `scale(0.96)` faisait passer une cible de 64 à 61 px,
+  invisiblement sur les captures au repos. `cassecou.spec.ts` attend le transform stabilisé,
+  mesure la prise puis demande réellement l'aide au doigt. Distinguer aide automatique et
+  volontaire selon le retour parent R15 (`retours-de-jeu.md`), pas le R15 des specs (audio).
+- Utiliser `attendreGeometrieStable` plutôt qu'un nombre fixe de frames. Entre le prévol réseau
+  et la mesure, React peut ajouter une image : attendre son `decode()` avant de juger ses
+  dimensions naturelles. Les contrôles « image ajoutée entre prévol et mesure » et « image
+  cassée » de `composition-exercices.spec.ts` doivent respectivement réussir et rejeter.
+- Un contrôle du centre seul ignore les ailes d'une luciole qui interceptent le bord de sa
+  voisine. Mesurer aussi les quatre côtés intérieurs avec `elementFromPoint`, puis remonter les
+  ancêtres pour identifier le vrai conteneur défilant. `fullPage` ne capture pas le contenu d'un
+  `main` encore limité par `max-block-size:100dvh`. Cas discriminants :
+  `tests/e2e/parcours-attrape-accessibilite.spec.ts` (sept fiches, cinq formats).
+- Une commande HTML dont les coins reçoivent le doigt mais dont le centre est couvert reste
+  défectueuse. Conserver le contrôle négatif de couverture centrale ; réserver l'exception des
+  formes concaves aux vraies géométries SVG.
+- Les titres et consignes hors boutons ne sont pas couverts par le balayage des prises. Contrôler
+  leur propre composition : une réserve flex centrée dans une rangée comprimée peut faire
+  remonter son titre sous le carton précédent sans masquer le centre d'un seul bouton.
+- Importer `test` depuis `./invariants.js` pour une nouvelle recette E2E, pas directement depuis
+  le harnais serveur : l'isolation ne remplace pas la sentinelle qui suit les invariants en cours.
+- Une sentinelle permanente doit aussi attendre les dimensions stabilisées pour juger R16,
+  sans suspendre les erreurs ou la sauvegarde. Observer les tailles avec `ResizeObserver` :
+  un bouton peut rétrécir sans changer la population ni provoquer le relevé attendu. Conserver
+  le contrôle qui accepte une taille transitoire corrigée et refuse le vrai bouton de 20 px.
+
+L'audit `npm run qa:coherence` vérifie les références, les réponses reconstituables et certaines
+contradictions textuelles sans LLM. Ce n'est ni une validation esthétique ni une preuve autonome
+du niveau CE1. Une correction de contenu reste soumise à la validation parentale du projet.
+Les critères de réceptacles Tri sont aussi lus et vocalisés : corriger les seules consignes
+laissait dix « son de … » à l'écran. Ils sont maintenant couverts par le même garde.
+Vérifier séparément `node scripts/valider-brouillons.mjs` avant toute affirmation sur le lexique :
+le contrôle 9 de `test:contenu` est historiquement non exécuté pour seuil non arbitré. Sa liste
+artisanale de 546 mots et les conjugaisons qu'elle ignore ne constituent pas un référentiel
+scolaire complet ; nommer les absences sans les assimiler à autant d'erreurs pédagogiques.
+
+Pour les jeux à règle changeante, jouer le parcours encodé ne prouve pas que les autres choix
+sont justes. Employer un oracle sémantique indépendant des id attendus : classer les mots
+visibles, vérifier chaque voisin possible et le maintien de vrais contre-exemples. Contrôler
+le changement de règle, la remise à zéro des coches de manche (pas des acquis) et une nouvelle
+demande d'aide après un pas. Pour Attrape, vérifier la permutation spatiale et sa stabilité
+pendant la lecture, pas seulement l'ordre DOM. Exemples exécutables :
+`chemin-plateaux-semantique.test.ts`, `MoteurCheminEtapes.test.tsx`,
+`MoteurAttrapeMelange.test.tsx`, `parcours-chemins-regles.spec.ts` dans `tests/`.
+Une table phonétique fermée ne certifie pas un mot nouveau ou une chronologie ; ces cas
+restent signalés à la relecture plutôt que comptés dans les réussites sémantiques.
+
+Une regex sur une garde ne prouve pas son comportement : le test R17 exigeait une clause
+en dernière position et rejetait une garde Chemin plus précise. Pour une règle de journal,
+exécuter les moteurs du registre sur leurs fixtures et une horloge contrôlée. Le scénario
+« palier automatique → demande explicite » de `aide-demandee.test.ts` vérifie les deux
+paliers sur les treize moteurs et rejette un état simulant une demande ignorée. Il a aussi
+trouvé le résumé Colorie qui comptait encore l'aide automatique : contrôler le résumé public,
+pas seulement le socle commun qu'un ancien moteur peut ne pas utiliser. Tout changement de
+journal reste accompagné du rejeu inchangé ; jamais d'actualisation automatique des références.
+
+Sur mobile, un débordement peut agrandir `innerWidth` **et** `innerHeight`, même si le
+viewport CSS ne change pas. Un repli piloté par ces mesures peut alors s'annuler lui-même.
+Ne pas conclure « scrollbar » sans relever les cadres : le cas Chemin à 360×640 gardait
+344 px de largeur de moteur mais alternait grille/plateau toutes les quatre images.
+Le viewport de mise en page (`document.documentElement.clientHeight`) a supprimé ce cycle.
+Le cas « chemin étroit » de `responsive-tous-ecrans.spec.ts` suit les cadres consécutifs,
+puis vérifie rotation, grand écran et retour au petit écran. Une capture unique ou un
+simple second passage vert ne prouve pas la stabilité ; conserver le rouge discriminant.
+
+### Reconnaissance visuelle : un oracle ne prouve pas la clarté
+
+Le coloriage du tapis a passé les taps natifs alors que le parent ne reconnaissait pas les
+« feuilles » : l'oracle connaissait les chemins, l'enfant voyait des ornements floraux minuscules.
+Pour une cible dessinée, mesurer la silhouette réelle, pas son cercle de repli clavier ; montrer
+le rendu gris sans halo à taille réduite et vérifier que le nom désigne un objet reconnaissable
+et unique. Les mots relatifs (« en haut ») doivent nommer leur repère quand il est ambigu.
+Conserver séparément les verdicts mécanique, reconnaissance et validation parentale. Un
+identifiant cohérent et un pixel réactif ne sont pas des preuves de compréhension.
+
+`npm run qa:coloriages` produit une revue depuis les SVG réellement déclarés et leurs PNG :
+gris sans aide, vrais masques superposés, boîtes et empreintes des deux fichiers. Son code zéro
+atteste seulement la production de ces preuves, jamais la reconnaissance. Examiner les objets
+et les silhouettes côte à côte avant d'utiliser la réussite d'un parcours comme visa : le 5
+septembre, le caillou des Marais réussissait sur un masque situé dans l'eau. Une validation
+d'image d'ambiance ne vaut pas validation de coloriage. Rouvrir la revue quand l'empreinte du
+fond ou du masque change. Ne pas confondre les empreintes historiques RGB décodées du verrou
+avec celles des fichiers PNG ; une compression différente n'est pas une autre illustration.
+
+### Plateau entier et cadrage réel d'une sortie
+
+Pour une demande de plateau entier (Paires), la recette de défilement ne suffit pas :
+`tests/e2e/parcours-paires-cadrage.spec.ts` exige simultanément toutes les cartes, le retour et
+l'aide dans le viewport, sans `scrollIntoView`, puis vérifie sélection, paire acquise et rotation.
+Conserver cette recette en complément du balayage natif sur les formats trop petits.
+Une entrée directe par `allerAuNoeud` ne monte pas l'en-tête « Exercice … sur … » : tester aussi
+une sortie. Si son plan est remplacé par une fixture HTTP, installer l'interception **après**
+`appliquerReglagesLectureReels` : ce helper appelle `preparerSansProfil`, qui retire les routes.
+Le bon moteur et la présence de l'en-tête doivent être assertés avant toute mesure.
+
+### Recette native Android, distincte de l'émulation de viewport
+
+`npm run qa:apk` utilise un émulateur isolé déjà lancé sur 5554 et l'APK déjà installé ; jamais
+la tablette de l'enfant. Voir `Docs/audit-livrables-2026-09-05.md` pour l'invocation locale validée.
+Lancer l'AVD avec `-read-only -no-snapshot -no-window`, conserver ses données de base, puis arrêter
+seulement cet émulateur de recette. Aucun pilote Android additionnel n'est nécessaire :
+`_android.devices({ omitDriverInstall: true })` accède à la WebView existante.
+
+La WebView peut refuser `locator.tap()` faute de contexte `hasTouch`. Utiliser les vrais événements
+CDP `Input.dispatchTouchEvent`, avec hit-testing du centre ou d'un pixel du path ; ne pas remplacer
+par un `dispatchEvent` DOM. Attendre le SVG illustré, ses images décodées et les polices.
+
+Une lecture SQL brute pendant une transaction voit parfois une écriture non commitée. Attendre
+la lecture du port public sérialisé avant de comparer après relance. Après `am force-stop`,
+attendre la fermeture de l'ancienne WebView avant de rattacher la nouvelle. Un arrêt après commit
+ne prouve pas la résistance à l'arrêt forcé pendant la transaction ; garder ce verdict distinct.
+
+`npm run qa:ancrages` est un prévol rapide de la chaîne globale, **hors** des suites que le banc
+exécute pendant une mutation : y tester la présence du code original créerait de fausses détections.
+
 ## Ce que le banc ne mesure PAS, et qu'il ne faut pas taire
+
+Pour conserver une comparaison visuelle refusée, relancer le cas avec un `--output` dédié dans
+`bac-a-sable/` : les invocations suivantes de Playwright nettoient son répertoire commun.
+La copie des références reçue dans ces artefacts n'autorise pas leur remplacement. Exemple
+exécuté et limites : `Docs/lot-corrections-cloture-2026-09-06.md`, dernière section.
 
 **Les E2E ne sont pas un étage de ce banc.** `playwright.config.ts` sert
 `node serveur/dist/index.js` : les parcours exigent un build, et la compilation appartient à

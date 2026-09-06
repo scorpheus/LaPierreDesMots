@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 640" width="960" height="640" role="img" aria-label="La fresque des trois histoires">
+  <title>La fresque des trois histoires</title>
+  <desc>Un mur illustré avec une montagne, une tente, un grand rond en haut, deux portes, un grand arbre, une pierre ronde et un ciel.</desc>
+  <!-- Brouillon local du 5 septembre 2026. Le raster est au même ratio 3:2 que le viewBox.
+       Tous les masques sont polygonaux et suivent les objets vus dans fresque-murale-v2.png. -->
+  <g id="calque-fond">
+    <path class="fond" fill="#FFF6E3" stroke="none" d="M0 0 L960 0 L960 640 L0 640 Z"/>
+    <image data-fond-illustre="fresque-murale-v2" href="image/fresque-murale-v2.png" x="0" y="0" width="960" height="640" preserveAspectRatio="xMidYMid meet"/>
+  </g>
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round" opacity="0" aria-hidden="true">
+    <!-- Identifiants historiques conservés ; les libellés décrivent désormais les vrais objets du raster v2. -->
+    <path id="mur-de-pierre" class="zone" data-region-svg="mur-de-pierre" fill-rule="evenodd" d="M375 0 L585 0 L585 24 L560 34 L536 38 L515 30 L497 22 L476 30 L452 38 L425 34 L400 24 L375 24 Z"/>
+    <path id="pave-de-la-rue" class="zone" data-region-svg="pave-de-la-rue" fill-rule="evenodd" d="M105 476 L813 476 L897 640 L105 640 L130 612 L118 574 L140 540 Z"/>
+    <path id="cadre-de-la-fresque" class="zone" data-region-svg="cadre-de-la-fresque" fill-rule="evenodd" d="M106 145 L854 145 L854 470 L106 470 Z M126 165 L834 165 L834 450 L126 450 Z"/>
+    <path id="ciel" class="zone" fill-rule="evenodd" d="M143.75,257.5 L145,224.375 L156.25,206.25 L178.125,190.625 L207.5,178.125 L234.375,176.25 L260.625,180.625 L288.125,193.75 L307.5,213.125 L320.625,235 L325.625,255 L325.625,279.375 L314.375,270.625 L300.625,257.5 L291.25,241.25 L280.625,228.125 L272.5,220.625 L255.625,231.875 L244.375,221.875 L236.875,205 L225.625,186.25 L215,199.375 L205.625,218.75 L188.75,236.875 L174.375,256.875 L161.25,270.625 L153.75,276.25 L148.125,266.875 Z"/>
+    <path id="soleil" class="zone" fill-rule="evenodd" d="M448.75,76.875 L467.5,69.375 L487.5,70 L509.375,77.5 L522.5,90.625 L529.375,110.625 L525,131.25 L511.875,149.375 L488.125,157.5 L468.75,156.25 L449.375,146.875 L438.125,131.875 L431.25,111.25 L435,93.125 L442.5,82.5 Z"/>
+    <path id="arbre" class="zone" fill-rule="evenodd" d="M565.625,181.875 L575.625,172.5 L587.5,173.125 L594.375,167.5 L603.75,173.125 L610.625,180.625 L615.625,185.625 L621.25,191.875 L625,191.25 L628.125,212.5 L628.75,230 L619.375,236.25 L621.25,253.125 L616.875,261.25 L624.375,276.25 L625.625,308.75 L611.25,307.5 L608.75,290 L609.375,276.875 L605,262.5 L598.125,250.625 L579.375,240.625 L566.25,228.125 L576.25,222.5 L567.5,209.375 L578.75,203.75 L572.5,193.125 Z"/>
+    <path id="feuille" class="zone" data-region-svg="feuille" fill-rule="evenodd" d="M866 552 L886 532 L913 524 L941 531 L960 552 L960 640 L925 625 L905 599 L885 580 Z"/>
+    <path id="scene-du-haut" class="zone" fill-rule="evenodd" d="M157.5,280 L174.375,258.75 L188.75,238.125 L204.375,218.75 L215.625,199.375 L225.625,187.5 L235.625,203.75 L244.375,223.125 L255.625,232.5 L272.5,223.125 L280,233.75 L291.25,245 L299.375,265.625 L308.125,276.25 L300,284.375 L286.25,280.625 L280,285.625 L266.875,281.25 L258.75,284.375 L245,280.625 L237.5,286.25 L225,281.25 L215.625,286.875 L205.625,281.875 L195,286.875 L184.375,282.5 L175,286.25 L162.5,281.25 Z"/>
+    <path id="scene-du-bas" class="zone" fill-rule="evenodd" d="M421.25,308.75 L430,283.125 L443.75,257.5 L456.875,233.125 L469.375,209.375 L481.875,190.625 L498.125,208.125 L514.375,221.25 L532.5,231.875 L554.375,245 L565.625,265.625 L570.625,290.625 L574.375,318.125 L556.875,325 L536.875,320 L525,323.75 L501.25,317.5 L480,318.75 L456.25,315 L436.875,318.75 Z M461.25,303.75 L466.875,273.75 L476.875,245.625 L485.625,223.125 L495,240.625 L506.875,258.75 L526.25,283.125 L540,302.5 L521.875,307.5 L491.25,308.75 L475.625,306.875 Z"/>
+    <path id="scene-de-droite" class="zone" fill-rule="evenodd" d="M720.625,265 L748.125,266.875 L767.5,276.25 L781.875,290.625 L785.625,310.625 L778.125,326.875 L765.625,338.125 L742.5,342.5 L728.125,348.75 L706.875,343.75 L690.625,334.375 L678.75,320 L668.75,305.625 L670,290.625 L680,277.5 L695,268.125 Z"/>
+    <path id="mur" class="zone" data-region-svg="mur" fill-rule="evenodd" d="M354 365 L625 365 L637 445 L340 445 L330 408 Z"/>
+    <path id="porte" class="zone" fill-rule="evenodd" d="M0,345 L8.125,333.125 L20.625,323.125 L29.375,333.125 L33.75,346.875 L33.75,453.125 L22.5,455 L19.375,467.5 L2.5,470 L0,468.75 Z"/>
+    <path id="fleur" class="zone" data-region-svg="fleur" fill-rule="evenodd" d="M0 565 L10 543 L28 524 L51 508 L76 518 L91 540 L87 563 L72 581 L54 595 L39 615 L20 610 L3 592 Z"/>
+    <path id="echafaudage" class="zone" data-region-svg="echafaudage" fill-rule="evenodd" d="M80 354 L213 354 L219 474 L193 486 L116 479 L76 460 Z"/>
+    <path id="pot-de-couleur" class="zone" fill-rule="evenodd" d="M913.125,348.125 L923.75,338.125 L936.25,333.125 L950,331.875 L960,336.25 L960,418.75 L950.625,419.375 L948.125,414.375 L942.5,411.25 L931.875,418.125 L925.625,433.125 L916.875,430 L913.125,450 Z"/>
+    <path id="pot" class="zone" data-region-svg="pot" fill-rule="evenodd" d="M650 535 L693 528 L723 545 L718 592 L683 607 L648 587 Z"/>
+    <path id="pinceau" class="zone" data-region-svg="pinceau" fill-rule="evenodd" d="M804 566 L820 554 L846 613 L836 628 L821 616 Z"/>
+  </g>
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0" aria-hidden="true">
+    <path class="trait" d="M106 145 L854 145 L854 470 L106 470 Z"/>
+  </g>
+</svg>

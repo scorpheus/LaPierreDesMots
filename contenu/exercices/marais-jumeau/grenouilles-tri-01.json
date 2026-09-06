@@ -58,7 +58,7 @@
         },
         {
           "id": "c3",
-          "texte": "Range les mots où tu entends le son de gant.",
+          "texte": "Range les mots où tu entends le même son que dans « gant ».",
           "forme": "imperative",
           "audio": null,
           "aRanger": [
@@ -74,7 +74,7 @@
         },
         {
           "id": "c4",
-          "texte": "Range aussi les mots où tu entends le son de gant.",
+          "texte": "Range aussi les mots où tu entends le même son que dans « gant ».",
           "forme": "imperative",
           "audio": null,
           "aRanger": [
@@ -109,7 +109,7 @@
         {
           "id": "feuille-gauche",
           "libelle": "la feuille de gauche",
-          "critere": "le son de pont",
+          "critere": "le même son que dans « pont »",
           "zone": [
             [
               60,
@@ -132,7 +132,7 @@
         {
           "id": "feuille-droite",
           "libelle": "la feuille de droite",
-          "critere": "le son de gant",
+          "critere": "le même son que dans « gant »",
           "zone": [
             [
               540,

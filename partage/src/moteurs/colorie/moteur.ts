@@ -293,8 +293,8 @@ function reduire(
     }
 
     case 'demanderAide': {
-      // L'appel volontaire de Gobi produit EXACTEMENT le palier `indice`, et coûte la
-      // même chose qu'un palier automatique : ni plus, ni moins (contrat § 5.6).
+      // Seul cet appel volontaire est compté dans le résumé (retour parent R15).
+      // Un palier automatique propose de l'aide sans enregistrer une demande de l'enfant.
       const consigne = etat.consignes[etat.indexConsigne];
       if (consigne === undefined || etat.termineMs !== null) return etat;
       // R15 + R17 — LA DEMANDE EST ENREGISTRÉE MÊME SI LE PALIER NE BOUGE PAS.
@@ -353,7 +353,8 @@ function resume(etat: EtatColorie): ResumeTentative {
   const etapes: readonly ResumeEtape[] = etat.consignes.map((c): ResumeEtape => ({
     identifiant: c.id,
     nbErreurs: c.nbErreurs,
-    aideUtilisee: c.niveauAide,
+    // R15 : le temps de réflexion ne transforme pas une proposition en demande d'aide.
+    aideUtilisee: c.aideDemandee,
     nbEcoutes: c.nbEcoutes,
     dureeMs: Math.max(0, (c.finMs ?? c.derniereActionMs) - (c.debutMs || etat.demarreMs)),
     // ─────────────────────────────────────────────────────────────────────────────────────
@@ -391,7 +392,10 @@ function resume(etat: EtatColorie): ResumeTentative {
     // le seul endroit du dépôt d'où un écran d'échec pourrait naître.
     reussi: true,
     nbErreurs: etat.consignes.reduce((somme, c) => somme + c.nbErreurs, 0),
-    aideUtilisee: etat.niveauAide,
+    aideUtilisee: etat.consignes.reduce<NiveauAide>(
+      (aide, consigne) => aideLaPlusHaute(aide, consigne.aideDemandee),
+      'aucune',
+    ),
     dureeMs: Math.max(0, fin - etat.demarreMs),
     etapes
   };

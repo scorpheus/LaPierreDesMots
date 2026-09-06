@@ -10,6 +10,7 @@
  */
 import { mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { toucherForme } from './gestes-dom.js';
 import type { Page } from '@playwright/test';
 
 import { expect, test } from './invariants.js';
@@ -94,13 +95,12 @@ test.describe('régression Clairière — décor, cadrage et vrai geste de color
     const rouge = page.getByRole('button', { name: 'rouge' });
     await rouge.click({ timeout: 3_000 });
 
-    // Ce cercle transparent est la prise réellement destinée au doigt. Ne pas utiliser
-    // dispatchEvent : il contournerait précisément le hit-test qui a déjà laissé passer le
-    // défaut des paniers de tri.
+    // Le vrai contour reçoit le doigt ; le cercle voisin n'est qu'une commande clavier.
+    // Aucun événement synthétique : la couleur doit être posée au pixel touché.
     const toit = page.locator(
-      '[data-moteur="colorie"] [data-calque="prises"] [data-region-svg="toit-ecole"]',
+      '[data-moteur="colorie"] [data-region-source="toit-ecole"]',
     );
-    await toit.click({ timeout: 3_000 });
+    await toucherForme(toit);
     await expect(toit).toHaveAttribute('data-peinte', 'oui');
 
     const etat = await etatDuJeu(page);
@@ -123,7 +123,7 @@ test.describe('régression Clairière — décor, cadrage et vrai geste de color
     await expect(formePull).toHaveCSS('opacity', '0');
 
     await page.getByRole('button', { name: 'bleu' }).click();
-    await prisePull.click();
+    await toucherForme(formePull);
 
     await expect(prisePull).toHaveAttribute('data-peinte', 'oui');
     await expect(formePull).toHaveAttribute('fill', '#2FA8E0');

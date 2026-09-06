@@ -49,6 +49,9 @@ export const STATUTS = {
  * quel que soit l'ordre dans lequel les fichiers JSON ont été écrits.
  */
 export const ORDRE_ETAPES = [
+  ['qa:ancrages', 'Intégrité des recettes de mutation', 'QA'],
+  ['ressources:verifier', 'Présence des polices et des voix livrées', 'QA'],
+  ['qa:coherence', 'Cohérence des exercices publiés', 'T1'],
   ['lint', 'ESLint', '—'],
   ['typescript', 'TypeScript (`tsc -b`)', '—'],
   ['test', 'Unitaires, composants, API', 'T1 + T2'],

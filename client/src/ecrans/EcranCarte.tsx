@@ -28,7 +28,7 @@
 // Le contrat DOM ne bouge pas : `data-ecran`, `data-region`, `data-region-etat`, `data-depart`,
 // `data-vers`, les libellés accessibles et la garde « une prise n'existe que si elle répond »
 // sont repris à l'identique — ce sont les prises de six suites de tests.
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import type {
@@ -39,6 +39,7 @@ import type {
   EtatRegion,
   IdNoeud
 } from '@pierre/partage';
+import type { PlanSortie } from '@pierre/partage/pedagogie';
 import {
   conclusionCentraleAccessible,
   etatAfficheRegion,
@@ -51,7 +52,7 @@ import {
   lirePaquetNoeud,
   urlAsset
 } from '../api/client.js';
-import { useEtatJeu, useMagasin } from '../etat/services.js';
+import { useEtatJeu, useMagasin, useServices } from '../etat/services.js';
 import { CheminEncre } from '../monde/CheminEncre.js';
 import { CarteRasterProgression } from '../monde/CarteRasterProgression.js';
 import { Parchemin } from '../monde/Parchemin.js';
@@ -130,9 +131,7 @@ const ANCRES: readonly (readonly [CodeRegion, number, number, string])[] = [
   ['cite-des-histoires', 160, 395, 'La Cité des Histoires']
 ];
 
-/** Rayon de la prise tactile, en unités `viewBox`. 64 unités ≈ 64 px CSS à l'échelle de rendu. */
-/* 50 unités restent 65 px CSS quand la carte tient dans les 800 px de la tablette. À 46, la
-   même prise tombait à 60 px : visible et fonctionnelle, mais sous le minimum tactile R16. */
+/** Rayon minimal en unités du dessin ; le rayon rendu est également borné à 33 px CSS. */
 const RAYON_PRISE = 50;
 
 /** Rayon du sceau visible. Plus petit que la prise : le territoire se voit à travers. */
@@ -278,6 +277,7 @@ export function EcranCarte({
   surVoirOuverture
 }: ProprietesEcranCarte = {}): ReactElement {
   const magasin = useMagasin();
+  const services = useServices();
   const profil = useEtatJeu((etat) => etat.profil);
   const animationsDesactivees = useEtatJeu((etat) => etat.animationsDesactivees);
   const [rasterIndisponible, fixerRasterIndisponible] = useState(false);
@@ -288,6 +288,21 @@ export function EcranCarte({
   } | null>(null);
   const [compagnonChoisi, fixerCompagnonChoisi] = useState<CodeCompagnon | null>(null);
   const [conclusionOuverte, fixerConclusionOuverte] = useState(false);
+  const supportCarte = useRef<HTMLDivElement>(null);
+  const [rayonPrise, fixerRayonPrise] = useState(RAYON_PRISE);
+  useLayoutEffect(() => {
+    const svg = supportCarte.current?.querySelector('svg');
+    if (svg === undefined || svg === null) return undefined;
+    const mesurer = (): void => {
+      const matrice = svg.getScreenCTM();
+      const echelle = matrice === null ? 0 : Math.hypot(matrice.a, matrice.b);
+      if (echelle > 0) fixerRayonPrise(Math.max(RAYON_PRISE, 33 / echelle));
+    };
+    mesurer();
+    const observateur = new ResizeObserver(mesurer);
+    observateur.observe(svg);
+    return () => observateur.disconnect();
+  }, []);
 
   const requeteMonde = useQuery({
     queryKey: ['monde', profil === null ? null : String(profil.id)],
@@ -433,9 +448,27 @@ export function EcranCarte({
         })
         .catch(() => {
           // Repli R14 : si le composeur est momentanément indisponible, la prise continue de
-          // mener au nœud que la carte annonçait. Le trajet pédagogique reste le chemin nominal.
-          magasin.getState().cloreSortie();
+          // mener au nœud que la carte annonçait. Le trajet pédagogique reste le chemin nominal,
+          // donc ce plan n'est jamais archivé ni présenté comme composé : c'est seulement la
+          // session réellement jouée. Garder le compagnon ici évite que le repli le remplace
+          // silencieusement par Gobi dans EcranNoeud puis à la récompense.
           return lirePaquetNoeud(noeudDeRepli).then((paquet) => {
+            const planDeSession: PlanSortie = {
+              profil: profil.id,
+              region: codeRegion,
+              compagnon,
+              etapes: [{
+                rang: 1,
+                // Une session d'une étape se clôt ici ; ce rôle n'est pas lu dans le paquet.
+                role: 'synthese',
+                noeud: paquet.noeud.id,
+                habillage: paquet.habillage.id,
+                competences: paquet.exercice.competences,
+                revisions: []
+              }],
+              composeeLe: services.horloge.maintenant()
+            };
+            magasin.getState().demarrerSortie(planDeSession);
             magasin.getState().demarrerNoeud(paquet);
           });
         })
@@ -443,7 +476,7 @@ export function EcranCarte({
           fixerRegionEnChargement(null);
         });
     },
-    [magasin, profil, regionEnChargement]
+    [magasin, profil, regionEnChargement, services]
   );
 
   const proposerDepart = useCallback(
@@ -577,7 +610,7 @@ export function EcranCarte({
           règle partagée de `global.css` : `flex: 1`, `min-block-size: 0`, et un SVG borné en
           hauteur ET en largeur. Sans `min-block-size: 0`, un enfant flex refuse de descendre
           sous sa taille de contenu et toute la règle serait inerte. */}
-      <div data-scene-adaptative="carte">
+      <div ref={supportCarte} data-scene-adaptative="carte">
       <Parchemin>
         {/* Le PNG validé est le décor principal. Le SVG historique reste dans `<defs>` : ses
             six silhouettes servent encore de repli si l'image ne se charge pas, mais il ne peut
@@ -762,9 +795,9 @@ export function EcranCarte({
                 </g>
               )}
               <circle
-                cx={x}
-                cy={y}
-                r={RAYON_PRISE}
+                cx={Math.max(rayonPrise, Math.min(x, 1200 - rayonPrise))}
+                cy={Math.max(rayonPrise, Math.min(y, 800 - rayonPrise))}
+                r={rayonPrise}
                 // Une prise INVISIBLE et pourtant tapable : le sceau ci-dessus porte tout le
                 // dessin, celui-ci porte toute la surface. `pointerEvents: all` rend le tap
                 // indépendant du remplissage — sans quoi une opacité nulle coûterait la
@@ -868,7 +901,7 @@ export function EcranCarte({
               data-ancre-raster={`${String(ANCRE_CONCLUSION[0])},${String(ANCRE_CONCLUSION[1])}`}
               cx={ANCRE_CONCLUSION[0]}
               cy={ANCRE_CONCLUSION[1]}
-              r={RAYON_PRISE}
+              r={rayonPrise}
               fill="var(--parchemin)"
               fillOpacity={0}
               role="button"

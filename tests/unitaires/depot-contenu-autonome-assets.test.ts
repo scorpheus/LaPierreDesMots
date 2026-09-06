@@ -102,6 +102,21 @@ function decoderPngRgb(octets: Buffer): {
 }
 
 describe('assets raster du mode autonome', () => {
+  it('embarque aussi les JSON du monde et des référentiels lus par URL après un exercice', () => {
+    const attendus = ['monde', 'referentiel'].flatMap((dossier) =>
+      readdirSync(join(process.cwd(), 'contenu', dossier))
+        .filter((fichier) => fichier.endsWith('.json'))
+        .map((fichier) => `${dossier}/${fichier}`)
+    );
+    expect(attendus).toEqual(expect.arrayContaining([
+      'monde/regions.json', 'monde/gobi-stades.json', 'referentiel/competences.json'
+    ]));
+    expect(
+      attendus.filter((chemin) => urlAssetAutonome(chemin) === null),
+      'une importation JSON comme objet ne fournit pas son URL aux récompenses et au coffre',
+    ).toEqual([]);
+  });
+
   it('embarque les PNG de production, comme ceux des tableaux d’ouverture', () => {
     // Asset réel et déjà validé : il prouve le glob PNG sans introduire de faux tableau
     // d'ouverture dans la production avant la validation parentale.

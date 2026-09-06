@@ -59,6 +59,7 @@ interface EtatColorieLu {
   readonly consignes: ReadonlyArray<{
     readonly ciblesRestantes: ReadonlyArray<{ readonly region: string; readonly couleur: string }>;
     readonly nbErreurs: number;
+    readonly aideDemandee: string;
   }>;
   readonly niveauAide: string;
   readonly remplissages: Readonly<Record<string, string>>;
@@ -90,7 +91,11 @@ async function verifierNonEchec(page: Page): Promise<void> {
 test.describe('casse-cou — le bot qui répond toujours faux', () => {
   test.slow();
 
-  test(`${REPONSES_FAUSSES} réponses fausses ne produisent aucun échec, et la sortie se termine sur une réussite`, async ({
+  // Retour parent R15 (retours-de-jeu.md) : proposée automatiquement ≠ demandée.
+  // Les deux scénarios gardent les 40 erreurs et tous les invariants R14 ; celui avec
+  // demande explicite conserve la preuve d'une seule étoile pour cette tentative.
+  for (const demanderAide of [false, true]) {
+  test(`${REPONSES_FAUSSES} réponses fausses sans échec — aide ${demanderAide ? 'demandée' : 'automatique seulement'}`, async ({
     page
   }) => {
     const erreursConsole: string[] = [];
@@ -168,6 +173,34 @@ test.describe('casse-cou — le bot qui répond toujours faux', () => {
     expect(aideVueApres2eEssai, 'l’aide doit être proposée dès le 2ᵉ essai raté').toBe('indice');
     await expect(racineNoeud).toHaveAttribute('data-aide', 'demonstration');
 
+    const avantDemande = await etatMoteur(page);
+    expect(avantDemande.consignes[avantDemande.indexConsigne]!.aideDemandee).toBe('aucune');
+    if (demanderAide) {
+      // Tenir l'appui révèle le rétrécissement invisible dans une capture au repos.
+      const boutonAide = page.locator('[data-action="aide"]');
+      const cadre = await boutonAide.boundingBox();
+      expect(cadre).not.toBeNull();
+      await page.mouse.move(cadre!.x + cadre!.width / 2, cadre!.y + cadre!.height / 2);
+      await page.mouse.down();
+      try {
+        await expect(boutonAide).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 0, 3)');
+        const cadreAppuye = await boutonAide.boundingBox();
+        expect(cadreAppuye!.width).toBeGreaterThanOrEqual(64);
+        expect(cadreAppuye!.height).toBeGreaterThanOrEqual(64);
+        // Sortir avant de relâcher : seule la demande tactile ci-dessous doit compter.
+        await page.mouse.move(0, 0);
+      } finally {
+        await page.mouse.up();
+      }
+      await page.locator('[data-action="aide"]').tap();
+      await expect.poll(async () => {
+        const etat = await etatMoteur(page);
+        return etat.consignes[etat.indexConsigne]!.aideDemandee;
+      }).toBe('indice');
+      // Demander après le palier automatique ne doit pas faire régresser l'aide affichée.
+      await expect(racineNoeud).toHaveAttribute('data-aide', 'demonstration');
+    }
+
     // Aucune étoile n'a été retirée pendant la débâcle.
     const progressionPendant = (await (
       await page.request.get(`/api/profils/${profil!.id}/progression`)
@@ -193,8 +226,8 @@ test.describe('casse-cou — le bot qui répond toujours faux', () => {
 
     // La première étoile est acquise malgré 40 erreurs — c'est R14, littéralement.
     await expect(page.locator('[data-etoile="1"]')).toHaveAttribute('data-acquise', 'oui');
-    // Et les deux autres ne sont pas acquises : le barème reste honnête (contrat § 5.7).
-    await expect(page.locator('[data-etoile="2"]')).toHaveAttribute('data-acquise', 'non');
+    // R15 du suivi parent : seule l'aide volontaire compte pour la deuxième étoile.
+    await expect(page.locator('[data-etoile="2"]')).toHaveAttribute('data-acquise', demanderAide ? 'non' : 'oui');
     await expect(page.locator('[data-etoile="3"]')).toHaveAttribute('data-acquise', 'non');
 
     // Et le score déjà acquis n'a toujours pas bougé.
@@ -207,6 +240,7 @@ test.describe('casse-cou — le bot qui répond toujours faux', () => {
 
     expect(erreursConsole, 'aucune exception non capturée pendant la débâcle').toEqual([]);
   });
+  }
 
   test('aucune couleur rouge et aucune secousse ne signalent le refus — v2 § 8', async ({
     page

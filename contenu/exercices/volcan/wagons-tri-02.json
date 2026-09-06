@@ -141,7 +141,7 @@
         {
           "id": "wagon-gauche",
           "libelle": "le premier wagon",
-          "critere": "le son de fille",
+          "critere": "le même son que dans « fille »",
           "zone": [
             [
               40,
@@ -164,7 +164,7 @@
         {
           "id": "wagon-milieu",
           "libelle": "le deuxième wagon",
-          "critere": "le son de montagne",
+          "critere": "le même son que dans « montagne »",
           "zone": [
             [
               350,
@@ -187,7 +187,7 @@
         {
           "id": "wagon-droite",
           "libelle": "le troisième wagon",
-          "critere": "pas le son de fille",
+          "critere": "pas le même son que dans « fille »",
           "zone": [
             [
               660,

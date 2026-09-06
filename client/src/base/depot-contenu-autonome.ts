@@ -80,6 +80,13 @@ const ASSETS_URL = {
     import: 'default',
     eager: true
   }) as Record<string, string>),
+  // Les récompenses, le coffre et le campement lisent aussi ces référentiels par URL.
+  // Les imports objets de `referentiels-autonome.ts` ne créent pas ces URL dans le port.
+  ...(import.meta.glob('../../../contenu/monde/*.json', {
+    query: '?url',
+    import: 'default',
+    eager: true
+  }) as Record<string, string>),
   // `referentiel/*.json` : lu comme OBJET par `referentiels-autonome.ts` (imports directs, pour
   // `port-local.ts`), et comme URL ICI — `client/src/etat/services.ts` fetch ce même fichier via
   // `urlAsset()` (contrat de port, § 5) pour les jauges de cascade. Mesuré sur émulateur (Lot 5,

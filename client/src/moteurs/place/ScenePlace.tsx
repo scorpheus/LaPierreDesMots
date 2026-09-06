@@ -18,7 +18,7 @@
  * doigt pendant deux secondes ne doit pas être empêché de jouer.
  */
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { KeyboardEvent as KeyboardEventReact, ReactElement } from 'react';
 import { useDroppable } from '@dnd-kit/core';
 // Le client n'emprunte JAMAIS l'alias `@partage` (réservé aux tests, contrat v1 § 11.3) :
@@ -44,7 +44,7 @@ const ZONE_VISEE = 'var(--zone-visee, rgba(27, 36, 64, 0.16))';
 /** Repli si l'habillage ne déclare aucun `viewBox` — neutre, jamais emprunté à un décor. */
 export const VIEWBOX_PAR_DEFAUT = '0 0 100 100';
 
-/** Marge de frappe R16 : 80 unités restent ≥ 64 px sur la largeur utile de la tablette. */
+/** Taille de repli avant mesure ; les unités SVG ne sont pas des pixels CSS. */
 const COTE_PRISE_MINIMAL = 80;
 
 export interface ProprietesScenePlace {
@@ -78,11 +78,20 @@ function Zone(proprietes: {
   readonly enRefus: boolean;
   readonly marqueRefus: number;
   readonly animationsDesactivees: boolean;
+  readonly cotePrise: number;
+  readonly viewBox: string;
   onTaper(point: Point): void;
 }): ReactElement {
   const { zone, occupee, enDemonstration, enRefus, marqueRefus, animationsDesactivees, onTaper } =
     proprietes;
   const { setNodeRef, isOver } = useDroppable({ id: zone.id });
+  const [minX = 0, minY = 0, largeurVue = 100, hauteurVue = 100] = proprietes.viewBox.split(/[\s,]+/u).map(Number);
+  const largeurPrise = Math.min(proprietes.cotePrise, largeurVue);
+  const hauteurPrise = Math.min(proprietes.cotePrise, hauteurVue);
+  // Le ciel est proche du bord supérieur : grandir autour du seul centroïde peut encore
+  // rogner la moitié de la prise. Garder toute sa surface à l'intérieur du dessin.
+  const xPrise = Math.max(minX, Math.min(zone.centroide[0] - largeurPrise / 2, minX + largeurVue - largeurPrise));
+  const yPrise = Math.max(minY, Math.min(zone.centroide[1] - hauteurPrise / 2, minY + hauteurVue - hauteurPrise));
 
   /**
    * dnd-kit type sa `ref` sur `HTMLElement` ; une zone cible est un groupe SVG, donc un
@@ -129,10 +138,10 @@ function Zone(proprietes: {
           Le toit de l'école mesurait 60 px de haut dans le navigateur, malgré un polygone
           parfaitement visible. */}
       <rect
-        x={zone.centroide[0] - COTE_PRISE_MINIMAL / 2}
-        y={zone.centroide[1] - COTE_PRISE_MINIMAL / 2}
-        width={COTE_PRISE_MINIMAL}
-        height={COTE_PRISE_MINIMAL}
+        x={xPrise}
+        y={yPrise}
+        width={largeurPrise}
+        height={hauteurPrise}
         fill="transparent"
         stroke="none"
         pointerEvents="all"
@@ -165,6 +174,23 @@ export function ScenePlace(proprietes: ProprietesScenePlace): ReactElement {
   } = proprietes;
 
   const viewBox = habillage.scene.viewBox || VIEWBOX_PAR_DEFAUT;
+  const scene = useRef<SVGSVGElement | null>(null);
+  const [cotePrise, fixerCotePrise] = useState(COTE_PRISE_MINIMAL);
+  useLayoutEffect(() => {
+    const svg = scene.current;
+    if (svg === null) return undefined;
+    const [, , largeur = 100, hauteur = 100] = viewBox.split(/[\s,]+/u).map(Number);
+    const mesurer = (): void => {
+      const cadre = svg.getBoundingClientRect();
+      const echelle = Math.min(cadre.width / largeur, cadre.height / hauteur);
+      if (Number.isFinite(echelle) && echelle > 0) fixerCotePrise(Math.max(COTE_PRISE_MINIMAL, 66 / echelle));
+    };
+    mesurer();
+    if (typeof ResizeObserver !== 'function') return undefined;
+    const observateur = new ResizeObserver(mesurer);
+    observateur.observe(svg);
+    return () => observateur.disconnect();
+  }, [viewBox]);
 
   const occupees = useMemo(() => new Set(Object.values(places)), [places]);
   const parZone = useMemo(() => {
@@ -179,6 +205,7 @@ export function ScenePlace(proprietes: ProprietesScenePlace): ReactElement {
 
   return (
     <svg
+      ref={scene}
       data-scene="place"
       viewBox={viewBox}
       // ── `group`, ET NON `img` ────────────────────────────────────────────────────────
@@ -211,6 +238,8 @@ export function ScenePlace(proprietes: ProprietesScenePlace): ReactElement {
             enRefus={zoneEnRefus === zone.id}
             marqueRefus={marqueRefus}
             animationsDesactivees={animationsDesactivees}
+            cotePrise={cotePrise}
+            viewBox={viewBox}
             onTaper={onDeposer}
           />
         ))}

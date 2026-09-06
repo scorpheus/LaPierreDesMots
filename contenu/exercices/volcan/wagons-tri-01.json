@@ -141,7 +141,7 @@
         {
           "id": "wagon-gauche",
           "libelle": "le premier wagon",
-          "critere": "le son de chat",
+          "critere": "le même son que dans « chat »",
           "zone": [
             [
               40,
@@ -164,7 +164,7 @@
         {
           "id": "wagon-milieu",
           "libelle": "le deuxième wagon",
-          "critere": "le son de photo",
+          "critere": "le même son que dans « photo »",
           "zone": [
             [
               350,
@@ -187,7 +187,7 @@
         {
           "id": "wagon-droite",
           "libelle": "le troisième wagon",
-          "critere": "le son de coq",
+          "critere": "le même son que dans « coq »",
           "zone": [
             [
               660,

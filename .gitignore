@@ -43,6 +43,9 @@ contenu/audio/
 .env
 .env.local
 
+# Photos et pièces jointes privées des retours parent : conservées localement.
+.codex-remote-attachments/
+
 # --- système et éditeurs
 Thumbs.db
 desktop.ini
