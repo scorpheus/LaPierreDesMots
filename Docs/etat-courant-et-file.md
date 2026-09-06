@@ -1,12 +1,287 @@
 # État courant et file de travail
 
-Dernière mise à jour : 5 septembre 2026.
+Dernière mise à jour : 6 septembre 2026.
 
 Ce document est la mémoire de passage du projet. La conversation principale reste le poste de
 pilotage : tout nouveau retour du parent s'ajoute à cette file tant qu'il n'est pas explicitement
 annulé, remplacé ou reporté.
 
-## Point de reprise
+## Corrections sauvegardées — bilan du 6 septembre
+
+**Commit d'intégration : `2970567` — `Jeu: finaliser les corrections tablette et renforcer la QA`.**
+180 fichiers, avec les sources des archives et les documents des lots. Crochet Git normal
+réussi : lint, 2675 T1/T2 et détecteur QA ; aucun contournement. Les deux documents de suivi
+sont finalisés dans le commit de documentation suivant. Aucune publication GitHub ni APK.
+
+La campagne complète a été exécutée en **823,5 s** : **2675/2675 T1/T2, 869/869 parcours,
+320/320 qualité/responsive, 655/655 contrôles de contenu**. Aucun cas sauté ou instable dans
+les rapports Playwright. Types, lint, builds, ressources, budget et rejeu verts ; cinq seuils
+de couverture atteints. La commande globale reste **rouge sur le seul étage visuel** : trois
+différences Colorie sur treize comparaisons. Les captures ne sont pas approuvées par ce bilan.
+Planche locale : `bac-a-sable/cloture-git-2026-09-06/comparaison-visuelle.html` ; rapport complet
+conservé dans `bac-a-sable/cloture-git-2026-09-06/RAPPORT-apres-corrections.md`.
+
+Serveur relancé et vérifié : **http://192.168.1.19:8080/**, profils conservés. Huit fiches corrigées
+comparées intégralement entre HTTP et disque, HTML/JS/CSS et portraits comparés par SHA-256.
+Le JavaScript reste `index-Cbbgf2Fy.js` (changement de données/CSS), le nouveau style est
+`style-D8Xe68Pb.css`, SHA-256 `d2e8892a1ff8041f1cb2cc4ebc9e697064b95f679aa7458650e563bcb4deccfd`.
+Relancer l'onglet de la tablette pour sortir d'un exercice déjà chargé.
+
+Demande parent : documenter et commiter les lots accumulés. Inventaire trié en coloriages,
+infrastructure/QA, jeu et suivi ; détails : `cloture-git-2026-09-06.md`. Les photos privées sont
+désormais ignorées. Quatre anciens décors archivés à l'identique, cinq SVG sources et leurs
+trois PNG relatifs inclus explicitement dans la préparation, aucun atlas non approuvé promu.
+
+Après le refus du premier commit, le parent a explicitement demandé de **corriger puis commiter**.
+La demande de dérogation est abandonnée : les crochets restent actifs. L'abeille du Volcan est
+remise en accord avec le récit et son image ; les consignes des Lucioles et des Marais ainsi
+que les intitulés des Ponts sont corrigés. La revue a aussi retrouvé dix critères de paniers
+oubliés du contrôle : garde élargi, témoins rouges puis verts, **76 fiches sans incohérence
+mécanique signalée**. 24 écarts corrigés, 27 chaînes avec les mots-clés, réponses inchangées.
+
+Le faux positif du détecteur (`cible` dans une chaîne d'attribut) est corrigé avec témoins ;
+aucun plafond relevé. Cassecou vérifie les deux cas d'aide : automatique seule/deux étoiles,
+volontaire/une étoile. Les 40 erreurs et les acquis préexistants restent contrôlés dans chacun.
+Le bouton d'aide rétrécissait réellement à 61 px pendant l'appui : le relief reste, la réduction
+commune est supprimée, 3/3 scénarios Cassecou verts. Détail : `lot-corrections-cloture-2026-09-06.md`.
+
+25 clips régénérés et contrôlés, aucun refus ; 673 clips/368 consignes couvertes. Les 23 anciens
+clips remplacés sont archivés avec manifeste récupérable, pas détruits. La nouvelle option
+`--lot-archive` permet une seconde archive sans écraser la première ; 11/11 tests du prévol.
+
+**Campagne précédente**, avant ces corrections, exécutée en 867,2 s : 2660/2661 unitaires, 853 E2E passés / un rouge
+Cassecou / 14 bilans non exécutés, **320/320 qualité/responsive**, 655 contrôles structurels,
+bundle et rejeu verts. Les 14 incohérences de ce passage sont corrigées ci-dessus ; trois
+références visuelles restent gelées. La nouvelle campagne ci-dessus remplace ce verdict
+historique pour l'état courant.
+La réussite responsive de ce passage n'efface pas les incidents intermittents antérieurs.
+Les preuves historiques ne sont pas remplacées par les contrôles ciblés.
+
+Ajout à la file de prochaine livraison autonome : exclure des paquets les quatre anciens PNG
+archivés sous `contenu/assets/` (11 718 757 octets), en conservant leur provenance dans Git.
+Toutes les autres dettes et validations en attente ci-dessous sont maintenues.
+
+## Correctif local — toutes les paires dans la page tablette (6 septembre)
+
+Le dernier retour précise que le défilement ne suffit pas : les cartes étaient trop grandes.
+La composition Paires est refaite pour les huit fiches, avec colonnes larges pour les textes,
+étroites pour les images, cadre compact et une seule consigne. Aucune carte retirée ; réglages
+de lecture du profil conservés (27 px/interligne 2 dans la recette), cibles >= 64 px.
+**78/78 contrôles ciblés en 34,8 s**, dont 32 de cadrage complet sans scroll sur quatre formats
+tablette, rotation, stabilité lors des sélections et appariements. Les balayages sur téléphone
+et les glissers souris/tactiles restent testés. Contrat et preuves :
+`lot-paires-plein-ecran-2026-09-06.md`. Commande courte : `npm run test:paires`.
+Le glisser ne dilate plus la page à l'horizontale ; les cartes acquises ne sont plus des cibles
+de dépôt. Deux rouges reproduits, puis 20/20 cas répétés et les 78 contrôles de famille verts.
+
+Serveur reconstruit et relancé le 6 septembre : **http://192.168.1.19:8080/**.
+Build final `index-Cbbgf2Fy.js`, SHA-256
+`b77425c3ff00da9040629a26085479cb8723051cdaf65da2391a4481a3f717bd`.
+HTML/JS/CSS servis comparés au build, profils conservés. Recharger l'onglet de la tablette.
+Aucune publication GitHub ni APK. Vérification générale exécutée en 717,3 s, non entièrement
+verte : 14 incohérences textuelles, une vignette Volcan non approuvée, trois références visuelles,
+un scénario Cassecou qui attend une seule étoile après aide automatique (deux reçues sans
+demande explicite) et un démarrage de navigateur intermittent. Ce dernier passe 3/3 isolément,
+sans être déclaré résolu. Le glisser tactile rouge de cette campagne est suivi des correctifs
+et répétitions décrits ci-dessus. Les 73 tests responsive/latence bloqués par dépendance sont
+ensuite exécutés **73/73 verts** ; 17/17 unitaires ciblés, types/lint et budget 239,7 Ko verts.
+Rapport historique et contre-vérifications restent distincts, aucun test ni seuil affaibli.
+Les autres dettes ci-dessous ne sont ni effacées ni annoncées résolues.
+
+## Correctif précédent — Paires défilables au doigt (5 septembre)
+
+Photo parent `cite-des-histoires-02` : huit paires, grandes phrases, dernières cartes hors
+écran. Rouge reproduit par de vrais balayages : les cartes empêchaient le pan vertical
+(`touch-action:none`/PointerSensor), et le parent n'adoptait pas la hauteur de la grille.
+Correction sur le moteur commun aux **huit fiches Paires**, sans changement de contenu :
+document défilant, capteurs souris/tactile distincts, balayage immédiat pour défiler et
+maintien de 250 ms pour glisser intentionnellement. Deux taps toujours disponibles.
+
+**43/43 tests ciblés en 45 s** : huit fiches × cinq formats, témoin qui prouve le blocage
+du pilote, glisser souris et tactile. Dernière carte et bouton d'aide réellement atteints,
+pas de `scrollIntoView` ni d'injection de scroll pour contourner le défaut. Aucun choix ou
+refus parasite après un balayage. Recette réutilisable ajoutée au skill QA et validée.
+Contre-vérification finale : **43/43 en 44,3 s**. Le `verifier` complet (980 s) a passé
+les **320 contrôles responsive**, build/budget et rejeu. Il conserve les 14 incohérences
+textuelles, trois différences de référence, un échec de chargement et un faux rouge
+syntaxique R17. Ses 14 bilans E2E dépendants n'ont pas été exécutés, pas comptés verts.
+Détail et preuves historiques : `lot-paires-defilement-2026-09-05.md`.
+
+Après clôture, R17 remplacé par de vrais scénarios sur les treize moteurs avec aide et
+témoins négatifs. Ils ont trouvé et fait corriger le résumé Colorie qui comptait la lenteur
+comme une aide demandée : **57/57** contrôles ciblés, rejeu inchangé. Suite complète relancée :
+**2660/2661**, seul rouge mouche/abeille conservé. Vitest produit désormais sa couverture
+même lorsqu'un test échoue ; cinq zones mesurées, tous leurs seuils atteints. Le chargement
+de `galeries-13` passe 3/3 isolément ; l'instabilité en campagne reste signalée, pas effacée.
+
+Serveur local reconstruit et relancé : **http://192.168.1.19:8080/** ; recharger la tablette.
+JS `index-DRWzcVGh.js`, SHA-256
+`327f6a1af1860bdd80297f38bec8e5296486fed64ef80671752a2aeff17e01c6`.
+HTML/JS/CSS et portraits servis vérifiés ; profils conservés, aucune publication GitHub/APK.
+
+Suite de l'audit, pas effacée : reproduire ce conflit de gestes sur les grands plateaux Tri
+(`volcan-02`/`volcan-10`) ; Place seulement si la réserve déborde. Risques de code relevés
+en lecture seule, pas encore bugs reproduits. Les petites vignettes dans les grands cartons
+Paires restent une finition de composition distincte du blocage tactile corrigé.
+Les validations textuelles, animations,
+références visuelles et voix des sections suivantes restent en attente.
+
+## Livraison précédente — mélange Attrape et refonte commune des chemins (5 septembre)
+
+Deux nouveaux retours ajoutés : réponses dans l'ordre dans Attrape ; règles changeantes
+peu visibles et réponses incohérentes dans Chemin, notamment `volcan-05`.
+Contrat : `lot-attrape-chemins-2026-09-05.md`. Les sept Attrape sont mélangés, stables pendant
+la lecture ; le plafond des rasters, les ailes qui interceptaient le doigt et le sous-scroll
+sont corrigés. Les six chemins lettres/sons (20 étapes) ont un oracle lexical indépendant,
+un plateau par étape, des coches locales, une règle courte avec repère souligné, une annonce
+« Nouveau chemin » et une aide redemandable après chaque pas.
+
+Le septième Chemin (Cité) est contrôlé au doigt et géométriquement, **pas certifié pour son
+contenu**. Proposition des douze phrases dans `proposition-chemin-cite-2026-09-05.md`, en
+attente du parent. On ne remplace pas silencieusement un contenu publié.
+
+Mesures : campagne générale E2E 756/756 (avant la dernière finition de défilement), puis
+88/88 parcours ciblés après ces derniers correctifs. Ces 88 incluent les sept Attrape dans
+cinq formats, tous les chemins, les mots incomplets, Roc et l'audit des 75 nœuds pédagogiques.
+Le dernier `verifier` complet reste rouge sur les contenus et trois références visuelles ;
+son résultat historique et les contre-vérifications sont conservés dans
+`recette-attrape-chemins-2026-09-05.md`.
+
+Dernière finition après ces mesures : **71/71 contrôles responsive en 2,2 min**, **31/31
+parcours natifs Chemin/Attrape en 31,3 s**, **43/43 tests ciblés de logique et de composant**.
+Le nouveau test étroit a d'abord reproduit une alternance grille/plateau à 360×640 :
+`innerHeight` variait avec le débordement mobile, réinitialisant le repli. `clientHeight`
+stabilise le viewport de mise en page ; rotation et retour au petit écran sont contrôlés.
+La sonde stricte conserve ses témoins négatifs (image cassée, cible masquée, cadre instable).
+TypeScript et lint verts, 18 avertissements anciens ; aucune référence visuelle remplacée.
+
+Serveur reconstruit/redémarré : **http://192.168.1.19:8080/**. Recharger la page. HTML/JS/CSS,
+quatre portraits et six coloriages servis vérifiés par empreintes, profils conservés.
+JS servi `index-CGVxgXVk.js`. Budget contrôlé : 239,5 Ko gzip / 250, aucun crochet de test livré.
+Le raccord raster des grottes est également corrigé : la version du SVG ne versionne pas le PNG.
+
+Reste à arbitrer/intégrer : 14 écarts de contenu (11 antérieurs + trois consignes Cité),
+trois références visuelles, quatre atlas d'animation non approuvés, référentiel lexical CE1
+incomplet. Les clips des fiches Grave gardent leur ancienne consigne de tracé : leur
+alignement audio reste à faire lors de la reprise des textes. Pas de publication GitHub/APK,
+pas de commit contournant les crochets rouges. Guide QA enrichi et skill validé.
+
+## Livré en local — compagnon au résultat et mots incomplets (5 septembre)
+
+Retours parent ajoutés : compagnon absent sur `/recompense` ; « bateau » en `bat_au` avec
+choix `eau` et fausse consigne de tracé. Correction commune des cinq fiches `grave` (29 mots),
+clavier centré, portrait du compagnon choisi au résultat. Le parcours réel a aussi détecté
+un repli 409 qui perdait ce choix ; une session locale d'une étape le conserve désormais.
+21 parcours natifs verts dans la dernière recette, dont le choix de Roc jusqu'au résultat.
+Reconstruction et contrôle réseau terminés. Détail : `recette-compagnon-mots-incomplets-2026-09-05.md`.
+
+## État précédent — coloriages intégrés pour essai local
+
+Mandat parent du 5 septembre : finaliser les reprises pour tester **en local**, le reste plus tard.
+Les six coloriages (43 cibles) sont intégrés : tapis v2 à vrais objets, école conservée avec
+porte/ardoise/banc corrigés, Marais et forge réillustrés, fresque couleur réemployée et retracée.
+Phrases, masques et voix sont raccordés. Loupe volontaire sans indice automatique et vrai noir.
+
+Preuves : 50 tests de repères indépendants, 10 tests de composants, 26 parcours ciblés verts
+dans quatre formats ; prévol vert avec 6 polices / 671 clips ; 25 clips rendus dans ce lot.
+Dernière suite unitaire : 2540/2541, seul rouge « mouche/abeille » déjà soumis au parent.
+La campagne qualité a passé 318/318 ; les **704 parcours repassent en 7,3 minutes**, sans cas
+non exécuté, après raccord du test qui exigeait les anciens ornements du tapis. Le premier `verifier` complet
+(830,5 s) est conservé avec ses rouges initiaux, pas maquillé en réussite.
+
+Serveur de production reconstruit et redémarré : **http://192.168.1.19:8080/**.
+Les six SVG/PNG servis ont les empreintes attendues, HTML identique au build ; profils conservés.
+Recharger la page tablette. Recette détaillée :
+[recette-coloriages-locaux-2026-09-05.md](recette-coloriages-locaux-2026-09-05.md).
+
+Toujours à valider séparément : 11 reformulations dans quatre autres fiches, trois différences
+de captures, quatre atlas animés des compagnons, référentiel lexical incomplet. Aucun de ces
+points n'est effacé par ce lot. Pas de publication GitHub/APK, pas de contournement du crochet
+git encore rouge. Les anciens décors et voix sont archivés avec preuves, non supprimés.
+
+Dernière revue : le masque de porte peignait encore le visage et celui du banc manquait l'assise.
+Trois nouvelles régressions rouges ont précédé leur reprise ; 82 contrôles ciblés puis les
+26 parcours des coloriages repassent en 12,5 s. La capture partiellement coloriée a été relue.
+Ce dernier changement porte seulement sur deux contours, après les campagnes globales ci-dessus.
+
+## Historique — état avant intégration des coloriages (dépassé par la section ci-dessus)
+
+**Nouveau retour parent, ajouté sans remplacer les lots en cours :** le coloriage
+`foret-muette-08` / `tapis-colorie-01` reste incompréhensible malgré sa réussite tactile.
+Les six « feuilles » sont de petits ornements floraux du tapis, difficiles à reconnaître même
+pour un adulte ; les repères haut/gauche/milieu sont ambigus. Sa validation pédagogique est
+**rouverte**. Préparer une seule scène de remplacement avec de grands objets distincts, en
+brouillon pour validation ; refaire ensuite les consignes, masques exacts, voix et recette sans
+halo d'aide initial. Ne pas confondre la réussite des 152 parcours avec cette reconnaissance.
+La v1 est **refusée pour son style 3D/catalogue**. La v2 repart des décors approuvés, sans
+réemployer la v1 : `contenu/brouillons/coloriage-tapis-2026-09-05/tapis-objets-v2.png`, comparée
+en couleur et en gris dans `bac-a-sable/coloriage-tapis-2026-09-05/comparaison-gris-v2.png`.
+Tapis, chat, bol, sac, pot, ballon et banc ; sept phrases au lexique local, aucun contenu publié
+remplacé. Image à valider, puis masques et voix à fabriquer. Détails :
+`Docs/refonte-coloriage-tapis-2026-09-05.md`.
+
+**Contrôle étendu demandé par le parent : six coloriages, 43 cibles, cinq décors inspectés.**
+Quatre exercices demandent une reprise du raccord image/consigne/masque : tapis, brume des
+Marais (objets absents), forge (outils hors masques), fresque de la Cité (mots sans objets).
+Les deux exercices de l'école ont leurs objets reconnaissables, mais de petites régions à
+améliorer. Ces défauts sont visibles sur les images réellement servies, empreintes vérifiées.
+La réussite des parcours ne prouve pas la reconnaissance de leurs cibles. Rapport exact :
+`Docs/audit-visuel-coloriages-2026-09-05.md`. Nouvelle commande `npm run qa:coloriages` : planches
+et mesures, pas visa automatique. Aucun de ces quatre exercices n'est déclaré corrigé.
+
+Cette section remplace les anciens bilans ci-dessous pour la reprise. **La finition n'est pas
+déclarée terminée** : les nouvelles entrées tactiles ont trouvé des défauts que les anciennes
+campagnes d'injection logique ne pouvaient pas révéler. Base réelle : `1d5a637`.
+
+- Nouvelle campagne : les 76 nœuds sont joués au doigt natif, sur téléphone et tablette, avec
+  rotation pendant chaque exercice, profil de lecture réellement agrandi et contrôle de la
+  progression persistée. Les réponses ne sont jamais injectées au réducteur.
+- Correctifs intégrés : grilles `tri`, `paires`, `chemin`, `attrape` ; composition `histoire`,
+  `phrase`, `grave` ; prises de placement dimensionnées en pixels CSS ; coloriage sur les vrais
+  pixels SVG/Canvas ; protection contre le dernier tap qui activait le nouvel écran de récompense.
+- La sonde de composition attend images décodées, polices et trois cadres stables. Elle possède
+  des contrôles négatifs (image cassée, bouton couvert, rognage, géométrie instable) et positifs
+  (défilement normal, texte réservé aux lecteurs d'écran, vrais chemins SVG).
+- Le contrôle des ressources vérifie 6 polices et 673 clips manifestés. 216 anciens clips non
+  référencés ont été **archivés, pas supprimés**, dans `bac-a-sable/archives-audio-2026-09-05/`.
+- Les portraits canoniques sont publiés ; les **quatre nouveaux atlas animés sont des brouillons
+  non approuvés et non intégrés**. Plume présente notamment un écart de contour des yeux à arbitrer.
+- L'audit des 76 fiches identifie 11 corrections textuelles dans quatre fichiers, regroupées en
+  trois propositions soumises au parent : ne plus révéler le mot éclair, clarifier « même son que
+  dans gant », rétablir « abeille » dans une carte. Le contenu publié n'a pas été modifié.
+  `qa:coherence` et le test de chronologies doivent rester rouges tant que cet écart subsiste.
+- La campagne E2E complète repasse **679/679 en 7,6 minutes** : les 76 exercices sont terminés
+  sur tablette et téléphone, avec rotation. Le dernier contrôle de composition/matrice parcourt
+  aussi les 89 recettes dans quatre formats et les 14 familles de moteurs.
+- Dernière suite unitaires/composants/API : **2475/2476**. Le seul rouge porte sur la carte
+  « mouche » au lieu d'« abeille », en attente de validation. `qa:coherence` reste rouge sur les
+  onze textes proposés. Les 645 contrôles de contenu ne constituent **pas** un visa lexical CE1 :
+  ce volet historique n'a pas de seuil arbitré (198 occurrences hors de la liste locale incomplète).
+- `npm run verifier` a été exécuté et lu dans ce lot : son dernier rapport complet, de 898 s,
+  conserve les anciens rouges de contenu et d'import du harnais. L'import est corrigé et la
+  campagne E2E distincte ci-dessus est verte. Ne pas présenter ce rapport historique comme vert.
+- Le serveur local est reconstruit et actif sur `http://192.168.1.19:8080/` ; profils inchangés.
+  La PWA locale `98306bf5aa6d0400` est reconstruite : exercice joué et rejoué hors ligne, audio,
+  persistance, mise à jour, export/import, second onglet et route profonde vérifiés. Cinq anciennes
+  tentatives conservées lors du dernier remplacement de build ; zéro `/api/` et erreur de page.
+- L'APK debug est reconstruite et installée **seulement dans un émulateur isolé en lecture seule**.
+  Placement puis tri joués avec Wi-Fi et données coupés, deux tentatives conservées après arrêt
+  et relance. Deux défauts natifs trouvés et corrigés : images internes des SVG non réécrites,
+  et registre de connexions SQLite oublié lors du rechargement JavaScript.
+- Les commandes `qa:pwa` et `qa:apk` conservent ces recettes. Le contrôle de persistance attend
+  une lecture par le port sérialisé : une lecture SQL brute pendant la transaction ne prouve pas
+  encore un commit. La résistance à un arrêt forcé **avant** ce commit reste un volet distinct.
+- **Clôture encore suspendue** : validation des trois familles de reformulations, des quatre
+  atlas animés et arbitrage du référentiel lexical. Les corrections sont locales, non commitées :
+  le crochet impose la suite unitaire complète, encore rouge sur le contenu. Aucun contournement
+  du crochet, aucune publication GitHub. Après validation : intégrer les textes et atlas acceptés,
+  actualiser les voix concernées, repasser les portes finales, commiter puis demander l'accord
+  distinct pour la publication.
+
+Plan cumulatif et preuves : [campagne-finition-qa-2026-09-05.md](campagne-finition-qa-2026-09-05.md).
+Les résultats chiffrés suivants sont **historiques**, pas des mesures du nouvel état de code.
+
+## Point de reprise historique, avant la nouvelle recette
 
 - Branche : `main`.
 - Base du présent lot : `5874524` — couverture responsive des quatorze moteurs sur tablette.
@@ -17,7 +292,7 @@ annulé, remplacé ou reporté.
   `https://scorpheus.github.io/LaPierreDesMots/`. Sa recette doit être rejouée après les présentes
   modifications avant la prochaine publication.
 
-## Validé techniquement
+## Bilan historique, à ne pas confondre avec la nouvelle recette
 
 - Les 76 exercices sont livrés et atteignables dans les six régions.
 - Les fonds raster, les scènes adaptatives, les mécaniques communes et la reprise au premier nœud
@@ -28,8 +303,8 @@ annulé, remplacé ou reporté.
 - Le choix de compagnon précède une sortie. Seuls Gobi et les compagnons ralliés sont proposés.
 - Le compagnon choisi favorise réellement ses moteurs déclarés, côté serveur comme en mode Android
   autonome.
-- Les quatre compagnons utilisent désormais leurs atlas raster validés de huit poses ; le portrait
-  statique reste le repli et le mode calme coupe l'animation.
+- Les anciens atlas de huit poses existaient avant le remplacement canonique. Ils ne valident
+  pas l'identité des nouveaux personnages : voir les brouillons et le statut prioritaire ci-dessus.
 - Les huit images manquantes du second jeu de paires de la Cité sont publiées et raccordées.
 - La Pierre centrale est désormais la conclusion : la Clairière part du chemin au sud et le centre
   ne se révèle qu'après l'obtention des six Éclats.
@@ -208,12 +483,11 @@ annulé, remplacé ou reporté.
 
 ## File ouverte
 
-1. Faire tester sur la tablette les nouveaux rendus `chrono`, `tri`, `eclair`, `chemin` et les deux
-   écrans de l'école avec la maîtresse sur le serveur local reconstruit. Vérifier aussi que le
-   compagnon choisi reste visible dans l'aide pendant toute la sortie. Rejouer aussi le tapis de
-   la Forêt Muette : sa première étape dit maintenant « Colorie le centre du tapis en brun », puis
-   les six feuilles sont repérées par leur position. Intégrer les retours sans perdre les tâches
-   ouvertes.
+1. Faire tester sur la tablette les nouveaux rendus `chrono`, `tri`, `eclair`, `chemin`, les
+   **huit grilles Paires compactes** et les deux écrans de l'école avec la maîtresse. Vérifier le
+   compagnon choisi dans l'aide et dans la récompense. Le tapis de la Forêt Muette a désormais
+   **sept objets distincts** (tapis, chat, bol, sac, pot, ballon, banc) : les six ornements
+   ambigus ne sont plus les cibles. Consignes, masques et voix sont liés au nouveau dessin.
 2. Tester sur l’appareil réel les cinq exercices de chronologie reconstruits. Les quinze triplets
    ont été validés par le parent puis publiés sous forme de 45 cartes 4:3 ; le verrou de pixels et
    les gardes de correspondance texte/image sont décrits dans
@@ -226,6 +500,14 @@ annulé, remplacé ou reporté.
    préparation locale précédente est invalidée par le correctif responsive : refaire
    `publier-site.bat --preparer`, demander l'autorisation explicite, publier puis vérifier Gobi,
    le campement, l'histoire et les compagnons après activation du nouveau service worker.
+   Exclure aussi les quatre anciens décors archivés des paquets autonomes (11,7 Mo). Cette
+   clôture sauvegarde le travail **local**, elle ne publie pas une nouvelle version du site.
+5. Faire valider les quatre atlas de compagnons (`animations-canoniques-2026-09-05.md`) avant
+   intégration ; les portraits canoniques sont distincts de ces nouvelles poses. Faire arbitrer
+   les douze nouveaux textes de `proposition-chemin-cite-2026-09-05.md` avant de refaire ce récit.
+6. Valider les trois nouvelles captures de référence Colorie ; aucune référence changée dans
+   cette clôture. Le lexique local CE1 reste incomplet : revoir la couverture et son seuil avec
+   le parent sans transformer le zéro incohérence mécanique en certification pédagogique.
 
 ## Retours parent à surveiller pendant le test
 
