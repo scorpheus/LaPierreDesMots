@@ -1,0 +1,438 @@
+{
+  "$commentaire": "Campement V6 validé : fond raster 1586 × 992 sans feu ni papillon immobiles, trente zones tactiles calées et deux sprites séparés.",
+  "scene": {
+    "fichier": "assets/campement/campement-v6.png",
+    "viewBox": "0 0 1586 992"
+  },
+  "coloriageLibre": "galeries-12",
+  "points": [
+    {
+      "id": "tente",
+      "libelle": "la tente",
+      "reaction": "replique",
+      "animationUnique": true,
+      "replique": "campement/tente",
+      "zone": [
+        600,
+        40,
+        620,
+        500
+      ]
+    },
+    {
+      "id": "feu",
+      "libelle": "le feu de camp",
+      "reaction": "replique",
+      "animationUnique": true,
+      "replique": "campement/feu",
+      "zone": [
+        670,
+        500,
+        250,
+        255
+      ]
+    },
+    {
+      "id": "carte",
+      "libelle": "la carte du monde",
+      "reaction": "replique",
+      "animationUnique": true,
+      "replique": "campement/carte",
+      "zone": [
+        75,
+        295,
+        355,
+        235
+      ]
+    },
+    {
+      "id": "coffre",
+      "libelle": "le coffre aux collections",
+      "reaction": "replique",
+      "animationUnique": true,
+      "replique": "campement/coffre",
+      "zone": [
+        125,
+        475,
+        275,
+        190
+      ]
+    },
+    {
+      "id": "mur-des-noms",
+      "libelle": "le mur des noms",
+      "reaction": "replique",
+      "animationUnique": true,
+      "replique": "campement/mur-des-noms",
+      "zone": [
+        0,
+        520,
+        170,
+        320
+      ]
+    },
+    {
+      "id": "chaudron",
+      "libelle": "le chaudron à couleurs",
+      "reaction": "replique",
+      "animationUnique": true,
+      "replique": "campement/chaudron",
+      "zone": [
+        380,
+        420,
+        190,
+        190
+      ]
+    },
+    {
+      "id": "lunette",
+      "libelle": "la lunette",
+      "reaction": "replique",
+      "animationUnique": true,
+      "replique": "campement/lunette",
+      "zone": [
+        1110,
+        215,
+        255,
+        310
+      ]
+    },
+    {
+      "id": "hamac-de-gobi",
+      "libelle": "le hamac de Gobi",
+      "reaction": "animation",
+      "animationUnique": true,
+      "replique": null,
+      "zone": [
+        1250,
+        170,
+        330,
+        300
+      ]
+    },
+    {
+      "id": "banniere",
+      "libelle": "la bannière",
+      "reaction": "animation",
+      "animationUnique": true,
+      "replique": null,
+      "zone": [
+        650,
+        60,
+        320,
+        130
+      ]
+    },
+    {
+      "id": "carillon",
+      "libelle": "le carillon",
+      "reaction": "son",
+      "animationUnique": true,
+      "replique": null,
+      "zone": [
+        980,
+        100,
+        140,
+        290
+      ]
+    },
+    {
+      "id": "marmite",
+      "libelle": "la marmite",
+      "reaction": "son",
+      "animationUnique": false,
+      "replique": null,
+      "zone": [
+        1260,
+        455,
+        170,
+        170
+      ]
+    },
+    {
+      "id": "tas-de-bois",
+      "libelle": "le tas de bois",
+      "reaction": "son",
+      "animationUnique": false,
+      "replique": null,
+      "zone": [
+        1070,
+        430,
+        220,
+        150
+      ]
+    },
+    {
+      "id": "seau",
+      "libelle": "le seau",
+      "reaction": "son",
+      "animationUnique": false,
+      "replique": null,
+      "zone": [
+        570,
+        410,
+        135,
+        165
+      ]
+    },
+    {
+      "id": "lanterne",
+      "libelle": "la lanterne",
+      "reaction": "animation",
+      "animationUnique": true,
+      "replique": null,
+      "zone": [
+        1335,
+        650,
+        170,
+        300
+      ]
+    },
+    {
+      "id": "corde-a-linge",
+      "libelle": "la corde à linge",
+      "reaction": "animation",
+      "animationUnique": false,
+      "replique": null,
+      "zone": [
+        130,
+        130,
+        540,
+        250
+      ]
+    },
+    {
+      "id": "tabouret",
+      "libelle": "le tabouret",
+      "reaction": "son",
+      "animationUnique": false,
+      "replique": null,
+      "zone": [
+        430,
+        550,
+        190,
+        190
+      ]
+    },
+    {
+      "id": "panier-de-pommes",
+      "libelle": "le panier de pommes",
+      "reaction": "replique",
+      "animationUnique": false,
+      "replique": "campement/panier-de-pommes",
+      "zone": [
+        1060,
+        630,
+        275,
+        220
+      ]
+    },
+    {
+      "id": "sac-de-graines",
+      "libelle": "le sac de graines",
+      "reaction": "son",
+      "animationUnique": false,
+      "replique": null,
+      "zone": [
+        910,
+        340,
+        170,
+        160
+      ]
+    },
+    {
+      "id": "bocal-de-lucioles",
+      "libelle": "le bocal de lucioles",
+      "reaction": "animation",
+      "animationUnique": true,
+      "replique": null,
+      "zone": [
+        1440,
+        700,
+        140,
+        285
+      ]
+    },
+    {
+      "id": "livre-ouvert",
+      "libelle": "le livre ouvert",
+      "reaction": "replique",
+      "animationUnique": false,
+      "replique": "campement/livre-ouvert",
+      "zone": [
+        500,
+        680,
+        330,
+        210
+      ]
+    },
+    {
+      "id": "plume-et-encrier",
+      "libelle": "la plume et l’encrier",
+      "reaction": "son",
+      "animationUnique": false,
+      "replique": null,
+      "zone": [
+        760,
+        660,
+        190,
+        220
+      ]
+    },
+    {
+      "id": "galets-empiles",
+      "libelle": "les galets empilés",
+      "reaction": "son",
+      "animationUnique": false,
+      "replique": null,
+      "zone": [
+        830,
+        805,
+        150,
+        175
+      ]
+    },
+    {
+      "id": "champignon",
+      "libelle": "le champignon",
+      "reaction": "animation",
+      "animationUnique": false,
+      "replique": null,
+      "zone": [
+        250,
+        690,
+        160,
+        230
+      ]
+    },
+    {
+      "id": "buisson",
+      "libelle": "le buisson",
+      "reaction": "animation",
+      "animationUnique": false,
+      "replique": null,
+      "zone": [
+        0,
+        730,
+        270,
+        260
+      ]
+    },
+    {
+      "id": "fleur-bleue",
+      "libelle": "la fleur bleue",
+      "reaction": "animation",
+      "animationUnique": false,
+      "replique": null,
+      "zone": [
+        1320,
+        560,
+        180,
+        220
+      ]
+    },
+    {
+      "id": "papillon",
+      "libelle": "le papillon",
+      "reaction": "animation",
+      "animationUnique": true,
+      "replique": null,
+      "zone": [
+        170,
+        835,
+        150,
+        130
+      ]
+    },
+    {
+      "id": "escargot",
+      "libelle": "l’escargot",
+      "reaction": "animation",
+      "animationUnique": false,
+      "replique": null,
+      "zone": [
+        1010,
+        830,
+        160,
+        140
+      ]
+    },
+    {
+      "id": "grenouille",
+      "libelle": "la grenouille",
+      "reaction": "replique",
+      "animationUnique": false,
+      "replique": "campement/grenouille",
+      "zone": [
+        1200,
+        730,
+        120,
+        120
+      ]
+    },
+    {
+      "id": "pierre-gravee",
+      "libelle": "la pierre gravée",
+      "reaction": "replique",
+      "animationUnique": false,
+      "replique": "campement/pierre-gravee",
+      "zone": [
+        390,
+        820,
+        260,
+        170
+      ]
+    },
+    {
+      "id": "etoile-filante",
+      "libelle": "l’étoile du coffre",
+      "reaction": "animation",
+      "animationUnique": true,
+      "replique": null,
+      "zone": [
+        275,
+        520,
+        120,
+        110
+      ]
+    }
+  ],
+  "objets": [
+    {
+      "code": "fanion-clairiere",
+      "libelle": "le fanion de la Clairière",
+      "asset": "assets/campement/campement-v6.png",
+      "region": "clairiere"
+    },
+    {
+      "code": "geode-galeries",
+      "libelle": "la géode des Galeries",
+      "asset": "assets/campement/campement-v6.png",
+      "region": "galeries"
+    },
+    {
+      "code": "nenuphar-marais",
+      "libelle": "le nénuphar du Marais Jumeau",
+      "asset": "assets/campement/campement-v6.png",
+      "region": "marais-jumeau"
+    },
+    {
+      "code": "feuille-foret",
+      "libelle": "la feuille de la Forêt Muette",
+      "asset": "assets/campement/campement-v6.png",
+      "region": "foret-muette"
+    },
+    {
+      "code": "braise-volcan",
+      "libelle": "la braise du Volcan",
+      "asset": "assets/campement/campement-v6.png",
+      "region": "volcan"
+    },
+    {
+      "code": "livre-cite",
+      "libelle": "le livre de la Cité des Histoires",
+      "asset": "assets/campement/campement-v6.png",
+      "region": "cite-des-histoires"
+    }
+  ]
+}

@@ -1,0 +1,202 @@
+{
+  "$commentaire": "D43 CLOT LA QUESTION Q3 — « Gobi evolue en 8 a 10 stades, a petits pas. Chaque stade est un changement discret : un cristal de plus, une teinte qui glisse. Progression tres frequente et toujours visible, au prix d'aucun moment spectaculaire. » La table passe donc de 5 a 10 stades. LES CINQ CODES DE LA v1 SONT CONSERVES, aux rangs 1, 3, 5, 7 et 10 : les cinq series de production deviennent cinq stades et non cinq echecs (D28), et surtout `stade_gobi.stade_code` n'a AUCUNE contrainte CHECK en base — renumeroter un code existant invaliderait en silence les etats deja ecrits, et rien ne le verrait. Les seuils restent des parametres (convention C2), a recalibrer sur l'enfant : aucun n'est ecrit dans le code. Le dernier seuil vaut exactement le nombre de formes — le Gardien s'atteint quand la collection est complete, jamais avant. Les assets sont dessines a partir de la canonique verrouillee (D36) ; leur groupe `gobi-corps` est octet pour octet identique, ce que tests/unitaires/gobi-assets.test.ts mesure.",
+  "stades": [
+    {
+      "code": "oeuf",
+      "rang": 1,
+      "libelle": "L’Œuf de cristal",
+      "formesRequises": 0,
+      "asset": "assets/gobi/stades/stade-1.svg"
+    },
+    {
+      "code": "fissure",
+      "rang": 2,
+      "libelle": "La Lueur qui perce",
+      "formesRequises": 1,
+      "asset": "assets/gobi/stades/stade-2.svg"
+    },
+    {
+      "code": "boule",
+      "rang": 3,
+      "libelle": "La Boule",
+      "formesRequises": 2,
+      "asset": "assets/gobi/stades/stade-3.svg"
+    },
+    {
+      "code": "premier-cristal",
+      "rang": 4,
+      "libelle": "Le Premier Cristal",
+      "formesRequises": 4,
+      "asset": "assets/gobi/stades/stade-4.svg"
+    },
+    {
+      "code": "crete",
+      "rang": 5,
+      "libelle": "La Crête",
+      "formesRequises": 6,
+      "asset": "assets/gobi/stades/stade-5.svg"
+    },
+    {
+      "code": "couronne",
+      "rang": 6,
+      "libelle": "La Couronne",
+      "formesRequises": 9,
+      "asset": "assets/gobi/stades/stade-6.svg"
+    },
+    {
+      "code": "equipe",
+      "rang": 7,
+      "libelle": "L’Équipé",
+      "formesRequises": 12,
+      "asset": "assets/gobi/stades/stade-7.svg"
+    },
+    {
+      "code": "besace",
+      "rang": 8,
+      "libelle": "La Besace",
+      "formesRequises": 16,
+      "asset": "assets/gobi/stades/stade-8.svg"
+    },
+    {
+      "code": "veilleur",
+      "rang": 9,
+      "libelle": "Le Veilleur",
+      "formesRequises": 20,
+      "asset": "assets/gobi/stades/stade-9.svg"
+    },
+    {
+      "code": "gardien",
+      "rang": 10,
+      "libelle": "Le Gardien",
+      "formesRequises": 25,
+      "asset": "assets/gobi/stades/stade-10.svg"
+    }
+  ],
+  "formes": [
+    {
+      "grapheme": "a",
+      "libelle": "Gobi-A",
+      "cristal": "assets/coffre/formes/a.png"
+    },
+    {
+      "grapheme": "e",
+      "libelle": "Gobi-E",
+      "cristal": "assets/coffre/formes/e.png"
+    },
+    {
+      "grapheme": "i",
+      "libelle": "Gobi-I",
+      "cristal": "assets/coffre/formes/i.png"
+    },
+    {
+      "grapheme": "o",
+      "libelle": "Gobi-O",
+      "cristal": "assets/coffre/formes/o.png"
+    },
+    {
+      "grapheme": "u",
+      "libelle": "Gobi-U",
+      "cristal": "assets/coffre/formes/u.png"
+    },
+    {
+      "grapheme": "b",
+      "libelle": "Gobi-B",
+      "cristal": "assets/coffre/formes/b.png"
+    },
+    {
+      "grapheme": "d",
+      "libelle": "Gobi-D",
+      "cristal": "assets/coffre/formes/d.png"
+    },
+    {
+      "grapheme": "p",
+      "libelle": "Gobi-P",
+      "cristal": "assets/coffre/formes/p.png"
+    },
+    {
+      "grapheme": "q",
+      "libelle": "Gobi-Q",
+      "cristal": "assets/coffre/formes/q.png"
+    },
+    {
+      "grapheme": "t",
+      "libelle": "Gobi-T",
+      "cristal": "assets/coffre/formes/t.png"
+    },
+    {
+      "grapheme": "on",
+      "libelle": "Gobi-ON",
+      "cristal": "assets/coffre/formes/on.png"
+    },
+    {
+      "grapheme": "an",
+      "libelle": "Gobi-AN",
+      "cristal": "assets/coffre/formes/an.png"
+    },
+    {
+      "grapheme": "in",
+      "libelle": "Gobi-IN",
+      "cristal": "assets/coffre/formes/in.png"
+    },
+    {
+      "grapheme": "ou",
+      "libelle": "Gobi-OU",
+      "cristal": "assets/coffre/formes/ou.png"
+    },
+    {
+      "grapheme": "oi",
+      "libelle": "Gobi-OI",
+      "cristal": "assets/coffre/formes/oi.png"
+    },
+    {
+      "grapheme": "s",
+      "libelle": "Gobi-S",
+      "cristal": "assets/coffre/formes/s.png"
+    },
+    {
+      "grapheme": "x",
+      "libelle": "Gobi-X",
+      "cristal": "assets/coffre/formes/x.png"
+    },
+    {
+      "grapheme": "er",
+      "libelle": "Gobi-ER",
+      "cristal": "assets/coffre/formes/er.png"
+    },
+    {
+      "grapheme": "ent",
+      "libelle": "Gobi-ENT",
+      "cristal": "assets/coffre/formes/ent.png"
+    },
+    {
+      "grapheme": "ez",
+      "libelle": "Gobi-EZ",
+      "cristal": "assets/coffre/formes/ez.png"
+    },
+    {
+      "grapheme": "eau",
+      "libelle": "Gobi-EAU",
+      "cristal": "assets/coffre/formes/eau.png"
+    },
+    {
+      "grapheme": "ill",
+      "libelle": "Gobi-ILL",
+      "cristal": "assets/coffre/formes/ill.png"
+    },
+    {
+      "grapheme": "gn",
+      "libelle": "Gobi-GN",
+      "cristal": "assets/coffre/formes/gn.png"
+    },
+    {
+      "grapheme": "ph",
+      "libelle": "Gobi-PH",
+      "cristal": "assets/coffre/formes/ph.png"
+    },
+    {
+      "grapheme": "ch",
+      "libelle": "Gobi-CH",
+      "cristal": "assets/coffre/formes/ch.png"
+    }
+  ]
+}

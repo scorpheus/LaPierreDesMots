@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 640" width="960" height="640" role="img" aria-label="Le tapis de feuilles">
+  <title>Le tapis de la forêt</title>
+  <desc>Un tapis uni, un chat, un bol, un sac, un pot, un ballon et un banc, tous distincts.</desc>
+  <!--
+    DÉCOR — lot M6, contrat du monde v4 § 2. Trait noir sur blanc, la COULEUR VIENT DU CODE
+    (annexe P § 2) : les régions sortent d'ici en grisaille #8E97A8, qui est leur état
+    par défaut et non un choix graphique. Géométrie 100 % polygonale (M, L, Z — aucun arc) :
+    surface et centroïde sont donc calculables exactement et opposables aux valeurs déclarées
+    par le .habillage.json, que scripts/verifier-regions-fermees.mjs --strict recalcule.
+
+    Chaque région est un ENFANT DIRECT de #calque-zones : SceneSvg.tsx sélectionne
+    "#calque-zones > [id]", et un tracé niché dans un sous-groupe échapperait au tap sans
+    qu'aucun message ne le dise.
+
+    ÉCRIT PAR scripts/dessiner-decors.mjs — ne pas retoucher à la main : la scène est décrite
+    dans scripts/decors/decors.mjs, et l'émetteur refuse d'écrire si la mesure est mauvaise.
+  -->
+  <g id="calque-fond">
+    <path class="fond" fill="#FFF6E3" stroke="none" d="M0,0 L960,0 L960,600 L0,600 Z"/>
+    <image data-fond-illustre="tapis" href="/LaPierreDesMots/assets/tapis-objets-v2-CCJxXpZ8.png" x="0" y="0" width="960" height="640" preserveAspectRatio="xMidYMid meet"/>
+  </g>
+  <g id="calque-zones" fill="#8E97A8" stroke="#1B2440" stroke-width="4" stroke-linejoin="round" opacity="0" aria-hidden="true">
+    <path id="ciel-entre-troncs" class="zone" data-region-svg="ciel-entre-troncs" fill="#8E97A8" fill-rule="evenodd" d="M0,0 L960,0 L960,64 L933.3,68.5 L906.7,70.9 L880,70.1 L853.3,66.4 L826.7,61.6 L800,57.9 L773.3,57.1 L746.7,59.5 L720,64 L693.3,68.5 L666.7,70.9 L640,70.1 L613.3,66.4 L586.7,61.6 L560,57.9 L533.3,57.1 L506.7,59.5 L480,64 L453.3,68.5 L426.7,70.9 L400,70.1 L373.3,66.4 L346.7,61.6 L320,57.9 L293.3,57.1 L266.7,59.5 L240,64 L213.3,68.5 L186.7,70.9 L160,70.1 L133.3,66.4 L106.7,61.6 L80,57.9 L53.3,57.1 L26.7,59.5 L0,64 Z"/>
+    <path id="ciel" class="zone" data-region-svg="ciel" fill="#8E97A8" fill-rule="evenodd" d="M0,64 L26.7,68.5 L53.3,71.8 L80,73 L106.7,71.8 L133.3,68.5 L160,64 L186.7,59.5 L213.3,56.2 L240,55 L266.7,56.2 L293.3,59.5 L320,64 L346.7,68.5 L373.3,71.8 L400,73 L426.7,71.8 L453.3,68.5 L480,64 L506.7,59.5 L533.3,56.2 L560,55 L586.7,56.2 L613.3,59.5 L640,64 L666.7,68.5 L693.3,71.8 L720,73 L746.7,71.8 L773.3,68.5 L800,64 L826.7,59.5 L853.3,56.2 L880,55 L906.7,56.2 L933.3,59.5 L960,64 L960,180 L0,180 Z"/>
+    <path id="sol-nu" class="zone" data-region-svg="sol-nu" fill="#8E97A8" fill-rule="evenodd" d="M0,500 L26.7,506.1 L53.3,507.9 L80,504 L106.7,497.3 L133.3,492.5 L160,493.1 L186.7,498.6 L213.3,505.1 L240,508 L266.7,505.1 L293.3,498.6 L320,493.1 L346.7,492.5 L373.3,497.3 L400,504 L426.7,507.9 L453.3,506.1 L480,500 L506.7,493.9 L533.3,492.1 L560,496 L586.7,502.7 L613.3,507.5 L640,506.9 L666.7,501.4 L693.3,494.9 L720,492 L746.7,494.9 L773.3,501.4 L800,506.9 L826.7,507.5 L853.3,502.7 L880,496 L906.7,492.1 L933.3,493.9 L960,500 L960,600 L0,600 Z"/>
+    <path id="tronc-un" class="zone" data-region-svg="tronc-un" fill="#8E97A8" fill-rule="evenodd" d="M18,180 L76,180 L76,510 L18,510 Z"/>
+    <path id="tronc-deux" class="zone" data-region-svg="tronc-deux" fill="#8E97A8" fill-rule="evenodd" d="M430,190 L502,190 L502,510 L430,510 Z"/>
+    <path id="tronc-trois" class="zone" data-region-svg="tronc-trois" fill="#8E97A8" fill-rule="evenodd" d="M890,176 L942,176 L942,510 L890,510 Z"/>
+    <path id="arbre" class="zone" data-region-svg="arbre" fill="#8E97A8" fill-rule="evenodd" d="M656,150 L686.7,159.7 L709.8,183.9 L725.1,212.9 L721.3,242 L740.5,256.5 L725.1,280.7 L698.2,295.2 L671.4,300 L667.5,392 L644.5,392 L640.6,300 L613.8,295.2 L586.9,280.7 L571.5,256.5 L590.7,242 L586.9,212.9 L602.2,183.9 L625.3,159.7 Z"/>
+    <path id="chat" class="zone" data-region-svg="chat" fill="#8E97A8" fill-rule="evenodd" d="M286.9,294.7 L284.1,260.3 L304,277.5 L332.4,277.5 L352.2,260.3 L349.4,294.7 L360.8,318.8 L357.9,353.2 L366.4,384.2 L383.5,397.9 L392,418.6 L363.6,418.6 L343.7,401.4 L335.2,415.1 L301.1,415.1 L289.8,397.9 L281.2,356.6 L275.6,322.2 Z"/>
+    <path id="rat" class="zone" data-region-svg="rat" fill="#8E97A8" fill-rule="evenodd" d="M134.4,362 L129.5,346.9 L141.7,337.5 L156.4,345 L158.8,356.3 L178.3,354.4 L180.8,341.3 L195.4,335.6 L207.6,345 L202.7,360.1 L217.4,371.4 L224.7,388.3 L217.4,405.2 L200.3,414.6 L232,416.5 L229.6,424 L185.6,420.2 L163.7,418.4 L141.7,410.8 L127.1,395.8 L122.2,377 Z"/>
+    <path id="nid" class="zone" data-region-svg="nid" fill="#8E97A8" fill-rule="evenodd" d="M770,286.1 L781.2,277.9 L792.4,284.4 L801.4,274.6 L814.8,282.8 L826,273 L837.2,282.8 L850.6,274.6 L859.6,284.4 L870.8,277.9 L882,286.1 L873,309 L850.6,325.4 L826,330.4 L801.4,325.4 L779,309 Z"/>
+    <path id="gland-du-tapis" class="zone" data-region-svg="gland-du-tapis" fill="#8E97A8" fill-rule="evenodd" d="M238.13,356.25 L494.38,240.63 L735,305.63 L717.5,320 L518.75,477.5 L503.75,473.13 L350.63,411.25 Z"/>
+    <path id="feuille-du-tapis-un" class="zone" data-region-svg="feuille-du-tapis-un" fill="#8E97A8" fill-rule="evenodd" d="M731.25,270.63 L731.25,256.88 L736.25,243.13 L738.75,228.75 L750.63,243.13 L763.75,242.5 L776.88,233.75 L780.63,253.13 L781.88,262.5 L796.25,270.63 L821.25,275 L844.38,277.5 L869.38,284.38 L888.75,281.88 L905,271.88 L913.13,260.63 L915,247.5 L910.63,236.88 L907.5,231.25 L910.63,225.63 L917.5,226.88 L923.75,237.5 L926.88,250.63 L923.75,268.13 L915.63,281.25 L901.25,291.88 L873.75,298.75 L873.75,320.63 L878.13,336.88 L878.13,356.88 L873.75,371.88 L862.5,378.13 L852.5,375 L853.75,365.63 L862.5,359.38 L863.13,343.13 L855,335.63 L845,325 L836.25,340.63 L823.75,358.13 L814.38,366.88 L805,367.5 L800.63,363.13 L804.38,355.63 L814.38,348.13 L819.38,333.13 L815.63,328.75 L796.25,334.38 L791.88,345.63 L783.13,371.88 L776.25,383.75 L765.63,386.88 L756.25,384.38 L758.13,376.88 L766.88,368.75 L773.13,341.25 L773.75,326.88 L763.75,343.13 L754.38,360.63 L746.25,371.88 L736.25,372.5 L731.25,366.88 L734.38,360 L741.88,353.13 L749.38,327.5 L753.13,313.75 L745.63,301.88 L743.13,291.25 L734.38,285 L727.5,278.13 Z"/>
+    <path id="feuille-du-tapis-deux" class="zone" data-region-svg="feuille-du-tapis-deux" fill="#8E97A8" fill-rule="evenodd" d="M200.63,506.25 L205.63,497.5 L218.75,490 L234.38,484.38 L256.88,480.63 L282.5,479.38 L307.5,482.5 L326.25,489.38 L340,499.38 L345.63,510 L344.38,526.25 L337.5,547.5 L328.13,568.13 L315.63,582.5 L294.38,591.88 L270,593.75 L248.13,590 L230.63,581.25 L218.13,566.88 L209.38,545.63 L204.38,526.25 Z"/>
+    <path id="feuille-du-tapis-trois" class="zone" data-region-svg="feuille-du-tapis-trois" fill="#8E97A8" fill-rule="evenodd" d="M136.25,364.38 L154.38,357.5 L179.38,353.13 L200.63,348.13 L218.75,348.13 L231.88,355 L242.5,368.75 L248.75,385.63 L251.25,404.38 L248.13,416.88 L256.88,426.25 L262.5,448.75 L259.38,463.13 L246.25,473.75 L222.5,480.63 L193.75,485 L167.5,485 L145,478.13 L131.25,468.13 L124.38,455 L116.88,451.25 L111.25,435 L118.13,416.88 L126.25,398.75 L128.75,380.63 Z M125.63,419.38 L119.38,438.13 L121.88,445.63 L129.38,448.75 L131.88,423.13 Z"/>
+    <path id="feuille-haute" class="zone" data-region-svg="feuille-haute" fill="#8E97A8" fill-rule="evenodd" d="M761.88,424.38 L770,414.38 L786.25,407.5 L808.13,404.38 L832.5,404.38 L859.38,408.13 L880,415.63 L888.75,425.63 L891.25,437.5 L885.63,449.38 L878.75,458.13 L871.25,489.38 L862.5,530 L855,539.38 L841.25,546.25 L823.13,548.13 L803.13,543.13 L793.75,533.75 L785.63,506.88 L780.63,478.13 L775.63,456.25 L766.25,449.38 L761.25,437.5 Z"/>
+    <path id="feuille-basse" class="zone" data-region-svg="feuille-basse" fill="#8E97A8" fill-rule="evenodd" d="M615.63,467.5 L628.13,469.38 L640.63,475 L651.25,483.75 L658.13,495.63 L661.25,509.38 L659.38,523.13 L653.13,536.25 L643.75,546.25 L630,551.88 L615.63,554.38 L602.5,551.88 L590,546.25 L580.63,536.25 L575,523.75 L573.13,509.38 L575.63,496.25 L582.5,484.38 L591.88,475 L603.75,470 Z"/>
+    <path id="feuille-du-tapis-quatre" class="zone" data-region-svg="feuille-du-tapis-quatre" fill="#8E97A8" fill-rule="evenodd" d="M45,178.13 L323.13,138.75 L325.63,160.63 L322.5,182.5 L53.13,228.13 Z M50,255 L330.63,200.63 L377.5,218.13 L376.88,236.88 L101.25,313.13 L63.13,284.38 Z M62.5,226.88 L78.13,222.5 L89.38,248.75 L76.25,251.88 Z M279.38,191.25 L294.38,187.5 L302.5,205.63 L288.13,208.75 Z M118.13,308.13 L141.25,301.25 L163.13,355 L140,361.25 Z M348.75,243.75 L366.25,239.38 L361.25,286.88 L346.88,291.88 Z M63.13,286.88 L83.13,294.38 L86.25,319.38 L68.75,331.25 Z"/>
+  </g>
+  <g id="calque-trait" fill="none" stroke="#1B2440" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0" aria-hidden="true">
+    <path class="trait" d="M0,502 L960,494"/>
+  </g>
+</svg>

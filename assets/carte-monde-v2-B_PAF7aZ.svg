@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800" role="img" aria-label="La carte du monde">
+  <title>La carte du monde</title>
+  <!--
+    CARTE DU MONDE v2 — lot N7.
+
+    LE DÉFAUT DE LA v1 : six hexagones réguliers identiques, translatés. Sur une carte, une
+    région se reconnaît d'abord à sa FORME ; six fois la même forme oblige à lire la légende,
+    c'est-à-dire à déchiffrer — exactement ce que l'enfant fait encore lentement.
+
+    CE QUI NE BOUGE PAS, ET C'EST OPPOSABLE :
+      • les six `id`, dans le MÊME ORDRE — l'ordre EST la progression phonologique ;
+      • les six centres de marqueur, à l'unité près. `EcranCarte.tsx:41` porte les mêmes six
+        ancres en dur ; les déplacer décalerait le tap du dessin, ce qui ne se voit qu'à
+        l'usage. `ids-regions-stables.test.ts` compare les deux fichiers marqueur à marqueur ;
+      • les cinq segments du chemin à l'encre, aux mêmes points de passage.
+
+    Les couleurs sont posées ici en aplat, comme dans la v1 : c'est le VOILE DE GRISAILLE du
+    client qui grise une région non ouverte, jamais une teinte différente dans ce fichier.
+  -->
+  <g id="calque-parchemin">
+    <path id="parchemin" d="M12,28 L1188,12 L1176,776 L24,788 Z" fill="#FFF6E3" stroke="#C9B48A" stroke-width="8" stroke-linejoin="round"/>
+  </g>
+  <g id="calque-chemin" fill="none" stroke="#1B2440" stroke-width="6" stroke-linecap="round" stroke-dasharray="16 14">
+    <path id="chemin-clairiere-galeries" d="M190,640 Q320,490 450,460"/>
+    <path id="chemin-galeries-marais-jumeau" d="M450,460 Q345,290 240,240"/>
+    <path id="chemin-marais-jumeau-foret-muette" d="M240,240 Q430,135 620,150"/>
+    <path id="chemin-foret-muette-volcan" d="M620,150 Q760,185 900,340"/>
+    <path id="chemin-volcan-cite-des-histoires" d="M900,340 Q960,425 1020,630"/>
+  </g>
+  <g id="calque-regions" stroke="#1B2440" stroke-width="6" stroke-linejoin="round">
+    <path id="clairiere" data-region-svg="clairiere" d="M190,563.05 L228.93,596.06 L289.75,613.42 L265.25,660.05 L247.32,704.69 L190,691.3 L130.52,707.14 L111.25,660.98 L104.25,617.15 L148.9,593.62 Z" fill="#3DDC97"><title>La Clairiere</title></path>
+    <path id="galeries" data-region-svg="galeries" d="M450,404.17 L512.73,389.2 L520,441.35 L544.5,485.18 L487.85,502.72 L450,550.53 L407.82,507.61 L360.75,483.78 L387,443.22 L389.43,391.64 Z" fill="#8FD6F2"><title>Les Galeries</title></path>
+    <path id="marais-jumeau" data-region-svg="marais-jumeau" d="M240,155.51 L290.83,182.63 L308.25,221.82 L334.5,265.18 L289.75,296.15 L240,327.51 L196.74,288.83 L156,262.38 L149,215.76 L193.49,187.51 Z" fill="#2FA8E0"><title>Le Marais Jumeau</title></path>
+    <path id="foret-muette" data-region-svg="foret-muette" d="M620,83.61 L683.81,77.98 L702.25,128.09 L683,166.78 L679.48,217.14 L620,213.37 L557.27,220.8 L541.25,170.98 L553.5,132.28 L562.68,85.31 Z" fill="#C98B4B"><title>La Foret Muette</title></path>
+    <path id="volcan" data-region-svg="volcan" d="M900,249.47 L942.18,292.39 L989.25,316.22 L961.25,356.32 L963.81,412.02 L900,395.83 L847.01,399.81 L828.25,359.12 L800.25,313.42 L858.9,293.62 Z" fill="#FF5D8F"><title>Le Volcan</title></path>
+    <path id="cite-des-histoires" data-region-svg="cite-des-histoires" d="M1020,557.58 L1078.4,564.09 L1095.25,609.95 L1119.75,656.58 L1062.18,677.61 L1020,706.95 L971.33,684.93 L916.75,657.51 L948.25,610.88 L960.52,562.86 Z" fill="#FFC93C"><title>La Cite des Histoires</title></path>
+  </g>
+  <g id="calque-marqueurs" stroke="#1B2440" stroke-width="5">
+    <circle id="marqueur-clairiere" cx="190" cy="640" r="22" fill="#FFF6E3"/>
+    <circle id="marqueur-galeries" cx="450" cy="460" r="22" fill="#FFF6E3"/>
+    <circle id="marqueur-marais-jumeau" cx="240" cy="240" r="22" fill="#FFF6E3"/>
+    <circle id="marqueur-foret-muette" cx="620" cy="150" r="22" fill="#FFF6E3"/>
+    <circle id="marqueur-volcan" cx="900" cy="340" r="22" fill="#FFF6E3"/>
+    <circle id="marqueur-cite-des-histoires" cx="1020" cy="630" r="22" fill="#FFF6E3"/>
+  </g>
+</svg>
