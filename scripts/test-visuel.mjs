@@ -77,7 +77,7 @@ const referencesAvant = compterReferences();
 // dépôt (décision D9). Passer par `npx playwright` chercherait le navigateur dans
 // `%LOCALAPPDATA%`, où rien n'est installé — un rouge qui ressemblerait à un défaut de code.
 const resultat = lancerPlaywright(
-  ['test', '--project=visuel', `--update-snapshots=${modeSnapshots}`],
+  ['test', '--project=visuel', '--output=tests/rapports/artefacts/visuel', `--update-snapshots=${modeSnapshots}`],
   { supplement: { PIERRE_RAPPORT_JSON: CHEMIN_JSON }, silencieux: true }
 );
 
@@ -240,7 +240,7 @@ ecrireEtape({
   echecs,
   details,
   note,
-  artefacts: ['tests/rapports/artefacts/playwright']
+  artefacts: ['tests/rapports/artefacts/visuel']
 });
 genererRapport({ commande: `npm run test:visuel${majDemandee ? ' -- --maj' : ''}` });
 

@@ -143,7 +143,7 @@ export function PastilleSortie({
   });
 
   const noeudsFaits = useMemo(
-    () => new Set((requeteProgression.data ?? []).map((ligne) => String(ligne.noeud))),
+    () => new Set((requeteProgression.data ?? []).filter((ligne) => ligne.etoiles > 0).map((ligne) => String(ligne.noeud))),
     [requeteProgression.data]
   );
 

@@ -136,6 +136,8 @@ export interface EtatMagasin {
    * résultat.
    */
   appliquerGainCascade(gain: GainCascade): void;
+  /** Recharge les compteurs persistants sans annoncer de nouveau gain. */
+  hydraterCascade(profilId: string, cascade: EtatCascade): void;
 }
 
 export type MagasinJeu = StoreApi<EtatMagasin>;
@@ -232,6 +234,11 @@ export function creerMagasin(
       }
     },
 
+    hydraterCascade(profilId: string, cascade: EtatCascade): void {
+      if (String(lire().profil?.id) !== profilId) return;
+      fixer({ cascade });
+    },
+
     choisirProfil(profil: Profil): void {
       // Un tap suffit, aucun mot de passe (v2 § 11).
       //
@@ -240,8 +247,10 @@ export function creerMagasin(
       // renvoyait au choix de profil. Les routes existaient pourtant toutes ; c'est le JOUEUR
       // qui manquait, pas l'URL.
       memoriserProfil(String(profil.id));
-      const sortie = lire().profil?.id === profil.id ? lire().sortie : null;
-      fixer({ profil, sortie, ecran: 'carte' });
+      const memeProfil = lire().profil?.id === profil.id;
+      const sortie = memeProfil ? lire().sortie : null;
+      fixer({ profil, sortie, ecran: 'carte',
+        ...(memeProfil ? {} : { cascade: ETAT_CASCADE_VIDE, dernierGain: null }) });
     },
 
     demarrerSortie(sortie: PlanSortie): void {

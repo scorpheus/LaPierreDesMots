@@ -15,7 +15,9 @@
 //   7. LA SORTIE — `data-vers="carte"`. Voir l'encadré ci-dessous : elle manquait.
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import type { CheminAsset, JaugePalier as ModeleJauge, NiveauAide } from '@pierre/partage';
+import { lireMonde } from '../api/client.js';
 import { compagnonsDuDocument } from '@pierre/partage/monde';
 import compagnonsDocument from '../../../contenu/monde/compagnons.json' with { type: 'json' };
 import { jaugesDe } from '@pierre/partage/recompenses';
@@ -200,6 +202,22 @@ function extraireEtapes(contenu: unknown, moteur: string): readonly EtapeAfficha
 export function EcranNoeud(): ReactElement {
   const magasin = useMagasin();
   const services = useServices();
+  const profil = useEtatJeu((etat) => etat.profil);
+  const requeteMonde = useQuery({
+    queryKey: ['monde', profil === null ? null : String(profil.id)],
+    queryFn: () => {
+      if (profil === null) throw new Error('Profil absent pour la lecture du monde.');
+      return lireMonde(profil.id);
+    },
+    enabled: profil !== null
+  });
+  useEffect(() => {
+    // Le GET recharge un acquis ; seul le POST de récompense peut le célébrer.
+    // Une réponse ancienne reste dans le cache de son profil, jamais dans celui du suivant.
+    if (profil !== null && requeteMonde.data?.cascade !== undefined) {
+      magasin.getState().hydraterCascade(String(profil.id), requeteMonde.data.cascade);
+    }
+  }, [profil, requeteMonde.data, magasin]);
 
   const paquet = useEtatJeu((etat) => etat.paquet);
   const codeMoteur = useEtatJeu((etat) => etat.codeMoteur);

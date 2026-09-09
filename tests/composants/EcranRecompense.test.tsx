@@ -50,7 +50,11 @@ vi.mock('@client/api/client', async (importOriginal) => {
       if (promesseEnregistrement !== null) return promesseEnregistrement;
       return enregistrementEchoue
         ? Promise.reject(new Error('la Pierre n’a pas répondu'))
-        : Promise.resolve({});
+        : Promise.resolve({ gainCascade: {
+          etat: { etoilesTotal: 3, etoilesDepuisIntermediaire: 3, intermediairesTotal: 0,
+            intermediairesDepuisRare: 0, raresTotal: 0, dernierPalierLe: null },
+          paliersFranchis: [], recompenses: [], jauges: []
+        } });
     }
   };
 });
@@ -291,11 +295,15 @@ describe('la fin de partie est une réussite, quoi qu’il arrive (R14)', () => 
     });
 
     await waitFor(() => expect(enregistrements).toHaveLength(1));
-    expect(magasin.getState().tentativeEnvoyee).toBe(true);
+    expect(magasin.getState().tentativeEnvoyee).toBe(false);
 
     // C'est ce que `demarrerNoeud` fait pour la tentative suivante.
-    magasin.setState({ tentativeEnvoyee: false });
-    resoudre?.({});
+    magasin.setState({ tentativeEnvoyee: false, demarreLe: '2026-09-01T08:01:00.000Z' });
+    resoudre?.({ gainCascade: {
+      etat: { etoilesTotal: 2, etoilesDepuisIntermediaire: 2, intermediairesTotal: 0,
+        intermediairesDepuisRare: 0, raresTotal: 0, dernierPalierLe: null },
+      paliersFranchis: [], recompenses: [], jauges: []
+    } });
 
     await waitFor(() => expect(magasin.getState().tentativeEnvoyee).toBe(false));
   });

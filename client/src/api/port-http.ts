@@ -44,8 +44,12 @@ function entetesParent(): Readonly<Record<string, string>> {
 }
 
 async function reponseBrute(cheminAppele: string, options?: RequestInit): Promise<Response> {
+  // Une connexion LAN suspendue doit rendre la sauvegarde réessayable. Cette expiration
+  // couvre aussi la lecture du corps ; elle n'est pas une attente ajoutée au parcours.
+  const expiration = AbortSignal.timeout(15_000);
   const reponse = await fetch(cheminAppele, {
     ...options,
+    signal: options?.signal == null ? expiration : AbortSignal.any([options.signal, expiration]),
     headers: {
       Accept: 'application/json',
       ...(options?.body === undefined ? {} : { 'Content-Type': 'application/json' }),

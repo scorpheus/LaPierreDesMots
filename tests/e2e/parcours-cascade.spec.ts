@@ -1,10 +1,10 @@
 /**
  * La cascade de récompenses, de bout en bout — D25, annexe T § T3 (lot L2-A).
  *
- * On joue le nœud, encore et encore, et on vérifie que les TROIS paliers de D25 sont
- * réellement franchis : l'étoile à chaque réussite, le tampon spécial toutes les cinq étoiles,
- * l'image tous les dix tampons. Cinquante et une étoiles séparent le premier tap du palier
- * rare ; ce test les joue vraiment, il ne les simule pas.
+ * La fixture prépare la frontière du palier rare avec des exercices DISTINCTS réussis.
+ * L'E2E joue le dernier exercice, vérifie les trois paliers puis le rejeu sans nouveau crédit.
+ * Le trajet métier des cinquante exercices est couvert au niveau API ; cette recette prouve
+ * le franchissement et son rendu dans le navigateur.
  *
  * Deux règles de l'annexe T § 6 gouvernent chaque ligne :
  *   • on attend un ÉTAT, jamais une durée — aucun `waitForTimeout` ici ;
@@ -17,6 +17,8 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { expect, test } from './invariants.js';
+import { noeudsLivres } from './qa-outils.js';
+import type { ReponseTentative } from '@pierre/partage';
 
 import type { Page } from '@playwright/test';
 
@@ -29,18 +31,14 @@ const GRAINE = Number(process.env['ATELIER_GRAINE'] ?? 20260801);
 const INSTANT = '2026-09-01T08:00:00Z';
 const NOEUD = 'clairiere-01';
 
-/**
- * Nombre maximal de nœuds joués avant d'abandonner.
- *
- * Dérivé, pas deviné : 3 étoiles par nœud, 5 étoiles par tampon, 10 tampons par image, donc
- * 50 / 3 = 17 nœuds pour l'image. La marge de trois nœuds couvre le cas où l'exercice ne
- * donnerait pas trois étoiles.
- */
-const NOEUDS_MAX = 20;
+const seuils = JSON.parse(readFileSync(fileURLToPath(new URL(
+  'contenu/referentiel/parametres-recompenses.json', RACINE,
+)), 'utf8')) as { etoilesParIntermediaire: number; intermediairesParRare: number };
+const CREDITS_POUR_IMAGE = seuils.etoilesParIntermediaire * seuils.intermediairesParRare;
 
 /**
- * Un instant distinct par tentative : l'idempotence doit absorber un DOUBLE ENVOI, pas vingt
- * parties réellement rejouées. Les vingt valeurs restent déterministes et passent toutes par
+ * Un instant distinct par tentative : l'idempotence doit absorber un DOUBLE ENVOI, pas deux
+ * parties réellement rejouées. Les valeurs restent déterministes et passent toutes par
  * l'Horloge injectée ; aucune attente ni horloge système n'entre dans le scénario.
  */
 function instantDuTour(tour: number): string {
@@ -61,7 +59,7 @@ interface CrochetsTest {
 }
 type FenetreTest = Window & { __test: CrochetsTest };
 
-async function preparer(page: Page): Promise<void> {
+async function preparer(page: Page, progression: readonly { noeud: string; etoiles: number }[] = []): Promise<void> {
   await page.goto('/');
   await page.waitForFunction(() => (window as FenetreTest).__test !== undefined);
   await page.evaluate(
@@ -72,18 +70,14 @@ async function preparer(page: Page): Promise<void> {
       crochets.figerHorloge(instant);
       await crochets.chargerProfil(fixture);
     },
-    { fixture: fixtureProfil, graine: GRAINE, instant: INSTANT }
+    { fixture: { ...fixtureProfil, progression }, graine: GRAINE, instant: INSTANT }
   );
 }
 
-/**
- * Joue le nœud entier au clavier du magasin, jusqu'à l'écran de récompense.
- *
- * On passe par `repondre` et non par des taps réels : `parcours-nominal` prouve déjà que le
- * doigt marche, et ce test-ci en joue vingt de suite. Ce qu'il vérifie est la CASCADE, pas la
- * géométrie du décor.
- */
-async function jouerLeNoeudEntier(page: Page): Promise<void> {
+/** Joue le moteur puis attend l'ACK de sa tentative et son application dans la récompense. */
+async function jouerLeNoeudEntier(page: Page): Promise<ReponseTentative> {
+  const accuseReception = page.waitForResponse((reponse) =>
+    reponse.request().method() === 'POST' && new URL(reponse.url()).pathname === '/api/tentatives');
   await page.evaluate(async () => {
     const crochets = (window as FenetreTest).__test;
     interface EtatColorieLu {
@@ -108,67 +102,54 @@ async function jouerLeNoeudEntier(page: Page): Promise<void> {
     }
   });
   await expect(page.locator('[data-ecran="recompense"]')).toBeVisible();
+  const reponse = await accuseReception;
+  expect(reponse.ok(), 'la réussite a reçu son ACK serveur').toBe(true);
+  const resultat = await reponse.json() as ReponseTentative;
+  for (const jauge of resultat.gainCascade.jauges) {
+    await expect(page.locator('[data-ecran="recompense"] [data-palier="' + jauge.palier + '"]'))
+      .toHaveAttribute('data-restant', String(jauge.restant));
+  }
+  await expect(page.locator('[data-action="voir-carte"]')).toBeEnabled();
+  return resultat;
 }
 
 test.describe('la cascade de D25', () => {
   test('les trois paliers sont franchis, et aucun écran d’échec n’apparaît jamais', async ({
     page
   }) => {
-    await preparer(page);
+    const precedents = noeudsLivres().filter((noeud) => noeud.progression && noeud.id !== NOEUD)
+      .slice(0, CREDITS_POUR_IMAGE - 1).map((noeud) => ({ noeud: noeud.id, etoiles: 3 }));
+    expect(precedents).toHaveLength(CREDITS_POUR_IMAGE - 1);
+    expect(new Set(precedents.map((ligne) => ligne.noeud)).size).toBe(precedents.length);
+    await preparer(page, precedents);
+    await page.evaluate(async (noeud) => (window as FenetreTest).__test.allerAuNoeud(noeud), NOEUD);
+    await expect(page.locator('[data-ecran="noeud"] [data-palier="intermediaire"]'))
+      .toHaveAttribute('data-restant', '1');
+    const premier = await jouerLeNoeudEntier(page);
+    expect(premier.deja).toBe(false);
+    expect(premier.gainCascade.etat.etoilesTotal).toBe(CREDITS_POUR_IMAGE);
+    expect(premier.gainCascade.paliersFranchis).toEqual(['etoile', 'intermediaire', 'rare']);
+    await expect(page.locator('[data-fin="reussite"]')).toBeVisible();
+    expect(await page.locator('[data-etat="echec"]').count()).toBe(0);
+    await expect.poll(async () => (await page.locator('[data-recompense]').evaluateAll((marques) =>
+      marques.map((marque) => marque.getAttribute('data-recompense')))).sort())
+      .toEqual(['etoile', 'intermediaire', 'rare']);
+    const jauges = page.locator('[data-ecran="recompense"] [data-palier]');
+    await expect(jauges).toHaveCount(3);
+    for (const jauge of await jauges.all()) expect(Number(await jauge.getAttribute('data-restant'))).toBeGreaterThanOrEqual(0);
 
-    // Les seuils sont CHARGÉS AU DÉMARRAGE, en données (convention C2). On attend leur
-    // arrivée par leur seule conséquence visible : la jauge dans la barre de consigne.
-    await page.evaluate(async (noeud) => {
-      await (window as FenetreTest).__test.allerAuNoeud(noeud);
-    }, NOEUD);
-    await expect(page.locator('[data-ecran="noeud"] [data-palier="intermediaire"]')).toBeVisible();
-
-    // Au départ, il reste cinq étoiles avant le premier tampon. Le nombre vient des données,
-    // pas d'une constante de ce fichier : on lit ce que la jauge affiche.
-    const jaugeDepart = page.locator('[data-ecran="noeud"] [data-palier="intermediaire"]');
-    const restantDepart = Number(await jaugeDepart.getAttribute('data-restant'));
-    expect(restantDepart).toBeGreaterThan(0);
-
-    const paliersVus = new Set<string>();
-
-    for (let noeudJoue = 0; noeudJoue < NOEUDS_MAX; noeudJoue += 1) {
-      await page.evaluate((instant) => {
-        (window as FenetreTest).__test.figerHorloge(instant);
-      }, instantDuTour(noeudJoue));
-      if (noeudJoue > 0) {
-        await page.evaluate(async (noeud) => {
-          await (window as FenetreTest).__test.allerAuNoeud(noeud);
-        }, NOEUD);
-        await expect(page.locator('[data-ecran="noeud"]')).toBeVisible();
-      }
-
-      await jouerLeNoeudEntier(page);
-
-      // ── R14, à chaque tour : aucun écran d'échec, la fin est toujours une réussite.
-      expect(await page.locator('[data-etat="echec"]').count()).toBe(0);
-      await expect(page.locator('[data-fin="reussite"]')).toBeVisible();
-
-      for (const marque of await page.locator('[data-recompense]').all()) {
-        const palier = await marque.getAttribute('data-recompense');
-        if (palier !== null) {
-          paliersVus.add(palier);
-        }
-      }
-
-      // ── les trois jauges sont TOUJOURS là, et `data-restant` n'est jamais négatif
-      const jauges = page.locator('[data-ecran="recompense"] [data-palier]');
-      await expect(jauges).toHaveCount(3);
-      for (const jauge of await jauges.all()) {
-        expect(Number(await jauge.getAttribute('data-restant'))).toBeGreaterThanOrEqual(0);
-      }
-
-      if (paliersVus.has('etoile') && paliersVus.has('intermediaire') && paliersVus.has('rare')) {
-        break;
-      }
-    }
-
-    // ── LE cœur du test : les trois paliers de D25, réellement franchis.
-    expect([...paliersVus].sort()).toEqual(['etoile', 'intermediaire', 'rare']);
+    await page.evaluate(async ({ noeud, instant }) => {
+      const crochets = (window as FenetreTest).__test;
+      crochets.figerHorloge(instant);
+      await crochets.allerAuNoeud(noeud);
+    }, { noeud: NOEUD, instant: instantDuTour(1) });
+    const rejeu = await jouerLeNoeudEntier(page);
+    expect(rejeu.deja, 'une nouvelle tentative réelle, pas un renvoi idempotent').toBe(false);
+    expect(rejeu.gainCascade.etat, 'rejouer le même exercice ne fait pas avancer la cascade').toEqual(premier.gainCascade.etat);
+    expect(rejeu.gainCascade.paliersFranchis).toEqual([]);
+    expect(rejeu.gainCascade.recompenses).toEqual([]);
+    await expect(page.locator('[data-fin="reussite"]')).toBeVisible();
+    expect(await page.locator('[data-etat="echec"]').count()).toBe(0);
   });
 
   test('la jauge montre le VIDE restant, et il DÉCROÎT quand on joue (D25, point 3)', async ({
@@ -190,9 +171,9 @@ test.describe('la cascade de D25', () => {
     await expect(jauge).toBeVisible();
     const apres = Number(await jauge.getAttribute('data-restant'));
 
-    // Trois étoiles gagnées : il reste STRICTEMENT moins à parcourir. Une jauge qui
+    // Un exercice inédit gagné : exactement un crédit de moins avant le palier. Une jauge qui
     // n'afficherait que l'acquis passerait toutes les assertions de forme et échouerait ici.
-    expect(apres).toBeLessThan(avant);
+    expect(apres).toBe(avant - 1);
     expect(apres).toBeGreaterThanOrEqual(0);
   });
 

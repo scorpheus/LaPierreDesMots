@@ -53,14 +53,13 @@ for (const format of FORMATS) {
         expect(gestes, 'au moins un geste doit avoir été réellement effectué').toBeGreaterThan(0);
         expect(gestes, 'aucune boucle infinie après 256 gestes').toBeLessThan(256);
         await expect(page.locator('[data-ecran="recompense"]')).toBeVisible();
-        if (noeud.progression) {
-          await expect.poll(async () => {
+        await expect.poll(async () => {
             const reponse = await page.request.get(`/api/profils/${encodeURIComponent(profil!)}/progression`);
             expect(reponse.ok(), 'la progression est relue au serveur, pas seulement dans le magasin client').toBe(true);
             const progression = await reponse.json() as readonly { noeud: string; etoiles: number }[];
-            return progression.find((ligne) => ligne.noeud === noeud.id)?.etoiles ?? 0;
-          }, { message: `${noeud.id} : la réussite tactile est réellement sauvegardée` }).toBeGreaterThan(0);
-        }
+            return progression.filter((ligne) => ligne.etoiles > 0).map((ligne) => ligne.noeud).sort();
+          }, { message: `${noeud.id} : seul l'exercice joué progresse ; l'activité libre ne débloque aucun nœud` })
+          .toEqual(noeud.progression ? [noeud.id] : []);
         expect(erreurs, 'aucune exception dans le navigateur').toEqual([]);
         await info.attach('gestes-tactiles', {
           body: JSON.stringify({ noeud: noeud.id, moteur: noeud.moteur, format: format.nom, gestes }),

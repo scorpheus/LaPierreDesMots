@@ -95,6 +95,7 @@ import {
   poserObjetCampement as poserObjetCampementDepot,
   previsualiserReinitialisation,
   profilExiste,
+  recalculerToutesLesCascades,
   reinitialiserProfil,
   reinitialiserVerrou,
   selNeuf,
@@ -136,6 +137,9 @@ async function ouvrirBaseLocale(): Promise<Base> {
 async function creerBase(): Promise<Base> {
   const base = await ouvrirBaseLocale();
   await migrerBaseAutonome(base, horloge.maintenant());
+  await base.transaction((transaction) => recalculerToutesLesCascades(
+    transaction, chargerSeuilsCascadeAutonome()
+  ));
   return base;
 }
 
@@ -427,7 +431,7 @@ export const portLocal: PortApi = {
       maitrises: await lireMaitrises(base, id),
       revisionsDues: await lireRevisionsDues(base, id, maintenant),
       noeudsDisponibles: construireCandidats(noeuds, exercices),
-      noeudsTermines: (await lireProgression(base, id)).map((ligne) => ligne.noeud),
+      noeudsTermines: (await lireProgression(base, id)).filter((ligne) => ligne.etoiles > 0).map((ligne) => ligne.noeud),
       competences,
       maintenant
     };

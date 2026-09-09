@@ -29,7 +29,6 @@ import { enregistrerRoutesTentatives } from '@serveur/routes/tentatives';
 import { chargerReferentielMonde } from '@serveur/referentiels/monde';
 import { enregistrerFormeGobi } from '@pierre/partage/base';
 import type { Base } from '@pierre/partage/base';
-import { calculerEtoiles } from '@partage/etoiles';
 import { lireSeuilsCascade } from '@pierre/partage/recompenses';
 
 import { readdirSync } from 'node:fs';
@@ -491,19 +490,14 @@ describe('étanchéité stricte entre profils — v2 § 11', () => {
     // ce que fait un enfant : chaque nœud terminé donne ses étoiles, et chaque palier
     // intermédiaire attribue une forme de Gobi.
     //
-    // On DÉRIVE donc l'attendu des seuils livrés et du barème, plutôt que de figer un nombre
+    // On DÉRIVE donc l'attendu des seuils livrés et des réussites uniques, plutôt que de figer un nombre
     // qu'un recalibrage ferait mentir (« ces valeurs vivent en données parce qu'elles seront
     // recalibrées », `parametres-recompenses.json`).
     const seuils = lireSeuilsCascade(lireJson('contenu/referentiel/parametres-recompenses.json'));
-    const etoilesParNoeud = calculerEtoiles({
-      reussi: true,
-      nbErreurs: 0,
-      aideUtilisee: 'aucune',
-      dureeMs: 60_000,
-      etapes: []
-    });
+    // Décision parent du 6 septembre 2026 : une première réussite vaut un crédit,
+    // indépendamment des étoiles de qualité et des reprises du même nœud.
     const formesAttendues = Math.floor(
-      (noeudsDeLaClairiere().length * etoilesParNoeud) / seuils.etoilesParIntermediaire
+      noeudsDeLaClairiere().length / seuils.etoilesParIntermediaire
     );
     // Le palier intermédiaire n'attribue une forme que s'il est réglé sur ça : si le
     // référentiel change de nature, ce cas doit le dire au lieu de compter dans le vide.

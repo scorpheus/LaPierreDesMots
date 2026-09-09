@@ -12,7 +12,7 @@ import { mkdirSync } from 'node:fs';
 import path from 'node:path';
 
 import { creerAlea, horloge } from '@pierre/partage';
-import { reparerProgressionRegion } from '@pierre/partage/base';
+import { recalculerToutesLesCascades, reparerProgressionRegion } from '@pierre/partage/base';
 
 import { construireApplication } from './application.js';
 import { appliquerMigrations } from './base/migrations.js';
@@ -20,6 +20,7 @@ import { creerBaseNodeSqlite } from './base/adaptateur-node-sqlite.js';
 import { BASE_EN_MEMOIRE, ouvrirBase } from './base/connexion.js';
 import { lireConfiguration } from './configuration.js';
 import { chargerReferentielMonde } from './referentiels/monde.js';
+import { chargerSeuilsCascade } from './referentiels/recompenses.js';
 import { creerDepotContenuDisque } from './services/depot-contenu-disque.js';
 
 async function demarrer(): Promise<void> {
@@ -46,6 +47,10 @@ async function demarrer(): Promise<void> {
   // avant que l'enfant n'ouvre la carte lirait le pourcentage que la migration 010 vient
   // d'invalider. Idempotent, et sans effet quand tout est deja juste.
   const reparees = await reparerProgressionRegion(base, chargerReferentielMonde(configuration.racineContenu));
+  // Les crédits suivent les exercices distincts réussis, y compris pour les anciens profils.
+  await base.transaction((transaction) => recalculerToutesLesCascades(
+    transaction, chargerSeuilsCascade(path.join(configuration.racineContenu, 'referentiel', 'parametres-recompenses.json'))
+  ));
   if (reparees > 0) {
     process.stdout.write(
       `[pierre] recoloration recalculee pour ${String(reparees)} profil(s).\n`

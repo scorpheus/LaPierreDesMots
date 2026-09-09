@@ -101,6 +101,8 @@ export interface ServeurIsole {
   readonly port: number;
   readonly url: string;
   arreter: () => Promise<void>;
+  /** Recrée uniquement la base mémoire de recette, sans changer l'adresse du navigateur. */
+  reinitialiser: () => Promise<void>;
 }
 
 /**
@@ -171,11 +173,11 @@ async function attendreEnEcoute(port: number, fils: ChildProcess): Promise<boole
  * test n'a aucune raison d'être joignable depuis le LAN, et 372 processus qui ouvrent une
  * écoute publique feraient clignoter le pare-feu de la machine à chaque campagne.
  */
-async function demarrerServeur(): Promise<ServeurIsole> {
+async function demarrerInstance(portImpose?: number): Promise<Omit<ServeurIsole, 'reinitialiser'>> {
   let derniereRaison = 'inconnue';
 
   for (let tentative = 0; tentative < DEMARRAGES_MAX; tentative += 1) {
-    const port = await reserverPort();
+    const port = portImpose ?? await reserverPort();
     const fils = spawn(process.execPath, ['serveur/dist/index.js'], {
       cwd: RACINE,
       env: {
@@ -233,6 +235,19 @@ async function demarrerServeur(): Promise<ServeurIsole> {
  * immédiatement un préchauffage. Le démarrage du serveur du cas n+1 se déroule pendant que le
  * cas n joue, c'est-à-dire pendant plusieurs centaines de millisecondes de navigateur.
  */
+async function demarrerServeur(): Promise<ServeurIsole> {
+  let courant = await demarrerInstance();
+  const { port, url } = courant;
+  return {
+    port, url,
+    arreter: () => courant.arreter(),
+    reinitialiser: async () => {
+      await courant.arreter();
+      courant = await demarrerInstance(port);
+    },
+  };
+}
+
 class Vivier {
   #suivant: Promise<ServeurIsole> | null = null;
   #ferme = false;

@@ -202,13 +202,13 @@ async function prochaineFormeAOffrir(
 async function appliquerCascadeEtRecompenses(
   base: Base,
   profilId: string,
-  etoiles: NombreEtoiles,
+  credit: 0 | 1,
   termineLe: Horodatage,
   horloge: Horloge,
   seuils: SeuilsCascade,
   referentiel: ReferentielMonde
 ): Promise<GainCascade> {
-  const gain = await appliquerTentativeALaCascadeAvecGain(base, profilId, etoiles, seuils, termineLe);
+  const gain = await appliquerTentativeALaCascadeAvecGain(base, profilId, credit, seuils, termineLe);
 
   if (!gain.paliersFranchis.includes('intermediaire')) {
     return gain;
@@ -265,6 +265,19 @@ export async function enregistrerTentative(
       };
     }
 
+    // Le journal distingue une nouvelle réussite d'une reprise et d'un échec.
+    // La projection conserve les étoiles de qualité ; la cascade reçoit UN crédit
+    // par nœud réussi pour la première fois (décision parent du 6 septembre 2026).
+    // Cette lecture précède l'insertion dans la même transaction sérialisée : deux
+    // envois concurrents avec des clés différentes ne peuvent pas créditer deux fois.
+    const reussiteAnterieure = validee.resume.reussi
+      ? await transaction.uneLigne<{ id: string }>(
+          'SELECT id FROM tentatives WHERE profil_id = ? AND noeud_id = ? AND reussi = 1 LIMIT 1',
+          [validee.profil, validee.noeud]
+        )
+      : undefined;
+    const credit = validee.resume.reussi && reussiteAnterieure === undefined ? 1 : 0;
+
     try {
       await transaction.lancer(`INSERT INTO tentatives (${CHAMPS}) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [
         await deriverIdentifiant(validee.cleIdempotence),
@@ -315,7 +328,7 @@ export async function enregistrerTentative(
     const gainCascade = await appliquerCascadeEtRecompenses(
       transaction,
       validee.profil,
-      etoiles,
+      credit,
       validee.termineLe,
       horloge,
       seuilsCascade,

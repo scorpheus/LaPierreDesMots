@@ -11,6 +11,51 @@ description: >-
 
 # Le banc de mutation, et le détecteur de tests trompeurs
 
+## Progression et sauvegarde : commencer par le parcours cumulé
+
+`npm run test:progression` exécute la famille sans couverture ni navigateur ; la recette
+`parcours-progression-cumulee.spec.ts` passe ensuite par la carte avec les gestes natifs.
+Les cas tactiles isolés restent complémentaires : leur réussite sur un profil neuf ne
+prouve pas la reprise d’une sortie interrompue. Comparer l’ensemble exact des nœuds acquis,
+les compteurs affichés et les récompenses après chaque exercice puis après rechargement.
+
+Pour un enregistrement asynchrone, maintenir une promesse non résolue puis la rejeter ou
+la résoudre : exiger ACK avant navigation, même clé au réessai, absence de gain appliqué
+à une autre tentative ou à un autre profil. Une réponse factice `{}` ne représente pas
+un enregistrement réussi : fournir une enveloppe `gainCascade` valide.
+
+Pour une évolution illustrée, comparer le `href`/`src` effectivement rendu entre deux
+stades. `data-stade` peut annoncer Gardien tout en affichant le même sprite de joie.
+
+La décision parent du 6 septembre compte un crédit par nouvel exercice réussi : le rejeu
+améliore les étoiles mais ne donne pas de crédit supplémentaire. Vérifier incrémental et
+recalcul sur le même journal, avec reprises et échecs, et préserver les récompenses acquises.
+Voir `Docs/audit-qa-progression-2026-09-06.md` pour les mesures et limites du lot.
+
+Pour un dépassement RPC Vitest, mesurer d’abord le bruit réellement produit, sans masquer
+les erreurs non capturées. L’exploration générait 7 130 avertissements `act` malgré
+`silent: 'passed-only'` : ce réglage d’affichage ne corrige pas l’environnement React.
+Importer `act` depuis Testing Library dans son harnais configure et restaure cet
+environnement même avec `globals: false`. Conserver le test qui compte ces avertissements
+et les assertions du graphe ; zéro avertissement ne remplace pas la navigation validée.
+
+Le balayage générique des commandes utilise `tests/e2e/audit-interactions.ts` : inventorier
+des identités, refuser les doublons, conserver les repères DOM puis retrouver la cible à
+froid si une réponse précédente l’a retirée. Une absence persistante reste non vérifiée.
+Tester la cible seule avant l’amorçage, puis après chaque amorce ; rétablir l’écran quand
+une amorce navigue ailleurs. Les contrôles du helper couvrent déplacement, remplacement,
+homonymes et faux adaptateur. Ce balayage synthétique n’est pas une recette tactile.
+
+Pour le chaudron, attendre le moteur et le masque raster chargé. La couleur se trouve dans
+`canvas[data-raster-couche="couleurs"]`, pas dans le HTML ni dans l’état global du jeu :
+comparer ses pixels, en excluant les particules. Le contrôle exige un signal égal si les
+pixels sont inchangés et différent lorsqu’ils changent à DOM identique. Ne pas déduire le
+rendu du seul nom `SceneLibre` : cette scène peut choisir le SVG ou le raster indexé.
+
+La chaîne complète conserve maintenant les artefacts dans trois dossiers distincts :
+`tests/rapports/artefacts/e2e`, `visuel`, `qualite`. Les appels ciblés continuent d’utiliser
+leur dossier par défaut ; passer un `--output` dédié pour conserver un échec ciblé.
+
 **Sources à lire : historique, recettes et dernière mesure sont distincts.** Ne pas recopier
 un ancien nombre comme état du jour ; ne pas modifier une référence pour rendre un résultat vert.
 
@@ -391,6 +436,29 @@ ne prouve pas la résistance à l'arrêt forcé pendant la transaction ; garder 
 exécute pendant une mutation : y tester la présence du code original créerait de fausses détections.
 
 ## Ce que le banc ne mesure PAS, et qu'il ne faut pas taire
+
+### Commandes chargées, champs, exports et branches destructives
+
+Attendre les données du panneau avant son inventaire : un dashboard déjà monté peut encore
+ne contenir que son en-tête. Identifier les champs par leur réglage et les commandes répétées
+par le brouillon auquel elles appartiennent, sans utiliser leur rang comme identité.
+Une saisie se vérifie sur la propriété courante du champ après événements `input`/`change` ;
+un export se vérifie sur le téléchargement terminé et son nom, pas sur un changement du DOM.
+Ces signaux restent distincts de la persistance ou de la justesse du contenu exporté.
+
+Une navigation ne remet pas la base à neuf : valider un brouillon supprime la branche Rejeter.
+Pour explorer les deux, `serveurIsole.reinitialiser()` recrée la base en mémoire sur le même
+port, après avoir quitté la page ; la recette remonte ensuite l'état initial. Le contrôle
+`parcours-restauration-harnais.spec.ts` vérifie deux réinitialisations successives et la
+disparition des seuls profils de test. Ne jamais remplacer cela par une remise à zéro de
+la base personnelle. Voir `Docs/audit-qa-progression-2026-09-06.md` pour les rouges et mesures.
+
+Un crochet de test absent après navigation peut venir du chargement du bundle : lire la trace
+réseau/console avant d'accuser le moteur. Le 9 septembre, Chromium signale
+`ERR_NO_BUFFER_SPACE` sur un module JS ; le cas passe isolément, puis les 872 E2E passent avec
+`PIERRE_TRAVAILLEURS=3`. Conserver le passage rouge et les cas dépendants non exécutés dans
+le bilan. Le passage à trois est une reprise mesurée, pas une suppression d'assertion, une
+augmentation de délai ni la preuve que l'épuisement des ressources est définitivement résolu.
 
 Pour conserver une comparaison visuelle refusée, relancer le cas avec un `--output` dédié dans
 `bac-a-sable/` : les invocations suivantes de Playwright nettoient son répertoire commun.

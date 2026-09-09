@@ -149,7 +149,7 @@ export function enregistrerRoutesSortie(app: FastifyInstance, contexte: Contexte
       maitrises: await lireMaitrises(contexte.base, id),
       revisionsDues: await lireRevisionsDues(contexte.base, id, maintenant),
       noeudsDisponibles: construireCandidats(noeuds, exercices),
-      noeudsTermines: (await lireProgression(contexte.base, id)).map((ligne) => ligne.noeud),
+      noeudsTermines: (await lireProgression(contexte.base, id)).filter((ligne) => ligne.etoiles > 0).map((ligne) => ligne.noeud),
       competences,
       maintenant
     };

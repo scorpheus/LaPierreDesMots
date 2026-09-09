@@ -146,7 +146,7 @@ export function EvolutionGobi({
             }}
           >
             <svg viewBox={GOBI_VUE} role="img" aria-hidden="true" style={{ inlineSize: '100%', blockSize: '100%' }}>
-              <DessinDeGobi stade={apres} animation="joie" />
+              <DessinDeGobi stade={apres} animation="repos" />
             </svg>
           </div>
         ) : null}

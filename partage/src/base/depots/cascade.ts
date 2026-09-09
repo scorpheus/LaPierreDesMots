@@ -12,9 +12,10 @@
  * (`@pierre/partage/recompenses`). Le SQL ne recalcule rien de la cascade, il ne fait que la
  * ranger — c'est la seule facon d'eviter une seconde source de verite sur les seuils.
  *
- * Ordre de rejeu : `ORDER BY termine_le, id`. Les horodatages sont ISO 8601 UTC, donc leur
- * ordre lexicographique est leur ordre chronologique ; `id` departage deux tentatives closes
- * a la meme milliseconde, ce que l'horloge figee des tests produit systematiquement.
+ * La cascade compte un crédit par première réussite d'un nœud. Les champs `etoiles_*`
+ * et la fonction pure `appliquerEtoiles` gardent leur nom historique pour la compatibilité
+ * du stockage et de l'API ; ils ne portent plus la somme des étoiles de qualité.
+ * Le rejeu retient la première réussite de chaque nœud, triée par date puis nœud.
  *
  * Porté sur le contrat `Base` — Docs/addendum-portage-android.md § 4. Le CHARGEMENT des seuils
  * (`contenu/referentiel/parametres-recompenses.json`, `node:fs`) reste côté serveur/autonome —
@@ -23,7 +24,6 @@
  */
 
 import type { Horodatage } from '../../identifiants.js';
-import type { NombreEtoiles } from '../../journal/types.js';
 import type { EtatCascade, GainCascade, SeuilsCascade } from '../../recompenses/types.js';
 import { ETAT_CASCADE_VIDE, appliquerEtoiles } from '../../recompenses/index.js';
 import type { Base } from '../contrat.js';
@@ -69,6 +69,14 @@ ON CONFLICT (profil_id) DO UPDATE SET
   dernier_palier_le          = excluded.dernier_palier_le
 `;
 
+// La même population alimente les crédits du rejeu et la date de l'incrémental.
+// Les dates des appareils peuvent arriver hors ordre : la dernière requête reçue
+// n'est pas nécessairement la dernière première réussite chronologique.
+const SQL_PREMIERES_REUSSITES = `
+SELECT noeud_id, MIN(termine_le) AS termine_le FROM tentatives
+WHERE profil_id = ? AND reussi = 1 GROUP BY noeud_id
+`;
+
 /**
  * L'etat de cascade d'un profil. Un profil qui n'a rien joue rend `ETAT_CASCADE_VIDE` plutot
  * que `null` : il n'existe pas d'enfant « sans cascade », seulement un enfant qui commence.
@@ -92,7 +100,8 @@ async function ecrire(base: Base, profilId: string, etat: EtatCascade): Promise<
 
 /**
  * Chemin incremental, RICHE. A appeler dans la MEME transaction que l'insertion de la
- * tentative, exactement comme `appliquerTentativeALaProgression`.
+ * tentative, exactement comme `appliquerTentativeALaProgression`. L'appelant transmet
+ * le crédit de première réussite (0 ou 1), jamais les étoiles de qualité de la tentative.
  *
  * Rend le `GainCascade` COMPLET (etat, paliers franchis, recompenses, jauges) — pas seulement
  * l'etat qui en resulte. Lot A1 (R31) : `depots/tentatives.ts` en a besoin pour savoir QUELS
@@ -103,28 +112,37 @@ async function ecrire(base: Base, profilId: string, etat: EtatCascade): Promise<
 export async function appliquerTentativeALaCascadeAvecGain(
   base: Base,
   profilId: string,
-  etoiles: NombreEtoiles,
+  credit: 0 | 1,
   seuils: SeuilsCascade,
   termineLe: Horodatage
 ): Promise<GainCascade> {
-  const gain = appliquerEtoiles(await lireCascade(base, profilId), etoiles, seuils, termineLe);
+  const brut = appliquerEtoiles(await lireCascade(base, profilId), credit, seuils, termineLe);
+  const derniere = await base.uneLigne<{ dernier_palier_le: string | null }>(
+    `SELECT MAX(termine_le) AS dernier_palier_le FROM (${SQL_PREMIERES_REUSSITES})`,
+    [profilId]
+  );
+  // Même avec zéro crédit, une réussite ancienne reçue en reprise peut corriger la
+  // première date connue du nœud. Cela répare la projection sans célébrer de nouveau.
+  const gain: GainCascade = {
+    ...brut,
+    etat: { ...brut.etat, dernierPalierLe: derniere?.dernier_palier_le ?? null }
+  };
   await ecrire(base, profilId, gain.etat);
   return gain;
 }
 
 /**
  * Chemin incremental, comme ci-dessus, mais ne rend que l'ETAT — la forme que
- * `tests/unitaires/cascade.test.ts` attend depuis L2-A. INCHANGEE par le lot A1 : elle delegue
- * simplement a `appliquerTentativeALaCascadeAvecGain`, rien de son comportement ne bouge.
+ * `tests/unitaires/cascade.test.ts` attend depuis L2-A. Il délègue au même chemin de crédit.
  */
 export async function appliquerTentativeALaCascade(
   base: Base,
   profilId: string,
-  etoiles: NombreEtoiles,
+  credit: 0 | 1,
   seuils: SeuilsCascade,
   termineLe: Horodatage
 ): Promise<EtatCascade> {
-  return (await appliquerTentativeALaCascadeAvecGain(base, profilId, etoiles, seuils, termineLe)).etat;
+  return (await appliquerTentativeALaCascadeAvecGain(base, profilId, credit, seuils, termineLe)).etat;
 }
 
 /**
@@ -142,9 +160,8 @@ export async function recalculerCascade(
 ): Promise<EtatCascade> {
   await base.lancer('DELETE FROM progression_cascade WHERE profil_id = ?', [profilId]);
 
-  const lignes = await base.lignes<{ etoiles: number; termine_le: string }>(
-    `SELECT etoiles, termine_le FROM tentatives
-     WHERE profil_id = ? ORDER BY termine_le, id`,
+  const lignes = await base.lignes<{ termine_le: string }>(
+    `${SQL_PREMIERES_REUSSITES} ORDER BY termine_le, noeud_id`,
     [profilId]
   );
 
@@ -152,7 +169,7 @@ export async function recalculerCascade(
   for (const ligne of lignes) {
     etat = appliquerEtoiles(
       etat,
-      Number(ligne.etoiles) as NombreEtoiles,
+      1,
       seuils,
       String(ligne.termine_le)
     ).etat;

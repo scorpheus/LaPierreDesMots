@@ -40,8 +40,8 @@
  * `pointerdown` ». Une prise SVG peinte sur `pointerdown` serait invisible autrement.
  * ══════════════════════════════════════════════════════════════════════════════════════════
  */
-import { act } from 'react';
-import { cleanup, fireEvent, render } from '@testing-library/react';
+// Le wrapper déclare puis restaure l'environnement React, même avec globals:false dans Vitest.
+import { act, cleanup, fireEvent, render } from '@testing-library/react';
 import { QueryClient } from '@tanstack/react-query';
 
 import { Application } from '@client/Application';

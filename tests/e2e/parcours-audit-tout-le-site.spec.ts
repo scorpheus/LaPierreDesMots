@@ -41,6 +41,7 @@
  * Aucune attente de durée (annexe T § 6) : on attend un état, jamais un délai.
  */
 import { expect, test } from './invariants.js';
+import { auditerInteractions, empreintesCouleurs, repererCommandes, taperCommandeReperee, valeursFormulaires } from './audit-interactions.js';
 
 import type { Page } from '@playwright/test';
 
@@ -53,6 +54,7 @@ import {
   choisirLeProfil,
   ciblesTropPetites,
   ecranCourant,
+  deuxImages,
   ecransDeclares,
   entrerDansLeNoeud,
   etatDuJeu,
@@ -166,112 +168,85 @@ test.describe('QA — R16 : aucune cible sous 64 px', () => {
 // ═════════════════════════════════════════════════ 3. AUCUN ÉLÉMENT INTERACTIF MORT
 
 /**
- * « Un bouton qui ne fait rien est un bug » — c'est le défaut n° 2 du père, énoncé en général.
- *
- * Un élément est VIVANT si son tap change quelque chose d'observable : le DOM, l'écran, ou
- * l'état du jeu. Les trois sont mesurés, parce qu'un seul ne suffit pas — le bouton « écouter »
- * ne change pas d'écran, et une réponse de moteur ne change pas toujours le DOM visible.
- *
- * ── DEUX PASSES, ET C'EST CE QUI REND LE VERDICT HONNÊTE ───────────────────────────────────
- * Certains contrôles sont LÉGITIMEMENT inertes dans l'état où on les trouve d'abord. Le
- * réceptacle du moteur `tri` en est l'exemple net : sans élément en main, `MoteurTri` fait
- * `if (etat.elementSaisi === null) return;`, et son commentaire le revendique — « un doigt qui
- * traîne ne coûte rien ». Le déclarer mort serait une FAUSSE ALERTE, et une suite QA qui crie
- * au loup finit par être lue en diagonale : c'est la pire chose qui puisse lui arriver.
- *
- *   Passe A — EN AVANT, comme joue un enfant : on tape 0, 1, 2 … sans jamais revenir en
- *             arrière. La partie progresse, donc un réceptacle finit par avoir un élément en
- *             main. Une seule mise en place pour tout l'écran.
- *   Passe B — À FROID : pour les seuls éléments restés muets en passe A, on repart d'un écran
- *             frais et on ne tape qu'eux. Un contrôle que la passe A avait masqué ou déplacé
- *             retrouve ainsi sa chance.
- *
- * Un élément n'est déclaré MORT que s'il est resté inerte dans les DEUX passes. Il n'y a
- * AUCUNE liste d'exemptions — c'est plus strict qu'un jeu d'exceptions écrites à la main, et
- * ça ne dépend d'aucune connaissance des 14 moteurs.
- *
- * COÛT : la version précédente rechargeait l'écran une fois par élément ET par élément
- * d'amorçage — de l'ordre de n² chargements, soit plus de mille pour le nœud `colorie` et ses
- * 33 régions. Ici c'est 1 + k, où k est le nombre d'éléments muets. Même verdict, deux ordres
- * de grandeur moins cher : une QA trop lente pour être lancée ne garde rien.
+ * Balayage de réactions observables, sans promesse de justesse métier ni de hit-testing.
+ * Chaque commande initiale conserve un repère DOM ; sa disparition ou son remplacement
+ * reste non vérifié. La seconde passe rétablit l'écran après une navigation d'amorçage.
+ * Les parcours spécifiques restent responsables de l'effet métier attendu.
  */
-test.describe('QA — aucun élément interactif mort', () => {
+test.describe('QA — réactions des commandes inventoriées', () => {
   test.slow();
 
   for (const ecran of ECRANS) {
-    test(`« ${ecran.nom} » : tout élément tapable produit un effet`, async ({ page }) => {
-      await allerSur(page, ecran);
-      const nbInteractifs = Math.min(
-        await page.locator(SELECTEUR_INTERACTIF).count(),
-        ELEMENTS_MAX_AUDITES,
-      );
-
-      /** Tape l'élément `rang` et dit si quelque chose d'observable a bougé. */
-      const tapeEtObserve = async (
-        rang: number,
-      ): Promise<{ vivant: boolean; description: string | null }> => {
-        const avantEcran = await ecranCourant(page);
-        const avantEtat = JSON.stringify(await etatDuJeu(page));
-        const tape = await taperElement(page, rang);
-        if (tape === null) {
-          // L'élément n'existe plus dans cet état : absent n'est pas mort.
-          return { vivant: true, description: null };
-        }
-        const apresEcran = await ecranCourant(page);
-        const apresEtat = JSON.stringify(await etatDuJeu(page));
-        return {
-          vivant: tape.domChange || apresEcran !== avantEcran || apresEtat !== avantEtat,
-          description: tape.description,
-        };
-      };
-
-      // ── Passe A : en avant, en restant ANCRÉ sur l'écran audité.
-      //
-      // Si un tap change d'écran, on y revient avant de continuer. Sans cela l'audit dérive :
-      // les rangs suivants désignent les éléments d'un AUTRE écran, et on impute à celui-ci
-      // des contrôles qui ne lui appartiennent pas. Mesuré — « choix du joueur à suivre »
-      // rapportait un bouton « Le suivi », qui est un onglet du dashboard, atteint parce que
-      // le premier tap y avait mené.
-      const depart = await ecranCourant(page);
-      const muets: number[] = [];
-      const noms = new Map<number, string>();
-      for (let rang = 0; rang < nbInteractifs; rang += 1) {
-        const { vivant, description } = await tapeEtObserve(rang);
-        if (description !== null) noms.set(rang, description);
-        if (!vivant) muets.push(rang);
-        if ((await ecranCourant(page)) !== depart) await allerSur(page, ecran);
-      }
-
-      // ── Passe B : écran frais, TOUS LES AUTRES d'abord, la cible en dernier.
-      //
-      // Pourquoi pas simplement « à froid » : un contrôle peut être inerte parce qu'il est
-      // DÉJÀ dans l'état qu'il commande. Le bouton « Andika » des réglages de lecture en est
-      // l'exemple mesuré — c'est la police par défaut, donc la choisir depuis un écran neuf
-      // ne change rien, et il paraissait mort. Tapé APRÈS qu'une autre police a été choisie,
-      // il redevient ce qu'il est : vivant.
-      //
-      // On ne tape que pour les muets de la passe A, donc le surcoût reste borné par leur
-      // nombre — et un écran dont TOUT est muet est de toute façon un écran à regarder.
-      const morts: string[] = [];
-      for (const rang of muets) {
-        await allerSur(page, ecran);
-        for (let autre = 0; autre < nbInteractifs; autre += 1) {
-          if (autre !== rang) await taperElement(page, autre);
-        }
-        const { vivant, description } = await tapeEtObserve(rang);
-        if (description !== null) noms.set(rang, description);
-        if (!vivant) morts.push(noms.get(rang) ?? `élément n° ${String(rang)}`);
-      }
-
+    test(`« ${ecran.nom} » : chaque commande inventoriée est observée`, async ({ page, serveurIsole }) => {
+      let inventaire: string[] = [];
+      const verdicts = await auditerInteractions({
+        async restaurer() {
+          if (ecran.attendu === 'dashboard') {
+            // Valider un brouillon retire son bouton Rejeter : une simple navigation
+            // ne remet pas les données à neuf pour explorer cette autre branche.
+            await page.goto('/');
+            await serveurIsole.reinitialiser();
+          }
+          await allerSur(page, ecran);
+          if (ecran.attendu === 'dashboard') {
+            await expect(page.locator('[data-indicateur="reglages"]')).toBeVisible();
+            await expect(page.locator('[data-indicateur="relecture"]')).toBeVisible();
+          }
+          if (ecran.attendu === 'chaudron') {
+            // Le main existe pendant le chargement du paquet, avant les couleurs et prises.
+            await expect(page.locator('[data-ecran="chaudron"] [data-moteur="libre"]')).toBeVisible();
+          }
+          // Le repli SVG précède l'illustration chargée ; inventorier ses cercles
+          // reviendrait à demander ensuite des commandes qui n'ont jamais été livrées.
+          for (const scene of await page.locator('svg[data-decor]').all()) {
+            await expect(scene).toHaveAttribute('data-decor', 'habillage');
+          }
+          for (const scene of await page.locator('[data-masque-raster]').all()) {
+            await expect(scene).toHaveAttribute('data-masque-raster', 'pret');
+          }
+          inventaire = await repererCommandes(page, SELECTEUR_INTERACTIF);
+        },
+        ecran: () => ecranCourant(page),
+        async inventorier() { return inventaire; },
+        async taper(cible) {
+          const avantEcran = await ecranCourant(page);
+          const avantEtat = JSON.stringify(await etatDuJeu(page));
+          const avantCouleurs = await empreintesCouleurs(page);
+          const avantFormulaires = await valeursFormulaires(page);
+          const [, reperes] = JSON.parse(cible) as [string, [string, string][]];
+          const codeExport = reperes.find(([nom]) => nom === 'data-export')?.[1];
+          const telechargement = codeExport !== undefined &&
+            await page.locator(`[data-export="${codeExport}"]`).count() === 1
+            ? page.waitForEvent('download') : null;
+          const observation = await taperCommandeReperee(page, cible);
+          if (observation === null) return null;
+          if (telechargement !== null) {
+            const fichier = await telechargement;
+            expect(fichier.suggestedFilename()).toBe(`pierre-${codeExport}.csv`);
+            expect(await fichier.failure()).toBeNull();
+          }
+          await deuxImages(page);
+          const apresDom = await page.evaluate(() => document.body.innerHTML);
+          const apresCouleurs = await empreintesCouleurs(page);
+          const apresFormulaires = await valeursFormulaires(page);
+          return {
+            cible,
+            effet: telechargement !== null || observation.avantDom !== apresDom ||
+              JSON.stringify(apresCouleurs) !== JSON.stringify(avantCouleurs) ||
+              JSON.stringify(apresFormulaires) !== JSON.stringify(avantFormulaires) ||
+              await ecranCourant(page) !== avantEcran ||
+              JSON.stringify(await etatDuJeu(page)) !== avantEtat,
+          };
+        },
+      });
+      expect(verdicts.length, 'inventaire de commandes vide').toBeGreaterThan(0);
       expect(
-        morts,
-        `${ecran.nom} : ces éléments se tapent et ne produisent rien, ni en jouant en avant ` +
-          `ni sur un écran frais — c'est ce que le père a vécu avec le bouton « écouter »`,
+        verdicts.filter((verdict) => verdict.statut !== 'observe'),
+        `${ecran.nom} : commandes muettes ou non vérifiées ; un signal DOM ne prouve pas la justesse métier`,
       ).toEqual([]);
     });
   }
 });
-
 // ═══════════════════════════════════════════ 4. LES DEUX RÉGIONS, DANS LES DEUX SENS
 
 test.describe('QA — le parcours complet et les deux régions', () => {

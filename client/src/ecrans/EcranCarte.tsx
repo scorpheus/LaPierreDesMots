@@ -366,7 +366,7 @@ export function EcranCarte({
   );
 
   const noeudsFaits = useMemo(
-    () => new Set((requeteProgression.data ?? []).map((ligne) => String(ligne.noeud))),
+    () => new Set((requeteProgression.data ?? []).filter((ligne) => ligne.etoiles > 0).map((ligne) => String(ligne.noeud))),
     [requeteProgression.data]
   );
   const compagnonsRallies: readonly Compagnon[] = useMemo(
@@ -493,13 +493,17 @@ export function EcranCarte({
       .sort((gauche, droite) => gauche.ordre - droite.ordre)
       .find((une) => !une.ouverte && une.noeuds.length > 0);
     if (verrouillee === undefined) return null;
+    // Une place se libère dès qu'UNE des régions ouvertes est terminée (D38).
+    // La région d'ordre précédent peut être intacte alors qu'une autre approche de la fin.
+    const restantDe = (une: EtatRegion): number =>
+      une.noeuds.filter((noeud) => !noeudsFaits.has(String(noeud))).length;
     const precedente = [...regions]
-      .sort((gauche, droite) => gauche.ordre - droite.ordre)
-      .find((une) => une.ordre === verrouillee.ordre - 1);
+      .filter((une) => une.ouverte && une.pourcentageColorie < 1 && une.noeuds.length > 0)
+      .sort((gauche, droite) => restantDe(gauche) - restantDe(droite) || gauche.ordre - droite.ordre)[0];
     return {
       region: verrouillee.region,
       precedente: precedente?.region ?? null,
-      restant: precedente === undefined ? null : Math.max(0, precedente.noeuds.length - precedente.noeuds.filter((noeud) => noeudsFaits.has(String(noeud))).length),
+      restant: precedente === undefined ? null : restantDe(precedente),
     };
   }, [regions, noeudsFaits]);
 

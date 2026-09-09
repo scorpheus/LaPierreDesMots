@@ -48,6 +48,7 @@ import { compagnonParRegion, compagnonsDuProfil } from '../../monde/compagnons.j
 import type { DefinitionCompagnon } from '../../monde/compagnons.js';
 import type { Horloge } from '../../horloge.js';
 import type { Base } from '../contrat.js';
+import { lireCascade } from './cascade.js';
 
 /** Tout ce que `contenu/monde/` declare, deja lu et valide — le chargement est ailleurs. */
 export interface ReferentielMonde {
@@ -88,7 +89,7 @@ interface LigneObjet {
 /** Les nœuds que ce profil a deja termines, lus dans la projection de progression. */
 async function noeudsTermines(base: Base, profilId: string): Promise<readonly string[]> {
   const lignes = await base.lignes<{ noeud_id: string }>(
-    'SELECT noeud_id FROM progression_noeud WHERE profil_id = ?',
+    'SELECT noeud_id FROM progression_noeud WHERE profil_id = ? AND etoiles > 0',
     [profilId]
   );
   return lignes.map((ligne) => String(ligne.noeud_id));
@@ -488,6 +489,7 @@ export async function lireMonde(base: Base, profilId: string, referentiel: Refer
   await synchroniserRecompensesDeRegion(base, profilId, carte, referentiel);
   return {
     carte,
+    cascade: await lireCascade(base, profilId),
     gobi: await lireGobi(base, profilId, referentiel, horloge),
     compagnons: await lireCompagnons(base, profilId, referentiel),
     campement: await lireCampement(base, profilId, referentiel)

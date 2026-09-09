@@ -11,6 +11,7 @@ import type {
   CheminAsset, CodeRegion, Horodatage, IdNoeud,
 } from '../identifiants.js';
 import type { CodeCompagnon } from '../pedagogie/types.js';
+import type { EtatCascade } from '../recompenses/types.js';
 
 export type CodeGrapheme = string;
 export type IdPointInteraction = string;
@@ -139,6 +140,8 @@ export interface Compagnon {
 }
 
 export interface EtatMonde {
+  /** Présent sur les réponses actuelles ; optionnel pour les anciens serveurs et caches PWA. */
+  readonly cascade?: EtatCascade;
   readonly carte: EtatCarte;
   readonly gobi: EtatGobi;
   readonly compagnons: readonly Compagnon[];

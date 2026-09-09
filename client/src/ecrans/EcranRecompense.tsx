@@ -10,7 +10,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import type { EtatMonde, IdNoeud, IdProfil, TentativeAEnregistrer } from '@pierre/partage';
+import type { EtatMonde, GainCascade, IdNoeud, IdProfil, TentativeAEnregistrer } from '@pierre/partage';
 import {
   calculerCleIdempotence,
   enregistrerTentative,
@@ -105,6 +105,7 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
   // Garde locale EN PLUS du drapeau du magasin : `StrictMode` monte deux fois en
   // développement, et le POST partirait deux fois avant que le premier n'ait répondu.
   const envoiEnCours = useRef(false);
+  const gainAccuse = useRef<{ cle: string; gain: GainCascade } | null>(null);
 
   const nombreEtoiles = etoiles ?? 1;
   // Le choix est porté par le plan de sortie, déjà lu par EcranNoeud pour l'aide. Le résultat
@@ -124,111 +125,69 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
     jouerEffet(services.audio, 'fin-noeud');
   }, [services]);
 
-  useEffect(() => {
-    if (dejaEnvoyee || envoiEnCours.current) {
-      return;
-    }
-    // ── R30 — LA PARTIE DU PARENT NE COMPTE PAS ────────────────────────────────────────────
-    //
-    // `tentatives` fait foi pour toute la pédagogie : BKT, Leitner et sélecteur s'en
-    // recalculent. Une partie que le parent lance depuis sa galerie pour VOIR à quoi ressemble
-    // un exercice n'est pas une donnée sur l'enfant ; l'y inscrire fausserait les trois, et de
-    // la pire façon — silencieusement, et dans le sens « il sait faire ».
-    //
-    // Le garde est ici, au seul endroit qui écrit. `LANCEMENT_PARENT` portait déjà l'intention
-    // depuis N5 (`journalise: false`) sans que personne ne la lise : le drapeau existait, la
-    // constante existait, et rien ne s'en servait.
-    if (!journalise) {
-      return;
-    }
-    if (profil === null || paquet === null || resume === null) {
-      return;
-    }
-    if (demarreLe === null || termineLe === null) {
-      return;
-    }
+  const [sauvegardeEnCours, fixerSauvegardeEnCours] = useState(false);
+  const sauvegardeNecessaire = journalise && profil !== null && paquet !== null &&
+    resume !== null && demarreLe !== null && termineLe !== null;
 
+  // Chaque opération asynchrone appartient à cet instantané. Ni le chargement suivant,
+  // ni sa réponse d'erreur ne peuvent reprendre la main après une navigation.
+  const estToujoursLaTentative = useCallback((): boolean => {
+    const etat = magasin.getState();
+    return etat.ecran === 'recompense' && etat.profil?.id === profil?.id &&
+      etat.paquet === paquet && etat.resume === resume && etat.demarreLe === demarreLe &&
+      etat.termineLe === termineLe && etat.graine === graine;
+  }, [magasin, profil, paquet, resume, demarreLe, termineLe, graine]);
+
+  const sauvegarder = useCallback(async (): Promise<boolean> => {
+    if (!sauvegardeNecessaire || dejaEnvoyee) return true;
+    if (envoiEnCours.current || profil === null || paquet === null || resume === null ||
+        demarreLe === null || termineLe === null) return false;
     envoiEnCours.current = true;
-    const profilId = String(profil.id);
-    const noeudId = String(paquet.noeud.id);
-
-    // Le drapeau décrit CETTE tentative, pas la réponse réseau. Il doit donc être posé avant
-    // l'envoi : si l'enfant ouvre déjà le nœud suivant quand une ancienne réponse revient,
-    // celle-ci ne doit surtout pas marquer la NOUVELLE tentative comme envoyée. Cette course
-    // faisait disparaître aléatoirement des réussites lors d'un enchaînement rapide.
-    magasin.getState().marquerTentativeEnvoyee();
-
-    void (async () => {
-      try {
-        const cle = await calculerCleIdempotence(profilId, noeudId, demarreLe, graine);
-
-        // LA CHARGE EST CELLE DE `TentativeAEnregistrer`, CHAMP POUR CHAMP.
-        //
-        // Elle ne l'était pas, et c'était le défaut le plus coûteux du client : l'ancienne
-        // version envoyait `profilId`, `noeudId`, `exerciceId`, `detail`, et dupliquait à plat
-        // `reussi` / `nbErreurs` / `aideUtilisee` / `dureeMs` au lieu de les grouper sous
-        // `resume`. Or `serveur/src/routes/tentatives.ts` exige `profil`, `noeud`, `exercice`,
-        // `moteur`, `habillage`, `graine`, `demarreLe`, `termineLe` et un OBJET `resume` :
-        // **chaque envoi repartait en 400**. Le `catch` plus bas — qui est une bonne règle, une
-        // écriture perdue ne doit jamais gâcher la fin de partie — l'avalait dans un
-        // `console.warn`. L'enfant voyait ses trois étoiles, et rien n'était jamais journalisé.
-        // Le tableau de bord du parent aurait été vide indéfiniment.
-        //
-        // Le type est gelé et ses champs le sont avec lui : ils sont écrits dans
-        // `partage/src/journal/types.ts`, que § 11.1 réexporte. Il n'y avait aucune latitude.
-        // Le parcours T3 garde désormais ce risque : il rejoue le nœud, recharge la page et
-        // exige que la progression soit là.
-        //
-        // `etoiles` n'est volontairement PAS envoyé — « dérivée du résumé par
-        // `calculerEtoiles`, jamais envoyée par le client ». Un client qui choisit ses propres
-        // étoiles peut s'en attribuer trois sans rien réussir.
-        const charge: TentativeAEnregistrer = {
-          cleIdempotence: cle,
-          profil: profil.id,
-          noeud: paquet.noeud.id,
-          exercice: paquet.exercice.id,
-          moteur: paquet.exercice.jeu.moteur,
-          habillage: paquet.habillage.id,
-          graine,
-          demarreLe,
-          termineLe,
-          resume
-        };
-
+    fixerSauvegardeEnCours(true);
+    try {
+      const profilId = String(profil.id);
+      const cle = await calculerCleIdempotence(profilId, String(paquet.noeud.id), demarreLe, graine);
+      const charge: TentativeAEnregistrer = {
+        cleIdempotence: cle, profil: profil.id, noeud: paquet.noeud.id,
+        exercice: paquet.exercice.id, moteur: paquet.exercice.jeu.moteur,
+        habillage: paquet.habillage.id, graine, demarreLe, termineLe, resume
+      };
+      if (gainAccuse.current?.cle !== cle) {
         const reponse = await enregistrerTentative(charge);
-        // ── LA CASCADE VIENT DU SERVEUR — lot A1 (R31) ────────────────────────────────────
-        // Avant ce lot, `magasin.ts` calculait `dernierGain` lui-même, dans une variable qui
-        // repartait de zéro à chaque rechargement : rien de ce que l'enfant gagnait n'était
-        // jamais enregistré. Le serveur calcule et enregistre désormais la cascade DANS la
-        // même transaction que la tentative, et la rend ici : le client ne fait plus que LIRE.
-        magasin.getState().appliquerGainCascade(reponse.gainCascade);
-        await fileDAttente.invalidateQueries({ queryKey: ['progression', profilId] });
-        // R6 — le monde AUSSI. Gobi évolue en fonction des formes qu'il vient de gagner, et
-        // sans cette invalidation la carte comme l'écran garderaient le Gobi d'avant : son
-        // évolution n'aurait jamais pu se voir, puisqu'on ne rechargeait jamais ce qui la porte.
-        await fileDAttente.invalidateQueries({ queryKey: ['monde', String(profil.id)] });
-      } catch (cause) {
-        // Une écriture perdue ne doit JAMAIS gâcher la fin de partie de l'enfant : l'écran
-        // reste une réussite, la trace part dans la console pour le parent.
-        console.warn('[tentative] enregistrement impossible :', cause);
-      } finally {
-        envoiEnCours.current = false;
+        gainAccuse.current = { cle, gain: reponse.gainCascade };
       }
-    })();
-  }, [
-    dejaEnvoyee,
-    journalise,
-    profil,
-    paquet,
-    resume,
-    demarreLe,
-    termineLe,
-    graine,
-    nombreEtoiles,
-    magasin,
-    fileDAttente
-  ]);
+      const gain = gainAccuse.current.gain;
+      // Une panne de lecture retente seulement les caches. Le POST idempotent renverrait
+      // les compteurs sans le cadeau déjà remis : conserver son ACK préserve sa célébration.
+      await Promise.all([
+        fileDAttente.invalidateQueries({ queryKey: ['progression', profilId] }, { throwOnError: true }),
+        fileDAttente.invalidateQueries({ queryKey: ['monde', profilId] }, { throwOnError: true })
+      ]);
+      if (!estToujoursLaTentative()) return false;
+      magasin.getState().appliquerGainCascade(gain);
+      magasin.getState().marquerTentativeEnvoyee();
+      return true;
+    } catch (cause) {
+      // La célébration demeure ; le prochain tap reprend l'envoi ou les lectures restantes.
+      console.warn('[tentative] enregistrement impossible :', cause);
+      return false;
+    } finally {
+      envoiEnCours.current = false;
+      fixerSauvegardeEnCours(false);
+    }
+  }, [sauvegardeNecessaire, dejaEnvoyee, profil, paquet, resume, demarreLe, termineLe,
+    graine, magasin, fileDAttente, estToujoursLaTentative]);
 
+  useEffect(() => { void sauvegarder(); }, [sauvegarder]);
+
+  const agirApresSauvegarde = (action: () => void): void => {
+    if (envoiEnCours.current) return;
+    if (!sauvegardeNecessaire || dejaEnvoyee) {
+      action();
+    } else {
+      void sauvegarder().then((enregistree) => { if (enregistree) action(); });
+    }
+  };
   const rejouer = useCallback((): void => {
     magasin.getState().rejouer();
   }, [magasin]);
@@ -331,7 +290,7 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
     // Le nœud qu'on vient de finir compte comme fait, même si la progression du serveur n'est
     // pas encore revenue : sans ça, le bouton reproposerait l'exercice qu'on quitte.
     const faits = new Set(
-      (requeteProgression.data ?? []).map((ligne) => String(ligne.noeud))
+      (requeteProgression.data ?? []).filter((ligne) => ligne.etoiles > 0).map((ligne) => String(ligne.noeud))
     );
     faits.add(String(paquet.noeud.id));
     return noeudSuivant(laRegion.noeuds, faits, paquet.noeud.id);
@@ -341,7 +300,7 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
     if (paquet === null || region === null || requeteMonde.data === undefined) return null;
     const laRegion = requeteMonde.data.carte.regions.find((une) => une.region === region);
     if (laRegion === undefined) return null;
-    const faits = new Set((requeteProgression.data ?? []).map((ligne) => String(ligne.noeud)));
+    const faits = new Set((requeteProgression.data ?? []).filter((ligne) => ligne.etoiles > 0).map((ligne) => String(ligne.noeud)));
     faits.add(String(paquet.noeud.id));
     return {
       termines: laRegion.noeuds.filter((noeud) => faits.has(String(noeud))).length,
@@ -357,7 +316,7 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
     if (region === null || requeteMonde.data === undefined) return null;
     const laRegion = requeteMonde.data.carte.regions.find((une) => une.region === region);
     if (laRegion === undefined) return null;
-    const faits = new Set((requeteProgression.data ?? []).map((ligne) => String(ligne.noeud)));
+    const faits = new Set((requeteProgression.data ?? []).filter((ligne) => ligne.etoiles > 0).map((ligne) => String(ligne.noeud)));
     faits.add(String(paquet?.noeud.id ?? ''));
     return repriseDeRegion(laRegion.noeuds, faits);
   }, [region, paquet, requeteMonde.data, requeteProgression.data]);
@@ -423,15 +382,17 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
     fixerChargementSuivant(true);
     void lirePaquetNoeud(suivant)
       .then((paquetSuivant) => {
+        if (!estToujoursLaTentative()) return;
         magasin.getState().demarrerNoeud(paquetSuivant);
       })
       .catch(() => {
+        if (!estToujoursLaTentative()) return;
         // Un nœud qu'on n'arrive pas à charger ne laisse jamais l'enfant sur un bouton mort :
         // on le ramène à la carte, d'où tout reste atteignable.
         fixerChargementSuivant(false);
         magasin.getState().naviguer('carte');
       });
-  }, [suivant, magasin]);
+  }, [suivant, magasin, estToujoursLaTentative]);
 
   const continuerLaRegion = useCallback((): void => {
     if (continuerRegion === null) return;
@@ -439,14 +400,16 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
     fixerChargementSuivant(true);
     void lirePaquetNoeud(continuerRegion)
       .then((paquetSuivant) => {
+        if (!estToujoursLaTentative()) return;
         magasin.getState().cloreSortie();
         magasin.getState().demarrerNoeud(paquetSuivant);
       })
       .catch(() => {
+        if (!estToujoursLaTentative()) return;
         fixerChargementSuivant(false);
         magasin.getState().naviguer('carte');
       });
-  }, [continuerRegion, magasin]);
+  }, [continuerRegion, magasin, estToujoursLaTentative]);
 
   const terminerSortie = useCallback((): void => {
     effacerParticules();
@@ -551,8 +514,8 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
             className="cible action-recompense action-recompense--principale"
             data-action="exercice-suivant"
             data-noeud-suivant={String(suivant)}
-            disabled={chargementSuivant}
-            onClick={allerAuSuivant}
+            disabled={chargementSuivant || sauvegardeEnCours}
+            onClick={() => agirApresSauvegarde(allerAuSuivant)}
           >
             {chargementSuivant ? 'On y va…' : 'On y va !'}
           </button>
@@ -563,8 +526,8 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
             className="cible action-recompense action-recompense--principale"
             data-action="continuer-region"
             data-noeud-suivant={String(continuerRegion)}
-            disabled={chargementSuivant}
-            onClick={continuerLaRegion}
+            disabled={chargementSuivant || sauvegardeEnCours}
+            onClick={() => agirApresSauvegarde(continuerLaRegion)}
           >
             {chargementSuivant ? 'On y va…' : `Continuer ${nomRegion}`}
           </button>
@@ -574,7 +537,8 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
             type="button"
             className={`cible action-recompense${continuerRegion === null && !regionTerminee ? ' action-recompense--principale' : ''}`}
             data-action="fin-sortie"
-            onClick={terminerSortie}
+            disabled={sauvegardeEnCours}
+            onClick={() => agirApresSauvegarde(terminerSortie)}
           >
             Au campement !
           </button>
@@ -583,7 +547,8 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
           <button
             type="button"
             className={`cible action-recompense${suivant === null && !finDeSortie ? ' action-recompense--principale' : ''}`}
-            onClick={rejouer}
+            disabled={sauvegardeEnCours}
+            onClick={() => agirApresSauvegarde(rejouer)}
           >
             Encore une fois
           </button>
@@ -592,7 +557,8 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
           type="button"
           data-action="voir-carte"
           className={`cible action-recompense${regionTerminee ? ' action-recompense--principale' : ''}`}
-          onClick={retourCarte}
+          disabled={sauvegardeEnCours}
+          onClick={() => agirApresSauvegarde(retourCarte)}
         >
           Voir la carte
         </button>

@@ -154,6 +154,15 @@ describe('GET /api/parent/:profil/etat — la porte', () => {
 });
 
 describe('GET /api/parent/:profil/etat — un profil neuf', () => {
+  it('ne présente pas une tentative sans étoile comme un exercice terminé', async () => {
+    const profil = await creerProfil();
+    contexte.base.prepare('INSERT INTO progression_noeud VALUES (?, ?, ?, ?, ?)')
+      .run(profil, 'clairiere-01', 0, 1, INSTANT_DE_REFERENCE);
+    const etat = await lireEtat(profil, { [ENTETE_JETON_PARENT]: await jeton() });
+    expect(etat.noeudsTermines).toBe(0);
+    expect(etat.regions.find((region) => region.region === 'clairiere')?.noeudsTermines).toBe(0);
+  });
+
   it('dit 0 nœud terminé sur les nœuds livrés, et aucune incohérence', async () => {
     const profil = await creerProfil();
     const etat = await lireEtat(profil, { [ENTETE_JETON_PARENT]: await jeton() });

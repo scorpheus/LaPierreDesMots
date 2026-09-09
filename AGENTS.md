@@ -8,6 +8,38 @@ vocabulaire métier l'est aussi (`Alea`, `Horloge`, `FournisseurVoix`, `tentativ
 tenir évite un dépôt à deux langues. Seules exceptions : les identifiants imposés par un outil
 externe.
 
+## Conduite des agents et choix des vérifications — septembre 2026
+
+Voir [l’audit QA et progression](Docs/audit-qa-progression-2026-09-06.md). Les recommandations
+[OpenAI pour GPT-6 Astra](https://developers.openai.com/api/docs/guides/latest-model)
+invitent à expliciter la délégation et à proportionner les vérifications.
+
+- Conserver la file des demandes de l’utilisateur jusqu’à leur résolution. Avancer sur les
+  choix techniques réversibles ; demander un arbitrage pour une règle pédagogique ambiguë.
+- Déléguer les audits indépendants et les modifications à fichiers disjoints lorsque cela aide.
+  Chaque brief nomme le résultat attendu, les fichiers possédés et le plan partagé. Ne pas
+  déléguer une simple commande ni lancer des agents qui attendent tous le même résultat.
+- L’orchestrateur seul construit et exécute les suites. Aucun banc de mutation pendant des
+  écritures concurrentes. Lire les rapports des agents avant de prendre les décisions associées.
+- Lire les sections documentaires utiles au défaut. Les attributions de fichiers à d’anciens
+  lots sont historiques ; elles ne créent pas un propriétaire encore actif ou un besoin
+  d’autorisation. Les quatre références protégées et les règles de contenu restent applicables.
+- Pendant une correction, lancer le test discriminant, puis la famille concernée. Utiliser
+  `npm run test:progression` pour la progression ; `npm run test:tactile -- --grep <noeud>`
+  pour les gestes ; `npm run test:responsive -- --grep <cas>` pour la composition. Ces commandes
+  sont des vérifications ciblées, jamais une certification complète du jeu.
+- Exécuter `npm run verifier` une fois à la clôture du lot intégré, conformément à l’annexe T.
+  Ne pas le répéter après chaque sous-tâche ou pour relire un rapport. Après un nouveau défaut,
+  repartir de son cas ciblé ; ne relancer la campagne complète que si une modification ou un
+  doute non résolu le justifie. Ne pas annoncer une campagne verte si une étape est rouge.
+- Un test doit vérifier l’effet métier attendu **et l’absence d’effets parasites** : ensemble
+  exact des exercices acquis, delta des récompenses, persistance et reprise depuis la carte.
+  La présence d’un bouton, une réponse HTTP 200, un attribut `data-*` ou un changement quelconque
+  du DOM ne suffit pas. Pour un dessin, vérifier l’asset réellement rendu ; pour une sauvegarde,
+  simuler rejet et réponse tardive ; pour un parcours, conserver le même profil entre étapes.
+- Séparer explicitement jouabilité mécanique, composition, justesse de la consigne et
+  reconnaissance de l’image. Un oracle connaissant les réponses ne valide pas leur clarté.
+
 ## État du dépôt : l'application existe et tourne
 
 > **Corrigé par le lot N5** (contrat de finition v3 § 1.1 et § 4.5). Cette section affirmait

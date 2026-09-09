@@ -166,7 +166,8 @@ test.describe("Q3 — ce que l’écran annonce comme gagné existe en base", ()
       "contenu/referentiel/parametres-recompenses.json",
     );
     const jouables = NOEUDS.filter((n) => n.moteur === "colorie").map((n) => n.id);
-    const aJouer = Math.min(jouables.length, Math.ceil(seuils.etoilesParIntermediaire / 3) + 1);
+    const aJouer = seuils.etoilesParIntermediaire;
+    expect(jouables.length, "assez d’exercices distincts pour le palier").toBeGreaterThanOrEqual(aJouer);
     expect(
       aJouer,
       "pas assez de nœuds `colorie` livrés pour franchir le palier intermédiaire : Q3 ne " +

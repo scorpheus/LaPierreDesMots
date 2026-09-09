@@ -150,7 +150,7 @@ export async function regionsDuProfil(
   const stockees = new Map(lignesStockees.map((ligne) => [String(ligne.region_code), ligne]));
 
   const lignesTerminees = await base.lignes<{ readonly noeud_id: string }>(
-    'SELECT noeud_id FROM progression_noeud WHERE profil_id = ?',
+    'SELECT noeud_id FROM progression_noeud WHERE profil_id = ? AND etoiles > 0',
     [profilId]
   );
   const termines = new Set(lignesTerminees.map((ligne) => String(ligne.noeud_id)));
@@ -216,7 +216,9 @@ export async function etatDuProfil(
     creeLe: profil.creeLe,
     dernierAccesLe: profil.dernierAccesLe,
 
-    noeudsTermines: await compter(base, 'progression_noeud', profilId),
+    noeudsTermines: Number((await base.uneLigne<{ n: number }>(
+      'SELECT COUNT(*) AS n FROM progression_noeud WHERE profil_id = ? AND etoiles > 0', [profilId]
+    ))?.n ?? 0),
     noeudsLivres,
     etoilesObtenues: Number(etoiles?.n ?? 0),
     etoilesPossibles: noeudsLivres * 3,

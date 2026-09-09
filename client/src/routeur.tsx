@@ -33,7 +33,8 @@ import {
   createRootRoute,
   createRoute,
   createRouter,
-  useNavigate
+  useNavigate,
+  useRouterState
 } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import type { CodeEcran, Profil } from '@pierre/partage';
@@ -834,6 +835,7 @@ function HoteApercuChoixProfilVisite(): ReactElement {
  */
 function BandeauRetourVisite(): ReactElement | null {
   const { visiteEnCours, terminerVisite } = useZoneParent();
+  const chemin = useRouterState({ select: (etat) => cheminInterne(etat.location.pathname) });
   const journalise = useEtatJeu((etat) => etat.journalise);
   const ecran = useEtatJeu((etat) => etat.ecran);
   const naviguer = useNavigate();
@@ -844,7 +846,7 @@ function BandeauRetourVisite(): ReactElement | null {
     }
   }, [visiteEnCours, ecran, journalise, terminerVisite]);
 
-  if (!visiteEnCours) {
+  if (!visiteEnCours || chemin === CHEMINS.parentVisite) {
     return null;
   }
 

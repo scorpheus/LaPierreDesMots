@@ -30,7 +30,7 @@
  * paie. Arbitrage consigné dans `Docs/questions-en-attente.md` (Q2-3).
  * ══════════════════════════════════════════════════════════════════════════════════════════
  */
-import { beforeAll, describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 
 import { explorer, decrireChemin } from '../modele/explorateur.js';
 import type { RapportExploration } from '../modele/explorateur.js';
@@ -57,20 +57,30 @@ const PROFONDEUR_MAX = 6;
 const A_EXERCER = TRANSITIONS.filter((transition) => transition.horsPorteeExplorateur === undefined);
 
 let rapport: RapportExploration;
+let avertissementsAct = 0;
 
 beforeAll(async () => {
-  rapport = await explorer({
-    profondeurMax: PROFONDEUR_MAX,
-    declarees: A_EXERCER.filter((transition) => transition.prise !== null).map((transition) => ({
-      depuis: transition.depuis,
-      prise: transition.prise as NonNullable<typeof transition.prise>
-    })),
-    recettes: RECETTES.map((recette) => ({
-      nom: recette.nom,
-      depuis: recette.depuis,
-      gestes: recette.gestes
-    }))
+  const erreur = console.error;
+  const observation = vi.spyOn(console, 'error').mockImplementation((...argumentsErreur: unknown[]) => {
+    if (String(argumentsErreur[0]).includes('not configured to support act')) avertissementsAct += 1;
+    erreur(...argumentsErreur);
   });
+  try {
+    rapport = await explorer({
+      profondeurMax: PROFONDEUR_MAX,
+      declarees: A_EXERCER.filter((transition) => transition.prise !== null).map((transition) => ({
+        depuis: transition.depuis,
+        prise: transition.prise as NonNullable<typeof transition.prise>
+      })),
+      recettes: RECETTES.map((recette) => ({
+        nom: recette.nom,
+        depuis: recette.depuis,
+        gestes: recette.gestes
+      }))
+    });
+  } finally {
+    observation.mockRestore();
+  }
 
   console.log(
     `[q2] ${String(rapport.ecransAtteints.length)} écran(s) atteint(s) · ` +
@@ -87,6 +97,9 @@ beforeAll(async () => {
 // ═══════════════════════════════════════════ 0. LA MESURE VAUT-ELLE QUELQUE CHOSE ?
 
 describe('l’exploration a réellement eu lieu', () => {
+  it('configure les mises à jour React sans saturer le canal de diagnostics', () => {
+    expect(avertissementsAct, 'chaque avertissement React traverse le canal RPC de Vitest').toBe(0);
+  });
   it('a monté l’application, joué des gestes, et atteint des écrans', () => {
     // Sans ces planchers, tous les cas ci-dessous resteraient verts sur une exploration vide.
     // C'est le défaut n° 6 de l'historique — « 14 moteurs joués sur 14 » assertí `> 0`.
