@@ -331,6 +331,33 @@ test.describe("CONTRÔLES POSITIFS — chaque invariant sait rendre rouge", () =
     await page.close();
   });
 
+  test("`cible` ne confond pas un cercle réservé au clavier avec une prise du doigt", async ({ context }) => {
+    const { page, sentinelle } = await pageSousSentinelle(context);
+    await preparer(page);
+    await page.evaluate(() => {
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('viewBox', '0 0 20 20');
+      svg.style.cssText = 'position:fixed;left:0;top:0;width:20px;height:20px';
+      const cercle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      cercle.setAttribute('cx', '10');
+      cercle.setAttribute('cy', '10');
+      cercle.setAttribute('r', '10');
+      cercle.setAttribute('role', 'button');
+      cercle.setAttribute('tabindex', '0');
+      cercle.setAttribute('aria-label', 'commande réservée au clavier');
+      cercle.style.pointerEvents = 'none';
+      svg.append(cercle);
+      document.body.append(svg);
+    });
+    await deuxImages(page);
+    await deuxImages(page);
+    expect(
+      decrireLesViolations(sentinelle.bilan().violations).filter((violation) => violation.includes('[cible]')),
+      'un contrôle que le doigt ne peut pas recevoir ne doit pas être mesuré comme une prise tactile',
+    ).toEqual([]);
+    await page.close();
+  });
+
   test("`issue` mord : un écran dont on a retiré toute prise est rapporté (défaut n° 1)", async ({
     context,
   }) => {

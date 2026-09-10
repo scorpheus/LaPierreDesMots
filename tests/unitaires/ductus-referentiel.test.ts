@@ -171,13 +171,12 @@ describe('règle « rond-antihoraire » — D33, le geste du `o`', () => {
     }
   });
 
-  it('le `d` et le `q` — même famille gestuelle — partagent leur ductus (D33, conséquence 4)', () => {
+  it('le d commence par la barre demandée par le parent, q conserve son rond initial', () => {
     const d = lettresDeclarees.find((l) => l.lettre === 'd')!;
     const q = lettresDeclarees.find((l) => l.lettre === 'q')!;
-    expect(d.sens).toBe(q.sens);
-    expect(d.depart[1]).toBe(q.depart[1]);
-    // Et le départ est EN HAUT : hauteur d'x y=60, ligne de base y=100.
-    expect(d.depart[1], 'le rond du `d` part en haut à droite').toBeLessThan(80);
+    // La confirmation du 9 septembre remplace l'ordre D33 pour d uniquement.
+    expect(d).toMatchObject({ premierTrait: 'd-hampe', depart: [70, 20], sens: 'sans-objet' });
+    expect(q).toMatchObject({ premierTrait: 'q-panse', depart: [70, 60], sens: 'antihoraire' });
   });
 });
 
@@ -244,6 +243,19 @@ describe('CONTRAT DE SORTIE — le ductus est déclaré, et le modèle lui obéi
   it('imprime les comptes, et échoue si le référentiel est creux', () => {
     const regleRond = regleDe('rond-antihoraire');
     const regleHaste = regleDe('haste-descendante');
+    const regleB = regleDe('b-barre-puis-panse-descendante');
+    const modeleB = parLettre.get('b')!;
+    const barreB = modeleB.traits[0]!;
+    const panseB = modeleB.traits[1]!;
+    const bConforme =
+      modeleB.traits.length === 2 &&
+      barreB.id === 'b-hampe' && panseB.id === 'b-panse' &&
+      barreB.depart[0] === 30 && barreB.depart[1] === 20 &&
+      barreB.arrivee[0] === 30 && barreB.arrivee[1] === 100 &&
+      panseB.depart[0] === 30 && panseB.depart[1] === 60 &&
+      panseB.arrivee[0] === 30 && panseB.arrivee[1] === 100 &&
+      panseB.points.every((point, index) => index === 0 || point[1] >= panseB.points[index - 1]![1]);
+    const nombreDeclarees = new Set(lettresDeclarees.map((lettre) => lettre.lettre)).size;
     const conformes = (regleRond.lettres ?? []).filter((d) => {
       const premier = parLettre.get(d.lettre)!.traits[0]!;
       return (
@@ -260,10 +272,12 @@ describe('CONTRAT DE SORTIE — le ductus est déclaré, et le modèle lui obéi
         `  traits du modèle ..................... ${tousLesTraits.length}\n` +
         `  lettres déclarées (rond-antihoraire) . ${(regleRond.lettres ?? []).length}` +
         `  → conformes : ${conformes.length}\n` +
+        `  b barre puis panse descendante ...... ${bConforme ? 1 : 0} / 1 conforme\n` +
+        `  lettres déclarées (toutes règles) ... ${nombreDeclarees}\n` +
         `  lettres nommément non tranchées ...... ${ductus.nonTranchees.length}\n` +
         `  lettres non couvertes ................ ${
           bibliotheque.lettres.length -
-          (regleRond.lettres ?? []).length -
+          nombreDeclarees -
           ductus.nonTranchees.length
         }\n` +
         `  hastes auditées (haste-descendante) .. ${(regleHaste.traits ?? []).length}\n` +
@@ -271,11 +285,17 @@ describe('CONTRAT DE SORTIE — le ductus est déclaré, et le modèle lui obéi
     );
 
     // Un référentiel qui ne déclarerait rien, ou dont le modèle s'écarterait, échoue ici.
-    expect((regleRond.lettres ?? []).length).toBeGreaterThanOrEqual(5);
+    // d est maintenant déclaré dans sa règle barre-puis-panse, pas supprimé de l'audit.
+    expect((regleRond.lettres ?? []).map((lettre) => lettre.lettre)).toEqual(['a', 'g', 'o', 'q']);
+    expect(regleDe('d-barre-puis-panse-descendante').lettres).toEqual([
+      { lettre: 'd', premierTrait: 'd-hampe', depart: [70, 20], sens: 'sans-objet' },
+    ]);
     expect(conformes.length).toBe((regleRond.lettres ?? []).length);
+    expect(regleB.lettres?.map((lettre) => lettre.lettre)).toEqual(['b']);
+    expect(bConforme, 'demande du parent : barre descendante puis panse descendante du b').toBe(true);
     expect((regleHaste.traits ?? []).length).toBeGreaterThanOrEqual(24);
     expect(
-      (regleRond.lettres ?? []).length + ductus.nonTranchees.length,
+      nombreDeclarees + ductus.nonTranchees.length,
       'toutes les lettres du modèle sont rendues, déclarées ou non tranchées',
     ).toBe(bibliotheque.lettres.length);
   });

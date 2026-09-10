@@ -270,7 +270,9 @@ describe('P10 — rang 1 toujours `echauffement`, dernier rang toujours `synthes
 
 // ───────────────────────────────────────────────────────────── P11
 
-describe('P11 — aucune compétence dont un prérequis est sous `seuilPrerequis` (v2 § 12.1)', () => {
+// Accord parent du 9 septembre 2026 : P11 porte sur la compétence principale proposée.
+// Voir Docs/correction-progression-galeries-2026-09-09.md ; les seuils restent identiques.
+describe('P11 — aucun prérequis de la compétence principale sous `seuilPrerequis`', () => {
   it('sur 200 sorties simulées, aucune étape ne viole la chaîne de prérequis', () => {
     let etapesVerifiees = 0;
     fc.assert(
@@ -278,7 +280,7 @@ describe('P11 — aucune compétence dont un prérequis est sous `seuilPrerequis
         const plan = composerOuNull(entree, graine);
         if (plan === null) return;
         for (const etape of plan.etapes) {
-          for (const code of etape.competences) {
+          for (const code of etape.competences.slice(0, 1)) {
             const competence = COMPETENCES.find((c) => c.code === code);
             expect(competence).toBeDefined();
             for (const prerequis of competence?.prerequis ?? []) {
@@ -572,7 +574,7 @@ describe('branches défensives', () => {
     // Une compétence inconnue n'a pas de chaîne de prérequis lisible : la supposer sans
     // prérequis ferait sauter la progression phonologique en silence.
     const plan = composerSortie(
-      entreeAvec([candidat(1), candidat(2), candidat(3, ['gph.inconnue']), candidat(4)]),
+      entreeAvec([candidat(1), candidat(2), candidat(3, ['gph.inconnue']), candidat(4), candidat(5, ['gph.a', 'gph.inconnue'])]),
       PARAMETRES,
       creerAlea(11)
     );

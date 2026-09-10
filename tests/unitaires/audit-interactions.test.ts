@@ -160,6 +160,7 @@ it('la relecture distingue les commandes identiques de deux exercices', async ()
 
 it.each([
   '<input type="text" value="">',
+  '<input type="search" value="">',
   '<input type="range" min="0" max="100" step="5" value="100">',
   '<select><option value="a">A</option><option value="b">B</option></select>',
 ])('le contrôle de saisie modifie réellement sa valeur : %s', async (html) => {

@@ -190,6 +190,15 @@ export function SceneDecor({
       `${portee} [data-region-svg] { fill: ${rasterDisponible === true ? 'transparent' : '#8E97A8'}; transition: fill ${String(dureeMs)}ms ease-in-out; }`,
       `${portee} [data-fond-illustre] { display: ${rasterDisponible === true ? 'none' : 'initial'}; filter: grayscale(${String(grisailleRaster)}); transition: filter ${String(dureeMs)}ms ease-in-out; }`,
     ];
+    if (rasterDisponible === true) {
+      // Le PNG remplace tout le fond : son image SVG ET le papier opaque derrière elle.
+      // Les prises coloriables restent au-dessus. Sans PNG, le style initial revient.
+      for (const calque of habillage.scene.calques) {
+        if (calque.role === 'fond') {
+          lignes.push(`${portee} [id="${echapper(String(calque.id))}"] { display: none; }`);
+        }
+      }
+    }
     for (const region of allumees) {
       lignes.push(
         `${portee} [data-region-svg="${echapper(region.id)}"] { fill: ${region.couleur}; }`,

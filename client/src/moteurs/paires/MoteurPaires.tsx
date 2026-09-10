@@ -45,6 +45,7 @@
  * ══════════════════════════════════════════════════════════════════════════════════════════════
  */
 
+import { MessageStable } from '../../composants/MessageStable.js';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { CSSProperties, ReactElement } from 'react';
 import { DndContext, MouseSensor, TouchSensor, pointerWithin, useDraggable, useDroppable, useSensor, useSensors } from '@dnd-kit/core';
@@ -536,7 +537,7 @@ export function MoteurPaires(
             data-refus-texte={messageDeRefus === '' ? 'non' : 'oui'}
             data-animations={animationsDesactivees ? 'calmes' : 'vives'}
           >
-            {messageDeRefus === '' ? (etat.aide === null ? '' : (etat.aide.texte ?? '')) : messageDeRefus}
+            <MessageStable messages={Object.values(MESSAGES_DE_REFUS)}>{messageDeRefus === '' ? (etat.aide === null ? '' : (etat.aide.texte ?? '')) : messageDeRefus}</MessageStable>
           </p>
         </div>
 

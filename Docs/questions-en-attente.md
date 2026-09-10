@@ -6797,7 +6797,13 @@ sa consigne et son parcours portent exclusivement sur « gn » : la valeur
 `gph.rare.gn`, qui reçoit donc un vrai canal de journalisation. L'arbitrage reste ouvert pour
 `gph.rare.ph` et `comp.consigne.multiple`.
 
-## S3-Q2 — « Partir en sortie » ne sait proposer que 10 nœuds sur 76, et quatre régions sur six lui répondent 409
+## S3-Q2 — verrou de « Partir en sortie » — **résolu le 9 septembre 2026**
+
+**Arbitrage parent appliqué** : les prérequis portent sur la compétence principale de
+l'exercice. Les compétences secondaires restent déclarées et journalisées. La portée optimiste
+mesurée après correction vaut 70 nœuds sur 76. Le détail et les gardes figurent dans
+`Docs/correction-progression-galeries-2026-09-09.md`. Les mesures à 10 ci-dessous sont conservées
+comme diagnostic historique antérieur à l'arbitrage.
 
 C'est le point le plus lourd trouvé par ce lot, et il n'appartient pas au contenu seul.
 
@@ -7490,15 +7496,16 @@ raison :
 expect(repondent.length, `sorties servies : …`).toBeGreaterThanOrEqual(2);
 ```
 
-Or le lot S3 a mesuré (S3-Q2) que pour un profil neuf, **deux régions sur six répondent** —
+Dans l'état historique mesuré par le lot S3, avant l'arbitrage S3-Q2 du 9 septembre,
+**deux régions sur six répondaient** —
 `clairiere` et `galeries` ; les quatre autres rendent un 409 « 0 nœud(s) éligible(s) ». Cette
 assertion est donc posée **exactement sur son propre plancher, avec zéro marge**. Il suffit que
 la composition d'une seule région bascule pour qu'on passe à 1, et le cas devient rouge.
 
-**Ce n'est pas un test fragile qu'il faudrait détendre. C'est un test honnête posé au bord d'une
-falaise produit**, et la falaise est déjà consignée : `selecteur.ts:194` exige
+**Ce n'était pas un test fragile qu'il fallait détendre. C'était un test honnête posé au bord d'une
+falaise produit**, alors consignée ainsi : `selecteur.ts:194` exigeait
 `candidat.competences.every(competenceEligible)`, donc un exercice précoce qui déclare en
-secondaire un code plus avancé **se ferme lui-même**. 10 nœuds sur 76 au mieux.
+secondaire un code plus avancé **se fermait lui-même**. 10 nœuds sur 76 au mieux.
 
 ### Ce que ça coûte, et pourquoi ça compte plus que le désagrément
 
@@ -7520,9 +7527,8 @@ et mon banc d'intégration **3 sur 3** — deux mesures ciblées, restaurations 
 
 ### Ce qu'il faut faire, dans cet ordre
 
-1. **Trancher S3-Q2** (le verrou circulaire du sélecteur). Tant que « partir en sortie » ne
-   propose que 10 nœuds sur 76 et que 4 régions sur 6 refusent, ces trois recettes resteront au
-   bord du vide — et la QA restera bruyante.
+1. **S3-Q2 a été tranché le 9 septembre** : les prérequis portent sur la compétence principale.
+   La portée optimiste vaut désormais 70 nœuds sur 76 ; ce point n'est plus une décision ouverte.
 2. **Ensuite seulement**, relancer `npm run qa:mutations` sur un dépôt calme et resserrer le
    cliquet sur les cinq recettes ci-dessus. Fait dans l'autre ordre, on grave un chiffre que le
    bruit a fabriqué.
@@ -7610,7 +7616,7 @@ plancher observé sur 500 graines : 2 région(s)
 
 **Le plancher n'est jamais franchi**, sur 500 graines. L'assertion n'a aucune marge et n'en a pas
 besoin : la valeur ne varie pas. `composerSortie` est déterministe — 200 passes, une seule
-empreinte. La falaise de S3 est réelle et reste à trancher (S3-Q2), mais **elle n'a jamais fait
+empreinte. La falaise de S3 était réelle et a été tranchée le 9 septembre (S3-Q2), mais **elle n'a jamais fait
 rougir la suite**, et la séquence recommandée par Q-INT-9 — « trancher S3-Q2 d'abord, la QA
 ensuite » — bloquait la mesure de la QA derrière une décision de contenu sans rapport.
 
@@ -7723,7 +7729,7 @@ pas ce qu'il possède**. Un commit de campagne nomme ses fichiers, il ne ramasse
 
 Les 1 975 tests passent, plusieurs fois de suite, sur un arbre figé. Aucun test n'a été assoupli,
 désactivé ni allongé : les deux fichiers touchés sont de l'outillage de mesure. La falaise du
-sélecteur (S3-Q2) est réelle et reste à trancher — mais pour ce qu'elle est, un problème de
+sélecteur (S3-Q2), réelle lors de cette mesure, a depuis été tranchée — c'était un problème de
 contenu, et non parce qu'elle ferait rougir la QA.
 
 ## Q-INT-11. Les seuils de couverture par zone n'avaient JAMAIS rien vérifié — et l'échec qu'on leur imputait venait d'ailleurs

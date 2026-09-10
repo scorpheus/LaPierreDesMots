@@ -46,6 +46,7 @@ import { EcranCarte } from './ecrans/EcranCarte.js';
 import { EcranCodeParent } from './ecrans/EcranCodeParent.js';
 import { EcranCoffre } from './ecrans/EcranCoffre.js';
 import { EcranDashboard } from './ecrans/EcranDashboard.js';
+import { EcranDebugRecompenses } from './ecrans/EcranDebugRecompenses.js';
 import { EcranGalerieParent } from './ecrans/EcranGalerieParent.js';
 import { EcranNoeud } from './ecrans/EcranNoeud.js';
 import { EcranOuverture } from './ecrans/EcranOuverture.js';
@@ -88,11 +89,16 @@ function estRouteConnue(chemin: string): boolean {
   );
 }
 
+function estHoteLocal(): boolean {
+  return ['localhost', '127.0.0.1', '[::1]'].includes(window.location.hostname);
+}
+
 /**
  * Les chemins que le magasin ne connaît pas. Déclarés ici, une seule fois, plutôt qu'écrits en
  * littéral dans chaque `navigate` : c'est la table des routes que le contrat demande.
  */
 export const CHEMINS = {
+  debugRecompenses: '/debug/recompenses',
   campement: '/campement',
   chaudron: '/chaudron',
   coffre: '/coffre',
@@ -565,6 +571,7 @@ function HoteDashboard(): ReactElement {
   }
 
   return (
+    <>
     <EcranDashboard
       profil={profil.id}
       prenom={profil.prenom}
@@ -602,6 +609,12 @@ function HoteDashboard(): ReactElement {
         void naviguer({ to: CHEMIN_PAR_ECRAN.profils });
       }}
     />
+    {estHoteLocal() && <p style={{ padding: '1rem', textAlign: 'center' }}>
+      <button type="button" className="cible" onClick={() => {
+        void naviguer({ to: CHEMINS.debugRecompenses });
+      }}>Tester les récompenses sans enregistrer</button>
+    </p>}
+    </>
   );
 }
 
@@ -894,6 +907,13 @@ function construireRouteur() {
   });
 
   const arbre = routeRacine.addChildren([
+    createRoute({
+      getParentRoute: () => routeRacine,
+      path: CHEMINS.debugRecompenses,
+      component: () => estHoteLocal()
+        ? <EcranDebugRecompenses exercicesInitiaux={Number(new URLSearchParams(window.location.search).get('exercices') ?? '23')} />
+        : <RacineOuProfils />
+    }),
     createRoute({ getParentRoute: () => routeRacine, path: '/', component: RacineOuProfils }),
     createRoute({ getParentRoute: () => routeRacine, path: '/carte', component: HoteCarte }),
     createRoute({ getParentRoute: () => routeRacine, path: '/noeud', component: EcranNoeud }),
@@ -996,6 +1016,8 @@ export function Routeur(): ReactElement {
 
   useEffect(() => {
     const aller = (ecran: CodeEcran): void => {
+      // Le banc local est autonome ; l'hydratation du joueur ne doit pas effacer son URL.
+      if (estHoteLocal() && cheminInterne(routeur.history.location.pathname) === CHEMINS.debugRecompenses) return;
       const cible = CHEMIN_PAR_ECRAN[ecran];
       const ciblePublique = cheminPublic(cible);
       if (routeur.history.location.pathname !== ciblePublique) {

@@ -34,6 +34,7 @@
  * ══════════════════════════════════════════════════════════════════════════════════════════════
  */
 
+import { MessageStable } from '../../composants/MessageStable.js';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { CSSProperties, ReactElement } from 'react';
 import type { ActionChrono, ContenuChrono, EtatChrono, Habillage } from '@pierre/partage';
@@ -835,7 +836,7 @@ export function MoteurChrono(
           className="chrono-retour"
           style={{ margin: 0 } as CSSProperties}
         >
-          {messageDeRefus === '' ? (etat.aide === null ? '' : (etat.aide.texte ?? '')) : messageDeRefus}
+          <MessageStable messages={Object.values(MESSAGES_DE_REFUS)}>{messageDeRefus === '' ? (etat.aide === null ? '' : (etat.aide.texte ?? '')) : messageDeRefus}</MessageStable>
         </p>
 
         <p

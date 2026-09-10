@@ -58,7 +58,7 @@ describe('JaugePalier — `data-restant` porte le RESTE, jamais l’acquis', () 
 
   test('le texte lisible dit le reste, pas le score', () => {
     render(<JaugePalier jauge={jaugeDu('intermediaire', 3)} />);
-    expect(screen.getByText(/Encore 2 avant la prochaine forme de Gobi/)).toBeTruthy();
+    expect(screen.getByText('Encore 2 nouveaux exercices réussis avant la prochaine forme de Gobi.')).toBeTruthy();
   });
 
   test('à zéro étoile, tout est vide et l’attribut vaut le requis entier', () => {
@@ -97,5 +97,38 @@ describe('JaugePalier — `data-restant` porte le RESTE, jamais l’acquis', () 
       expect(jauge.getAttribute('data-palier')).toBe(palier);
       expect(Number(jauge.getAttribute('data-restant'))).toBeGreaterThanOrEqual(0);
     }
+  });
+
+  test('l’étoile annonce la règle de gain, pas un compte à rebours figé à un', () => {
+    const modele = Object.freeze(jaugeDu('etoile', 16));
+    render(<JaugePalier jauge={modele} />);
+    const phrase = 'Une étoile à chaque nouvel exercice réussi.';
+    expect(screen.getByText(phrase)).toBeTruthy();
+    expect(screen.getByRole('group').getAttribute('aria-label')).toBe(phrase);
+    expect(screen.getByRole('group').getAttribute('data-restant')).toBe('1');
+    expect(modele).toEqual(jaugeDu('etoile', 16));
+  });
+
+  test('un seul exercice nouveau manquant est nommé au singulier', () => {
+    render(<JaugePalier jauge={jaugeDu('intermediaire', 4)} />);
+    const phrase = 'Encore 1 nouvel exercice réussi avant la prochaine forme de Gobi.';
+    expect(screen.getByText(phrase)).toBeTruthy();
+    expect(screen.getByRole('group').getAttribute('data-restant')).toBe('1');
+  });
+
+  test('le grand palier compte des formes de Gobi et ne promet aucune zone', () => {
+    const modele = Object.freeze(jaugeDu('rare', 15));
+    const { rerender } = render(<JaugePalier jauge={modele} />);
+    const phrase = 'Encore 7 formes de Gobi avant le grand palier.';
+    expect(screen.getByText(phrase)).toBeTruthy();
+    expect(screen.getByRole('group').getAttribute('aria-label')).toBe(phrase);
+    expect(screen.getByRole('group').getAttribute('data-restant')).toBe('7');
+    expect(screen.queryByText(/zone/)).toBeNull();
+    expect(modele).toEqual(jaugeDu('rare', 15));
+    rerender(<JaugePalier jauge={jaugeDu('rare', 16)} />);
+    expect(screen.getByText(phrase)).toBeTruthy();
+    rerender(<JaugePalier jauge={jaugeDu('rare', 20)} />);
+    expect(screen.getByText('Encore 6 formes de Gobi avant le grand palier.')).toBeTruthy();
+    expect(screen.getByRole('group').getAttribute('data-restant')).toBe('6');
   });
 });

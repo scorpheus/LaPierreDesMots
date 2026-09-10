@@ -12,9 +12,9 @@
  * c'est le père qui a demandé qu'ils se ressemblent.
  *
  * ── LA SEULE CHOSE QUI CHANGE ENTRE EUX, ET C'EST UNE RÈGLE DE JEU ────────────────────────────
- * **La couleur.** Sur l'étagère de Gobi, elle est montrée en grand : c'est une promesse assumée,
- * et le panneau dit en toutes lettres qu'elle n'est pas encore gagnée. Sur les Éclats et le
- * butin, elle est CACHÉE — « c'est à deviner ». Un objet non rapporté s'y montre en silhouette.
+ * **La couleur.** Une forme acquise de Gobi est montrée en grand. Une forme future n'ouvre plus
+ * ce panneau. Sur les Éclats et le butin, une fiche peut s'ouvrir avant l'acquisition, mais la
+ * couleur reste CACHÉE — « c'est à deviner ».
  *
  * Ce n'est pas une nuance d'affichage, c'est ce qui décide si la collection garde son mystère.
  * `couleurRevelee` porte donc la décision, et chaque appelant la prend explicitement : aucune
@@ -40,7 +40,7 @@ export interface ProprietesFicheObjet {
   /**
    * La couleur est-elle montrée ? **Aucune valeur par défaut, et c'est voulu.**
    *
-   * `true` sur l'étagère de Gobi : la couleur y est une promesse (R24, demandé explicitement).
+   * `true` sur une forme de Gobi déjà acquise.
    * `false` sur les Éclats et le butin : « c'est à deviner » (R28). Un objet non obtenu s'y
    * montre en silhouette, et le panneau le dit.
    */

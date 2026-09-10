@@ -71,8 +71,17 @@ export async function deriverCode(code: string, sel: Uint8Array): Promise<Uint8A
   const cle = await sousCouche.importKey('raw', new TextEncoder().encode(code), 'PBKDF2', false, [
     'deriveBits'
   ]);
+  // La signature generique de `Uint8Array` autorise un tampon `SharedArrayBuffer`, tandis que
+  // Web Crypto exige ici un `BufferSource` adosse a un `ArrayBuffer`. Cette copie conserve les
+  // octets du sel et garantit ce tampon ordinaire, dans Node comme dans la WebView.
+  const selCompatibleWebCrypto = new Uint8Array(sel);
   const bits = await sousCouche.deriveBits(
-    { name: 'PBKDF2', hash: 'SHA-256', salt: sel, iterations: ITERATIONS_PBKDF2 },
+    {
+      name: 'PBKDF2',
+      hash: 'SHA-256',
+      salt: selCompatibleWebCrypto,
+      iterations: ITERATIONS_PBKDF2
+    },
     cle,
     OCTETS_EMPREINTE * 8
   );

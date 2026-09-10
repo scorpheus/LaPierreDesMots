@@ -1,5 +1,72 @@
 import type { Page } from '@playwright/test';
 
+interface FenetreRecompenseAttendue {
+  readonly titre: string;
+  readonly contenu: 'etoile' | 'carte-monde';
+}
+
+/**
+ * Deux gains de l'écran de récompense disparaissent après sa première restauration : la tentative
+ * a alors déjà été journalisée. Leur identité initiale suffit à les reconnaître sans ajouter de
+ * crochet de test au client.
+ */
+function fenetreRecompenseAttendue(cible: string): FenetreRecompenseAttendue | null {
+  let identite: [string, [string, string][], string, string | null];
+  try {
+    identite = JSON.parse(cible) as [string, [string, string][], string, string | null];
+  } catch {
+    return null;
+  }
+  const [balise, reperes, texteBrut] = identite;
+  if (balise !== 'BUTTON') return null;
+  const texte = texteBrut.replace(/\s+/gu, ' ').trim();
+  if (texte === '★Une étoile de plus !' || texte === '★ Une étoile de plus !') {
+    return { titre: 'Une étoile de plus !', contenu: 'etoile' };
+  }
+  const annonce = reperes.find(([nom]) => nom === 'aria-label')?.[1] ?? texte;
+  const region = /^Une nouvelle région s’ouvre : (.+) !$/.exec(annonce)?.[1];
+  return region === undefined ? null : { titre: region, contenu: 'carte-monde' };
+}
+
+/**
+ * Le changement de DOM ne suffit pas : le dialogue doit nommer et illustrer le gain tapé.
+ * On le referme ensuite par sa vraie commande afin que l'audit suivant ne tape jamais derrière
+ * une modale. La marque finale conserve uniquement la preuve déjà établie pour l'observateur DOM.
+ */
+async function verifierFenetreRecompense(
+  page: Page,
+  cible: string,
+): Promise<void> {
+  const attendue = fenetreRecompenseAttendue(cible);
+  if (attendue === null) return;
+  try {
+    await page.waitForFunction(({ titre, contenu }) => {
+      const dialogues = [...document.querySelectorAll<HTMLDialogElement>('dialog.fenetre-recompense[open]')];
+      return dialogues.some((dialogue) => {
+        const bonTitre = dialogue.querySelector('h2')?.textContent?.replace(/\s+/gu, ' ').trim() === titre;
+        if (!bonTitre) return false;
+        const bonContenu = contenu === 'etoile'
+          ? dialogue.querySelector('[data-pictogramme-palier="etoile"]')?.textContent?.trim() === '★'
+          : dialogue.querySelector('img[alt="La carte du monde"]') !== null;
+        if (bonContenu) dialogue.setAttribute('data-audit-fenetre-recompense', 'exacte');
+        return bonContenu;
+      });
+    }, attendue);
+  } catch {
+    throw new Error(
+      `La commande de récompense « ${attendue.titre} » n'a pas ouvert son dialogue avec le bon contenu.`,
+    );
+  }
+  const dialogue = page.locator('dialog[data-audit-fenetre-recompense="exacte"]');
+  await dialogue.getByRole('button', { name: 'Fermer', exact: true }).click();
+  await dialogue.waitFor({ state: 'detached' });
+  await page.evaluate((identite) => {
+    const declencheur = [...document.querySelectorAll('[data-audit-identite]')]
+      .find((element) => element.getAttribute('data-audit-identite') === identite);
+    declencheur?.setAttribute('data-audit-effet-verifie', 'fenetre-recompense');
+  }, cible);
+}
+
 /** Le DOM sérialisé seul ne reflète pas les propriétés courantes des champs. */
 export async function valeursFormulaires(page: Page): Promise<readonly string[]> {
   return page.evaluate(() => [...document.querySelectorAll<HTMLInputElement | HTMLSelectElement>('input, select')]
@@ -57,13 +124,16 @@ export async function taperCommandeReperee(
   page: Page,
   cible: string,
 ): Promise<{ avantDom: string } | null> {
-  return page.evaluate((identite) => {
+  const observation = await page.evaluate((identite) => {
     const correspondances = [...document.querySelectorAll('[data-audit-identite]')]
       .filter((element) => element.getAttribute('data-audit-identite') === identite);
     if (correspondances.length !== 1) return null;
     const element = correspondances[0]!;
     const avantDom = document.body.innerHTML;
-    if (element instanceof HTMLInputElement && (element.type === 'text' || element.type === 'range')) {
+    if (
+      element instanceof HTMLInputElement &&
+      (element.type === 'text' || element.type === 'search' || element.type === 'range')
+    ) {
       let valeur: string;
       if (element.type === 'range') {
         const minimum = element.min === '' ? 0 : Number(element.min);
@@ -104,6 +174,8 @@ export async function taperCommandeReperee(
     element.dispatchEvent(new MouseEvent('click', commun));
     return { avantDom };
   }, cible);
+  if (observation !== null) await verifierFenetreRecompense(page, cible);
+  return observation;
 }
 
 export interface ObservationInteraction {
@@ -142,8 +214,12 @@ export async function auditerInteractions(
         ? 'non-verifie' : observation.effet ? 'observe' : 'muet',
     };
   };
+  // Les gains doivent être testés avant toute navigation : restaurer la récompense après son
+  // enregistrement la remonte légitimement sans ces cadeaux et rendrait leurs prises introuvables.
+  const prioritaires = initiales.filter((cible) => fenetreRecompenseAttendue(cible) !== null);
+  const ordre = [...prioritaires, ...initiales.filter((cible) => !prioritaires.includes(cible))];
   const verdicts: VerdictInteraction[] = [];
-  for (const cible of initiales) {
+  for (const cible of ordre) {
     verdicts.push(await observer(cible));
     if (await adaptateur.ecran() !== depart) await adaptateur.restaurer();
   }
@@ -152,13 +228,13 @@ export async function auditerInteractions(
     await adaptateur.restaurer();
     // La cible a pu disparaître parce qu'une autre commande a changé la question.
     // La tester d'abord seule évite de reproduire cette disparition avant chaque essai.
-    verdicts[rang] = await observer(initiales[rang]!);
+    verdicts[rang] = await observer(ordre[rang]!);
     if (verdicts[rang]!.statut !== 'muet') continue;
-    for (const autre of initiales) {
-      if (autre === initiales[rang]) continue;
+    for (const autre of ordre) {
+      if (autre === ordre[rang]) continue;
       await adaptateur.taper(autre);
       if (await adaptateur.ecran() !== depart) await adaptateur.restaurer();
-      const apresAmorcage = await observer(initiales[rang]!);
+      const apresAmorcage = await observer(ordre[rang]!);
       if (apresAmorcage.statut === 'observe') {
         verdicts[rang] = apresAmorcage;
         break;

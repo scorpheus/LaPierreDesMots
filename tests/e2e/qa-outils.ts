@@ -1022,6 +1022,9 @@ export function recettesDEcrans(): readonly EcranQA[] {
       // vit dans son en-tête, et `ouvrirLaZoneParent` rend la main dès la validation du code.
       await expect(page.locator('[data-ecran="dashboard"]')).toBeVisible();
       await page.locator('[data-vers="visite-parent"]').click();
+      // La coque de visite précède le catalogue chargé. Le premier bouton de lancement
+      // atteste que recherche, filtres et exercices appartiennent tous au même inventaire.
+      await expect(page.locator('[data-galerie-lancer]').first()).toBeVisible();
     },
   },
   {

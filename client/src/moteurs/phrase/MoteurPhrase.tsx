@@ -42,6 +42,7 @@
  * ══════════════════════════════════════════════════════════════════════════════════════════════
  */
 
+import { MessageStable } from '../../composants/MessageStable.js';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { CSSProperties, ReactElement } from 'react';
 import type { ActionPhrase, ContenuPhrase, EtatPhrase, Habillage } from '@pierre/partage';
@@ -667,6 +668,7 @@ export function MoteurPhrase(
     <div
       ref={racine}
       data-moteur="phrase"
+      data-plateau-defilant="oui"
       data-habillage={habillage.id}
       data-termine={etat.termineMs === null ? 'non' : 'oui'}
       data-aide={etat.niveauAide}
@@ -751,6 +753,7 @@ export function MoteurPhrase(
           sont positionnés dans le même rectangle : un décor et ses prises doivent partager UN
           SEUL référentiel (la leçon de R40). */}
       <div
+        data-plateau="illustration-phrase"
         style={{ gridArea: '2 / 1', position: 'relative', minBlockSize: 220, zIndex: 0 }}
       >
         <SceneDecor
@@ -994,7 +997,7 @@ export function MoteurPhrase(
               textAlign: 'center'
             } as CSSProperties}
           >
-            {messageDeRefus === '' ? (etat.aide === null ? '' : (etat.aide.texte ?? '')) : messageDeRefus}
+            <MessageStable messages={Object.values(MESSAGES_DE_REFUS)}>{messageDeRefus === '' ? (etat.aide === null ? '' : (etat.aide.texte ?? '')) : messageDeRefus}</MessageStable>
           </p>
 
           {/* Ce que le décor NE DIT PAS aux lecteurs d'écran, le moteur le dit en clair. Le SVG

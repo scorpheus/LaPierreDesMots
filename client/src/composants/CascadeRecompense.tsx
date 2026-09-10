@@ -7,11 +7,13 @@
 //
 // Le mapping avec le système de l'école est direct et délibéré (D25) : étoile → tampon
 // spécial → image. Les libellés le disent en français d'enfant, jamais en vocabulaire de jeu.
+import { useState } from 'react';
 import type { ReactElement } from 'react';
 import type { CodePalier, GainCascade, RecompenseObtenue } from '@pierre/partage';
 
 import { JaugePalier } from './JaugePalier.js';
 import { urlAsset } from '../api/client.js';
+import { FenetreRecompense } from './FenetreRecompense.js';
 
 /**
  * Une phrase par palier. Aucune ne compare, aucune ne juge, aucune ne regrette (R14).
@@ -71,9 +73,19 @@ export interface ProprietesCascadeRecompense {
 }
 
 export function CascadeRecompense({ gain }: ProprietesCascadeRecompense): ReactElement | null {
+  const [selection, choisir] = useState<{ gain: GainCascade; recompense: RecompenseObtenue } | null>(null);
   if (gain === null) {
     return null;
   }
+  const recompenseOuverte = selection?.gain === gain ? selection.recompense : null;
+
+  const intermediaire = gain.jauges.find((jauge) => jauge.palier === 'intermediaire');
+  const jauges = gain.jauges.map((jauge) => {
+    if (jauge.palier !== 'rare' || intermediaire === undefined) return jauge;
+    const requis = jauge.requis * intermediaire.requis;
+    const acquis = jauge.acquis * intermediaire.requis + intermediaire.acquis;
+    return { ...jauge, acquis, requis, restant: requis - acquis };
+  });
 
   return (
     <section
@@ -92,6 +104,8 @@ export function CascadeRecompense({ gain }: ProprietesCascadeRecompense): ReactE
               data-recompense={recompense.palier}
               className="cascade-recompense-gain"
             >
+              <button type="button" className="cascade-recompense-bouton"
+                onClick={() => choisir({ gain, recompense })}>
               <SignePalier palier={recompense.palier} />
               {estCadeauConcret(recompense) ? (
                 <>
@@ -108,15 +122,27 @@ export function CascadeRecompense({ gain }: ProprietesCascadeRecompense): ReactE
               ) : (
                 <span>{texteDuPalier(recompense)}</span>
               )}
+              </button>
             </li>
           ))}
         </ul>
       )}
+      {recompenseOuverte === null ? null : (
+        <FenetreRecompense
+          titre={estCadeauConcret(recompenseOuverte)
+            ? `Gobi reçoit la forme « ${recompenseOuverte.reference} ».`
+            : texteDuPalier(recompenseOuverte)}
+          surFermer={() => choisir(null)}>
+          {estCadeauConcret(recompenseOuverte)
+            ? <img src={urlAsset(recompenseOuverte.asset!)} alt={`Forme de Gobi : ${recompenseOuverte.reference}`} draggable={false} />
+            : <SignePalier palier={recompenseOuverte.palier} />}
+        </FenetreRecompense>
+      )}
 
       {/* ── et le vide qui reste : c'est lui qui donne envie de revenir (D25, point 3) */}
       <div className="cascade-recompense-jauges">
-        {gain.jauges.map((jauge) => (
-          <JaugePalier key={jauge.palier} jauge={jauge} />
+        {jauges.map((jauge) => (
+          <JaugePalier key={jauge.palier} jauge={jauge} enExercices={intermediaire !== undefined} />
         ))}
       </div>
     </section>

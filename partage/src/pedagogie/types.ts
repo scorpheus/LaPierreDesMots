@@ -157,6 +157,8 @@ export interface EtapeSortie {
 }
 
 export interface PlanSortie {
+  /** Région à reprendre après une sortie consacrée à ses prérequis. */
+  readonly regionObjectif?: CodeRegion;
   readonly profil: IdProfil;
   readonly region: CodeRegion;
   readonly compagnon: CodeCompagnon | null;
@@ -167,7 +169,7 @@ export interface PlanSortie {
 export interface ContraintesSelecteur {
   readonly nbNoeudsMin: number;
   readonly nbNoeudsMax: number;
-  /** v2 § 12.1 : aucune compétence dont un prérequis est sous ce seuil. */
+  /** Pré-requis de la compétence principale proposée : accord parent du 9 septembre 2026. */
   readonly seuilPrerequis: number;
   /** R13 : jamais deux fois le même habillage dans une sortie. */
   readonly habillageUniqueParSortie: boolean;

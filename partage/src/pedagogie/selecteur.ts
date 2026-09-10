@@ -167,7 +167,8 @@ function rolesDeLaSortie(n: number, rangRevision: number): readonly RoleNoeudSor
  *
  *  - **P9**  jamais deux fois le même habillage dans une sortie (R13) ;
  *  - **P10** l'étape de rang 1 est toujours `echauffement`, la dernière toujours `synthese` ;
- *  - **P11** aucune compétence dont un prérequis est sous `seuilPrerequis` (v2 § 12.1) ;
+ *  - **P11** aucun prérequis de la compétence principale sous `seuilPrerequis`
+ *    (v2 § 12.1, portée précisée par accord parent du 9 septembre 2026) ;
  *  - **P12** les révisions dues sont placées au rang `rangRevision`, jamais en 1 ni en dernier.
  *
  * LÈVE `ErreurPierre('contenu-invalide')` quand le vivier ne permet pas deux nœuds distincts.
@@ -184,16 +185,17 @@ export function composerSortie(
     entree.competences.map((competence) => [competence.code, competence])
   );
 
-  // 1. Filtrer : la bonne région, et la chaîne de prérequis respectée pour TOUTES les
-  //    compétences du nœud. Un nœud dont une seule compétence est prématurée est écarté en
-  //    entier — on ne joue pas la moitié d'un exercice.
+  // Accord parent du 9 septembre 2026 : les prérequis portent sur la compétence
+  // travaillée, en première position. Les compétences secondaires ne peuvent plus
+  // fermer l'exercice qui introduit leur propre prérequis (voyelles puis syllabes).
+  // Toutes les étiquettes doivent néanmoins appartenir au référentiel.
+  const candidatEligible = (candidat: NoeudCandidat): boolean => {
+    const principale = candidat.competences[0];
+    return principale !== undefined && candidat.competences.every((code) => parRef.has(code)) &&
+      competenceEligible(entree, parRef, principale, contraintes.seuilPrerequis);
+  };
   const eligibles = entree.noeudsDisponibles.filter(
-    (candidat) =>
-      candidat.region === entree.region &&
-      candidat.competences.length > 0 &&
-      candidat.competences.every((code) =>
-        competenceEligible(entree, parRef, code, contraintes.seuilPrerequis)
-      )
+    (candidat) => candidat.region === entree.region && candidatEligible(candidat)
   );
 
   // 2. Un seul nœud par habillage (R13, P9) : la déduplication se fait AVANT le choix du
@@ -223,6 +225,45 @@ export function composerSortie(
   // le dernier exercice ne peut donc plus se perdre dans un nouveau tirage aléatoire.
   const termines = new Set((entree.noeudsTermines ?? []).map(String));
   const inedits = eligibles.filter((candidat) => !termines.has(String(candidat.noeud)));
+  // Une région incomplète peut ne plus avoir de nouveauté accessible. Rejouer ses
+  // miroirs ne fait jamais progresser un prérequis de syllabation : chercher alors
+  // l'ancêtre encore faible dont les propres prérequis sont accessibles.
+  if (inedits.length === 0 && entree.noeudsTermines !== undefined) {
+    const aTravailler = new Set<CodeCompetence>();
+    const visites = new Set<CodeCompetence>();
+    const examiner = (code: CodeCompetence): void => {
+      if (visites.has(code)) return;
+      visites.add(code);
+      for (const prerequis of parRef.get(code)?.prerequis ?? []) {
+        if (maitriseDe(entree, prerequis) < contraintes.seuilPrerequis) {
+          aTravailler.add(prerequis);
+          examiner(prerequis);
+        }
+      }
+    };
+    entree.noeudsDisponibles
+      .filter((candidat) => candidat.region === entree.region && !termines.has(String(candidat.noeud)))
+      .forEach((candidat) => {
+        const principale = candidat.competences[0];
+        if (principale !== undefined) examiner(principale);
+      });
+    const entrainements = entree.noeudsDisponibles.filter((candidat) =>
+      candidat.competences[0] !== undefined && aTravailler.has(candidat.competences[0]) &&
+      candidatEligible(candidat)
+    ).sort(ordreCanonique);
+    const regionEntrainement = entrainements[0]?.region;
+    if (regionEntrainement !== undefined) {
+      const prioritaires = new Set(entrainements
+        .filter((candidat) => candidat.region === regionEntrainement).map((candidat) => candidat.noeud));
+      // Cette liste est un filtre de sélection local, jamais une écriture de progression.
+      // Elle garantit aussi une reprise utile quand l'exercice de prérequis a déjà une étoile.
+      const plan = composerSortie({ ...entree, region: regionEntrainement,
+        noeudsTermines: entree.noeudsDisponibles
+          .filter((candidat) => !prioritaires.has(candidat.noeud)).map((candidat) => candidat.noeud)
+      }, parametres, alea);
+      return { ...plan, regionObjectif: entree.region };
+    }
+  }
   const dejaVus = eligibles.filter((candidat) => termines.has(String(candidat.noeud)));
   const renforts = inedits.length === 1
     ? dejaVus

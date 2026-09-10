@@ -106,8 +106,12 @@ async function jouerLeNoeudEntier(page: Page): Promise<ReponseTentative> {
   expect(reponse.ok(), 'la réussite a reçu son ACK serveur').toBe(true);
   const resultat = await reponse.json() as ReponseTentative;
   for (const jauge of resultat.gainCascade.jauges) {
+    const intermediaire = resultat.gainCascade.jauges.find((une) => une.palier === 'intermediaire')!;
+    const restant = jauge.palier === 'rare'
+      ? jauge.restant * intermediaire.requis - intermediaire.acquis
+      : jauge.restant;
     await expect(page.locator('[data-ecran="recompense"] [data-palier="' + jauge.palier + '"]'))
-      .toHaveAttribute('data-restant', String(jauge.restant));
+      .toHaveAttribute('data-restant', String(restant));
   }
   await expect(page.locator('[data-action="voir-carte"]')).toBeEnabled();
   return resultat;

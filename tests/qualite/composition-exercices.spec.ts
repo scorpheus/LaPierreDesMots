@@ -165,6 +165,24 @@ test.describe('composition des exercices — anti-faux-verts de la sonde', () =>
     await expect(attendreGeometrieStable(page)).rejects.toThrow('image cassée ou indécodable');
   });
 
+  test('CONTRÔLE POSITIF — une image paresseuse hors écran garde son cadre sans bloquer la mesure', async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 200 });
+    await page.setContent(`
+      <main data-moteur="temoin" style="position:relative;height:1000px">
+        <img loading="lazy" width="88" height="88" style="position:absolute;top:800px"
+          src="http://127.0.0.1/image-paresseuse-hors-ecran.png">
+      </main>
+    `);
+    await page.locator('img').evaluate((image) => {
+      Object.defineProperty(image, 'complete', { configurable: true, value: false });
+    });
+    await attendreGeometrieStable(page);
+    expect(await page.locator('img').evaluate((image) => {
+      const boite = image.getBoundingClientRect();
+      return { largeur: boite.width, hauteur: boite.height, complete: (image as HTMLImageElement).complete };
+    })).toEqual({ largeur: 88, hauteur: 88, complete: false });
+  });
+
   test('CONTRÔLE NÉGATIF — une géométrie qui bouge ne devient pas stable par hasard', async ({ page }) => {
     await page.setContent(`
       <style>

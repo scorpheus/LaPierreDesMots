@@ -5,6 +5,20 @@
   "source": "Docs/journal-des-decisions.md — D33, « Le sens du trace (ductus) est norme ». Signale par la mere de l'enfant apres essai reel : le d ne se trace pas dans le bon sens.",
   "regles": [
     {
+      "id": "d-barre-puis-panse-descendante",
+      "enonce": "Le d minuscule commence par la barre du haut vers le bas, puis la panse part du milieu de la barre et descend à gauche vers sa base. La forme reste minuscule.",
+      "source": "Demande explicite du parent du 9 septembre 2026, confirmée pour le d minuscule, remplaçant l'ordre de D33 pour cette lettre seulement. Docs/correction-trace-2026-09-09.md.",
+      "lettres": [{ "lettre": "d", "premierTrait": "d-hampe", "depart": [70, 20], "sens": "sans-objet" }],
+      "traits": ["d-hampe", "d-panse"]
+    },
+    {
+      "id": "b-barre-puis-panse-descendante",
+      "enonce": "Le b commence par la barre du haut vers le bas, puis la panse part du milieu de la barre et descend vers sa base, sans remonter.",
+      "source": "Demande explicite du parent du 9 septembre 2026, Docs/correction-trace-2026-09-09.md.",
+      "lettres": [{ "lettre": "b", "premierTrait": "b-hampe", "depart": [30, 20], "sens": "sans-objet" }],
+      "traits": ["b-hampe", "b-panse"]
+    },
+    {
       "id": "rond-antihoraire",
       "enonce": "Une lettre initiee par un rond part en haut a droite du rond et tourne en sens antihoraire, comme pour tracer un o. La boucle vient avant la haste.",
       "source": "D33, texte : « pour le d : le geste part en haut a droite de la lettre, tourne dans le sens antihoraire — comme pour tracer un o — puis remonte. La boucle vient avant la haste. » Etendu aux lettres de la MEME famille gestuelle, jamais aux lettres qui lui ressemblent (D33, consequence 4).",
@@ -14,13 +28,6 @@
           "premierTrait": "a-rond",
           "depart": [54.0, 62.68],
           "sens": "antihoraire"
-        },
-        {
-          "lettre": "d",
-          "premierTrait": "d-panse",
-          "depart": [70.0, 60.0],
-          "sens": "antihoraire",
-          "commentaire": "La lettre du retour du pere : « je n'ai pas reussi a faire le d ». Le modele livre partait de [70, 100], en bas, et tournait a l'horaire — l'exact inverse de ce geste."
         },
         {
           "lettre": "g",
@@ -77,10 +84,6 @@
     }
   ],
   "nonTranchees": [
-    {
-      "lettre": "b",
-      "raison": "D33 dit que le b s'initie par « la boucle haute et descendante » et qu'il n'est PAS de la famille du d, sans decrire le sens de sa panse. Le modele livre part du bas de la hampe et tourne en antihoraire, ce qui suit le crayon la ou il se trouve ; on n'y touche pas sans source. Question Q-C2-1."
-    },
     {
       "lettre": "c",
       "raison": "Le modele livre a son ouverture EN HAUT, entre [37.14, 64.68] et [62.86, 64.68], la ou un c ouvre a droite. Le trace ne peut pas etre reoriente sans redessiner la lettre, et redessiner n'est pas une correction de ductus. Question Q-C2-2."

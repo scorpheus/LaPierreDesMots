@@ -38,6 +38,7 @@
  *   - **toute cible fait au moins 64 px** — la classe `.cible` le pose, jamais un nombre recopié.
  */
 
+import { MessageStable } from '../../composants/MessageStable.js';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { CSSProperties, ReactElement } from 'react';
 import type { ActionHistoire, ContenuHistoire, EtatHistoire } from '@pierre/partage';
@@ -349,12 +350,11 @@ export function MoteurHistoire(
           data-animations={animationsDesactivees ? 'calmes' : 'vives'}
           style={{
             ...styleLecture,
-            display: messageDeRefus === '' && etat.aide === null ? 'none' : undefined,
             margin: 0,
             minBlockSize: '1.5em',
           } as CSSProperties}
         >
-          {messageDeRefus === '' ? (etat.aide === null ? '' : (etat.aide.texte ?? '')) : messageDeRefus}
+          <MessageStable messages={Object.values(MESSAGES_DE_REFUS)}>{messageDeRefus === '' ? (etat.aide === null ? '' : (etat.aide.texte ?? '')) : messageDeRefus}</MessageStable>
         </p>
 
         <p

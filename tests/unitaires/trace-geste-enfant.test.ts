@@ -80,6 +80,8 @@ const ductus = lireJson<DuctusDeclare>(CHEMIN_DUCTUS);
 const ductusDuD = ductus.regles
   .flatMap((r) => r.lettres ?? [])
   .find((l) => l.lettre === 'd')!;
+// Demande du parent du 9 septembre : la panse conserve son parcours ; seul son rang change.
+const panseDuDDeclaree = { depart: [70, 60], sens: 'antihoraire' } as const;
 
 /** La lettre que le père n'a pas réussi à graver. */
 const lettreD: ModeleLettre = contenu.lettres.find((l) => l.lettre === 'd')!;
@@ -147,8 +149,8 @@ function decale(
 }
 
 /**
- * Le rond du `d` parcouru comme le ductus DÉCLARÉ le demande — départ et sens lus dans
- * `contenu/referentiel/ductus-minuscules.json`, jamais dans le modèle.
+ * Le rond du `d` conserve le parcours déclaré par D33 et confirmé le 9 septembre ;
+ * l'oracle de sa panse est explicite, indépendant de la géométrie livrée.
  *
  * Des deux parcours possibles d'un arc, on retient celui qui part du point déclaré ET tourne
  * dans le sens déclaré. Si aucun ne convient, le modèle ne dessine pas la lettre annoncée :
@@ -158,16 +160,16 @@ function pointsDuDuctusDeclare(): readonly (readonly [number, number])[] {
   for (const candidat of [rondDuD.points, [...rondDuD.points].reverse()]) {
     const premier = candidat[0]!;
     if (
-      premier[0] === ductusDuD.depart[0] &&
-      premier[1] === ductusDuD.depart[1] &&
-      sensDeRotation(candidat) === ductusDuD.sens
+      premier[0] === panseDuDDeclaree.depart[0] &&
+      premier[1] === panseDuDDeclaree.depart[1] &&
+      sensDeRotation(candidat) === panseDuDDeclaree.sens
     ) {
       return candidat;
     }
   }
   throw new Error(
-    `le rond du \`d\` ne peut se parcourir depuis ${JSON.stringify(ductusDuD.depart)} ` +
-      `en sens ${ductusDuD.sens} : depart livré ${JSON.stringify(rondDuD.depart)}, ` +
+    `le rond du \`d\` ne peut se parcourir depuis ${JSON.stringify(panseDuDDeclaree.depart)} ` +
+      `en sens ${panseDuDDeclaree.sens} : depart livré ${JSON.stringify(rondDuD.depart)}, ` +
       `sens livré ${sensDeRotation(rondDuD.points)}`,
   );
 }
@@ -198,7 +200,7 @@ function actionsDuGeste(geste: readonly EchantillonGeste[]): readonly ActionTrac
 
 // ═══════════════════════════════════════════════════════════════════ D33, le ductus
 
-describe('D33 — le ductus du `d` est celui de l’école', () => {
+describe('ductus du d — panse D33, ordre confirmé par le parent le 9 septembre', () => {
   it('la mesure du sens de rotation est juste sur un cas connu', () => {
     // Contrôle de l'instrument, avant de s'en servir : un carré parcouru vers la droite puis
     // vers le bas est HORAIRE à l'écran (y vers le bas). Sans ce cas, un signe inversé ferait
@@ -233,10 +235,8 @@ describe('D33 — le ductus du `d` est celui de l’école', () => {
     expect(sensDeRotation(rondDuD.points)).toBe('antihoraire');
   });
 
-  it('`d` et `q` — même famille gestuelle — ont le MÊME ductus (D33, conséquence 4)', () => {
-    // D33 regroupe les lettres « par famille gestuelle, jamais par ressemblance visuelle ».
-    // `d` et `q` s'initient tous deux par la rotation antihoraire du `o`. Ils sont dans le
-    // même fichier de modèles, écrits par la même main : leur ductus doit coïncider.
+  it('les panses d et q conservent le même parcours malgré leur nouvel ordre différent', () => {
+    // L'arbitrage du 9 septembre change seulement l'ordre du d ; le q est inchangé.
     const q = bibliotheque.lettres.find((l) => l.lettre === 'q')!;
     const rondDuQ = q.traits.find((t) => t.libelle === 'le rond')!;
 
@@ -247,11 +247,10 @@ describe('D33 — le ductus du `d` est celui de l’école', () => {
     expect(rondDuD.depart[1], '`d` vs `q` : hauteur du point de départ').toBe(rondDuQ.depart[1]);
   });
 
-  it('la boucle vient AVANT la haste (D33) — seul point déjà conforme', () => {
-    // Contrôle positif : ce que le modèle fait déjà bien ne doit pas être cassé par le
-    // correctif. `d-panse` est bien `ordre: 1`.
-    expect(lettreD.traits[0]?.libelle).toBe('le rond');
-    expect(lettreD.traits[1]?.libelle).toBe('la grande barre');
+  it('la barre vient avant la panse, selon la confirmation du parent du 9 septembre', () => {
+    expect(lettreD.traits[0]?.id).toBe(ductusDuD.premierTrait);
+    expect(lettreD.traits[0]?.libelle).toBe('la grande barre');
+    expect(lettreD.traits[1]?.libelle).toBe('le rond');
   });
 });
 
@@ -315,8 +314,9 @@ describe('R16 — on assouplit la précision, jamais le sens (D33, conséquence 
 
 describe('L’ORDRE des traits est imposé, mais jamais expliqué', () => {
   /**
-   * CORRECTION DE HARNAIS, mesurée. Les trois cas ci-dessous parlent du `d` — « commencer le
-   * `d` par la grande barre » — mais `etatNeuf()` ouvre l'exercice sur le `b` :
+   * CORRECTION DE HARNAIS, mesurée. Les trois cas ci-dessous vérifient qu'un rond tenté trop
+   * tôt sur le `d` est refusé et guidé vers la grande barre, mais `etatNeuf()` ouvre l'exercice
+   * sur le `b` :
    * `contenu.lettres` vaut `[b, d]` et `creerEtat` place `indexLettre` à 0. Le geste y était
    * donc jugé contre la grande barre du `b`, à `x = 30`, et le moteur répondait
    * `depart-eloigne` pour la bonne raison — ce n'est pas un problème d'ordre, c'est le trait
@@ -325,7 +325,7 @@ describe('L’ORDRE des traits est imposé, mais jamais expliqué', () => {
    * attendu s'appelait « la grande barre ».
    *
    * On amène donc l'état là où les trois énoncés se placent : le `b` soldé, l'exercice sur le
-   * `d`. Les assertions elles-mêmes ne bougent pas d'un caractère.
+   * `d`. Les assertions portent ensuite explicitement sur le rond joué avant la barre.
    */
   function etatSurLeD(): EtatTrace {
     expect(contenu.lettres[0]?.lettre, 'l’exercice ouvre bien sur le `b`').toBe('b');
@@ -338,37 +338,26 @@ describe('L’ORDRE des traits est imposé, mais jamais expliqué', () => {
     return etat;
   }
 
-  it('commencer le `d` par la grande barre est diagnostiqué `trait-hors-ordre`', () => {
-    // Le geste que le joueur vient d'apprendre sur le `b`, dans le MÊME exercice : la grande
-    // barre d'abord. Sur le `d`, l'ordre est inversé — la boucle passe première (et D33 le
-    // confirme).
-    //
-    // `moteur.ts` prévoit exactement ce cas (`traitPlusLoinReconnu`, motif
-    // `trait-hors-ordre`), mais la requalification est gardée par
-    // `decision.motif === 'trace-incomplet'`. Or un trait ultérieur commence à SON départ,
-    // donc loin du départ attendu : `evaluerTrait` rend `depart-eloigne`, et la
-    // requalification n'est jamais atteinte. Le seul motif capable de dire « commence par le
-    // rond » est donc inatteignable — code mort pour le cas qui l'a fait écrire.
-    const etat = jouer(etatSurLeD(), actionsDuGeste(gesteLeLongDe(barreDuD.points)));
+  it('commencer le `d` par le rond est diagnostiqué `trait-hors-ordre`', () => {
+    // La demande du parent du 9 septembre impose la barre avant le rond.
+    // Le même diagnostic doit guider un rond tracé trop tôt vers la barre attendue.
+    const etat = jouer(etatSurLeD(), actionsDuGeste(gesteLeLongDe(rondDuD.points)));
     expect(etat.dernierRefus?.motif).toBe('trait-hors-ordre');
   });
 
   it('le refus nomme le trait attendu, pour que l’enfant sache quoi refaire', () => {
-    const etat = jouer(etatSurLeD(), actionsDuGeste(gesteLeLongDe(barreDuD.points)));
+    const etat = jouer(etatSurLeD(), actionsDuGeste(gesteLeLongDe(rondDuD.points)));
     // Sans libellé du trait attendu, le seul retour à l'écran est « On recommence ce trait,
     // tranquillement. », qui ne dit rien de ce qu'il faut changer.
-    expect(etat.aide?.libelle ?? null).toBe(rondDuD.libelle);
+    expect(etat.aide?.libelle ?? null).toBe(barreDuD.libelle);
   });
 
   it('cinq tentatives dans le mauvais ordre déclenchent l’aide de Gobi', () => {
-    // `DELAIS_AIDE_PAR_DEFAUT.erreursAvantIndice` vaut 2. Mais `depart-eloigne` est déclaré
-    // SANS COÛT, et c'est le motif que rend TOUTE tentative dans le mauvais ordre :
-    // `nbErreurs` reste à zéro quel que soit le nombre d'essais. La seule voie vers l'aide
-    // est d'attendre 45 secondes sans rien faire — devant un écran qui, par ailleurs, n'a
-    // aucune sortie (défaut n° 1).
+    // Un rond commencé avant la barre rend désormais `trait-hors-ordre`. Ce refus compte comme
+    // une vraie tentative guidée : après le seuil déclaré, Gobi intervient sans attendre.
     let etat = etatSurLeD();
     for (let essai = 0; essai < 5; essai += 1) {
-      etat = jouer(etat, actionsDuGeste(gesteLeLongDe(barreDuD.points)));
+      etat = jouer(etat, actionsDuGeste(gesteLeLongDe(rondDuD.points)));
     }
     expect(etat.nbErreurs, 'cinq tentatives refusées ont été comptées').toBeGreaterThanOrEqual(
       DELAIS_AIDE_PAR_DEFAUT.erreursAvantIndice,

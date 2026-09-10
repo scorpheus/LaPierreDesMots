@@ -59,6 +59,19 @@ describe('deriverCode / verifierCode — PBKDF2-SHA256', () => {
     expect(memesOctets(await deriverCode('4271', sel), await deriverCode('4271', sel))).toBe(true);
   });
 
+  it('copie un sel partagé dans un tampon accepté par Web Crypto', async () => {
+    const selPartage = new Uint8Array(new SharedArrayBuffer(16));
+    selPartage.set([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
+    const selOrdinaire = new Uint8Array(selPartage);
+
+    expect(
+      memesOctets(
+        await deriverCode('4271', selPartage),
+        await deriverCode('4271', selOrdinaire)
+      )
+    ).toBe(true);
+  });
+
   it('rend une empreinte différente pour le même code sur deux sels', async () => {
     const [a, b] = await Promise.all([deriverCode('4271', selNeuf()), deriverCode('4271', selNeuf())]);
     expect(memesOctets(a, b)).toBe(false);

@@ -33,17 +33,33 @@ export async function attendreGeometrieStable(page: Page): Promise<void> {
   // changement d'état `complete`, avec son délai de navigation borné, plutôt que douze images
   // de rendu qui condamneraient une vraie tablette à tort.
   await page.waitForFunction(
-    () =>
-      [...document.images].every((image) => image.complete) &&
+    () => {
+      const estDiffereeHorsCadre = (image: HTMLImageElement): boolean => {
+        const boite = image.getBoundingClientRect();
+        const cadreReserve = Number(image.getAttribute('width')) > 0 && Number(image.getAttribute('height')) > 0;
+        const horsCadre = boite.bottom <= 0 || boite.top >= innerHeight || boite.right <= 0 || boite.left >= innerWidth;
+        return image.loading === 'lazy' && !image.complete && cadreReserve && horsCadre;
+      };
+      return [...document.images].filter((image) => !estDiffereeHorsCadre(image))
+        .every((image) => image.complete) &&
       [...document.querySelectorAll('[data-masque-raster]')]
-        .every((element) => element.getAttribute('data-masque-raster') === 'pret'),
+        .every((element) => element.getAttribute('data-masque-raster') === 'pret');
+    },
     undefined,
     { timeout: 10_000 },
   );
   await page.evaluate(async (selecteurGeometrie) => {
     const attendreImage = (): Promise<void> => new Promise((resoudre) => requestAnimationFrame(() => resoudre()));
     await document.fonts.ready;
-    const images = [...document.images];
+    const estDiffereeHorsCadre = (image: HTMLImageElement): boolean => {
+      const boite = image.getBoundingClientRect();
+      const cadreReserve = Number(image.getAttribute('width')) > 0 && Number(image.getAttribute('height')) > 0;
+      const horsCadre = boite.bottom <= 0 || boite.top >= innerHeight || boite.right <= 0 || boite.left >= innerWidth;
+      return image.loading === 'lazy' && !image.complete && cadreReserve && horsCadre;
+    };
+    // Une image paresseuse hors écran ne démarrera précisément qu'au défilement. Ses attributs
+    // width/height réservent déjà sa géométrie ; la forcer ici annulerait le contrat `lazy`.
+    const images = [...document.images].filter((image) => !estDiffereeHorsCadre(image));
     try {
       await Promise.all(images.map((image) => image.decode()));
     } catch {

@@ -804,9 +804,18 @@ export function MoteurAssemble(
           aria-live="polite"
           data-refus-texte={messageDeRefus === '' ? 'non' : 'oui'}
           data-animations={animationsDesactivees ? 'calmes' : 'vives'}
-          style={{ ...styleLecture, margin: 0, minBlockSize: '1.5em' } as CSSProperties}
+          style={{ ...styleLecture, margin: 0, display: 'grid' } as CSSProperties}
         >
-          {messageDeRefus === '' ? (etat.aide === null ? '' : (etat.aide.texte ?? '')) : messageDeRefus}
+          {/* La bande est mesurée pour dimensionner le décor. Réserver tous les refus,
+              y compris leurs retours à la ligne, évite de réduire l'image au mauvais geste. */}
+          {Array.from(new Set(Object.values(MESSAGES_DE_REFUS))).map((message) => (
+            <span key={message} aria-hidden="true" style={{ gridArea: '1 / 1', visibility: 'hidden' }}>
+              {message}
+            </span>
+          ))}
+          <span data-message-refus="oui" style={{ gridArea: '1 / 1' }}>
+            {messageDeRefus === '' ? (etat.aide === null ? '' : (etat.aide.texte ?? '')) : messageDeRefus}
+          </span>
         </p>
 
         {/* Ce que le décor NE DIT PAS aux lecteurs d'écran, le moteur le dit en clair. */}

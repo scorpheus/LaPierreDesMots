@@ -675,7 +675,7 @@ export function SceneSvg(proprietes: ProprietesSceneSvg): ReactElement {
                   }
                   if (region.id === regionEnRefus) classes.push('pierre-region--refus');
                   return (
-                    <circle
+                    <CercleAccessible
                       // La clé porte `marqueRefus` : un second refus sur la même région
                       // remonte l'élément, seul moyen de rejouer l'animation en React.
                       key={`${region.id}-${region.id === regionEnRefus ? marqueRefus : 0}`}
@@ -684,8 +684,9 @@ export function SceneSvg(proprietes: ProprietesSceneSvg): ReactElement {
                       cx={region.centroide[0]}
                       cy={region.centroide[1]}
                       // Le repli est visible pendant le chargement asynchrone du décor réel.
-                      // Il doit donc respecter R16 lui aussi, dès le tout premier relevé E2E.
-                      r={Math.max(rayonEquivalent(region.surface), rayonPrise)}
+                      // `CercleAccessible` conserve ses 66 px CSS même si la loupe compacte
+                      // provisoirement la scène avant l'arrivée de l'asset.
+                      rayonMinimal={Math.max(rayonEquivalent(region.surface), rayonPrise)}
                       fill={couleur === undefined ? REMPLISSAGE_VIDE : hexDeCouleur(couleur)}
                       stroke={TRAIT}
                       strokeWidth={4}

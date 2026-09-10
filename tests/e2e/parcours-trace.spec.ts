@@ -123,6 +123,25 @@ async function entrerDansLeNoeud(page: Page): Promise<void> {
 }
 
 test.describe('parcours trace', () => {
+  test('le refus ne change ni la taille ni la position de la lettre sur PC', async ({ page }) => {
+    await page.setViewportSize({ width: 1366, height: 768 });
+    await preparer(page);
+    await page.getByText(String(fixtureProfil['prenom']), { exact: false }).first().click();
+    await expect(page.locator('[data-ecran="carte"]')).toBeVisible();
+    await entrerDansLeNoeud(page);
+    const mesurer = () => page.locator('[data-scene="trace"]').evaluate((element) => {
+      const matrice = (element as SVGSVGElement).getScreenCTM()!;
+      return [matrice.a, matrice.d, matrice.e, matrice.f];
+    });
+    const avant = await mesurer();
+    await tracer(page, [[90, 20], [90, 40], [90, 60]]);
+    await expect(page.locator('[data-message-refus="oui"]')).toHaveText('On recommence ce trait, tranquillement.');
+    expect(await mesurer()).toEqual(avant);
+    await tracer(page, contenu.lettres[0]!.traits[0]!.points);
+    await expect(page.locator(`[data-trait="${contenu.lettres[0]!.traits[0]!.id}"]`)).toHaveAttribute('data-trait-etat', 'trace');
+    expect(await mesurer()).toEqual(avant);
+  });
+
   test('un nœud `trace` de bout en bout, un seul axe, aucun écran d’échec', async ({ page }) => {
     await preparer(page);
 

@@ -16,6 +16,7 @@
  * Un enfant qui ne sait pas maintenir un doigt deux secondes doit pouvoir jouer.
  */
 
+import { MessageStable } from '../../composants/MessageStable.js';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
 import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
@@ -204,9 +205,10 @@ export function MoteurPlace(
 
   // Le seul message de refus qui mérite un mot : l'enfant n'a pas pris d'objet. Ce n'est pas
   // une erreur — `REFUS_PLACE_COMPTE_ERREUR` le dit — donc pas un reproche.
+  const messageRappel = 'Choisis d’abord un objet.';
   const rappel =
     etat.dernierRefus !== null && etat.dernierRefus.motif === 'aucun-element-saisi'
-      ? 'Choisis d’abord un objet.'
+      ? messageRappel
       : '';
 
   return (
@@ -279,7 +281,7 @@ export function MoteurPlace(
         />
 
         <p role="status" aria-live="polite" data-rappel={rappel === '' ? 'non' : 'oui'}>
-          {rappel}
+          <MessageStable messages={[messageRappel]}>{rappel}</MessageStable>
         </p>
       </div>
     </DndContext>

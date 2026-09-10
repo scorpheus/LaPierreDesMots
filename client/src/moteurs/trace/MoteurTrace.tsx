@@ -115,8 +115,8 @@ function bornesViewBox(viewBox: string): readonly [number, number, number, numbe
  *
  * `trait-hors-ordre` est le seul motif qui porte une information actionnable : l'enfant a
  * tracé un trait juste, au mauvais moment. Lui répondre « On recommence ce trait » ne lui
- * apprend rien — c'est précisément ce qui bloquait sur le `d`, dont l'ordre est l'inverse de
- * celui du `b` (D33). Le libellé du trait attendu vient de l'état, jamais d'une chaîne
+ * apprend rien. Le parent a confirmé la barre avant la panse du `d` le 9 septembre 2026.
+ * Le libellé du trait attendu vient de l'état, jamais d'une chaîne
  * recopiée ici.
  */
 function messageDeRefus(etat: EtatTrace, libelleAttendu: string | null): string {
@@ -454,9 +454,23 @@ export function MoteurTrace(
           role="status"
           aria-live="polite"
           data-refus={etat.dernierRefus?.motif ?? 'non'}
-          style={{ ...styleLecture, margin: 0, textAlign: 'center' } as CSSProperties}
+          style={{ ...styleLecture, margin: 0, textAlign: 'center', display: 'grid' } as CSSProperties}
         >
-          {messageDeRefus(etat, traitAttendu?.libelle ?? null)}
+          {/* Réserver les messages avant le premier refus : leur apparition ne doit
+              déplacer ni redimensionner la lettre sous le pointeur. La grille réserve
+              aussi les retours à la ligne, sans hauteur fixe liée à un écran. */}
+          <span aria-hidden="true" style={{ gridArea: '1 / 1', visibility: 'hidden' }}>
+            On recommence ce trait, tranquillement.
+          </span>
+          {Array.from(new Set(contenu.lettres.flatMap((modele) => modele.traits.map((trait) => trait.libelle))))
+            .map((libelle) => (
+              <span key={libelle} aria-hidden="true" style={{ gridArea: '1 / 1', visibility: 'hidden' }}>
+                {`On commence par ${libelle}, tranquillement.`}
+              </span>
+            ))}
+          <span data-message-refus="oui" style={{ gridArea: '1 / 1' }}>
+            {messageDeRefus(etat, traitAttendu?.libelle ?? null)}
+          </span>
         </p>
 
         <span data-trait-libelle="oui" style={{ color: TRAIT, fontWeight: 700 }}>

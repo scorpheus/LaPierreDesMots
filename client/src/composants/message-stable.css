@@ -1,0 +1,5 @@
+.message-stable { display: grid; min-inline-size: 0; }
+.message-stable__reserve, .message-stable__texte { grid-area: 1 / 1; min-inline-size: 0; }
+.message-stable__reserve { visibility: hidden; pointer-events: none; }
+/* Le texte de mesure n'est ni annoncé ni compté comme message visible dans le DOM. */
+.message-stable__reserve::before { content: attr(data-texte); }

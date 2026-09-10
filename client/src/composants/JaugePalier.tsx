@@ -12,18 +12,7 @@
 // Aucun rouge, aucune croix, aucun barré : les cases non acquises sont en creux, comme les
 // étoiles manquantes de `Etoiles.tsx` (v2 § 6.2).
 import type { ReactElement } from 'react';
-import type { JaugePalier as ModeleJauge, NatureRecompense } from '@pierre/partage';
-
-/**
- * Libellé lisible de chaque nature. Aucune ne compare, aucune ne juge (R14).
- *
- * `'objet-campement'` retiré par le lot A1 (R31) — voir `partage/src/recompenses/types.ts`.
- */
-const LIBELLE_NATURE: Readonly<Record<NatureRecompense, string>> = {
-  etoile: 'étoile',
-  'forme-gobi': 'forme de Gobi',
-  'zone-recoloriee': 'zone à rallumer'
-};
+import type { JaugePalier as ModeleJauge } from '@pierre/partage';
 
 /**
  * Au-delà de ce nombre, on cesse de dessiner une case par unité : dix cases se lisent d'un
@@ -38,6 +27,8 @@ export interface ProprietesJaugePalier {
   readonly taille?: number;
   /** `false` sur la carte et le coffre, où la jauge est un simple repère. */
   readonly avecLibelle?: boolean;
+  /** Le palier rare peut être converti en exercices par la cascade complète. */
+  readonly enExercices?: boolean;
 }
 
 function Cases({ jauge, taille }: { jauge: ModeleJauge; taille: number }): ReactElement {
@@ -104,16 +95,23 @@ function Barre({ jauge, taille }: { jauge: ModeleJauge; taille: number }): React
 export function JaugePalier({
   jauge,
   taille = 20,
-  avecLibelle = true
+  avecLibelle = true,
+  enExercices = false
 }: ProprietesJaugePalier): ReactElement {
-  const nature = LIBELLE_NATURE[jauge.nature];
-  // Le texte dit le RESTE, pas l'acquis. C'est la phrase de D25, pas une paraphrase.
-  const phrase =
-    jauge.restant === 0
-      ? `C’est gagné : une ${nature} !`
-      : jauge.restant === 1
-        ? `Encore 1 avant la prochaine ${nature}`
-        : `Encore ${String(jauge.restant)} avant la prochaine ${nature}`;
+  // Chaque palier compte une unité différente. L'étoile revient toujours à 0/1 :
+  // annoncer « encore 1 » ressemble à un compteur bloqué. Le palier rare compte
+  // des formes, et sa nature interne ne garantit pas qu'une zone soit attribuée.
+  const phrase = jauge.palier === 'etoile'
+    ? 'Une étoile à chaque nouvel exercice réussi.'
+    : jauge.palier === 'rare'
+      ? jauge.restant === 0
+        ? 'Le grand palier est atteint !'
+        : enExercices
+          ? `Encore ${String(jauge.restant)} ${jauge.restant === 1 ? 'nouvel exercice réussi' : 'nouveaux exercices réussis'} avant le grand palier.`
+          : `Encore ${String(jauge.restant)} ${jauge.restant === 1 ? 'forme' : 'formes'} de Gobi avant le grand palier.`
+      : jauge.restant === 0
+        ? 'C’est gagné : une forme de Gobi !'
+        : `Encore ${String(jauge.restant)} ${jauge.restant === 1 ? 'nouvel exercice réussi' : 'nouveaux exercices réussis'} avant la prochaine forme de Gobi.`;
 
   return (
     <div

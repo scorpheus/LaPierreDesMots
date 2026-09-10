@@ -8,11 +8,12 @@
 // C'est aussi le seul endroit du client qui ÉCRIT dans le journal : un `POST /api/tentatives`
 // idempotent (§ 6.3). Le journal fait foi ; l'écran, lui, ne calcule rien.
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { ReactElement } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import type { EtatMonde, GainCascade, IdNoeud, IdProfil, TentativeAEnregistrer } from '@pierre/partage';
 import {
   calculerCleIdempotence,
+  composerSortie,
   enregistrerTentative,
   lireMonde,
   lirePaquetNoeud,
@@ -25,6 +26,7 @@ import { CascadeRecompense } from '../composants/CascadeRecompense.js';
 import { detailDesEtoiles } from '../composants/detail-etoiles.js';
 import { Etoiles } from '../composants/Etoiles.js';
 import { EvolutionGobi } from '../composants/EvolutionGobi.js';
+import { FenetreRecompense } from '../composants/FenetreRecompense.js';
 import { SpriteCompagnon } from '../composants/SpriteCompagnon.js';
 import { DessinButin } from '../monde/Butin.js';
 import { useEtatJeu, useMagasin, useServices } from '../etat/services.js';
@@ -43,6 +45,32 @@ const FELICITATIONS: Readonly<Record<number, string>> = {
 export interface ProprietesEcranRecompense {
   /** Destination de fin d'une vraie sortie. Le routeur la relie au campement. */
   readonly surFinSortie?: () => void;
+}
+
+/** Consulter un gain ne fait que changer l'état local de sa fenêtre. */
+export function CadeauRegion({ titre, annonce, illustration, illustrationFenetre, compagnon, objet, regions }: {
+  readonly titre: string;
+  readonly annonce: string;
+  readonly illustration: ReactNode;
+  readonly illustrationFenetre?: ReactNode;
+  readonly compagnon?: string;
+  readonly objet?: string;
+  readonly regions?: string;
+}): ReactElement {
+  const [ouverte, fixerOuverte] = useState(false);
+  return <>
+    <button type="button" className="cible recompense-region-acquis__carte"
+      data-compagnon-rallie={compagnon} data-objet-rapporte={objet} data-nouvelle-region={regions}
+      aria-label={annonce} aria-haspopup="dialog"
+      style={{ minHeight: 64, minWidth: 64, cursor: 'pointer', color: 'inherit', font: 'inherit' }}
+      onClick={() => fixerOuverte(true)}>
+      {illustration}
+      <span>{annonce}</span>
+    </button>
+    {ouverte ? <FenetreRecompense titre={titre} surFermer={() => fixerOuverte(false)}>
+      {illustrationFenetre ?? illustration}
+    </FenetreRecompense> : null}
+  </>;
 }
 
 /** Les seules ouvertures dignes d'une annonce : une région vraiment passée de fermée à ouverte. */
@@ -395,6 +423,25 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
   }, [suivant, magasin, estToujoursLaTentative]);
 
   const continuerLaRegion = useCallback((): void => {
+    if (sortie?.regionObjectif !== undefined && profil !== null) {
+      effacerParticules();
+      fixerChargementSuivant(true);
+      void composerSortie(profil.id, { region: String(sortie.regionObjectif), compagnon: sortie.compagnon ?? null })
+        .then(async (plan) => {
+          const premiere = plan.etapes[0];
+          if (premiere === undefined) throw new Error('Sortie sans exercice.');
+          const paquetSuivant = await lirePaquetNoeud(premiere.noeud);
+          if (!estToujoursLaTentative()) return;
+          magasin.getState().demarrerSortie(plan);
+          magasin.getState().demarrerNoeud(paquetSuivant);
+        })
+        .catch(() => {
+          if (!estToujoursLaTentative()) return;
+          fixerChargementSuivant(false);
+          magasin.getState().naviguer('carte');
+        });
+      return;
+    }
     if (continuerRegion === null) return;
     effacerParticules();
     fixerChargementSuivant(true);
@@ -409,7 +456,7 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
         fixerChargementSuivant(false);
         magasin.getState().naviguer('carte');
       });
-  }, [continuerRegion, magasin, estToujoursLaTentative]);
+  }, [continuerRegion, magasin, estToujoursLaTentative, sortie, profil]);
 
   const terminerSortie = useCallback((): void => {
     effacerParticules();
@@ -520,16 +567,16 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
             {chargementSuivant ? 'On y va…' : 'On y va !'}
           </button>
         )}
-        {continuerRegion === null ? null : (
+        {continuerRegion === null && !(finDeSortie && sortie?.regionObjectif !== undefined) ? null : (
           <button
             type="button"
             className="cible action-recompense action-recompense--principale"
             data-action="continuer-region"
-            data-noeud-suivant={String(continuerRegion)}
+            data-noeud-suivant={continuerRegion === null ? undefined : String(continuerRegion)}
             disabled={chargementSuivant || sauvegardeEnCours}
             onClick={() => agirApresSauvegarde(continuerLaRegion)}
           >
-            {chargementSuivant ? 'On y va…' : `Continuer ${nomRegion}`}
+            {chargementSuivant ? 'On y va…' : sortie?.regionObjectif !== undefined ? 'On y va !' : `Continuer ${nomRegion}`}
           </button>
         )}
         {finDeSortie ? (
@@ -634,41 +681,40 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
           <h2>Ta bande et ton campement grandissent !</h2>
           <div className="recompense-region-acquis__cartes">
             {compagnonRallie === null ? null : (
-              <article
-                className="recompense-region-acquis__carte"
-                data-compagnon-rallie={String(compagnonRallie.code)}
-              >
-                <img
+              <CadeauRegion
+                titre={compagnonRallie.libelle}
+                annonce={`${compagnonRallie.libelle} rejoint ta bande !`}
+                compagnon={String(compagnonRallie.code)}
+                illustration={<img
                   src={urlAsset(String(compagnonRallie.asset))}
-                  alt=""
+                  alt={compagnonRallie.libelle}
                   draggable={false}
-                />
-                <p><strong>{compagnonRallie.libelle}</strong> rejoint ta bande !</p>
-              </article>
+                />}
+              />
             )}
             {objetRapporte === null ? null : (
-              <article
-                className="recompense-region-acquis__carte"
-                data-objet-rapporte={String(objetRapporte.code)}
-              >
-                <DessinButin code={String(objetRapporte.code)} taille={112} />
-                <p><strong>{objetRapporte.libelle}</strong> rejoint le campement !</p>
-              </article>
+              <CadeauRegion
+                titre={objetRapporte.libelle}
+                annonce={`${objetRapporte.libelle} rejoint le campement !`}
+                objet={String(objetRapporte.code)}
+                illustration={<DessinButin code={String(objetRapporte.code)} taille={112} />}
+                illustrationFenetre={<DessinButin code={String(objetRapporte.code)} taille={240} />}
+              />
             )}
           </div>
         </section>
       )}
 
       {nomsRegionsOuvertes.length === 0 ? null : (
-        <p
-          className="zone-lecture"
-          data-nouvelle-region={nomsRegionsOuvertes.join('|')}
-          style={{ fontSize: '1.35rem', padding: '0.75rem 1rem', margin: 0, textAlign: 'center' }}
-        >
-          {nomsRegionsOuvertes.length === 1
+        <CadeauRegion
+          titre={nomsRegionsOuvertes.join(', ')}
+          regions={nomsRegionsOuvertes.join('|')}
+          illustration={<img src={urlAsset('assets/decors/carte-six-regions.png')}
+            alt="La carte du monde" draggable={false} />}
+          annonce={nomsRegionsOuvertes.length === 1
             ? `Une nouvelle région s’ouvre : ${nomsRegionsOuvertes[0]} !`
             : `De nouvelles régions s’ouvrent : ${nomsRegionsOuvertes.join(', ')} !`}
-        </p>
+        />
       )}
 
       {progressionRegionale === null ? null : (

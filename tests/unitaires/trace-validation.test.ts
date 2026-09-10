@@ -331,14 +331,14 @@ describe('CONTRAT DE SORTIE — part des refus dont l’axe est renseigné', () 
   });
 
   /**
-   * LES DEUX CAS ÉCARTÉS, et ils le sont par la géométrie, jamais par leur nom.
+   * LES QUATRE CAS IDENTIQUES, mesurés par la géométrie, jamais exclus par leur nom.
    *
-   * Depuis que le ductus du `d` est celui de l'école (D33), le rond du `d` et celui du `q`
-   * sont le MÊME geste : même arc — les deux lettres partagent la panse entre la hauteur d'x
-   * et la ligne de base —, même départ en haut à droite, même rotation antihoraire. Ce qui
-   * les distingue est la HASTE, qui monte pour le `d` et descend pour le `q`, et ces deux
-   * fixtures-là portent bien leur axe. Demander à la panse de distinguer `d` de `q` serait
-   * demander au moteur de lire une différence qui n'existe pas.
+   * La demande du parent du 9 septembre 2026 impose la panse descendante du b. Elle devient
+   * alors identique à celle du p : neuf points, de [30,60] à [30,100], écart maximum nul.
+   * d et q conservent leur panse identique de [70,60] à [70,100]. Les barres distinguent
+   * ces lettres par leur position, toutes tracées de haut en bas. Le moteur ne doit pas
+   * inventer une confusion sur les panses identiques ; les douze gestes distincts restent
+   * soumis aux mêmes obligations de refus et de diagnostic d'axe.
    */
   const fixtures = toutes.filter((f) => !f.gesteIdentique);
 
@@ -349,11 +349,15 @@ describe('CONTRAT DE SORTIE — part des refus dont l’axe est renseigné', () 
     expect(
       toutes.filter((f) => f.gesteIdentique).map((f) => f.cas),
       'gestes rigoureusement identiques au trait attendu',
-    ).toEqual(['d→q (haut-bas) · le rond', 'q→d (haut-bas) · le rond']);
-    expect(fixtures.length).toBe(14);
+    ).toEqual([
+      'b→p (haut-bas) · le rond', 'p→b (haut-bas) · le rond',
+      'd→q (haut-bas) · le rond', 'q→d (haut-bas) · le rond',
+    ]);
+    expect(fixtures.length).toBe(12);
     expect(fixtures.every((f) => f.decision.acceptee === false)).toBe(true);
-    // Et les deux écartés sont ACCEPTÉS : c'est le même geste, il ne peut pas être une faute.
+    // Les quatre identiques sont acceptés sans confusion : le geste attendu est correct.
     expect(toutes.filter((f) => f.gesteIdentique).every((f) => f.decision.acceptee)).toBe(true);
+    expect(toutes.filter((f) => f.gesteIdentique).every((f) => f.decision.axe === null)).toBe(true);
   });
 
   it('au moins 90 % des refus portent leur axe, et TOUJOURS le bon', () => {

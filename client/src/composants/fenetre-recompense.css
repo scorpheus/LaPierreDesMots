@@ -1,0 +1,52 @@
+.fenetre-recompense {
+  color: var(--trait, #1b2440);
+  background: var(--parchemin, #fbf6ea);
+  border: 4px solid var(--trait, #1b2440);
+  border-radius: 2rem;
+  padding: 0;
+  margin: auto;
+  width: min(34rem, calc(100vw - 2rem));
+  max-height: calc(100dvh - 2rem);
+  overflow: auto;
+  box-shadow: 0 12px 0 #1b244033, 0 24px 80px #1b244066;
+}
+.fenetre-recompense::backdrop { background: #152039b8; backdrop-filter: blur(5px); }
+.fenetre-recompense__carte { padding: clamp(1rem, 4vw, 2rem); text-align: center; }
+.fenetre-recompense__couronne { display: block; color: #a56512; font-size: 2rem; letter-spacing: .5rem; }
+.fenetre-recompense h2 { margin: .5rem 0 1rem; font-size: clamp(1.5rem, 4vw, 2.25rem); }
+.fenetre-recompense__illustration {
+  display: grid; place-items: center; margin: 1rem auto;
+  width: min(100%, 22rem); min-height: min(42vh, 18rem);
+  border-radius: 50%; background: radial-gradient(circle, #fff1b8 0, #fff1b85c 55%, transparent 72%);
+}
+.fenetre-recompense__illustration img, .fenetre-recompense__illustration svg {
+  display: block; width: min(100%, 20rem); height: min(38vh, 18rem); object-fit: contain;
+}
+.fenetre-recompense__illustration .cascade-embleme {
+  width: min(42vw, 12rem); height: min(42vw, 12rem); font-size: min(24vw, 7rem);
+  border-width: 4px; box-shadow: 0 9px 0 #1b244025;
+}
+.fenetre-recompense__fermer {
+  min-height: 64px; min-width: 10rem; padding: .75rem 2rem;
+  border: 3px solid var(--trait, #1b2440); border-radius: 1rem;
+  background: var(--soleil, #ffc93c); color: inherit; font: inherit; font-weight: 700;
+  box-shadow: 0 4px 0 var(--trait, #1b2440); cursor: pointer;
+}
+.cascade-recompense-bouton {
+  width: 100%; min-height: 64px; display: flex; align-items: center; gap: .75rem;
+  padding: .25rem; border: 0; border-radius: .8rem; background: transparent;
+  color: inherit; font: inherit; text-align: left; cursor: pointer;
+}
+.cascade-recompense-bouton:hover { background: #fff1b8; }
+.cascade-recompense-bouton:focus-visible, .fenetre-recompense__fermer:focus-visible {
+  outline: 4px solid #247e6e; outline-offset: 4px;
+}
+@media (max-height: 600px) {
+  .fenetre-recompense__carte { padding: .5rem 1rem; }
+  .fenetre-recompense__couronne { font-size: 1.25rem; }
+  .fenetre-recompense h2 { font-size: 1.25rem; margin: .25rem 0; }
+  .fenetre-recompense__illustration { min-height: 0; height: 30dvh; margin: .5rem auto; }
+  .fenetre-recompense__illustration img,
+  .fenetre-recompense__illustration svg,
+  .fenetre-recompense__illustration .cascade-embleme { height: 100%; max-height: 30dvh; }
+}

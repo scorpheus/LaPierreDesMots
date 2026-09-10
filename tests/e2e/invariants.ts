@@ -531,6 +531,15 @@ function sentinelleDansLaPage(config: ConfigurationSentinelle): void {
   /** I5 — R16. Seuls les éléments RENDUS comptent : un contrôle replié n'exige aucun doigt. */
   function auditerLesCibles(interactifs: readonly Element[]): void {
     for (const element of interactifs) {
+      // Le cercle transparent voisin d'un vrai path de coloriage n'accepte aucun pointeur :
+      // il donne seulement un bouton au clavier et au lecteur d'écran. Sa boîte ne décrit
+      // donc pas une cible que le doigt doit viser ; le path visible est contrôlé séparément
+      // par `composition-exercices.spec.ts` et joué par le parcours tactile.
+      if (
+        element instanceof SVGCircleElement &&
+        element.getAttribute('role') === 'button' &&
+        getComputedStyle(element).pointerEvents === 'none'
+      ) continue;
       const boite = element.getBoundingClientRect();
       const largeur = Math.round(boite.width);
       const hauteur = Math.round(boite.height);

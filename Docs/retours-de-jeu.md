@@ -89,23 +89,20 @@ c'est de la géométrie polygonale, comme le reste du décor.
 
 ---
 
-## R3. Fin d'exercice : aucun chemin vers l'exercice suivant — **ouvert**
+## R3. Fin d'exercice : aucun chemin vers l'exercice suivant — **corrigé le 9 septembre 2026**
 
 « quand l'exercice est fini, il y a soit rejoué ou retour a la carte ? il n'y a pas d'autres
 exercice dans la clairiere ? »
 
-**Mesuré** : `ls contenu/noeuds/ | grep -c clairiere` → **12**. La carte l'affiche même
-(« Étape 1 sur 12 »). Mais `client/src/ecrans/EcranRecompense.tsx` n'offre que **Rejouer** et
-**Retour à la carte** : rien ne mène au nœud suivant.
+**Correction** : l'écran de récompense propose la suite de la région. Si un prérequis manque,
+le composeur ouvre une préparation réellement éligible, conserve `regionObjectif`, puis reprend
+la région demandée. L'arbitrage S3-Q2 du 9 septembre limite l'éligibilité à la compétence
+principale ; les compétences secondaires restent déclarées et journalisées.
 
-**Et derrière, une falaise plus large, déjà mesurée et non tranchée** (S3-Q2) : le sélecteur exige
-que **toutes** les compétences d'un nœud soient éligibles (`selecteur.ts`,
-`competences.every(competenceEligible)`). Un exercice précoce qui déclare une compétence avancée en
-secondaire se ferme lui-même. Mesuré sur 500 graines : **2 régions sur 6 répondent**, et **10 nœuds
-sur 76 au mieux** sont atteignables pour un profil neuf.
-
-**À faire** : un bouton « exercice suivant » sur l'écran de récompense, et l'arbitrage de S3-Q2.
-Les deux sont nécessaires — le bouton seul mènerait vite à un cul-de-sac.
+La portée optimiste passe de 15 à 70 nœuds sur 76 sans crédit artificiel. Le parcours réel des
+Galeries, la réponse tardive, l'échec de recomposition et le retour à la carte sont gardés par
+les tests de progression et d'API. Cette mesure ne prétend pas valider pédagogiquement les six
+nœuds restants.
 
 ---
 

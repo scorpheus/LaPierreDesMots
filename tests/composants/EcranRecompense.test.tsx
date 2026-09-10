@@ -32,7 +32,8 @@ import { enonceUnePerte } from '@partage/ton/index.js';
 const enregistrements: unknown[] = [];
 let enregistrementEchoue = false;
 let promesseEnregistrement: Promise<unknown> | null = null;
-const { effacementsParticules, mondeRecompense, progressionRecompense } = vi.hoisted(() => ({
+const { effacementsParticules, mondeRecompense, progressionRecompense, compositionReprise } = vi.hoisted(() => ({
+  compositionReprise: vi.fn(),
   effacementsParticules: vi.fn(),
   mondeRecompense: { valeur: null as EtatMonde | null },
   progressionRecompense: { valeur: [] as Array<{ noeud: string; etoiles: number }> }
@@ -42,6 +43,7 @@ vi.mock('@client/api/client', async (importOriginal) => {
   const original = await importOriginal<Record<string, unknown>>();
   return {
     ...original,
+    composerSortie: compositionReprise,
     calculerCleIdempotence: () => Promise.resolve('cle-de-test'),
     lireMonde: () => Promise.resolve(mondeRecompense.valeur),
     lireProgression: () => Promise.resolve(progressionRecompense.valeur),
@@ -146,6 +148,7 @@ beforeEach(() => {
   mondeRecompense.valeur = null;
   progressionRecompense.valeur = [];
   effacementsParticules.mockClear();
+  compositionReprise.mockReset();
 });
 
 afterEach(() => {
@@ -525,6 +528,22 @@ describe('la récompense suit le plan pédagogique actif', () => {
     expect(document.body.textContent).toContain('Filou rejoint ta bande');
     expect(document.body.textContent).toContain('fanion de la Clairière rejoint le campement');
     expect(document.body.textContent).not.toContain('Encore une fois');
+  });
+
+  it('recompose la destination initiale après une sortie de préparation et garde une issue si le chargement échoue', async () => {
+    compositionReprise.mockRejectedValue(new Error('indisponible'));
+    const magasin = monter({
+      profil: { id: 'prf-1', prenom: 'Alma' },
+      journalise: false,
+      sortie: { ...PLAN_DE_SORTIE, regionObjectif: 'galeries' },
+      paquet: { noeud: { id: 'clairiere-06', region: 'clairiere' }, habillage: { timings: {} } }
+    });
+    const bouton = document.querySelector('[data-action="continuer-region"]');
+    expect(bouton).not.toBeNull();
+    fireEvent.click(bouton!);
+    await waitFor(() => expect(compositionReprise).toHaveBeenCalledWith('prf-1', { region: 'galeries', compagnon: null }));
+    await waitFor(() => expect(magasin.getState().ecran).toBe('carte'));
+    expect(enregistrements).toEqual([]);
   });
 
   it('propose l’étape suivante du plan, jamais le prochain nœud arbitraire de la région', () => {

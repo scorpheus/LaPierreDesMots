@@ -143,40 +143,37 @@ describe("attribution des compétences — ce que le journal recevra", () => {
 // ═══════════════════════════════════════════════════════════════════════════════════════════
 // LA PORTÉE RÉELLE DE « PARTIR EN SORTIE », MESURÉE PAR LE VRAI SÉLECTEUR
 //
-// `composerSortie` retient un candidat si `candidat.competences.every(competenceEligible)`
-// (selecteur.ts) et `competenceEligible` exige TOUS les prérequis à `p >= seuilPrerequis`.
-// `maitriseDe` rend 0 pour une compétence absente. Conséquence : un exercice précoce qui
-// déclare, en compétence secondaire, un code situé PLUS LOIN dans la chaîne de prérequis
-// se ferme lui-même — et ferme la compétence qu'il était le seul à pouvoir faire monter.
+// Depuis l'arbitrage parent du 9 septembre, `composerSortie` vérifie les prérequis de la
+// compétence principale. Les secondaires restent déclarées et journalisées, mais ne ferment
+// plus l'exercice qui permet justement de commencer leur apprentissage.
 //
 // ⚠ CE QUE CE NOMBRE NE DIT PAS, ET IL FAUT LE DIRE POUR NE PAS SUR-VENDRE LA MESURE.
 // Il porte sur la SEULE route « partir en sortie ». Les 76 nœuds restent jouables quand on les
 // adresse directement — `tests/api/sortie-sur-disque.test.ts`, cas « LA MARCHE », les joue tous
 // par `POST /api/tentatives` et montre les six régions finir par offrir une sortie. Le défaut
-// mesuré ici est donc : sur un profil NEUF, la composition automatique ne sait proposer que dix
-// nœuds, et quatre régions sur six lui répondent 409. `sortie-sur-disque` l'accepte déjà — son
-// assertion est `repondent.length >= 2`, écrite pour distinguer 0 de 2 et pas pour borner le
-// reste. Ce fichier-ci borne le reste.
+// mesuré ici reste une portée OPTIMISTE du composeur, et non un parcours réel de l'enfant.
 //
 // Le nombre ci-dessous est un CONSTAT, pas une cible atteinte. Il est asserté exactement pour
 // qu'il ne puisse ni empirer en silence, ni s'améliorer sans qu'on le voie.
 // ═══════════════════════════════════════════════════════════════════════════════════════════
 
 /**
- * Le nombre de nœuds qu'une sortie peut atteindre AU MIEUX, mesuré le 2026-08-03 :
- * **10 sur 76**. Les 66 autres sont fermés à « partir en sortie », dans quatre régions sur six
- * (Cité des Histoires, Forêt Muette, Marais Jumeau, Volcan : zéro nœud atteignable).
+ * Le nombre de nœuds qu'une sortie peut atteindre AU MIEUX. La mesure historique du
+ * 2026-08-03 était 10 sur 76 ; après arbitrage sur la compétence principale, elle vaut 70.
  */
 // Mesure du 2026-09-02 : la correction de l'étiquette pédagogique d'`ecole-02-place`
 // libère ce nœud, puis cinq nœuds au point fixe optimiste. La hausse de 10 à 15 est donc
 // expliquée et conservée comme nouveau témoin, pas absorbée par une borne plus lâche.
-const NOEUDS_ATTEIGNABLES_MESURES = 15;
+// Accord parent du 9 septembre 2026 : les prérequis portent sur la compétence principale.
+// La mesure passe exactement de 15 à 70 sur 76 ; six nœuds restent hors de ce point fixe.
+// Voir Docs/correction-progression-galeries-2026-09-09.md. Ce témoin ne valide pas un jeu réel.
+const NOEUDS_ATTEIGNABLES_MESURES = 70;
 
 /**
  * Graines fixes : la mesure ne doit pas dépendre du tirage. `composerSortie` départage les
  * candidats de même difficulté par `alea.choisir`, donc une graine unique SOUS-ESTIME la
- * portée. Stabilité vérifiée avant de figer le nombre — 1 graine rend 9, et 5, 20, 100 puis
- * 400 graines rendent toutes 10. Cinq suffisent, et le plafond est bien 10.
+ * portée. Les cinq graines restent un échantillon déterministe du tirage ; l'assertion exacte
+ * sur 70 empêche toute dérive silencieuse de la mesure après l'arbitrage.
  */
 const GRAINES: readonly number[] = [1, 7920, 15839, 23758, 31677];
 

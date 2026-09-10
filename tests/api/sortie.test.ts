@@ -10,6 +10,7 @@
  * sert qu'un, et une sortie d'un seul nœud n'existe pas.
  */
 import { join, sep } from 'node:path';
+import { readdirSync } from 'node:fs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import {
@@ -71,7 +72,7 @@ interface Harnais {
 
 let contexte: Harnais;
 
-async function monter(): Promise<Harnais> {
+async function monter(contenuReel = false): Promise<Harnais> {
   const [
     { construireApplication },
     { ouvrirBase },
@@ -91,7 +92,12 @@ async function monter(): Promise<Harnais> {
   const horloge = horlogeDeTest();
   await appliquerMigrations(baseAsync, DOSSIER_MIGRATIONS, horloge);
 
-  const { exercices, noeuds } = contenuDeTest();
+  const lireDossier = <T,>(dossier: string): T[] => readdirSync(join(RACINE_DEPOT, dossier), { recursive: true })
+    .filter((fichier): fichier is string => typeof fichier === 'string' && fichier.endsWith('.json'))
+    .map((fichier) => lireJson<T>(join(dossier, fichier)));
+  const { exercices, noeuds } = contenuReel
+    ? { exercices: lireDossier<Exercice>('contenu/exercices'), noeuds: lireDossier<Noeud>('contenu/noeuds') }
+    : contenuDeTest();
   const contenu = new factices.DepotContenuMemoire({
     exercices,
     noeuds,
@@ -272,5 +278,49 @@ describe('déterminisme et étanchéité', () => {
       .prepare('SELECT COUNT(*) AS n FROM sorties WHERE profil_id = ?')
       .get(bruno) as unknown as { n: number };
     expect(Number(ligne.n)).toBe(0);
+  });
+});
+
+describe('remédiation Galeries avec le contenu livré', () => {
+  it('prépare les prérequis puis retrouve les trois exercices manquants sans modifier les dix acquis', async () => {
+    await contexte.fermer();
+    contexte = await monter(true);
+    const profil = await creerProfil();
+    const acquis = ['galeries-01', 'galeries-02', 'galeries-03', 'galeries-04', 'galeries-05',
+      'galeries-06', 'galeries-07', 'galeries-08', 'galeries-09', 'galeries-11'];
+    for (const noeud of acquis) contexte.base.prepare(
+      'INSERT INTO progression_noeud VALUES (?, ?, 3, 1, ?)'
+    ).run(profil, noeud, '2026-09-01T08:00:00.000Z');
+    const fixerMaitrise = (competence: string, p: number): void => {
+      contexte.base.prepare(`INSERT INTO maitrise_competence VALUES (?, ?, ?, 6, '[]', 0, NULL)
+        ON CONFLICT(profil_id, competence) DO UPDATE SET p = excluded.p`).run(profil, competence, p);
+    };
+    for (const competence of ['comp.consigne.simple', 'comp.consigne.multiple', 'mot.outil.frequent',
+      'gph.miroir.gauche-droite', 'gph.miroir.haut-bas']) fixerMaitrise(competence, 0.99);
+    fixerMaitrise('syl.cvc', 0.456);
+    const avant = contexte.base.prepare('SELECT * FROM progression_noeud WHERE profil_id = ? ORDER BY noeud_id').all(profil);
+    const premiere = await composer(profil, { region: 'galeries' });
+    expect(premiere.statusCode).toBe(201);
+    const planVoyelles = premiere.json() as PlanSortie;
+    expect(planVoyelles.region).toBe('clairiere');
+    expect(planVoyelles.regionObjectif).toBe('galeries');
+    expect(planVoyelles.etapes.some((etape) => etape.competences.includes('gph.voyelle.orale'))).toBe(true);
+    // Accord parent : les étiquettes secondaires ne ferment plus les voyelles.
+    expect(planVoyelles.etapes.some((etape) => etape.competences[0] === 'syl.cv')).toBe(false);
+    fixerMaitrise('gph.voyelle.orale', 0.9);
+    const planCv = (await composer(profil, { region: 'galeries' })).json() as PlanSortie;
+    expect(planCv.regionObjectif).toBe('galeries');
+    expect(planCv.etapes.some((etape) => etape.competences[0] === 'syl.cv')).toBe(true);
+    fixerMaitrise('syl.cv', 0.9);
+    const planCvc = (await composer(profil, { region: 'galeries' })).json() as PlanSortie;
+    expect(planCvc.region).toBe('galeries');
+    expect(planCvc.etapes.map((etape) => etape.noeud)).toContain('galeries-07');
+    expect(planCvc.etapes.some((etape) => etape.competences[0] === 'gph.confusion.sourde-sonore')).toBe(false);
+    fixerMaitrise('syl.cvc', 0.9);
+    const planNouveau = (await composer(profil, { region: 'galeries' })).json() as PlanSortie;
+    expect(planNouveau.etapes.map((etape) => etape.noeud).sort()).toEqual(['galeries-10', 'galeries-13', 'galeries-14']);
+    expect(planNouveau.regionObjectif).toBeUndefined();
+    expect(contexte.base.prepare('SELECT * FROM progression_noeud WHERE profil_id = ? ORDER BY noeud_id').all(profil)).toEqual(avant);
+    expect(contexte.base.prepare('SELECT COUNT(*) AS n FROM tentatives WHERE profil_id = ?').get(profil)).toEqual({ n: 0 });
   });
 });

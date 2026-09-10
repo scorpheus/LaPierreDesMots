@@ -208,8 +208,8 @@ fausses.** Mesuré depuis :
   modifiait le code du serveur **pendant** la mesure. Un `git status` avant et après une campagne de
   dix minutes ne dit rien de ce qui s'est passé pendant.
 - Le « plancher sans marge » du composeur n'existe pas : sondé sur **500 graines**, deux régions
-  répondent **500 fois sur 500**, et 200 passes rendent une empreinte unique. La décision S3-Q2
-  reste utile pour l'enfant — elle ne conditionne plus la fiabilité de la QA.
+  répondaient **500 fois sur 500**, et 200 passes rendaient une empreinte unique. S3-Q2 a depuis
+  été tranché pour l'enfant ; il ne conditionnait déjà pas la fiabilité de la QA.
 
 Éprouvé après correction, et c'est le chiffre à retenir :
 
@@ -285,10 +285,9 @@ Détail et mesures dans **`Docs/questions-en-attente.md`**.
 
 1. **Les captures visuelles** — les regarder, puis figer ou refuser. C'est ce qui débloque
    `npm run verifier`.
-2. **Le verrou du composeur de sortie** (S3-Q2) — toujours à trancher pour ce que l'enfant peut
-   jouer (10 nœuds sur 76 en sortie), mais **plus du tout urgent pour la QA** : la prémisse de
-   Q-INT-9, qui en faisait la cause des rouges spontanés, est réfutée (Q-INT-10). Ce point ne
-   bloque plus rien d'autre que lui-même.
+2. **Le verrou du composeur de sortie** (S3-Q2) — résolu le 9 septembre par arbitrage parent :
+   les prérequis portent sur la compétence principale. La portée optimiste mesurée passe de
+   15 à 70 nœuds sur 76 ; les six restants ne sont pas déclarés joués ni pédagogiquement validés.
 3. **Les trois compétences muettes** (Q-INT-4) — contenu, garde, ou code. C'est la décision qui a
    le plus d'effet sur ce que tu liras dans le suivi.
 4. **Le seuil de couverture lexicale CE1**, inchangé : 93,0 % des mots lus en jeu figurent dans la

@@ -46,6 +46,7 @@
  *   - **toute cible fait au moins 64 px** — la classe `.cible` le pose, jamais un nombre recopié.
  */
 
+import { MessageStable } from '../../composants/MessageStable.js';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { CSSProperties, ReactElement } from 'react';
 import type { ActionChemin, ContenuChemin, EtatChemin } from '@pierre/partage';
@@ -664,7 +665,9 @@ export function MoteurChemin(
             : `${etat.position === departEtape ? 'Départ' : 'Tu es sur'} : « ${caseCourante.libelle} ».`}
         </span>
         <span data-retour-chemin="oui" style={{ fontSize: '0.68em', minBlockSize: '2lh' }}>
-          {retourChemin || 'Touche une case reliée en jaune.'}
+          <MessageStable messages={[...Object.values(MESSAGES_DE_REFUS), 'Touche une case reliée en jaune.', 'Indice : une case possible brille en bleu.']}>
+            {retourChemin || 'Touche une case reliée en jaune.'}
+          </MessageStable>
         </span>
       </div>
 
