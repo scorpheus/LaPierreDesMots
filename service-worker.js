@@ -11,7 +11,7 @@
  */
 /* global self, caches */
 
-const VERSION = '2efaf2a61cb04a9d';
+const VERSION = '2d4fb58e16844caf';
 const BASE = '/LaPierreDesMots/';
 const PRECACHE = [
   "/LaPierreDesMots/.vite/manifest.json",
@@ -157,12 +157,12 @@ const PRECACHE = [
   "/LaPierreDesMots/assets/clairiere-veillee-histoire-01-c5.normal.91c48779-CeAc7sZJ.opus",
   "/LaPierreDesMots/assets/clairiere-veillee-histoire-01-recit.normal.de1aa334-DDfqHZbd.opus",
   "/LaPierreDesMots/assets/collier-Ab_KlpVI.svg",
-  "/LaPierreDesMots/assets/compagnons-D9RTRuka.js",
+  "/LaPierreDesMots/assets/compagnons-vB49LEMM.js",
   "/LaPierreDesMots/assets/competences-OMAh9bxl.json",
   "/LaPierreDesMots/assets/coquillages-BM65uvex.svg",
   "/LaPierreDesMots/assets/coulee-DYHvFA3G.svg",
   "/LaPierreDesMots/assets/cristal-L00bfdnI.svg",
-  "/LaPierreDesMots/assets/ductus-minuscules-BoEBbV4k.json",
+  "/LaPierreDesMots/assets/ductus-minuscules-B8XBqC8V.json",
   "/LaPierreDesMots/assets/echo-conte-DTHgHUJQ.svg",
   "/LaPierreDesMots/assets/echos-BVVjzekT.svg",
   "/LaPierreDesMots/assets/ecole-BK-Txehm.svg",
@@ -293,7 +293,7 @@ const PRECACHE = [
   "/LaPierreDesMots/assets/grenouilles-BuCMD2GP.svg",
   "/LaPierreDesMots/assets/guirlande-BoZr2VSf.svg",
   "/LaPierreDesMots/assets/hesitation-BBCjGqUA.svg",
-  "/LaPierreDesMots/assets/index-DDjHADrg.js",
+  "/LaPierreDesMots/assets/index-BcmQzUIv.js",
   "/LaPierreDesMots/assets/index-DRefDHMM.js",
   "/LaPierreDesMots/assets/joie-C4xsL_9o.svg",
   "/LaPierreDesMots/assets/lianes-Llw4yK2T.svg",
@@ -362,7 +362,7 @@ const PRECACHE = [
   "/LaPierreDesMots/assets/marais-jumeau-roseaux-phrase-01-c1.normal.7d711b9e-B4zgMxh7.opus",
   "/LaPierreDesMots/assets/marais-jumeau-roseaux-phrase-01-c2.normal.7d711b9e-jWMwuFJg.opus",
   "/LaPierreDesMots/assets/message-B-MGyrbk.svg",
-  "/LaPierreDesMots/assets/minuscules-az1xqpei.json",
+  "/LaPierreDesMots/assets/minuscules-BZoXV0wx.json",
   "/LaPierreDesMots/assets/mot-ami.syllabe.5152cc21-BO-0LHsN.opus",
   "/LaPierreDesMots/assets/mot-assemble.syllabe.63ebfab6-D0ltv2FQ.opus",
   "/LaPierreDesMots/assets/mot-attrape.syllabe.ddaa6f07-CfmRrV4g.opus",
@@ -443,7 +443,7 @@ const PRECACHE = [
   "/LaPierreDesMots/assets/poissons-B2yEcocG.svg",
   "/LaPierreDesMots/assets/ponton-BAopEDcG.svg",
   "/LaPierreDesMots/assets/ponts-DnMR1Jxq.svg",
-  "/LaPierreDesMots/assets/port-local-C99b07V0.js",
+  "/LaPierreDesMots/assets/port-local-Bm8wTZST.js",
   "/LaPierreDesMots/assets/rayonnages-BeJ6vWwN.svg",
   "/LaPierreDesMots/assets/regions-KaGt3j0-.json",
   "/LaPierreDesMots/assets/repos-DBQqkFKN.svg",
@@ -466,7 +466,7 @@ const PRECACHE = [
   "/LaPierreDesMots/assets/stade-8-CB2Ros1z.svg",
   "/LaPierreDesMots/assets/stade-9-BPM2raNh.svg",
   "/LaPierreDesMots/assets/stalagmites-D7RvGHa5.svg",
-  "/LaPierreDesMots/assets/style-B6qwTGJq.css",
+  "/LaPierreDesMots/assets/style-BL7k4Puh.css",
   "/LaPierreDesMots/assets/tapis-Do3rL1TA.svg",
   "/LaPierreDesMots/assets/theatre-ombres-sezFftCi.svg",
   "/LaPierreDesMots/assets/train-DUP2gaNd.svg",

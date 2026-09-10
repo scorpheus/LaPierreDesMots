@@ -660,7 +660,7 @@
     "src": "../contenu/assets/gobi/stades/stade-1.svg"
   },
   "../contenu/assets/gobi/stades/stade-1.webp": {
-    "file": "assets/stade-1-CrZzeGw1.webp",
+    "file": "assets/stade-1-DZ_QSAf8.webp",
     "src": "../contenu/assets/gobi/stades/stade-1.webp"
   },
   "../contenu/assets/gobi/stades/stade-10.svg": {
@@ -668,7 +668,7 @@
     "src": "../contenu/assets/gobi/stades/stade-10.svg"
   },
   "../contenu/assets/gobi/stades/stade-10.webp": {
-    "file": "assets/stade-10-CCtZNz4h.webp",
+    "file": "assets/stade-10-Cemxq9ot.webp",
     "src": "../contenu/assets/gobi/stades/stade-10.webp"
   },
   "../contenu/assets/gobi/stades/stade-2.svg": {
@@ -676,7 +676,7 @@
     "src": "../contenu/assets/gobi/stades/stade-2.svg"
   },
   "../contenu/assets/gobi/stades/stade-2.webp": {
-    "file": "assets/stade-2-h4nWeByN.webp",
+    "file": "assets/stade-2-BNmNZIco.webp",
     "src": "../contenu/assets/gobi/stades/stade-2.webp"
   },
   "../contenu/assets/gobi/stades/stade-3.svg": {
@@ -684,7 +684,7 @@
     "src": "../contenu/assets/gobi/stades/stade-3.svg"
   },
   "../contenu/assets/gobi/stades/stade-3.webp": {
-    "file": "assets/stade-3-ChUobyY-.webp",
+    "file": "assets/stade-3-Cg9W9155.webp",
     "src": "../contenu/assets/gobi/stades/stade-3.webp"
   },
   "../contenu/assets/gobi/stades/stade-4.svg": {
@@ -692,7 +692,7 @@
     "src": "../contenu/assets/gobi/stades/stade-4.svg"
   },
   "../contenu/assets/gobi/stades/stade-4.webp": {
-    "file": "assets/stade-4-Clst67ay.webp",
+    "file": "assets/stade-4-CkMp1B7B.webp",
     "src": "../contenu/assets/gobi/stades/stade-4.webp"
   },
   "../contenu/assets/gobi/stades/stade-5.svg": {
@@ -700,7 +700,7 @@
     "src": "../contenu/assets/gobi/stades/stade-5.svg"
   },
   "../contenu/assets/gobi/stades/stade-5.webp": {
-    "file": "assets/stade-5-5wNvsvtB.webp",
+    "file": "assets/stade-5-DAQkq5Dj.webp",
     "src": "../contenu/assets/gobi/stades/stade-5.webp"
   },
   "../contenu/assets/gobi/stades/stade-6.svg": {
@@ -708,7 +708,7 @@
     "src": "../contenu/assets/gobi/stades/stade-6.svg"
   },
   "../contenu/assets/gobi/stades/stade-6.webp": {
-    "file": "assets/stade-6-BL-i57--.webp",
+    "file": "assets/stade-6-DJE3Q16c.webp",
     "src": "../contenu/assets/gobi/stades/stade-6.webp"
   },
   "../contenu/assets/gobi/stades/stade-7.svg": {
@@ -716,7 +716,7 @@
     "src": "../contenu/assets/gobi/stades/stade-7.svg"
   },
   "../contenu/assets/gobi/stades/stade-7.webp": {
-    "file": "assets/stade-7-Dgar74oJ.webp",
+    "file": "assets/stade-7-yJMP5qOX.webp",
     "src": "../contenu/assets/gobi/stades/stade-7.webp"
   },
   "../contenu/assets/gobi/stades/stade-8.svg": {
@@ -724,7 +724,7 @@
     "src": "../contenu/assets/gobi/stades/stade-8.svg"
   },
   "../contenu/assets/gobi/stades/stade-8.webp": {
-    "file": "assets/stade-8-cznxYYyZ.webp",
+    "file": "assets/stade-8-C2Y_JhdN.webp",
     "src": "../contenu/assets/gobi/stades/stade-8.webp"
   },
   "../contenu/assets/gobi/stades/stade-9.svg": {
@@ -732,7 +732,7 @@
     "src": "../contenu/assets/gobi/stades/stade-9.svg"
   },
   "../contenu/assets/gobi/stades/stade-9.webp": {
-    "file": "assets/stade-9-Duo49qOx.webp",
+    "file": "assets/stade-9-BFxA8hgP.webp",
     "src": "../contenu/assets/gobi/stades/stade-9.webp"
   },
   "../contenu/assets/objets/oiseau.svg": {
@@ -2924,7 +2924,7 @@
     "src": "../contenu/habillages/volcan/wagons.svg"
   },
   "../contenu/modeles-lettres/minuscules.json": {
-    "file": "assets/minuscules-az1xqpei.json",
+    "file": "assets/minuscules-BZoXV0wx.json",
     "src": "../contenu/modeles-lettres/minuscules.json"
   },
   "../contenu/monde/campement.json": {
@@ -2944,20 +2944,20 @@
     "src": "../contenu/referentiel/competences.json"
   },
   "../contenu/referentiel/ductus-minuscules.json": {
-    "file": "assets/ductus-minuscules-BoEBbV4k.json",
+    "file": "assets/ductus-minuscules-B8XBqC8V.json",
     "src": "../contenu/referentiel/ductus-minuscules.json"
   },
-  "_compagnons-D9RTRuka.js": {
-    "file": "assets/compagnons-D9RTRuka.js",
+  "_compagnons-vB49LEMM.js": {
+    "file": "assets/compagnons-vB49LEMM.js",
     "name": "compagnons"
   },
   "index.html": {
-    "file": "assets/index-DDjHADrg.js",
+    "file": "assets/index-BcmQzUIv.js",
     "name": "index",
     "src": "index.html",
     "isEntry": true,
     "imports": [
-      "_compagnons-D9RTRuka.js"
+      "_compagnons-vB49LEMM.js"
     ],
     "dynamicImports": [
       "src/api/port-local.ts",
@@ -2965,12 +2965,12 @@
     ]
   },
   "src/api/port-local.ts": {
-    "file": "assets/port-local-C99b07V0.js",
+    "file": "assets/port-local-Bm8wTZST.js",
     "name": "port-local",
     "src": "src/api/port-local.ts",
     "isDynamicEntry": true,
     "imports": [
-      "_compagnons-D9RTRuka.js"
+      "_compagnons-vB49LEMM.js"
     ],
     "dynamicImports": [
       "src/base/adaptateur-sqlite-wasm.ts"
@@ -3263,16 +3263,16 @@
       "assets/hesitation-DUeBQKb4.webp",
       "assets/joie-B-6mcJEL.webp",
       "assets/repos-CjVM6JSn.webp",
-      "assets/stade-1-CrZzeGw1.webp",
-      "assets/stade-10-CCtZNz4h.webp",
-      "assets/stade-2-h4nWeByN.webp",
-      "assets/stade-3-ChUobyY-.webp",
-      "assets/stade-4-Clst67ay.webp",
-      "assets/stade-5-5wNvsvtB.webp",
-      "assets/stade-6-BL-i57--.webp",
-      "assets/stade-7-Dgar74oJ.webp",
-      "assets/stade-8-cznxYYyZ.webp",
-      "assets/stade-9-Duo49qOx.webp",
+      "assets/stade-1-DZ_QSAf8.webp",
+      "assets/stade-10-Cemxq9ot.webp",
+      "assets/stade-2-BNmNZIco.webp",
+      "assets/stade-3-Cg9W9155.webp",
+      "assets/stade-4-CkMp1B7B.webp",
+      "assets/stade-5-DAQkq5Dj.webp",
+      "assets/stade-6-DJE3Q16c.webp",
+      "assets/stade-7-yJMP5qOX.webp",
+      "assets/stade-8-C2Y_JhdN.webp",
+      "assets/stade-9-BFxA8hgP.webp",
       "assets/aide-gobi-montre-cible.normal.16d5cf94-D9FLCR52.opus",
       "assets/aide-gobi-montre-couleur.normal.293474c6-DY6POJC6.opus",
       "assets/aide-gobi-relire-consigne.normal.6e817c2f-CRw15hbc.opus",
@@ -3707,12 +3707,12 @@
       "assets/volcan-wagons-tri-02-wagon-gauche.normal.b1ff73c7-DzorLug9.opus",
       "assets/volcan-wagons-tri-02-wagon-milieu.normal.1576ca5f-vSg04-dQ.opus",
       "assets/manifeste-DI0ixzSE.json",
-      "assets/minuscules-az1xqpei.json",
+      "assets/minuscules-BZoXV0wx.json",
       "assets/campement-DXQia1bV.json",
       "assets/gobi-stades-CNVGYk5O.json",
       "assets/regions-KaGt3j0-.json",
       "assets/competences-OMAh9bxl.json",
-      "assets/ductus-minuscules-BoEBbV4k.json"
+      "assets/ductus-minuscules-B8XBqC8V.json"
     ]
   },
   "src/base/adaptateur-sqlite-wasm.ts": {
@@ -3722,7 +3722,7 @@
     "isDynamicEntry": true
   },
   "style.css": {
-    "file": "assets/style-B6qwTGJq.css",
+    "file": "assets/style-BL7k4Puh.css",
     "src": "style.css"
   }
 }
