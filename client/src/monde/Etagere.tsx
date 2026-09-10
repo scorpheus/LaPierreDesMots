@@ -15,11 +15,11 @@
 // Trois règles portées ici :
 //   1. **Rien n'est caché, rien n'est cadenassé.** Une case vide est la MÊME case, en Grisaille.
 //      C'est le principe déjà posé par `EcranCoffre.tsx:52` ; on l'étend, on ne l'invente pas.
-//   2. **Chaque case s'explore.** La liste garde ses vrais `<li>` et chaque vignette contient
-//      un bouton natif : R24 ouvre la même fiche, gagnée ou non, sans casser la sémantique.
+//   2. **Une forme future ne se révèle pas.** Sa vignette reste visible, mais seule une forme
+//      acquise devient un bouton et ouvre sa fiche complète.
 //   3. **Le compte se lit sans compter.** `data-cases-total`, `data-cases-obtenues` et
 //      `data-cases-vides` sont posés sur la racine, pour l'enfant comme pour la recette.
-import type { ReactElement } from 'react';
+import type { CSSProperties, ReactElement } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { formesDuDocument } from '@pierre/partage/monde';
 import type { CaseEtagere, CatalogueFormes, Etagere as ModeleEtagere } from '@pierre/partage/monde';
@@ -47,65 +47,68 @@ function Vignette({
   readonly surOuvrir: () => void;
   readonly compacte: boolean;
 }): ReactElement {
+  const style: CSSProperties = {
+    cursor: une.obtenue ? 'pointer' : 'default',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '0.35rem',
+    boxSizing: 'border-box',
+    inlineSize: compacte ? '9rem' : '9.5rem',
+    minBlockSize: compacte ? '9rem' : '10rem',
+    padding: '0.5rem',
+    color: 'inherit',
+    font: 'inherit',
+    borderRadius: 'var(--rayon-carte, 12px)',
+    border: une.obtenue
+      ? 'var(--epaisseur-trait) solid var(--trait)'
+      : 'var(--epaisseur-trait) dashed var(--trait)',
+    backgroundColor: une.obtenue ? 'var(--parchemin)' : 'transparent',
+  };
+  const contenu = (
+    <>
+      <img
+        src={urlAsset(String(une.cristal))}
+        alt=""
+        width={compacte ? 72 : 80}
+        height={compacte ? 72 : 80}
+        aria-hidden="true"
+        draggable={false}
+        loading="lazy"
+        style={une.obtenue ? undefined : { opacity: 0.55, filter: 'saturate(0)' }}
+      />
+      <span style={{ fontSize: '0.9rem', textAlign: 'center' }}>{une.libelle}</span>
+    </>
+  );
+
   return (
     <li>
-      <button
-        type="button"
-        data-case-etagere={String(une.grapheme)}
-        data-rang={String(une.rang)}
-        data-obtenue={une.obtenue ? 'oui' : 'non'}
-        // R24 — CHAQUE CASE S'OUVRE, GAGNÉE OU NON.
-        //
-        // « même si on ne les a pas, tous les items à récupérer devraient être affichés en grand
-        // dans un popup avec une description de ce qu'on peut gagner, et on aura la couleur. »
-        //
-        // L'étagère montrait déjà les cases VIDES (D44, D25 point 3) — mais une case vide ne
-        // disait pas CE QU'ELLE ATTEND. Elle est maintenant une prise, et les deux états ouvrent
-        // la même fiche : un enfant ne doit pas apprendre que « les cases grises ne répondent
-        // pas », sinon il cesse de les toucher et le vide cesse de donner envie.
-        onClick={surOuvrir}
-        aria-label={
-          une.obtenue
-            ? `${une.libelle}, gagnée — voir sa fiche`
-            : `${une.libelle}, case ${String(une.rang)} encore libre — voir ce qu’elle attend`
-        }
-        style={{
-          cursor: 'pointer',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '0.35rem',
-          boxSizing: 'border-box',
-          inlineSize: compacte ? '9rem' : '9.5rem',
-          minBlockSize: compacte ? '9rem' : '10rem',
-          padding: '0.5rem',
-          color: 'inherit',
-          font: 'inherit',
-          borderRadius: 'var(--rayon-carte, 12px)',
-          // La case vide garde le MÊME contour, en pointillé : l'emplacement se voit sans
-          // paraître verrouillé. Jamais de cadenas, jamais de rouge (R14).
-          border: une.obtenue
-            ? 'var(--epaisseur-trait) solid var(--trait)'
-            : 'var(--epaisseur-trait) dashed var(--trait)',
-          backgroundColor: une.obtenue ? 'var(--parchemin)' : 'transparent'
-          // `opacity` et `filter` ne sont PLUS ici — voir l'encadré sur le libellé, plus bas.
-        }}
-      >
-        <img
-          src={urlAsset(String(une.cristal))}
-          alt=""
-          width={compacte ? 72 : 80}
-          height={compacte ? 72 : 80}
-          aria-hidden="true"
-          draggable={false}
-          loading="lazy"
-          // Une forme non gagnée garde sa vraie silhouette, mais pas sa couleur : l'enfant
-          // voit précisément ce qu'il lui reste à trouver sans confondre les 25 cases.
-          style={une.obtenue ? undefined : { opacity: 0.55, filter: 'saturate(0)' }}
-        />
-        <span style={{ fontSize: '0.9rem', textAlign: 'center' }}>{une.libelle}</span>
-      </button>
+      {une.obtenue ? (
+        <button
+          type="button"
+          data-case-etagere={String(une.grapheme)}
+          data-rang={String(une.rang)}
+          data-obtenue="oui"
+          data-consultable="oui"
+          aria-label={`${une.libelle}, gagnée — voir sa fiche`}
+          style={style}
+          onClick={surOuvrir}
+        >
+          {contenu}
+        </button>
+      ) : (
+        <div
+          data-case-etagere={String(une.grapheme)}
+          data-rang={String(une.rang)}
+          data-obtenue="non"
+          data-consultable="non"
+          aria-label={`${une.libelle}, encore à découvrir`}
+          style={style}
+        >
+          {contenu}
+        </div>
+      )}
     </li>
   );
 }

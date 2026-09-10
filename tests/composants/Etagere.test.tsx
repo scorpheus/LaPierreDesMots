@@ -5,6 +5,7 @@
  * que l'ÉCRAN les dessine. Un composant qui filtrerait `cases.filter(c => c.obtenue)` passerait
  * le premier test et tomberait sur celui-là — et c'est exactement le défaut que D44 nomme :
  * « les emplacements non gagnés sont EN CREUX et VISIBLES ».
+ * Leur petite silhouette reste donc visible, mais leur fiche en couleur demeure secrète.
  *
  * Le catalogue vient du disque réel, jamais d'une maquette.
  */
@@ -103,25 +104,37 @@ describe('une case vide est EN CREUX, jamais cachée ni cadenassée', () => {
   });
 });
 
-describe('l’étagère reste une vraie liste dont chaque case ouvre sa fiche — R24', () => {
-  it('garde les `li` comme enfants directs et place un bouton natif dans chaque case', () => {
+describe('l’étagère garde secrètes les formes qui ne sont pas encore gagnées', () => {
+  it('garde les `li` comme enfants directs et ne rend consultables que les formes acquises', () => {
     monter([gagnee('a')]);
     const dansLEtagere = document.querySelector('[data-etagere="oui"]');
     const liste = dansLEtagere?.querySelector('ul');
     expect(liste).not.toBeNull();
     expect([...liste!.children].every((enfant) => enfant.tagName === 'LI')).toBe(true);
     expect([...liste!.children].every((enfant) => !enfant.hasAttribute('role'))).toBe(true);
-    expect(liste?.querySelectorAll('button[data-case-etagere]')).toHaveLength(
-      liste?.children.length ?? 0
+    expect(liste?.querySelectorAll('[data-consultable="oui"]')).toHaveLength(1);
+    expect(liste?.querySelectorAll('[data-consultable="non"]')).toHaveLength(
+      (liste?.children.length ?? 0) - 1
     );
   });
 
-  it('le bouton d’une case vide ouvre sa fiche : la prise n’est pas décorative', () => {
+  it('une case vide reste visible mais ne révèle aucune fiche en couleur', () => {
     monter([]);
-    const vide = document.querySelector<HTMLButtonElement>('[data-obtenue="non"]');
+    const vide = document.querySelector<HTMLElement>('[data-obtenue="non"]');
     expect(vide).not.toBeNull();
     fireEvent.click(vide!);
-    expect(document.querySelector('[data-fiche-case]')).not.toBeNull();
+    expect(vide?.tagName).not.toBe('BUTTON');
+    expect(document.querySelector('[data-fiche-case]')).toBeNull();
+  });
+
+  it('une forme gagnée ouvre toujours sa fiche complète', () => {
+    monter([gagnee('a')]);
+    const gagneeA = document.querySelector<HTMLButtonElement>(
+      '[data-case-etagere="a"][data-consultable="oui"]'
+    );
+    expect(gagneeA?.tagName).toBe('BUTTON');
+    fireEvent.click(gagneeA!);
+    expect(document.querySelector('[data-fiche-case="a"]')).not.toBeNull();
   });
 
   it('reste un écran plein même sans aucune forme — jamais de page vide', () => {

@@ -25,6 +25,7 @@ import { campementDuDocument, prochainStade, stadesDuDocument } from "@pierre/pa
 import type { DocumentCampement, StadeGobi } from "@pierre/partage/monde";
 import { lireMonde, lirePaquetNoeud, noterVisitePointCampement, urlAsset } from "../api/client.js";
 import { Compagnon } from "../composants/Compagnon.js";
+import { GalerieEvolutionsGobi } from "../composants/GalerieEvolutionsGobi.js";
 import { Gobi } from "../composants/Gobi.js";
 import { useEtatJeu, useMagasin } from "../etat/services.js";
 import { Chaudron } from "../monde/Chaudron.js";
@@ -121,6 +122,7 @@ export function EcranCampement({
   } | null>(null);
   const [ouvertureChaudronEnCours, fixerOuvertureChaudronEnCours] = useState(false);
   const [messageOuvertureChaudron, fixerMessageOuvertureChaudron] = useState<string | null>(null);
+  const [evolutionsGobiOuvertes, fixerEvolutionsGobiOuvertes] = useState(false);
 
   const requeteCampement = useQuery({
     queryKey: ["monde", "campement"],
@@ -576,6 +578,9 @@ export function EcranCampement({
             libelleForme={formeActive?.libelle ?? null}
             animation="repos"
             taille={96}
+            surVoirEvolutions={() => {
+              fixerEvolutionsGobiOuvertes(true);
+            }}
           />
           {suivant === null ? null : (
             // La jauge montre le VIDE restant, jamais seulement l'acquis (D25, point 3).
@@ -652,6 +657,16 @@ export function EcranCampement({
           </div>
         </section>
       </div>
+
+      {evolutionsGobiOuvertes && stades.length > 0 ? (
+        <GalerieEvolutionsGobi
+          stades={stades}
+          stadeActuel={stade}
+          surFermer={() => {
+            fixerEvolutionsGobiOuvertes(false);
+          }}
+        />
+      ) : null}
     </main>
   );
 }

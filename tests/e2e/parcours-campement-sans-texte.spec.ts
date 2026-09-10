@@ -82,6 +82,65 @@ async function allerAuCampement(page: Page): Promise<void> {
 }
 
 test.describe('R18 — le campement se comprend sans lire', () => {
+  test('le portrait détouré de Gobi ouvre son parcours sans révéler les stades futurs', async ({
+    page
+  }) => {
+    await preparer(page);
+    await allerAuCampement(page);
+
+    const entree = page.locator('[data-ouvrir-evolutions-gobi="oui"]');
+    await expect(entree).toBeVisible();
+    await expect(entree).toContainText('Ses évolutions');
+    await entree.click();
+
+    const galerie = page.locator('[data-galerie-evolutions-gobi="oui"]');
+    await expect(galerie).toBeVisible();
+    await expect(galerie.locator('[data-evolution-stade]')).toHaveCount(10);
+    await expect(galerie.locator('[data-stade-acquis="non"] img')).toHaveCount(0);
+    await expect(galerie.locator('[data-stade-acquis="non"] [data-gobi-contour="oui"]').first())
+      .toBeVisible();
+
+    // Le profil neuf possède l'Œuf : son raster est visible, mais son ancien carré clair ne
+    // doit plus exister. On lit le vrai pixel décodé par Chromium, pas un attribut déclaratif.
+    const alphaCoin = await galerie.locator('[data-stade-acquis="oui"] img').first().evaluate(
+      async (image) => {
+        const element = image as HTMLImageElement;
+        if (!element.complete) await element.decode();
+        const toile = document.createElement('canvas');
+        toile.width = element.naturalWidth;
+        toile.height = element.naturalHeight;
+        toile.getContext('2d')!.drawImage(element, 0, 0);
+        return toile.getContext('2d')!.getImageData(0, 0, 1, 1).data[3];
+      }
+    );
+    expect(alphaCoin, 'le coin du Gobi porte encore son fond carré').toBe(0);
+    if (process.env['PIERRE_CAPTURE_GOBI'] === '1') {
+      await page.screenshot({
+        path: 'bac-a-sable/progression-gobi/galerie-1920x1200.png',
+        fullPage: false,
+      });
+    }
+  });
+
+  test('une forme grise du coffre reste visible mais ne peut pas ouvrir sa couleur', async ({
+    page
+  }) => {
+    await preparer(page);
+    await allerAuCoffre(page);
+
+    const future = page.locator('[data-case-etagere][data-obtenue="non"]').first();
+    await expect(future).toBeVisible();
+    await expect(future).toHaveAttribute('data-consultable', 'non');
+    await future.click();
+    await expect(page.locator('[data-fiche-case]')).toHaveCount(0);
+    if (process.env['PIERRE_CAPTURE_GOBI'] === '1') {
+      await page.screenshot({
+        path: 'bac-a-sable/progression-gobi/coffre-groupe-1920x1200.png',
+        fullPage: false,
+      });
+    }
+  });
+
   test('chaque destination porte un pictogramme, et il survit à l’effacement du texte', async ({
     page
   }) => {

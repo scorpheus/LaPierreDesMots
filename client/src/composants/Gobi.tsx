@@ -118,6 +118,8 @@ export interface ProprietesGobi {
   readonly animation?: EtatAnimationGobi;
   /** Taille du dessin, en pixels. 64 dans la bulle d'aide, davantage au campement. */
   readonly taille?: number;
+  /** Au campement, transforme le portrait en entrée explicite vers l'historique des stades. */
+  readonly surVoirEvolutions?: (() => void) | null;
 }
 
 /** Ce que Gobi dit quand personne ne lui a rien demandé. Aucun de ces textes n'est un reproche. */
@@ -186,7 +188,8 @@ export function Gobi({
   libelleForme = null,
   compagnon = null,
   animation = 'repos',
-  taille = 64
+  taille = 64,
+  surVoirEvolutions = null
 }: ProprietesGobi): ReactElement {
   // ── R46 — LA RÉSOLUTION EST EXPLICITE, ET SES TROIS ISSUES SONT NOMMÉES ─────────────────
   //
@@ -210,6 +213,33 @@ export function Gobi({
   // L'invitation ne sert QUE quand Gobi n'a rien proposé. Elle ne remplace jamais une aide :
   // c'est exactement le repli qui a permis au défaut de survivre trois campagnes.
   const texte = texteDeLAide ?? INVITE_PAR_DEFAUT;
+
+  const dessinDeGobi = (
+    <svg
+      width={taille}
+      height={taille}
+      viewBox={GOBI_VUE}
+      role="img"
+      aria-label={
+        libelleForme === null ? `Gobi, stade ${stade}` : `Gobi, stade ${stade}, forme ${libelleForme}`
+      }
+      focusable="false"
+      style={{ overflow: 'visible' }}
+    >
+      <DessinDeGobi stade={stade} animation={animation} />
+      {cristal === null ? null : (
+        <image
+          href={urlAsset(String(cristal))}
+          x="68"
+          y="-8"
+          width="64"
+          height="64"
+          data-cristal={cristal}
+          preserveAspectRatio="xMidYMid meet"
+        />
+      )}
+    </svg>
+  );
 
   return (
     <aside
@@ -239,35 +269,20 @@ export function Gobi({
           dentelé, joues orangées, grands yeux ronds à deux reflets, et le cœur de Pierre
           rayonnant au ventre. Le corps ne change pas de stade en stade — seule la parure
           pousse, et seul le geste change d'un état d'animation à l'autre. */}
-      {compagnon === null ? <svg
-        width={taille}
-        height={taille}
-        viewBox={GOBI_VUE}
-        role="img"
-        aria-label={
-          libelleForme === null ? `Gobi, stade ${stade}` : `Gobi, stade ${stade}, forme ${libelleForme}`
-        }
-        focusable="false"
-        style={{ overflow: 'visible' }}
-      >
-        <DessinDeGobi stade={stade} animation={animation} />
-        {/* LE CRISTAL, et lui seul, porte la déclinaison (D20). Il se pose au sommet de la
-            parure, comme le cristal que Gobi vient de gagner ; aucun corps de rechange n'est
-            jamais chargé. Le cadre fait 64 unités sur les 200 du dessin : le PNG carré est
-            contenu dans cette boîte et se lit comme un cristal de la crête, pas comme un badge
-            posé dessus. */}
-        {cristal === null ? null : (
-          <image
-            href={urlAsset(String(cristal))}
-            x="68"
-            y="-8"
-            width="64"
-            height="64"
-            data-cristal={cristal}
-            preserveAspectRatio="xMidYMid meet"
-          />
-        )}
-      </svg> : (
+      {compagnon === null ? (
+        surVoirEvolutions === null ? dessinDeGobi : (
+          <button
+            type="button"
+            className="cible gobi-evolutions-bouton"
+            data-ouvrir-evolutions-gobi="oui"
+            aria-label="Voir les évolutions de Gobi"
+            onClick={surVoirEvolutions}
+          >
+            {dessinDeGobi}
+            <span>Ses évolutions</span>
+          </button>
+        )
+      ) : (
         <span className="compagnon-portrait compagnon-portrait--aide" data-aideur={compagnon.code}>
           <img src={urlAsset(compagnon.asset)} alt="" draggable={false} />
         </span>

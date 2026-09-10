@@ -248,8 +248,8 @@ export function EcranCoffre({
   const regions = monde?.carte.regions ?? [];
   const objets = monde?.campement ?? [];
 
-  // L'étagère, cases vides comprises. Même catalogue et même clé de requête qu'au campement :
-  // les deux écrans montrent exactement le même album, jamais deux comptes différents (C5).
+  // L'étagère, cases vides comprises. Le catalogue donne tous les emplacements ; le monde du
+  // profil donne les seules formes réellement acquises.
   const catalogue = useCatalogueFormes();
   const etagere = construireEtagere(catalogue, monde?.gobi.formes ?? []);
 
@@ -306,9 +306,16 @@ export function EcranCoffre({
           oublié, parce qu'il n'y a plus de liste où il serait absent.
           L'attribut `data-collection-titre="formes"` est CONSERVÉ : `parcours-campement.spec.ts`
           (L2-F) l'attend, et il n'appartient pas à ce lot. */}
+      {/* Les trois collections partagent un même coffre visuel. Leurs proportions diffèrent,
+          mais aucune ne flotte désormais en dehors du groupe des trouvailles. */}
+      <section
+        className="panneau coffre-collections-groupees"
+        data-coffre-collections="groupees"
+        aria-label="Toutes les collections du coffre"
+      >
       <div className="collections-coffre">
         <section
-          className="panneau collection-coffre collection-coffre--formes"
+          className="collection-coffre collection-coffre--formes"
           aria-label="Les formes de Gobi"
           data-collection-titre="formes"
         >
@@ -316,7 +323,7 @@ export function EcranCoffre({
         </section>
 
         <section
-          className="panneau collection-coffre"
+          className="collection-coffre"
           aria-label="Les Éclats de Pierre"
           data-collection-titre="eclats"
           data-progression-restante={String(regions.length - nbEclats)}
@@ -355,7 +362,7 @@ export function EcranCoffre({
         </section>
 
         <section
-          className="panneau collection-coffre"
+          className="collection-coffre"
           aria-label="Les objets du campement"
           data-collection-titre="objets"
           data-progression-restante={String(
@@ -403,6 +410,7 @@ export function EcranCoffre({
         </ul>
         </section>
       </div>
+      </section>
 
       {ouverte === null ? null : (
         <FicheObjet

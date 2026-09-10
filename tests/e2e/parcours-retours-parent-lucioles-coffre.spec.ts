@@ -58,7 +58,15 @@ test.describe('retours parent — lucioles et coffre', () => {
       scale: 'css'
     });
 
+    // Une forme future reste visible, mais ne doit plus ouvrir le grand dessin en couleur.
+    expect(await premiereCase.getAttribute('data-consultable')).toBe('non');
+    expect(await premiereCase.evaluate((element) => element.tagName)).not.toBe('BUTTON');
     await premiereCase.click();
+    await expect(page.locator('[data-fiche-modal="oui"]')).toHaveCount(0);
+
+    // Les autres collections conservent leur fiche en silhouette : elle permet de vérifier
+    // la fenêtre centrée sans contredire le secret désormais propre aux formes de Gobi.
+    await page.locator('button[data-collection="eclat"]').first().click();
     const fiche = page.locator('[data-fiche-modal="oui"]');
     await expect(fiche).toBeVisible();
     const visuel = fiche.locator('[data-fiche-visuel="oui"]');

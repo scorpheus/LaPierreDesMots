@@ -1,10 +1,9 @@
 /**
- * VOIR CE QU'IL Y A À GAGNER, MÊME SANS L'AVOIR — R24.
+ * VOIR EN GRAND UNE FORME ACQUISE, SANS RÉVÉLER LES FORMES FUTURES.
  *
  * ══════════════════════════════════════════════════════════════════════════════════════════════
- * « même si on ne les a pas, tous les items à récupérer devraient être affichés en grand dans un
- * popup avec une description de ce qu'on peut gagner, et on aura la couleur, et avec une croix ou
- * un bouton retour. »
+ * La demande du 10 septembre 2026 révise R24 pour les formes de Gobi : une forme future reste
+ * visible en creux dans l'étagère, mais ne s'ouvre plus et ne révèle jamais sa couleur.
  *
  * La moitié existait : l'étagère montrait déjà les cases VIDES (D44, D25 point 3 — « ce qui donne
  * envie, c'est de voir la case suivante encore vide »). Ce qui manquait, c'est que la case vide ne
@@ -20,9 +19,8 @@
  * demandé. Le contour en pointillé et une phrase explicite disent que c'est encore à gagner.
  *
  * ── CE QUE CE FICHIER GARDE, ET QUI NE SE VOIT PAS SUR UNE CAPTURE ────────────────────────────
- * Qu'une case NON gagnée s'ouvre comme les autres — si les cases grises ne répondaient pas,
- * l'enfant cesserait de les toucher et le vide cesserait de donner envie —, que la couleur soit
- * annoncée comme une promesse et non comme un acquis, et que la sortie existe par TROIS portes.
+ * La fiche acquise montre bien le dessin en couleur. Son repli défensif, s'il recevait malgré
+ * tout une forme future, la conserve en silhouette secrète. La sortie existe par TROIS portes.
  * ══════════════════════════════════════════════════════════════════════════════════════════════
  */
 import { cleanup, fireEvent, render } from '@testing-library/react';
@@ -50,7 +48,7 @@ afterEach(() => {
 describe('R24 — la fiche dit ce qu’une case attend', () => {
   it('la fiche garde le dessin centré sans cercle parasite et laisse le nom en tête', () => {
     const { container } = render(
-      <FicheCase une={uneCase(false)} commentLObtenir={null} surFermer={() => undefined} />
+      <FicheCase une={uneCase(true)} commentLObtenir={null} surFermer={() => undefined} />
     );
     const fiche = container.querySelector('[data-fiche-case]') as HTMLElement;
     const visuel = fiche.querySelector('[data-fiche-visuel]') as HTMLElement;
@@ -64,7 +62,7 @@ describe('R24 — la fiche dit ce qu’une case attend', () => {
 
   it('la fenêtre reste contenue et défilable sur une tablette 16:10', () => {
     const { container } = render(
-      <FicheCase une={uneCase(false)} commentLObtenir={null} surFermer={() => undefined} />
+      <FicheCase une={uneCase(true)} commentLObtenir={null} surFermer={() => undefined} />
     );
     const fenetre = container.querySelector('[data-fiche-modal] > div') as HTMLElement;
     expect(fenetre.style.inlineSize).toContain('42rem');
@@ -72,30 +70,25 @@ describe('R24 — la fiche dit ce qu’une case attend', () => {
     expect(fenetre.style.overflowY).toBe('auto');
   });
 
-  it('LE DÉFAUT CORRIGÉ — une case NON gagnée s’ouvre et montre sa forme en couleur', () => {
+  it('une forme FUTURE ne révèle pas sa couleur, même si la fiche est montée par erreur', () => {
     const { container } = render(
       <FicheCase une={uneCase(false)} commentLObtenir={null} surFermer={() => undefined} />
     );
     const fiche = container.querySelector('[data-fiche-case]');
     expect(fiche?.getAttribute('data-obtenue')).toBe('non');
 
-    const image = container.querySelector<HTMLImageElement>('[data-fiche-visuel] img');
-    expect(image, 'aucune forme montrée : la case reste muette sur ce qu’elle attend').not.toBeNull();
-    expect(
-      image?.getAttribute('style') ?? '',
-      'la forme est ternie : on ne voit alors PAS la couleur, qui est justement la promesse'
-    ).toContain('opacity: 1');
+    const visuel = container.querySelector<HTMLElement>('[data-fiche-visuel]');
+    expect(visuel?.getAttribute('data-couleur-revelee')).toBe('non');
+    expect(visuel?.style.filter).toContain('saturate(0)');
+    expect(container.querySelector('[data-couleur-a-deviner]')).not.toBeNull();
   });
 
-  it('la couleur est annoncée comme une PROMESSE, jamais comme un acquis', () => {
-    // Sans cette phrase, un enfant croirait l'avoir déjà gagnée — et la déception vaudrait
-    // mieux ne rien montrer du tout.
+  it('une forme future n’annonce plus sa couleur comme une promesse', () => {
     const { container } = render(
       <FicheCase une={uneCase(false)} commentLObtenir={null} surFermer={() => undefined} />
     );
-    const promesse = container.querySelector('[data-promesse-couleur]');
-    expect(promesse).not.toBeNull();
-    expect(promesse?.textContent).toMatch(/quand tu l’auras/iu);
+    expect(container.querySelector('[data-promesse-couleur]')).toBeNull();
+    expect(container.textContent).toMatch(/couleurs sont encore secrètes/iu);
   });
 
   it('et une case GAGNÉE ne porte pas cette phrase — elle est à lui', () => {
@@ -122,7 +115,7 @@ describe('R24 — la fiche dit ce qu’une case attend', () => {
     // sortir est un état sans issue, et c'est le pire défaut possible sur une appli d'enfant.
     const fermer = vi.fn();
     const { container } = render(
-      <FicheCase une={uneCase(false)} commentLObtenir={null} surFermer={fermer} />
+      <FicheCase une={uneCase(true)} commentLObtenir={null} surFermer={fermer} />
     );
 
     fireEvent.click(container.querySelector('[data-fermer-fiche]') as Element);
@@ -138,7 +131,7 @@ describe('R24 — la fiche dit ce qu’une case attend', () => {
   it('taper le CONTENU ne referme pas : on peut regarder sans perdre la fiche', () => {
     const fermer = vi.fn();
     const { container } = render(
-      <FicheCase une={uneCase(false)} commentLObtenir={null} surFermer={fermer} />
+      <FicheCase une={uneCase(true)} commentLObtenir={null} surFermer={fermer} />
     );
     fireEvent.click(container.querySelector('[data-fiche-visuel]') as Element);
     expect(fermer, 'regarder le dessin fait sortir du panneau').not.toHaveBeenCalled();
@@ -146,7 +139,7 @@ describe('R24 — la fiche dit ce qu’une case attend', () => {
 
   it('le focus part sur la sortie — un panneau sans porte au clavier est un piège', () => {
     const { container } = render(
-      <FicheCase une={uneCase(false)} commentLObtenir={null} surFermer={() => undefined} />
+      <FicheCase une={uneCase(true)} commentLObtenir={null} surFermer={() => undefined} />
     );
     expect(globalThis.document.activeElement).toBe(
       container.querySelector('[data-fermer-fiche]')

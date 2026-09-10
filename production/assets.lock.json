@@ -1184,6 +1184,35 @@
       },
       "valide_par": "réemploi du décor couleur existant pour essai local",
       "valide_le": "2026-09-05"
+    },
+    {
+      "id": "gobi.stades.detoures.v1",
+      "fichier": "contenu/assets/gobi/stades/",
+      "empreintes": {
+        "stade-1.webp": "sha256:f8751acedb4c84fb4826f4dd998832b985f2637b8cefbb29fb0fa73d87c5def2",
+        "stade-2.webp": "sha256:d388d40a993dc1b04ef641f992a9eaf93a2645f73d43508107677283349e2752",
+        "stade-3.webp": "sha256:038231d04d34f4bdc07dff8696c81b7e4e865e45ce6cb44f2db04b4e6a430810",
+        "stade-4.webp": "sha256:cfb4571c130192cfade3c5fb06346f6cba6b4b6bc190f6ae6ec1c62bb9c2af68",
+        "stade-5.webp": "sha256:231a2bb4ca524918b19663527dcaa86b20b064f3b93ac0d48f33013a67f7e26a",
+        "stade-6.webp": "sha256:7486df801ab3eb5a0177f764e3f261d944c69f8e66971152a5ebc74fd8be5f37",
+        "stade-7.webp": "sha256:75000123689ab4b4e71d0bcac4b6c0a018242ec1aec04667aaf4825537b1a245",
+        "stade-8.webp": "sha256:b7d1288c196f112788d1e0272e9d5e10d3c9682ecf7508e4966dd289bc502f61",
+        "stade-9.webp": "sha256:b0a88d347227c4be4cc06af4a989e69f9ab4cc04877c102c19b4fc01fac8e395",
+        "stade-10.webp": "sha256:388ade41bc631b004c0270c65ceb75584033ed68a5140aa557109e7a3bd3d67f"
+      },
+      "generation": {
+        "outil": "détourage déterministe Pillow 12.1",
+        "workflow": "scripts/images/detourer-stades-gobi.py",
+        "source": "production/personnages/gobi/stades/stade-{1..10}.png",
+        "retouche": "Le fond clair relié aux bords devient transparent ; les îlots intérieurs, le personnage, son ombre et ses couleurs sont conservés. Réduction Lanczos en 512 × 512 puis encodage WebP RGBA qualité 92."
+      },
+      "qc": {
+        "technique": "ok — 10/10 WebP RGBA 512 × 512, alpha nul au coin supérieur gauche, canal alpha non vide",
+        "semantique": "stades 1, 5 et 10 contrôlés sur fond parchemin ; silhouette, détails blancs et ombre au sol conservés",
+        "integration": "portrait du campement et galerie d’évolution sans carré clair"
+      },
+      "valide_par": "demande parent du 2026-09-10 ; contrôle esthétique final dans le jeu à faire",
+      "valide_le": "2026-09-10"
     }
   ]
 }

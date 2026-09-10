@@ -279,6 +279,39 @@ describe('le campement montre le monde sans jamais le cacher', () => {
     );
   });
 
+  it('fait du portrait de Gobi un bouton évident qui ouvre son parcours d’évolution', () => {
+    monter();
+
+    const ouvrir = screen.getByRole('button', { name: /voir les évolutions de Gobi/iu });
+    expect(ouvrir.getAttribute('data-ouvrir-evolutions-gobi')).toBe('oui');
+    expect(ouvrir.textContent).toContain('Ses évolutions');
+
+    fireEvent.click(ouvrir);
+    const galerie = screen.getByRole('dialog', { name: /évolution de Gobi/iu });
+    expect(galerie.getAttribute('data-galerie-evolutions-gobi')).toBe('oui');
+    expect(galerie.querySelectorAll('[data-evolution-stade]')).toHaveLength(STADES.length);
+
+    const rangActuel = STADES.find((unStade) => unStade.code === 'crete')!.rang;
+    expect(galerie.querySelectorAll('[data-stade-acquis="oui"]')).toHaveLength(rangActuel);
+    expect(galerie.querySelectorAll('[data-stade-acquis="non"]')).toHaveLength(
+      STADES.length - rangActuel,
+    );
+  });
+
+  it('ne révèle ni couleur ni dessin complet des évolutions à venir', () => {
+    monter();
+    fireEvent.click(screen.getByRole('button', { name: /voir les évolutions de Gobi/iu }));
+
+    for (const futur of document.querySelectorAll('[data-stade-acquis="non"]')) {
+      expect(futur.querySelector('img')).toBeNull();
+      expect(futur.querySelector('[data-gobi-contour="oui"]')).not.toBeNull();
+      expect(futur.textContent).toContain('À découvrir');
+    }
+
+    fireEvent.click(screen.getByRole('button', { name: /fermer les évolutions/iu }));
+    expect(document.querySelector('[data-galerie-evolutions-gobi]')).toBeNull();
+  });
+
   it('porte le cristal de la forme active, et non un second corps (D20)', () => {
     monter();
     const cristal = document.querySelector('[data-cristal]');

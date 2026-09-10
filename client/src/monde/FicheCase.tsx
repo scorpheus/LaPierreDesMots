@@ -1,5 +1,5 @@
 /**
- * CE QU'UNE CASE DE L'ÉTAGÈRE ATTEND — R24, demandé par le père le 2026-08-03.
+ * LA FICHE D'UNE FORME ACQUISE DE GOBI.
  *
  * ══════════════════════════════════════════════════════════════════════════════════════════════
  * « même si on ne les a pas, tous les items à récupérer devraient être affichés en grand dans un
@@ -11,10 +11,9 @@
  * ensuite demandé la même chose pour le butin, la bande et les Éclats (R26, R28). Quatre
  * collections, un seul panneau — sans quoi les quatre auraient divergé.
  *
- * Ce qui reste ici est ce qui appartient à l'étagère de Gobi, et à elle seule : **la couleur y
- * est montrée**. C'est le seul endroit du jeu où la Grisaille se lève par avance, et c'est
- * assumé — le panneau annonce en toutes lettres que la couleur n'est pas encore gagnée. Les
- * Éclats et le butin font l'inverse : « c'est à deviner ».
+ * Depuis la demande du 10 septembre 2026, l'étagère ne monte cette fiche que pour une forme
+ * acquise : une case future reste visible en gris, mais ne peut plus révéler son grand dessin
+ * en couleur.
  *
  * ── LA DÉCISION QUI A FAILLI ÊTRE UNE FAUTE, ET QUI VAUT D'ÊTRE RELUE ─────────────────────────
  * Le catalogue ne déclare NI couleur NI description : `grapheme`, `libelle`, `cristal`, rien
@@ -45,10 +44,7 @@ export function FicheCase({ une, commentLObtenir, surFermer }: ProprietesFicheCa
       libelleAria={une.obtenue ? `${une.libelle}, gagnée` : `${une.libelle}, pas encore gagnée`}
       titre={une.libelle}
       obtenu={une.obtenue}
-      // ── LA COULEUR EST MONTRÉE ICI, ET SEULEMENT ICI ─────────────────────────────────────
-      // « et on aura la couleur », mot pour mot. C'est la promesse de l'étagère de Gobi. Les
-      // autres collections passent `false` : leur couleur est une devinette.
-      couleurRevelee
+      couleurRevelee={une.obtenue}
       phrase={
         une.obtenue
           ? 'Tu l’as gagnée. Elle est à toi.'

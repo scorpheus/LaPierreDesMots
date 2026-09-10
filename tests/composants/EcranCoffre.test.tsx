@@ -114,10 +114,13 @@ describe('rien ne sort jamais du coffre, et le vide se montre (R14, D25)', () =>
   it('organise les trois collections dans l’album compact du coffre', async () => {
     await monterEtAttendre();
     const album = document.querySelector('.collections-coffre');
+    const groupe = document.querySelector('[data-coffre-collections="groupees"]');
     expect(document.querySelector('[data-ecran="coffre"]')?.classList.contains('ecran-coffre')).toBe(
       true,
     );
     expect(album?.querySelectorAll(':scope > [data-collection-titre]')).toHaveLength(3);
+    expect(groupe?.classList.contains('panneau')).toBe(true);
+    expect(groupe?.querySelectorAll('[data-collection-titre]')).toHaveLength(3);
     expect(album?.querySelector('[data-etagere="oui"]')?.getAttribute('data-densite')).toBe(
       'compacte',
     );
