@@ -2947,17 +2947,17 @@
     "file": "assets/ductus-minuscules-B8XBqC8V.json",
     "src": "../contenu/referentiel/ductus-minuscules.json"
   },
-  "_compagnons-vB49LEMM.js": {
-    "file": "assets/compagnons-vB49LEMM.js",
+  "_compagnons-CIbzGC0v.js": {
+    "file": "assets/compagnons-CIbzGC0v.js",
     "name": "compagnons"
   },
   "index.html": {
-    "file": "assets/index-BcmQzUIv.js",
+    "file": "assets/index-DjLnezI-.js",
     "name": "index",
     "src": "index.html",
     "isEntry": true,
     "imports": [
-      "_compagnons-vB49LEMM.js"
+      "_compagnons-CIbzGC0v.js"
     ],
     "dynamicImports": [
       "src/api/port-local.ts",
@@ -2965,12 +2965,12 @@
     ]
   },
   "src/api/port-local.ts": {
-    "file": "assets/port-local-Bm8wTZST.js",
+    "file": "assets/port-local-BSjgiwA1.js",
     "name": "port-local",
     "src": "src/api/port-local.ts",
     "isDynamicEntry": true,
     "imports": [
-      "_compagnons-vB49LEMM.js"
+      "_compagnons-CIbzGC0v.js"
     ],
     "dynamicImports": [
       "src/base/adaptateur-sqlite-wasm.ts"
@@ -3716,13 +3716,13 @@
     ]
   },
   "src/base/adaptateur-sqlite-wasm.ts": {
-    "file": "assets/adaptateur-sqlite-wasm-BpHmMPAb.js",
+    "file": "assets/adaptateur-sqlite-wasm-DXDw9EJ-.js",
     "name": "adaptateur-sqlite-wasm",
     "src": "src/base/adaptateur-sqlite-wasm.ts",
     "isDynamicEntry": true
   },
   "style.css": {
-    "file": "assets/style-BL7k4Puh.css",
+    "file": "assets/style-DiGsuuSU.css",
     "src": "style.css"
   }
 }

@@ -11,12 +11,12 @@
  */
 /* global self, caches */
 
-const VERSION = '2d4fb58e16844caf';
+const VERSION = '77456385be2f7f38';
 const BASE = '/LaPierreDesMots/';
 const PRECACHE = [
   "/LaPierreDesMots/.vite/manifest.json",
   "/LaPierreDesMots/404.html",
-  "/LaPierreDesMots/assets/adaptateur-sqlite-wasm-BpHmMPAb.js",
+  "/LaPierreDesMots/assets/adaptateur-sqlite-wasm-DXDw9EJ-.js",
   "/LaPierreDesMots/assets/aide-gobi-montre-cible.normal.16d5cf94-D9FLCR52.opus",
   "/LaPierreDesMots/assets/aide-gobi-montre-couleur.normal.293474c6-DY6POJC6.opus",
   "/LaPierreDesMots/assets/aide-gobi-relire-consigne.normal.6e817c2f-CRw15hbc.opus",
@@ -157,7 +157,7 @@ const PRECACHE = [
   "/LaPierreDesMots/assets/clairiere-veillee-histoire-01-c5.normal.91c48779-CeAc7sZJ.opus",
   "/LaPierreDesMots/assets/clairiere-veillee-histoire-01-recit.normal.de1aa334-DDfqHZbd.opus",
   "/LaPierreDesMots/assets/collier-Ab_KlpVI.svg",
-  "/LaPierreDesMots/assets/compagnons-vB49LEMM.js",
+  "/LaPierreDesMots/assets/compagnons-CIbzGC0v.js",
   "/LaPierreDesMots/assets/competences-OMAh9bxl.json",
   "/LaPierreDesMots/assets/coquillages-BM65uvex.svg",
   "/LaPierreDesMots/assets/coulee-DYHvFA3G.svg",
@@ -293,7 +293,7 @@ const PRECACHE = [
   "/LaPierreDesMots/assets/grenouilles-BuCMD2GP.svg",
   "/LaPierreDesMots/assets/guirlande-BoZr2VSf.svg",
   "/LaPierreDesMots/assets/hesitation-BBCjGqUA.svg",
-  "/LaPierreDesMots/assets/index-BcmQzUIv.js",
+  "/LaPierreDesMots/assets/index-DjLnezI-.js",
   "/LaPierreDesMots/assets/index-DRefDHMM.js",
   "/LaPierreDesMots/assets/joie-C4xsL_9o.svg",
   "/LaPierreDesMots/assets/lianes-Llw4yK2T.svg",
@@ -443,7 +443,7 @@ const PRECACHE = [
   "/LaPierreDesMots/assets/poissons-B2yEcocG.svg",
   "/LaPierreDesMots/assets/ponton-BAopEDcG.svg",
   "/LaPierreDesMots/assets/ponts-DnMR1Jxq.svg",
-  "/LaPierreDesMots/assets/port-local-Bm8wTZST.js",
+  "/LaPierreDesMots/assets/port-local-BSjgiwA1.js",
   "/LaPierreDesMots/assets/rayonnages-BeJ6vWwN.svg",
   "/LaPierreDesMots/assets/regions-KaGt3j0-.json",
   "/LaPierreDesMots/assets/repos-DBQqkFKN.svg",
@@ -451,7 +451,7 @@ const PRECACHE = [
   "/LaPierreDesMots/assets/sable-CvRf_qDg.svg",
   "/LaPierreDesMots/assets/soleil-CVU_LB_i.svg",
   "/LaPierreDesMots/assets/souche-DCHNaS0B.svg",
-  "/LaPierreDesMots/assets/sqlite-wasm.worker-D7ACNc5O.js",
+  "/LaPierreDesMots/assets/sqlite-wasm.worker-CfMYBVXK.js",
   "/LaPierreDesMots/assets/sqlite3-BVKGSWc-.wasm",
   "/LaPierreDesMots/assets/sqlite3-opfs-async-proxy-D_xnb1D8.js",
   "/LaPierreDesMots/assets/sqlite3-worker1-B532Kw8W.js",
@@ -466,7 +466,7 @@ const PRECACHE = [
   "/LaPierreDesMots/assets/stade-8-CB2Ros1z.svg",
   "/LaPierreDesMots/assets/stade-9-BPM2raNh.svg",
   "/LaPierreDesMots/assets/stalagmites-D7RvGHa5.svg",
-  "/LaPierreDesMots/assets/style-BL7k4Puh.css",
+  "/LaPierreDesMots/assets/style-DiGsuuSU.css",
   "/LaPierreDesMots/assets/tapis-Do3rL1TA.svg",
   "/LaPierreDesMots/assets/theatre-ombres-sezFftCi.svg",
   "/LaPierreDesMots/assets/train-DUP2gaNd.svg",
@@ -1230,22 +1230,47 @@ const CACHE_NOYAU = `${PREFIXE}noyau-${VERSION}`;
 const CACHE_IMAGES = `${PREFIXE}images-${VERSION}`;
 const INDEX = `${BASE}index.html`;
 const TAILLE_LOT = 24;
+const ESSAIS_MAXIMUM = 3;
+const DELAI_REQUETE_MS = 15_000;
+
+async function prechargerRessource(cache, url) {
+  for (let essai = 1; essai <= ESSAIS_MAXIMUM; essai += 1) {
+    const annulation = new AbortController();
+    const expiration = setTimeout(() => annulation.abort(), DELAI_REQUETE_MS);
+    let recuperable = true;
+    try {
+      const requete = new Request(url, {
+        cache: 'reload', credentials: 'same-origin', signal: annulation.signal
+      });
+      const reponse = await fetch(requete);
+      if (!reponse.ok) {
+        recuperable = reponse.status === 408 || reponse.status === 429 || reponse.status >= 500;
+        await reponse.body?.cancel();
+        throw new Error(`precache ${url} : HTTP ${String(reponse.status)}`);
+      }
+      // Le délai couvre aussi le corps. Un en-tête reçu ne signifie pas que le fichier est complet.
+      await cache.put(requete, reponse);
+      return;
+    } catch (cause) {
+      if (!recuperable || essai === ESSAIS_MAXIMUM) throw cause;
+    } finally {
+      clearTimeout(expiration);
+    }
+    // Repli borné pour les seules erreurs transitoires, sans recommencer les fichiers déjà reçus.
+    await new Promise((resoudre) => setTimeout(resoudre, 250 * 2 ** (essai - 1)));
+  }
+}
 
 async function mettreEnCacheNoyau() {
   const cache = await caches.open(CACHE_NOYAU);
   try {
     for (let debut = 0; debut < PRECACHE.length; debut += TAILLE_LOT) {
       const lot = PRECACHE.slice(debut, debut + TAILLE_LOT);
-      await Promise.all(
-        lot.map(async (url) => {
-          const requete = new Request(url, { cache: 'reload', credentials: 'same-origin' });
-          const reponse = await fetch(requete);
-          if (!reponse.ok) {
-            throw new Error(`precache ${url} : HTTP ${String(reponse.status)}`);
-          }
-          await cache.put(requete, reponse);
-        })
-      );
+      // Attendre chaque écriture avant le nettoyage : Promise.all rejetait pendant que les
+      // autres réponses remplissaient encore le cache que le catch venait de supprimer.
+      const resultats = await Promise.allSettled(lot.map((url) => prechargerRessource(cache, url)));
+      const echec = resultats.find((resultat) => resultat.status === 'rejected');
+      if (echec !== undefined) throw echec.reason;
     }
   } catch (cause) {
     await caches.delete(CACHE_NOYAU);
@@ -1341,15 +1366,17 @@ self.addEventListener('fetch', (evenement) => {
   evenement.respondWith(
     (async () => {
       if (requete.mode === 'navigate') {
-        const index = await caches.match(INDEX, { ignoreSearch: true });
+        const cache = await caches.open(CACHE_NOYAU);
+        const index = await cache.match(INDEX, { ignoreSearch: true });
         return index ?? fetch(requete);
       }
 
       const plage = requete.headers.get('Range');
       if (plage !== null) {
         const sansPlage = new Request(requete.url, { credentials: 'same-origin' });
+        const cache = await caches.open(estImageLourde(url) ? CACHE_IMAGES : CACHE_NOYAU);
         const complete =
-          (await caches.match(sansPlage, { ignoreVary: true })) ?? (await fetch(sansPlage));
+          (await cache.match(sansPlage, { ignoreVary: true })) ?? (await fetch(sansPlage));
         return reponsePartielle(complete, plage);
       }
 
@@ -1357,7 +1384,8 @@ self.addEventListener('fetch', (evenement) => {
         return lirePuisMettreEnCache(requete, CACHE_IMAGES);
       }
 
-      const noyau = await caches.match(requete, { ignoreVary: true });
+      const cache = await caches.open(CACHE_NOYAU);
+      const noyau = await cache.match(requete, { ignoreVary: true });
       return noyau ?? fetch(requete);
     })()
   );
