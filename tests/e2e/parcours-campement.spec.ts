@@ -58,12 +58,10 @@ async function preparer(page: Page): Promise<void> {
   );
 }
 
-/** Le chemin de l'enfant : je choisis mon profil, je vois la carte, je vais au campement. */
+/** Le chemin de l'enfant : je choisis mon profil, j'arrive au campement. */
 async function allerAuCampement(page: Page): Promise<void> {
   await expect(page.locator('[data-ecran="profils"]')).toBeVisible();
   await page.getByText(String(fixtureProfil['prenom']), { exact: false }).first().click();
-  await expect(page.locator('[data-ecran="carte"]')).toBeVisible();
-  await page.locator('[data-vers="campement"]').click();
   await expect(page.locator('[data-ecran="campement"]')).toBeVisible();
   // Le décor est chargé quand les points sont posés : on attend l'ÉTAT, pas une durée.
   await expect(page.locator('[data-interaction="libre"]').first()).toBeVisible();

@@ -1,3 +1,4 @@
+import { lireStyles } from '../configuration/styles.js';
 /**
  * La V6 validée est désormais le décor lui-même, pas une consigne donnée à un SVG de blockout.
  * Ces gardes échouent si l’application revient au dessin provisoire ou si les zones tactiles
@@ -15,7 +16,7 @@ const DOCUMENT = campementDuDocument(lireJson('contenu/monde/campement.json'));
 const IMAGE = readFileSync('contenu/assets/campement/campement-v6.png');
 const FEU = readFileSync('contenu/assets/campement/animations/feu.png');
 const PAPILLON = readFileSync('contenu/assets/campement/animations/papillon.png');
-const STYLES = readFileSync('client/src/styles/global.css', 'utf8');
+const STYLES = lireStyles('client/src/styles/global.css');
 
 function dimensionsPng(image: Buffer): readonly [number, number] {
   expect(image.subarray(1, 4).toString('ascii')).toBe('PNG');

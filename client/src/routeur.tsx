@@ -1,31 +1,7 @@
-// Routeur — contrat technique v1 § 1.4, étendu par le contrat des features v2 § 3.6 (L2-F).
-//
-// UN SEUL ÉCRIVAIN DE L'ÉCRAN COURANT : `EtatMagasin.ecran`. Le routeur en est le MIROIR.
-// C'est la seule disposition qui garantit que `window.__test.etat().ecran` (§ 7.1) et
-// l'attribut `data-ecran` (§ 10) disent toujours la même chose que ce qui est affiché — deux
-// sources de navigation en produiraient trois versions différentes.
-//
-// ⚠ DÉFAUT DU CONTRAT GELÉ, signalé au rapport de L2-F et contourné ici sans le trahir.
-// `CodeEcran` (`partage/src/testabilite/surface.ts`) ne porte QUE les cinq codes de la v1 —
-// `chargement`, `profils`, `carte`, `noeud`, `recompense`. Or le contrat des features v2 confie
-// à L2-F « la table des routes complète, y compris celles de L2-B et L2-H », c'est-à-dire cinq
-// écrans de plus. Et `surface.ts` **n'est attribué à aucun lot au § 3** : personne n'a le droit
-// d'y ajouter un code.
-//
-// Conséquence, assumée et écrite : les cinq écrans nouveaux sont des ROUTES sans code d'écran.
-//   * les cinq écrans de la v1 restent pilotés par `EtatMagasin.ecran`, exactement comme avant —
-//     `window.__test.etat().ecran` continue donc de dire la vérité pour tout ce qu'il connaît ;
-//   * les cinq nouveaux se rejoignent par une navigation explicite (`useNavigate`), et leur
-//     `data-ecran` reste l'unique prise des tests E2E.
-// Rien n'est cassé, rien n'est inventé dans un fichier d'un autre lot. Le jour où `CodeEcran`
-// s'élargira, il n'y aura qu'à ajouter les entrées à `CHEMIN_PAR_ECRAN`.
-//
-// Historique EN MÉMOIRE, volontairement : le jeu est une borne sur tablette. L'URL n'est ni
-// partagée, ni mise en favori, ni rechargée à la main, et un retour navigateur au milieu d'un
-// exercice n'a aucun sens pour un enfant de 7 ans. Les tests E2E ouvrent `/` et pilotent tout
-// par `window.__test`.
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import type { ReactElement, ReactNode } from 'react';
+// Les écrans de jeu synchronisent le magasin et l’historique du navigateur.
+// Les pages complémentaires conservent leur URL ; les pages parent passent par la porte à code.
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import type { Dispatch, ReactElement, ReactNode, SetStateAction } from 'react';
 import {
   Outlet,
   RouterProvider,
@@ -38,8 +14,8 @@ import {
 } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import type { CodeEcran, Profil } from '@pierre/partage';
-import type { EntreeGalerie, OptionsLancement } from '@pierre/partage/parent';
-import { lirePaquetNoeud, listerProfils, marquerOuvertureVue } from './api/client.js';
+import type { EntreeGalerie, OptionsLancement, RapportReinitialisation } from '@pierre/partage/parent';
+import { jetonParentPose, lirePaquetNoeud, lireProfil, listerProfils, marquerOuvertureVue } from './api/client.js';
 import { EcranCampement } from './ecrans/EcranCampement.js';
 import { EcranChaudron } from './ecrans/EcranChaudron.js';
 import { EcranCarte } from './ecrans/EcranCarte.js';
@@ -54,13 +30,14 @@ import { EcranProfils } from './ecrans/EcranProfils.js';
 import { EcranRecompense } from './ecrans/EcranRecompense.js';
 import { EcranReglagesLecture } from './ecrans/EcranReglagesLecture.js';
 import { useEtatJeu, useMagasin } from './etat/services.js';
-// AJOUT V1 — la visite des écrans et des exercices, en zone parent (R38).
+import { memoriserProfil } from './etat/profil-memorise.js';
 import { VisiteDesEcrans } from './parent/VisiteDesEcrans.js';
 
-/** Les 5 codes d'écran de § 7.1 vers les 4 routes. `chargement` partage la racine. */
+/** Les écrans pilotés par le magasin. `chargement` partage la racine avec les profils. */
 const CHEMIN_PAR_ECRAN: Readonly<Record<CodeEcran, string>> = {
   chargement: '/',
   profils: '/',
+  campement: '/campement',
   carte: '/carte',
   noeud: '/noeud',
   recompense: '/recompense'
@@ -105,55 +82,9 @@ export const CHEMINS = {
   reglagesLecture: '/reglages-lecture',
   parent: '/parent',
   parentDashboard: '/parent/dashboard',
-  /**
-   * AJOUT À L'INTÉGRATION — la galerie parent en plein écran (D34).
-   *
-   * Le contrat de finition v3 § 6.2 nomme cette route explicitement et la confie à N4 :
-   * « Le contrat les nomme ici : `/ouverture` (N4), `/parent/galerie` et `/parent/definir`
-   * (N5) ». N4 n'a ajouté que `/ouverture`. `client/src/ecrans/EcranGalerieParent.tsx` était
-   * donc écrit, compilé, testé — et importé par personne :
-   *
-   *     $ grep -rn "EcranGalerieParent" client/src --include=*.tsx | grep -v son propre fichier
-   *     (aucune sortie)
-   *
-   * C'est exactement le mode de défaillance que D10 nomme : « un contrat gelé n'oblige
-   * personne tant qu'un fichier n'est pas nommé pour chaque morceau », et il revient à
-   * l'orchestrateur de vérifier que chaque symbole déclaré a trouvé son propriétaire.
-   *
-   * `/parent/definir` n'est PAS ajoutée, et c'est mesuré, pas oublié : `EcranCodeParent`
-   * rend `EcranDefinirCode` lui-même quand aucun code n'est posé
-   * (`EcranCodeParent.tsx:45,157`). La porte est donc déjà complète, et une seconde route
-   * vers le même écran ferait deux chemins pour un seul état.
-   */
   parentGalerie: '/parent/galerie',
-  /**
-   * AJOUT V1 — la visite des écrans et des exercices (R38, `Docs/questions-en-attente.md` § J3).
-   *
-   * Même disposition que `parentGalerie` juste au-dessus : une route à elle seule, plutôt qu'un
-   * onglet de plus dans `EcranDashboard`, parce que le bandeau « retour à la visite »
-   * (`BandeauRetourVisite`, plus bas dans ce fichier) doit pouvoir y ramener depuis N'IMPORTE
-   * QUELLE page — y compris une page de jeu, où aucun onglet de dashboard n'est monté.
-   */
   parentVisite: '/parent/visite',
-  /**
-   * AJOUT V1, second correctif — la prévisualisation de « choix du joueur à suivre » depuis la
-   * visite (R38).
-   *
-   * UNE ROUTE À PART, et pas un drapeau affiché par-dessus `parentVisite` : un booléen partagé
-   * a été essayé d'abord (`useState` local à `HoteVisiteDesEcrans`, puis un magasin partagé
-   * hors composant) et les DEUX ont produit un cul-de-sac, mesuré par l'orchestrateur — le
-   * bandeau navigue vers `parentVisite`, LA ROUTE OÙ L'ON EST DÉJÀ pendant la prévisualisation,
-   * donc TanStack Router ne remonte rien et aucun drapeau qui vivrait hors du routeur ne se
-   * réinitialise. Une route SÉPARÉE n'a pas ce problème par construction : y revenir EST un
-   * changement de chemin, donc une vraie navigation, donc un remontage garanti.
-   */
   parentVisiteApercuProfil: '/parent/visite/quel-joueur',
-  /**
-   * AJOUT N4 — la séquence d'ouverture (D35, contrat de finition v3 § 4.4 et § 6.2).
-   *
-   * Frontière « N4 → N6 » du § 6.1 : c'est par cette constante que le campement rejoue
-   * l'ouverture (D35, point 3). N6 l'importe, il ne réécrit pas le littéral.
-   */
   ouverture: '/ouverture'
 } as const;
 
@@ -203,35 +134,7 @@ function HoteCarte(): ReactElement {
   );
 }
 
-/**
- * ═════════════════════════════════════════════════════════════════════════════════════════════
- * LA SÉQUENCE D'OUVERTURE — D35, lot N4.
- *
- * ── L'ARBITRAGE, ET IL EST CONTRE-INTUITIF ──────────────────────────────────────────────────
- * La séquence est **OFFERTE, jamais imposée**. Elle ne se déclenche pas toute seule, ni au
- * premier lancement, ni jamais. Ce n'est pas une timidité : c'est D46, point 3, dans ses
- * termes — « **aucun écran intermédiaire obligatoire, NULLE PART**. Chaque écran qui
- * s'interpose entre l'envie de jouer et le jeu mange du temps de lecture. » D46 est la
- * décision la plus récente du dossier, et elle est sans exception.
- *
- * Deux conséquences, et il faut les regarder en face :
- *   • un enfant peut ne jamais voir le récit. C'est pourquoi l'entrée est en HAUT de la carte,
- *     nommée, et non rangée dans un menu ; et pourquoi le serveur enregistre `vue` — pour que
- *     le PARENT sache s'il doit lui montrer une fois. C'est le seul signal actionnable.
- *   • si l'usage montre que personne ne la lance, passer à un déclenchement automatique est
- *     UNE ligne ici — et on l'aura alors décidé sur une mesure, pas sur une intention.
- * Arbitrage consigné dans `Docs/questions-en-attente.md` (N4-3), avec sa contradiction.
- *
- * ── LE FETCH N'EST PLUS ICI ─────────────────────────────────────────────────────────────────
- * « Un seul fichier du client appelle le réseau, et c'est `api/client.ts` ». Ce bloc l'a
- * enfreint pendant tout le lot N4 pour une raison d'écrivain unique (§ historique ci-dessus) —
- * corrigé au Lot 4 du portage Android (Docs/addendum-portage-android.md § 6bis) :
- * `marquerOuvertureVue` vit désormais dans `client/src/api/contrat.ts`/`port-http.ts`/
- * `port-local.ts`, importée d'`api/client.ts` comme les 28 autres méthodes du port. Bénéfice
- * au-delà de la règle : cet appel fonctionne maintenant aussi en mode autonome (Android), où il
- * n'existe aucun serveur à interroger.
- * ═════════════════════════════════════════════════════════════════════════════════════════════
- */
+/** Le récit est optionnel, mémorise sa lecture et rend la main au campement. */
 function HoteOuverture(): ReactElement {
   const naviguer = useNavigate();
   const profil = useEtatJeu((etat) => etat.profil);
@@ -242,43 +145,14 @@ function HoteOuverture(): ReactElement {
         if (profil !== null) {
           void marquerOuvertureVue(String(profil.id), passee);
         }
-        // Une seule destination, et c'est la carte : le récit se termine sur « viens », donc
-        // il rend la main sur le monde. Il n'y a jamais de retour en arrière depuis ici — un
-        // récit qu'on quitte ne se re-propose pas, il se REJOUE, et c'est un autre geste.
-        void naviguer({ to: CHEMIN_PAR_ECRAN.carte });
+        // La fin du récit rejoint le campement ; sa réécoute reste proposée depuis ce lieu.
+        void naviguer({ to: CHEMINS.campement });
       }}
     />
   );
 }
 
-/**
- * ═════════════════════════════════════════════════════════════════════════════════════════════
- * `surRejouerOuverture` — CÂBLAGE MANQUANT, trouvé par le lot Q2 le 2026-08-02.
- *
- * Le fait, mesuré avant correction, sortie citée :
- *
- *     $ grep -rn "surRejouerOuverture" client/src
- *     client/src/ecrans/EcranCampement.tsx:58   (déclaration de la propriété)
- *     client/src/ecrans/EcranCampement.tsx:92   (déstructuration)
- *     client/src/ecrans/EcranCampement.tsx:234  (garde de rendu)
- *     client/src/ecrans/EcranCampement.tsx:241  (onClick)
- *     → AUCUNE ligne dans routeur.tsx
- *
- * `EcranCampement` ne rend son bouton « Revoir l'histoire » que si le rappel lui est donné —
- * « un bouton qui ne mènerait nulle part serait pire que son absence, et ce lot refuse d'en
- * poser un » (son propre en-tête). Personne ne le lui donnait : D35 point 3 — « rejouable ; un
- * enfant qui n'a pas suivi la première fois doit pouvoir y revenir SEUL » — restait sur le
- * papier côté campement, et le commentaire de `CHEMINS.ouverture`, vingt lignes plus haut dans
- * ce fichier, annonçait pourtant que « c'est par cette constante que le campement rejoue
- * l'ouverture ».
- *
- * Aucune suite ne pouvait le voir : `parcours-audit-tout-le-site.spec.ts` exige de chaque écran
- * UNE sortie, et le campement en avait deux. Un contrôle ABSENT ne se compte pas.
- *
- * L'ajout est de trois lignes et strictement additif : il n'invente aucune destination, il
- * emprunte `CHEMINS.ouverture`, déjà déclarée ici pour cet usage exact.
- * ═════════════════════════════════════════════════════════════════════════════════════════════
- */
+/** Le campement câble ses destinations réelles, dont la réécoute du récit. */
 function HoteCampement(): ReactElement {
   const naviguer = useNavigate();
   return (
@@ -296,8 +170,35 @@ function HoteCampement(): ReactElement {
       surRejouerOuverture={() => {
         void naviguer({ to: CHEMINS.ouverture });
       }}
+      surAccesParent={() => {
+        void naviguer({ to: CHEMINS.parent });
+      }}
     />
   );
+}
+
+/** Aucun hôte ne lit un profil partiel pendant la restauration de la session. */
+function RacineRouteur(): ReactElement {
+  const chemin = useRouterState({ select: (etat) => cheminInterne(etat.location.pathname) });
+  const bancLocal = estHoteLocal() && chemin === CHEMINS.debugRecompenses;
+  const indisponible = useEtatJeu((etat) => (!bancLocal && etat.ecran === 'chargement')
+    || (chemin === '/noeud' && (etat.profil === null || etat.paquet === null || etat.moteur === null))
+    || (chemin === '/recompense' && (etat.profil === null || etat.paquet === null || etat.resume === null)));
+  if (indisponible) return <EcranChargement />;
+  return <><BandeauRetourVisite /><Outlet /></>;
+}
+
+/** Un lien profond conserve sa destination, mais ne constitue jamais une ouverture parent. */
+function RouteParent({ children }: { readonly children: ReactNode }): ReactElement {
+  const [autorisee, fixerAutorisee] = useState(jetonParentPose);
+  const naviguer = useNavigate();
+  if (!autorisee || !jetonParentPose()) {
+    return <EcranCodeParent
+      surOuverture={() => { fixerAutorisee(jetonParentPose()); }}
+      surAbandon={() => { void naviguer({ to: CHEMIN_PAR_ECRAN.profils }); }}
+    />;
+  }
+  return <>{children}</>;
 }
 
 function HoteChaudron(): ReactElement {
@@ -352,29 +253,7 @@ function HoteCodeParent(): ReactElement {
   );
 }
 
-/**
- * ═════════════════════════════════════════════════════════════════════════════════════════════
- * LE CHOIX DU JOUEUR À SUIVRE — la seconde impasse, et elle était sur le chemin NORMAL.
- *
- * Le fait mesuré : la porte de la zone parent est en pied de `EcranProfils`
- * (`data-acces-parent`), c'est-à-dire **avant** que le moindre profil ne soit choisi. Le père
- * a donc traversé `/parent`, tapé son code, atteint `/parent/dashboard` — et `profil` y valait
- * `null`. L'écran rendu était alors `EcranCodeParent` avec `surOuverture` et `surAbandon`
- * tous deux à `() => undefined` : **un pavé numérique dont les deux boutons de sortie ne font
- * rien**, et un dashboard qui n'apparaissait jamais. C'est exactement le « c'est quoi le code
- * pour aller sur l'espace parent et à quoi il sert ? » du retour.
- *
- * Les deux tests parent (`tests/e2e/parcours-parent.spec.ts`,
- * `tests/qualite/a11y-parent.spec.ts`) ne pouvaient pas le voir : tous deux appellent
- * `window.__test.chargerProfil()` avant d'ouvrir la porte, donc `profil` n'y est jamais `null`.
- * Le seul chemin qu'un humain emprunte est précisément celui qu'aucun test ne prenait.
- *
- * Le remède n'est pas de rendre la main au jeu — le parent voulait le suivi, pas le jeu — mais
- * de lui **demander de quel enfant il s'agit**. Le choix est LOCAL à la zone parent : appeler
- * `magasin.choisirProfil` poserait `ecran: 'carte'`, et le routeur, qui en est le miroir,
- * éjecterait le parent vers le jeu à l'instant même où il choisit.
- * ═════════════════════════════════════════════════════════════════════════════════════════════
- */
+/** Le parent choisit un profil local à sa zone, sans démarrer une partie enfant. */
 function ChoixProfilParent({
   surChoix,
   surRetour
@@ -438,47 +317,10 @@ function ChoixProfilParent({
   );
 }
 
-/**
- * ═════════════════════════════════════════════════════════════════════════════════════════════
- * LE CONTEXTE DE LA ZONE PARENT — profil suivi et visite en cours, partagés entre les hôtes.
- *
- * ── HISTORIQUE DES DEUX FAUSSES PISTES, ET POURQUOI AUCUNE DES DEUX NE TENAIT ─────────────────
- *
- * 1. `useState` LOCAL à chaque hôte (`HoteDashboard`, `HoteGalerieParent`, `HoteVisiteDesEcrans`).
- *    Mesuré : entrer par la porte du pied de l'accueil (AVANT tout choix de joueur — voir
- *    l'en-tête de `ChoixProfilParent`), choisir un enfant sur le dashboard, puis cliquer
- *    « Visite des écrans » retombait sur `ChoixProfilParent` — un SECOND choix, pour la MÊME
- *    session, parce que chaque hôte démonté-remonté reperd son `useState`.
- *
- * 2. Un magasin PARTAGÉ hors composant (`let` de module + `useSyncExternalStore`), pour
- *    survivre à la navigation d'un hôte vers l'autre. Ça a réglé le cas ci-dessus — mesuré,
- *    confirmé par l'orchestrateur, « les dix liens atteignent leur cible ». Mais soumis ensuite
- *    à `npm run verifier`, ce module a fait diverger `tests/modele/explorateur.tsx` : chaque
- *    « nouvelle session » de l'explorateur monte une `<Application>` FRAÎCHE et vide
- *    `localStorage`, en simulant un appareil neuf — mais un `let` de module ne se réinitialise
- *    PAS entre deux montages dans le même process Vitest, contrairement à un vrai rechargement
- *    de page. Le résidu d'une exploration antérieure fuyait dans la suivante : mesuré, sortie
- *    citée dans le rapport du lot — « rejeu de … attendu « choix-profil-parent », arrivé sur
- *    « dashboard » », puis toute une cascade de 40 « transitions non déclarées » qui étaient en
- *    réalité les tuiles de la visite, mal étiquetées `depuis: 'dashboard'` parce que le rejeu
- *    avait dérivé sans que l'explorateur puisse le savoir.
- *
- * ── LE REMÈDE : LE CONTEXTE REACT DE `Routeur`, PAS UN MODULE ─────────────────────────────────
- *
- * `Routeur` (fin de ce fichier) instancie ce contexte en `useState`, une fois par montage de
- * `<Application>`. Il se réinitialise donc exactement quand un vrai rechargement de page le
- * ferait ET exactement quand `tests/modele/explorateur.tsx` monte une session fraîche — les
- * DEUX bornes de remise à zéro coïncident enfin, parce que c'est la MÊME chose : une nouvelle
- * instance de l'arbre React.
- *
- * Coût assumé : `profilSuivi` ne survit plus à un rechargement de page en cours de visite (il
- * survivait avec le magasin de module). C'est un renoncement mineur — re-choisir une fois le
- * joueur après un F5 accidentel — face à un test qui garde une classe entière de régressions.
- * ═════════════════════════════════════════════════════════════════════════════════════════════
- */
+/** Le contexte partage profil et visite entre les hôtes, puis se réinitialise au remontage. */
 interface ContexteZoneParent {
   readonly profilSuivi: Profil | null;
-  readonly fixerProfilSuivi: (profil: Profil | null) => void;
+  readonly fixerProfilSuivi: Dispatch<SetStateAction<Profil | null>>;
   readonly visiteEnCours: boolean;
   readonly demarrerVisite: () => void;
   readonly terminerVisite: () => void;
@@ -527,33 +369,49 @@ function HoteDashboard(): ReactElement {
   // PARTAGÉ entre les hôtes via `FournisseurZoneParent` — voir l'en-tête ci-dessus.
   const { profilSuivi, fixerProfilSuivi } = useZoneParent();
   const profil = profilDeSession ?? profilSuivi;
+  const [relecture, fixerRelecture] = useState<{
+    id: Profil['id']; session: boolean; erreur: string | null;
+  } | null>(null);
+  const monte = useRef(true);
+  useEffect(() => { monte.current = true; return () => { monte.current = false; }; }, []);
+
+  const relireApresEffacement = async (id: Profil['id'], session: boolean): Promise<void> => {
+    fixerRelecture({ id, session, erreur: null });
+    try {
+      const frais = await lireProfil(id);
+      if (frais.id !== id || frais.generationProgression === undefined) {
+        throw new Error('Le profil rechargé ne confirme pas la nouvelle progression.');
+      }
+      if (!monte.current) return;
+      fixerProfilSuivi((suivi) => suivi === null || suivi.id === id ? frais : suivi);
+      if (session && magasin.getState().profil === null) magasin.setState({ profil: frais });
+      fixerRelecture(null);
+    } catch {
+      if (monte.current) fixerRelecture({ id, session,
+        erreur: 'La remise à zéro est faite. Le profil doit être rechargé avant de rejouer.' });
+    }
+  };
+
+  const apresReinitialisation = (rapport: RapportReinitialisation): Promise<void> => {
+    const id = rapport.profil as Profil['id'];
+    const session = magasin.getState().profil?.id === id;
+    fixerProfilSuivi((suivi) => suivi?.id === id ? null : suivi);
+    if (session) {
+      // Le résumé reste celui de l'ancienne partie : on l'abandonne, on ne le régénère pas.
+      // On conserve l'écran parent ; aucun changement d'URL intermédiaire vers les profils.
+      magasin.setState({ profil: null, sortie: null, paquet: null, moteur: null, codeMoteur: null,
+        etatMoteur: null, progression: null, aide: null, resume: null, etoiles: null,
+        demarreLe: null, termineLe: null, tentativeEnvoyee: false, erreurConservation: null,
+        cascade: magasin.getInitialState().cascade, dernierGain: null, serie: 0 });
+    }
+    return relireApresEffacement(id, session);
+  };
 
   const rendreLaMainAuJeu = (): void => {
     void naviguer({ to: CHEMIN_PAR_ECRAN.profils });
   };
 
-  /**
-   * R30 — lancer un exercice depuis la galerie parent.
-   *
-   * Deux précautions, et aucune n'est décorative :
-   *
-   *  1. **Le profil de SESSION est choisi si besoin.** Le parent est souvent entré par la porte
-   *     du pied de l'écran des profils, donc sans avoir choisi de joueur : `profil` vient alors
-   *     de `profilSuivi`, et le magasin de jeu, lui, n'a personne. Sans ce `choisirProfil`,
-   *     l'écran de nœud s'ouvrirait sur un profil nul.
-   *  2. **`options` est transmis tel quel**, et vaut toujours `LANCEMENT_PARENT` : la fiche n'a
-   *     pas le choix de journaliser, et l'hôte ne le lui rend pas. C'est le magasin qui porte
-   *     désormais le drapeau, et `data-journalise` le rend constatable.
-   *
-   * ⚠ GARDE ÉLARGIE À `== null` — trouvé en corrigeant V1, sur le même patron. `EntreeGalerie.
-   * noeud` est typé `IdNoeud | null`, jamais `undefined` — mais `tests/modele/serveur-double.ts`
-   * (le double de réseau de la QA Q2, hors de mon périmètre) construit ses entrées de catalogue
-   * SANS poser cette clé du tout, via un `as never` qui contourne le type. `entree.noeud` y vaut
-   * alors `undefined` à l'exécution, `=== null` ne l'attrape pas, et l'appel suivant partait sur
-   * `GET /api/contenu/noeuds/undefined` — mesuré, sortie citée dans le rapport du lot (`404`,
-   * rejet de promesse non intercepté). `== null` couvre les deux : c'est un garde-fou contre un
-   * contenu réel tout aussi incomplet, pas seulement contre le double de test.
-   */
+  /** Le lancement parent installe le profil de session et préserve ses options non journalisées. */
   const lancerUnExercice = (entree: EntreeGalerie, options: OptionsLancement): void => {
     if (entree.noeud == null) {
       return;
@@ -561,10 +419,26 @@ function HoteDashboard(): ReactElement {
     if (profilDeSession === null && profilSuivi !== null) {
       magasin.getState().choisirProfil(profilSuivi);
     }
+    const profilDuDepart = magasin.getState().profil;
+    if (profilDuDepart === null) return;
     void lirePaquetNoeud(entree.noeud).then((paquet) => {
+      if (magasin.getState().profil !== profilDuDepart) return;
       magasin.getState().demarrerNoeud(paquet, options);
     });
   };
+
+  if (relecture !== null) {
+    return <main className="dashboard-parent" data-ecran="dashboard">
+      <p role="status">{relecture.erreur ?? 'La remise à zéro est faite. On recharge le profil…'}</p>
+      {relecture.erreur === null ? null : <button type="button" className="cible"
+        onClick={() => { void relireApresEffacement(relecture.id, relecture.session); }}>
+        Recharger le profil
+      </button>}
+      <button type="button" className="cible cible-secondaire" onClick={rendreLaMainAuJeu}>
+        Retour au choix du joueur
+      </button>
+    </main>;
+  }
 
   if (profil === null) {
     return <ChoixProfilParent surChoix={fixerProfilSuivi} surRetour={rendreLaMainAuJeu} />;
@@ -579,28 +453,11 @@ function HoteDashboard(): ReactElement {
       surGaleriePleinEcran={() => {
         void naviguer({ to: CHEMINS.parentGalerie });
       }}
-      // AJOUT V1 — la porte d'entrée de la visite depuis le dashboard (R38).
       surAllerVisite={() => {
         void naviguer({ to: CHEMINS.parentVisite });
       }}
-      // ── R30 — « le bouton lancer l'exercice, mais ça ne fait rien » ────────────────────
-      //
-      // Il ne faisait rien parce qu'AUCUN hôte ne fournissait `surLancerExercice`. Le rappel
-      // était déclaré sur `EcranDashboard`, relayé jusqu'au bouton de `FicheExercice` — qui
-      // se désactivait proprement, `disabled={surLancer === undefined}` — et le parent voyait
-      // un bouton gris sans savoir pourquoi.
-      //
-      // Recensé par objet : 7 rappels optionnels sur 27 ne sont fournis nulle part. Le père en
-      // a trouvé deux en jouant, celui-ci et le chaudron. Aucune recette ne pouvait les voir,
-      // puisque chacune injecte elle-même les rappels dont elle a besoin et ne traverse donc
-      // jamais le câblage réel.
       surLancerExercice={lancerUnExercice}
-      // ── R29 — APRÈS LA SUPPRESSION, ON NE PEUT PLUS PARLER DE CE PROFIL ───────────────
-      //
-      // Sans ce rappel, le dashboard resterait affiché sur un compte qui n'existe plus :
-      // chacune de ses requêtes rendrait 404 et le parent verrait une page d'erreurs. On le
-      // ramène donc au choix du joueur, en oubliant AUSSI le profil de session s'il se trouve
-      // que c'était le même — sinon le jeu rouvrirait sur un enfant effacé.
+      surProfilReinitialise={apresReinitialisation}
       surProfilSupprime={() => {
         fixerProfilSuivi(null);
         if (profilDeSession !== null) {
@@ -656,21 +513,7 @@ function HoteGalerieParent(): ReactElement {
   return <EcranGalerieParent profil={profil.id} surRetour={retourAuSuivi} />;
 }
 
-/**
- * ═════════════════════════════════════════════════════════════════════════════════════════════
- * LA VISITE DES ÉCRANS ET DES EXERCICES — R38, lot V1.
- *
- * Même repli que `HoteDashboard` et `HoteGalerieParent` juste au-dessus : sans profil, on rend
- * `ChoixProfilParent` plutôt qu'un écran vide — c'est d'ailleurs EXACTEMENT ce chemin qui fait
- * de « choix du joueur à suivre » un écran atteignable depuis la visite elle-même (§ « Les 11
- * écrans nommés » de `VisiteDesEcrans.tsx`) : y revenir sans profil choisi montre cet écran.
- *
- * Les rappels de navigation ci-dessous sont les SEULS endroits du dépôt qui savent comment
- * atteindre chacun des 13 écrans sans jouer — `VisiteDesEcrans.tsx` ne connaît, comme tous les
- * écrans, aucun chemin (voir son en-tête). C'est la même règle que `HoteCarte`, `HoteCampement`,
- * etc. plus haut dans ce fichier, appliquée une fois de plus.
- * ═════════════════════════════════════════════════════════════════════════════════════════════
- */
+/** La visite garde son profil local et délègue les chemins à cet hôte. */
 function HoteVisiteDesEcrans(): ReactElement {
   const naviguer = useNavigate();
   const magasin = useMagasin();
@@ -679,10 +522,7 @@ function HoteVisiteDesEcrans(): ReactElement {
   const { profilSuivi, fixerProfilSuivi, demarrerVisite, terminerVisite } = useZoneParent();
   const profil = profilDeSession ?? profilSuivi;
 
-  // La visite démarre dès que cet hôte est monté avec un profil connu — c'est CE geste qui
-  // fait apparaître le bandeau sur tout ce qu'on ouvrira ensuite. `VisiteDesEcrans.tsx` ne le
-  // déclenche plus lui-même : un composant purement présentatif, qui ne connaît ni chemin ni
-  // état global, est plus facile à monter isolément (`tests/composants/**`).
+  // Le bandeau reste actif tant que cette visite garde la main.
   useEffect(() => {
     if (profil !== null) {
       demarrerVisite();
@@ -703,44 +543,16 @@ function HoteVisiteDesEcrans(): ReactElement {
   return (
     <VisiteDesEcrans
       profil={profil}
-      // « profils » — une simple navigation d'URL. Le routeur reconcilie lui-même l'écran du
-      // magasin vers 'profils' (voir l'écouteur d'historique plus bas) SANS appeler
-      // `quitterProfil()` : contrairement à `rendreLaMainAuJeu` de `HoteDashboard`, la visite
-      // ne doit RIEN effacer — ni le profil de session, ni le profil mémorisé sur l'appareil.
+      // La visite ne doit pas effacer le profil de session ni celui mémorisé.
       surAllerProfils={() => {
         void naviguer({ to: CHEMIN_PAR_ECRAN.profils });
       }}
-      // « carte » — `choisirProfil` pose `ecran: 'carte'` ET mémorise le joueur ; le routeur
-      // pousse `/carte` tout seul (effet de `Routeur`, plus bas). C'est la SEULE des cinq
-      // destinations qui veut vraiment `ecran: 'carte'` ; les quatre suivantes s'en passent —
-      // voir DÉFAUT B ci-dessous.
+      // Poser le profil puis naviguer une seule fois : choisirProfil ouvre le campement.
       surAllerCarte={() => {
-        magasin.getState().choisirProfil(profil);
+        magasin.setState({ profil });
+        memoriserProfil(String(profil.id));
+        void naviguer({ to: CHEMIN_PAR_ECRAN.carte });
       }}
-      /**
-       * ═════════════════════════════════════════════════════════════════════════════════════
-       * DÉFAUT B, signalé par l'orchestrateur : « ouverture → visite-parent, il reste sur la
-       * visite ». `HoteOuverture` ne renvoie nulle part de son propre chef (relu : aucune
-       * condition « déjà vue » n'existe côté client, `lireOuverture` n'est même pas appelée) —
-       * la vraie cause est ICI, une ligne au-dessus dans l'ancienne version.
-       *
-       * `choisirProfil(profil)` pose DEUX choses à la fois : le profil ET `ecran: 'carte'`. Ce
-       * second effet poussait `/carte` sur l'historique (l'abonnement au magasin, plus bas dans
-       * ce fichier) DANS LA MÊME TÂCHE JS que le `naviguer({ to: CHEMINS.ouverture })` qui
-       * suivait — deux navigations tirées coup sur coup sur le MÊME objet d'historique, l'une
-       * brute (`history.push`), l'autre via le routeur (`naviguer`, asynchrone). Une course, et
-       * pas une supposition : `choisirProfil` est la SEULE des actions du magasin qui pose
-       * `ecran`, donc le SEUL des cinq rappels de cet hôte à fabriquer une seconde navigation
-       * que personne n'a demandée.
-       *
-       * Le remède ne devine pas où était la course, il la retire : `magasin.setState({ profil })`
-       * pose le SEUL champ dont `EcranOuverture`/`EcranCampement`/`EcranCoffre` ont besoin
-       * (ils lisent `useEtatJeu(etat => etat.profil)`), sans toucher `ecran` — donc sans
-       * déclencher la moindre navigation concurrente. Une seule poussée d'historique par clic,
-       * exactement comme `surAllerReglagesLecture` juste plus bas, qui n'a jamais montré ce
-       * défaut parce qu'il ne posait déjà aucun profil.
-       * ═════════════════════════════════════════════════════════════════════════════════════
-       */
       surAllerOuverture={() => {
         magasin.setState({ profil });
         void naviguer({ to: CHEMINS.ouverture });
@@ -753,8 +565,7 @@ function HoteVisiteDesEcrans(): ReactElement {
         magasin.setState({ profil });
         void naviguer({ to: CHEMINS.coffre });
       }}
-      // Même correctif qu'au-dessus : sans lui, un profil connu seulement par `profilSuivi`
-      // (chemin de la porte du pied) laissait `EcranReglagesLecture` sans profil de session.
+      // Les réglages lisent le profil de session.
       surAllerReglagesLecture={() => {
         magasin.setState({ profil });
         void naviguer({ to: CHEMINS.reglagesLecture });
@@ -762,9 +573,6 @@ function HoteVisiteDesEcrans(): ReactElement {
       surAllerCodeParent={() => {
         void naviguer({ to: CHEMINS.parent });
       }}
-      // DÉFAUT A, sa forme définitive — voir l'en-tête de `CHEMINS.parentVisiteApercuProfil` :
-      // une route à part, plutôt qu'un drapeau que ni un `useState` local ni un magasin partagé
-      // n'ont réussi à faire survivre correctement au clic du bandeau global.
       surAllerChoixProfilParent={() => {
         void naviguer({ to: CHEMINS.parentVisiteApercuProfil });
       }}
@@ -774,16 +582,7 @@ function HoteVisiteDesEcrans(): ReactElement {
       surAllerGalerieParent={() => {
         void naviguer({ to: CHEMINS.parentGalerie });
       }}
-      // ── R30, repris tel quel — même logique que `HoteDashboard.lancerUnExercice` ─────────
-      //
-      // `options` vaut toujours `LANCEMENT_PARENT` (posé par `FicheExercice`, jamais ici) :
-      // rien de ce que le père joue depuis la visite n'entre dans le journal de l'enfant.
-      // `choisirProfil` reste volontairement ICI (et pas `setState`) : lancer un exercice VEUT
-      // `ecran: 'noeud'` juste après, et la navigation qui compte est celle que `demarrerNoeud`
-      // posera — la brève étape par `'carte'` ne se voit jamais, `lirePaquetNoeud` est asynchrone.
-      //
-      // `== null` et non `=== null` : voir la même garde, avec sa mesure, sur
-      // `HoteDashboard.lancerUnExercice` plus haut dans ce fichier.
+      // Les options de la visite empêchent toute écriture dans le journal enfant.
       surLancerExercice={(entree, options) => {
         if (entree.noeud == null) {
           return;
@@ -829,23 +628,7 @@ function HoteApercuChoixProfilVisite(): ReactElement {
   );
 }
 
-/**
- * Le bandeau « retour à la visite » — R38, exigence n° 3 : « toujours atteignable, sur chaque
- * page ». Monté à la RACINE du routeur (voir `construireRouteur`) : il survole donc les 13
- * écrans, tous les moteurs, les deux panneaux — tout ce que `<Outlet />` peut rendre.
- *
- * ── POURQUOI IL S'ÉTEINT TOUT SEUL DÈS QU'UNE VRAIE PARTIE D'ENFANT COMMENCE ────────────────
- *
- * Le drapeau (`visiteEnCours`, `FournisseurZoneParent`) vit dans l'état React de `Routeur` —
- * réinitialisé à chaque montage de `<Application>`, donc à chaque vrai rechargement de page.
- * Mais TANT QUE l'onglet reste ouvert, il survit à toute navigation en son sein : si un parent
- * quitte la visite sans cliquer « Fermer » et que l'enfant reprend la MÊME tablette SANS
- * recharger, le bandeau resterait affiché PENDANT une vraie partie. `EtatMagasin.journalise`
- * vaut `true` par défaut et ne vaut `false` QUE pour un lancement `LANCEMENT_PARENT`
- * (contrat § R30) : dès qu'un nœud démarre journalisé (donc joué par l'enfant, par la carte),
- * on éteint le drapeau. Aucune écriture dans `magasin.ts` (propriété du lot A1) : on ne fait que
- * LIRE `journalise` et `ecran`, déjà publics via `useEtatJeu`.
- */
+/** Le bandeau de visite disparaît dès qu’une partie enfant journalisée commence. */
 function BandeauRetourVisite(): ReactElement | null {
   const { visiteEnCours, terminerVisite } = useZoneParent();
   const chemin = useRouterState({ select: (etat) => cheminInterne(etat.location.pathname) });
@@ -878,9 +661,6 @@ function BandeauRetourVisite(): ReactElement | null {
         className="cible cible-appel"
         data-retour-visite
         onClick={() => {
-          // Naviguer suffit désormais : la prévisualisation vit sur SA PROPRE route
-          // (`CHEMINS.parentVisiteApercuProfil`), donc y revenir EST un changement de chemin —
-          // un vrai remontage de `HoteVisiteDesEcrans`, pas un drapeau à éteindre à la main.
           void naviguer({ to: CHEMINS.parentVisite });
         }}
         style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.35)' }}
@@ -894,17 +674,8 @@ function BandeauRetourVisite(): ReactElement | null {
 // Type de retour volontairement inféré : `createRouter` est générique sur l'arbre de routes,
 // et l'écrire à la main reviendrait à recopier cet arbre.
 function construireRouteur() {
-  // AJOUT V1 — `<BandeauRetourVisite />` survole TOUT ce que `<Outlet />` rend, à la racine de
-  // l'arbre de routes : c'est la seule façon de le rendre « toujours atteignable, sur chaque
-  // page » sans le poser dans chacun des 13 écrans un par un.
-  const routeRacine = createRootRoute({
-    component: () => (
-      <>
-        <BandeauRetourVisite />
-        <Outlet />
-      </>
-    )
-  });
+  // Le bandeau de visite entoure toutes les routes.
+  const routeRacine = createRootRoute({ component: RacineRouteur });
 
   const arbre = routeRacine.addChildren([
     createRoute({
@@ -957,24 +728,22 @@ function construireRouteur() {
     createRoute({
       getParentRoute: () => routeRacine,
       path: CHEMINS.parentDashboard,
-      component: HoteDashboard
+      component: () => <RouteParent><HoteDashboard /></RouteParent>
     }),
     createRoute({
       getParentRoute: () => routeRacine,
       path: CHEMINS.parentGalerie,
-      component: HoteGalerieParent
+      component: () => <RouteParent><HoteGalerieParent /></RouteParent>
     }),
-    // AJOUT V1 — la visite des écrans et des exercices (R38).
     createRoute({
       getParentRoute: () => routeRacine,
       path: CHEMINS.parentVisite,
-      component: HoteVisiteDesEcrans
+      component: () => <RouteParent><HoteVisiteDesEcrans /></RouteParent>
     }),
-    // AJOUT V1, second correctif — la prévisualisation de « choix du joueur à suivre ».
     createRoute({
       getParentRoute: () => routeRacine,
       path: CHEMINS.parentVisiteApercuProfil,
-      component: HoteApercuChoixProfilVisite
+      component: () => <RouteParent><HoteApercuChoixProfilVisite /></RouteParent>
     })
   ]);
 
@@ -983,28 +752,7 @@ function construireRouteur() {
     // TanStack retire cette base a l'entree et la remet a chaque navigation. Les routes du jeu
     // restent donc `/carte`, `/parent/dashboard`, etc. dans tout le code applicatif.
     basepath: import.meta.env.BASE_URL,
-    /**
-     * ══════════════════════════════════════════════════════════════════════════════════════
-     * R21 / R22 — HISTORIQUE DU NAVIGATEUR, ET NON PLUS EN MÉMOIRE.
-     *
-     * L'ancien commentaire disait : « Historique EN MÉMOIRE, volontairement : le jeu est une
-     * borne sur tablette. L'URL n'est ni partagée, ni mise en favori, ni rechargée à la main,
-     * et un retour navigateur au milieu d'un exercice n'a aucun sens pour un enfant de 7 ans. »
-     *
-     * Le père a mesuré la conséquence en jouant, et elle est l'inverse de l'intention :
-     *
-     *     « quand on appuie dans le navigateur sur rafraîchir ou sur retour en arrière, ça
-     *       enlève le site. Et ça, faudrait pouvoir revenir en arrière justement. »
-     *
-     * Un historique en mémoire n'écrit AUCUNE entrée dans celui du navigateur : le bouton
-     * « retour » de la tablette sort donc du site, et le rafraîchissement repart de `/`.
-     * L'hypothèse « l'enfant n'appuiera pas » était fausse — un enfant de 7 ans appuie sur
-     * tout, et c'est précisément pour lui qu'un état sans issue est le pire des défauts.
-     *
-     * Avec l'historique du navigateur, « retour » remonte D'UN écran de jeu, et un
-     * rafraîchissement recharge la page où l'on était (avec le bon joueur, voir R21).
-     * ══════════════════════════════════════════════════════════════════════════════════════
-     */
+    // Le bouton retour et les URL profondes utilisent le même historique.
     history: createBrowserHistory(),
     defaultPreload: false
   });
@@ -1015,66 +763,61 @@ export function Routeur(): ReactElement {
   const [routeur] = useState(construireRouteur);
 
   useEffect(() => {
-    const aller = (ecran: CodeEcran): void => {
-      // Le banc local est autonome ; l'hydratation du joueur ne doit pas effacer son URL.
-      if (estHoteLocal() && cheminInterne(routeur.history.location.pathname) === CHEMINS.debugRecompenses) return;
-      const cible = CHEMIN_PAR_ECRAN[ecran];
-      const ciblePublique = cheminPublic(cible);
-      if (routeur.history.location.pathname !== ciblePublique) {
-        routeur.history.push(ciblePublique);
-      }
-    };
-
-    // Au chargement direct d'une URL profonde, le magasin n'a pas encore relu le joueur. Le
-    // forcer immédiatement vers `/` effacerait chemin, recherche et fragment juste avant que
-    // l'hydratation puisse confirmer l'écran. Une route connue reste donc en place pendant cet
-    // unique état transitoire ; l'état suivant la conserve ou ramène normalement aux profils.
-    const cheminAuDemarrage = cheminInterne(routeur.history.location.pathname);
-    if (magasin.getState().ecran !== 'chargement' || !estRouteConnue(cheminAuDemarrage)) {
-      aller(magasin.getState().ecran);
-    }
-
-    const arreterMagasin = magasin.subscribe((etat, precedent) => {
-      if (etat.ecran !== precedent.ecran) {
-        aller(etat.ecran);
-      }
-    });
-
-    /**
-     * ══════════════════════════════════════════════════════════════════════════════════════
-     * R22 — LE MIROIR REGARDE MAINTENANT DANS LES DEUX SENS.
-     *
-     * Il ne suivait que le magasin. Un retour navigateur changeait donc l'URL SANS que le
-     * magasin le sache : l'écran affiché redevenait la carte, et `etat.ecran` valait encore
-     * `noeud`. Les deux se contredisaient, et la suite en découle —
-     *
-     *     if (etat.ecran !== precedent.ecran) aller(etat.ecran);
-     *
-     * — ne déclenche RIEN quand on repart vers le même code d'écran. Choisir une autre région
-     * après un retour arrière ne poussait donc aucune navigation : le père voyait « le même
-     * exercice ».
-     *
-     * On écoute donc aussi l'historique. Seuls les chemins que le magasin POSSÈDE sont
-     * réconciliés : `/campement`, `/coffre` ou la zone parent ont leur propre route et ne
-     * doivent pas être ramenés de force vers l'écran de jeu courant.
-     * ══════════════════════════════════════════════════════════════════════════════════════
-     */
+    // Une navigation d'URL met à jour le magasin sans provoquer une seconde navigation.
+    let synchronisation = false;
     const cheminsDuMagasin = new Map<string, CodeEcran>(
       (Object.entries(CHEMIN_PAR_ECRAN) as readonly (readonly [CodeEcran, string])[]).map(
         ([ecran, chemin]) => [chemin, ecran]
       )
     );
-
-    const arreterHistorique = routeur.history.subscribe(() => {
-      const ecranDuChemin = cheminsDuMagasin.get(
-        cheminInterne(routeur.history.location.pathname)
-      );
-      if (ecranDuChemin === undefined) return;
-      if (magasin.getState().ecran !== ecranDuChemin) {
-        magasin.getState().naviguer(ecranDuChemin);
+    const cheminActuel = (): string => cheminInterne(routeur.history.location.pathname);
+    const estBancLocal = (): boolean => estHoteLocal() && cheminActuel() === CHEMINS.debugRecompenses;
+    const fixerEcran = (ecran: CodeEcran): void => {
+      if (magasin.getState().ecran === ecran) return;
+      synchronisation = true;
+      try { magasin.getState().naviguer(ecran); }
+      finally { synchronisation = false; }
+    };
+    const aller = (ecran: CodeEcran, remplacer = false): void => {
+      if (estBancLocal()) return;
+      const cible = cheminPublic(CHEMIN_PAR_ECRAN[ecran]);
+      if (routeur.history.location.pathname !== cible) {
+        if (remplacer) routeur.history.replace(cible);
+        else routeur.history.push(cible);
       }
-    });
+    };
+    const lireHistorique = (restauration = false): void => {
+      const etat = magasin.getState();
+      if (etat.ecran === 'chargement' || estBancLocal()) return;
+      const chemin = cheminActuel();
+      const parent = chemin === CHEMINS.parent || chemin.startsWith(`${CHEMINS.parent}/`);
+      const connue = estRouteConnue(chemin) && chemin !== CHEMINS.debugRecompenses;
+      const manqueExercice = (chemin === '/noeud' && (etat.paquet === null || etat.moteur === null))
+        || (chemin === '/recompense' && (etat.paquet === null || etat.resume === null));
+      if (!connue || manqueExercice || (etat.profil === null && !parent && chemin !== '/')) {
+        const repli = etat.profil === null ? 'profils' : 'campement';
+        fixerEcran(repli);
+        aller(repli, true);
+        return;
+      }
+      // À la racine, restaurer le joueur ouvre son campement. Les URL stables restent exactes,
+      // y compris recherche et fragment. Les pages parent gardent leur porte à code.
+      if (restauration && chemin === '/' && etat.profil !== null) {
+        aller(etat.ecran, true);
+        return;
+      }
+      const ecran = cheminsDuMagasin.get(chemin);
+      if (ecran !== undefined) fixerEcran(ecran);
+    };
 
+    const arreterMagasin = magasin.subscribe((etat, precedent) => {
+      if (synchronisation || etat.ecran === precedent.ecran) return;
+      if (precedent.ecran === 'chargement') lireHistorique(true);
+      else aller(etat.ecran);
+    });
+    const arreterHistorique = routeur.history.subscribe(() => { lireHistorique(); });
+    // L'hydratation peut avoir fini avant cet effet ; la même réconciliation traite les deux ordres.
+    lireHistorique(true);
     return () => {
       arreterMagasin();
       arreterHistorique();

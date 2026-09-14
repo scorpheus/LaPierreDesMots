@@ -60,6 +60,7 @@ import {
   etatDuJeu,
   lireTexte,
   noeudsLivres,
+  ouvrirVueRegion,
   recettesDEcrans,
   preparer,
   taperElement,
@@ -269,13 +270,13 @@ test.describe('QA — le parcours complet et les deux régions', () => {
     const PRENOM = 'Iris';
     await preparer(page, PRENOM);
     await choisirLeProfil(page, PRENOM);
-    const departs = await page
-      .locator('[data-depart]')
-      .evaluateAll((noeuds) => noeuds.map((e) => e.getAttribute('data-depart') ?? ''));
+    const clairiere = await ouvrirVueRegion(page, 'clairiere');
+    await expect(clairiere.locator('[data-depart="clairiere"]')).toHaveCount(1);
+    await page.getByRole('button', { name: 'Retour à la carte' }).click();
+    const galeries = await ouvrirVueRegion(page, 'galeries');
+    await expect(galeries.locator('[data-depart="galeries"]')).toHaveCount(1);
     // D38 : « Les deux régions sont ouvertes d'emblée. » Nommées, pas comptées : un
     // `toHaveLength(2)` ne dirait pas LAQUELLE manque le jour où l'une disparaît.
-    expect(departs, `départs offerts : ${departs.join(', ')}`).toContain('clairiere');
-    expect(departs, `départs offerts : ${departs.join(', ')}`).toContain('galeries');
   });
 
   test('on passe d’une région à l’autre DANS LES DEUX SENS, et on en revient', async ({ page }) => {

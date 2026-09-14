@@ -127,6 +127,8 @@ test.describe('parcours trace', () => {
     await page.setViewportSize({ width: 1366, height: 768 });
     await preparer(page);
     await page.getByText(String(fixtureProfil['prenom']), { exact: false }).first().click();
+    await expect(page.locator('[data-ecran="campement"]')).toBeVisible();
+    await page.locator('[data-vers="carte"]').click();
     await expect(page.locator('[data-ecran="carte"]')).toBeVisible();
     await entrerDansLeNoeud(page);
     const mesurer = () => page.locator('[data-scene="trace"]').evaluate((element) => {
@@ -147,6 +149,8 @@ test.describe('parcours trace', () => {
 
     const carteProfil = page.getByText(String(fixtureProfil['prenom']), { exact: false }).first();
     await carteProfil.click();
+    await expect(page.locator('[data-ecran="campement"]')).toBeVisible();
+    await page.locator('[data-vers="carte"]').click();
     await expect(page.locator('[data-ecran="carte"]')).toBeVisible();
 
     await entrerDansLeNoeud(page);

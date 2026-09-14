@@ -1,3 +1,4 @@
+import { lireStyles } from '../configuration/styles.js';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -26,7 +27,7 @@ describe('atlas normalisés des compagnons validés', () => {
   });
 
   it('anime par positions de fond et coupe les atlas en mode calme', () => {
-    const css = readFileSync(join(process.cwd(), 'client', 'src', 'styles', 'global.css'), 'utf8');
+    const css = lireStyles('client/src/styles/global.css');
     expect(css).toContain('compagnon-sprite-huit-poses 2.6s steps(1, end)');
     expect(css).toContain('background-size: 400% 200%');
     expect(css).toContain("@media (prefers-reduced-motion: reduce)");

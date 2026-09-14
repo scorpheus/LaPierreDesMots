@@ -167,18 +167,20 @@ describe('le catalogue livré, mesuré à chaque exécution', () => {
   });
 });
 
-// ═════════════════════════ la sonde d'invariant reste fidèle à l'écran qu'elle imite
+// ═════════════════════════ la sonde d'invariant reste fidèle à la règle qu'elle mesure
 
-describe('la sonde d’invariant ne dérive pas de `EcranCarte`', () => {
+describe('la sonde d’invariant ne dérive pas de la carte du monde', () => {
   /**
-   * `sortiesOffertes` recopie deux règles de `client/src/ecrans/EcranCarte.tsx` : `jouables`
-   * vient de `regionsOuvertes`, et `reprise` rend `null` quand la région n'a aucun nœud. Ces
-   * deux règles sont des closures locales de l'écran, non exportables. Si elles changent, la
-   * sonde mesure autre chose que ce que l'enfant voit — et le mensonge serait invisible.
+   * `sortiesOffertes` recopie deux règles de la carte : `jouables` vient de
+   * `regionsOuvertes`, et `reprise` rend `null` quand la région n'a aucun nœud. Si elles
+   * changent, la sonde mesure autre chose que ce que l'enfant voit — et le mensonge serait
+   * invisible.
    *
    * Un fait mécanique ne s'affirme pas, il se mesure : on relit le fichier.
    */
   const ecran = lireTexte('client/src/ecrans/EcranCarte.tsx');
+  const carteMonde = lireTexte('client/src/monde/carte/CarteMonde.tsx');
+  const vueRegion = lireTexte('client/src/monde/carte/VueRegion.tsx');
 
   it('la carte tire encore ses régions tapables de `regionsOuvertes`', () => {
     expect(ecran).toContain('regionsOuvertes(monde.carte)');
@@ -215,8 +217,10 @@ describe('la sonde d’invariant ne dérive pas de `EcranCarte`', () => {
     expect(repriseDeRegion([], new Set())).toEqual({ noeud: null, rang: 0 });
   });
 
-  it('une prise n’est un bouton que si elle est ouverte ET porte un nœud', () => {
-    expect(ecran).toContain('ouverte && premierNoeud !== null');
+  it('une région voilée reste consultable, mais ses lieux et son départ restent gardés', () => {
+    expect(carteMonde).toContain('onClick={() => surChoisirRegion(code)}');
+    expect(vueRegion).toContain('estAcquis && jouable');
+    expect(vueRegion).toContain('jouable && noeud !== null');
   });
 });
 

@@ -156,8 +156,12 @@ function urlDeFichier(relatif) {
   return `${BASE_PAGES}${relatif.split('/').map(encodeURIComponent).join('/')}`;
 }
 
-function empreinteLivrable(fichiers) {
+export function empreinteLivrable(fichiers, modeleServiceWorker = readFileSync(MODELE_SERVICE_WORKER, 'utf8')) {
   const hachage = createHash('sha256');
+  // Un worker corrigé doit installer un AUTRE cache, même si le reste du build est identique.
+  // Sinon l'échec de son installation pourrait supprimer le cache du worker encore actif.
+  hachage.update(modeleServiceWorker);
+  hachage.update('\0');
   for (const fichier of fichiers) {
     hachage.update(relatifPosix(DIST_PWA, fichier));
     hachage.update('\0');
@@ -216,11 +220,12 @@ export function finaliserLivrable() {
   copyFileSync(ICONE_SOURCE, path.join(dossierIcones, 'gobi-gardien.svg'));
 
   let fichiers = listerFichiers(DIST_PWA).filter(
-    (fichier) => path.basename(fichier) !== 'service-worker.js'
+    (fichier) => !['service-worker.js', 'version-build.json'].includes(relatifPosix(DIST_PWA, fichier))
   );
   verifierCheminsPublics(fichiers);
 
-  const version = empreinteLivrable(fichiers);
+  const modele = readFileSync(MODELE_SERVICE_WORKER, 'utf8');
+  const version = empreinteLivrable(fichiers, modele);
   const precache = fichiers
     .map((fichier) => relatifPosix(DIST_PWA, fichier))
     // `.nojekyll` est un marqueur de publication, pas une ressource du site. GitHub
@@ -231,7 +236,6 @@ export function finaliserLivrable() {
     .map(urlDeFichier);
   exiger(precache.includes(`${BASE_PAGES}index.html`), 'Le precache ne contient pas index.html.');
 
-  const modele = readFileSync(MODELE_SERVICE_WORKER, 'utf8');
   const serviceWorker = modele
     .replace('__PIERRE_VERSION__', version)
     .replace('__PIERRE_BASE__', BASE_PAGES)

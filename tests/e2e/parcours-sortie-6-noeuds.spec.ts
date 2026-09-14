@@ -31,6 +31,7 @@
 import { readFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { expect, test } from './invariants.js';
+import { ouvrirVueRegion } from './qa-outils.js';
 
 import type { Page } from '@playwright/test';
 
@@ -157,6 +158,8 @@ async function entrerSurLaCarte(
   await page.getByText(String(prenomPropre ?? fixtureProfil['prenom']), { exact: false })
     .first()
     .click();
+  await expect(page.locator('[data-ecran="campement"]')).toBeVisible();
+  await page.locator('[data-vers="carte"]').click();
   await expect(page.locator('[data-ecran="carte"]')).toBeVisible();
 }
 
@@ -218,7 +221,8 @@ test.describe('Les Galeries sont une région JOUABLE, pas seulement ouverte (D38
     await page.goto('/');
     await page.waitForFunction(() => (window as FenetreTest).__test !== undefined);
     await entrerSurLaCarte(page, []);
-    const depart = page.locator(`[data-depart="${REGION}"]`);
+    const vue = await ouvrirVueRegion(page, REGION);
+    const depart = vue.locator(`[data-depart="${REGION}"]`);
     await expect(
       depart,
       'Les Galeries n’offrent aucune prise alors que D38 les ouvre dès le départ',
@@ -251,11 +255,7 @@ test.describe('Les Galeries sont une région JOUABLE, pas seulement ouverte (D38
     // rien : le crochet retrouvait « Alma » et le cas héritait du monde laissé par le
     // précédent, qui venait de clore Les Galeries.
     await entrerSurLaCarte(page, [], 'Neuve');
-
-    const departs = await page
-      .locator('[data-depart]')
-      .evaluateAll((noeuds) => noeuds.map((element) => element.getAttribute('data-depart') ?? ''));
-    console.log(`[sortie ${REGION}] profil neuf — départs offerts : ${departs.join(', ')}`);
-    expect(departs, 'aucune progression, et Les Galeries ne sont pas proposées').toContain(REGION);
+    const vue = await ouvrirVueRegion(page, REGION);
+    await expect(vue.locator(`[data-depart="${REGION}"]`), 'aucune progression, et Les Galeries ne sont pas proposées').toHaveCount(1);
   });
 });

@@ -1,0 +1,348 @@
+/* La réussite a une scène, une suite immédiate et un carnet de gains consultable. */
+.ecran-recompense {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: center;
+  justify-items: center;
+  gap: clamp(16px, 2vmin, 28px);
+  min-block-size: 100dvh;
+  padding: clamp(16px, 3vw, 48px);
+  padding-block-end: max(24px, env(safe-area-inset-bottom));
+  background:
+    radial-gradient(ellipse at 22% 20%, color-mix(in srgb, var(--soleil) 18%, transparent), transparent 50%),
+    var(--parchemin);
+}
+
+.recompense-scene {
+  display: grid;
+  grid-template-columns: minmax(160px, 0.7fr) minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(16px, 4vw, 64px);
+  inline-size: min(100%, 1120px);
+  padding: clamp(16px, 3vw, 40px);
+  border: 2px solid color-mix(in srgb, var(--trait) 18%, transparent);
+  border-radius: calc(var(--rayon-carte) * 1.5);
+  background: var(--parchemin);
+  box-shadow: 0 8px 0 color-mix(in srgb, var(--trait) 8%, transparent);
+}
+
+.recompense-gobi {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-inline-size: 0;
+  min-block-size: 160px;
+  align-self: stretch;
+}
+
+.recompense-gobi::before {
+  content: '';
+  position: absolute;
+  inset: 8%;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--soleil) 17%, transparent);
+}
+
+.recompense-gobi img {
+  position: relative;
+  inline-size: min(100%, 300px);
+  block-size: auto;
+  max-block-size: 32dvh;
+  object-fit: contain;
+  filter: drop-shadow(0 5px 0 color-mix(in srgb, var(--trait) 12%, transparent));
+}
+
+.recompense-texte {
+  display: grid;
+  justify-items: center;
+  gap: 16px;
+  min-inline-size: 0;
+  text-align: center;
+}
+
+.recompense-titre {
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  line-height: 1.15;
+}
+
+.recompense-message {
+  margin: 0;
+  max-inline-size: 34ch;
+  font-size: var(--lecture-corps, 1.5rem);
+}
+
+.recompense-texte .etoiles {
+  display: flex;
+  justify-content: center;
+  gap: clamp(8px, 2vw, 24px);
+  max-inline-size: 100%;
+}
+
+.recompense-texte .etoiles > svg {
+  inline-size: clamp(56px, 7vw, 96px);
+  block-size: auto;
+  flex-shrink: 0;
+}
+
+.actions-recompense {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  inline-size: min(100%, 1120px);
+}
+
+.action-recompense {
+  flex: 0 1 auto;
+  min-inline-size: min(184px, 100%);
+  padding: 12px 24px;
+  border: 2px solid color-mix(in srgb, var(--trait) 32%, transparent);
+  border-radius: 999px;
+  background: var(--parchemin);
+  color: var(--trait);
+  font-size: 1.125rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.action-recompense--principale {
+  border-color: var(--trait);
+  background: var(--soleil);
+  box-shadow: 0 4px 0 var(--trait);
+}
+
+.recompense-bilan {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  align-items: start;
+  gap: 20px;
+  inline-size: min(100%, 1120px);
+}
+
+.recompense-bilan:empty {
+  display: none;
+}
+
+.recompense-detail-etoiles {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 20px;
+  list-style: none;
+  border: 1px solid color-mix(in srgb, var(--trait) 18%, transparent);
+  border-radius: var(--rayon-carte);
+  background: color-mix(in srgb, var(--parchemin) 94%, var(--grisaille));
+}
+
+.recompense-detail-etoile {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  align-items: baseline;
+  gap: 12px;
+  font-size: 1rem;
+}
+
+.recompense-detail-signe {
+  color: var(--trait);
+  font-size: 1.5rem;
+}
+
+.recompense-detail-etoile[data-acquise='oui'] .recompense-detail-signe {
+  color: var(--soleil);
+  -webkit-text-stroke: 1px var(--trait);
+}
+
+.recompense-detail-etoile[data-acquise='non'] {
+  color: var(--texte-secondaire);
+}
+
+.ecran-recompense .cascade-recompense {
+  inline-size: 100%;
+  min-inline-size: 0;
+  gap: 16px;
+}
+
+.ecran-recompense .cascade-recompense-liste {
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  inline-size: 100%;
+}
+
+.ecran-recompense .cascade-recompense-jauges {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr));
+  gap: 16px;
+  inline-size: 100%;
+}
+
+.ecran-recompense .jauge-palier {
+  min-inline-size: 0;
+  padding: 16px;
+  border: 1px solid color-mix(in srgb, var(--trait) 18%, transparent);
+  border-radius: 16px;
+  background: var(--parchemin);
+}
+
+.ecran-recompense .jauge-palier-phrase {
+  padding: 0;
+  font-size: 0.9375rem;
+}
+
+.recompense-region-acquis {
+  inline-size: min(100%, 1120px);
+  padding: 24px;
+  border: 2px solid color-mix(in srgb, var(--trait) 22%, transparent);
+  border-radius: var(--rayon-carte);
+  background: color-mix(in srgb, var(--menthe) 8%, var(--parchemin));
+  text-align: center;
+}
+
+.recompense-region-acquis h2 {
+  margin: 0 0 16px;
+  font-size: 1.5rem;
+}
+
+.recompense-region-acquis__cartes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+}
+
+.recompense-region-acquis__carte {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  align-items: center;
+  gap: 16px;
+  inline-size: min(360px, 100%);
+  min-inline-size: var(--cible-min);
+  min-block-size: var(--cible-min);
+  padding: 12px 16px;
+  border: 2px solid color-mix(in srgb, var(--trait) 24%, transparent);
+  border-radius: var(--rayon-carte);
+  background: var(--parchemin);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.recompense-region-acquis__carte > :is(img, svg) {
+  inline-size: 96px;
+  block-size: 96px;
+  object-fit: contain;
+}
+
+.recompense-region-acquis__carte > span {
+  font-size: 1.125rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.recompense-progression {
+  margin: 0;
+  max-inline-size: 68ch;
+  padding: 12px 20px;
+  border-radius: 16px;
+  font-size: 1.125rem;
+  text-align: center;
+}
+
+.recompense-eclat {
+  position: absolute;
+  z-index: 1;
+  color: var(--trait);
+  font-size: clamp(24px, 3vw, 40px);
+}
+
+.recompense-eclat--un { inset: 8% auto auto 7%; }
+.recompense-eclat--deux { inset: 20% 6% auto auto; }
+.recompense-eclat--trois { inset: auto 12% 8% auto; }
+
+@media (min-width: 1200px) and (min-height: 800px) {
+  .ecran-recompense {
+    gap: 24px;
+  }
+}
+
+@media (max-width: 700px) {
+  .ecran-recompense {
+    align-content: start;
+    padding: 16px 12px 24px;
+  }
+
+  .recompense-scene {
+    grid-template-columns: minmax(96px, 0.45fr) minmax(0, 1fr);
+    gap: 12px;
+    padding: 16px 12px;
+  }
+
+  .recompense-gobi {
+    min-block-size: 120px;
+  }
+
+  .recompense-gobi img {
+    max-block-size: 180px;
+  }
+
+  .recompense-texte {
+    gap: 10px;
+  }
+
+  .recompense-titre {
+    font-size: 2rem;
+  }
+
+  .recompense-message {
+    grid-column: 1 / -1;
+  }
+
+  .recompense-texte .etoiles > svg {
+    inline-size: 48px;
+  }
+
+  .recompense-bilan {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .action-recompense {
+    flex: 1 1 160px;
+    min-inline-size: min(160px, 100%);
+    padding-inline: 16px;
+  }
+}
+
+@media (max-width: 420px) {
+  .recompense-scene {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .recompense-gobi {
+    min-block-size: 96px;
+  }
+
+  .recompense-gobi img {
+    inline-size: 112px;
+    max-block-size: 112px;
+  }
+
+  .recompense-eclat--un { inset-inline-start: 20%; }
+  .recompense-eclat--deux { inset-inline-end: 20%; }
+  .recompense-eclat--trois { display: none; }
+}
+
+@media (max-height: 650px) and (min-width: 701px) {
+  .ecran-recompense {
+    align-content: start;
+    padding-block: 16px;
+  }
+
+  .recompense-scene {
+    padding-block: 12px;
+  }
+
+  .recompense-gobi img {
+    max-block-size: 200px;
+  }
+}

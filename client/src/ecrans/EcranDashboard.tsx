@@ -28,6 +28,7 @@ import type {
   DecisionRelecture,
   EntreeGalerie,
   OptionsLancement,
+  RapportReinitialisation,
   RapportSuppressionProfil
 } from '@pierre/partage/parent';
 import {
@@ -48,6 +49,7 @@ import { CourbeLatence } from '../parent/CourbeLatence.js';
 import { FileRelecture } from '../parent/FileRelecture.js';
 import { ReglagesParent } from '../parent/ReglagesParent.js';
 import { TopConfusions } from '../parent/TopConfusions.js';
+import '../styles/parent.css';
 import { EtatStockagePwa } from '../pwa/EtatStockagePwa.js';
 import { SauvegardePwa } from '../pwa/SauvegardePwa.js';
 
@@ -92,6 +94,8 @@ export interface ProprietesEcranDashboard {
    * tranquille. C'est l'hôte qui sait où aller — le composant ne connaît aucune route.
    */
   readonly surProfilSupprime?: (rapport: RapportSuppressionProfil) => void;
+  /** L'hôte relit le profil après l'effacement avant d'autoriser un nouveau départ. */
+  readonly surProfilReinitialise?: (rapport: RapportReinitialisation) => void | Promise<void>;
 }
 
 /**
@@ -112,7 +116,8 @@ export function EcranDashboard({
   surLancerExercice,
   surGaleriePleinEcran,
   surAllerVisite,
-  surProfilSupprime
+  surProfilSupprime,
+  surProfilReinitialise
 }: ProprietesEcranDashboard): ReactElement {
   const clientRequetes = useQueryClient();
   const [onglet, fixerOnglet] = useState<OngletParent>('suivi');
@@ -164,10 +169,9 @@ export function EcranDashboard({
       data-ecran="dashboard"
       data-parent="dashboard"
       className="dashboard-parent"
-      style={{ padding: '2rem', display: 'grid', gap: '2rem', maxInlineSize: '60rem', marginInline: 'auto' }}
     >
-      <header className="dashboard-parent-entete" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
-        <h1 className="titre" style={{ fontSize: '2rem', margin: 0 }}>
+      <header className="dashboard-parent-entete">
+        <h1 className="titre dashboard-parent-titre">
           {prenom === undefined ? 'Suivi' : `Suivi de ${prenom}`}
         </h1>
         {/* AJOUT V1 — R38 : « me donner des pages en mode parent juste pour faire des retours ».
@@ -195,7 +199,7 @@ export function EcranDashboard({
           `role="tablist"` et `aria-selected` plutôt qu'un simple trio de boutons : axe-core en
           fait un critère `serious`, et `tests/qualite/a11y-galerie.spec.ts` le vérifie — en les
           NOMMANT, pour qu'un onglet perdu se voie au lieu de faire baisser un compte. */}
-      <div className="dashboard-parent-onglets" role="tablist" aria-label="Espace parent" style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+      <div className="dashboard-parent-onglets" role="tablist" aria-label="Espace parent">
         {(
           [
             ['suivi', 'Le suivi'],
@@ -231,15 +235,14 @@ export function EcranDashboard({
               className="cible cible-secondaire"
               data-vers="galerie-parent"
               onClick={surGaleriePleinEcran}
-              style={{ marginBlockEnd: '1rem' }}
             >
               Voir le catalogue en plein écran
             </button>
           )}
-          {galerie.isPending ? <p style={{ margin: 0 }}>On rassemble les exercices…</p> : null}
+          {galerie.isPending ? <p className="parent-message">On rassemble les exercices…</p> : null}
           {galerie.isError ? (
-            <div className="zone-lecture" style={{ padding: '1rem', display: 'grid', gap: '1rem' }}>
-              <p style={{ margin: 0 }}>
+            <div className="zone-lecture parent-notice">
+              <p className="parent-message">
                 Les exercices n’arrivent pas. Vérifie que la Pierre tourne, puis réessaie.
               </p>
               <button type="button" className="cible" onClick={() => void galerie.refetch()}>
@@ -260,11 +263,11 @@ export function EcranDashboard({
           n'arrive pas : c'est précisément quand quelque chose ne va pas qu'un parent en a
           besoin, et une porte de secours qui dépend de ce qu'elle répare n'est pas une porte. */}
       {onglet === 'profil' ? (
-        <div role="tabpanel" id="panneau-profil" aria-labelledby="onglet-profil" style={{ display: 'grid', gap: '2rem' }}>
-          {etatProfil.isPending ? <p style={{ margin: 0 }}>On relit ce que ton enfant a fait…</p> : null}
+          <div role="tabpanel" id="panneau-profil" aria-labelledby="onglet-profil" className="panneau-parent">
+          {etatProfil.isPending ? <p className="parent-message">On relit ce que ton enfant a fait…</p> : null}
           {etatProfil.isError ? (
-            <div className="zone-lecture" style={{ padding: '1rem', display: 'grid', gap: '1rem' }}>
-              <p style={{ margin: 0 }}>
+            <div className="zone-lecture parent-notice">
+              <p className="parent-message">
                 L’état du profil n’arrive pas. Vérifie que la Pierre tourne, puis réessaie.
               </p>
               <button type="button" className="cible" onClick={() => void etatProfil.refetch()}>
@@ -276,7 +279,7 @@ export function EcranDashboard({
           <ReinitialiserProfil
             profil={profil}
             prenom={etatProfil.data?.prenom ?? prenom ?? ''}
-            surTermine={() => void etatProfil.refetch()}
+            {...(surProfilReinitialise === undefined ? {} : { surTermine: surProfilReinitialise })}
           />
           {/* ── R29 — « il faudrait pouvoir les supprimer en fait, supprimer un compte » ────
               Sous la remise à zéro, et repliée : c'est le seul geste irréversible de toute la
@@ -292,12 +295,12 @@ export function EcranDashboard({
       ) : null}
 
       {dashboard.isPending && onglet === 'suivi' ? (
-        <p style={{ margin: 0 }}>On rassemble les données…</p>
+        <p className="parent-message">On rassemble les données…</p>
       ) : null}
 
       {dashboard.isError && onglet === 'suivi' ? (
-        <div className="zone-lecture" style={{ padding: '1rem', display: 'grid', gap: '1rem' }}>
-          <p style={{ margin: 0 }}>
+        <div className="zone-lecture parent-notice">
+          <p className="parent-message">
             Les données n’arrivent pas. Vérifie que la Pierre tourne, puis réessaie.
           </p>
           <button type="button" className="cible" onClick={() => void dashboard.refetch()}>
@@ -307,7 +310,7 @@ export function EcranDashboard({
       ) : null}
 
       {resume === undefined || onglet !== 'suivi' ? null : (
-        <div role="tabpanel" id="panneau-suivi" aria-labelledby="onglet-suivi" style={{ display: 'grid', gap: '2rem' }}>
+        <div role="tabpanel" id="panneau-suivi" aria-labelledby="onglet-suivi" className="panneau-parent">
           <CourbeLatence points={resume.latences} />
           <TopConfusions
             confusions={resume.confusions}

@@ -33,9 +33,12 @@ import { mondeDeTest, profilDeTest } from './donnees-ecrans.js';
 const paquetsDemandes: string[] = [];
 const demandesDeSortie: { region: string; compagnon: string | null }[] = [];
 let compositionEchoue = false;
+let paquetRejete = false;
+let paquetDiffere: { readonly promesse: Promise<unknown>; readonly resoudre: (paquet: unknown) => void } | null = null;
 
 /** Le monde servi par le bouchon. Une variable, pour qu'un cas puisse en poser un autre. */
 let mondeServi: ReturnType<typeof mondeDeTest> = mondeDeTest();
+let progressionServie: Array<{ noeud: string; etoiles: number }> = [];
 
 /**
  * L'exercice et l'habillage RÉELS de la Clairière, lus sur disque.
@@ -75,15 +78,16 @@ vi.mock('@client/api/client', async (importOriginal) => {
         composeeLe: '2026-09-01T08:00:00.000Z'
       });
     },
-    // Aucun nœud terminé : la reprise tombe donc sur le PREMIER nœud de chaque région.
-    lireProgression: () => Promise.resolve([]),
+    lireProgression: () => Promise.resolve(progressionServie),
     lirePaquetNoeud: (id: unknown) => {
       paquetsDemandes.push(String(id));
-      return Promise.resolve({
+      if (paquetRejete) return Promise.reject(new Error('Paquet indisponible.'));
+      const paquet = {
         noeud: lireContenu('contenu/noeuds/clairiere-01.json'),
         exercice: lireContenu('contenu/exercices/clairiere/ecole-01.json'),
         habillage: lireContenu('contenu/habillages/clairiere/ecole.habillage.json')
-      });
+      };
+      return paquetDiffere?.promesse ?? Promise.resolve(paquet);
     }
   };
 });
@@ -185,11 +189,25 @@ function prise(region: string): Element | null {
   return document.querySelector(`[data-region="${region}"] circle[aria-label]`);
 }
 
+/** La région mène d'abord à sa vue dédiée ; seul son départ ouvre le choix du compagnon. */
+function ouvrirDepartDeRegion(region: string): Element {
+  fireEvent.click(prise(region)!);
+  const vue = document.querySelector(`[data-vue-region="${region}"]`);
+  expect(vue, `la région ${region} doit ouvrir sa vue avant le départ`).not.toBeNull();
+  const depart = vue?.querySelector(`[data-depart="${region}"]`);
+  expect(depart, `la vue de ${region} doit porter son départ réel`).not.toBeNull();
+  fireEvent.click(depart!);
+  return depart!;
+}
+
 beforeEach(() => {
   paquetsDemandes.length = 0;
   demandesDeSortie.length = 0;
   compositionEchoue = false;
+  paquetRejete = false;
+  paquetDiffere = null;
   mondeServi = mondeDeTest();
+  progressionServie = [];
   installerFetchLocal();
 });
 
@@ -242,49 +260,52 @@ describe('une prise n’existe que si elle répond (M23)', () => {
     );
   });
 
-  /**
-   * ── UN COMPORTEMENT QUE JE N'AVAIS PAS SUPPOSÉ, ET QUE LA MESURE A CORRIGÉ ─────────────────
-   * Ce cas attendait d'abord que la Clairière TERMINÉE reste tapable. Elle ne l'est pas :
-   * `regionsOuvertes` (`partage/src/monde/carte.ts:239`) n'offre que les régions `enCours`
-   * — `ouverte && pourcentageColorie < 1`, lot H1 — et ne retombe sur les régions rejouables
-   * que si AUCUNE n'est en cours. Tant que les Galeries avancent, la Clairière finie est un
-   * décor doré, pas une porte.
-   *
-   * Le test dit donc ce que le code fait, et l'arbitrage — « un enfant peut-il retourner
-   * rejouer une région finie depuis la carte ? » — est consigné dans
-   * `Docs/questions-en-attente.md` (section QA-2) au lieu d'être tranché ici. Ce qui est
-   * garanti, en revanche, et c'est le cas suivant : quand tout est fini, la carte redevient
-   * tapable. Aucun état sans issue, jamais.
-   */
-  it('la région TERMINÉE n’est pas une porte tant qu’une autre est en cours', async () => {
+  it('la région TERMINÉE ouvre ses lieux acquis, même si une autre région est conseillée', async () => {
+    progressionServie = [
+      { noeud: 'clairiere-01', etoiles: 3 },
+      { noeud: 'clairiere-02', etoiles: 2 }
+    ];
     await monterEtAttendre();
     const cercle = prise('clairiere');
     expect(cercle).not.toBeNull();
-    expect(cercle!.getAttribute('role')).toBeNull();
-    // Elle reste NOMMÉE et distinguée : l'enfant voit qu'elle est finie, il ne la perd pas.
+    expect(cercle!.getAttribute('role')).toBe('button');
     expect(
       document.querySelector('[data-region="clairiere"]')?.getAttribute('data-region-etat')
     ).toBe('terminee');
-    expect(document.querySelector('[data-region="clairiere"] path[d]')).not.toBeNull();
+    fireEvent.click(cercle!);
+    expect(document.querySelector('[data-vue-region="clairiere"]')).not.toBeNull();
+    const lieux = document.querySelectorAll('[data-revisiter]');
+    expect(lieux).toHaveLength(2);
+    fireEvent.click(lieux[1]!);
+    await waitFor(() => expect(paquetsDemandes).toContain('clairiere-02'));
   });
 
-  it('la région VOILÉE n’est ni un bouton, ni atteignable au clavier — c’est un décor', async () => {
+  it('la région VOILÉE est consultable mais ne propose aucun départ', async () => {
     await monterEtAttendre();
     for (const region of ['marais-jumeau', 'foret-muette', 'volcan', 'cite-des-histoires']) {
       const cercle = prise(region);
       expect(cercle, `aucun cercle sur « ${region} »`).not.toBeNull();
-      expect(
-        cercle!.getAttribute('role'),
-        `« ${region} » est annoncée « bouton » alors qu’elle ne répond pas`
-      ).toBeNull();
-      expect(cercle!.getAttribute('tabindex')).toBeNull();
-      expect(cercle!.getAttribute('aria-hidden')).toBe('true');
+      expect(cercle!.getAttribute('role')).toBe('button');
+      fireEvent.click(cercle!);
+      const vue = document.querySelector(`[data-vue-region="${region}"]`);
+      expect(vue).not.toBeNull();
+      expect(vue?.querySelector('[data-depart]')).toBeNull();
+      expect(vue?.querySelector('[data-revisiter]')).toBeNull();
+      fireEvent.click(document.querySelector('.vue-region__retour')!);
     }
+  });
+
+  it('la légende ne transforme pas une région voilée en faux départ après un acquis', async () => {
+    progressionServie = [{ noeud: 'galeries-01', etoiles: 3 }];
+    await monterEtAttendre();
+
+    expect(document.querySelector('[data-depart="galeries"]')).not.toBeNull();
+    expect(document.querySelector('[data-depart="volcan"]')).toBeNull();
   });
 
   it('demande avec qui partir avant de composer la sortie', async () => {
     await monterEtAttendre();
-    fireEvent.click(prise('galeries')!);
+    ouvrirDepartDeRegion('galeries');
 
     const choix = document.querySelector('[data-choix-compagnon]');
     expect(choix?.getAttribute('role')).toBe('dialog');
@@ -300,6 +321,47 @@ describe('une prise n’existe que si elle répond (M23)', () => {
     expect(demandesDeSortie).toEqual([{ region: 'galeries', compagnon: 'filou' }]);
   });
 
+  it('un rejet final garde la carte vivante et propose de réessayer', async () => {
+    compositionEchoue = true;
+    paquetRejete = true;
+    const { magasin } = await monterEtAttendre();
+    const demarrages: unknown[] = [];
+    magasin.setState({ demarrerNoeud: (paquet: unknown) => demarrages.push(paquet) } as never);
+    ouvrirDepartDeRegion('galeries');
+    fireEvent.click(document.querySelector('[data-confirmer-depart]')!);
+
+    await waitFor(() => expect(document.querySelector('[data-depart-refuse="oui"]')).not.toBeNull());
+    expect(document.body.textContent).toContain('La Pierre n’a pas répondu. On réessaie ?');
+    expect(document.querySelector('[data-depart-refuse="oui"]')?.textContent).toContain('Réessayer');
+    expect(demarrages).toEqual([]);
+    expect(magasin.getState().ecran).toBe('carte');
+  });
+
+  it('une réponse tardive après le retour au campement ne démarre aucun exercice', async () => {
+    let resoudre: ((paquet: unknown) => void) | null = null;
+    paquetDiffere = {
+      promesse: new Promise<unknown>((resolve) => { resoudre = resolve; }),
+      resoudre: (paquet) => resoudre?.(paquet),
+    };
+    const { magasin, campement } = await monterEtAttendre();
+    const demarrages: unknown[] = [];
+    magasin.setState({ demarrerNoeud: (paquet: unknown) => demarrages.push(paquet) } as never);
+    ouvrirDepartDeRegion('galeries');
+    fireEvent.click(document.querySelector('[data-confirmer-depart]')!);
+    await waitFor(() => expect(document.querySelector('[data-confirmer-depart]')?.hasAttribute('disabled')).toBe(true));
+
+    fireEvent.click(document.querySelector('[data-vers="campement"]')!);
+    paquetDiffere.resoudre({
+      noeud: lireContenu('contenu/noeuds/clairiere-01.json'),
+      exercice: lireContenu('contenu/exercices/clairiere/ecole-01.json'),
+      habillage: lireContenu('contenu/habillages/clairiere/ecole.habillage.json'),
+    });
+
+    await waitFor(() => expect(campement).toHaveLength(1));
+    expect(demarrages).toEqual([]);
+    expect(magasin.getState().ecran).toBe('carte');
+  });
+
   it.each([
     { compagnon: null, libelle: 'Gobi' },
     { compagnon: 'filou', libelle: 'Filou' }
@@ -308,7 +370,7 @@ describe('une prise n’existe que si elle répond (M23)', () => {
     async ({ compagnon }) => {
       compositionEchoue = true;
       const { magasin } = await monterEtAttendre();
-      fireEvent.click(prise('galeries')!);
+      ouvrirDepartDeRegion('galeries');
       fireEvent.click(
         document.querySelector(`[data-choisir-compagnon="${compagnon ?? 'gobi'}"]`)!
       );
@@ -520,6 +582,7 @@ describe('l’exigence commune des dix écrans', () => {
               dernier.campement.length > 0 ||
               dernier.ouverture.length > 0 ||
               paquetsDemandes.length > 0 ||
+              document.querySelector('[data-vue-region]') !== null ||
               document.querySelector('[data-choix-compagnon]') !== null
             );
           }
@@ -530,8 +593,9 @@ describe('l’exigence commune des dix écrans', () => {
         cleanup();
       }
     );
-    // Le campement, l'histoire, le changement de joueur, les deux pastilles ouvertes et les
-    // deux départs : la carte est l'écran le plus riche en issues du jeu, et c'est voulu.
+    // Les vues régionales sont des sorties réelles : elles donnent ensuite accès au chemin,
+    // au départ conseillé ou aux lieux acquis. Les compter interdit de ramener la carte à une
+    // image décorative dont les repères ne changent aucun état.
     expect(rapport.repondent.length).toBeGreaterThanOrEqual(4);
   });
 

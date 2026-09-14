@@ -1,0 +1,76 @@
+.ecran-carte {
+  box-sizing: border-box;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  gap: clamp(0.8rem, 2vw, 1.5rem);
+  inline-size: min(100%, 94rem);
+  min-block-size: 100dvh;
+  margin-inline: auto;
+  padding: clamp(0.8rem, 2vw, 1.75rem);
+}
+
+.entete-carte, .entete-carte__actions, .introduction-carte, .carte-monde, .vue-region { display: flex; }
+.entete-carte { align-items: center; justify-content: space-between; gap: 1rem; }
+.entete-carte__surtitre, .vue-region__surtitre { margin: 0; color: var(--texte-secondaire); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+.entete-carte h1 { margin: 0; font-size: clamp(2rem, 5vw, 3.5rem); line-height: 1; }
+.entete-carte__actions { flex-wrap: wrap; gap: 0.6rem; justify-content: end; }
+.introduction-carte { align-items: center; justify-content: space-between; gap: 1rem; padding: 0.9rem 1rem; border-inline-start: 0.45rem solid var(--soleil); background: color-mix(in srgb, var(--parchemin) 87%, white); }
+.introduction-carte p { margin: 0; }
+.introduction-carte p + p { margin-block-start: 0.35rem; color: var(--texte-secondaire); font-size: 0.95em; }
+.carte-monde { min-block-size: clamp(21rem, 68dvh, 48rem); display: flex; flex-direction: column; align-items: center; gap: 0.7rem; }
+.carte-monde__parchemin { inline-size: 100%; min-inline-size: 0; min-block-size: clamp(19rem, 62dvh, 46rem); display: grid; place-items: center; }
+.carte-monde__parchemin [data-scene-adaptative='carte'] { display: grid; inline-size: 100%; min-block-size: inherit; place-items: center; }
+.carte-monde__parchemin [data-parchemin] { max-inline-size: 1200px; max-block-size: 100%; }
+.carte-monde__legende { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.55rem; inline-size: min(100%, 50rem); padding: 0.5rem; border: 0.18rem solid var(--trait); border-radius: 999px; background: rgb(255 246 227 / 92%); box-shadow: 0 0.25rem 0 rgb(27 36 64 / 55%); }
+.carte-monde__legende h2 { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); }
+.carte-monde__destination { min-block-size: var(--cible-min); padding: 0.45rem 0.8rem; border-radius: 999px; }
+.carte-monde__destination > span { font-size: 0.76em; }
+
+.vue-region { position: relative; min-block-size: min(68dvh, 45rem); align-items: stretch; gap: clamp(1rem, 3vw, 3rem); padding: clamp(1.25rem, 4vw, 3rem); border: var(--epaisseur-trait) solid var(--trait); border-radius: calc(var(--rayon-carte) * 1.4); background: var(--parchemin); box-shadow: var(--ombre-bd); overflow: hidden; isolation: isolate; }
+.vue-region__decor { position: absolute; z-index: 0; inset: 0; inline-size: 100%; block-size: 100%; opacity: 0.8; }
+.vue-region__retour, .vue-region__scene, .vue-region__action, .vue-region__repere { z-index: 1; }
+
+.vue-region__retour { position: absolute; inset: 1rem auto auto 1rem; z-index: 1; }
+.vue-region__scene { flex: 1 1 auto; inline-size: 100%; min-inline-size: 0; max-inline-size: 44rem; margin: 4rem auto 1rem; padding: .25rem; text-align: center; }
+.vue-region__scene h2 { display: table; margin: .2rem auto; padding: .25rem 1rem; border-radius: 1rem; background: rgb(255 246 227 / 94%); font-size: clamp(1.8rem, 5vw, 3rem); }
+.vue-region__scene > p { margin: 0 auto; max-inline-size: 36rem; }
+.vue-region__chemin { --diametre-lieu: 64px; --ecart-lieux: 28px; --colonnes-chemin: 4; container-type: inline-size; display: grid; grid-template-columns: repeat(var(--colonnes-chemin), minmax(64px, 1fr)); grid-auto-rows: var(--diametre-lieu); justify-items: center; gap: var(--ecart-lieux) 12px; margin: 2rem 0 0; padding: 0; list-style: none; }
+.vue-region__chemin li { position: relative; display: grid; place-items: center; inline-size: var(--diametre-lieu); block-size: var(--diametre-lieu); border: 2px solid var(--trait); border-radius: 50%; background: var(--parchemin); box-shadow: 0 4px 0 var(--trait); font-size: 1.15rem; font-weight: 700; line-height: 1.1; text-align: center; }
+
+.vue-region__lieu { position: relative; z-index: 1; inline-size: var(--diametre-lieu); block-size: var(--diametre-lieu); min-block-size: var(--cible-min); padding: 0; border-radius: 50%; font-size: 1.15rem; line-height: 1.1; }
+.vue-region__numero { display: grid; place-items: center; inline-size: 100%; block-size: 100%; }
+.vue-region__chemin li:not(:last-child)::after { content: ""; position: absolute; inset-block-start: 50%; inset-inline-start: 100%; inline-size: max(12px, calc((100cqw + 12px) / var(--colonnes-chemin) - var(--diametre-lieu))); border-block-start: 3px dashed var(--parchemin); filter: drop-shadow(0 1px 1px var(--trait)); pointer-events: none; }
+.vue-region__chemin li[data-sens-chemin="retour"]::after { inset-inline-start: auto; inset-inline-end: 100%; }
+.vue-region__chemin li[data-bout-de-ligne="oui"]:not(:last-child)::after { inset: 100% auto auto 50%; inline-size: 0; block-size: var(--ecart-lieux); border-inline-start: 3px dashed var(--parchemin); border-block-start: 0; }
+.vue-region__chemin [data-etat-lieu='acquis'] { background: var(--soleil); }
+.vue-region__chemin [data-etat-lieu='conseille'] { outline: 4px solid var(--soleil); outline-offset: 4px; }
+.vue-region__action { flex: 0 1 14rem; align-self: center; padding: .5rem; border-radius: var(--rayon-carte); background: rgb(255 246 227 / 94%); text-align: center; }
+.vue-region__action:empty { display: none; }
+.vue-region__action p { margin: 0 0 0.8rem; font-weight: 700; }
+.vue-region__action .cible { flex-direction: column; gap: 0.4rem; inline-size: 100%; }
+.vue-region__action .cible span { font-size: 0.85em; font-weight: 400; }
+.vue-region__attente { color: var(--texte-secondaire); }
+
+.choix-compagnon { position: fixed; inset: 0; z-index: 40; display: grid; place-items: center; padding: 1rem; background: rgb(27 36 64 / 62%); }
+.choix-compagnon__carte { position: relative; inline-size: min(62rem, 100%); max-block-size: calc(100dvh - 2rem); overflow: auto; padding: clamp(1.5rem, 4vw, 3rem); border: var(--epaisseur-trait) solid var(--trait); border-radius: calc(var(--rayon-carte) * 1.4); background: var(--parchemin); box-shadow: 0.7rem 0.8rem 0 var(--trait); text-align: center; }
+.choix-compagnon__fermer { position: absolute; inset: 1rem auto auto 1rem; }
+.choix-compagnon__entete { max-inline-size: 38rem; margin-inline: auto; }
+.choix-compagnon__entete h2 { margin: 0.2rem 0; font-size: clamp(1.8rem, 4vw, 2.8rem); }
+.choix-compagnon__entete p { margin: 0; }
+.choix-compagnon__destination { color: var(--texte-secondaire); font-weight: 700; }
+.choix-compagnon__liste { display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem; margin-block: 1.5rem; }
+.choix-compagnon__tuile { flex: 1 1 9rem; max-inline-size: 12rem; min-block-size: 13rem; flex-direction: column; gap: 0.35rem; padding: 0.75rem; }
+.choix-compagnon__tuile[data-selectionne='oui'] { background: color-mix(in srgb, var(--soleil) 35%, var(--parchemin)); outline: 0.3rem solid var(--soleil); transform: translateY(-0.25rem); }
+.choix-compagnon__portrait { display: grid; place-items: center; inline-size: 7rem; block-size: 8rem; }
+.choix-compagnon__portrait > img { inline-size: 100%; block-size: 100%; object-fit: contain; }
+.choix-compagnon__partir { margin-inline: auto; }
+
+@media (max-width: 860px), (orientation: portrait) { .carte-monde { min-block-size: clamp(20rem, 67dvh, 42rem); } .carte-monde__parchemin { min-block-size: clamp(18rem, 59dvh, 38rem); } .carte-monde__parchemin [data-parchemin] { max-block-size: min(55dvh, 38rem); } .carte-monde__legende { inline-size: 100%; border-radius: var(--rayon-carte); } .vue-region { flex-direction: column; } .vue-region__action { flex-basis: auto; align-self: stretch; } }
+@media (max-width: 540px) { .ecran-carte { padding: 0.7rem; } .entete-carte { align-items: start; } .entete-carte__actions { justify-content: start; } .introduction-carte { align-items: start; flex-direction: column; } .vue-region { padding: 5.5rem 1rem 1rem; } .vue-region__scene { margin: .25rem auto; } .vue-region__scene h2 { font-size: 1.5rem; } .vue-region__chemin { margin-block-start: 1.25rem; padding-block: 0.7rem; } .choix-compagnon__entete { padding-block-start: 3rem; } }
+@media (max-width: 900px), (max-height: 520px) {
+  .entete-carte { align-items: center; gap: .5rem; }
+  .entete-carte > div:first-child { min-inline-size: 0; flex: 1; }
+  .entete-carte h1 { font-size: clamp(1.25rem, 3.5vw, 1.75rem); line-height: 1.1; }
+  .entete-carte__actions { display: grid; grid-template-columns: repeat(2, minmax(64px, 1fr)); flex: 0 0 clamp(128px, 38vw, 280px); gap: .35rem; }
+  .entete-carte__actions .cible { min-block-size: var(--cible-min); min-inline-size: var(--cible-min); padding: .25rem; font-size: .78rem; line-height: 1.05; }
+}

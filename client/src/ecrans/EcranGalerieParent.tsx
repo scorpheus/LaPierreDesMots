@@ -18,6 +18,7 @@ import type { IdProfil } from '@pierre/partage';
 import type { EntreeGalerie, OptionsLancement } from '@pierre/partage/parent';
 import { lireGalerieParent } from '../api/client.js';
 import { GalerieExercices } from '../parent/GalerieExercices.js';
+import '../styles/parent.css';
 
 export interface ProprietesEcranGalerieParent {
   readonly profil: IdProfil;
@@ -45,16 +46,9 @@ export function EcranGalerieParent({
       data-ecran="galerie-parent"
       data-parent="galerie"
       className="galerie-parent-page"
-      style={{
-        padding: '2rem',
-        display: 'grid',
-        gap: '2rem',
-        maxInlineSize: '70rem',
-        marginInline: 'auto'
-      }}
     >
-      <header className="galerie-parent-entete" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
-        <h1 className="titre" style={{ fontSize: '2rem', margin: 0 }}>
+      <header className="galerie-parent-entete">
+        <h1 className="titre galerie-parent-titre">
           Les exercices
         </h1>
         {/* La sortie est dans l'en-tête, donc visible sans défiler, même sur un catalogue de
@@ -70,11 +64,11 @@ export function EcranGalerieParent({
         </button>
       </header>
 
-      {galerie.isPending ? <p style={{ margin: 0 }}>On rassemble les exercices…</p> : null}
+      {galerie.isPending ? <p className="parent-message">On rassemble les exercices…</p> : null}
 
       {galerie.isError ? (
-        <div className="zone-lecture" style={{ padding: '1rem', display: 'grid', gap: '1rem' }}>
-          <p style={{ margin: 0 }}>
+        <div className="zone-lecture parent-notice">
+          <p className="parent-message">
             Les exercices n’arrivent pas. Vérifie que la Pierre tourne, puis réessaie.
           </p>
           <button type="button" className="cible" onClick={reessayer}>

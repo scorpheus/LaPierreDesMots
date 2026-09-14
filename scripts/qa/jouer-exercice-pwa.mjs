@@ -22,6 +22,8 @@ export async function jouerUnExercicePwa(page, moduleUrl, prenom, options) {
   if (await page.locator('[data-ecran="campement"]').count()) await page.locator('[data-vers="carte"]').click();
   await expect(page.locator('[data-ecran="carte"]')).toBeVisible();
   await page.locator('[data-depart="clairiere"]').click();
+  await expect(page.locator('[data-vue-region="clairiere"]')).toBeVisible();
+  await page.locator('[data-vue-region="clairiere"] [data-depart="clairiere"]').click();
   await page.locator('[data-confirmer-depart]').click();
   return jouerExerciceEnCoursPwa(page, moduleUrl, prenom, options);
 }

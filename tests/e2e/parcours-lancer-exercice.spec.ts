@@ -165,6 +165,9 @@ test.describe("R30 — le parent peut lancer un exercice, sans que ça compte", 
     // pire défaut que ce fichier puisse laisser passer est un journal devenu muet.
     await preparer(page);
     await page.locator("[data-profil]").first().click();
+    await expect(page.locator('[data-ecran="campement"]')).toBeVisible();
+    await page.locator('[data-vers="carte"]').click();
+    await expect(page.locator('[data-ecran="carte"]')).toBeVisible();
     await page.evaluate(async (noeud) => {
       await (window as unknown as FenetreTest).__test.allerAuNoeud(noeud);
     }, NOEUD_COLORIE);

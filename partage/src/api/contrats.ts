@@ -39,6 +39,8 @@ export interface Profil {
   readonly paletteVariante: CodeRegion;
   readonly creeLe: Horodatage;
   readonly dernierAccesLe: Horodatage;
+  /** Incrémentée à chaque remise à zéro ; absente seulement sur les anciens clients. */
+  readonly generationProgression?: number;
 }
 
 /** Corps de `POST /api/profils`. Le serveur pose l'identifiant et les deux horodatages. */

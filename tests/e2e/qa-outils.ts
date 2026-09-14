@@ -68,7 +68,7 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { expect } from '@playwright/test';
 
-import type { Page } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 
 const RACINE = new URL('../../', import.meta.url);
 
@@ -655,7 +655,28 @@ export async function choisirLeProfil(page: Page, prenom?: string): Promise<void
       ? page.locator('[data-profil]').first()
       : page.locator('[data-profil]').filter({ hasText: prenom }).first();
   await carte.click();
+  const campement = page.locator('[data-ecran="campement"]');
+  await expect(campement).toBeVisible();
+  await campement.locator('[data-vers="carte"]').click();
   await expect(page.locator('[data-ecran="carte"]')).toBeVisible();
+}
+
+/** La carte ouvre d'abord le lieu choisi ; son départ est dans cette vue, jamais sur le décor. */
+export async function ouvrirVueRegion(page: Page, region: string): Promise<Locator> {
+  await expect(page.locator('[data-ecran="carte"]')).toBeVisible();
+  const prise = page.locator(`[data-region="${region}"] [role="button"]`);
+  await expect(prise, `la carte doit offrir une prise pour ${region}`).toHaveCount(1);
+  await prise.click();
+  const vue = page.locator(`[data-vue-region="${region}"]`);
+  await expect(vue, `le lieu ${region} doit s’ouvrir avant son départ`).toBeVisible();
+  return vue;
+}
+
+/** Le profil ouvre la carte ; les accès du campement passent donc par son retour explicite. */
+async function revenirAuCampement(page: Page): Promise<void> {
+  await expect(page.locator('[data-ecran="carte"]')).toBeVisible();
+  await page.locator('[data-vers="campement"]').click();
+  await expect(page.locator('[data-ecran="campement"]')).toBeVisible();
 }
 
 export async function entrerDansLeNoeud(
@@ -888,6 +909,7 @@ export function recettesDEcrans(): readonly EcranQA[] {
     aller: async (page) => {
       await preparer(page);
       await choisirLeProfil(page);
+      await revenirAuCampement(page);
       await page.locator('[data-vers="ouverture"]').click();
       // ── ON ATTEND QUE LE RÉCIT SOIT ARRIVÉ, PAS SEULEMENT QUE L'ÉCRAN SOIT MONTÉ.
       //
@@ -917,7 +939,7 @@ export function recettesDEcrans(): readonly EcranQA[] {
     aller: async (page) => {
       await preparer(page);
       await choisirLeProfil(page);
-      await page.locator('[data-vers="campement"]').click();
+      await revenirAuCampement(page);
     },
   },
   {
@@ -926,8 +948,7 @@ export function recettesDEcrans(): readonly EcranQA[] {
     aller: async (page) => {
       await preparer(page);
       await choisirLeProfil(page);
-      await page.locator('[data-vers="campement"]').click();
-      await expect(page.locator('[data-ecran="campement"]')).toBeVisible();
+      await revenirAuCampement(page);
       await page.locator('[data-chaudron] button').click();
     },
   },
@@ -937,8 +958,7 @@ export function recettesDEcrans(): readonly EcranQA[] {
     aller: async (page) => {
       await preparer(page);
       await choisirLeProfil(page);
-      await page.locator('[data-vers="campement"]').click();
-      await expect(page.locator('[data-ecran="campement"]')).toBeVisible();
+      await revenirAuCampement(page);
       await page.locator('[data-vers="coffre"]').click();
     },
   },

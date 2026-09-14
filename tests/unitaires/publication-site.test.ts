@@ -1,6 +1,7 @@
 import path from 'node:path';
+import { readFileSync } from 'node:fs';
 
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import {
   depouillerRapportPlaywright,
@@ -10,7 +11,50 @@ import {
   identifierProcessusTests,
   verifierEtatPrepare,
   verifierRapportVert,
+  verifierSiteDistant,
 } from '../../scripts/publier-site.mjs';
+import { empreinteLivrable } from '../../scripts/preparer-publication-pages.mjs';
+
+afterEach(() => vi.unstubAllGlobals());
+
+describe('recette des fichiers réellement publiés', () => {
+  it('accepte la racine réelle du jeu et vérifie aussi le worker, l’icône et les images', async () => {
+    const requetes: string[] = [];
+    vi.stubGlobal('fetch', vi.fn(async (adresse: URL | string) => {
+      const url = new URL(adresse);
+      requetes.push(url.pathname);
+      if (url.pathname.endsWith('version-build.json')) return Response.json({ version: 'nouveau' });
+      if (url.pathname.endsWith('service-worker.js')) return new Response("const VERSION = 'nouveau';");
+      if (url.pathname.endsWith('manifest.webmanifest')) {
+        return Response.json({ icons: [{ src: 'icones/gobi.svg' }] });
+      }
+      if (url.pathname.endsWith('.svg')) return new Response('<svg/>');
+      return new Response(readFileSync('client/index.html', 'utf8'));
+    }));
+
+    await expect(verifierSiteDistant('nouveau', ['https://scorpheus.github.io/LaPierreDesMots/assets/gobi.svg']))
+      .resolves.toBeUndefined();
+    expect(requetes).toEqual([
+      '/LaPierreDesMots/version-build.json', '/LaPierreDesMots/',
+      '/LaPierreDesMots/service-worker.js', '/LaPierreDesMots/manifest.webmanifest',
+      '/LaPierreDesMots/icones/gobi.svg', '/LaPierreDesMots/assets/gobi.svg',
+    ]);
+  });
+
+  it('refuse une page HTTP 200 dépourvue de l’application', async () => {
+    vi.stubGlobal('fetch', vi.fn(async (adresse: URL | string) =>
+      new URL(adresse).pathname.endsWith('version-build.json')
+        ? Response.json({ version: 'nouveau' }) : new Response('<html>Maintenance</html>')));
+    await expect(verifierSiteDistant('nouveau', [])).rejects.toThrow(/racine React/u);
+  });
+
+  it('isole les caches de deux workers différents même si les autres fichiers sont identiques', () => {
+    const fichiers = [path.resolve('client/index.html')];
+    const premiere = empreinteLivrable(fichiers, 'worker A');
+    expect(empreinteLivrable(fichiers, 'worker A')).toBe(premiere);
+    expect(empreinteLivrable(fichiers, 'worker B')).not.toBe(premiere);
+  });
+});
 
 describe('publication GitHub Pages automatisee', () => {
   it('arrete une seconde campagne de test du meme depot sans confondre un autre projet', () => {

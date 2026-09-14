@@ -29,6 +29,8 @@ export type NombreEtoiles = 0 | 1 | 2 | 3;
 export interface TentativeAEnregistrer {
   readonly cleIdempotence: string;
   readonly profil: IdProfil;
+  /** Génération capturée avec le profil de la partie, avant toute remise à zéro. */
+  readonly generationProgression?: number;
   readonly noeud: IdNoeud;
   readonly exercice: IdExercice;
   readonly moteur: CodeMoteur;

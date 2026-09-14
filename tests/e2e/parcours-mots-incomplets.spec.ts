@@ -2,7 +2,7 @@ import { resolve } from 'node:path';
 import type { Page } from '@playwright/test';
 import { expect, test } from './invariants.js';
 import { appliquerReglagesLectureReels, entrerDansLeNoeud, etatDuJeu, deuxImages,
-  fixtureProfil, noeudsLivres, preparer, choisirLeProfil } from './qa-outils.js';
+  fixtureProfil, noeudsLivres, preparer, choisirLeProfil, ouvrirVueRegion } from './qa-outils.js';
 import { jouerProchainGesteDom, toucherPrise } from './gestes-dom.js';
 
 const fiches = noeudsLivres().filter((noeud) => noeud.moteur === 'grave');
@@ -79,7 +79,8 @@ test('Roc choisi sur la carte accompagne les gestes réels puis la récompense',
     await crochets.chargerProfil({ ...fixture, progression });
   }, { fixture: fixtureProfil, progression });
   await choisirLeProfil(page);
-  await toucherPrise(page.locator('[data-depart="marais-jumeau"]'));
+  const vue = await ouvrirVueRegion(page, 'marais-jumeau');
+  await toucherPrise(vue.locator('[data-depart="marais-jumeau"]'));
   await toucherPrise(page.locator('[data-choisir-compagnon="roc"]'));
   await expect(page.locator('[data-choisir-compagnon="roc"]')).toHaveAttribute('aria-pressed', 'true');
   await toucherPrise(page.locator('[data-confirmer-depart]'));

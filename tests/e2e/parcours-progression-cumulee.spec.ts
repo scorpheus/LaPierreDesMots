@@ -1,6 +1,6 @@
 /** La progression d'une vraie sortie compte les exercices joués, même après retour et relance. */
 import { test, expect } from './invariants.js';
-import { appliquerReglagesLectureReels, choisirLeProfil, etatDuJeu, noeudsLivres } from './qa-outils.js';
+import { appliquerReglagesLectureReels, choisirLeProfil, etatDuJeu, noeudsLivres, ouvrirVueRegion } from './qa-outils.js';
 import { jalonDom, jouerProchainGesteDom, lireEtatDom, toucherPrise } from './gestes-dom.js';
 import type { Page } from '@playwright/test';
 import type { EtatMonde } from '@pierre/partage/monde';
@@ -41,7 +41,8 @@ async function fermerCelebrationSiPresente(page: Page): Promise<void> {
 
 async function partirDepuisCarte(page: Page): Promise<void> {
   await expect(page.locator('[data-ecran="carte"]')).toBeVisible();
-  await toucherPrise(page.locator(`[data-depart="${REGION}"]`));
+  const vue = await ouvrirVueRegion(page, REGION);
+  await toucherPrise(vue.locator(`[data-depart="${REGION}"]`));
   await expect(page.locator(`[data-choix-compagnon="${REGION}"]`)).toBeVisible();
   await toucherPrise(page.locator('[data-choisir-compagnon="gobi"]'));
   await toucherPrise(page.locator('[data-confirmer-depart]'));

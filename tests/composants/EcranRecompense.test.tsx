@@ -237,7 +237,9 @@ describe('la fin de partie est une réussite, quoi qu’il arrive (R14)', () => 
     const actions = document.querySelector('[data-actions-recompense="oui"]');
     const details = document.querySelector('[data-detail-etoiles="oui"]');
     expect(scene?.nextElementSibling).toBe(actions);
-    expect(actions?.nextElementSibling).toBe(details);
+    expect(details).not.toBeNull();
+    expect(actions?.nextElementSibling?.classList.contains('recompense-bilan')).toBe(true);
+    expect(actions?.nextElementSibling?.firstElementChild).toBe(details);
   });
 
   it('porte `data-fin="reussite"` et aucun `data-etat="echec"`', () => {

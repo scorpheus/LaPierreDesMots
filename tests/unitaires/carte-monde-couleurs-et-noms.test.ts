@@ -41,11 +41,12 @@
  */
 import { NUANCIER, PALETTE } from '@pierre/partage';
 import { describe, expect, it } from 'vitest';
+import { ANCRES_CARTE } from '@client/monde/carte/modele';
 
 import { lireTexte } from '../configuration/preparation.js';
 
 const CHEMIN_CARTE = 'contenu/habillages/carte/carte-monde-v3.svg';
-const CHEMIN_ECRAN = 'client/src/ecrans/EcranCarte.tsx';
+const CHEMIN_RENDU = 'client/src/monde/carte/CarteMonde.tsx';
 
 /**
  * Les sept teintes de décor qui ne recopient aucun jeton — GELÉES, avec ce qu'elles nomment.
@@ -155,19 +156,15 @@ describe('les six territoires portent leur nom, accentué et conforme à l’éc
   });
 
   it('l’écran affiche EXACTEMENT les mêmes six libellés à l’enfant', () => {
-    // Le dessin et le texte doivent parler du même lieu. `EcranCarte.ANCRES` est la table qui
-    // porte les libellés lus à voix haute par le lecteur d'écran (`aria-label`).
-    const ecran = lireTexte(CHEMIN_ECRAN);
-    for (const [code, libelle] of LIBELLES) {
-      expect(ecran.includes(`'${code}', `), code).toBe(true);
-      expect(ecran.includes(`'${libelle}'`), libelle).toBe(true);
-    }
+    // Le dessin et le texte doivent parler du même lieu. La table dédiée est importée par le
+    // rendu monde et la vue région : elle n’est plus une copie dans l’écran orchestrateur.
+    expect(ANCRES_CARTE.map(([code, , , libelle]) => [String(code), libelle])).toEqual(LIBELLES);
   });
 
   it('le décor injecté est masqué au lecteur d’écran : ses 7 `<title>` ne parlent pas', () => {
     // Sept `<title>` injectés, c'est sept noms accessibles de plus — treize nœuds nommés
     // mesurés dans Chrome, en doublon des six prises qui portent déjà le nom de leur région.
-    const ecran = lireTexte(CHEMIN_ECRAN);
+    const ecran = lireTexte(CHEMIN_RENDU);
     const balise = /<g\s+data-decor="carte"([\s\S]{0,200}?)\/>/u.exec(ecran)?.[1] ?? '';
     expect(balise, 'le décor de la carte doit être masqué : il n’est qu’un dessin').toContain(
       'aria-hidden="true"'

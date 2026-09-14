@@ -31,6 +31,7 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { expect, test } from './invariants.js';
+import { ouvrirVueRegion } from './qa-outils.js';
 
 import type { Page } from '@playwright/test';
 
@@ -102,6 +103,8 @@ async function entrerSurLaCarte(page: Page, termines: readonly string[]): Promis
 
   await expect(page.locator('[data-ecran="profils"]')).toBeVisible();
   await page.getByText(String(fixtureProfil['prenom']), { exact: false }).first().click();
+  await expect(page.locator('[data-ecran="campement"]')).toBeVisible();
+  await page.locator('[data-vers="carte"]').click();
   await expect(page.locator('[data-ecran="carte"]')).toBeVisible();
 }
 
@@ -112,7 +115,8 @@ test.describe('la Clairière enchaîne une SORTIE — ce que l’enfant atteint 
     await page.goto('/');
     await page.waitForFunction(() => (window as FenetreTest).__test !== undefined);
     await entrerSurLaCarte(page, []);
-    const depart = page.locator(`[data-depart="${REGION}"]`);
+    const vue = await ouvrirVueRegion(page, REGION);
+    const depart = vue.locator(`[data-depart="${REGION}"]`);
     await expect(depart, 'la Clairière n’offre aucune prise pour entrer').toHaveCount(1);
     await depart.click();
     await expect(page.locator('[data-choix-compagnon]')).toBeVisible();

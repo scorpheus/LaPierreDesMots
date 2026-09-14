@@ -19,22 +19,47 @@ const CACHE_NOYAU = `${PREFIXE}noyau-${VERSION}`;
 const CACHE_IMAGES = `${PREFIXE}images-${VERSION}`;
 const INDEX = `${BASE}index.html`;
 const TAILLE_LOT = 24;
+const ESSAIS_MAXIMUM = 3;
+const DELAI_REQUETE_MS = 15_000;
+
+async function prechargerRessource(cache, url) {
+  for (let essai = 1; essai <= ESSAIS_MAXIMUM; essai += 1) {
+    const annulation = new AbortController();
+    const expiration = setTimeout(() => annulation.abort(), DELAI_REQUETE_MS);
+    let recuperable = true;
+    try {
+      const requete = new Request(url, {
+        cache: 'reload', credentials: 'same-origin', signal: annulation.signal
+      });
+      const reponse = await fetch(requete);
+      if (!reponse.ok) {
+        recuperable = reponse.status === 408 || reponse.status === 429 || reponse.status >= 500;
+        await reponse.body?.cancel();
+        throw new Error(`precache ${url} : HTTP ${String(reponse.status)}`);
+      }
+      // Le délai couvre aussi le corps. Un en-tête reçu ne signifie pas que le fichier est complet.
+      await cache.put(requete, reponse);
+      return;
+    } catch (cause) {
+      if (!recuperable || essai === ESSAIS_MAXIMUM) throw cause;
+    } finally {
+      clearTimeout(expiration);
+    }
+    // Repli borné pour les seules erreurs transitoires, sans recommencer les fichiers déjà reçus.
+    await new Promise((resoudre) => setTimeout(resoudre, 250 * 2 ** (essai - 1)));
+  }
+}
 
 async function mettreEnCacheNoyau() {
   const cache = await caches.open(CACHE_NOYAU);
   try {
     for (let debut = 0; debut < PRECACHE.length; debut += TAILLE_LOT) {
       const lot = PRECACHE.slice(debut, debut + TAILLE_LOT);
-      await Promise.all(
-        lot.map(async (url) => {
-          const requete = new Request(url, { cache: 'reload', credentials: 'same-origin' });
-          const reponse = await fetch(requete);
-          if (!reponse.ok) {
-            throw new Error(`precache ${url} : HTTP ${String(reponse.status)}`);
-          }
-          await cache.put(requete, reponse);
-        })
-      );
+      // Attendre chaque écriture avant le nettoyage : Promise.all rejetait pendant que les
+      // autres réponses remplissaient encore le cache que le catch venait de supprimer.
+      const resultats = await Promise.allSettled(lot.map((url) => prechargerRessource(cache, url)));
+      const echec = resultats.find((resultat) => resultat.status === 'rejected');
+      if (echec !== undefined) throw echec.reason;
     }
   } catch (cause) {
     await caches.delete(CACHE_NOYAU);
@@ -130,15 +155,17 @@ self.addEventListener('fetch', (evenement) => {
   evenement.respondWith(
     (async () => {
       if (requete.mode === 'navigate') {
-        const index = await caches.match(INDEX, { ignoreSearch: true });
+        const cache = await caches.open(CACHE_NOYAU);
+        const index = await cache.match(INDEX, { ignoreSearch: true });
         return index ?? fetch(requete);
       }
 
       const plage = requete.headers.get('Range');
       if (plage !== null) {
         const sansPlage = new Request(requete.url, { credentials: 'same-origin' });
+        const cache = await caches.open(estImageLourde(url) ? CACHE_IMAGES : CACHE_NOYAU);
         const complete =
-          (await caches.match(sansPlage, { ignoreVary: true })) ?? (await fetch(sansPlage));
+          (await cache.match(sansPlage, { ignoreVary: true })) ?? (await fetch(sansPlage));
         return reponsePartielle(complete, plage);
       }
 
@@ -146,7 +173,8 @@ self.addEventListener('fetch', (evenement) => {
         return lirePuisMettreEnCache(requete, CACHE_IMAGES);
       }
 
-      const noyau = await caches.match(requete, { ignoreVary: true });
+      const cache = await caches.open(CACHE_NOYAU);
+      const noyau = await cache.match(requete, { ignoreVary: true });
       return noyau ?? fetch(requete);
     })()
   );

@@ -1,3 +1,4 @@
+import { lireStyles } from '../configuration/styles.js';
 /**
  * R11 mesurée sur la PROPRIÉTÉ (« dix mouvements distincts ») et non sur l'indice
  * (« dix attributs »). Lot S5.
@@ -38,12 +39,12 @@ import {
   phaseInvite
 } from '@client/monde/animations-campement';
 
-import { lireJson, lireTexte } from '../configuration/preparation.js';
+import { lireJson } from '../configuration/preparation.js';
 
 const POINTS: readonly PointInteraction[] = pointsDuDocument(
   lireJson('contenu/monde/campement.json')
 );
-const FEUILLE = lireTexte('client/src/styles/global.css');
+const FEUILLE = lireStyles('client/src/styles/global.css');
 
 /**
  * Le nombre de noms de mouvement de la table — dix-huit au 2026-08-03.
@@ -133,9 +134,23 @@ describe('aucun mouvement déclaré n’est inerte', () => {
     // Les COMMENTAIRES sont retirés d'abord — ils citent les valeurs hexadécimales des
     // contrastes mesurés par M8, et une recette qui les compterait mesurerait la prose.
     const sansCommentaires = FEUILLE.replace(/\/\*[\s\S]*?\*\//gu, '');
-    const debut = sansCommentaires.indexOf('@keyframes pierre-campement-invite');
-    const corps = sansCommentaires.slice(debut, sansCommentaires.indexOf('.case-butin', debut));
-    expect(debut).toBeGreaterThan(0);
+    const nomsControles = new Set<string>(['invite', ...ANIMATIONS_CAMPEMENT]);
+    const mouvements = [...sansCommentaires.matchAll(/@keyframes pierre-campement-([a-z]+)\s*\{/gu)]
+      .filter((mouvement) => nomsControles.has(mouvement[1]!));
+    expect(mouvements.length).toBe(NOMS_DE_MOUVEMENT_ATTENDUS + 1);
+    // Inspecter les blocs concernés, pas une tranche entre deux classes devenues voisines
+    // par hasard. Le découpage des feuilles ne change pas la propriété contrôlée.
+    const corps = mouvements.map((mouvement) => {
+      let curseur = mouvement.index + mouvement[0].length;
+      let profondeur = 1;
+      while (curseur < sansCommentaires.length && profondeur > 0) {
+        if (sansCommentaires[curseur] === '{') profondeur += 1;
+        if (sansCommentaires[curseur] === '}') profondeur -= 1;
+        curseur += 1;
+      }
+      expect(profondeur).toBe(0);
+      return sansCommentaires.slice(mouvement.index, curseur);
+    }).join('\n');
     expect(corps).toContain('@keyframes pierre-campement-bond');
     expect(corps).not.toMatch(/\bcolor\s*:/u);
     expect(corps).not.toMatch(/background(-color)?\s*:/u);

@@ -75,8 +75,6 @@ async function allerAuCoffre(page: Page): Promise<void> {
 async function allerAuCampement(page: Page): Promise<void> {
   await expect(page.locator('[data-ecran="profils"]')).toBeVisible();
   await page.getByText(String(fixtureProfil['prenom']), { exact: false }).first().click();
-  await expect(page.locator('[data-ecran="carte"]')).toBeVisible();
-  await page.locator('[data-vers="campement"]').click();
   await expect(page.locator('[data-ecran="campement"]')).toBeVisible();
   await expect(page.locator('[data-interaction="libre"]').first()).toBeVisible();
 }

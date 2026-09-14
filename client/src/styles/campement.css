@@ -1,0 +1,146 @@
+/* Le raster V6 demeure la scène; les boutons HTML suivent ses coordonnées JSON. */
+.campement-page {
+  box-sizing: border-box;
+  min-block-size: 100dvh;
+  padding: clamp(.75rem, 2vw, 1.5rem);
+  display: grid;
+  gap: clamp(.75rem, 1.5vw, 1.25rem);
+  background:
+    radial-gradient(circle at 8% 0%, color-mix(in srgb, var(--soleil) 20%, transparent), transparent 30rem),
+    var(--parchemin);
+}
+
+.campement-entete {
+  display: grid;
+  grid-template-columns: minmax(15rem, 1fr) minmax(8rem, 10rem) repeat(3, minmax(4.5rem, 6.5rem));
+  align-items: stretch;
+  gap: .75rem;
+}
+
+.campement-introduction {
+  align-self: center;
+  padding-inline: clamp(.25rem, 1vw, .75rem);
+}
+
+.campement-surtitre {
+  margin: 0 0 .2rem;
+  color: color-mix(in srgb, var(--trait) 72%, var(--menthe));
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  font-size: .8rem;
+}
+
+.campement-titre { margin: 0; font-size: clamp(1.8rem, 3vw, 2.5rem); line-height: 1.15; }
+.campement-accroche { max-inline-size: 34rem; margin: .25rem 0 0; font-size: 1rem; }
+
+.campement-entete [data-pastille-sortie],
+.action-campement { inline-size: 100%; min-inline-size: 0; }
+.campement-entete [data-pastille-sortie] { min-block-size: var(--cible-min); padding: .45rem; gap: .15rem; }
+.campement-entete [data-pastille-sortie] > :first-child { font-size: 1.55rem; }
+.action-campement { min-block-size: var(--cible-min); padding: .35rem; gap: .2rem; border-radius: var(--rayon-carte); }
+.action-campement-vignette { inline-size: 2rem; block-size: 2rem; min-inline-size: 2rem; min-block-size: 2rem; border-radius: .5rem; background-size: 16rem auto; }
+.action-campement [data-action-campement-texte="nom"] { font-size: .84rem; line-height: 1.05; }
+.action-campement [data-action-campement-texte="detail"] { display: none; }
+
+.campement-grille {
+  display: grid;
+  gap: clamp(.75rem, 1.5vw, 1.25rem);
+}
+
+.campement-scene {
+  box-sizing: border-box;
+  position: relative;
+  grid-column: 1 / -1;
+  inline-size: min(100%, 1200px);
+  justify-self: center;
+  overflow: hidden;
+  border: var(--epaisseur-trait) solid var(--trait);
+  border-radius: var(--rayon-carte);
+  background: var(--parchemin);
+  box-shadow: var(--ombre-bd);
+}
+
+.campement-gobi,
+.campement-sections > [data-mur-des-noms],
+.campement-sections > [data-chaudron] {
+  min-block-size: 100%;
+  padding: clamp(.8rem, 1.5vw, 1.15rem);
+  border: var(--epaisseur-trait) solid color-mix(in srgb, var(--trait) 42%, transparent);
+  border-radius: var(--rayon-carte);
+  background: color-mix(in srgb, var(--parchemin) 92%, var(--menthe));
+}
+
+.campement-gobi-progression { max-inline-size: 32rem; margin: .75rem auto 0; padding: .5rem .75rem; }
+.campement-gobi .gobi { flex-wrap: wrap; justify-content: center; }
+.campement-gobi .gobi-bulle { flex: 1 1 12rem; min-inline-size: min(12rem, 100%); }
+.campement-sections { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr)); align-items: start; gap: clamp(.75rem, 1.5vw, 1.25rem); }
+.campement-compagnons { grid-column: 1 / -1; padding: clamp(.8rem, 1.5vw, 1.15rem); }
+.campement-compagnons-titre { margin-block: 0 .75rem; font-size: 1.5rem; }
+.campement-compagnons-liste { display: flex; flex-wrap: wrap; gap: 1rem; }
+.campement-acces-parent { display: flex; justify-content: end; margin-block: clamp(.75rem, 1.5vw, 1.25rem) 0; }
+.campement-acces-parent .cible { min-block-size: var(--cible-min); padding-inline: .85rem; opacity: .82; }
+
+@media (orientation: portrait) {
+  .campement-entete { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .campement-introduction { grid-column: 1 / -1; }
+}
+
+/* En paysage, la scène reçoit la place réellement laissée par l'en-tête. Les panneaux suivent
+   dans le conteneur qui défile, après cette première vue complète. */
+@media (orientation: landscape) {
+  .campement-page {
+    block-size: 100dvh;
+    grid-template-rows: auto minmax(0, 1fr);
+    overflow: visible;
+  }
+
+  .campement-grille {
+    display: block;
+    min-block-size: 0;
+    container-type: size;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .campement-scene {
+    inline-size: min(100cqw, calc(100cqh * var(--campement-ratio)));
+    block-size: min(100cqh, calc(100cqw / var(--campement-ratio)));
+    margin-inline: auto;
+    align-self: start;
+  }
+
+  .campement-sections {
+    margin-block-start: clamp(.75rem, 1.5vw, 1.25rem);
+  }
+}
+
+@media (max-width: 620px) {
+  .campement-page { padding: .65rem; }
+  .campement-entete {
+    grid-template-columns: repeat(4, minmax(var(--cible-min), 1fr));
+    grid-template-rows: auto var(--cible-min);
+  }
+  .campement-introduction { grid-column: 1 / -1; }
+  .campement-titre { font-size: clamp(1.75rem, 8vw, 2rem); }
+  .campement-entete [data-pastille-sortie], .action-campement { min-inline-size: var(--cible-min); min-block-size: var(--cible-min); }
+  .action-campement [data-action-campement-texte="detail"] { display: none; }
+}
+
+@media (max-width: 900px), (max-height: 520px) {
+  .campement-entete { grid-template-columns: minmax(4rem, 1fr) repeat(4, minmax(var(--cible-min), 4.5rem)); grid-template-rows: auto; gap: .35rem; }
+  .campement-introduction { grid-column: auto; min-inline-size: 0; padding-inline: 0; }
+  .campement-surtitre, .campement-accroche { display: none; }
+  .campement-titre { font-size: clamp(1.35rem, 3vw, 1.8rem); }
+  .campement-entete [data-pastille-sortie], .action-campement { min-block-size: var(--cible-min); padding: .2rem; }
+  .campement-entete [data-pastille-sortie] > :first-child, .action-campement-vignette { display: none; }
+  .campement-entete .pastille-sortie__titre { font-size: 1.1rem; line-height: 1.1; }
+  .campement-entete .pastille-sortie__etape { display: none; }
+  .action-campement [data-action-campement-texte="detail"] { display: none; }
+}
+
+@media (max-width: 620px) and (orientation: portrait) {
+  .campement-entete { grid-template-columns: repeat(4, minmax(var(--cible-min), 1fr)); }
+  .campement-introduction { grid-column: 1 / -1; }
+  .campement-titre { font-size: clamp(1.75rem, 8vw, 2rem); }
+}

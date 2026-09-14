@@ -56,6 +56,19 @@ Le cache initial est hybride : coquille, code, WASM, polices, SVG, JSON et voix 
 les PNG, WebP et JPEG sont conservés à leur première consultation. Ne pas promettre tout le jeu
 illustré hors connexion avant qu'un téléchargement complet explicite ait été implanté.
 
+### Modification du worker ou de la version du cache
+
+Pour une correction de ce mécanisme, exécuter les tests `pwa-cycle-cache.test.ts` et
+`publication-site.test.ts`, puis `node scripts/qa/verifier-cycle-pwa.mjs`. Ce dernier sert deux
+versions du vrai worker sur une origine locale isolée, injecte un 503 et vérifie le remplacement
+naturel, le hors-ligne et les témoins localStorage/OPFS. Compléter par la recette `qa:pwa` du vrai
+jeu pour SQLite. Ne pas confondre ces deux niveaux de preuve.
+
+Après un build PWA, une seconde `node scripts/preparer-publication-pages.mjs --finaliser` doit
+conserver la version de `version-build.json` et le SHA-256 du worker. Le modèle source du worker
+participe à l'empreinte ; les fichiers générés `service-worker.js` et `version-build.json` n'en
+sont pas des entrées. Voir `Docs/audit-fiabilite-pwa-2026-09-14.md`.
+
 ## Commande automatisée en deux temps
 
 ### Garde fonctionnelle locale avant préparation

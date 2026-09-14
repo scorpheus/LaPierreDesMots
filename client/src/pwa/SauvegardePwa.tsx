@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import type { ChangeEvent, ReactElement } from 'react';
+import { lireMessageImportInterrompu } from '../api/client.js';
 
 import {
   importerSauvegardePwa,
@@ -18,7 +19,11 @@ export function SauvegardePwa(): ReactElement | null {
   const entree = useRef<HTMLInputElement>(null);
   const [fichier, fixerFichier] = useState<File | null>(null);
   const [operation, fixerOperation] = useState<Operation>('repos');
-  const [message, fixerMessage] = useState('');
+  const [message, fixerMessage] = useState(() => {
+    if (import.meta.env.MODE !== 'pwa') return '';
+    try { return lireMessageImportInterrompu() ?? ''; }
+    catch { return 'Le stockage local est indisponible. La sauvegarde doit être réessayée avant de fermer la page.'; }
+  });
 
   if (import.meta.env.MODE !== 'pwa') return null;
 

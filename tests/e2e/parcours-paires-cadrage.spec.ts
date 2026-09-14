@@ -1,6 +1,6 @@
 import { resolve } from 'node:path';
 import { expect, test } from './invariants.js';
-import { appliquerReglagesLectureReels, choisirLeProfil, etatDuJeu, noeudsLivres } from './qa-outils.js';
+import { appliquerReglagesLectureReels, choisirLeProfil, etatDuJeu, noeudsLivres, ouvrirVueRegion } from './qa-outils.js';
 import type { PlanSortie, EtatPaires } from '@pierre/partage';
 import { attendreGeometrieStable } from '../qualite/aides-composition.js';
 
@@ -25,7 +25,8 @@ for (const format of formats) for (const fiche of fiches) {
       } });
     });
     await choisirLeProfil(page, 'PairesCadrees');
-    await page.locator('[data-depart="clairiere"]').click();
+    const vue = await ouvrirVueRegion(page, 'clairiere');
+    await vue.locator('[data-depart="clairiere"]').click();
     await page.locator('[data-confirmer-depart]').click();
     await expect(page.locator('[data-ecran="noeud"]')).toHaveAttribute('data-test-pret', 'oui');
     await expect(page.locator('[data-progression-sortie]')).toContainText('Exercice 1 sur');

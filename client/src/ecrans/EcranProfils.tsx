@@ -30,6 +30,7 @@ import { creerProfil, listerProfils } from '../api/client.js';
 import { useMagasin } from '../etat/services.js';
 import { PastilleSortie } from '../monde/PastilleSortie.js';
 import { EcranReglagesLecture } from './EcranReglagesLecture.js';
+import '../styles/profils.css';
 
 /** Les couleurs d'avatar, prises au nuancier. Aucune ne signifie « raté ». */
 const TEINTES_AVATAR = [
@@ -240,11 +241,7 @@ export function EcranProfils({ surAccesParent }: ProprietesEcranProfils = {}): R
   }
 
   return (
-    <main
-      data-ecran="profils"
-      className="ecran-profils"
-      style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '2rem' }}
-    >
+    <main data-ecran="profils" className="ecran-profils">
       <header className="entete-profils">
         <span className="entete-profils__surtitre">La Pierre des Mots</span>
         <h1 className="titre">Qui joue&nbsp;?</h1>
@@ -262,15 +259,7 @@ export function EcranProfils({ surAccesParent }: ProprietesEcranProfils = {}): R
         </div>
       ) : null}
 
-      <div
-        className="liste-profils"
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: '1.5rem',
-          alignItems: 'stretch'
-        }}
-      >
+      <div className="liste-profils">
         {liste.map((profil) => (
           <CarteProfil
             key={String(profil.id)}
@@ -299,18 +288,9 @@ export function EcranProfils({ surAccesParent }: ProprietesEcranProfils = {}): R
       {creationOuverte ? (
         <form
           onSubmit={soumettre}
-          className="zone-lecture"
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            alignItems: 'center',
-            gap: '1rem',
-            padding: '1rem',
-            border: 'var(--epaisseur-trait) solid var(--trait)',
-            borderRadius: 'var(--rayon-carte)'
-          }}
+          className="zone-lecture creation-profil"
         >
-          <label htmlFor="prenom-nouveau" style={{ fontSize: '1.25rem' }}>
+          <label htmlFor="prenom-nouveau" className="creation-profil-label">
             Ton prénom
           </label>
           <input
@@ -321,16 +301,7 @@ export function EcranProfils({ surAccesParent }: ProprietesEcranProfils = {}): R
             maxLength={24}
             value={prenomSaisi}
             onChange={(evenement) => fixerPrenomSaisi(evenement.target.value)}
-            style={{
-              minBlockSize: 'var(--cible-min)',
-              fontSize: '1.5rem',
-              fontFamily: 'var(--font-lecture)',
-              padding: '0 1rem',
-              border: 'var(--epaisseur-trait) solid var(--trait)',
-              borderRadius: 'var(--rayon-carte)',
-              backgroundColor: 'var(--parchemin)',
-              color: 'var(--trait)'
-            }}
+            className="creation-profil-champ"
           />
           <button
             type="submit"
@@ -347,7 +318,7 @@ export function EcranProfils({ surAccesParent }: ProprietesEcranProfils = {}): R
             Annuler
           </button>
           {creation.isError ? (
-            <p style={{ inlineSize: '100%', margin: 0 }}>
+            <p className="creation-profil-erreur">
               La Pierre n’a pas pu enregistrer ce joueur. Réessaie dans un instant.
             </p>
           ) : null}
@@ -356,7 +327,7 @@ export function EcranProfils({ surAccesParent }: ProprietesEcranProfils = {}): R
 
       {/* La porte de la zone parent. Discrète, en pied de page, et jamais présentée comme
           une interdiction : c'est un endroit pour l'adulte, pas un mur pour l'enfant. */}
-      <footer className="pied-profils" style={{ marginBlockStart: 'auto', paddingBlockStart: '1rem' }}>
+      <footer className="pied-profils">
         <button
           type="button"
           className="cible"

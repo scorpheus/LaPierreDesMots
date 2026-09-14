@@ -173,27 +173,27 @@ export const TRANSITIONS: readonly TransitionModele[] = [
   // ── depuis « qui joue ? » ──────────────────────────────────────────────────────────────
   {
     depuis: 'profils',
-    vers: 'carte',
+    vers: 'campement',
     prise: { selecteur: '[data-profil]' },
-    motif: 'la carte de l’enfant ouvre le monde (v2 § 11 : un tap, aucun mot de passe)'
+    motif: 'le profil rejoint le campement, entrée habituelle de la reconstruction'
   },
   {
     depuis: 'profils',
     vers: 'noeud',
     prise: { selecteur: '[data-pastille-sortie]' },
-    motif: 'D46 — partir en sortie en UN tap depuis l’ouverture de l’application'
+    motif: 'D46 — partir en sortie en un tap depuis l’ouverture de l’application'
   },
   {
     depuis: 'profils',
     vers: 'reglages-lecture',
     prise: { selecteur: '[data-reglages-lecture]' },
-    motif: 'D19 — les réglages sont PAR PROFIL, donc l’accès part de la carte de l’enfant'
+    motif: 'D19 — les réglages restent attachés à la carte de l’enfant'
   },
   {
     depuis: 'profils',
     vers: 'code-parent',
     prise: { selecteur: '[data-acces-parent="oui"]' },
-    motif: 'la porte de la zone parent, en pied de page'
+    motif: 'la porte de la zone parent demeure accessible depuis l’accueil'
   },
 
   // ── depuis les réglages de lecture ────────────────────────────────────────────────────
@@ -438,16 +438,21 @@ export const TRANSITIONS: readonly TransitionModele[] = [
   {
     depuis: 'campement',
     vers: 'chaudron',
-    prise: { selecteur: '[data-point="chaudron"]' },
-    motif: 'R25 — ouvrir l’activité libre du chaudron depuis le campement'
+    prise: { selecteur: '[data-chaudron-entree="oui"]' },
+    motif: 'R25 — le chaudron ouvre son activité libre depuis le campement'
   },
-
   // ── depuis le chaudron ──────────────────────────────────────────────────────────────
   {
     depuis: 'chaudron',
     vers: 'campement',
     prise: { selecteur: '[data-vers="campement"]' },
     motif: 'R25 — revenir au campement depuis l’activité libre'
+  },
+  {
+    depuis: 'campement',
+    vers: 'code-parent',
+    prise: { selecteur: '[data-acces-parent="oui"]' },
+    motif: 'la porte parent reste discrète dans le lieu de vie de l’enfant'
   },
 
   // ── depuis le coffre ──────────────────────────────────────────────────────────────────
@@ -461,9 +466,9 @@ export const TRANSITIONS: readonly TransitionModele[] = [
   // ── depuis la séquence d'ouverture ────────────────────────────────────────────────────
   {
     depuis: 'ouverture',
-    vers: 'carte',
+    vers: 'campement',
     prise: { selecteur: '[data-passer="ouverture"]' },
-    motif: 'D46 — la sortie immédiate, sans condition et sans « es-tu sûr ? »'
+    motif: 'la sortie immédiate rejoint le campement, entrée habituelle après le récit'
   },
   /**
    * R19 — LES DEUX PRISES DU RÉCIT, déclarées depuis que le minuteur a été retiré.
@@ -566,6 +571,7 @@ export const RECETTES: readonly RecetteModele[] = [
     depuis: 'carte',
     vers: 'noeud',
     gestes: [
+      { selecteur: '[data-depart]' },
       { selecteur: '[data-depart]' },
       { selecteur: '[data-confirmer-depart]' }
     ],

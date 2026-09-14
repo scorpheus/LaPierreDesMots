@@ -5,13 +5,13 @@
 // `AudioMuet`, une horloge figée et une graine connue, sans toucher au code de production.
 import { useEffect, useState } from 'react';
 import type { ReactElement } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query';
 import { FournisseurJeu, chargerSeuilsCascade, useEtatJeu } from './etat/services.js';
 import type { ContexteJeu } from './etat/services.js';
 import type { MagasinJeu } from './etat/magasin.js';
 import type { ServicesJeu } from './moteurs/types.js';
 import { Particules } from './composants/Particules.js';
-import { lireProfil } from './api/client.js';
+import { lireProfil, reprendreTentativesEnAttente } from './api/client.js';
 import { lireProfilMemorise, oublierProfil } from './etat/profil-memorise.js';
 import type { IdProfil } from '@pierre/partage';
 import { FournisseurReglagesDuProfil } from './lecture/reglages-du-profil.js';
@@ -60,6 +60,43 @@ function CoucheParticules(): ReactElement | null {
   return <Particules animationsDesactivees={animationsDesactivees} />;
 }
 
+/** La reprise ne fabrique aucun gain : seuls les caches relus depuis le journal sont actualisés. */
+function RepriseDesTentatives(): null {
+  const profil = useEtatJeu((etat) => etat.profil);
+  const ecran = useEtatJeu((etat) => etat.ecran);
+  const file = useQueryClient();
+  useEffect(() => {
+    if (profil === null || (ecran !== 'campement' && ecran !== 'carte')) return undefined;
+    let enCours = false;
+    const actualiser = async (): Promise<void> => {
+      await Promise.all([
+        file.invalidateQueries({ queryKey: ['progression', String(profil.id)] }),
+        file.invalidateQueries({ queryKey: ['monde', String(profil.id)] })
+      ]);
+    };
+    const reprendre = (): void => {
+      if (enCours) return;
+      enCours = true;
+      void reprendreTentativesEnAttente(profil).then(async (nombre) => {
+        if (nombre === 0) return;
+        await actualiser();
+      }).catch(async (cause: unknown) => {
+        console.warn('[tentative] reprise différée conservée :', cause);
+        // Une première tentative peut avoir reçu son ACK avant qu'une suivante échoue.
+        await actualiser();
+      }).finally(() => { enCours = false; });
+    };
+    reprendre();
+    window.addEventListener('online', reprendre);
+    window.addEventListener('focus', reprendre);
+    return () => {
+      window.removeEventListener('online', reprendre);
+      window.removeEventListener('focus', reprendre);
+    };
+  }, [profil, ecran, file]);
+  return null;
+}
+
 export function Application({
   magasin,
   services,
@@ -94,13 +131,15 @@ export function Application({
       return undefined;
     }
     let vivant = true;
+    const restaurationEncoreDemandee = (): boolean =>
+      vivant && magasin.getState().ecran === 'chargement' && lireProfilMemorise() === memorise;
     void lireProfil(memorise as IdProfil)
       .then((profil) => {
-        if (!vivant) return;
+        if (!restaurationEncoreDemandee()) return;
         magasin.getState().choisirProfil(profil);
       })
       .catch(() => {
-        if (!vivant) return;
+        if (!restaurationEncoreDemandee()) return;
         // Profil disparu (base remise à zéro, autre appareil) : on oublie et on redemande.
         oublierProfil();
         magasin.getState().naviguer('profils');
@@ -131,6 +170,7 @@ export function Application({
   return (
     <QueryClientProvider client={file}>
       <FournisseurJeu valeur={contexte}>
+        <RepriseDesTentatives />
         {/* Q7 — LE RÉGLAGE DE LECTURE DU PARENT ATTEINT TOUT CE QUI SE LIT.
             Il est DANS `FournisseurJeu` (il lit le profil courant) et AUTOUR du routeur (tout
             écran affiche du texte à déchiffrer). Avant le 2026-08-08, `FournisseurReglagesLecture`

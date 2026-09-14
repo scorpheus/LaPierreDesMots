@@ -12,7 +12,7 @@ import type { NombreEtoiles } from '../journal/types.js';
 import type { AideProposee, ProgressionMoteur } from '../moteurs/types.js';
 import type { ConfigurationAvatar } from '../api/contrats.js';
 
-export type CodeEcran = 'chargement' | 'profils' | 'carte' | 'noeud' | 'recompense';
+export type CodeEcran = 'chargement' | 'profils' | 'campement' | 'carte' | 'noeud' | 'recompense';
 
 export interface EntreeProgressionTest {
   readonly noeud: IdNoeud;

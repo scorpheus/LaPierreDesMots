@@ -59,6 +59,7 @@ import type {
   VerrouParent
 } from '@pierre/partage/parent';
 import {
+  GenerationProgressionPerimee,
   appliquerEchec,
   codeEstDefini,
   confusionsDuProfil,
@@ -316,14 +317,17 @@ export const portLocal: PortApi = {
         ? undefined
         : { competences, parametres: chargerParametresPedagogieAutonome() };
 
-    const resultat = await enregistrerTentative(
-      base,
-      validee,
-      horloge,
-      chargerSeuilsCascadeAutonome(),
-      referentielMonde,
-      pedagogie
-    );
+    let resultat: Awaited<ReturnType<typeof enregistrerTentative>>;
+    try {
+      resultat = await enregistrerTentative(
+        base, validee, horloge, chargerSeuilsCascadeAutonome(), referentielMonde, pedagogie
+      );
+    } catch (cause) {
+      if (cause instanceof GenerationProgressionPerimee) {
+        throw new ErreurReseau(409, '(local)', cause.message, { code: 'generation-progression-perimee' });
+      }
+      throw cause;
+    }
 
     const progression = await lireProgressionNoeud(base, resultat.tentative.profil, resultat.tentative.noeud);
     if (progression === null) {

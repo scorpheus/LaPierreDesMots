@@ -10,6 +10,8 @@
 // Corollaire opposable : le montage doit rester un `await import()` DANS la garde. Un import
 // statique en tête de fichier, même inutilisé, ferait entrer les crochets dans le bundle de
 // production et ferait échouer `test:qualite`.
+// Le socle précède les feuilles des écrans : leur composition garde la priorité.
+import './styles/global.css';
 import { StrictMode } from 'react';
 import type { ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -19,7 +21,6 @@ import { creerMagasin } from './etat/magasin.js';
 import { creerServicesParDefaut, resoudreGraineParDefaut } from './etat/services.js';
 import { appliquerVariablesPalette } from './habillages/chargeur.js';
 import { demanderPersistanceStockage } from './pwa/persistance-stockage.js';
-import './styles/global.css';
 
 // Idempotent, et appelé par CHAQUE racine de composition (§ 4.3) : client, serveur, tests.
 initialiserRegistreMoteurs();

@@ -45,6 +45,7 @@ import { act, cleanup, fireEvent, render } from '@testing-library/react';
 import { QueryClient } from '@tanstack/react-query';
 
 import { Application } from '@client/Application';
+import { fermerZoneParent } from '@client/api/client';
 import { creerMagasin } from '@client/etat/magasin';
 import { creerHaptiqueMuette } from '@client/gamefeel/haptique-navigateur';
 import { creerRetourSensoriel } from '@client/gamefeel/retour';
@@ -252,10 +253,22 @@ function ouvrirSession(): Session {
    */
   try {
     globalThis.localStorage?.clear();
+    // Une session de l'explorateur représente un nouvel appareil, y compris pour les
+    // préférences qui seraient ensuite ajoutées à la session du navigateur.
+    globalThis.sessionStorage?.clear();
   } catch {
     // Pas de stockage dans cet environnement : rien à nettoyer, et surtout rien à faire
     // échouer — l'absence de `localStorage` est un cas que le produit gère déjà.
   }
+  // Le verrou parent vit en mémoire de module, précisément pour survivre entre les hôtes de
+  // la zone parent. Dans Vitest, ce module survit aussi au démontage React : il faut donc le
+  // refermer explicitement pour que deux montages frais observent le même graphe.
+  fermerZoneParent();
+  // Le routeur synchronise chaque écran avec l'URL. `cleanup()` démonte React, mais ne remet
+  // pas l'historique du navigateur à la racine : après une session parent, le montage suivant
+  // repartirait de `/parent` et verrait légitimement le pavé de code. Un rejeu reconstruit son
+  // chemin depuis l'accueil, donc sa nouvelle session doit faire de même.
+  globalThis.history?.replaceState(null, '', '/');
   poserLAiguillage();
   doubleCourant = creerDoubleDeReseau();
   const file = new QueryClient({

@@ -23,7 +23,7 @@ import {
 import { compagnonsDuDocument, regionsDuDocument, stadesDuDocument } from '@pierre/partage/monde';
 import compagnonsDocument from '../../../contenu/monde/compagnons.json' with { type: 'json' };
 import { CascadeRecompense } from '../composants/CascadeRecompense.js';
-import { detailDesEtoiles } from '../composants/detail-etoiles.js';
+import { DetailEtoiles } from '../composants/activite/DetailEtoiles.js';
 import { Etoiles } from '../composants/Etoiles.js';
 import { EvolutionGobi } from '../composants/EvolutionGobi.js';
 import { FenetreRecompense } from '../composants/FenetreRecompense.js';
@@ -33,6 +33,7 @@ import { useEtatJeu, useMagasin, useServices } from '../etat/services.js';
 import { noeudSuivant, repriseDeRegion } from '../monde/reprise.js';
 import { jouerEffet } from '../services/audio-tone.js';
 import { effacerParticules } from '../gamefeel/particules.js';
+import '../styles/recompenses.css';
 
 /** Une phrase par nombre d'étoiles. Aucune ne compare, aucune ne juge, aucune ne regrette. */
 const FELICITATIONS: Readonly<Record<number, string>> = {
@@ -62,7 +63,6 @@ export function CadeauRegion({ titre, annonce, illustration, illustrationFenetre
     <button type="button" className="cible recompense-region-acquis__carte"
       data-compagnon-rallie={compagnon} data-objet-rapporte={objet} data-nouvelle-region={regions}
       aria-label={annonce} aria-haspopup="dialog"
-      style={{ minHeight: 64, minWidth: 64, cursor: 'pointer', color: 'inherit', font: 'inherit' }}
       onClick={() => fixerOuverte(true)}>
       {illustration}
       <span>{annonce}</span>
@@ -121,6 +121,7 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
   const demarreLe = useEtatJeu((etat) => etat.demarreLe);
   const termineLe = useEtatJeu((etat) => etat.termineLe);
   const dejaEnvoyee = useEtatJeu((etat) => etat.tentativeEnvoyee);
+  const erreurConservation = useEtatJeu((etat) => etat.erreurConservation);
   const journalise = useEtatJeu((etat) => etat.journalise);
   const dernierGain = useEtatJeu((etat) => etat.dernierGain);
   const animationsDesactivees = useEtatJeu((etat) => etat.animationsDesactivees);
@@ -154,6 +155,8 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
   }, [services]);
 
   const [sauvegardeEnCours, fixerSauvegardeEnCours] = useState(false);
+  const [messageSauvegarde, fixerMessageSauvegarde] = useState<string | null>(null);
+  const messageVisible = messageSauvegarde ?? (dejaEnvoyee ? null : erreurConservation);
   const sauvegardeNecessaire = journalise && profil !== null && paquet !== null &&
     resume !== null && demarreLe !== null && termineLe !== null;
 
@@ -162,6 +165,7 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
   const estToujoursLaTentative = useCallback((): boolean => {
     const etat = magasin.getState();
     return etat.ecran === 'recompense' && etat.profil?.id === profil?.id &&
+      etat.profil?.generationProgression === profil?.generationProgression &&
       etat.paquet === paquet && etat.resume === resume && etat.demarreLe === demarreLe &&
       etat.termineLe === termineLe && etat.graine === graine;
   }, [magasin, profil, paquet, resume, demarreLe, termineLe, graine]);
@@ -172,11 +176,14 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
         demarreLe === null || termineLe === null) return false;
     envoiEnCours.current = true;
     fixerSauvegardeEnCours(true);
+    fixerMessageSauvegarde(null);
     try {
       const profilId = String(profil.id);
       const cle = await calculerCleIdempotence(profilId, String(paquet.noeud.id), demarreLe, graine);
+      if (!estToujoursLaTentative()) return false;
       const charge: TentativeAEnregistrer = {
         cleIdempotence: cle, profil: profil.id, noeud: paquet.noeud.id,
+        generationProgression: profil.generationProgression ?? 0,
         exercice: paquet.exercice.id, moteur: paquet.exercice.jeu.moteur,
         habillage: paquet.habillage.id, graine, demarreLe, termineLe, resume
       };
@@ -198,6 +205,9 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
     } catch (cause) {
       // La célébration demeure ; le prochain tap reprend l'envoi ou les lectures restantes.
       console.warn('[tentative] enregistrement impossible :', cause);
+      if (estToujoursLaTentative()) {
+        fixerMessageSauvegarde(cause instanceof Error ? cause.message : 'La sauvegarde attend. Réessaie.');
+      }
       return false;
     } finally {
       envoiEnCours.current = false;
@@ -493,15 +503,7 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
       className="ecran-recompense"
       // Une seule valeur possible, aujourd'hui et toujours.
       data-fin="reussite"
-      style={{
-        padding: '2rem',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '1.35rem',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minBlockSize: '100dvh'
-      }}
+      data-animations={animationsDesactivees ? 'non' : 'oui'}
     >
       <section
         className="recompense-scene"
@@ -529,9 +531,8 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
 
         <div className="recompense-texte" data-texte-recompense="immobile">
           <h1
-            className="titre"
+            className="titre recompense-titre"
             data-victoire-region={regionTerminee ? 'oui' : 'non'}
-            style={{ fontSize: '3rem', margin: 0, textAlign: 'center' }}
           >
             {regionTerminee ? `${nomRegion} est rallumée !` : 'Bravo !'}
           </h1>
@@ -539,11 +540,11 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
           <Etoiles
             acquises={nombreEtoiles}
             taille={96}
-            animees
+            animees={!animationsDesactivees}
             interEtoilesMs={paquet?.habillage.timings.interEtoilesMs ?? 180}
           />
 
-          <p className="zone-lecture" style={{ fontSize: '1.5rem', padding: '1rem', margin: 0 }}>
+          <p className="zone-lecture recompense-message">
             {regionTerminee
               ? `Tu as terminé tous les exercices de ${nomRegion}. La région brille de nouveau !`
               : FELICITATIONS[nombreEtoiles] ?? FELICITATIONS[1]}
@@ -555,6 +556,9 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
           étoiles et les gains restent juste dessous, mais ne peuvent plus repousser l'action
           principale hors du premier écran sur téléphone ou tablette. */}
       <div className="actions-recompense" data-actions-recompense="oui">
+        {messageVisible === null ? null : <p role="status" className="zone-lecture">
+          {messageVisible}
+        </p>}
         {suivant === null ? null : (
           <button
             type="button"
@@ -611,67 +615,10 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
         </button>
       </div>
 
-      {/*
-        ══════════════════════════════════════════════════════════════════════════════════════
-        R4 — « j'ai eu qu'une seule étoile alors que tout est bon ppk ? »
-
-        Le barème avait raison. Relevé dans son journal :
-
-            clairiere-01   nb_erreurs = 2   aide_utilisee = indice   etoiles = 1
-
-        `calculerEtoiles` rend `1 + sansAide + sansErreur` : deux erreurs et une aide donnent
-        bien une étoile. **Le défaut n'était pas le calcul, c'était le SILENCE.** La couleur
-        fautive s'écoule (D16), l'image finit juste, et l'enfant conclut « tout est bon ». Rien
-        ne reliait son étoile unique à ce qui s'était passé.
-
-        ── CE QUI REND CE BLOC DIFFICILE, ET COMMENT IL S'EN SORT ────────────────────────────
-        « Aucun écran d'échec, jamais » et « l'aide de Gobi ne coûte rien et n'est JAMAIS
-        présentée comme un échec ». Un tableau « raté / réussi » violerait les deux.
-
-        Alors ce bloc ne dit jamais ce qui a manqué : il dit CE QU'OUVRE chaque étoile, au
-        présent pour celles qui sont là, et comme une porte ouverte pour les autres. Pas de
-        « tu as fait 2 erreurs », pas de rouge, pas de croix. Les étoiles non acquises portent
-        leur condition, et c'est tout : l'enfant apprend la règle du jeu au lieu de recevoir
-        une note.
-
-        Et la ligne de Gobi est retournée exprès : quand il a aidé, on le dit comme un fait
-        heureux — c'est gratuit, il peut redemander. Jamais comme la raison d'une étoile en
-        moins.
-        ══════════════════════════════════════════════════════════════════════════════════════
-      */}
-      {resume === null ? null : (
-        <ul
-          data-detail-etoiles="oui"
-          className="recompense-detail-etoiles"
-        >
-          {detailDesEtoiles(resume).map((ligne) => (
-            <li
-              key={ligne.rang}
-              data-etoile-detail={String(ligne.rang)}
-              data-acquise={ligne.acquise ? 'oui' : 'non'}
-              className="recompense-detail-etoile"
-            >
-              <span aria-hidden="true" className="recompense-detail-signe">
-                ★
-              </span>
-              <span className="recompense-detail-texte">{ligne.texte}</span>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      {/* ─────────────────────────────────────────────────────────────────────────────────
-          LA CASCADE DE D25 REMPLACE LE SEUL DÉCOMPTE D'ÉTOILES.
-
-          Les étoiles ci-dessus disent ce que ce nœud-ci valait ; la cascade dit où en est
-          l'enfant dans le système qui le motive déjà à l'école — étoile, tampon spécial,
-          image. Et surtout elle montre **le vide restant** (D25, point 3), qui est la seule
-          partie de tout cet écran qui donne envie de recommencer.
-
-          `null` tant que les seuils ne sont pas chargés : aucune jauge inventée, aucun
-          nombre en dur (convention C2). */}
-      <CascadeRecompense gain={dernierGain} />
-
+      <div className="recompense-bilan">
+        {resume === null ? null : <DetailEtoiles resume={resume} />}
+        <CascadeRecompense gain={dernierGain} />
+      </div>
       {compagnonRallie === null && objetRapporte === null ? null : (
         <section
           className="recompense-region-acquis"
@@ -719,9 +666,8 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
 
       {progressionRegionale === null ? null : (
         <p
-          className="zone-lecture"
+          className="zone-lecture recompense-progression"
           data-progression-regionale="oui"
-          style={{ fontSize: '1.35rem', padding: '0.75rem 1rem', margin: 0, textAlign: 'center' }}
         >
           {texteProgressionRegionale(
             finDeSortie,

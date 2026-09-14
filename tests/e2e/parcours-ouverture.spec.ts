@@ -83,6 +83,8 @@ async function allerALaCarte(page: Page, prenom?: string): Promise<void> {
     .getByText(String(prenom ?? fixtureProfil['prenom']), { exact: false })
     .first()
     .click();
+  await expect(page.locator('[data-ecran="campement"]')).toBeVisible();
+  await page.locator('[data-vers="carte"]').click();
   await expect(page.locator('[data-ecran="carte"]')).toBeVisible();
 }
 
@@ -91,9 +93,9 @@ test.describe('la séquence d’ouverture', () => {
     await preparer(page);
     await expect(page.locator('[data-ecran="profils"]')).toBeVisible();
 
-    // Le tap qui choisit le profil. Un seul, et il mène au monde.
+    // Le tap qui choisit le profil mène au campement, sans imposer le récit.
     await page.getByText(String(fixtureProfil['prenom']), { exact: false }).first().click();
-    await expect(page.locator('[data-ecran="carte"]')).toBeVisible();
+    await expect(page.locator('[data-ecran="campement"]')).toBeVisible();
 
     // La preuve par l'ABSENCE : aucun écran d'ouverture ne s'est interposé.
     // « Aucun écran intermédiaire obligatoire, nulle part » (D46, point 3).

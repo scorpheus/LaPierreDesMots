@@ -42,7 +42,7 @@ export interface ProprietesReinitialiserProfil {
   readonly profil: IdProfil;
   readonly prenom: string;
   /** Appelé après une remise à zéro réussie — l'hôte rafraîchit l'état affiché. */
-  readonly surTermine?: (rapport: RapportReinitialisation) => void;
+  readonly surTermine?: (rapport: RapportReinitialisation) => void | Promise<void>;
 }
 
 const PORTEES: readonly PorteeReinitialisation[] = ['progression', 'complete'];
@@ -67,12 +67,18 @@ export function ReinitialiserProfil({
 
   const remise = useMutation({
     mutationFn: () => reinitialiserProfilParent(profil, portee, saisie),
-    onSuccess: (resultat) => {
+    onSuccess: async (resultat) => {
       fixerRapport(resultat);
       fixerSaisie('');
-      // Tout ce que la zone parent affiche de ce profil vient de changer.
-      void clientRequetes.invalidateQueries({ queryKey: ['parent'] });
-      surTermine?.(resultat);
+      // L'hôte abandonne immédiatement la partie de l'ancienne génération, avant les lectures.
+      const actualisation = surTermine?.(resultat);
+      await Promise.all([
+        actualisation,
+        ...[
+          ['parent'], ['profils'], ['monde', String(profil)], ['progression', String(profil)],
+          ['pastille-sortie'], ['reglages-lecture', String(profil)]
+        ].map((queryKey) => clientRequetes.invalidateQueries({ queryKey }))
+      ]);
     }
   });
 

@@ -68,6 +68,14 @@ async function preparer(page: Page): Promise<void> {
   );
 }
 
+async function ouvrirLaCarte(page: Page): Promise<void> {
+  await page.getByText(String(fixtureProfil['prenom']), { exact: false }).first().click();
+  const campement = page.locator('[data-ecran="campement"]');
+  await expect(campement).toBeVisible();
+  await campement.locator('[data-vers="carte"]').click();
+  await expect(page.locator('[data-ecran="carte"]')).toBeVisible();
+}
+
 test.describe('le décor v2 arrive entier jusqu’à l’enfant', () => {
   test('la cour d’école : 31 régions servies, tapables, et une maîtresse plus grande', async ({
     page,
@@ -170,8 +178,7 @@ test.describe('le décor v2 arrive entier jusqu’à l’enfant', () => {
 
   test('la carte du monde : six régions de six formes différentes', async ({ page }) => {
     await preparer(page);
-    await page.getByText(String(fixtureProfil['prenom']), { exact: false }).first().click();
-    await expect(page.locator('[data-ecran="carte"]')).toBeVisible();
+    await ouvrirLaCarte(page);
     await expect(page.locator('[data-region-etat]')).toHaveCount(6);
 
     // La v1 dessinait six hexagones réguliers translatés. On compare les six chemins ramenés à

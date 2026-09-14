@@ -1,6 +1,6 @@
 ---
 name: generer-asset
-description: Produire un asset image du projet (personnage, décor, objet, page de coloriage) avec ComfyUI, sans refaire les cinq séries qui ont échoué. À utiliser dès qu'il s'agit de générer, décliner ou corriger une image d'asset — personnage Gobi et compagnons, planche de vues, déclinaisons de graphèmes, décors de région, objets de campement, vignettes d'exercice, coloriages. Couvre aussi les pièges de pilotage de ComfyUI : prompt négatif inerte à CFG 1, liste blanche de modèles, empreinte des PNG, porte technique inadaptée aux décors et aux planches.
+description: Générer, décliner ou corriger un asset image du projet avec ComfyUI. Utiliser pour personnages, décors, objets, planches ou coloriages ; pas pour intégrer un asset déjà validé ni modifier seulement sa mise en page.
 ---
 
 # Générer un asset image

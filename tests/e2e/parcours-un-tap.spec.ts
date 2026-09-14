@@ -151,8 +151,6 @@ test.describe('D46 — un tap de l’ouverture au premier nœud', () => {
 
     // On y va par le chemin long, exprès : c'est celui du père.
     await page.getByText(String(fixtureProfil['prenom']), { exact: false }).first().click();
-    await expect(page.locator('[data-ecran="carte"]')).toBeVisible();
-    await page.locator('[data-vers="campement"]').click();
     await expect(page.locator('[data-ecran="campement"]')).toBeVisible();
 
     const doigt = new Doigt();

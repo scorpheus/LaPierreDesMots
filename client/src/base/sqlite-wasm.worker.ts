@@ -54,7 +54,7 @@ const TAILLE_MAX_SAUVEGARDE = 64 * 1024 * 1024;
 const SIGNATURE_SQLITE = new TextEncoder().encode('SQLite format 3\0');
 // À relever avec toute nouvelle migration. Une sauvegarde d'une version antérieure connue sera
 // migrée au rechargement ; une version future est refusée pour ne jamais ouvrir un schéma inconnu.
-const VERSION_SCHEMA_MAXIMA = 11;
+const VERSION_SCHEMA_MAXIMA = 12;
 const TABLES_REQUISES = [
   { nom: 'schema_migrations', depuis: 1 },
   { nom: 'profils', depuis: 1 },
@@ -324,6 +324,11 @@ function verifierIntegriteEtTables(cible: Database): void {
       'sauvegarde-invalide',
       `La sauvegarde ne correspond pas à La Pierre des Mots (tables absentes : ${absentes.join(', ')}).`
     );
+  }
+  if (versionCourante >= 12 && Number(cible.selectValue(
+    "SELECT COUNT(*) FROM pragma_table_info('profils') WHERE name = 'generation_progression';"
+  )) !== 1) {
+    throw new ErreurWorkerSqlite('sauvegarde-invalide', 'La génération de progression manque dans la sauvegarde.');
   }
 }
 

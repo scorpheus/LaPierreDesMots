@@ -43,6 +43,7 @@ import type { ReactElement } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { ErreurReseau, lireEtatPorteParent, ouvrirZoneParent } from '../api/client.js';
 import { EcranDefinirCode } from './EcranDefinirCode.js';
+import '../styles/parent.css';
 
 export interface ProprietesEcranCodeParent {
   /** Appelé une fois le code accepté. */
@@ -168,26 +169,19 @@ export function EcranCodeParent({
       data-parent="code"
       data-parent-mode="ouverture"
       data-verrou={verrouille ? 'actif' : 'inactif'}
-      style={{
-        padding: '2rem',
-        display: 'grid',
-        gap: '1.5rem',
-        justifyItems: 'center',
-        maxInlineSize: '30rem',
-        marginInline: 'auto'
-      }}
+      className="code-parent-page"
     >
-      <h1 className="titre" style={{ fontSize: '2rem', margin: 0 }}>
+      <h1 className="titre code-parent-titre">
         Espace du parent
       </h1>
 
       {verrouille ? (
-        <p style={{ margin: 0, textAlign: 'center', fontSize: '1.125rem' }}>
+        <p className="code-parent-message code-parent-message--important">
           L’espace est fermé un moment. Il rouvre vers{' '}
           {heureLisible(verrouilleJusqua)}.
         </p>
       ) : (
-        <p style={{ margin: 0, textAlign: 'center' }}>
+        <p className="code-parent-message">
           {/* CORRIGÉ N5 — la phrase d'avant disait « au tout premier passage, le code que tu
               tapes devient celui du foyer ». Elle décrivait fidèlement le défaut du § 1.8.
               Le code se choisit désormais sur son propre écran, et celui-ci ne fait plus
@@ -199,25 +193,19 @@ export function EcranCodeParent({
       <output
         aria-label={`Code saisi : ${String(saisie.length)} chiffre(s) sur ${String(LONGUEUR_CODE)}`}
         data-code-longueur={String(saisie.length)}
-        style={{ display: 'flex', gap: '1rem' }}
+        className="code-parent-pastilles"
       >
         {Array.from({ length: LONGUEUR_CODE }, (_, rang) => (
           <span
             key={rang}
             aria-hidden="true"
-            style={{
-              inlineSize: '1.5rem',
-              blockSize: '1.5rem',
-              borderRadius: '50%',
-              border: '3px solid var(--trait)',
-              background: rang < saisie.length ? 'var(--trait)' : 'transparent'
-            }}
+            className={rang < saisie.length ? 'code-parent-pastille code-parent-pastille--pleine' : 'code-parent-pastille'}
           />
         ))}
       </output>
 
       {codeComplet && !enCours && !verrouille ? (
-        <p data-code-complet="oui" role="status" style={{ margin: 0, textAlign: 'center' }}>
+        <p data-code-complet="oui" role="status" className="code-parent-message">
           Code complet. Tu peux entrer ou Effacer.
         </p>
       ) : null}
@@ -225,24 +213,23 @@ export function EcranCodeParent({
       <div
         role="group"
         aria-label="Pavé numérique"
-        style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(80px, 1fr))', gap: '1rem' }}
+        className="code-parent-pave"
       >
         {TOUCHES.map((chiffre) => (
           <button
             key={chiffre}
             type="button"
-            className="cible"
+            className="cible code-parent-touche"
             data-touche={chiffre}
             disabled={verrouille || enCours || codeComplet}
             onClick={() => taper(chiffre)}
-            style={{ fontSize: '1.75rem', minBlockSize: 'var(--cible-min)' }}
           >
             {chiffre}
           </button>
         ))}
       </div>
 
-      <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+      <div className="code-parent-actions">
         <button
           type="button"
           className="cible cible-secondaire"
@@ -270,7 +257,7 @@ export function EcranCodeParent({
 
       {/* Jamais de rouge, jamais de croix : une phrase, et on recommence. */}
       {message === null ? null : (
-        <p role="status" style={{ margin: 0, fontSize: '1.125rem' }}>
+        <p role="status" className="code-parent-message code-parent-message--important">
           {message}
         </p>
       )}

@@ -115,7 +115,7 @@ async function defautsDe(page: Page, ecran: string): Promise<DefautResponsive[]>
       defauts.push({
         ecran: nomEcran,
         raison: `page plus large que le viewport (${String(racine.scrollWidth)} > ${String(racine.clientWidth)}) : ` +
-          [...document.querySelectorAll<HTMLElement>('[data-moteur] *')]
+          [...document.querySelectorAll<HTMLElement>('[data-ecran] *')]
             .filter((element) => element.getBoundingClientRect().right > racine.clientWidth + 1)
             .slice(0, 5).map((element) => element.outerHTML.slice(0, 220)).join(' · '),
       });
@@ -404,24 +404,24 @@ test.describe('responsive — la coque ne garde pas les proportions tablette sur
             })() : null,
             carte: ecran === 'carte' ? (() => {
               const scene = document.querySelector<HTMLElement>('[data-scene-adaptative="carte"]');
-              const destinations = document.querySelector<HTMLElement>('.destinations-carte');
-              const titreDestinations = destinations?.querySelector<HTMLElement>('h2');
+              const legende = document.querySelector<HTMLElement>('.carte-monde__legende');
+              const titreLegende = legende?.querySelector<HTMLElement>('h2');
               const boiteScene = scene?.getBoundingClientRect();
-              const boiteDestinations = destinations?.getBoundingClientRect();
-              const hauteursDeparts = [...(destinations?.querySelectorAll<HTMLElement>('[data-depart]') ?? [])]
+              const boiteLegende = legende?.getBoundingClientRect();
+              const hauteursDeparts = [...(legende?.querySelectorAll<HTMLElement>('[data-depart]') ?? [])]
                 .map((depart) => depart.getBoundingClientRect().height);
               return {
                 partCarte: (boiteScene?.width ?? 0) / innerWidth,
-                sousScroll: destinations === null
+                sousScrollLegende: legende === null
                   ? 0
-                  : Math.max(0, destinations.scrollHeight - destinations.clientHeight),
-                corpsTitre: titreDestinations === null
+                  : Math.max(0, legende.scrollHeight - legende.clientHeight),
+                corpsTitreLegende: titreLegende === null
                   ? 0
-                  : Number.parseFloat(getComputedStyle(titreDestinations).fontSize),
-                espaceAvantDestinations:
-                  boiteScene === undefined || boiteDestinations === undefined
+                  : Number.parseFloat(getComputedStyle(titreLegende).fontSize),
+                espaceAvantLegende:
+                  boiteScene === undefined || boiteLegende === undefined
                     ? 0
-                    : Math.max(0, boiteDestinations.top - boiteScene.bottom),
+                    : Math.max(0, boiteLegende.top - boiteScene.bottom),
                 plusGrandDepart: Math.max(0, ...hauteursDeparts),
               };
             })() : null,
@@ -464,8 +464,8 @@ test.describe('responsive — la coque ne garde pas les proportions tablette sur
 
         if (mesure.carte !== null) {
           expect(
-            mesure.carte.sousScroll,
-            `${recette.nom} : les destinations ne doivent pas capturer le scroll de la page`,
+            mesure.carte.sousScrollLegende,
+            `${recette.nom} : la légende ne doit pas capturer le scroll de la page`,
           ).toBe(0);
           if (format.largeur > format.hauteur) {
             expect(
@@ -474,12 +474,12 @@ test.describe('responsive — la coque ne garde pas les proportions tablette sur
             ).toBeGreaterThanOrEqual(0.5);
           }
           expect(
-            mesure.carte.corpsTitre,
+            mesure.carte.corpsTitreLegende,
             `${recette.nom} : « Où veux-tu aller ? » ne doit pas dominer la carte`,
           ).toBeLessThanOrEqual(compact ? 20 : 28);
           expect(
-            mesure.carte.espaceAvantDestinations,
-            `${recette.nom} : aucun grand vide ne doit séparer la carte de ses destinations`,
+            mesure.carte.espaceAvantLegende,
+            `${recette.nom} : aucun grand vide ne doit séparer la carte de sa légende`,
           ).toBeLessThanOrEqual(32);
           if (format.largeur > format.hauteur && format.hauteur <= 520) {
             expect(

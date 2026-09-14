@@ -1,0 +1,74 @@
+
+
+.ouverture-tableau {
+  inline-size: min(1100px, 100%);
+  min-block-size: 0;
+  margin: 0;
+  display: grid;
+  gap: clamp(0.75rem, 1.8dvh, 1.25rem);
+  justify-items: center;
+}
+
+.ouverture-tableau__decor {
+  position: relative;
+  inline-size: min(100%, 69dvh, 780px);
+  block-size: auto;
+  aspect-ratio: 3 / 2;
+  overflow: hidden;
+  border: 3px solid color-mix(in srgb, var(--trait) 28%, transparent);
+  border-radius: clamp(1rem, 2.2vw, 1.75rem);
+  background:
+    radial-gradient(circle at 50% 42%, rgb(244 250 245 / 92%), rgb(203 220 213 / 92%)),
+    var(--parchemin);
+  box-shadow:
+    0 1rem 2.5rem rgb(32 63 70 / 16%),
+    inset 0 0 0 1px rgb(255 255 255 / 58%);
+  animation: apparition-tableau 420ms ease-out both;
+}
+
+.ouverture-tableau__decor > img,
+.ouverture-tableau__decor > svg {
+  inline-size: 100%;
+  block-size: 100%;
+  display: block;
+}
+
+.ouverture-tableau__decor > img {
+  object-fit: cover;
+  object-position: center;
+  user-select: none;
+}
+
+.ouverture-tableau__texte {
+  max-inline-size: min(52ch, 94vw);
+  margin: 0;
+  padding: clamp(0.85rem, 1.6dvh, 1.25rem) clamp(1.25rem, 2.2vw, 1.75rem);
+  border-radius: 0.9rem;
+  color: var(--trait);
+  font-size: clamp(1.25rem, 1.4vw + 0.65rem, 1.6rem);
+  line-height: 1.55;
+  text-align: center;
+  animation: none;
+}
+
+@media (orientation: landscape) and (max-height: 800px) {
+  .ouverture-tableau__decor {
+    inline-size: min(100%, 66dvh, 510px);
+  }
+}
+
+@media (orientation: landscape) and (max-height: 800px) {
+
+  .ouverture-tableau__texte {
+    line-height: 1.42;
+  }
+}
+.ecran-ouverture { box-sizing: border-box; min-block-size: 100dvh; padding: clamp(1rem, 3vw, 2rem); display: grid; align-content: center; justify-items: center; gap: clamp(1rem, 2.5dvh, 1.75rem); background: radial-gradient(circle at 50% 15%, color-mix(in srgb, var(--soleil) 18%, transparent), transparent 34rem), var(--parchemin); }
+.ouverture-titre { margin: 0; text-align: center; font-size: clamp(1.75rem, 4vw, 2.5rem); }
+.ouverture-attente { margin: 0; max-inline-size: 35rem; text-align: center; font-size: 1.375rem; }
+.ouverture-actions { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: .75rem; }
+.ouverture-action-principale { min-inline-size: min(100%, 14rem); padding-inline: 2rem; font-size: 1.375rem; }
+.ouverture-progression { display: flex; gap: .75rem; }
+.ouverture-point { inline-size: .75rem; block-size: .75rem; border: 2px solid var(--trait); border-radius: 50%; background: transparent; }
+.ouverture-point--actif { background: var(--trait); }
+@media (max-width: 620px) { .ecran-ouverture { padding: 1rem; } .ouverture-actions > .cible { inline-size: 100%; } }

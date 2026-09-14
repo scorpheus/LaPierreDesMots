@@ -215,6 +215,7 @@ export function MoteurPlace(
     <DndContext sensors={capteurs} onDragStart={auDebutDuGlisse} onDragEnd={auBoutDuGlisse}>
       <div
         className="moteur-place"
+        data-plateau-defilant="oui"
         data-moteur="place"
         data-habillage={habillage.id}
         data-termine={etat.termineMs === null ? 'non' : 'oui'}

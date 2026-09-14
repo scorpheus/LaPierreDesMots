@@ -118,6 +118,8 @@ interface EcranAtteignable {
 
 async function choisirLeProfil(page: Page): Promise<void> {
   await page.getByText(String(fixtureProfil['prenom']), { exact: false }).first().click();
+  await expect(page.locator('[data-ecran="campement"]')).toBeVisible();
+  await page.locator('[data-vers="carte"]').click();
   await expect(page.locator('[data-ecran="carte"]')).toBeVisible();
 }
 

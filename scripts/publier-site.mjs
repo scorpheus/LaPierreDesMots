@@ -288,7 +288,7 @@ async function verifierVisuelsDistants(urls) {
   }
 }
 
-async function verifierSiteDistant(versionAttendue, assetsVisuels) {
+export async function verifierSiteDistant(versionAttendue, assetsVisuels) {
   const suffixe = `?publication=${encodeURIComponent(versionAttendue)}`;
   await attendre(
     'La version publique',
@@ -296,7 +296,7 @@ async function verifierSiteDistant(versionAttendue, assetsVisuels) {
     (valeur) => valeur?.version === versionAttendue,
   );
   const accueil = await fetchOk(new URL(suffixe, URL_SITE));
-  exiger((await accueil.text()).includes('<div id="root">'), 'La page publique ne contient pas la racine React.');
+  exiger((await accueil.text()).includes('<div id="racine">'), 'La page publique ne contient pas la racine React.');
   const serviceWorker = await fetchOk(new URL(`service-worker.js${suffixe}`, URL_SITE));
   exiger((await serviceWorker.text()).includes(versionAttendue), 'Le service worker public ne porte pas la version attendue.');
   const manifeste = await (await fetchOk(new URL(`manifest.webmanifest${suffixe}`, URL_SITE))).json();

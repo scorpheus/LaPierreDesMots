@@ -27,6 +27,8 @@ import type {
 import type { PlanSortie } from '@pierre/partage/pedagogie';
 import { ETAT_CASCADE_VIDE } from '@pierre/partage/recompenses';
 import type { PaquetNoeudAttendu } from '../api/client.js';
+import { conserverTentativeTerminee } from '../api/client.js';
+import type { TentativeSansCle } from '../api/tentatives-en-attente.js';
 import { memoriserProfil, oublierProfil } from './profil-memorise.js';
 import type { ServicesJeu } from '../moteurs/types.js';
 import { maintenantIso } from './services.js';
@@ -73,6 +75,8 @@ export interface EtatMagasin {
   readonly demarreLe: string | null;
   readonly termineLe: string | null;
   readonly tentativeEnvoyee: boolean;
+  /** Échec de la copie synchrone : le résultat reste en mémoire et sa sauvegarde est réessayable. */
+  readonly erreurConservation: string | null;
   /**
    * Cette partie compte-t-elle dans le journal de l'enfant ? — R30.
    *
@@ -174,7 +178,9 @@ export function creerMagasin(
    * posés par `fixerSeuils`. Les tests de composants les injectent directement, ce qui leur
    * évite de dépendre du réseau.
    */
-  seuilsInitiaux: SeuilsCascade | null = null
+  seuilsInitiaux: SeuilsCascade | null = null,
+  /** Injection sans transport, appelée avant de publier la réussite. */
+  conserverTerminee: (tentative: TentativeSansCle) => void = (tentative) => conserverTentativeTerminee(tentative)
 ): MagasinJeu {
   const animationsInitiales = mouvementReduitDemande();
   refleterAnimations(animationsInitiales);
@@ -196,6 +202,7 @@ export function creerMagasin(
     demarreLe: null,
     termineLe: null,
     tentativeEnvoyee: false,
+    erreurConservation: null,
     // Vrai par défaut : c'est l'enfant qui joue. Un défaut à `false` serait la pire valeur
     // possible — un journal muet ne se voit nulle part avant que la pédagogie n'ait dérivé.
     journalise: true,
@@ -249,7 +256,7 @@ export function creerMagasin(
       memoriserProfil(String(profil.id));
       const memeProfil = lire().profil?.id === profil.id;
       const sortie = memeProfil ? lire().sortie : null;
-      fixer({ profil, sortie, ecran: 'carte',
+      fixer({ profil, sortie, ecran: 'campement',
         ...(memeProfil ? {} : { cascade: ETAT_CASCADE_VIDE, dernierGain: null }) });
     },
 
@@ -280,6 +287,7 @@ export function creerMagasin(
         demarreLe: null,
         termineLe: null,
         tentativeEnvoyee: false,
+        erreurConservation: null,
         // La cascade appartient au PROFIL : elle repart de zéro quand on en change. Les seuils,
         // eux, appartiennent au jeu et restent chargés.
         cascade: ETAT_CASCADE_VIDE,
@@ -311,6 +319,7 @@ export function creerMagasin(
         demarreLe: maintenantIso(services.horloge),
         termineLe: null,
         tentativeEnvoyee: false,
+        erreurConservation: null,
         // Même un ancien lien direct vers l'activité libre ne peut promettre un acquis
         // que le serveur refusera (progression:false). La règle appartient au lancement.
         journalise: options.journalise && paquet.noeud.progression !== false,
@@ -381,6 +390,21 @@ export function creerMagasin(
         // et le cast défensif de la v1 a disparu : la signature réelle est sous les yeux.
         const resumeFinal = moteur.resume(suivant);
         const etoiles: NombreEtoiles = calculerEtoiles(resumeFinal);
+        const termineLe = maintenantIso(services.horloge);
+        const { profil, paquet, graine, demarreLe, journalise } = lire();
+        let erreurConservation: string | null = null;
+        if (journalise && profil !== null && paquet !== null && demarreLe !== null) {
+          try {
+            conserverTerminee({
+              profil: profil.id, generationProgression: profil.generationProgression ?? 0,
+              noeud: paquet.noeud.id, exercice: paquet.exercice.id, moteur: paquet.exercice.jeu.moteur,
+              habillage: paquet.habillage.id, graine, demarreLe, termineLe, resume: resumeFinal
+            });
+          } catch {
+            // Le résultat reconnu n'est pas perdu en mémoire et aucun ACK n'est fabriqué.
+            erreurConservation = 'La sauvegarde attend. Réessaie sans fermer cette page.';
+          }
+        }
 
         fixer({
           etatMoteur: suivant,
@@ -388,7 +412,8 @@ export function creerMagasin(
           aide,
           resume: resumeFinal,
           etoiles,
-          termineLe: maintenantIso(services.horloge),
+          termineLe,
+          erreurConservation,
           ecran: 'recompense',
           serie,
           // La cascade de D25 n'est plus calculée ici — lot A1 (R31) : elle vient du serveur, à

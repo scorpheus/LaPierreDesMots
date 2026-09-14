@@ -33,6 +33,7 @@ import type { SequenceOuverture } from '@pierre/partage/ouverture';
 
 import { urlAsset } from '../api/client.js';
 import { useEtatJeu } from '../etat/services.js';
+import '../styles/ouverture.css';
 import { TableauOuverture } from '../monde/TableauOuverture.js';
 
 /** Le document de contenu, relatif à `contenu/`. */
@@ -141,27 +142,15 @@ export function EcranOuverture({
       data-ecran="ouverture"
       data-passable-des-ms={String(PASSABLE_DES_MS)}
       data-tableau-courant={tableau === null ? 'aucun' : tableau.code}
-      style={{
-        minBlockSize: '100dvb',
-        padding: '1.5rem',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '1.75rem'
-      }}
+      className="ecran-ouverture"
     >
-      <style>{
-        '@keyframes apparition-tableau { from { opacity: 0 } to { opacity: 1 } }'
-      }</style>
-
-      <h1 className="titre" style={{ fontSize: '2rem', margin: 0, textAlign: 'center' }}>
+      <h1 className="titre ouverture-titre">
         La Pierre des Mots
       </h1>
 
       {tableau === null ? (
         // Ni écran vide, ni écran d'erreur : on dit ce qui se passe et la porte reste ouverte.
-        <p style={{ margin: 0, fontSize: '1.375rem', textAlign: 'center' }}>
+        <p className="ouverture-attente">
           L’histoire arrive. Tu peux déjà partir jouer.
         </p>
       ) : (
@@ -173,15 +162,7 @@ export function EcranOuverture({
         />
       )}
 
-      <div
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: '1rem',
-          justifyContent: 'center',
-          alignItems: 'center'
-        }}
-      >
+      <div className="ouverture-actions">
         {/*
           LA PRISE PRINCIPALE. Présente au premier rendu, quelle que soit la branche — y
           compris quand la séquence n'est pas encore là. C'est elle qui fait de `t = 0` une
@@ -189,11 +170,10 @@ export function EcranOuverture({
         */}
         <button
           type="button"
-          className="cible cible-appel"
+          className="cible cible-appel ouverture-action-principale"
           data-suite="ouverture"
           aria-label={dernier ? 'Partir jouer' : 'Voir la suite de l’histoire'}
           onClick={avancer}
-          style={{ fontSize: '1.375rem', paddingInline: '2rem' }}
         >
           {dernier ? 'On y va !' : 'Et après ?'}
         </button>
@@ -251,18 +231,12 @@ export function EcranOuverture({
         <div
           data-progression-ouverture={String(indice + 1)}
           aria-hidden="true"
-          style={{ display: 'flex', gap: '0.75rem' }}
+          className="ouverture-progression"
         >
           {tableaux.map((entree, rang) => (
             <span
               key={entree.code}
-              style={{
-                inlineSize: '0.75rem',
-                blockSize: '0.75rem',
-                borderRadius: '50%',
-                background: rang <= indice ? 'var(--trait)' : 'transparent',
-                border: '2px solid var(--trait)'
-              }}
+              className={rang <= indice ? 'ouverture-point ouverture-point--actif' : 'ouverture-point'}
             />
           ))}
         </div>

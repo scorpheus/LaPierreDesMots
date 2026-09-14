@@ -13,8 +13,12 @@ import { useQuery } from '@tanstack/react-query';
 import { lirePaquetNoeud, urlAsset } from '../api/client.js';
 import { useEtatJeu, useServices } from '../etat/services.js';
 import type { ServicesJeu } from '../moteurs/types.js';
-import { MoteurLibre } from '../moteurs/libre/MoteurLibre.js';
+import { INVITE_LIBRE, MoteurLibre } from '../moteurs/libre/MoteurLibre.js';
 import { effacerParticules } from '../gamefeel/particules.js';
+import { BoutonEcouter } from '../composants/BoutonEcouter.js';
+import { EnteteActivite } from '../composants/activite/EnteteActivite.js';
+import { variablesHabillage } from '../habillages/chargeur.js';
+import '../styles/activites.css';
 
 export interface ProprietesEcranChaudron {
   /** Paquet injecté par les tests ; en production le contenu du campement fournit la destination. */
@@ -65,6 +69,10 @@ export function EcranChaudron({ paquet: paquetInjecte = null, surRetour }: Propr
     retry: false,
   });
   const paquet = paquetInjecte ?? requetePaquet.data ?? null;
+  const styleHabillage = useMemo(
+    () => paquet === null ? {} : variablesHabillage(paquet.habillage),
+    [paquet],
+  );
   const [etat, fixerEtat] = useState<EtatLibre | null>(null);
   const finDejaTraitee = useRef(false);
 
@@ -101,20 +109,27 @@ export function EcranChaudron({ paquet: paquetInjecte = null, surRetour }: Propr
 
   if (paquet === null || etat === null) {
     return (
-      <main data-ecran="chaudron" data-activite="libre" style={{ padding: '2rem' }}>
+      <main data-ecran="chaudron" data-activite="libre" className="activite-indisponible">
         <button type="button" className="cible" data-vers="campement" onClick={surRetour}>← Le campement</button>
-        <p>{requetePaquet.isError ? 'Le chaudron est indisponible pour le moment.' : 'Le chaudron prépare ses couleurs…'}</p>
+        <p className="zone-lecture" role="status">{requetePaquet.isError ? 'Le chaudron est indisponible pour le moment.' : 'Le chaudron prépare ses couleurs…'}</p>
       </main>
     );
   }
 
   return (
-    <main data-ecran="chaudron" data-activite="libre" className="ecran-chaudron">
-      <header className="zone-lecture entete-chaudron">
-        <button type="button" className="cible" data-vers="campement" onClick={surRetour}>← Le campement</button>
-        <h1 className="titre" style={{ margin: 0 }}>Le chaudron à couleurs</h1>
-      </header>
-      <div className="activite-chaudron">
+    <main data-ecran="chaudron" data-activite="libre" className="ecran-activite ecran-chaudron" style={styleHabillage}>
+      <EnteteActivite
+        className="entete-chaudron"
+        destination="campement"
+        libelleRetour="Le campement"
+        nomRetour="← Le campement"
+        surRetour={surRetour}
+        ecoute={<BoutonEcouter texte={INVITE_LIBRE} cle={`${paquet.exercice.id}/c1`} />}
+      >
+        <h1 className="titre activite-titre">Le chaudron à couleurs</h1>
+        <p className="activite-consigne-texte">{INVITE_LIBRE}</p>
+      </EnteteActivite>
+      <div className="activite-chaudron cadre-scene-activite">
         <MoteurLibre
           contenu={paquet.exercice.jeu.contenu as ContenuLibre}
           habillage={paquet.habillage}

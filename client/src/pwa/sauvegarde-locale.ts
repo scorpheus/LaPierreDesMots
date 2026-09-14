@@ -1,4 +1,5 @@
 /** Frontière de sauvegarde manuelle : aucun octet ne quitte le navigateur sans geste du parent. */
+import { remplacerDonneesAvecTentatives, viderTentativesEnAttente } from '../api/client.js';
 
 export const TAILLE_MAX_SAUVEGARDE_PWA = 64 * 1024 * 1024;
 
@@ -12,6 +13,7 @@ async function ouvrirBasePwa() {
 
 export async function telechargerSauvegardePwa(): Promise<{ readonly octets: number }> {
   const base = await ouvrirBasePwa();
+  await viderTentativesEnAttente();
   const donnees = await base.exporter();
   const copie = new ArrayBuffer(donnees.byteLength);
   new Uint8Array(copie).set(donnees);
@@ -41,7 +43,7 @@ export async function importerSauvegardePwa(
   }
   const donnees = new Uint8Array(await fichier.arrayBuffer());
   const base = await ouvrirBasePwa();
-  const resultat = await base.importer(donnees);
+  const resultat = await remplacerDonneesAvecTentatives(() => base.importer(donnees));
   // Libérer explicitement le Web Lock avant le rechargement évite que la nouvelle page ne
   // prenne l'ancienne connexion, encore en cours de destruction, pour un second onglet.
   await base.fermer();

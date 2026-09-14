@@ -23,6 +23,7 @@ import { DessinButin } from '../monde/Butin.js';
 import { eclatDeRegion } from '../monde/eclats.js';
 import { Etagere, useCatalogueFormes } from '../monde/Etagere.js';
 import { FicheObjet } from '../monde/FicheObjet.js';
+import '../styles/collections.css';
 
 export interface ProprietesEcranCoffre {
   /** Le monde du profil. Injecté par les tests et par un hôte qui l'a déjà ; chargé sinon. */
@@ -128,23 +129,15 @@ function Case({
   readonly compacte?: boolean;
 }): ReactElement {
   return (
-    <li style={{ display: 'contents' }}>
+    <li className="case-coffre-porte">
     <button
       type="button"
       data-collection={categorie}
       data-piece={cle}
       data-obtenue={obtenu ? 'oui' : 'non'}
-      className={`cible case-coffre case-coffre--${categorie}`}
+      className={`cible case-coffre case-coffre--${categorie}${compacte ? ' case-coffre--compacte' : ''}`}
       aria-label={obtenu ? `${libelle}, gagné` : `${libelle}, pas encore gagné`}
       onClick={surOuvrir}
-      style={{
-        flexDirection: 'column',
-        gap: '0.35rem',
-        boxSizing: 'border-box',
-        inlineSize: compacte ? '7.5rem' : '10rem',
-        minBlockSize: compacte ? '8rem' : '11rem'
-        // `opacity` / `filter` ne sont plus ici : voir l'encadré sur le dessin, ci-dessous.
-      }}
     >
       {categorie === 'objet' ? (
         // Le butin, dessiné pièce par pièce. Le voile du creux est porté par la feuille de
@@ -217,15 +210,6 @@ function Case({
   );
 }
 
-const STYLE_LISTE = {
-  listStyle: 'none',
-  margin: 0,
-  padding: 0,
-  display: 'flex',
-  flexWrap: 'wrap' as const,
-  gap: '0.75rem'
-};
-
 export function EcranCoffre({
   monde: mondeInjecte = null,
   surRetour
@@ -257,10 +241,14 @@ export function EcranCoffre({
 
   return (
     <main data-ecran="coffre" className="ecran-coffre">
-      <header className="coffre-en-tete" style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-        <h1 className="titre" style={{ fontSize: '2.25rem', margin: 0 }}>
+      <header className="coffre-en-tete">
+        <div className="coffre-en-tete-texte">
+          <p className="coffre-surtitre">Les trésors de l’aventure</p>
+          <h1 className="titre coffre-titre">
           Le coffre
-        </h1>
+          </h1>
+          <p>Tes trouvailles t’attendent ici.</p>
+        </div>
         <button
           type="button"
           className="cible"
@@ -274,17 +262,7 @@ export function EcranCoffre({
           className="coffre-en-tete-illustration"
           data-coffre-illustration="raster"
           aria-hidden="true"
-          style={{
-            marginInlineStart: 'auto',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.75rem',
-            minInlineSize: 0,
-          }}
         >
-          <p style={{ margin: 0, maxInlineSize: '16rem', fontWeight: 700, textAlign: 'right' }}>
-            Tes trouvailles t’attendent ici.
-          </p>
           <img
             className="coffre-en-tete-image"
             src={urlAsset('assets/coffre/coffre-ouvert-v1.png')}
@@ -292,7 +270,6 @@ export function EcranCoffre({
             width={156}
             height={156}
             draggable={false}
-            style={{ inlineSize: 'clamp(7rem, 12vw, 9.75rem)', blockSize: 'auto' }}
           />
         </div>
       </header>
@@ -328,7 +305,7 @@ export function EcranCoffre({
           data-collection-titre="eclats"
           data-progression-restante={String(regions.length - nbEclats)}
         >
-        <h2 className="panneau-titre" style={{ fontSize: '1.5rem' }}>
+        <h2 className="panneau-titre collection-coffre-titre">
           Les Éclats de Pierre — {nbEclats} sur {regions.length}
         </h2>
         <p className="collection-progression" data-progression-reste="oui">
@@ -336,7 +313,7 @@ export function EcranCoffre({
             ? 'Tous les Éclats sont découverts.'
             : `Il reste ${String(regions.length - nbEclats)} Éclat${regions.length - nbEclats > 1 ? 's' : ''} à découvrir.`}
         </p>
-        <ul style={STYLE_LISTE}>
+        <ul className="liste-cases-coffre">
           {regions.map((region) => (
             <Case
               key={String(region.region)}
@@ -375,7 +352,7 @@ export function EcranCoffre({
             à l'identique, jamais réinventé, sinon deux pictogrammes pour un même objet sur
             deux écrans se seraient mis à mentir. `campement-affordance.test.tsx` documentait
             déjà la règle pour l'étagère ; elle vaut ici sans changer un mot. */}
-        <h2 className="panneau-titre" style={{ fontSize: '1.5rem' }}>
+        <h2 className="panneau-titre collection-coffre-titre">
           <span aria-hidden="true" data-pictogramme="butin">
             🎒
           </span>
@@ -387,7 +364,7 @@ export function EcranCoffre({
             ? 'Tout le butin est rapporté.'
             : `Il reste ${String(objets.filter((objet) => objet.placeLe === null).length)} objet${objets.filter((objet) => objet.placeLe === null).length > 1 ? 's' : ''} à rapporter.`}
         </p>
-        <ul style={STYLE_LISTE}>
+        <ul className="liste-cases-coffre">
           {objets.map((objet) => (
             <Case
               key={String(objet.code)}

@@ -148,6 +148,7 @@ export function monterCrochetsDeTest({
     await enregistrerTentative({
       cleIdempotence,
       profil: profil.id,
+      generationProgression: profil.generationProgression ?? 0,
       noeud: entree.noeud,
       exercice: paquet.exercice.id,
       moteur: paquet.exercice.jeu.moteur,

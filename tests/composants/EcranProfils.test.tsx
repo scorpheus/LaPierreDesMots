@@ -32,6 +32,7 @@ const PROFILS = [profilDeTest('prf-1', 'Alma'), profilDeTest('prf-2', 'Nino')];
 
 const creations: unknown[] = [];
 const demandesDeSortie: unknown[] = [];
+let progressionServie: Array<{ noeud: string; etoiles: number }> = [];
 
 vi.mock('@client/api/client', async (importOriginal) => {
   const original = await importOriginal<Record<string, unknown>>();
@@ -45,17 +46,21 @@ vi.mock('@client/api/client', async (importOriginal) => {
     // Les trois appels de `PastilleSortie` (D46). Sans eux, la pastille reste en attente et
     // la moitié de l'écran ne se rend jamais.
     lireMonde: () => Promise.resolve(mondeDeTest()),
-    lireProgression: () => Promise.resolve([]),
+    lireProgression: () => Promise.resolve(progressionServie),
     composerSortie: (_profil: string, demande: unknown) => {
       demandesDeSortie.push(demande);
       const region = (demande as { readonly region: string }).region;
+      const prochainNoeud = ['01', '02', '03']
+        .map((rang) => `${region}-${rang}`)
+        .find((noeud) => !progressionServie.some((ligne) => ligne.noeud === noeud && ligne.etoiles > 0))
+        ?? `${region}-01`;
       return Promise.resolve({
         profil: 'prf-1',
         region,
         compagnon: null,
         composeeLe: '2026-09-01T08:00:00.000Z',
         etapes: [
-          { rang: 1, role: 'echauffement', noeud: `${region}-03`, habillage: 'pont', competences: [], revisions: [] },
+          { rang: 1, role: 'echauffement', noeud: prochainNoeud, habillage: 'pont', competences: [], revisions: [] },
           { rang: 2, role: 'competence-en-cours', noeud: `${region}-04`, habillage: 'mare', competences: [], revisions: [] },
           { rang: 3, role: 'revision', noeud: `${region}-05`, habillage: 'cabane', competences: [], revisions: [] },
           { rang: 4, role: 'synthese', noeud: `${region}-06`, habillage: 'sentier', competences: [], revisions: [] }
@@ -100,6 +105,7 @@ function services() {
 
 interface Monte {
   readonly magasin: Magasin;
+  readonly client: QueryClient;
   /** Les appels au rappel « ouvrir l'espace des parents ». */
   readonly accesParent: number[];
 }
@@ -117,7 +123,7 @@ function monter(): Monte {
       </FournisseurJeu>
     </QueryClientProvider>
   );
-  return { magasin, accesParent };
+  return { magasin, client, accesParent };
 }
 
 /** Attend que la liste des profils soit là : les cartes viennent d'une requête. */
@@ -132,6 +138,7 @@ async function monterEtAttendre(): Promise<Monte> {
 beforeEach(() => {
   creations.length = 0;
   demandesDeSortie.length = 0;
+  progressionServie = [];
   // Les réglages de lecture, atteints par « Comment je lis », appellent `fetch` en direct
   // (`EcranReglagesLecture` le déclare comme un écart, en tête de son fichier). Sans ce
   // bouchon, l'audit des sorties sème des `ECONNREFUSED` dans le rapport — un test propre ne
@@ -177,14 +184,15 @@ describe('la carte de profil RÉPOND au tap (M25)', () => {
     );
   });
 
-  it('UN TAP suffit : le magasin porte le profil choisi et bascule sur la carte', async () => {
+  // Plan de réhabilitation § 10 : le campement est désormais l'entrée habituelle.
+  it('UN TAP suffit : le magasin porte le profil choisi et ouvre le campement', async () => {
     const { magasin } = await monterEtAttendre();
     expect(magasin.getState().profil).toBeNull();
 
     fireEvent.click(document.querySelector('[data-profil="prf-2"]')!);
 
     expect(magasin.getState().profil?.id).toBe('prf-2');
-    expect(magasin.getState().ecran).toBe('carte');
+    expect(magasin.getState().ecran).toBe('campement');
   });
 
   it('la carte tapée est bien CELLE qu’on a tapée — jamais la première de la liste', async () => {
@@ -212,7 +220,7 @@ describe('la carte de profil RÉPOND au tap (M25)', () => {
     expect(pastille).not.toBeNull();
     await waitFor(() => {
       expect(pastille?.getAttribute('data-sortie-prete')).toBe('oui');
-      expect(pastille?.getAttribute('data-sortie-noeud')).toBe('galeries-03');
+      expect(pastille?.getAttribute('data-sortie-noeud')).toBe('galeries-01');
     });
 
     fireEvent.click(pastille!);
@@ -220,9 +228,23 @@ describe('la carte de profil RÉPOND au tap (M25)', () => {
     await waitFor(() => {
       expect(demarrages).toHaveLength(1);
     });
-    expect((demarrages[0] as { noeud: { id: string } }).noeud.id).toBe('galeries-03');
+    expect((demarrages[0] as { noeud: { id: string } }).noeud.id).toBe('galeries-01');
     expect(demandesDeSortie).toContainEqual({ region: 'galeries', compagnon: null });
     expect(magasin.getState().sortie?.etapes).toHaveLength(4);
+  });
+
+  it('la pastille relit les acquis invalidés et prépare la reprise suivante', async () => {
+    const { client } = await monterEtAttendre();
+    const pastille = document.querySelector('[data-pastille-sortie="prf-1"]');
+    await waitFor(() => expect(pastille?.getAttribute('data-sortie-noeud')).toBe('galeries-01'));
+
+    progressionServie = [{ noeud: 'galeries-01', etoiles: 3 }];
+    await Promise.all([
+      client.invalidateQueries({ queryKey: ['progression', 'prf-1'] }),
+      client.invalidateQueries({ queryKey: ['monde', 'prf-1'] }),
+    ]);
+
+    await waitFor(() => expect(pastille?.getAttribute('data-sortie-noeud')).toBe('galeries-02'));
   });
 
   it('aucun mot de passe, aucune confirmation : pas un champ de saisie avant le jeu', async () => {

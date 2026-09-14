@@ -33,6 +33,9 @@ import { obtenirRendu } from '../moteurs/registre-rendu.js';
 import type { ComposantMoteur } from '../moteurs/types.js';
 import { reveillerAudio } from '../services/audio-tone.js';
 import { effacerParticules } from '../gamefeel/particules.js';
+import { EnteteActivite } from '../composants/activite/EnteteActivite.js';
+import { CadreSceneActivite } from '../composants/activite/CadreSceneActivite.js';
+import '../styles/activites.css';
 
 /**
  * Trois actions que TOUT moteur doit accepter pour que la coquille reste générique.
@@ -424,11 +427,20 @@ export function EcranNoeud(): ReactElement {
     [paquet]
   );
 
+  const compagnonAide = useMemo(() => {
+    const code = sortie?.compagnon ?? null;
+    if (code === null) return null;
+    const definition = compagnonsDuDocument(compagnonsDocument).find((compagnon) => compagnon.code === code);
+    return definition === undefined
+      ? null
+      : { code: definition.code, libelle: definition.libelle, asset: definition.asset };
+  }, [sortie?.compagnon]);
+
   if (paquet === null || codeMoteur === null) {
     // L'URL /noeud peut être rafraîchie sans paquet en mémoire. Elle reste alors un écran de
     // nœud lisible, avec une unique issue réelle, plutôt qu'un faux chargement sans fin.
     return (
-      <main data-ecran="noeud" data-noeud="indisponible" style={{ padding: '2rem' }}>
+      <main data-ecran="noeud" data-noeud="indisponible" className="activite-indisponible">
         <h1 className="titre">Préparons ton exercice</h1>
         <p className="zone-lecture">Choisis un chemin sur la carte pour jouer.</p>
         <button type="button" className="cible" data-vers="carte" onClick={retourCarte}>
@@ -454,14 +466,6 @@ export function EcranNoeud(): ReactElement {
   // consigne. Voir `composants/aide-de-gobi.ts` : une stratégie visible sans clip vaut mieux
   // qu'une phrase affichée différente de celle qui serait entendue.
   const aideDeGobi = resoudreAideDeGobi(aide, etapeCourante, paquet.exercice.id);
-  const compagnonAide = useMemo(() => {
-    const code = sortie?.compagnon ?? null;
-    if (code === null) return null;
-    const definition = compagnonsDuDocument(compagnonsDocument).find((c) => c.code === code);
-    return definition === undefined
-      ? null
-      : { code: definition.code, libelle: definition.libelle, asset: definition.asset };
-  }, [sortie?.compagnon]);
 
   // La jauge du palier intermédiaire — « trois étoiles sur cinq » (D25, point 3). C'est celle
   // qui a du sens PENDANT une partie : elle dit ce que ce nœud-ci rapproche.
@@ -473,6 +477,7 @@ export function EcranNoeud(): ReactElement {
   return (
     <main
       ref={racine}
+      className="ecran-activite"
       data-ecran="noeud"
       data-noeud={paquet.noeud.id}
       data-test-pret={pret ? 'oui' : 'non'}
@@ -495,152 +500,49 @@ export function EcranNoeud(): ReactElement {
       // est posée dans le gestionnaire lui-même, donc avant tout traitement.
       data-appui={appuye ? 'oui' : 'non'}
       onPointerDown={surAppui}
-      style={{
-        ...styleHabillage,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '1rem',
-        padding: '1rem',
-        // R20 — une hauteur DÉFINIE, pas un minimum. `minBlockSize` laisse la colonne grandir
-        // avec son contenu : la scène du coloriage réclamait alors 2 073 px pour un cadre de
-        // 1 200. Avec `blockSize`, c'est la scène qui s'adapte au reste, et non l'inverse.
-        blockSize: '100dvh'
-      }}
+      style={styleHabillage}
     >
-      {/* ---------------------------------------------------------- barre de consigne
-          « Le décor s'agite, le texte jamais » : zone parchemin, police de lecture,
-          aucune animation dans le champ de déchiffrage (v2 § 9.3). */}
-      <header
-        className="zone-lecture barre-consigne"
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '1rem',
-          padding: '1rem',
-          border: 'var(--epaisseur-trait) solid var(--trait)',
-          borderRadius: 'var(--rayon-carte)'
-        }}
-      >
-        {/* LA SORTIE, en tête de la barre et non reléguée en pied : c'est le premier élément
-            que l'œil rencontre quand on cherche à partir. Voir l'encadré plus haut. */}
-        <button
-          type="button"
-          className="cible"
-          data-vers="carte"
-          aria-label="Revenir à la carte"
-          onClick={retourCarte}
-          style={{ flex: '0 0 auto', fontSize: '1.125rem', gap: '0.5rem' }}
-        >
-          <span aria-hidden="true">←</span>
-          <span>La carte</span>
-        </button>
-
-        <div style={{ flex: '1 1 auto' }}>
-          {etapeSortie === null || sortie === null ? null : (
-            <p data-progression-sortie style={{ margin: '0 0 0.4rem', fontWeight: 700 }}>
-              Exercice {String(rangSortie + 1)} sur {String(sortie.etapes.length)}
-            </p>
-          )}
-          {etapes.map((etape, index) => {
-            const etat =
-              index < indexCourant ? 'faite' : index === indexCourant ? 'courante' : 'a-venir';
-            if (etat !== 'courante') {
-              // Une seule consigne est active à la fois (§ 5.3). Les autres restent dans le
-              // DOM, mais hors du champ de lecture.
-              //
-              // `data-consigne-etat` n'est PAS émis ici : `PaletteConsigne` (moteur) en est le
-              // seul propriétaire. L'émettre des deux côtés faisait trouver 2 nœuds à
-              // `tests/e2e/parcours-nominal.spec.ts:170`, qui en attend exactement 1 — et le
-              // test composant, qui monte le moteur isolément, ne voit que la palette.
-              return <span key={etape.id} data-consigne={etape.id} hidden />;
-            }
-            return (
-              <p
-                key={etape.id}
-                data-consigne={etape.id}
-                style={{ margin: 0, fontSize: '1.75rem' }}
-              >
-                {texteCadreDeConsigne(codeMoteur, paquet.exercice.id, etape.texte)}
-              </p>
-            );
-          })}
-          {etapeCourante === null ? <p style={{ margin: 0 }}>&nbsp;</p> : null}
-        </div>
-
-        {etapeCourante === null ? null : (
+      <EnteteActivite
+        className="barre-consigne"
+        destination="carte"
+        libelleRetour="La carte"
+        nomRetour="Revenir à la carte"
+        surRetour={retourCarte}
+        ecoute={etapeCourante === null ? null : (
           <BoutonEcouter
             texte={etapeCourante.texte}
-            /* AJOUT N2 (contrat de finition v3 § 6.1, « six appelants adaptent leur mise en
-               page »). La propriété `clip` du bouton — un chemin de fichier — devient `cle`,
-               une clé de manifeste. On la CONSTRUIT ici plutôt que de la lire dans
-               l'exercice : c'est exactement la convention de `scripts/recenser-textes.mjs`,
-               `<idExercice>/<idConsigne>`, et la construire au même endroit que l'écran qui
-               l'affiche évite d'ajouter un champ aux fichiers d'exercice — dont N1 et N8 sont
-               propriétaires, pas N2. Le champ `audio` de l'exercice n'est plus lu du tout ;
-               il vaut `null` partout et le manifeste l'a remplacé. */
             cle={`${paquet.exercice.id}/${etapeCourante.id}`}
             surEcoute={() => emettre(ACTION_ECOUTE)}
           />
         )}
-
-        {/* La jauge du prochain cadeau. Elle est DANS la barre de consigne et non sur un côté :
-            « la progression doit être visible avant d'être atteinte » (D25, point 3), donc
-            sous les yeux pendant qu'on joue, pas rangée dans un menu. */}
-        {jaugeIntermediaire === null ? null : (
+        progression={jaugeIntermediaire === null ? null : (
           <JaugePalier jauge={jaugeIntermediaire} taille={16} avecLibelle={false} />
         )}
-      </header>
+      >
+        {etapeSortie === null || sortie === null ? null : (
+          <p className="activite-etape" data-progression-sortie>
+            Exercice {String(rangSortie + 1)} sur {String(sortie.etapes.length)}
+          </p>
+        )}
+        {etapes.map((etape, index) => index !== indexCourant ? (
+          <span key={etape.id} data-consigne={etape.id} hidden />
+        ) : (
+          <p key={etape.id} className="activite-consigne-texte" data-consigne={etape.id}>
+            {texteCadreDeConsigne(codeMoteur, paquet.exercice.id, etape.texte)}
+          </p>
+        ))}
+      </EnteteActivite>
 
-      {/* ---------------------------------------------------------- le moteur */}
-      {/*
-        LE DÉCOR EST MONTÉ ICI, UNE FOIS, POUR LES QUATORZE MOTEURS — R9, arbitré par le père
-        le 2026-08-03 : « oui fait comme ça, une seule fois dans EcranNoeud ».
-
-        Avant : deux moteurs sur quatorze montaient leur scène (`colorie`, `place`). Les douze
-        autres déclaraient un habillage et n'en affichaient rien — l'enfant jouait douze des
-        quatorze types de jeu sur un fond vide, et R13 (« jamais deux fois le même habillage
-        dans une sortie ») devenait inobservable, puisque deux habillages différents rendaient
-        un écran identique.
-
-        L'alternative était de reprendre les douze moteurs un par un : douze fois le coût, et
-        douze intégrations qui divergeraient. Ici, la scène retrouve la place que l'axe
-        « moteur × habillage × contenu » lui donne — l'habillage est le DÉCOR, le moteur est la
-        mécanique, et le moteur n'a pas à savoir dessiner.
-
-        `DecorDeFond` s'efface de lui-même pour les moteurs qui ont besoin d'un décor
-        ACTIONNABLE et montent le leur ; la liste est gardée par un test qui la croise avec le
-        code des moteurs, parce qu'une liste tenue à la main finit toujours par mentir.
-
-        `position: relative` porte le fond : sans lui, `inset: 0` se réfèrerait au bloc
-        contenant le plus proche, qui n'est pas celui-ci.
-      */}
-      <div className="scene-noeud" style={{ flex: '1 1 auto', minBlockSize: 0, position: 'relative' }}>
-        <DecorDeFond habillage={paquet.habillage} moteur={codeMoteur} />
-        {/* Le moteur passe DEVANT le fond. `zIndex` seul ne suffirait pas sur un élément non
-            positionné : sans `position: relative`, il resterait dans le même plan que le fond
-            et l'ordre du document déciderait — ce qui marche par accident aujourd'hui et
-            cesserait de marcher au premier moteur qui positionne un de ses enfants. */}
-        <div className="porteur-moteur" style={{ position: 'relative', zIndex: 1, blockSize: '100%' }}>
-          <ComposantMoteurMonte
-            contenu={paquet.exercice.jeu.contenu}
-            habillage={paquet.habillage}
-            etat={etatMoteur}
-            emettre={emettre}
-            services={services}
-            animationsDesactivees={animationsDesactivees}
-          />
-        </div>
-      </div>
-
-      {/* ---------------------------------------------------------- Gobi
-          R46 — LE TEXTE ET LE CLIP VIENNENT D'ICI, ET C'EST LE SEUL ENDROIT QUI PEUT LES
-          DONNER. Le moteur ne connaît pas l'identifiant de l'exercice — c'est déjà l'arbitrage
-          écrit dans `MoteurAssemble.tsx` pour le bouton « écouter », et il vaut mot pour mot
-          pour l'aide : « seul l'écran le connaît ».
-
-          La consigne et l'aide sont deux textes différents. La première garde son clip narrateur
-          dans la barre du haut ; l'aide ne réutilise pas ce clip. Les stratégies Gobi restent
-          visuelles tant que leurs cinq clips dédiés ne sont pas produits et validés. */}
+      <CadreSceneActivite decor={<DecorDeFond habillage={paquet.habillage} moteur={codeMoteur} />}>
+        <ComposantMoteurMonte
+          contenu={paquet.exercice.jeu.contenu}
+          habillage={paquet.habillage}
+          etat={etatMoteur}
+          emettre={emettre}
+          services={services}
+          animationsDesactivees={animationsDesactivees}
+        />
+      </CadreSceneActivite>
       <Gobi
         aide={aide}
         niveau={niveauAide}

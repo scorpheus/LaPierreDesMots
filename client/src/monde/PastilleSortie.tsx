@@ -106,45 +106,34 @@ export function PastilleSortie({
   const magasin = useMagasin();
   const resolutionDemandee = sortieInjectee === undefined;
 
-  // ═══════════════════════════════════════════════════════════════════════════════════════
-  // LES CLÉS SONT PROPRES À LA PASTILLE, ET C'EST UNE CORRECTION, PAS UNE PRÉCAUTION.
-  //
-  // Première écriture de ce fichier : les clés partagées `['monde', id]` et
-  // `['progression', id]`, « pour que les données soient déjà chaudes quand la carte s'ouvre ».
-  // Mesuré dans le vrai navigateur, `parcours-sortie-clairiere.spec.ts` est passé au rouge —
-  // « attendu 2/5, reçu 1/5 » — et le mécanisme est le suivant :
-  //
-  //   1. la page se charge, `EcranProfils` monte, la pastille lit la progression → elle est
-  //      vide, et le cache global la garde FRAÎCHE 30 s (`Application.tsx:32`) ;
-  //   2. le test journalise alors une réussite par `__test.chargerProfil` ;
-  //   3. l'enfant tape, `EcranCarte` monte, lit la MÊME clé, trouve la valeur d'avant, et
-  //      annonce « étape 1 sur 5 » alors qu'il en a fini une.
-  //
-  // Une pastille qui accélère l'entrée ne doit pas décider de ce que la carte affiche. Elle a
-  // donc ses propres clés, et `EcranCarte` retrouve exactement le comportement qu'il avait
-  // avant ce lot. Le prix est une requête locale de plus ; le prix inverse était un écran qui
-  // ment à l'enfant sur ce qu'il a déjà fait.
-  // ═══════════════════════════════════════════════════════════════════════════════════════
+  // Les projections de reprise partagent les clés que `RepriseDesTentatives` invalide après
+  // avoir relu le journal : la pastille et la carte repartent donc du même acquis réel.
   const requeteMonde = useQuery({
-    queryKey: ['pastille-sortie', 'monde', String(profil.id)],
+    queryKey: ['monde', String(profil.id)],
     queryFn: () => lireMonde(profil.id),
     enabled: resolutionDemandee,
-    // La pastille est revue à chaque retour sur l'écran de choix, après chaque sortie : sa
-    // destination doit être celle d'aujourd'hui, jamais celle d'il y a trente secondes.
     staleTime: 0,
     refetchOnMount: 'always'
   });
   const requeteProgression = useQuery({
-    queryKey: ['pastille-sortie', 'progression', String(profil.id)],
+    queryKey: ['progression', String(profil.id)],
     queryFn: () => lireProgression(profil.id),
     enabled: resolutionDemandee,
     staleTime: 0,
     refetchOnMount: 'always'
   });
 
+  const progression = requeteProgression.data ?? [];
   const noeudsFaits = useMemo(
-    () => new Set((requeteProgression.data ?? []).filter((ligne) => ligne.etoiles > 0).map((ligne) => String(ligne.noeud))),
-    [requeteProgression.data]
+    () => new Set(progression.filter((ligne) => ligne.etoiles > 0).map((ligne) => String(ligne.noeud))),
+    [progression],
+  );
+  const empreinteProgression = useMemo(
+    () => progression
+      .map((ligne) => `${String(ligne.noeud)}:${String(ligne.etoiles)}`)
+      .sort()
+      .join('|'),
+    [progression],
   );
 
   const destination = useMemo(
@@ -161,7 +150,9 @@ export function PastilleSortie({
       'pastille-sortie',
       'plan',
       String(profil.id),
-      destination === null ? null : String(destination.region)
+      destination === null ? null : String(destination.region),
+      destination === null ? null : String(destination.noeud),
+      empreinteProgression,
     ],
     queryFn: () => {
       if (destination === null) {
@@ -240,7 +231,7 @@ export function PastilleSortie({
   return (
     <button
       type="button"
-      className="cible cible-appel"
+      className="cible cible-appel pastille-sortie"
       data-pastille-sortie={String(profil.id)}
       data-sortie-noeud={premiereEtape === null ? '' : String(premiereEtape.noeud)}
       data-sortie-region={destination === null ? '' : String(destination.region)}
@@ -248,27 +239,20 @@ export function PastilleSortie({
       data-pictogramme="sortie"
       aria-label={`Partir en sortie avec ${String(profil.prenom)}`}
       onClick={partir}
-      style={{
-        flexDirection: 'column',
-        gap: '0.35rem',
-        inlineSize: '13rem',
-        minBlockSize: 'var(--cible-min, 64px)',
-        padding: '0.75rem',
-        ...style
-      }}
+      style={style}
     >
       {children ?? (
         <>
-          <span aria-hidden="true" style={{ fontSize: '2.75rem', lineHeight: 1 }}>
+          <span aria-hidden="true" className="pastille-sortie__icone">
             🥾
           </span>
-          <span className="titre" style={{ fontSize: '1.375rem' }}>
+          <span className="titre pastille-sortie__titre">
             On y va&nbsp;!
           </span>
           {/* Dire l'étape, jamais ce qui manque (C7) : « 2 sur 5 » est un état, pas une dette. */}
           {plan === null ? null : (
             <span data-sortie-etape={`1/${String(plan.etapes.length)}`}
-              style={{ fontSize: '1rem' }}>
+              className="pastille-sortie__etape">
               Étape 1 sur {plan.etapes.length}
             </span>
           )}

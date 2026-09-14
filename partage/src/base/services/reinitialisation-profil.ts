@@ -177,7 +177,10 @@ export async function reinitialiserProfil(
     // `dernier_acces_le` est touché dans la même transaction : le profil vient d'être
     // manipulé, et l'écran d'état doit le dire. `prenom` et `avatar_json` ne bougent JAMAIS —
     // les deux portées les conservent, c'est l'enfant qui reste.
-    await transaction.lancer('UPDATE profils SET dernier_acces_le = ? WHERE id = ?', [effectueLe, profilId]);
+    await transaction.lancer(
+      'UPDATE profils SET dernier_acces_le = ?, generation_progression = generation_progression + 1 WHERE id = ?',
+      [effectueLe, profilId]
+    );
 
     return comptes;
   });

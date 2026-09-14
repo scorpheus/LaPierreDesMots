@@ -16,6 +16,7 @@ export type { FichierMigration, RapportMigration } from './migrations.js';
 export { appliquerMigrations } from './migrations.js';
 
 export { hacherSha256Hex } from './hachage.js';
+export { GenerationProgressionPerimee } from './depots/tentatives.js';
 
 export type { DemandeCreationProfil } from './depots/profils.js';
 export {

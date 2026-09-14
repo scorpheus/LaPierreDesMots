@@ -80,9 +80,9 @@ export const MUTATIONS = [
     id: 'M2',
     titre: 'Le bouton « La carte » disparaît de l’écran du nœud — un écran sans issue',
     regle: 'D48 — le défaut n° 1 du père',
-    fichier: 'client/src/ecrans/EcranNoeud.tsx',
-    ancrage: '          data-vers="carte"',
-    remplacement: '          data-vers="carte-disparue"',
+    fichier: 'client/src/composants/activite/EnteteActivite.tsx',
+    ancrage: '        data-vers={destination}',
+    remplacement: "        data-vers={destination === 'carte' ? 'carte-disparue' : destination}",
     // ── CLIQUET RESSERRÉ LE 2026-08-02 À L'INTÉGRATION. « Pas avant » est arrivé.
     //
     // Le commentaire précédent, gardé ici parce qu'il vaut plus que la ligne qu'il explique,
@@ -365,9 +365,13 @@ export const MUTATIONS = [
     id: 'M23',
     titre: 'La pastille de région passe de 50 à 20 de rayon — la carte devient intapable',
     regle: 'R16',
-    fichier: 'client/src/ecrans/EcranCarte.tsx',
-    ancrage: 'const RAYON_PRISE = 50;',
-    remplacement: 'const RAYON_PRISE = 20;',
+    fichier: 'client/src/monde/carte/CarteMonde.tsx',
+    // Le rayon s'adapte au zoom du SVG. Ne muter que la constante nominale laisserait le
+    // clamp `33 / echelle` rendre une cible de 66 px : mutant équivalent, donc banc trompeur.
+    // Cette recette abaisse les deux bornes à 20 et 13 / échelle (26 px de diamètre).
+    ancrage:
+      /const RAYON_PRISE = 50;([\s\S]{0,1600}?if \(echelle > 0\) fixerRayonPrise\()Math\.max\(RAYON_PRISE, 33 \/ echelle\)(\);)/,
+    remplacement: 'const RAYON_PRISE = 20;$1Math.max(20, 13 / echelle)$2',
     attendu: 'SURVIT',
     couvertPar: 'e2e',
     assertionE2E: 'tests/e2e/qa-outils.ts:471 — `ciblesTropPetites()` sur `SELECTEUR_INTERACTIF`',

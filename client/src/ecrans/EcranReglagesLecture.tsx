@@ -28,6 +28,7 @@ import type { BorneReglage, CodePolice, ReglagesLecture } from "@pierre/partage/
 import type { Profil } from "@pierre/partage";
 
 import { ecrireReglagesLecture } from "../api/client.js";
+import '../styles/parent.css';
 import { ApercuReglages } from "../lecture/ApercuReglages.js";
 import { policeDisponible } from "../lecture/polices.js";
 import { cleReglages, lireReglages } from "../lecture/reglages-du-profil.js";
@@ -182,7 +183,7 @@ export function EcranReglagesLecture({
   return (
     <main data-ecran="reglages-lecture" className="ecran-reglages-lecture">
       <header className="reglages-entete">
-        <h1 className="titre" style={{ fontSize: "2.5rem", margin: 0 }}>
+        <h1 className="titre reglages-lecture-titre">
           Comment préfères-tu lire&nbsp;?
         </h1>
         <button
@@ -209,8 +210,8 @@ export function EcranReglagesLecture({
       <div className="reglages-grille">
         {/* ------------------------------------------------------------------ la police */}
         <section aria-labelledby="titre-police" data-groupe-reglage="police">
-          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-            <h2 id="titre-police" className="titre" style={{ fontSize: "1.5rem" }}>
+          <div className="reglages-groupe-entete">
+            <h2 id="titre-police" className="titre reglages-groupe-titre">
               La forme des lettres
             </h2>
             <button
@@ -226,7 +227,7 @@ export function EcranReglagesLecture({
               <span aria-hidden="true">🔊</span>
             </button>
           </div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem" }}>
+          <div className="reglages-choix">
             {POLICES.map((police) => {
               const disponible =
                 typeof document === "undefined" ? true : policeDisponible(police, document);
@@ -258,8 +259,8 @@ export function EcranReglagesLecture({
           const valeur = reglages[cle];
           return (
             <section key={cle} data-groupe-reglage={cle} aria-labelledby={`titre-${cle}`}>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-                <h2 id={`titre-${cle}`} className="titre" style={{ fontSize: "1.5rem" }}>
+              <div className="reglages-groupe-entete">
+                <h2 id={`titre-${cle}`} className="titre reglages-groupe-titre">
                   {intitule}
                 </h2>
                 <button
@@ -275,7 +276,7 @@ export function EcranReglagesLecture({
                   <span aria-hidden="true">🔊</span>
                 </button>
               </div>
-              <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+              <div className="reglages-mesure">
                 <button
                   type="button"
                   className="cible"
@@ -293,7 +294,7 @@ export function EcranReglagesLecture({
                   data-valeur={cle}
                   data-valeur-brute={String(valeur)}
                   aria-live="polite"
-                  style={{ minInlineSize: "8rem", margin: 0, textAlign: "center" }}
+                  className="reglages-valeur"
                 >
                   {positionLisible(valeur, borne)}
                 </p>
@@ -317,7 +318,7 @@ export function EcranReglagesLecture({
 
         {/* ------------------------------------------------------------------ les bascules */}
         <section data-groupe-reglage="options" aria-label="Aides à la lecture">
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem" }}>
+          <div className="reglages-choix">
             {INTERRUPTEURS.map(({ cle, intitule }) => (
               <button
                 key={cle}

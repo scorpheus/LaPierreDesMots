@@ -156,6 +156,11 @@ export async function validerTentative(
   }
 
   const brut = corps as Record<string, unknown>;
+  const generation = brut['generationProgression'];
+  if (generation !== undefined && (typeof generation !== 'number' ||
+      !Number.isSafeInteger(generation) || generation < 0)) {
+    return { ok: false, message: 'La génération de progression doit être un entier positif ou nul.' };
+  }
 
   const obligatoires: readonly string[] = [
     'profil',
@@ -223,6 +228,7 @@ export async function validerTentative(
     valeur: {
       cleIdempotence: cleFournie ?? (await deriverCleIdempotence(profil, noeud, demarreLe, graine)),
       profil,
+      ...(generation === undefined ? {} : { generationProgression: generation as number }),
       noeud,
       exercice: valeurs.get('exercice') ?? '',
       moteur: valeurs.get('moteur') ?? '',

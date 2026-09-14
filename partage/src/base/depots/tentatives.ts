@@ -73,6 +73,7 @@ interface LigneTentative {
 export interface TentativeValidee {
   readonly cleIdempotence: string;
   readonly profil: string;
+  readonly generationProgression?: number;
   readonly noeud: string;
   readonly exercice: string;
   readonly moteur: string;
@@ -81,6 +82,13 @@ export interface TentativeValidee {
   readonly demarreLe: string;
   readonly termineLe: string;
   readonly resume: ResumeTentative;
+}
+
+export class GenerationProgressionPerimee extends Error {
+  constructor() {
+    super('Cette tentative appartient à une progression qui a été remise à zéro.');
+    this.name = 'GenerationProgressionPerimee';
+  }
 }
 
 export interface ResultatEnregistrement {
@@ -254,6 +262,16 @@ export async function enregistrerTentative(
     : 'aucune';
 
   return base.transaction(async (transaction) => {
+    // Avant l'idempotence : un ACK perdu suivi d'un reset ne doit jamais ressusciter l'acquis.
+    // Le même verrou transactionnel couvre la lecture de génération et l'insertion.
+    if (validee.generationProgression !== undefined) {
+      const profil = await transaction.uneLigne<{ generation_progression: number }>(
+        'SELECT generation_progression FROM profils WHERE id = ?', [validee.profil]
+      );
+      if (profil === undefined || Number(profil.generation_progression) !== validee.generationProgression) {
+        throw new GenerationProgressionPerimee();
+      }
+    }
     const dejaLa = await lireParCle(transaction, validee.cleIdempotence);
     if (dejaLa !== null) {
       return {

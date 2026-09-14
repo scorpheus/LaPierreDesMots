@@ -68,9 +68,12 @@ async function preparer(page: Page, fixture: Record<string, unknown> = fixturePr
   );
 }
 
-/** Le geste de l'enfant : choisir son profil. Il emmène à la carte. */
+/** Le geste de l'enfant : profil, campement, puis carte. */
 async function ouvrirLaCarte(page: Page): Promise<void> {
   await page.getByText(String(fixtureProfil['prenom']), { exact: false }).first().click();
+  const campement = page.locator('[data-ecran="campement"]');
+  await expect(campement).toBeVisible();
+  await campement.locator('[data-vers="carte"]').click();
   await expect(page.locator('[data-ecran="carte"]')).toBeVisible();
   // La carte est prête quand ses six régions portent leur état — jamais après une durée.
   await expect(page.locator('[data-region-etat]')).toHaveCount(6);

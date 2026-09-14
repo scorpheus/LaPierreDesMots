@@ -16,6 +16,7 @@ import type { ProgressionNoeud, ReponseTentative } from '@pierre/partage';
 import type { ContexteServeur } from '../configuration.js';
 import { CODES_ERREUR, erreurApi } from '../configuration.js';
 import {
+  GenerationProgressionPerimee,
   enregistrerTentative,
   lireProgressionNoeud,
   profilExiste,
@@ -73,14 +74,18 @@ export function enregistrerRoutesTentatives(
         ? undefined
         : { competences, parametres: chargerParametresPedagogie() };
 
-    const resultat = await enregistrerTentative(
-      contexte.base,
-      validee,
-      contexte.horloge,
-      chargerSeuilsCascade(),
-      chargerReferentielMonde(),
-      pedagogie
-    );
+    let resultat: Awaited<ReturnType<typeof enregistrerTentative>>;
+    try {
+      resultat = await enregistrerTentative(
+        contexte.base, validee, contexte.horloge, chargerSeuilsCascade(),
+        chargerReferentielMonde(), pedagogie
+      );
+    } catch (cause) {
+      if (cause instanceof GenerationProgressionPerimee) {
+        return reponse.code(409).send({ code: 'generation-progression-perimee', message: cause.message });
+      }
+      throw cause;
+    }
 
     // Le filet du lot A1 a-t-il servi ? Il ne devrait JAMAIS servir : les quatorze moteurs
     // posent `nbElements` et un test le garde moteur par moteur. S'il sert, c'est qu'un moteur

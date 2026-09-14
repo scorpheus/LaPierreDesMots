@@ -76,6 +76,14 @@ async function ouvrirLeNoeud(page: Page): Promise<void> {
   await expect(page.locator('[data-test-pret="oui"]')).toBeVisible();
 }
 
+async function ouvrirLaCarte(page: Page): Promise<void> {
+  await page.getByText(String(fixtureProfil['prenom']), { exact: false }).first().click();
+  const campement = page.locator('[data-ecran="campement"]');
+  await expect(campement).toBeVisible();
+  await campement.locator('[data-vers="carte"]').click();
+  await expect(page.locator('[data-ecran="carte"]')).toBeVisible();
+}
+
 async function terminerLExercice(page: Page): Promise<void> {
   for (let tour = 0; tour < 64; tour += 1) {
     const etat = (await page.evaluate(
@@ -131,8 +139,7 @@ test.describe('axe-core sur les quatre écrans', () => {
 
   test('écran de la carte', async ({ page }) => {
     await preparer(page);
-    await page.getByText(String(fixtureProfil['prenom']), { exact: false }).first().click();
-    await expect(page.locator('[data-ecran="carte"]')).toBeVisible();
+    await ouvrirLaCarte(page);
     await auditerA11y(page, 'carte');
   });
 

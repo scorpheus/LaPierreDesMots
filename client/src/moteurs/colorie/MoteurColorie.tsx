@@ -158,6 +158,7 @@ export function MoteurColorie(
   return (
     <div
       data-moteur="colorie"
+      data-plateau-defilant="oui"
       data-habillage={habillage.id}
       data-termine={etat.termineMs === null ? 'non' : 'oui'}
       // La scène peut maintenant rétrécir pour tenir dans la tablette : `SceneSvg` sépare le

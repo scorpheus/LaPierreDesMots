@@ -1,3 +1,4 @@
+import { lireStyles } from '../configuration/styles.js';
 // @vitest-environment happy-dom
 /**
  * M26 — « AUCUNE ANIMATION DANS LE CHAMP DE LECTURE » N'AVAIT AUCUN GARDE MÉCANIQUE.
@@ -254,7 +255,7 @@ function auditerLeSousArbre(animees: ReadonlySet<string>): {
   return { griefs, noeuds: tous.length };
 }
 
-const CSS = lireTexte(CHEMIN_GLOBAL_CSS);
+const CSS = lireStyles(CHEMIN_GLOBAL_CSS);
 const REGLES = reglesDe(CSS);
 const CLASSES_ANIMEES = classesAnimees(CSS);
 

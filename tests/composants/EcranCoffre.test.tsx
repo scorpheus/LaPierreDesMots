@@ -128,15 +128,21 @@ describe('rien ne sort jamais du coffre, et le vide se montre (R14, D25)', () =>
 
   it('laisse l’album prendre sa hauteur en portrait : les collections ne se chevauchent pas', () => {
     const feuille = readFileSync(
-      join(RACINE_DEPOT, 'client', 'src', 'styles', 'global.css'),
+      join(RACINE_DEPOT, 'client', 'src', 'styles', 'collections.css'),
       'utf8',
     );
 
     // À 360 × 640, un album `flex: 1` à hauteur minimale nulle plaçait la rangée
     // « Éclats » sur les cartes de formes. Le défilement doit appartenir à la page,
     // jamais à un album qui écrase ses propres sections.
+    // Réhabilitation § 3 : la page possède maintenant une grille de hauteur naturelle.
+    // L'album passe à une colonne en portrait ; aucune hauteur fixe ne borne ses rangées.
+    const compositions = [...feuille.matchAll(/\.collections-coffre\s*\{([^}]+)\}/gu)]
+      .map((regle) => regle[1] ?? '');
+    expect(compositions.length).toBeGreaterThan(0);
+    expect(compositions.join('\n')).not.toMatch(/(?:^|;)\s*(?:max-)?block-size\s*:/u);
     expect(feuille).toMatch(
-      /@media \(max-width: 900px\), \(orientation: portrait\) \{[\s\S]*?\.collections-coffre \{[\s\S]*?flex: 0 0 auto;[\s\S]*?min-block-size: auto;/u,
+      /@media \(max-width: 780px\), \(orientation: portrait\) \{[\s\S]*?\.collections-coffre \{[^}]*grid-template-columns: 1fr;/u,
     );
   });
 

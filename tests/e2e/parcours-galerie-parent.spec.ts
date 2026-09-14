@@ -256,6 +256,9 @@ test.describe('la galerie est invisible côté enfant — D34, propriété n° 3
     expect(await compter(), 'écran des profils').toBe(0);
 
     await page.locator('[data-profil]').first().click();
+    await expect(page.locator('[data-ecran="campement"]')).toBeVisible();
+    expect(await compter(), 'campement après le choix du profil').toBe(0);
+    await page.locator('[data-vers="carte"]').click();
     await expect(page.locator('[data-ecran="carte"]')).toBeVisible();
     expect(await compter(), 'carte du monde').toBe(0);
 

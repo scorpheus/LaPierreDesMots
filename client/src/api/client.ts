@@ -16,6 +16,8 @@
 // l'importe n'exécute sa propre première ligne. `port` est donc déjà résolu avant qu'aucun des
 // exports ci-dessous ne puisse être appelé.
 import type { PortApi } from './contrat.js';
+import { creerFileTentatives } from './tentatives-en-attente.js';
+import { ErreurReseau } from './commun.js';
 
 export type { PaquetNoeudAttendu, DashboardParent } from './contrat.js';
 export { ErreurReseau, calculerCleIdempotence, fermerZoneParent, jetonParentPose } from './commun.js';
@@ -27,14 +29,57 @@ const port: PortApi =
     ? (await import('./port-local.js')).portLocal
     : (await import('./port-http.js')).portHttp;
 
+const modeDonnees = import.meta.env.MODE === 'pwa' || import.meta.env.MODE === 'autonome'
+  ? import.meta.env.MODE : 'lan';
+const attentes = creerFileTentatives({
+  prefixe: `pierre.tentatives-attente.v1:${modeDonnees}:${import.meta.env.BASE_URL}:`,
+  stockage: () => {
+    if (globalThis.localStorage === undefined) throw new Error('Le stockage local est indisponible.');
+    return globalThis.localStorage;
+  },
+  envoyer: (tentative) => port.enregistrerTentative(tentative)
+});
+
+export const enregistrerTentative = attentes.enregistrer;
+export const conserverTentativeTerminee = attentes.conserver;
+export const reprendreTentativesEnAttente = attentes.reprendre;
+export const viderTentativesEnAttente = attentes.vider;
+export const remplacerDonneesAvecTentatives = attentes.remplacerDonnees;
+export const lireMessageImportInterrompu = attentes.messageSuspension;
+
+export const lireProfil: PortApi['lireProfil'] = async (id) => {
+  try { return await port.lireProfil(id); }
+  catch (cause) {
+    if (cause instanceof ErreurReseau && cause.statut === 404) attentes.oublier(String(id));
+    throw cause;
+  }
+};
+
+function oublierApresEffacement(profil: string): void {
+  try { attentes.oublier(profil); }
+  catch (cause) {
+    // Le serveur a confirmé l'effacement. La génération bloque aussi tout reliquat local.
+    console.warn('[tentative] progression effacée, copie locale encore présente :', cause);
+  }
+}
+
+export const reinitialiserProfilParent: PortApi['reinitialiserProfilParent'] = async (...arguments_) => {
+  const rapport = await port.reinitialiserProfilParent(...arguments_);
+  oublierApresEffacement(String(arguments_[0]));
+  return rapport;
+};
+export const supprimerProfilParent: PortApi['supprimerProfilParent'] = async (...arguments_) => {
+  const rapport = await port.supprimerProfilParent(...arguments_);
+  oublierApresEffacement(String(arguments_[0]));
+  return rapport;
+};
+
 export const {
   lireSante,
   listerProfils,
   creerProfil,
-  lireProfil,
   lireProgression,
   lirePaquetNoeud,
-  enregistrerTentative,
   urlAsset,
   lireReglagesLecture,
   ecrireReglagesLecture,
@@ -55,7 +100,5 @@ export const {
   trancherRelectureContenu,
   lireEtatProfilParent,
   apercuReinitialisationProfil,
-  reinitialiserProfilParent,
-  apercuSuppressionProfil,
-  supprimerProfilParent
+  apercuSuppressionProfil
 } = port;

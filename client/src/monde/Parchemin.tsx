@@ -7,12 +7,15 @@
 // ombre. Les six régions, le voile et le chemin sont posés par-dessus, en enfants. La
 // séparation n'est pas cosmétique : « le décor s'agite, le texte jamais » (v2 § 9.3), et le
 // parchemin est précisément la surface sur laquelle on lit — il ne bouge donc jamais.
+import { useId } from 'react';
 import type { ReactElement, ReactNode } from 'react';
 
 export interface ProprietesParchemin {
   /** Le `viewBox` de la scène posée dessus, pour que support et contenu partagent l'échelle. */
   readonly viewBox?: string;
   readonly titre?: string;
+  /** Le décor suit les bords du papier ; les cibles tactiles gardent toute leur surface. */
+  readonly fond?: ReactNode;
   readonly children?: ReactNode;
 }
 
@@ -22,8 +25,10 @@ const CONTOUR = 'M12,28 L1188,12 L1176,776 L24,788 Z';
 export function Parchemin({
   viewBox = '0 0 1200 800',
   titre = 'La carte du monde',
+  fond,
   children
 }: ProprietesParchemin): ReactElement {
+  const decoupe = useId();
   return (
     <div
       data-parchemin="oui"
@@ -64,6 +69,9 @@ export function Parchemin({
         }}
       >
         <title>{titre}</title>
+        <defs>
+          <clipPath id={decoupe}><path d={CONTOUR} /></clipPath>
+        </defs>
         <path
           d={CONTOUR}
           fill="var(--parchemin)"
@@ -71,7 +79,10 @@ export function Parchemin({
           strokeWidth="8"
           strokeLinejoin="round"
         />
+        <g clipPath={`url(#${decoupe})`}>{fond}</g>
         {children}
+        <path d={CONTOUR} fill="none" stroke="#C9B48A" strokeWidth="8"
+          strokeLinejoin="round" pointerEvents="none" aria-hidden="true" />
       </svg>
     </div>
   );
