@@ -2947,30 +2947,60 @@
     "file": "assets/ductus-minuscules-B8XBqC8V.json",
     "src": "../contenu/referentiel/ductus-minuscules.json"
   },
-  "_compagnons-CIbzGC0v.js": {
-    "file": "assets/compagnons-CIbzGC0v.js",
-    "name": "compagnons"
+  "_GalerieExercices-Dyi14xEW.js": {
+    "file": "assets/GalerieExercices-Dyi14xEW.js",
+    "name": "GalerieExercices",
+    "imports": [
+      "index.html",
+      "_partage-Cax0073I.js"
+    ]
+  },
+  "_commun-BGaluCk_.js": {
+    "file": "assets/commun-BGaluCk_.js",
+    "name": "commun"
+  },
+  "_partage-Cax0073I.js": {
+    "file": "assets/partage-Cax0073I.js",
+    "name": "partage"
+  },
+  "_referentiels-CZqLb5_W.js": {
+    "file": "assets/referentiels-CZqLb5_W.js",
+    "name": "referentiels",
+    "assets": [
+      "assets/campement-DXQia1bV.json",
+      "assets/gobi-stades-CNVGYk5O.json",
+      "assets/regions-KaGt3j0-.json",
+      "assets/competences-OMAh9bxl.json",
+      "assets/ductus-minuscules-B8XBqC8V.json"
+    ]
   },
   "index.html": {
-    "file": "assets/index-DjLnezI-.js",
+    "file": "assets/index-ByRAZ2ha.js",
     "name": "index",
     "src": "index.html",
     "isEntry": true,
     "imports": [
-      "_compagnons-CIbzGC0v.js"
+      "_partage-Cax0073I.js",
+      "_commun-BGaluCk_.js",
+      "_referentiels-CZqLb5_W.js"
     ],
     "dynamicImports": [
       "src/api/port-local.ts",
-      "src/base/adaptateur-sqlite-wasm.ts"
+      "src/ecrans/EcranDashboard.tsx",
+      "src/ecrans/EcranGalerieParent.tsx",
+      "src/parent/VisiteDesEcrans.tsx",
+      "src/ecrans/EcranDebugRecompenses.tsx"
     ]
   },
   "src/api/port-local.ts": {
-    "file": "assets/port-local-BSjgiwA1.js",
+    "file": "assets/port-local-9kcrxN3Z.js",
     "name": "port-local",
     "src": "src/api/port-local.ts",
     "isDynamicEntry": true,
     "imports": [
-      "_compagnons-CIbzGC0v.js"
+      "_commun-BGaluCk_.js",
+      "_partage-Cax0073I.js",
+      "_referentiels-CZqLb5_W.js"
     ],
     "dynamicImports": [
       "src/base/adaptateur-sqlite-wasm.ts"
@@ -3707,12 +3737,7 @@
       "assets/volcan-wagons-tri-02-wagon-gauche.normal.b1ff73c7-DzorLug9.opus",
       "assets/volcan-wagons-tri-02-wagon-milieu.normal.1576ca5f-vSg04-dQ.opus",
       "assets/manifeste-DI0ixzSE.json",
-      "assets/minuscules-BZoXV0wx.json",
-      "assets/campement-DXQia1bV.json",
-      "assets/gobi-stades-CNVGYk5O.json",
-      "assets/regions-KaGt3j0-.json",
-      "assets/competences-OMAh9bxl.json",
-      "assets/ductus-minuscules-B8XBqC8V.json"
+      "assets/minuscules-BZoXV0wx.json"
     ]
   },
   "src/base/adaptateur-sqlite-wasm.ts": {
@@ -3721,8 +3746,61 @@
     "src": "src/base/adaptateur-sqlite-wasm.ts",
     "isDynamicEntry": true
   },
+  "src/ecrans/EcranDashboard.tsx": {
+    "file": "assets/EcranDashboard-0ZvhvGaX.js",
+    "name": "EcranDashboard",
+    "src": "src/ecrans/EcranDashboard.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "index.html",
+      "_GalerieExercices-Dyi14xEW.js",
+      "_partage-Cax0073I.js",
+      "_commun-BGaluCk_.js",
+      "_referentiels-CZqLb5_W.js"
+    ],
+    "dynamicImports": [
+      "src/base/adaptateur-sqlite-wasm.ts"
+    ]
+  },
+  "src/ecrans/EcranDebugRecompenses.tsx": {
+    "file": "assets/EcranDebugRecompenses-CU1np2YZ.js",
+    "name": "EcranDebugRecompenses",
+    "src": "src/ecrans/EcranDebugRecompenses.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "index.html",
+      "_partage-Cax0073I.js",
+      "_referentiels-CZqLb5_W.js",
+      "_commun-BGaluCk_.js"
+    ]
+  },
+  "src/ecrans/EcranGalerieParent.tsx": {
+    "file": "assets/EcranGalerieParent-CMyzdl1V.js",
+    "name": "EcranGalerieParent",
+    "src": "src/ecrans/EcranGalerieParent.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "index.html",
+      "_GalerieExercices-Dyi14xEW.js",
+      "_partage-Cax0073I.js",
+      "_commun-BGaluCk_.js",
+      "_referentiels-CZqLb5_W.js"
+    ]
+  },
+  "src/parent/VisiteDesEcrans.tsx": {
+    "file": "assets/VisiteDesEcrans-B7h3W2U9.js",
+    "name": "VisiteDesEcrans",
+    "src": "src/parent/VisiteDesEcrans.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "index.html",
+      "_partage-Cax0073I.js",
+      "_commun-BGaluCk_.js",
+      "_referentiels-CZqLb5_W.js"
+    ]
+  },
   "style.css": {
-    "file": "assets/style-DiGsuuSU.css",
+    "file": "assets/style-VIgsEmSV.css",
     "src": "style.css"
   }
 }
