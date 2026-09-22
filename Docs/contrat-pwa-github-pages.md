@@ -85,7 +85,7 @@ accord. Aucun agent ne doit considérer l’authentification `gh` de cette machi
 autorisation implicite d’écrire sur GitHub.
 
 Le script utilisateur à la racine est `publier-site.bat`. Son mode `--preparer` est sûr à relancer,
-refuse une campagne de tests concurrente, exécute une seule validation complète, construit la PWA,
+refuse une campagne de tests concurrente, réutilise une validation complète encore exacte ou en exécute une, construit la PWA,
 prépare le commit local `gh-pages` et enregistre ses empreintes dans le bac à sable. Il n’écrit
 jamais sur GitHub. Après l’annonce de l’action distante et l’accord du propriétaire, le mode
 `--publier` refuse toute divergence depuis cette préparation, pousse le commit exact, attend
@@ -119,7 +119,7 @@ fichiers disjoints et lisent ce document au lieu d’en recopier une variante da
 
 ## 7. Recette avant publication
 
-La publication n’est proposée que si les preuves suivantes sont vertes dans le même tour :
+La publication n’est proposée que si les preuves suivantes sont vertes pour le livrable concerné :
 
 1. création d’un profil et d’au moins une tentative en mode PWA local ;
 2. fermeture puis réouverture dans le même profil Chromium : progression identique ;
@@ -201,3 +201,25 @@ rechargement hors connexion sous contrôle du service worker, le refus du second
 `https://scorpheus.github.io/LaPierreDesMots/`, l’export/import de SQLite, le refus atomique d’une
 sauvegarde invalide, zéro requête `/api/`, zéro erreur de page et la conservation d’une route
 profonde après rafraîchissement.
+
+
+### Réutilisation des preuves de validation — 22 septembre 2026
+
+La préparation et le crochet pre-push appellent `npm run verifier -- --si-necessaire`.
+La preuve locale `bac-a-sable/verification-preuve.json` est écrite uniquement à la fin d’une
+campagne complète verte. Elle compare les octets des fichiers Git suivis et nouveaux, voix,
+polices, dépendances installées, navigateurs locaux et fichiers `.env*`, ainsi que Node, OS,
+architecture et variables de configuration des tests. Les caches d’outils sont des sorties,
+exclus de cette empreinte ; les rapports canoniques ont une empreinte séparée.
+
+Les entrées doivent être identiques avant et après la campagne et à la réutilisation. Les
+15 rapports doivent encore être présents, inchangés et réussis, avec des cas réellement exécutés.
+Une campagne forcée invalide immédiatement la preuve précédente ; un verrou exclusif empêche
+les campagnes concurrentes. Le pre-push exige en plus un dépôt propre. Le pre-commit ne réutilise
+lint/logique que si l’index correspond au contenu testé ; le contrôle des tests trompeurs reste
+systématique. Sans preuve exacte, les contrôles habituels s’exécutent.
+
+Cela permet de vérifier avant le commit, puis de préparer et pousser les mêmes octets sans
+refaire les parcours navigateur. `npm run verifier` sans option force toujours une campagne.
+La preuve est locale et ne certifie ni une nouvelle machine ni la tablette familiale. Le build PWA,
+les empreintes de livraison, l’autorisation distante et la recette HTTPS restent obligatoires.

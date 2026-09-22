@@ -22,7 +22,7 @@
  * Ce script ne fait ni `npm install` ni `npx playwright install` : l'installation est réservée
  * à l'orchestrateur (contrat § 8.2, prérequis).
  */
-import { spawnSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -43,6 +43,7 @@ import {
 } from './rapport.mjs';
 
 const DOSSIER_JOURNAUX = join(DOSSIER_RAPPORTS, 'artefacts', 'journaux');
+import { calculerEntrees, commencerVerification, enregistrerPreuve, lirePreuveValide, verrouillerVerification } from './preuve-verification.mjs';
 
 /**
  * La chaîne, dans l'ordre du contrat § 8.2.
@@ -147,6 +148,23 @@ const MOTIFS_DEFAUT_DE_CODE = [
  */
 const NOTE_NON_EXECUTEE = 'étape non exécutée — `npm run verifier` ne s’est pas rendu jusque-là.';
 
+const libererVerification = verrouillerVerification();
+process.on('exit', libererVerification);
+if (process.argv.includes('--exiger-propre') && execFileSync('git', ['status', '--porcelain'], { cwd: RACINE, encoding: 'utf8' }).trim()) {
+  console.error('Le push exige un dépôt propre : les fichiers testés doivent correspondre au commit envoyé.');
+  process.exit(1);
+}
+const inventaireVerification = [];
+const entreesVerification = calculerEntrees(RACINE, inventaireVerification);
+if (process.argv.includes('--si-necessaire')) {
+  const preuve = lirePreuveValide(RACINE, entreesVerification);
+  if (preuve) {
+    console.log(`Validation réutilisée : ${preuve.etapes} étapes vertes du ${preuve.valideLe}, entrées et rapports inchangés.`);
+    process.exit(0);
+  }
+  console.log('Aucune preuve complète valide : exécution de la campagne.');
+}
+commencerVerification(RACINE, entreesVerification, inventaireVerification);
 preparerDossiers();
 mkdirSync(DOSSIER_JOURNAUX, { recursive: true });
 
@@ -547,4 +565,5 @@ console.log(
 console.log(`Rapport lisible : ${'tests/rapports/RAPPORT.md'}`);
 console.log(`Durée totale : ${((Date.now() - debutGlobal) / 1000).toFixed(1)} s`);
 
+if (bilan.bloquantes === 0) enregistrerPreuve(entreesVerification);
 process.exit(bilan.bloquantes > 0 ? 1 : 0);

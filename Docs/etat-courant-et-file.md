@@ -5,13 +5,22 @@ Le contrat de la reconstruction est [le plan de réhabilitation](plan-rehabilita
 
 ## Décision et demande active
 
+**22 septembre — protocole de livraison économique.** Chantier suivant explicitement demandé :
+réutiliser une campagne complète si ses entrées et ses rapports sont inchangés, au lieu de la
+répéter au commit, à la préparation et au push. Les fichiers sources, tests, ressources locales,
+dépendances installées et navigateurs participent à la preuve. Aucune garde désactivée ; campagne
+forcée toujours accessible par `npm run verifier`. Fichiers : scripts de vérification/publication,
+crochets Git et procédure PWA ; aucun changement de jeu, de données ni de références visuelles.
+Qualification : tests des invalidations, campagne intégrée puis mesure du chemin de réutilisation.
+Résultat de la campagne dans `tests/rapports/RAPPORT.md` ; détails dans la réalisation.
+
 **22 septembre — nettoyage et qualification du dépôt.** Le parent demande de diagnostiquer
 les tests rouges, corriger les bugs et les attentes périmées, puis vérifier l'ensemble.
 Les corrections couvrent navigation, stabilité des consignes, géométrie tactile et budget
 du premier chargement. Bilan consolidé : **15 étapes vertes sur 15** ; 2 807 tests de logique,
 921 parcours, 321 contrôles de qualité et 13 tests visuels passent. Le parent a validé toutes
 les vues présentées ; leurs références sont intégrées. La recette PWA locale passe. Détails et preuves dans la section du 22 septembre de
-[la réalisation](realisation-rehabilitation-site.md). Commit, push et publication explicitement autorisés par le parent le 22 septembre ; livraison en préparation.
+[la réalisation](realisation-rehabilitation-site.md). Livraison terminée : source `996a78f`, `gh-pages` `abd745a`, version `66e0bee4f2f07a39`, Action Pages `35709558384` réussie et recette HTTPS verte.
 
 Le parent demande une reconstruction cohérente de la présentation et une méthode économique,
 avec un design présentable sur PC, tablette et téléphone. Il refuse la poursuite d'une boucle
@@ -55,7 +64,8 @@ source `0477867`, `gh-pages` `74dc513f`, action Pages `34854401493` réussie ; v
 | R2 — tranche complète | Parcours téléphone et tablette réussis | Vraie réussite, rechargement du même profil, revisite sans crédit supplémentaire et abandon vérifiés. |
 | R3 — migration | Écrans migrés, gel fonctionnel | Feuilles spécialisées, 14 moteurs et 25 cas de repères coloriage validés ; file durable et reset intégrés. |
 | R4 — livraison et présentation | Après migration complète et contrôles | Version entière prête aux essais du parent et de sa famille ; livrable identifié, recette finale, visa parent et publication explicitement autorisée. |
-| Nettoyage du 22 septembre | Clos localement : 15/15 étapes vertes, recette PWA et visa parent obtenus | Références approuvées intégrées et 13 comparaisons visuelles réussies. Publication autorisée par le parent, en préparation. |
+| Protocole de livraison | Réutilisation implantée, qualification dans le rapport courant | Une seule campagne par contenu ; mesure des gardes de réutilisation et conservation des contrôles distants. |
+| Nettoyage du 22 septembre | Clos localement : 15/15 étapes vertes, recette PWA et visa parent obtenus | Références approuvées intégrées et 13 comparaisons visuelles réussies. Publication réalisée et vérifiée en HTTPS. |
 
 Les anciens sujets ne sont pas effacés : F1 progression rejoint R2/R3 ; F2 cadrage et calques
 rejoint R1/R3 ; F3 accueil/carte/campement rejoint R1/R3 ; F4 informations parent et version
@@ -63,9 +73,8 @@ rejoint R3 ; F5 livraison rejoint R4. F0 est la base locale validée décrite ci
 
 ## Base et coordination
 
-- Référence Git actuelle : `0477867`, publication anticipée du 14 septembre. Les corrections
-  du 22 septembre et le travail local préexistant ne sont pas committés ; ne pas les perdre
-  en créant un checkout depuis le seul commit.
+- Référence Git actuelle : `996a78f`, poussée sur `codex/rehabilitation-interface`. Le nettoyage
+  du 22 septembre est publié ; le chantier suivant concerne uniquement le protocole de livraison.
 - La tâche « Résoudre les problèmes de campagne » a clos F0 et rendu le jeton de tests le
   14 septembre à 13 h 58. Elle n'engage aucun lot suivant. Le nettoyage du 22 septembre est
   conduit par la tâche courante, avec une seule campagne à la fois.
@@ -79,7 +88,7 @@ rejoint R3 ; F5 livraison rejoint R4. F0 est la base locale validée décrite ci
   Détails et preuves : [audit PWA](audit-fiabilite-pwa-2026-09-14.md).
 - Corrections PWA de la livraison précédente : caches versionnés, reprises et expiration d'installation,
   nettoyage atomique, empreinte stable sensible au worker, contrôle du bon point de montage.
-  Le nettoyage du 22 septembre reste local. La version active sur l'appareil familial n'est
+  Le nettoyage du 22 septembre est publié. La version active sur l'appareil familial n'est
   pas requalifiée ici ; aucune sauvegarde familiale n'a été modifiée.
 - Le parent a validé les vues de carte et de récompense, puis les trois vues école/coloriage
   après comparaison à la même échelle, le 22 septembre. Les sept références approuvées
@@ -100,8 +109,8 @@ rejoint R3 ; F5 livraison rejoint R4. F0 est la base locale validée décrite ci
 - La direction visuelle est choisie ; le visa esthétique sur le résultat intervient à la fin.
   Les agents portent les contrôles intermédiaires, la qualité mécanique et la détection des
   défauts de composition ordinaires. Les règles pédagogiques restent inchangées.
-- Le parent signale désormais une contrainte de temps : ajouts gelés, priorité à la validation
-  finale et à la livraison locale du lot intégré. Aucun nouveau chantier lancé.
+- Le parent demande désormais de réduire le coût du protocole de livraison ; aucun ajout au jeu
+  ne fait partie de ce chantier.
 
 ## Historique à consulter seulement au besoin
 

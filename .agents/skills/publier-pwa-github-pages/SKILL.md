@@ -17,7 +17,7 @@ effective est :
 
 ```text
 commit(s) source sur le PC
-→ `publier-site.bat --preparer` : garde de concurrence + vérification unique + build + commit local
+→ `publier-site.bat --preparer` : garde de concurrence + preuve exacte ou vérification + build + commit local
 → accord explicite du propriétaire
 → `publier-site.bat --publier` : push + attente de l’Action + recette HTTPS
 ```
@@ -100,8 +100,9 @@ la tentative réellement écrite par le port SQLite du livrable autonome.
 
 ### Préparation et publication
 
-1. Exécuter une seule fois `publier-site.bat --preparer`. Ne pas lancer `npm run verifier` avant :
-   cette commande le fait déjà et relit ses rapports. Elle refuse un dépôt sale, les assets locaux
+1. Exécuter une seule fois `publier-site.bat --preparer`. La commande réutilise une campagne
+   complète verte si les entrées et les 15 rapports sont inchangés ; sinon elle la lance.
+   Ne pas relancer `npm run verifier` par habitude avant la préparation ou le push. Elle refuse un dépôt sale, les assets locaux
    absents et toute campagne Vitest/Playwright concurrente de ce dépôt avant d’engager les tests
    longs. Elle ne tue jamais un processus automatiquement. Si l’unique échec est
    `ERR_NO_BUFFER_SPACE` dans l’E2E, elle rejoue une seule fois la famille E2E complète et conserve
@@ -109,8 +110,9 @@ la tentative réellement écrite par le port SQLite du livrable autonome.
 2. Lire son résumé : commit source, commit `gh-pages`, version du build et nombre de preuves. Le
    fichier ignoré `bac-a-sable/publication-gh-pages-etat.json` lie ces quatre valeurs. Toute
    modification ultérieure invalide la publication au lieu d’envoyer d’autres octets.
-3. S'arrêter, annoncer que `--publier` poussera le commit indiqué vers la branche distante
-   `gh-pages` et déclenchera GitHub Pages, puis attendre l’accord explicite du propriétaire.
+3. Annoncer que `--publier` poussera le commit indiqué vers la branche distante `gh-pages`
+   et déclenchera GitHub Pages. Obtenir l’accord explicite du propriétaire s’il n’a pas déjà
+   autorisé cette livraison ; un accord reçu dans la tâche reste valable.
 4. Après accord, exécuter :
 
    ```powershell
@@ -128,3 +130,16 @@ ouverte. En automatisation, toujours préciser le mode afin de ne pas introduire
 
 La recette technique distante est automatisée. La recette fonctionnelle d’installation et de
 persistance sur la tablette reste à faire sans supprimer la base locale existante.
+
+
+### Coût et suivi de la livraison
+
+- `npm run verifier -- --si-necessaire` vérifie une preuve locale, ses entrées et ses rapports ;
+  sans preuve exacte il lance toute la campagne. Sans option, `npm run verifier` force les tests.
+- Le pre-commit réutilise lint/logique si le contenu indexé est déjà qualifié. Le pre-push et la
+  préparation partagent la preuve complète ; aucun contournement `LEFTHOOK=0` n’est nécessaire.
+- Écrire les modifications prévues avant la campagne finale : même une modification documentaire
+  change l’empreinte conservatrice. Ne jamais fabriquer une preuve à partir d’un ancien rapport.
+- Conserver les journaux complets dans le bac à sable ; lire le résumé aux transitions et en cas
+  d’échec. Éviter les sondages rapprochés et les messages répétant un état inchangé. Donner le
+  résultat utile : commit source, version publiée, verdict et limite éventuelle.

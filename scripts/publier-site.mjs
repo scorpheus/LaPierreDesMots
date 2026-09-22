@@ -64,9 +64,9 @@ function sortie(programme, arguments_, cwd = RACINE) {
 function npm(script, options = {}) {
   const npmExec = process.env['npm_execpath'];
   if (npmExec?.endsWith('.js')) {
-    return executer(process.execPath, [npmExec, 'run', script], options);
+    return executer(process.execPath, [npmExec, 'run', script, '--', ...(options.argumentsSupplementaires ?? [])], options);
   }
-  return executer('npm', ['run', script], {
+  return executer('npm', ['run', script, '--', ...(options.argumentsSupplementaires ?? [])], {
     ...options,
     shell: process.platform === 'win32',
   });
@@ -343,8 +343,8 @@ export async function preparerPublication() {
   exigerAucuneCampagneConcurrente();
   verifierEntreesLocales();
 
-  console.log('\n[publication] Verification complete, executee une seule fois...');
-  const verification = npm('verifier', { codesAcceptes: [1] });
+  console.log('\n[publication] Verification complete : reutilisation si les entrees et preuves sont inchangees...');
+  const verification = npm('verifier', { codesAcceptes: [1], argumentsSupplementaires: ['--si-necessaire'] });
   if (verification.status !== 0) {
     const etapesApresEchec = lireEtapes();
     if (estIncidentReseauRelancable(etapesApresEchec)) relancerE2eApresIncidentReseau();

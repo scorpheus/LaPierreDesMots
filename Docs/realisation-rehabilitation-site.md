@@ -208,3 +208,43 @@ les trois dernières références sont remplacées uniquement par les captures p
 La comparaison finale est conservée dans `bac-a-sable/nettoyage-tests/visuel-apres-visa.log` :
 13 réussites, aucune référence absente, aucune création automatique. Le lot de nettoyage est clos localement.
 Aucun commit, push ou déploiement dans cette intervention.
+
+
+## 22 septembre — publication réalisée puis protocole allégé
+
+Sur accord explicite du parent : source `996a78f` poussée sur `codex/rehabilitation-interface`,
+livrable `abd745a` sur `gh-pages`, version `66e0bee4f2f07a39`. L’Action `35709558384` réussit et
+le script termine en code 0 après recette HTTPS. Le dépôt est propre en fin de livraison.
+
+Le parent demande ensuite d’améliorer le protocole, trop long et trop bavard. Mesures conservées
+sous `bac-a-sable/nettoyage-tests/` : préparation complète ~1 014 s, puis crochet pre-push ~1 020 s
+sur les mêmes sources ; crochet de commit ~69 s. Aucun nouveau défaut n’avait justifié la répétition.
+
+Implantation : `scripts/preuve-verification.mjs` relie les 15 rapports canoniques réussis à
+l’empreinte des sources suivies et nouvelles, des voix/polices ignorées, des dépendances et
+navigateurs installés, des fichiers d’environnement et du contexte Node/OS. Les octets sont
+hachés ; les caches de compilation sont exclus. La preuve est invalidée au début d’une campagne,
+scellée seulement à sa réussite et si les entrées sont identiques en fin d’exécution. Un verrou
+exclusif protège les rapports. Un rapport absent, altéré, vide ou rouge interdit la réutilisation.
+Le calcul initial de l’empreinte complète a pris 14,35 s sur cette machine.
+
+`npm run verifier` force toujours une campagne. `--si-necessaire` réutilise une preuve exacte ;
+la préparation et le pre-push emploient cette option. Le push exige un dépôt propre. Le pre-commit
+réutilise lint/logique si la preuve correspond aussi au contenu indexé, sinon exécute ses gardes
+habituelles ; `qa:trompeurs` reste systématique. La préparation construit toujours le livrable PWA
+et les contrôles de publication distante restent inchangés. Une reprise E2E après incident réseau
+ne crée pas implicitement une preuve complète : la campagne suivante reste nécessaire dans ce cas.
+
+Qualification : tests de vrais dépôts temporaires sous le bac à sable (réutilisation du lanceur,
+modification, ajout, suppression, dépendance/voix/navigateur, rapports incomplets, interruption,
+concurrence et exécution forcée). Journaux sous `bac-a-sable/protocole-livraison/` ; la qualification
+intégrée fait foi dans `tests/rapports/RAPPORT.md`. Aucun changement de jeu ni publication
+supplémentaire n’est requis par cette modification d’outillage.
+
+
+Première qualification intégrée du protocole : les 15 étapes passent en 1 042,7 s, mais le
+scellement refuse correctement une différence d’entrées. Cause identifiée : Chromium écrit
+`debug.log` à côté de son exécutable ; ce journal était compté à tort comme une entrée.
+Le cas reproduit échoue avec `expected null not to be null`, puis passe après exclusion de ce
+seul chemin de sortie. Le test conserve le refus d’un exécutable modifié. Le diagnostic de
+scellement nomme désormais les fichiers divergents. Une nouvelle campagne qualifie cette correction.

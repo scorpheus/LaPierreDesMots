@@ -222,3 +222,14 @@ vérifiée en acte.
 `contenu/exercices/clairiere/{paniers-couleurs-01,luciole-couleurs-01}.json` : voir Q-I3 de
 `Docs/questions-en-attente.md`. Ils comblent le manque qui rendait **R12 mécaniquement
 intenable**, et attendent tous deux une relecture parent.
+
+
+## Réutilisation vérifiable des campagnes — 22 septembre 2026
+
+À la demande du parent, les crochets et la préparation de publication peuvent réutiliser une
+campagne complète déjà verte, uniquement après comparaison des entrées et des 15 rapports.
+`npm run verifier` reste la commande de campagne forcée ; `--si-necessaire` est l’option explicite
+de réutilisation. Une campagne interrompue invalide la preuve antérieure. Aucun ancien rapport
+vert isolé n’est promu en certificat, aucune assertion et aucun seuil n’est supprimé. La preuve
+locale est ignorée par Git, donc absente d’un nouveau clone : la première campagne reste obligatoire.
+Les fichiers et le contexte comparés sont décrits dans `contrat-pwa-github-pages.md`.
