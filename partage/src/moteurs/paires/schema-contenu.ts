@@ -17,12 +17,6 @@ const ID_CONSIGNE = { type: 'string', pattern: '^c[0-9]+$' } as const;
 const LIBELLE = { type: 'string', minLength: 1, maxLength: 80 } as const;
 const TEXTE = { type: 'string', minLength: 3, maxLength: 200 } as const;
 const MOTS_CLES = { type: 'array', minItems: 1, items: { type: 'string', minLength: 2 } } as const;
-const POINT = {
-  type: 'array',
-  minItems: 2,
-  maxItems: 2,
-  items: { type: 'number' },
-} as const;
 
 export const SCHEMA_CONTENU_PAIRES: SchemaJson = {
   $schema: 'https://json-schema.org/draft/2020-12/schema',

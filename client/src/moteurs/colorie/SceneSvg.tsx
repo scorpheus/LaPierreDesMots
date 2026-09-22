@@ -211,8 +211,6 @@ export function SceneSvg(proprietes: ProprietesSceneSvg): ReactElement {
 
   const viewBox = habillage.scene.viewBox || VIEWBOX_PAR_DEFAUT;
   const dureeRecolorationMs = habillage.timings.recolorationMs;
-  const dimensionsViewBox = viewBox.trim().split(/[\s,]+/u).map(Number);
-  const rapportViewBox = (dimensionsViewBox[2] ?? 1) / Math.max(1, dimensionsViewBox[3] ?? 1);
   const [rayonPrise, fixerRayonPrise] = useState(64);
   // Une longueur SVG est mise à l'échelle avec tout le dessin : 80 unités donnaient 80 px sur
   // la tablette de référence, mais seulement 40 px dans le viewport E2E plus bas. Le rayon est
@@ -601,8 +599,8 @@ export function SceneSvg(proprietes: ProprietesSceneSvg): ReactElement {
       style={{
         width: '100%',
         height: 'auto',
-        maxWidth: `min(100%, calc((100dvh - 19rem) * ${String(rapportViewBox)}))`,
-        maxHeight: 'calc(100dvh - 19rem)',
+        maxWidth: '100%',
+        maxHeight: '100%',
         alignSelf: 'center',
         flex: '0 1 auto',
         touchAction: loupeActive ? 'pan-x pan-y' : 'manipulation'

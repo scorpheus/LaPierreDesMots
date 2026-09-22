@@ -469,6 +469,30 @@ export function MoteurAssemble(
       .map((b) => b.id);
   }, [contenu, etat.indexEtape, blocParId]);
 
+  // Dimensionner le petit écran pour les boîtes de toutes les étapes, intrus compris.
+  // La hauteur reste constante pendant les réponses ; seul un changement de largeur la recalcule.
+  const hauteurBlocs = useMemo(() => Math.max(0, ...etat.etapes.map((etape) => {
+    const libelles = new Set(etape.ordreAffichage.map((cle) => blocParId.get(cle)?.libelle));
+    const cles = [...etape.ordreAffichage, ...contenu.blocs
+      .filter((bloc) => bloc.intrus && bloc.confusionAvec !== null && libelles.has(bloc.confusionAvec))
+      .map((bloc) => bloc.id)];
+    const largeur = Math.max(1, cadre.largeur - 2 * MARGE);
+    let largeurLigne = 0;
+    let hauteurLigne = 0;
+    let hauteur = 0;
+    for (const cle of cles) {
+      const boite = mesurer(cle);
+      if (largeurLigne > 0 && largeurLigne + 10 + boite.largeur > largeur) {
+        hauteur += hauteurLigne + 10;
+        largeurLigne = 0;
+        hauteurLigne = 0;
+      }
+      largeurLigne += (largeurLigne > 0 ? 10 : 0) + boite.largeur;
+      hauteurLigne = Math.max(hauteurLigne, boite.hauteur);
+    }
+    return hauteur + hauteurLigne + 2 * MARGE;
+  })), [etat.etapes, blocParId, contenu.blocs, cadre.largeur, mesurer]);
+
   /**
    * Les régions déjà réservées par les étapes PRÉCÉDENTES — le même calcul que `planifier()`
    * fait en interne pour la disponibilité de l'étape courante, reproduit ici pour poser les
@@ -637,7 +661,7 @@ export function MoteurAssemble(
       style={{
         position: 'relative',
         blockSize: '100%',
-        minBlockSize: 0,
+        minBlockSize: hauteurBlocs + hauteurBande,
         overflow: 'hidden',
         borderRadius: 'var(--rayon-carte)',
       }}

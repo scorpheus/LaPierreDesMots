@@ -1,6 +1,6 @@
 // Les écrans de jeu synchronisent le magasin et l’historique du navigateur.
 // Les pages complémentaires conservent leur URL ; les pages parent passent par la porte à code.
-import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { lazy, Suspense, createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import type { Dispatch, ReactElement, ReactNode, SetStateAction } from 'react';
 import {
   Outlet,
@@ -21,9 +21,6 @@ import { EcranChaudron } from './ecrans/EcranChaudron.js';
 import { EcranCarte } from './ecrans/EcranCarte.js';
 import { EcranCodeParent } from './ecrans/EcranCodeParent.js';
 import { EcranCoffre } from './ecrans/EcranCoffre.js';
-import { EcranDashboard } from './ecrans/EcranDashboard.js';
-import { EcranDebugRecompenses } from './ecrans/EcranDebugRecompenses.js';
-import { EcranGalerieParent } from './ecrans/EcranGalerieParent.js';
 import { EcranNoeud } from './ecrans/EcranNoeud.js';
 import { EcranOuverture } from './ecrans/EcranOuverture.js';
 import { EcranProfils } from './ecrans/EcranProfils.js';
@@ -31,7 +28,17 @@ import { EcranRecompense } from './ecrans/EcranRecompense.js';
 import { EcranReglagesLecture } from './ecrans/EcranReglagesLecture.js';
 import { useEtatJeu, useMagasin } from './etat/services.js';
 import { memoriserProfil } from './etat/profil-memorise.js';
-import { VisiteDesEcrans } from './parent/VisiteDesEcrans.js';
+
+// Les outils parent se chargent à leur ouverture, après le premier écran de jeu.
+const EcranDashboard = lazy(async () => ({ default: (await import('./ecrans/EcranDashboard.js')).EcranDashboard }));
+const EcranGalerieParent = lazy(async () => ({ default: (await import('./ecrans/EcranGalerieParent.js')).EcranGalerieParent }));
+const VisiteDesEcrans = lazy(async () => ({ default: (await import('./parent/VisiteDesEcrans.js')).VisiteDesEcrans }));
+
+// Le banc parent local ne fait pas partie du premier chargement du jeu.
+const EcranDebugRecompenses = lazy(async () => {
+  const module = await import('./ecrans/EcranDebugRecompenses.js');
+  return { default: module.EcranDebugRecompenses };
+});
 
 /** Les écrans pilotés par le magasin. `chargement` partage la racine avec les profils. */
 const CHEMIN_PAR_ECRAN: Readonly<Record<CodeEcran, string>> = {
@@ -185,7 +192,7 @@ function RacineRouteur(): ReactElement {
     || (chemin === '/noeud' && (etat.profil === null || etat.paquet === null || etat.moteur === null))
     || (chemin === '/recompense' && (etat.profil === null || etat.paquet === null || etat.resume === null)));
   if (indisponible) return <EcranChargement />;
-  return <><BandeauRetourVisite /><Outlet /></>;
+  return <><BandeauRetourVisite /><Suspense fallback={<EcranChargement />}><Outlet /></Suspense></>;
 }
 
 /** Un lien profond conserve sa destination, mais ne constitue jamais une ouverture parent. */
@@ -682,7 +689,7 @@ function construireRouteur() {
       getParentRoute: () => routeRacine,
       path: CHEMINS.debugRecompenses,
       component: () => estHoteLocal()
-        ? <EcranDebugRecompenses exercicesInitiaux={Number(new URLSearchParams(window.location.search).get('exercices') ?? '23')} />
+        ? <Suspense fallback={<EcranChargement />}><EcranDebugRecompenses exercicesInitiaux={Number(new URLSearchParams(window.location.search).get('exercices') ?? '23')} /></Suspense>
         : <RacineOuProfils />
     }),
     createRoute({ getParentRoute: () => routeRacine, path: '/', component: RacineOuProfils }),

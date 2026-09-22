@@ -3,20 +3,32 @@ import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
-type Json = Record<string, any>;
+interface ElementRecette { id: string; paire?: string; voisines?: string[] }
+interface ConsigneRecette {
+  id: string; texte: string; options?: string[]; ordre?: string[]; parcours?: string[];
+  aApparier?: string[]; aAttraper?: string[]; reponse?: string; cibles?: { region: string }[];
+}
+type ContenuRecette = Partial<Record<
+  'cartes' | 'options' | 'elements' | 'cibles' | 'blocs' | 'etiquettes' | 'vignettes' | 'cases',
+  ElementRecette[]
+>> & { consignes?: ConsigneRecette[]; questions?: ConsigneRecette[] };
+interface ExerciceRecette { id: string; jeu: { habillage: string; contenu: ContenuRecette } }
+interface HabillageRecette {
+  scene: { fichier: string; calques: { role: string; regions?: { id: string }[] }[] };
+}
 const RACINE = process.cwd();
 const REGIONS = ['marais-jumeau', 'volcan', 'cite-des-histoires'] as const;
 const NOMBRE_ATTENDU = { 'marais-jumeau': 12, volcan: 12, 'cite-des-histoires': 14 } as const;
 
-function lire(chemin: string): Json {
-  return JSON.parse(readFileSync(join(RACINE, chemin), 'utf8')) as Json;
+function lire<T>(chemin: string): T {
+  return JSON.parse(readFileSync(join(RACINE, chemin), 'utf8')) as T;
 }
 
-function contenuDe(region: string): Array<{ chemin: string; exercice: Json }> {
+function contenuDe(region: string): Array<{ chemin: string; exercice: ExerciceRecette }> {
   return readdirSync(join(RACINE, 'contenu/exercices', region))
     .filter((nom) => nom.endsWith('.json'))
     .sort()
-    .map((nom) => ({ chemin: `contenu/exercices/${region}/${nom}`, exercice: lire(`contenu/exercices/${region}/${nom}`) }));
+    .map((nom) => ({ chemin: `contenu/exercices/${region}/${nom}`, exercice: lire<ExerciceRecette>(`contenu/exercices/${region}/${nom}`) }));
 }
 
 describe('recette ciblée Marais / Volcan / Cité', () => {
@@ -29,12 +41,12 @@ describe('recette ciblée Marais / Volcan / Cité', () => {
   it('garde chaque étape atteignable et chaque référence interne résolue', () => {
     for (const region of REGIONS) {
       for (const { chemin, exercice } of contenuDe(region)) {
-        const contenu = exercice.jeu.contenu as Json;
+        const contenu = exercice.jeu.contenu;
         const elements = [
           ...(contenu.cartes ?? []), ...(contenu.options ?? []), ...(contenu.elements ?? []),
           ...(contenu.cibles ?? []), ...(contenu.blocs ?? []), ...(contenu.etiquettes ?? []),
           ...(contenu.vignettes ?? []), ...(contenu.cases ?? []),
-        ] as Json[];
+        ];
         const ids = new Set(elements.map((element) => element.id));
         for (const consigne of contenu.consignes ?? contenu.questions ?? []) {
           for (const id of [...(consigne.options ?? []), ...(consigne.ordre ?? []), ...(consigne.parcours ?? [])]) {
@@ -54,17 +66,17 @@ describe('recette ciblée Marais / Volcan / Cité', () => {
   });
 
   it('associe chaque habillage livré à ses trois calques et garde les voix synchronisées', () => {
-    const manifeste = lire('production/voix.lock.json');
-    const empreintes = new Map((manifeste.clips as Json[]).map((clip) => [clip.cle, clip.empreinteTexte.slice(0, 8)]));
+    const manifeste = lire<{ clips: { cle: string; empreinteTexte: string }[] }>('production/voix.lock.json');
+    const empreintes = new Map(manifeste.clips.map((clip) => [clip.cle, clip.empreinteTexte.slice(0, 8)]));
     for (const region of REGIONS) {
       for (const { chemin, exercice } of contenuDe(region)) {
         const nomHabillage = exercice.jeu.habillage.split('.')[1];
         const fichierHabillage = `contenu/habillages/${region}/${nomHabillage}.habillage.json`;
-        const habillage = lire(fichierHabillage);
-        const nomsCalques = new Set((habillage.scene.calques as Json[]).map((calque) => calque.role));
+        const habillage = lire<HabillageRecette>(fichierHabillage);
+        const nomsCalques = new Set(habillage.scene.calques.map((calque) => calque.role));
         expect(nomsCalques, fichierHabillage).toEqual(new Set(['fond', 'coloriable', 'trait']));
         const zones = new Set(
-          (habillage.scene.calques as Json[]).flatMap((calque) => (calque.regions ?? []).map((zone: Json) => zone.id)),
+          habillage.scene.calques.flatMap((calque) => (calque.regions ?? []).map((zone) => zone.id)),
         );
         for (const consigne of exercice.jeu.contenu.consignes ?? []) {
           for (const cible of consigne.cibles ?? []) expect(zones.has(cible.region), `${chemin}:${cible.region}`).toBe(true);

@@ -76,6 +76,15 @@ it('un contrôle rendu actif par amorçage reste observé', async () => {
   ]);
 });
 
+it('les lots couvrent tout l’inventaire et gardent les amorces situées dans un autre lot', async () => {
+  const { adaptateur } = scenario({ amorcage: true });
+  const premier = await auditerInteractions(adaptateur, { index: 0, total: 2 });
+  const second = await auditerInteractions(adaptateur, { index: 1, total: 2 });
+  expect([...premier, ...second]).toEqual([
+    { cible: 'amorce', statut: 'observe' }, { cible: 'cible', statut: 'observe' },
+  ]);
+});
+
 it('une identité ambiguë refuse le bilan avant de taper', async () => {
   const { adaptateur, tapes } = scenario({});
   adaptateur.inventorier = async () => ['cible', 'cible'];

@@ -459,7 +459,8 @@ export function EcranNoeud(): ReactElement {
   // `unknown` l'empêchait précisément de faire.
   const ComposantMoteurMonte = rendu.Composant as ComposantMoteur<unknown, unknown, unknown>;
 
-  const indexCourant = progression?.etapeCourante ?? 0;
+  // Trace compte les traits ; libre compte les zones, mais leur consigne reste unique.
+  const indexCourant = codeMoteur === 'trace' || codeMoteur === 'libre' ? 0 : progression?.etapeCourante ?? 0;
   const etapeCourante = etapes[indexCourant] ?? null;
 
   // L'aide est résolue ici : la coquille connaît l'étape, mais ne détourne plus son clip de

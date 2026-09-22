@@ -1,4 +1,5 @@
 /** Recette courte des trois chemins d'images ajoutés au jeu : décor, carte et vignette. */
+import type { Locator } from '@playwright/test';
 import { mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { expect, test } from './invariants.js';
@@ -6,7 +7,7 @@ import { entrerDansLeNoeud, preparer } from './qa-outils.js';
 
 const dossierCaptures = resolve(process.cwd(), 'bac-a-sable', 'captures-integration-images');
 
-async function imageChargee(locator: ReturnType<import('@playwright/test').Page['locator']>): Promise<boolean> {
+async function imageChargee(locator: Locator): Promise<boolean> {
   return locator.evaluate((element) => {
     const image = element as HTMLImageElement;
     return image.complete && image.naturalWidth > 0 && image.naturalHeight > 0;

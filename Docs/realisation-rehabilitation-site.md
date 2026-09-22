@@ -120,3 +120,91 @@ ne reste actif. Aucun correctif supplémentaire non vérifié n'a été ajouté 
 - Reprise directe : corriger le dimensionnement vertical du coloriage, contrôler les 75 activités
   aux deux grands formats et les repères/loupe, puis finir les preuves manquantes. Les 2 806 tests
   passés n'ont pas à être relancés pour simplement prendre connaissance du lot.
+
+## Publication demandée après livraison — 14 septembre 2026
+
+À la demande explicite du parent, Luna a publié cette version anticipée sans reprendre le chantier
+de finition. Sources commitées : `0477867cccee3e8a77f2b750961dc86516c6ae2e` ; branche publiée
+`gh-pages` : `74dc513f3484340b2c23f35cb3c4529dd2fd670b`. Les hooks de commit lint,
+tests unitaires/composants/API et tests trompeurs passent.
+
+GitHub Pages : action `34854401493` réussie, état `built`. La recette de livraison HTTPS valide
+racine, version, worker, manifeste, icône et 297 visuels. L'orchestrateur a relu directement
+`https://scorpheus.github.io/LaPierreDesMots/version-build.json` : version `77456385be2f7f38`.
+Le site est en ligne sur `https://scorpheus.github.io/LaPierreDesMots/`.
+
+L'état de publication sous `bac-a-sable/publication-gh-pages-etat.json` indique explicitement
+« publication anticipée avec recette incomplète ». Cela ne clôt ni la campagne navigateur ni
+le défaut de dimensionnement des six coloriages. Les limites de la livraison restent applicables.
+
+## Nettoyage et qualification — 22 septembre 2026
+
+Demande du parent : examiner les tests rouges, distinguer attentes périmées et défauts du site,
+corriger puis qualifier le dépôt. Le rapport initial du 20 septembre comptait 26 échecs E2E,
+7 différences visuelles et un dépassement du budget LAN (251,8 Kio gzip pour 250 autorisés).
+Les changements de coloriage grand écran et les notes de publication présents avant cette
+intervention sont conservés ; aucun asset, contenu publié ou journal familial n'est remplacé.
+
+Corrections intégrées :
+
+- Les tests d'entrée et d'introduction suivent le campement prévu par la réhabilitation.
+  Le choix du compagnon expose à nouveau le code stable de la région, séparé de son libellé.
+- Le tracé conserve sa consigne unique et son bouton audio après chaque trait réussi.
+  La disparition de cette consigne déplaçait réellement l'ardoise ; le test vérifie les deux effets.
+- Les paires restent accessibles après rotation ; récompenses, assemblage, coloriage libre et
+  choix éclair disposent de leur espace utile. Les choix éclair évitent la commande « Revoir ».
+- Le test de refus de gravure mesure après mise en vue de la prise, comme celui du tri ;
+  l'audit parent attend la décision effective de la porte avant d'inventorier les commandes.
+- Les écrans parent secondaires se chargent à la demande ; les contrats partagés sont séparés
+  du module d'entrée pour éviter une dépendance circulaire au démarrage. Les JSON monde et
+  référentiels le sont également : le document des compagnons créait sinon un cycle propre à la PWA.
+  Le mode test monte
+  ses crochets avant React sans suspendre l'évaluation du module racine.
+- Les déclarations inutilisées et le typage trop large des recettes sont nettoyés.
+- Le contour du parchemin laisse désormais entier le cartouche de la Clairière. Le nouveau
+  contrôle des six cartouches échouait précisément sur celui-ci avant correction, sur PC et téléphone.
+- L'audit des commandes du tableau de bord est réparti en trois lots disjoints : plusieurs
+  centaines de commandes dépassaient les 270 secondes du cas monolithique. Toutes les cibles
+  restent contrôlées et les amorces sont recherchées dans l'inventaire complet ; un test unitaire
+  vérifie notamment l'amorçage depuis un autre lot. Aucun délai ni seuil n'est assoupli.
+
+Les reproductions et contrôles ciblés sont conservés sous `bac-a-sable/nettoyage-tests/`.
+Première campagne intégrée terminée : rapport `2026-09-22T07:26:16.215Z`, code 1,
+2 806 tests de logique/composants/API et 321 contrôles de qualité réussis ; 916/917 parcours
+réussis, seul l'audit parent dépasse sa durée ; 7/13 captures divergent. Les autres étapes passent,
+dont le rejeu, les contrôles positifs et le budget LAN : **240,5 Kio gzip sur 250**, contre 251,8.
+La campagne finale (`verification-finale.log`, rapport initial `2026-09-22T08:02:11.086Z`, code 1)
+valide les **2 807 tests de logique/composants/API et les 921 parcours**, sans échec. La qualité
+rencontre une seule erreur de chargement avant démarrage : Chromium refuse
+`/assets/referentiels-CC0QweYY.js` avec `net::ERR_NO_BUFFER_SPACE` dans le cas de rotation de
+placement. Le contrôle identique passe ensuite (2,9 s), puis **toute la suite qualité passe :
+321/321, aucun ignoré ni instable**, code 0, 326 010 ms, départ `2026-09-22T08:04:45.0790263Z`.
+Aucune modification de code, d'assertion ou de délai entre ces exécutions.
+
+Le rapport consolidé `tests/rapports/RAPPORT.md`, daté `2026-09-22T08:23:15.253Z`, indique
+explicitement cette reprise et la comparaison après visa parent : **15/15 étapes vertes**.
+Les 13 tests visuels passent, code 0, sans création automatique de référence.
+Le rapport de la campagne initiale est
+conservé dans `bac-a-sable/nettoyage-tests/RAPPORT-campagne-finale.md` ; le consolidateur contrôle
+le code de sortie, les rapports frais, les 321 cas sans exclusion et le budget avant de remplacer
+le verdict de qualité. Charge initiale finale : **242,1 Kio gzip / 250**, aucun crochet de test
+dans le build de production. Q8 confirme ses huit contrôles positifs et aucune dette nommée.
+La PWA locale **66e0bee4f2f07a39** passe sa recette complète : `recette-pwa-3.log`, code 0.
+Vrais gestes sur `clairiere-03`, audio hors connexion, deux tentatives persistantes, reprise
+identique après fermeture, export/import, refus atomique d'import invalide, protection du second
+onglet et route profonde rechargée ; zéro requête `/api`, zéro erreur de page. Le profil isolé
+`bac-a-sable/profil-recette-nettoyage-2026-09-22` est conservé. L'essai initial bloqué par un cycle
+d'import est corrigé ; son ancien worker a été renouvelé par mise à jour puis fermeture normale
+des onglets, sans effacement de caches ni d'OPFS. La recette supplémentaire
+`parent-pwa-hors-connexion.log` valide les trois écrans différés (suivi, galerie et visite) hors réseau.
+Une nouvelle finalisation conserve la version `66e0bee4f2f07a39` et l'empreinte du worker.
+
+Revue parent présentée : `bac-a-sable/nettoyage-tests/revue-visuelle/index.html`, servie localement
+sur `http://127.0.0.1:4198/`. Le parent approuve la carte avec boutons en dessous et les récompenses :
+les quatre références correspondantes sont remplacées par les captures présentées. Suite à son
+retour, les comparaisons école/coloriage affichent les dimensions et la même échelle, sans
+étirement. Le dessin est inchangé, seul le cadre diffère. Le parent valide ensuite l'ensemble :
+les trois dernières références sont remplacées uniquement par les captures présentées.
+La comparaison finale est conservée dans `bac-a-sable/nettoyage-tests/visuel-apres-visa.log` :
+13 réussites, aucune référence absente, aucune création automatique. Le lot de nettoyage est clos localement.
+Aucun commit, push ou déploiement dans cette intervention.

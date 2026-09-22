@@ -100,7 +100,6 @@ describe('le garde refuse l’état historique, celui-là même qui est réappar
     }
   );
 
-  const idsLivres = noeudsLivres.map((noeud) => noeud.donnees.id).sort();
   const nbNoeudsDeProgression = noeudsLivres.filter(
     (noeud) => (noeud.donnees as NoeudSurDisque & { readonly progression?: boolean }).progression !== false
   ).length;

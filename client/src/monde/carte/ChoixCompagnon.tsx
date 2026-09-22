@@ -11,6 +11,7 @@ const ASSET_GOBI_PAR_STADE: Readonly<Record<string, string>> = {
 
 export interface ProprietesChoixCompagnon {
   readonly destination: string;
+  readonly codeDestination: string;
   readonly stadeGobi: string;
   readonly compagnons: readonly Compagnon[];
   readonly choisi: CodeCompagnon | null;
@@ -21,8 +22,8 @@ export interface ProprietesChoixCompagnon {
   readonly surPartir: () => void;
 }
 
-export function ChoixCompagnon({ destination, stadeGobi, compagnons, choisi, enChargement, animationsDesactivees, surChoisir, surRetour, surPartir }: ProprietesChoixCompagnon): ReactElement {
-  return <section className="choix-compagnon" data-choix-compagnon={destination} role="dialog" aria-modal="true" aria-labelledby="titre-choix-compagnon">
+export function ChoixCompagnon({ destination, codeDestination, stadeGobi, compagnons, choisi, enChargement, animationsDesactivees, surChoisir, surRetour, surPartir }: ProprietesChoixCompagnon): ReactElement {
+  return <section className="choix-compagnon" data-choix-compagnon={codeDestination} role="dialog" aria-modal="true" aria-labelledby="titre-choix-compagnon">
     <div className="choix-compagnon__carte">
       <button type="button" className="cible choix-compagnon__fermer" aria-label="Fermer le choix d’accompagnant" onClick={surRetour}>Retour</button>
       <div className="choix-compagnon__entete"><p className="choix-compagnon__destination">Départ pour {destination}</p><h2 id="titre-choix-compagnon" className="titre">Avec qui pars-tu ?</h2><p>Choisis ton compagnon. Il donnera sa couleur à cette sortie.</p></div>

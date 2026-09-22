@@ -17,6 +17,7 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { expect, test } from './invariants.js';
+import { attendreGeometrieStable } from '../qualite/aides-composition.js';
 
 import type { Page } from '@playwright/test';
 
@@ -135,12 +136,17 @@ test.describe('parcours trace', () => {
       const matrice = (element as SVGSVGElement).getScreenCTM()!;
       return [matrice.a, matrice.d, matrice.e, matrice.f];
     });
+    await attendreGeometrieStable(page);
+    const consigne = page.locator('.barre-consigne [data-consigne]:visible');
+    const texteConsigne = await consigne.innerText();
     const avant = await mesurer();
     await tracer(page, [[90, 20], [90, 40], [90, 60]]);
     await expect(page.locator('[data-message-refus="oui"]')).toHaveText('On recommence ce trait, tranquillement.');
     expect(await mesurer()).toEqual(avant);
     await tracer(page, contenu.lettres[0]!.traits[0]!.points);
     await expect(page.locator(`[data-trait="${contenu.lettres[0]!.traits[0]!.id}"]`)).toHaveAttribute('data-trait-etat', 'trace');
+    await expect(consigne).toHaveText(texteConsigne);
+    await expect(page.locator('.barre-consigne [data-action="ecouter"]')).toBeVisible();
     expect(await mesurer()).toEqual(avant);
   });
 

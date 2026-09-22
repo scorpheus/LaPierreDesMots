@@ -11,7 +11,7 @@
  *     node bac-a-sable/qa-aveugle/detecteurs.mjs
  */
 import { readFileSync, readdirSync } from 'node:fs';
-import { join, basename, relative, extname } from 'node:path';
+import { join, relative, extname } from 'node:path';
 
 const RACINE = new URL('../../', import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1');
 const ch = (r) => join(RACINE, r);

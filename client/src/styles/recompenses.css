@@ -346,3 +346,15 @@
     max-block-size: 200px;
   }
 }
+
+/* Sur PC, le bilan reste lisible sans repousser la progression sous la fenêtre. */
+@media (min-width: 1000px) and (min-height: 700px) {
+  .ecran-recompense { gap: 12px; padding-block: 16px; }
+  .recompense-scene { grid-template-columns: minmax(160px, 0.5fr) minmax(0, 1fr); padding-block: 16px; }
+  .recompense-titre { font-size: 2.5rem; }
+  .recompense-texte .etoiles > svg { inline-size: 64px; }
+  .recompense-texte { gap: 8px; }
+  .recompense-gobi img { max-block-size: 24dvh; }
+  .ecran-recompense .jauge-palier { padding: 10px; }
+  .ecran-recompense .cascade-recompense { gap: 10px; }
+}

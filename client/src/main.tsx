@@ -41,22 +41,28 @@ if (import.meta.env.MODE === 'pwa') {
   void demanderPersistanceStockage();
 }
 
-if (import.meta.env.MODE === 'test') {
-  const { monterCrochetsDeTest } = await import('./testabilite/crochets.js');
-  monterCrochetsDeTest({ magasin, services, fileDAttente });
+// Le module racine doit finir son évaluation avant de charger les crochets :
+// les chunks partagés des écrans différés peuvent eux-mêmes référencer cette racine.
+async function demarrer(): Promise<void> {
+  if (import.meta.env.MODE === 'test') {
+    const { monterCrochetsDeTest } = await import('./testabilite/crochets.js');
+    monterCrochetsDeTest({ magasin, services, fileDAttente });
+  }
+
+  const racine = document.getElementById('racine');
+  if (racine === null) {
+    throw new Error('Élément #racine introuvable : `index.html` a-t-il été modifié ?');
+  }
+
+  // `StrictMode` uniquement en développement : son double montage ferait partir deux fois les
+  // effets pilotés par `window.__test` pendant les parcours Playwright.
+  const arbre: ReactNode = (
+    <Application magasin={magasin} services={services} fileDAttente={fileDAttente} />
+  );
+
+  createRoot(racine).render(
+    import.meta.env.MODE === 'development' ? <StrictMode>{arbre}</StrictMode> : arbre
+  );
 }
 
-const racine = document.getElementById('racine');
-if (racine === null) {
-  throw new Error('Élément #racine introuvable : `index.html` a-t-il été modifié ?');
-}
-
-// `StrictMode` uniquement en développement : son double montage ferait partir deux fois les
-// effets pilotés par `window.__test` pendant les parcours Playwright.
-const arbre: ReactNode = (
-  <Application magasin={magasin} services={services} fileDAttente={fileDAttente} />
-);
-
-createRoot(racine).render(
-  import.meta.env.MODE === 'development' ? <StrictMode>{arbre}</StrictMode> : arbre
-);
+void demarrer();

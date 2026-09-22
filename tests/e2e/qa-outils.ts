@@ -976,6 +976,7 @@ export function recettesDEcrans(): readonly EcranQA[] {
     aller: async (page) => {
       await preparer(page);
       await page.locator('[data-acces-parent]').click();
+      await attendreQueLaPorteAitDecide(page);
     },
   },
   {

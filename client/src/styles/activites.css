@@ -226,3 +226,13 @@
     display: none;
   }
 }
+
+/* Le nuancier ne doit pas absorber la toile sur les écrans étroits. */
+@media (max-width: 700px) {
+  .cadre-scene-activite:has([data-moteur='assemble']),
+  .cadre-scene-activite:has([data-moteur='libre']),
+  .porteur-moteur:has(> [data-moteur='assemble']),
+  .porteur-moteur:has(> [data-moteur='libre']) { block-size: auto; }
+  .cadre-scene-activite:has([data-moteur='eclair']) { block-size: max(600px, 70svh); }
+  [data-moteur='libre'] { grid-template-rows: auto minmax(280px, 1fr) !important; }
+}

@@ -1,9 +1,17 @@
 # État courant et file de travail
 
-Mise à jour : 14 septembre 2026. Cette page porte uniquement l'état actif.
+Mise à jour : 22 septembre 2026. Cette page porte uniquement l'état actif.
 Le contrat de la reconstruction est [le plan de réhabilitation](plan-rehabilitation-site.md).
 
 ## Décision et demande active
+
+**22 septembre — nettoyage et qualification du dépôt.** Le parent demande de diagnostiquer
+les tests rouges, corriger les bugs et les attentes périmées, puis vérifier l'ensemble.
+Les corrections couvrent navigation, stabilité des consignes, géométrie tactile et budget
+du premier chargement. Bilan consolidé : **15 étapes vertes sur 15** ; 2 807 tests de logique,
+921 parcours, 321 contrôles de qualité et 13 tests visuels passent. Le parent a validé toutes
+les vues présentées ; leurs références sont intégrées. La recette PWA locale passe. Détails et preuves dans la section du 22 septembre de
+[la réalisation](realisation-rehabilitation-site.md). Commit, push et publication explicitement autorisés par le parent le 22 septembre ; livraison en préparation.
 
 Le parent demande une reconstruction cohérente de la présentation et une méthode économique,
 avec un design présentable sur PC, tablette et téléphone. Il refuse la poursuite d'une boucle
@@ -34,6 +42,10 @@ Les 2 806 tests de logique/composants/API passent. Qualification finale incompl�
 grand écran des six coloriages encore ouvert. Sources non commitées, aucune publication.
 Le détail de reprise immédiate est à la fin du document de réalisation.
 
+**Publication ensuite autorisée et réalisée par Luna.** Version `77456385be2f7f38` en ligne,
+source `0477867`, `gh-pages` `74dc513f`, action Pages `34854401493` réussie ; version HTTPS et
+297 visuels vérifiés. Cette publication anticipée ne clôt pas les limites de qualification ci-dessus.
+
 ## File active
 
 | Lot | État | Prochain résultat |
@@ -43,6 +55,7 @@ Le détail de reprise immédiate est à la fin du document de réalisation.
 | R2 — tranche complète | Parcours téléphone et tablette réussis | Vraie réussite, rechargement du même profil, revisite sans crédit supplémentaire et abandon vérifiés. |
 | R3 — migration | Écrans migrés, gel fonctionnel | Feuilles spécialisées, 14 moteurs et 25 cas de repères coloriage validés ; file durable et reset intégrés. |
 | R4 — livraison et présentation | Après migration complète et contrôles | Version entière prête aux essais du parent et de sa famille ; livrable identifié, recette finale, visa parent et publication explicitement autorisée. |
+| Nettoyage du 22 septembre | Clos localement : 15/15 étapes vertes, recette PWA et visa parent obtenus | Références approuvées intégrées et 13 comparaisons visuelles réussies. Publication autorisée par le parent, en préparation. |
 
 Les anciens sujets ne sont pas effacés : F1 progression rejoint R2/R3 ; F2 cadrage et calques
 rejoint R1/R3 ; F3 accueil/carte/campement rejoint R1/R3 ; F4 informations parent et version
@@ -50,11 +63,12 @@ rejoint R3 ; F5 livraison rejoint R4. F0 est la base locale validée décrite ci
 
 ## Base et coordination
 
-- Dépôt à `9946abf`, avec corrections PWA non commitées. Le lot ne doit pas être oublié en
-  créant un checkout depuis le seul commit. Les modifications de pilotage sont aussi locales.
+- Référence Git actuelle : `0477867`, publication anticipée du 14 septembre. Les corrections
+  du 22 septembre et le travail local préexistant ne sont pas committés ; ne pas les perdre
+  en créant un checkout depuis le seul commit.
 - La tâche « Résoudre les problèmes de campagne » a clos F0 et rendu le jeton de tests le
-  14 septembre à 13 h 58. Elle n'engage aucun lot suivant. Le pilotage appartient à la tâche
-  « Comparer les deux sites », avec ses sous-agents. L'orchestrateur seul exécute les suites.
+  14 septembre à 13 h 58. Elle n'engage aucun lot suivant. Le nettoyage du 22 septembre est
+  conduit par la tâche courante, avec une seule campagne à la fois.
 - À la demande du parent, « Analyser transcript et agents code »
   (`01a090c2-67cb-7f71-a72f-ddef5b5c430a`) a clos son aide documentaire : skill mutation
   recentré (30 609 → 4 560 octets), description de génération clarifiée ; rapport et diff relus.
@@ -63,11 +77,13 @@ rejoint R3 ; F5 livraison rejoint R4. F0 est la base locale validée décrite ci
 - F0 : campagne unique `npm run verifier`, rapport `2026-09-14T11:58:05.302Z`, code 0,
   15/15 étapes vertes, 962,5 secondes. Les étapes navigateur représentent environ 90 % du temps.
   Détails et preuves : [audit PWA](audit-fiabilite-pwa-2026-09-14.md).
-- Corrections PWA locales : caches versionnés, reprises et expiration d'installation,
+- Corrections PWA de la livraison précédente : caches versionnés, reprises et expiration d'installation,
   nettoyage atomique, empreinte stable sensible au worker, contrôle du bon point de montage.
-  Aucun changement publié. La version active sur l'appareil familial n'est pas requalifiée ici.
-- Aucune sauvegarde familiale ou référence visuelle n'a été modifiée. La campagne F0 ne clôt
-  pas les plaintes du parent ni le chantier de design.
+  Le nettoyage du 22 septembre reste local. La version active sur l'appareil familial n'est
+  pas requalifiée ici ; aucune sauvegarde familiale n'a été modifiée.
+- Le parent a validé les vues de carte et de récompense, puis les trois vues école/coloriage
+  après comparaison à la même échelle, le 22 septembre. Les sept références approuvées
+  sont intégrées ; les 13 tests visuels passent. La campagne F0 reste une preuve historique.
 
 ## Contraintes et décisions ouvertes
 
@@ -75,8 +91,9 @@ rejoint R3 ; F5 livraison rejoint R4. F0 est la base locale validée décrite ci
   la proposition trois/cinq est un arbitrage pédagogique distinct, pas une réparation implicite.
 - Fermeture avant accusé : file durable conservée au dernier geste, reprise idempotente et
   génération de profil au reset intégrées. Le changement d'appareil/origine ne synchronise pas les données.
-- Les défauts actuels de progression, rognage, orientation et superposition restent ouverts.
-  Le parent précisera son cas quand il le pourra ; la reconstruction ne dépend pas de son inventaire.
+- Les défauts reproduits de cadrage, orientation, superposition et stabilité de consigne sont
+  corrigés et leurs parcours passent. La qualité a été rejouée entièrement après une erreur
+  `ERR_NO_BUFFER_SPACE` de Chromium ; aucun test ou seuil n'a été assoupli.
 - Lexique CE1 incomplet, atlas de compagnons, nouveaux textes et variantes artistiques non
   approuvés : leur statut reste inchangé. Ils ne sont pas promus par la reconstruction.
 - Site web de référence ; LAN et APK conservés sans nouveaux portages pendant la réhabilitation.

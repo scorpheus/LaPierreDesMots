@@ -47,6 +47,8 @@ async function preparerRefus(page: Page, moteur: string): Promise<() => Promise<
       const attendue = etat.trous?.find((trou) => trou.id === restantes[0])?.attendu;
       expect(attendue).toBeDefined();
       const mauvaise = await prendreAutre(racine, 'data-lettre', [attendue!]);
+      // Atteindre le clavier avant la mesure : le scroll interne n'est pas un refus.
+      await mauvaise.scrollIntoViewIfNeeded();
       return async () => toucherPrise(mauvaise);
     }
     case 'histoire': case 'eclair': {

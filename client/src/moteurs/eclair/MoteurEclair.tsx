@@ -149,7 +149,23 @@ export function MoteurEclair(
 
   // --- la mesure du cadre -----------------------------------------------------
   const { racine, bande, cadre, hauteurBande } = useMesureCadre();
-  const { cadreJeu, bornes } = useMemo(() => cadreJeuEtBornes(cadre, hauteurBande), [cadre, hauteurBande]);
+  const barreSuperieure = useRef<HTMLDivElement | null>(null);
+  const [basBarre, fixerBasBarre] = useState(0);
+  useEffect(() => {
+    const barre = barreSuperieure.current;
+    if (barre === null) return undefined;
+    const mesurerBarre = (): void => { fixerBasBarre(barre.offsetTop + barre.offsetHeight); };
+    mesurerBarre();
+    if (typeof ResizeObserver !== 'function') return undefined;
+    const observateur = new ResizeObserver(mesurerBarre);
+    observateur.observe(barre);
+    return () => observateur.disconnect();
+  }, []);
+  const { cadreJeu, bornes } = useMemo(() => {
+    const mesure = cadreJeuEtBornes(cadre, hauteurBande);
+    // Aucune option ne doit se retrouver derrière la commande gratuite « Revoir ».
+    return { ...mesure, bornes: { ...mesure.bornes, yMin: Math.max(mesure.bornes.yMin, basBarre + 10) } };
+  }, [cadre, hauteurBande, basBarre]);
 
   const regions = useMemo(() => regionsColoriables(habillage), [habillage]);
   const centroideParRegion = useMemo(
@@ -281,7 +297,7 @@ export function MoteurEclair(
 
       {/* Une seule bande supérieure : le repère d'étape et la commande ne peuvent plus se
           superposer. Sur petit écran, le CSS condense les libellés sans réduire la cible. */}
-      <div className="eclair-barre-superieure">
+      <div ref={barreSuperieure} className="eclair-barre-superieure">
         {consigne === null ? null : (
           <div
             data-plateau="etape-eclair"

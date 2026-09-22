@@ -249,6 +249,21 @@ export default defineConfig(({ mode }) => {
       // peser dans le budget de 250 Ko gzip mesuré sur `dist/` (§ 7.3).
       sourcemap: estTest,
       cssCodeSplit: false,
+      // Les ports chargés dynamiquement partagent ces contrats avec les écrans.
+      // Les garder hors de l'entrée évite un cycle d'évaluation avec son await.
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            const chemin = id.replaceAll('\\', '/');
+            if (chemin.includes('/partage/src/')) return 'partage';
+            // La PWA partage aussi ces documents entre le port local et les écrans.
+            if (chemin.includes('/contenu/monde/') || chemin.includes('/contenu/referentiel/')) {
+              return 'referentiels';
+            }
+            return undefined;
+          },
+        },
+      },
       // Le budget de 250 Ko gzip (§ 7.3) est un contrat du mode LAN. Le mode autonome embarque
       // `contenu/` (7,29 Mo) et le pont SQLite : lui appliquer la même alerte serait du bruit,
       // pas un garde-fou — `verifier-bundle.mjs` ne mesure d'ailleurs que `dist/`.

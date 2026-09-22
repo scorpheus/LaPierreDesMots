@@ -197,6 +197,8 @@ test.describe('parcours nominal', () => {
 
     // ── on choisit le profil du doigt
     await carteProfil.click();
+    await expect(page.locator('[data-ecran="campement"]')).toBeVisible();
+    await page.locator('[data-vers="carte"]').click();
     await expect(page.locator('[data-ecran="carte"]')).toBeVisible();
 
     // ── on entre dans le nœud

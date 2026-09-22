@@ -38,11 +38,20 @@ const STYLES_CADRE_COLORIAGE = `
   outline-offset: 3px;
 }
 .pierre-cadre-coloriage__fenetre {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   min-inline-size: 0;
   min-block-size: 0;
   overflow: hidden;
 }
+@media (min-width: 1200px) and (min-height: 801px),
+       (orientation: landscape) and (max-height: 520px) {
+  .pierre-cadre-coloriage__fenetre { flex: 1 1 0; }
+}
 .pierre-cadre-coloriage[data-loupe="oui"] .pierre-cadre-coloriage__fenetre {
+  align-items: flex-start;
+  justify-content: flex-start;
   overflow: auto;
   overscroll-behavior: contain;
   touch-action: pan-x pan-y;
@@ -50,6 +59,7 @@ const STYLES_CADRE_COLORIAGE = `
   border-radius: .75rem;
 }
 .pierre-cadre-coloriage[data-loupe="oui"] .pierre-scene {
+  align-self: flex-start !important;
   flex: none !important;
   min-inline-size: ${String(LARGEUR_MINIMALE_LOUPE_PX)}px;
   inline-size: 100% !important;

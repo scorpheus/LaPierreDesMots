@@ -141,6 +141,8 @@ test.describe('la séquence d’ouverture', () => {
 
     await page.locator('[data-passer="ouverture"]').click();
     // Elle rend la main sur le monde, jamais sur un écran vide.
+    await expect(page.locator('[data-ecran="campement"]')).toBeVisible();
+    await page.locator('[data-vers="carte"]').click();
     await expect(page.locator('[data-ecran="carte"]')).toBeVisible();
   });
 
@@ -156,6 +158,8 @@ test.describe('la séquence d’ouverture', () => {
       await expect(ouverture).toHaveAttribute('data-tableau-courant', tableau.code);
       await page.locator('[data-suite="ouverture"]').click();
     }
+    await expect(page.locator('[data-ecran="campement"]')).toBeVisible();
+    await page.locator('[data-vers="carte"]').click();
     await expect(page.locator('[data-ecran="carte"]')).toBeVisible();
   });
 
@@ -170,6 +174,8 @@ test.describe('la séquence d’ouverture', () => {
         sequence.tableaux[0]!.code
       );
       await page.locator('[data-passer="ouverture"]').click();
+      await expect(page.locator('[data-ecran="campement"]')).toBeVisible();
+      await page.locator('[data-vers="carte"]').click();
       await expect(page.locator('[data-ecran="carte"]')).toBeVisible();
     }
   });
@@ -215,6 +221,8 @@ test.describe('la séquence d’ouverture', () => {
     for (let rang = 0; rang < sequence.tableaux.length; rang += 1) {
       await page.locator('[data-suite="ouverture"]').click();
     }
+    await expect(page.locator('[data-ecran="campement"]')).toBeVisible();
+    await page.locator('[data-vers="carte"]').click();
     await expect(page.locator('[data-ecran="carte"]')).toBeVisible();
 
     await expect
@@ -225,6 +233,8 @@ test.describe('la séquence d’ouverture', () => {
     // repris, et c'est ce que le parent lira.
     await page.locator('[data-vers="ouverture"]').click();
     await page.locator('[data-passer="ouverture"]').click();
+    await expect(page.locator('[data-ecran="campement"]')).toBeVisible();
+    await page.locator('[data-vers="carte"]').click();
     await expect(page.locator('[data-ecran="carte"]')).toBeVisible();
 
     await expect
@@ -247,6 +257,8 @@ test.describe('la séquence d’ouverture', () => {
     await expect(page.locator('[data-ecran="ouverture"]')).toBeVisible();
     await expect(page.locator(`[data-texte-tableau="${sequence.tableaux[0]!.code}"]`)).toBeVisible();
     await page.locator('[data-passer="ouverture"]').click();
+    await expect(page.locator('[data-ecran="campement"]')).toBeVisible();
+    await page.locator('[data-vers="carte"]').click();
     await expect(page.locator('[data-ecran="carte"]')).toBeVisible();
   });
 });

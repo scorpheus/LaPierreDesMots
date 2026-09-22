@@ -20,7 +20,8 @@ export interface ProprietesParchemin {
 }
 
 /** Bords volontairement inégaux : quatre coins jamais alignés, comme un vieux papier. */
-const CONTOUR = 'M12,28 L1188,12 L1176,776 L24,788 Z';
+// Le bord inférieur laisse entier le cartouche de la Clairière, traits compris.
+const CONTOUR = 'M12,28 L1188,12 L1176,788 L24,796 Z';
 
 export function Parchemin({
   viewBox = '0 0 1200 800',

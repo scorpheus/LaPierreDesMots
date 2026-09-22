@@ -177,8 +177,14 @@ test.describe('QA — R16 : aucune cible sous 64 px', () => {
 test.describe('QA — réactions des commandes inventoriées', () => {
   test.slow();
 
-  for (const ecran of ECRANS) {
-    test(`« ${ecran.nom} » : chaque commande inventoriée est observée`, async ({ page, serveurIsole }) => {
+  // La relecture parent contient plusieurs centaines de commandes. Trois cas isolés gardent
+  // tout l’inventaire et les mêmes assertions sans allonger le délai d’un test individuel.
+  const lots = ECRANS.flatMap((ecran) => {
+    const total = ecran.attendu === 'dashboard' ? 3 : 1;
+    return Array.from({ length: total }, (_, index) => ({ ecran, index, total }));
+  });
+  for (const { ecran, index, total } of lots) {
+    test(`« ${ecran.nom} » : chaque commande inventoriée est observée${total === 1 ? '' : ` — lot ${index + 1}/${total}`}`, async ({ page, serveurIsole }) => {
       let inventaire: string[] = [];
       const verdicts = await auditerInteractions({
         async restaurer() {
@@ -239,7 +245,7 @@ test.describe('QA — réactions des commandes inventoriées', () => {
               JSON.stringify(await etatDuJeu(page)) !== avantEtat,
           };
         },
-      });
+      }, { index, total });
       expect(verdicts.length, 'inventaire de commandes vide').toBeGreaterThan(0);
       expect(
         verdicts.filter((verdict) => verdict.statut !== 'observe'),

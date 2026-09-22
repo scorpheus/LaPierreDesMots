@@ -439,6 +439,32 @@
   overflow: visible !important;
 }
 
+/* Sur PC, `colorie` n'est pas intrinsèquement long : son cadre et son SVG savent rétrécir.
+   Le laisser suivre le repli mobile desserrait toute la page et repoussait palette et Gobi
+   sous le viewport. Les cadres bas conservent le document défilant prévu par R20. */
+@media (min-width: 1200px) and (min-height: 801px) {
+  [data-ecran="noeud"]:has([data-moteur="colorie"][data-plateau-defilant="oui"]) {
+    block-size: 100dvh !important;
+    min-block-size: min-content;
+    max-block-size: 100dvh;
+    overflow: hidden;
+  }
+
+  [data-ecran="noeud"] .scene-noeud:has([data-moteur="colorie"][data-plateau-defilant="oui"]) {
+    flex: 1 1 0 !important;
+    block-size: auto !important;
+    min-block-size: var(--activite-scene-min) !important;
+  }
+
+  [data-ecran="noeud"] .porteur-moteur:has(> [data-moteur="colorie"][data-plateau-defilant="oui"]) {
+    block-size: 100% !important;
+  }
+
+  [data-ecran="noeud"] .porteur-moteur > [data-moteur="colorie"][data-plateau-defilant="oui"] {
+    overflow-y: auto !important;
+  }
+}
+
 @media (max-width: 1100px), (max-height: 800px) {
   [data-ecran="noeud"] [data-moteur] {
     overflow: auto !important;
@@ -554,9 +580,11 @@
 main[data-ecran='noeud']:has([data-moteur='paires'][data-plateau-defilant='oui']) {
   gap: 4px !important;
   padding: 8px !important;
-  block-size: 100dvh !important;
+  block-size: auto;
+  min-block-size: 100dvh;
 }
 .scene-noeud:has([data-moteur='paires'][data-plateau-defilant='oui']) {
+  block-size: auto;
   flex: 1 0 auto !important;
   min-block-size: 0 !important;
   display: flex;
@@ -638,7 +666,7 @@ main[data-ecran='noeud']:has([data-moteur='paires'][data-plateau-defilant='oui']
 [data-moteur='paires'] [data-plateau='cartes'] {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
+  gap: 8px;
   align-items: stretch;
 }
 [data-moteur='paires'] [data-composition='mixte'] {
@@ -672,13 +700,20 @@ main[data-ecran='noeud']:has([data-moteur='paires']) [data-progression-sortie] {
   margin: 0 !important;
 }
 main[data-ecran='noeud']:has([data-moteur='paires']) .gobi {
+  display: grid !important;
+  grid-template-columns: 64px minmax(0, 1fr) auto;
   padding: 4px !important;
   gap: 8px !important;
 }
 main[data-ecran='noeud']:has([data-moteur='paires']) .gobi-bulle {
+  min-inline-size: 0;
   padding: 4px 8px !important;
 }
 @media (max-width: 619px) {
+  main[data-ecran='noeud']:has([data-moteur='paires']) .gobi { grid-template-columns: 64px minmax(0, 1fr); }
+  main[data-ecran='noeud']:has([data-moteur='paires']) .gobi-bulle { grid-column: 1 / -1; grid-row: 2; }
+  main[data-ecran='noeud']:has([data-moteur='paires']) .gobi > [data-action='aide'] { grid-column: 2; grid-row: 1; justify-self: end; }
+
   [data-moteur='paires'] [data-plateau='cartes'] {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -690,10 +725,10 @@ main[data-ecran='noeud']:has([data-moteur='paires']) .gobi-bulle {
   [data-moteur='paires'] [data-composition='mixte'] {
     grid-template-columns: repeat(2, minmax(0, 1fr) 72px);
   }
-  [data-moteur='paires'] [data-plateau='cartes'] { gap: 6px; }
+  [data-moteur='paires'] [data-plateau='cartes'] { gap: 4px; }
   main[data-ecran='noeud']:has([data-moteur='paires']) .gobi { padding: 0 !important; }
   main[data-ecran='noeud']:has([data-moteur='paires']) .barre-consigne {
-    padding: 4px !important;
+    padding: 0 !important;
     border-width: 2px !important;
   }
 }

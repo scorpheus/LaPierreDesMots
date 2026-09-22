@@ -269,7 +269,7 @@ export function EcranCarte({
         </section>
       </>}
       {conclusionOuverte ? <section className="choix-compagnon" data-conclusion-pierre="oui" role="dialog" aria-modal="true" aria-labelledby="titre-conclusion-pierre"><div className="choix-compagnon__carte"><h2 id="titre-conclusion-pierre" className="titre">La Pierre des Mots est entière !</h2><button type="button" className="cible cible-appel" onClick={() => fixerConclusionOuverte(false)}>Revoir la carte</button></div></section> : null}
-      {departDemande === null ? null : <ChoixCompagnon destination={departDemande.libelle} stadeGobi={String(monde?.gobi.stade ?? '')} compagnons={compagnons} choisi={compagnonChoisi} enChargement={regionEnChargement !== null} animationsDesactivees={animationsDesactivees} surChoisir={fixerCompagnonChoisi} surRetour={annulerDemande} surPartir={confirmerDepart} />}
+      {departDemande === null ? null : <ChoixCompagnon codeDestination={String(departDemande.region)} destination={departDemande.libelle} stadeGobi={String(monde?.gobi.stade ?? '')} compagnons={compagnons} choisi={compagnonChoisi} enChargement={regionEnChargement !== null} animationsDesactivees={animationsDesactivees} surChoisir={fixerCompagnonChoisi} surRetour={annulerDemande} surPartir={confirmerDepart} />}
     </main>
   );
 }

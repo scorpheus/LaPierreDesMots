@@ -198,7 +198,12 @@ export interface VerdictInteraction {
 /** Un signal observable n'est pas une preuve de justesse métier. Une absence n'est pas un signal. */
 export async function auditerInteractions(
   adaptateur: AdaptateurInteractions,
+  lot: { readonly index: number; readonly total: number } = { index: 0, total: 1 },
 ): Promise<readonly VerdictInteraction[]> {
+  if (!Number.isInteger(lot.total) || !Number.isInteger(lot.index)
+    || lot.total < 1 || lot.index < 0 || lot.index >= lot.total) {
+    throw new Error('Lot d’audit invalide');
+  }
   await adaptateur.restaurer();
   const depart = await adaptateur.ecran();
   const initiales = await adaptateur.inventorier();
@@ -218,8 +223,10 @@ export async function auditerInteractions(
   // enregistrement la remonte légitimement sans ces cadeaux et rendrait leurs prises introuvables.
   const prioritaires = initiales.filter((cible) => fenetreRecompenseAttendue(cible) !== null);
   const ordre = [...prioritaires, ...initiales.filter((cible) => !prioritaires.includes(cible))];
+  // Chaque cible appartient à un seul lot ; les amorces restent prises dans l’inventaire entier.
+  const ciblesDuLot = ordre.filter((_, index) => index % lot.total === lot.index);
   const verdicts: VerdictInteraction[] = [];
-  for (const cible of ordre) {
+  for (const cible of ciblesDuLot) {
     verdicts.push(await observer(cible));
     if (await adaptateur.ecran() !== depart) await adaptateur.restaurer();
   }
@@ -228,13 +235,13 @@ export async function auditerInteractions(
     await adaptateur.restaurer();
     // La cible a pu disparaître parce qu'une autre commande a changé la question.
     // La tester d'abord seule évite de reproduire cette disparition avant chaque essai.
-    verdicts[rang] = await observer(ordre[rang]!);
+    verdicts[rang] = await observer(ciblesDuLot[rang]!);
     if (verdicts[rang]!.statut !== 'muet') continue;
     for (const autre of ordre) {
-      if (autre === ordre[rang]) continue;
+      if (autre === ciblesDuLot[rang]) continue;
       await adaptateur.taper(autre);
       if (await adaptateur.ecran() !== depart) await adaptateur.restaurer();
-      const apresAmorcage = await observer(ordre[rang]!);
+      const apresAmorcage = await observer(ciblesDuLot[rang]!);
       if (apresAmorcage.statut === 'observe') {
         verdicts[rang] = apresAmorcage;
         break;

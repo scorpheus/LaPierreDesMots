@@ -165,8 +165,8 @@ export function MoteurColorie(
       // dessin de chaque région de sa prise transparente de 80 unités. R16 ne dépend donc plus
       // de la finesse de l'asset, et R20 n'a plus à payer ce défaut par un long défilement.
       // R20 — colonne souple : la scène prend l'espace restant tandis que la palette garde
-      // ses cibles de 64 px. Le débordement local reste un filet de sécurité en très petit
-      // portrait ; sur la tablette de référence, la scène et les commandes tiennent ensemble.
+      // ses cibles de 64 px. Le plateau reste long sur les petits cadres ; le CSS de la coquille
+      // ne le borne au viewport que sur les grands écrans où le dessin sait se contracter.
       style={{
         display: 'flex',
         flexDirection: 'column',
