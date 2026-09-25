@@ -2947,8 +2947,8 @@
     "file": "assets/ductus-minuscules-B8XBqC8V.json",
     "src": "../contenu/referentiel/ductus-minuscules.json"
   },
-  "_GalerieExercices-Dyi14xEW.js": {
-    "file": "assets/GalerieExercices-Dyi14xEW.js",
+  "_GalerieExercices-BVRxQvPm.js": {
+    "file": "assets/GalerieExercices-BVRxQvPm.js",
     "name": "GalerieExercices",
     "imports": [
       "index.html",
@@ -2975,7 +2975,7 @@
     ]
   },
   "index.html": {
-    "file": "assets/index-ByRAZ2ha.js",
+    "file": "assets/index-uyziQWfi.js",
     "name": "index",
     "src": "index.html",
     "isEntry": true,
@@ -3747,13 +3747,13 @@
     "isDynamicEntry": true
   },
   "src/ecrans/EcranDashboard.tsx": {
-    "file": "assets/EcranDashboard-0ZvhvGaX.js",
+    "file": "assets/EcranDashboard-BBvo2DCr.js",
     "name": "EcranDashboard",
     "src": "src/ecrans/EcranDashboard.tsx",
     "isDynamicEntry": true,
     "imports": [
       "index.html",
-      "_GalerieExercices-Dyi14xEW.js",
+      "_GalerieExercices-BVRxQvPm.js",
       "_partage-Cax0073I.js",
       "_commun-BGaluCk_.js",
       "_referentiels-CZqLb5_W.js"
@@ -3763,7 +3763,7 @@
     ]
   },
   "src/ecrans/EcranDebugRecompenses.tsx": {
-    "file": "assets/EcranDebugRecompenses-CU1np2YZ.js",
+    "file": "assets/EcranDebugRecompenses-CmPVGqxw.js",
     "name": "EcranDebugRecompenses",
     "src": "src/ecrans/EcranDebugRecompenses.tsx",
     "isDynamicEntry": true,
@@ -3775,20 +3775,20 @@
     ]
   },
   "src/ecrans/EcranGalerieParent.tsx": {
-    "file": "assets/EcranGalerieParent-CMyzdl1V.js",
+    "file": "assets/EcranGalerieParent-CHfn1tgc.js",
     "name": "EcranGalerieParent",
     "src": "src/ecrans/EcranGalerieParent.tsx",
     "isDynamicEntry": true,
     "imports": [
       "index.html",
-      "_GalerieExercices-Dyi14xEW.js",
+      "_GalerieExercices-BVRxQvPm.js",
       "_partage-Cax0073I.js",
       "_commun-BGaluCk_.js",
       "_referentiels-CZqLb5_W.js"
     ]
   },
   "src/parent/VisiteDesEcrans.tsx": {
-    "file": "assets/VisiteDesEcrans-B7h3W2U9.js",
+    "file": "assets/VisiteDesEcrans-BygNj_lZ.js",
     "name": "VisiteDesEcrans",
     "src": "src/parent/VisiteDesEcrans.tsx",
     "isDynamicEntry": true,

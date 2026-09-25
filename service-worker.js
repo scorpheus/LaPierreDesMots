@@ -11,7 +11,7 @@
  */
 /* global self, caches */
 
-const VERSION = '66e0bee4f2f07a39';
+const VERSION = '02931198d63a555a';
 const BASE = '/LaPierreDesMots/';
 const PRECACHE = [
   "/LaPierreDesMots/.vite/manifest.json",
@@ -168,9 +168,9 @@ const PRECACHE = [
   "/LaPierreDesMots/assets/ecole-BK-Txehm.svg",
   "/LaPierreDesMots/assets/ecole-place-jNX_q4hV.svg",
   "/LaPierreDesMots/assets/ecole-v2-DGBEfK6b.svg",
-  "/LaPierreDesMots/assets/EcranDashboard-0ZvhvGaX.js",
-  "/LaPierreDesMots/assets/EcranDebugRecompenses-CU1np2YZ.js",
-  "/LaPierreDesMots/assets/EcranGalerieParent-CMyzdl1V.js",
+  "/LaPierreDesMots/assets/EcranDashboard-BBvo2DCr.js",
+  "/LaPierreDesMots/assets/EcranDebugRecompenses-CmPVGqxw.js",
+  "/LaPierreDesMots/assets/EcranGalerieParent-CHfn1tgc.js",
   "/LaPierreDesMots/assets/enseigne-BH2kTI7w.svg",
   "/LaPierreDesMots/assets/etoiles-filantes-BB5-xaYc.svg",
   "/LaPierreDesMots/assets/feuilles-DB99FsvZ.svg",
@@ -231,7 +231,7 @@ const PRECACHE = [
   "/LaPierreDesMots/assets/fresque-murale-75yQBRgW.svg",
   "/LaPierreDesMots/assets/fresque-yWpnM1i8.svg",
   "/LaPierreDesMots/assets/frise-EQvAs4qp.svg",
-  "/LaPierreDesMots/assets/GalerieExercices-Dyi14xEW.js",
+  "/LaPierreDesMots/assets/GalerieExercices-BVRxQvPm.js",
   "/LaPierreDesMots/assets/galeries-cristal-bd-01-c1.normal.27a52847-BHvROCkN.opus",
   "/LaPierreDesMots/assets/galeries-cristal-bd-01-c2.normal.54e6a757-x-hqR6vl.opus",
   "/LaPierreDesMots/assets/galeries-cristal-bd-01-c3.normal.54e6a757-DZhDlL0y.opus",
@@ -297,8 +297,8 @@ const PRECACHE = [
   "/LaPierreDesMots/assets/grenouilles-BuCMD2GP.svg",
   "/LaPierreDesMots/assets/guirlande-BoZr2VSf.svg",
   "/LaPierreDesMots/assets/hesitation-BBCjGqUA.svg",
-  "/LaPierreDesMots/assets/index-ByRAZ2ha.js",
   "/LaPierreDesMots/assets/index-DRefDHMM.js",
+  "/LaPierreDesMots/assets/index-uyziQWfi.js",
   "/LaPierreDesMots/assets/joie-C4xsL_9o.svg",
   "/LaPierreDesMots/assets/lianes-Llw4yK2T.svg",
   "/LaPierreDesMots/assets/locuteur-bulle.normal.8dad8c39-B5CjukoM.opus",
@@ -479,7 +479,7 @@ const PRECACHE = [
   "/LaPierreDesMots/assets/veillee-automne-CS7C5A2G.svg",
   "/LaPierreDesMots/assets/veillee-DjFouPXW.svg",
   "/LaPierreDesMots/assets/veine-20F4Jbxj.svg",
-  "/LaPierreDesMots/assets/VisiteDesEcrans-B7h3W2U9.js",
+  "/LaPierreDesMots/assets/VisiteDesEcrans-BygNj_lZ.js",
   "/LaPierreDesMots/assets/vitrail-D5w1Z3Hp.svg",
   "/LaPierreDesMots/assets/volcan-coulee-chemin-01-c1.normal.5ca70ed2-DxMaFAUC.opus",
   "/LaPierreDesMots/assets/volcan-coulee-chemin-01-c2.normal.2419f2e4-DKRfVG2q.opus",
