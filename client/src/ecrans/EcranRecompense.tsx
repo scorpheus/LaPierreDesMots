@@ -27,6 +27,7 @@ import { DetailEtoiles } from '../composants/activite/DetailEtoiles.js';
 import { Etoiles } from '../composants/Etoiles.js';
 import { EvolutionGobi } from '../composants/EvolutionGobi.js';
 import { FenetreRecompense } from '../composants/FenetreRecompense.js';
+import { assetDeStadeGobi } from '../composants/Gobi.js';
 import { SpriteCompagnon } from '../composants/SpriteCompagnon.js';
 import { DessinButin } from '../monde/Butin.js';
 import { useEtatJeu, useMagasin, useServices } from '../etat/services.js';
@@ -520,7 +521,12 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
           <span className="recompense-eclat recompense-eclat--deux">✦</span>
           <span className="recompense-eclat recompense-eclat--trois">✦</span>
           {compagnonDeSortie === null ? (
-            <img src={urlAsset('assets/gobi/animation/joie.webp')} alt="" draggable={false} />
+            <img
+              src={urlAsset(assetDeStadeGobi(stadeCourant ?? 'oeuf'))}
+              data-stade-gobi={stadeCourant ?? 'oeuf'}
+              alt=""
+              draggable={false}
+            />
           ) : (
             <SpriteCompagnon
               code={compagnonDeSortie.code}

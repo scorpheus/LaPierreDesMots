@@ -151,6 +151,11 @@ const RANG_PAR_STADE: Readonly<Record<CodeStadeGobi, number>> = {
   gardien: 10,
 };
 
+/** Chemin du raster canonique d'un stade, partagé par tous les écrans qui montrent Gobi. */
+export function assetDeStadeGobi(stade: CodeStadeGobi): string {
+  return `assets/gobi/stades/stade-${String(RANG_PAR_STADE[stade])}.webp`;
+}
+
 export function DessinDeGobi({
   stade,
   animation
@@ -160,7 +165,7 @@ export function DessinDeGobi({
 }): ReactElement {
   const asset =
     animation === 'repos'
-      ? `assets/gobi/stades/stade-${String(RANG_PAR_STADE[stade])}.webp`
+      ? assetDeStadeGobi(stade)
       : `assets/gobi/animation/${animation}.webp`;
 
   return (

@@ -222,12 +222,22 @@ describe('la fin de partie est une réussite, quoi qu’il arrive (R14)', () => 
     expect(effacementsParticules).toHaveBeenCalledTimes(1);
   });
 
-  it('célèbre la réussite avec Gobi dans une scène dédiée, sans animer le texte', () => {
-    monter({ etoiles: 2 });
+  it('célèbre la réussite avec le stade actuel de Gobi, sans animer le texte', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(null, { status: 404 })));
+    mondeRecompense.valeur = {
+      carte: { ouvertesEnParallele: 2, regions: [] },
+      gobi: { stade: 'crete', formes: [], formeActive: null },
+      compagnons: [],
+      campement: []
+    } as EtatMonde;
+    monter({ etoiles: 2, profil: { id: 'prf-1', prenom: 'Alma' } });
     const scene = document.querySelector('[data-scene-recompense="gobi-joie"]');
     const gobi = scene?.querySelector<HTMLImageElement>('img');
     expect(scene).not.toBeNull();
-    expect(gobi?.getAttribute('src')).toContain('assets/gobi/animation/joie.webp');
+    await waitFor(() => {
+      expect(gobi?.getAttribute('data-stade-gobi')).toBe('crete');
+      expect(gobi?.getAttribute('src')).toContain('assets/gobi/stades/stade-5.webp');
+    });
     expect(document.querySelector('h1')?.closest('[data-texte-recompense]')).not.toBeNull();
   });
 
@@ -349,7 +359,7 @@ describe('le compagnon de la sortie reste présent jusqu’au résultat', () => 
     expect(scene).not.toBeNull();
     expect(scene?.getAttribute('data-scene-recompense')).toBe('gobi-joie');
     expect(scene?.querySelector<HTMLImageElement>('img')?.getAttribute('src')).toContain(
-      'assets/gobi/animation/joie.webp'
+      'assets/gobi/stades/stade-1.webp'
     );
   });
 

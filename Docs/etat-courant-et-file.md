@@ -1,6 +1,6 @@
 # État courant et file de travail
 
-Mise à jour : 22 septembre 2026. Cette page porte uniquement l'état actif.
+Mise à jour : 25 septembre 2026. Cette page porte uniquement l'état actif.
 Le contrat de la reconstruction est [le plan de réhabilitation](plan-rehabilitation-site.md).
 
 ## Décision et demande active
@@ -105,6 +105,9 @@ rejoint R3 ; F5 livraison rejoint R4. F0 est la base locale validée décrite ci
   `ERR_NO_BUFFER_SPACE` de Chromium ; aucun test ou seuil n'a été assoupli.
 - Lexique CE1 incomplet, atlas de compagnons, nouveaux textes et variantes artistiques non
   approuvés : leur statut reste inchangé. Ils ne sont pas promus par la reconstruction.
+- La récompense montre le stade courant de Gobi. Une future tranche artistique devra décliner
+  sa pose joyeuse pour les dix stades et la faire valider ; l'asset de joie unique n'est plus
+  employé comme substitut d'un stade et aucune nouvelle image n'est produite dans ce correctif.
 - Site web de référence ; LAN et APK conservés sans nouveaux portages pendant la réhabilitation.
 - La direction visuelle est choisie ; le visa esthétique sur le résultat intervient à la fin.
   Les agents portent les contrôles intermédiaires, la qualité mécanique et la détection des
