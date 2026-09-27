@@ -161,3 +161,48 @@
   .collection-coffre--formes { grid-column: auto; }
 }
 @media (prefers-reduced-motion: reduce) { .case-coffre { transition: none; } }
+
+/* Vue large : les quatre collections partagent l’espace sans ajouter une page sous
+   les trésors. Les cases restent toutes visibles, avec leurs noms et des prises ≥ 64 px. */
+@media (min-width: 1101px) and (orientation: landscape) {
+  .ecran-coffre { padding: 1rem; gap: .75rem; }
+  .coffre-en-tete-image { inline-size: 5rem; }
+  .coffre-titre { font-size: 2.25rem; }
+  .coffre-collections-groupees { padding: .65rem; }
+  .collections-coffre { gap: .65rem; grid-template-rows: auto; }
+  .collection-coffre { padding: .65rem; }
+  .collection-coffre--formes [data-case-etagere] {
+    inline-size: 7.5rem !important;
+    min-block-size: 7.5rem !important;
+  }
+  .case-coffre--compacte { inline-size: 7rem; min-block-size: 7rem; }
+}
+
+/* Tablette paysage : l’écran reste sur une vue. Les collections complètes vivent dans
+   le panneau qui peut défiler, sans rogner de cible ni retirer de cadeau. */
+@media (min-width: 781px) and (max-width: 1100px) and (orientation: landscape) {
+  .ecran-coffre {
+    block-size: 100dvh;
+    min-block-size: 0;
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: .65rem;
+  }
+
+  .coffre-en-tete { gap: .65rem; }
+  .coffre-en-tete-image { inline-size: 5.5rem; }
+  .coffre-titre { font-size: 2rem; }
+  .coffre-en-tete-texte > p:last-child { font-size: 1rem; }
+
+  .coffre-collections-groupees {
+    min-block-size: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: .65rem;
+  }
+
+  .collections-coffre { gap: .65rem; }
+  .collection-coffre { padding: .65rem; }
+  .collection-coffre-titre { font-size: 1.2rem; }
+  .collection-progression { margin-block-end: .35rem; }
+  .case-coffre--compacte { inline-size: 6.25rem; min-block-size: 6.8rem; }
+}

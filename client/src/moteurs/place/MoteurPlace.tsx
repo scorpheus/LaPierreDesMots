@@ -17,7 +17,7 @@
  */
 
 import { MessageStable } from '../../composants/MessageStable.js';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
 import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
@@ -37,6 +37,32 @@ const PERIODE_BATTEMENT_MS = 1000;
  * de 20 s ». RÉÉCOUTE, PAS AIDE (R15) : sans coût en étoiles, et sans borne.
  */
 const RELECTURE_MS = 20_000;
+
+const RESERVES_DE_SESSION = new WeakMap<object, Map<string, ContenuPlace['reserve']>>();
+
+function tirerReserveDeSession(
+  alea: ProprietesMoteur<ContenuPlace, EtatPlace, ActionPlace>['services']['alea'],
+  identifiantSession: string,
+  reserve: ContenuPlace['reserve'],
+): ContenuPlace['reserve'] {
+  let reserves = RESERVES_DE_SESSION.get(alea);
+  if (reserves === undefined) {
+    reserves = new Map<string, ContenuPlace['reserve']>();
+    RESERVES_DE_SESSION.set(alea, reserves);
+  }
+  const connue = reserves.get(identifiantSession);
+  if (connue !== undefined) return connue;
+  const melangee = alea.melanger(reserve);
+  reserves.set(identifiantSession, melangee);
+  return melangee;
+}
+
+function oublierReserveDeSession(alea: object, identifiantSession: string): void {
+  const reserves = RESERVES_DE_SESSION.get(alea);
+  if (reserves === undefined) return;
+  reserves.delete(identifiantSession);
+  if (reserves.size === 0) RESERVES_DE_SESSION.delete(alea);
+}
 
 /**
  * Le SVG d'habillage est un asset local, validé par `test:contenu` avant d'atteindre
@@ -126,13 +152,15 @@ export function MoteurPlace(
     () => new Set(contenu.consignes.flatMap((consigne) => consigne.depots.map((depot) => depot.element))),
     [contenu],
   );
-  // L'ordre du fichier n'est pas un indice : sinon les trois objets attendus, déclarés avant
-  // les deux intrus, donnent gratuitement la solution observée par le parent. Le mélange est
-  // effectué une seule fois avec l'Alea injecté, donc il reste déterministe et rejouable.
-  const reserveMelangee = useMemo(
-    () => services.alea.melanger(contenu.reserve),
-    [contenu.reserve, services.alea],
-  );
+  const identifiantSession = useId();
+  const [reserveInitiale] = useState(() => etat.reserveMelangee ??
+    tirerReserveDeSession(services.alea, identifiantSession, contenu.reserve));
+  const reserveMelangee = etat.reserveMelangee ?? reserveInitiale;
+  useEffect(() => {
+    if (etat.reserveMelangee === null) emettre({ type: 'fixerReserveMelangee', reserve: reserveInitiale });
+  }, [etat.reserveMelangee, emettre, reserveInitiale]);
+  useEffect(() => () => oublierReserveDeSession(services.alea, identifiantSession),
+    [services.alea, identifiantSession]);
 
   // --- la relecture automatique, avec son quota ----------------------------
   const refRelectures = useRef<{ consigne: string; faites: number }>({ consigne: '', faites: 0 });

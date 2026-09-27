@@ -1,14 +1,16 @@
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { QueryClient } from '@tanstack/react-query';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { Profil, SeuilsCascade } from '@pierre/partage';
+import type { Exercice, Noeud, Profil, SeuilsCascade } from '@pierre/partage';
 import { Application } from '@client/Application';
 import { creerMagasin } from '@client/etat/magasin';
+import type { DepotRepriseLecture } from '@client/etat/reprise-lecture-depot';
 import { lireProfilMemorise, memoriserProfil, oublierProfil } from '@client/etat/profil-memorise';
-import { fermerZoneParent, poserJetonParent } from '@client/api/commun';
+import { ErreurReseau, fermerZoneParent, poserJetonParent } from '@client/api/commun';
 import { creerHaptiqueMuette } from '@client/gamefeel/haptique-navigateur';
 import { creerRetourSensoriel } from '@client/gamefeel/retour';
-import { lireJson, servicesDeTest } from '../configuration/preparation.js';
+import { CHEMIN_EXERCICE_ECOLE, CHEMIN_NOEUD_CLAIRIERE, habillageEcole, lireJson,
+  servicesDeTest } from '../configuration/preparation.js';
 
 const api = vi.hoisted(() => ({
   lireProfil: vi.fn(), lireReglagesLecture: vi.fn(), listerProfils: vi.fn(),
@@ -26,12 +28,15 @@ vi.mock('@client/ecrans/EcranProfils', () => ({
   EcranProfils: () => <main data-testid="profils" data-ecran="profils" />
 }));
 vi.mock('@client/ecrans/EcranCampement', () => ({
-  EcranCampement: ({ surAllerCarte, surAccesParent }: {
+  EcranCampement: ({ surAllerCarte, surAccesParent, surReprendreLecture }: {
     surAllerCarte: () => void; surAccesParent: () => void;
+    surReprendreLecture?: () => void;
   }) =>
     <main data-testid="campement" data-ecran="campement">
       <button onClick={surAllerCarte}>Ouvrir la carte</button>
       <button onClick={surAccesParent}>Parents</button>
+      {surReprendreLecture === undefined ? null :
+        <button onClick={surReprendreLecture}>Reprendre la lecture</button>}
     </main>
 }));
 vi.mock('@client/ecrans/EcranCarte', () => ({
@@ -102,7 +107,7 @@ function differerProfil() {
   return { resoudre, rejeter };
 }
 
-function monter(chemin: string, souvenir = true) {
+function monter(chemin: string, souvenir = true, depot?: DepotRepriseLecture) {
   window.history.replaceState(null, '', chemin);
   if (souvenir) memoriserProfil(String(profil.id));
   const base = servicesDeTest();
@@ -111,7 +116,7 @@ function monter(chemin: string, souvenir = true) {
     animationsDesactivees: true, emettreParticules: () => undefined });
   const services = { ...base, haptique, retour };
   const magasin = creerMagasin(services, 1,
-    lireJson<SeuilsCascade>('contenu/referentiel/parametres-recompenses.json'));
+    lireJson<SeuilsCascade>('contenu/referentiel/parametres-recompenses.json'), undefined, depot);
   const cascadeInitiale = magasin.getState().cascade;
   const file = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   files.push(file);
@@ -188,6 +193,65 @@ describe('restauration du joueur et de sa destination', () => {
     expect(api.afficherRecompense).not.toHaveBeenCalled();
   });
 
+  it('garde le nœud suspendu au campement puis reprend exactement par son bouton', async () => {
+    const { magasin } = monter('/campement');
+    await screen.findByTestId('campement');
+    act(() => magasin.getState().demarrerNoeud({
+      exercice: lireJson<Exercice>(CHEMIN_EXERCICE_ECOLE),
+      noeud: lireJson<Noeud>(CHEMIN_NOEUD_CLAIRIERE), habillage: habillageEcole(),
+    }));
+    await screen.findByTestId('noeud');
+    act(() => magasin.getState().emettre({ type: 'demanderAide' }));
+    await act(async () => { await magasin.getState().suspendreLecture(); });
+    const attendu = magasin.getState();
+    act(() => magasin.getState().naviguer('campement'));
+    await screen.findByTestId('campement');
+    expect(magasin.getState().etatMoteur).toEqual(attendu.etatMoteur);
+    expect(magasin.getState().suspenduLeMs).toBe(attendu.suspenduLeMs);
+    fireEvent.click(screen.getByRole('button', { name: 'Reprendre la lecture' }));
+    await screen.findByTestId('noeud');
+    expect(magasin.getState().etatMoteur).toEqual(attendu.etatMoteur);
+    expect(magasin.getState().aide).toEqual(attendu.aide);
+    expect(magasin.getState().paquet).toEqual(attendu.paquet);
+    expect(magasin.getState().suspenduLeMs).toBeNull();
+    expect(urlActuelle()).toBe('/noeud');
+  });
+
+  it('rouvre le même nœud suspendu depuis une URL profonde explicite', async () => {
+    let sauve: Awaited<ReturnType<DepotRepriseLecture['lire']>> = null;
+    const depot: DepotRepriseLecture = {
+      lire: async () => sauve,
+      ecrire: async (instantane, attendue) => {
+        const revision = (attendue ?? 0) + 1;
+        sauve = { ...instantane, revision };
+        return revision;
+      },
+      effacer: async () => { sauve = null; },
+    };
+    const base = servicesDeTest();
+    const haptique = creerHaptiqueMuette();
+    const source = creerMagasin({ ...base, haptique, retour: creerRetourSensoriel({
+      audio: base.audio, haptique, animationsDesactivees: true, emettreParticules: () => undefined,
+    }) }, 1, null, undefined, depot);
+    source.getState().choisirProfil(profil);
+    source.getState().demarrerNoeud({
+      exercice: lireJson<Exercice>(CHEMIN_EXERCICE_ECOLE),
+      noeud: lireJson<Noeud>(CHEMIN_NOEUD_CLAIRIERE), habillage: habillageEcole(),
+    });
+    source.getState().emettre({ type: 'demanderAide' });
+    await source.getState().suspendreLecture();
+    const attendu = source.getState();
+    expect(sauve).not.toBeNull();
+
+    const { magasin } = monter('/noeud?origine=lien', true, depot);
+    await screen.findByTestId('noeud');
+    expect(urlActuelle()).toBe('/noeud?origine=lien');
+    expect(magasin.getState().paquet).toEqual(attendu.paquet);
+    expect(magasin.getState().etatMoteur).toEqual(attendu.etatMoteur);
+    expect(magasin.getState().aide).toEqual(attendu.aide);
+    expect(magasin.getState().suspenduLeMs).toBeNull();
+  });
+
   it('garde la dernière URL si le navigateur change de page pendant la lecture du joueur', async () => {
     const attente = differerProfil();
     const { magasin } = monter('/carte');
@@ -235,12 +299,26 @@ describe('restauration du joueur et de sa destination', () => {
   });
 
   it('retombe sur les profils si le souvenir est périmé', async () => {
-    api.lireProfil.mockRejectedValueOnce(new Error('Profil absent'));
+    api.lireProfil.mockRejectedValueOnce(new ErreurReseau(404, '/api/profils/profil-navigation-isole',
+      'Profil absent'));
     const { magasin } = monter('/coffre');
     await screen.findByTestId('profils');
     expect(urlActuelle()).toBe('/');
     expect(lireProfilMemorise()).toBeNull();
     expect(magasin.getState().profil).toBeNull();
+  });
+
+  it('garde le souvenir et propose de réessayer après une erreur de lecture transitoire', async () => {
+    api.lireProfil.mockRejectedValueOnce(new ErreurReseau(503, '/api/profils/profil-navigation-isole',
+      'Service indisponible'));
+    monter('/noeud');
+    await screen.findByRole('alert');
+    expect(lireProfilMemorise()).toBe(String(profil.id));
+    expect(urlActuelle()).toBe('/noeud');
+    fireEvent.click(screen.getByRole('button', { name: 'Réessayer' }));
+    await screen.findByTestId('campement');
+    expect(api.lireProfil).toHaveBeenCalledTimes(2);
+    expect(lireProfilMemorise()).toBe(String(profil.id));
   });
 });
 

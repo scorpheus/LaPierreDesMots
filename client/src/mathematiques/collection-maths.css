@@ -1,0 +1,47 @@
+.collection-maths { color: var(--trait, #24444a); }
+.collection-maths--coffre { grid-column: 1 / -1; padding: clamp(.7rem, 1.5vw, 1rem); border: var(--epaisseur-trait, 2px) solid color-mix(in srgb, var(--trait, #24444a) 34%, transparent); border-radius: var(--rayon-carte, 1rem); background: linear-gradient(145deg, #fff9df, #e7f2e2); }
+.collection-maths--campement { padding: .85rem; border: 2px solid color-mix(in srgb, var(--trait, #24444a) 30%, transparent); border-radius: 1rem; background: #fff9e9; }
+.collection-maths-entete { display: flex; align-items: center; justify-content: space-between; gap: .7rem; }
+.collection-maths-entete h2 { margin: 0; font-size: clamp(1.2rem, 2.2vw, 1.55rem); }
+.collection-maths-surtitre { margin: 0 0 .15rem; color: #76623c; font-size: .82rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+.collection-maths-mini-compteur { display: grid; place-items: center; min-inline-size: 2rem; min-block-size: 2rem; border-radius: 50%; background: #f3c76d; font-weight: 800; }
+.collection-maths-liste { display: grid; grid-template-columns: repeat(auto-fit, minmax(10.5rem, 1fr)); gap: .6rem; margin: .75rem 0 0; padding: 0; list-style: none; }
+.collection-maths-liste > li { display: grid; grid-template-columns: 3rem minmax(0, 1fr); align-items: center; gap: .55rem; min-block-size: 4.75rem; padding: .45rem; border: 1px solid color-mix(in srgb, var(--trait, #24444a) 28%, transparent); border-radius: .75rem; background: #fffdf4; }
+.collection-maths-liste > li[data-obtenu='oui'] { background: linear-gradient(140deg, #fffdf4, #f8e4a8); box-shadow: 0 .12rem 0 rgb(36 68 74 / 14%); }
+.collection-maths-liste > li[data-obtenu='non'] .collection-maths-dessin { color: #8a8b85; filter: saturate(0); opacity: .64; }
+.collection-maths-liste strong, .collection-maths-liste small { display: block; }
+.collection-maths-liste small { margin-top: .2rem; color: #595b53; font-size: .8rem; line-height: 1.2; }
+.collection-maths-dessin { inline-size: 2.75rem; block-size: 2.75rem; color: #b57034; }
+.collection-maths--campement .collection-maths-liste { grid-template-columns: repeat(auto-fit, minmax(8.75rem, 1fr)); }
+.collection-maths--campement .collection-maths-liste > li { grid-template-columns: 2.6rem minmax(0, 1fr); min-block-size: 4.2rem; }
+.collection-maths--campement .collection-maths-dessin { inline-size: 2.35rem; block-size: 2.35rem; }
+.collection-maths-vide { margin: .55rem 0 0; color: #5d654e; }
+@media (max-width: 520px) { .collection-maths-liste { grid-template-columns: 1fr 1fr; } .collection-maths-liste > li { grid-template-columns: 2.5rem minmax(0, 1fr); } }
+
+@media (min-width: 1101px) and (orientation: landscape) {
+  .collection-maths--coffre { padding: .65rem; }
+  .collection-maths--coffre .collection-maths-liste {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: .4rem;
+    margin-top: .4rem;
+  }
+  .collection-maths--coffre .collection-maths-liste > li {
+    grid-template-columns: 2.5rem minmax(0, 1fr);
+    min-block-size: 4.75rem;
+    gap: .4rem;
+  }
+  .collection-maths--coffre .collection-maths-liste strong { font-size: 1rem; }
+  .collection-maths--coffre .collection-maths-dessin { inline-size: 2.5rem; block-size: 2.5rem; }
+}
+
+/* Même densité dans le panneau tablette : tous les cadeaux restent présents et le
+   défilement appartient au panneau de collections, pas à l’écran du coffre. */
+@media (min-width: 781px) and (max-width: 1100px) and (orientation: landscape) {
+  .collection-maths--coffre { padding: .65rem; }
+  .collection-maths-entete h2 { font-size: 1.2rem; }
+  .collection-maths-surtitre { font-size: .72rem; }
+  .collection-maths-liste { grid-template-columns: repeat(auto-fit, minmax(8.75rem, 1fr)); gap: .45rem; margin-top: .45rem; }
+  .collection-maths-liste > li { grid-template-columns: 2.35rem minmax(0, 1fr); min-block-size: 3.8rem; padding: .35rem; }
+  .collection-maths-dessin { inline-size: 2.15rem; block-size: 2.15rem; }
+  .collection-maths-liste small { margin-top: .1rem; font-size: .72rem; }
+}

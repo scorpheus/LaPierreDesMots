@@ -130,7 +130,8 @@ export function enregistrerRoutesParentProfil(
             erreurApi(
               CODES_ERREUR.invalide,
               'Choisis une portée : « complete » remet le profil à neuf, ' +
-                '« progression » garde le prénom, l’avatar et les réglages de lecture.'
+                '« progression » garde le prénom, l’avatar et les réglages de lecture ; ' +
+                '« lecture » ou « maths » remet à zéro seulement le domaine choisi.'
             )
           );
       }

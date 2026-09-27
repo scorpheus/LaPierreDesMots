@@ -108,7 +108,7 @@ export interface RecetteModele {
 // ────────────────────────────────────────────────────────────────────────────── LES ÉTATS
 
 /**
- * Les treize écrans du jeu. La liste est confrontée aux `data-ecran` de la source par
+ * Les écrans du jeu. La liste est confrontée aux `data-ecran` de la source par
  * `modele-navigation-coherence.test.ts` : elle ne peut pas prendre du retard en silence.
  */
 export const ETATS: readonly EtatModele[] = [
@@ -123,6 +123,7 @@ export const ETATS: readonly EtatModele[] = [
   },
   { code: 'profils', nature: 'jouable', role: 'qui joue — la racine' },
   { code: 'carte', nature: 'jouable', role: 'la carte du monde' },
+  { code: 'mathematiques', nature: 'jouable', role: 'les ateliers de la Vallée des Nombres' },
   { code: 'noeud', nature: 'jouable', role: 'un exercice' },
   {
     code: 'recompense',
@@ -170,6 +171,11 @@ export const ETAT_RACINE = 'profils';
 // ───────────────────────────────────────────────────────────────────────── LES TRANSITIONS
 
 export const TRANSITIONS: readonly TransitionModele[] = [
+  { depuis: 'carte', vers: 'mathematiques', prise: { selecteur: '[data-depart="mathematiques"]' }, motif: 'la vallée est disponible dès le premier profil' },
+  { depuis: 'campement', vers: 'mathematiques', prise: { selecteur: '[data-vers="mathematiques"]' }, motif: 'accès permanent depuis le campement' },
+  { depuis: 'mathematiques', vers: 'campement', prise: { selecteur: 'button', libelle: 'Retour' }, motif: 'la sortie des ateliers rejoint le campement' },
+  { depuis: 'mathematiques', vers: 'carte', prise: { selecteur: 'button', libelle: 'Reprendre la lecture' }, motif: 'sans partie lecture suspendue, le choix revient sur la carte' },
+  { depuis: 'mathematiques', vers: 'noeud', prise: null, motif: 'une lecture suspendue retrouve exactement son nœud', horsPorteeExplorateur: { motif: 'nécessite une suspension durable avant la visite de la vallée', verifiePar: ['tests/composants/NavigationMathematiques.test.tsx'] } },
   // ── depuis « qui joue ? » ──────────────────────────────────────────────────────────────
   {
     depuis: 'profils',
@@ -561,9 +567,8 @@ export const TRANSITIONS: readonly TransitionModele[] = [
 /**
  * Les recettes composites : ce qu'un seul tap ne franchit pas.
  *
- * Il n'y en a qu'une, et son existence est justifiée : la porte parent demande QUATRE chiffres
- * puis une validation. Aucune énumération d'éléments un par un ne la franchit — non par
- * faiblesse de l'explorateur, mais parce que c'est le but de la porte.
+ * Une recette franchit les étapes d'un départ depuis la carte ; les autres ouvrent la porte
+ * parent et sa galerie. Les taps individuels ne suffisent pas à en vérifier la destination.
  */
 export const RECETTES: readonly RecetteModele[] = [
   {
@@ -571,8 +576,8 @@ export const RECETTES: readonly RecetteModele[] = [
     depuis: 'carte',
     vers: 'noeud',
     gestes: [
-      { selecteur: '[data-depart]' },
-      { selecteur: '[data-depart]' },
+      { selecteur: '[data-depart][data-etape]' },
+      { selecteur: '[data-depart][data-etape]' },
       { selecteur: '[data-confirmer-depart]' }
     ],
     motif: 'v2 § 4.3 — avant une sortie, l’enfant choisit qui l’accompagne'

@@ -124,7 +124,10 @@ export function resumeEtapeDepuis(etape: EtapeGenerique, finMs: number): ResumeE
     // R15 — ce que l'enfant a DEMANDÉ, jamais ce que Gobi a proposé de lui-même.
     aideUtilisee: etape.aideDemandee,
     nbEcoutes: etape.nbEcoutes,
-    dureeMs: Math.max(0, fin - etape.debutMs),
+    // `debutMs: 0` marque une étape qui n'a pas encore été ouverte. Son temps ne
+    // participe pas au résumé intermédiaire, même si `finMs` global est déjà daté.
+    dureeMs: etape.debutMs === 0 && etape.finMs === null
+      ? 0 : Math.max(0, fin - etape.debutMs),
     modeReponse: etape.modeReponse,
     latenceMs: latenceDe(etape),
     // Transporté tel quel : ce nombre n'est connu QUE du moteur, et le serveur refuse de

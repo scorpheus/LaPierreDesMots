@@ -23,7 +23,7 @@ import { campementDuDocument, prochainStade, stadesDuDocument } from "@pierre/pa
 // `DocumentCampement` et `StadeGobi` viennent du SOUS-CHEMIN : le barillet racine ne réexporte
 // que les seize types du § 4.5 (convention C1), et `DocumentCampement` n'en fait pas partie.
 import type { DocumentCampement, StadeGobi } from "@pierre/partage/monde";
-import { lireMonde, lirePaquetNoeud, noterVisitePointCampement, urlAsset } from "../api/client.js";
+import { apiMathematiques, lireMonde, lirePaquetNoeud, noterVisitePointCampement, urlAsset } from "../api/client.js";
 import { Compagnon } from "../composants/Compagnon.js";
 import { GalerieEvolutionsGobi } from "../composants/GalerieEvolutionsGobi.js";
 import { Gobi } from "../composants/Gobi.js";
@@ -35,6 +35,7 @@ import { PastilleSortie } from "../monde/PastilleSortie.js";
 import { PointLibre } from "../monde/PointLibre.js";
 import { classeAnimation } from "../monde/animations-campement.js";
 import type { AnimationCampement } from "../monde/animations-campement.js";
+import { CollectionMaths } from "../mathematiques/CollectionMaths.js";
 // La table des noms de région vit dans `EcranCoffre.tsx` — l'autre écran de ce même lot. Elle
 // n'est pas hissée dans un module commun parce qu'aucun lot du contrat du monde v4 ne possède
 // `client/src/monde/` : un lot ne s'accorde pas un fichier qu'un autre pourrait écrire. Sa
@@ -50,6 +51,8 @@ export interface ProprietesEcranCampement {
   /** La table des stades. Injectée par les tests ; chargée sinon. */
   readonly stades?: readonly StadeGobi[] | null;
   readonly surAllerCarte?: () => void;
+  readonly surAllerMaths?: () => void;
+  readonly surReprendreLecture?: (() => void) | undefined;
   readonly surAllerCoffre?: () => void;
   /** Entrée adulte câblée par le routeur quand elle est disponible. */
   readonly surAccesParent?: () => void;
@@ -108,6 +111,8 @@ export function EcranCampement({
   monde: mondeInjecte = null,
   stades: stadesInjectes = null,
   surAllerCarte,
+  surAllerMaths,
+  surReprendreLecture,
   surAllerCoffre,
   surAccesParent,
   surOuvrirChaudron,
@@ -115,6 +120,17 @@ export function EcranCampement({
 }: ProprietesEcranCampement = {}): ReactElement {
   const magasin = useMagasin();
   const profil = useEtatJeu((etat) => etat.profil);
+  const carnetMaths = useQuery({
+    queryKey: ['mathematiques', profil === null ? null : String(profil.id)],
+    queryFn: async () => {
+      const resultat = await apiMathematiques.lireEtat(String(profil!.id));
+      if (!resultat.ok) throw new Error('Le carnet maths attend.');
+      return resultat.valeur;
+    },
+    enabled: profil !== null && surAllerMaths !== undefined,
+    refetchOnMount: 'always',
+  });
+  const repriseMaths = carnetMaths.data?.reprise !== null && carnetMaths.data?.reprise !== undefined;
   const animationsDesactivees = useEtatJeu((etat) => etat.animationsDesactivees);
   const [objetAnime, fixerObjetAnime] = useState<{
     readonly id: string;
@@ -287,6 +303,18 @@ export function EcranCampement({
         </div>
 
         {/* D46 : le campement n'est JAMAIS sur le chemin obligatoire. On en repart en un tap. */}
+        {surAllerMaths === undefined ? null : <button type="button" className="cible action-campement" data-vers="mathematiques"
+          data-pictogramme="mathematiques" aria-label={repriseMaths ? 'La Vallée des Nombres — reprendre les maths' : 'La Vallée des Nombres'} onClick={surAllerMaths}>
+          <span aria-hidden="true" className="action-campement-vignette">🧮</span>
+          <span data-action-campement-texte="nom">{repriseMaths ? 'Reprendre les maths' : 'La Vallée des Nombres'}</span>
+          <span data-action-campement-texte="detail">{repriseMaths ? 'Retrouver ma partie' : 'Jouer avec les maths'}</span>
+        </button>}
+        {surReprendreLecture === undefined ? null : <button type="button" className="cible action-campement" data-vers="reprise-lecture"
+          data-pictogramme="reprise-lecture" aria-label="Reprendre la lecture" onClick={surReprendreLecture}>
+          <span aria-hidden="true" className="action-campement-vignette">🔖</span>
+          <span data-action-campement-texte="nom">Reprendre la lecture</span>
+          <span data-action-campement-texte="detail">Retrouver ma place</span>
+        </button>}
         {profil === null ? null : (
           <PastilleSortie profil={profil} style={{ inlineSize: "100%" }} />
         )}
@@ -461,6 +489,11 @@ export function EcranCampement({
               </p>
             )}
           </section>
+
+          <CollectionMaths
+            profilId={profil === null ? null : String(profil.id)}
+            emplacement="campement"
+          />
 
           <MurDesNoms noms={noms} />
 

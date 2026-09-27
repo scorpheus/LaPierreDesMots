@@ -113,12 +113,8 @@ function hacher(texte: string): number {
   return h;
 }
 
-/*
- * Le mélange appartient à la SESSION, pas à un rendu. `useState` garde la permutation pendant
- * les aides et les rerenders ; la clé `useId` mémorise le premier tirage pendant les deux
- * invocations de développement de StrictMode. Sans cette courte mémoire, StrictMode avancerait
- * deux fois le même Alea injecté et le rejeu dépendrait de l'environnement de rendu.
- */
+// React StrictMode peut créer deux fois l'état initial du composant. Ce cache conserve le
+// premier tirage pour un même montage ; l'ordre validé rejoint ensuite l'état du moteur.
 const ORDRES_DE_SESSION = new WeakMap<object, Map<string, readonly string[]>>();
 
 function tirerOrdreDeSession(
@@ -133,20 +129,13 @@ function tirerOrdreDeSession(
   }
   const connu = ordres.get(identifiantSession);
   if (connu !== undefined) return connu;
-
-  // L'ordre du JSON est éditorial. Le tirer tel quel ferait de son rangement par le rédacteur
-  // une variable cachée du jeu ; l'Alea reçoit donc toujours le même catalogue canonique.
-  const ordre = alea
-    .melanger([...cibles].sort((gauche, droite) => gauche.id.localeCompare(droite.id)))
+  const ordre = alea.melanger([...cibles].sort((gauche, droite) => gauche.id.localeCompare(droite.id)))
     .map((cible) => cible.id);
   ordres.set(identifiantSession, ordre);
   return ordre;
 }
 
-function oublierOrdreDeSession(
-  alea: ProprietesMoteur<ContenuAttrape, EtatAttrape, ActionAttrape>['services']['alea'],
-  identifiantSession: string,
-): void {
+function oublierOrdreDeSession(alea: object, identifiantSession: string): void {
   const ordres = ORDRES_DE_SESSION.get(alea);
   if (ordres === undefined) return;
   ordres.delete(identifiantSession);
@@ -239,9 +228,14 @@ export function MoteurAttrape(
 ): ReactElement {
   const { contenu, habillage, etat, emettre, services, animationsDesactivees } = proprietes;
   const identifiantSession = useId();
-  const [ordreCibles] = useState(() =>
-    tirerOrdreDeSession(services.alea, identifiantSession, contenu.cibles),
-  );
+  const [ordreInitial] = useState(() => etat.ordreAffichage ??
+    tirerOrdreDeSession(services.alea, identifiantSession, contenu.cibles));
+  const ordreCibles = etat.ordreAffichage ?? ordreInitial;
+  useEffect(() => {
+    if (etat.ordreAffichage === null) emettre({ type: 'fixerOrdreAffichage', ordre: ordreInitial });
+  }, [etat.ordreAffichage, emettre, ordreInitial]);
+  useEffect(() => () => oublierOrdreDeSession(services.alea, identifiantSession),
+    [services.alea, identifiantSession]);
   const ciblesParId = useMemo(
     () => new Map(contenu.cibles.map((cible) => [cible.id, cible] as const)),
     [contenu.cibles],
@@ -251,11 +245,6 @@ export function MoteurAttrape(
       .map((id) => ciblesParId.get(id))
       .filter((cible): cible is ContenuAttrape['cibles'][number] => cible !== undefined),
     [ordreCibles, ciblesParId],
-  );
-
-  useEffect(
-    () => () => oublierOrdreDeSession(services.alea, identifiantSession),
-    [services.alea, identifiantSession],
   );
 
   // --- le battement ---------------------------------------------------------

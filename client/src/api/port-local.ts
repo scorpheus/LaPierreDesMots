@@ -60,6 +60,10 @@ import type {
 } from '@pierre/partage/parent';
 import {
   GenerationProgressionPerimee,
+  creerApiMathematiques,
+  lireRepriseLecture,
+  ecrireRepriseLecture,
+  effacerRepriseLecture,
   appliquerEchec,
   codeEstDefini,
   confusionsDuProfil,
@@ -240,6 +244,18 @@ function construireCandidats(
 // ══════════════════════════════════════════════════════════════════════════════════════════
 
 export const portLocal: PortApi = {
+  mathematiques: {
+    ...creerApiMathematiques(garantirBase, horloge),
+    lireBilanParent: (profil) => {
+      exigerJeton();
+      return creerApiMathematiques(garantirBase, horloge).lireBilanParent(profil);
+    },
+  },
+  repriseLecture: {
+    lire: async (profil) => lireRepriseLecture(await garantirBase(), profil),
+    ecrire: async (instantane, revision) => ecrireRepriseLecture(await garantirBase(), horloge, instantane, revision),
+    effacer: async (profil, generation, revision) => effacerRepriseLecture(await garantirBase(), profil, generation, revision),
+  },
   async lireSante(): Promise<ReponseSante> {
     return {
       statut: 'ok',

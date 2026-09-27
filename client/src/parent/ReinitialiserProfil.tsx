@@ -45,7 +45,7 @@ export interface ProprietesReinitialiserProfil {
   readonly surTermine?: (rapport: RapportReinitialisation) => void | Promise<void>;
 }
 
-const PORTEES: readonly PorteeReinitialisation[] = ['progression', 'complete'];
+const PORTEES: readonly PorteeReinitialisation[] = ['lecture', 'maths', 'progression', 'complete'];
 
 export function ReinitialiserProfil({
   profil,
@@ -76,7 +76,7 @@ export function ReinitialiserProfil({
         actualisation,
         ...[
           ['parent'], ['profils'], ['monde', String(profil)], ['progression', String(profil)],
-          ['pastille-sortie'], ['reglages-lecture', String(profil)]
+          ['pastille-sortie'], ['reglages-lecture', String(profil)], ['mathematiques', String(profil)]
         ].map((queryKey) => clientRequetes.invalidateQueries({ queryKey }))
       ]);
     }

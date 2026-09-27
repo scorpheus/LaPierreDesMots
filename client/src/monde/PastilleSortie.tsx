@@ -19,7 +19,7 @@
 //   • sortie connue mais paquet pas encore là → le nœud dès qu'il arrive, la carte en attendant ;
 //   • aucune sortie ouverte → la carte, qui est un écran vivant, jamais un message d'erreur.
 // ─────────────────────────────────────────────────────────────────────────────────────────
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import type { CSSProperties, ReactElement, ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import type { CodeRegion, EtatMonde, IdNoeud, Profil } from '@pierre/partage';
@@ -104,6 +104,9 @@ export function PastilleSortie({
   surRepli
 }: ProprietesPastilleSortie): ReactElement {
   const magasin = useMagasin();
+  const departVerrouille = useRef(false);
+  const [departEnCours, fixerDepartEnCours] = useState(false);
+  const [erreurDepart, fixerErreurDepart] = useState<string | null>(null);
   const resolutionDemandee = sortieInjectee === undefined;
 
   // Les projections de reprise partagent les clés que `RepriseDesTentatives` invalide après
@@ -186,49 +189,53 @@ export function PastilleSortie({
   });
 
   const partir = useCallback((): void => {
-    // Le profil d'abord, TOUJOURS : sans lui, le nœud n'aurait personne à qui écrire sa
-    // tentative. `choisirProfil` pose `ecran: 'carte'` — c'est le repli, pas la destination.
-    magasin.getState().choisirProfil(profil);
-
-    if (destination === null) {
-      surRepli?.(profil);
-      return;
-    }
-
-    const ouvrir = (sortie: PlanSortie): Promise<void> => {
-      const premiere = sortie.etapes[0];
-      if (premiere === undefined) {
-        return Promise.reject(new Error('La sortie composée ne porte aucune étape.'));
+    if (departVerrouille.current) return;
+    departVerrouille.current = true;
+    fixerDepartEnCours(true);
+    fixerErreurDepart(null);
+    void (async () => {
+      try {
+        await magasin.getState().chargerProfilEtReprise(profil);
+        const reprise = magasin.getState();
+        if (reprise.profil?.id !== profil.id) return;
+        // Un paquet durable précède le plan préparé en arrière-plan par cette pastille.
+        if (reprise.paquet !== null && reprise.moteur !== null && reprise.reprisePersistable) {
+          if (reprise.suspenduLeMs !== null) reprise.reprendreLecture();
+          else reprise.naviguer(reprise.resume === null ? 'noeud' : 'recompense');
+          return;
+        }
+        if (destination === null) {
+          surRepli?.(profil);
+          return;
+        }
+        const ouvrir = async (sortie: PlanSortie): Promise<void> => {
+          const premiere = sortie.etapes[0];
+          if (premiere === undefined) throw new Error('La sortie composée ne porte aucune étape.');
+          magasin.getState().demarrerSortie(sortie);
+          const pret = plan === sortie ? requetePaquet.data : undefined;
+          const paquet = pret ?? await lirePaquetNoeud(premiere.noeud);
+          magasin.getState().demarrerNoeud(paquet);
+          await magasin.getState().attendreEcrituresLecture();
+          if (magasin.getState().erreurRepriseLecture !== null) {
+            throw new Error(magasin.getState().erreurRepriseLecture ?? 'Sauvegarde impossible.');
+          }
+        };
+        await ouvrir(plan ?? await composerSortie(profil.id,
+          { region: String(destination.region), compagnon: null }));
+      } catch {
+        if (magasin.getState().profil?.id === profil.id && magasin.getState().paquet === null) {
+          magasin.getState().cloreSortie();
+          surRepli?.(profil);
+        }
+        fixerErreurDepart('On n’a pas pu garder ta partie. Touche encore la pastille.');
+      } finally {
+        departVerrouille.current = false;
+        fixerDepartEnCours(false);
       }
-      magasin.getState().demarrerSortie(sortie);
-      const pret = plan === sortie ? requetePaquet.data : undefined;
-      if (pret !== undefined) {
-        magasin.getState().demarrerNoeud(pret);
-        return Promise.resolve();
-      }
-      return lirePaquetNoeud(premiere.noeud).then((paquet) => {
-        magasin.getState().demarrerNoeud(paquet);
-      });
-    };
-
-    const planPret = plan;
-    const demarrage =
-      planPret === null
-        ? composerSortie(profil.id, { region: String(destination.region), compagnon: null }).then(
-            ouvrir
-          )
-        : ouvrir(planPret);
-
-    // Le plan ou le paquet n'est pas encore là : la carte reste affichée dans l'intervalle —
-    // jamais un écran d'attente, jamais rien.
-    void demarrage
-      .catch(() => {
-        magasin.getState().cloreSortie();
-        surRepli?.(profil);
-      });
+    })();
   }, [magasin, profil, destination, plan, requetePaquet.data, surRepli]);
 
-  return (
+  return (<>
     <button
       type="button"
       className="cible cible-appel pastille-sortie"
@@ -238,6 +245,8 @@ export function PastilleSortie({
       data-sortie-prete={requetePaquet.data === undefined ? 'non' : 'oui'}
       data-pictogramme="sortie"
       aria-label={`Partir en sortie avec ${String(profil.prenom)}`}
+      aria-busy={departEnCours}
+      disabled={departEnCours}
       onClick={partir}
       style={style}
     >
@@ -259,5 +268,6 @@ export function PastilleSortie({
         </>
       )}
     </button>
-  );
+    {erreurDepart === null ? null : <p role="alert">{erreurDepart}</p>}
+  </>);
 }

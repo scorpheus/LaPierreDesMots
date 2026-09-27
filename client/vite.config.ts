@@ -62,6 +62,8 @@ const ALIAS_PARTAGE = {
   // autonome uniquement, Lot 3) compilent ; le mode LAN n'importe jamais ce sous-chemin, donc
   // sa présence ici n'entraîne rien dans le bundle du contrat § 3.1 tant que rien ne l'importe.
   '@pierre/partage/base': source('base/index.ts'),
+  '@pierre/partage/mathematiques': source('mathematiques/index.ts'),
+  '@pierre/partage/reprise-lecture': source('reprise-lecture/index.ts'),
   '@pierre/partage': source('index.ts')
 };
 

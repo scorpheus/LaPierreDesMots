@@ -1,0 +1,24 @@
+.moulin-atelier { display: grid; gap: 1rem; width: min(100%, 56rem); min-width: 0; max-width: 100%; margin-inline: auto; color: #302518; font-family: Andika, sans-serif; }
+.moulin-atelier *, .moulin-atelier *::before, .moulin-atelier *::after { box-sizing: border-box; }
+.moulin-atelier h2, .moulin-atelier p { margin: 0; }
+.moulin-atelier button { min-width: 64px; min-height: 64px; padding: .55rem .8rem; border: 2px solid #71593e; border-radius: .8rem; background: #fffdf7; color: inherit; font: inherit; font-weight: 700; cursor: pointer; touch-action: manipulation; overflow-wrap: anywhere; }
+.moulin-atelier button:focus-visible { outline: 4px solid #235395; outline-offset: 2px; }
+.moulin-atelier button:disabled { opacity: .53; cursor: default; }
+.moulin-groupe { min-width: 0; margin: 0; padding: .8rem; border: 2px solid #86674b; border-radius: 1rem; background: #fff9eb; }
+.moulin-groupe legend { padding-inline: .35rem; font-weight: 700; }
+.moulin-actions { display: flex; flex-wrap: wrap; gap: .5rem; min-width: 0; margin-block: .5rem; }
+.moulin-actions button { flex: 1 1 min(100%, 9rem); }
+.moulin-roues, .moulin-sacs { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr)); gap: .7rem; min-width: 0; }
+.moulin-roue, .moulin-sac { display: grid; align-content: start; gap: .3rem; min-width: 0; padding: .6rem; border: 1px solid #806147; border-radius: .75rem; background: #f5ead2; }
+.moulin-roue strong, .moulin-sac strong { overflow-wrap: anywhere; }
+.moulin-pales { display: flex; flex-wrap: wrap; gap: .15rem; min-height: 2rem; color: #755a38; }
+.moulin-reserve { padding: .6rem; margin-block: .5rem; border: 2px dashed #806147; border-radius: .75rem; background: #f8edcf; }
+.moulin-mesures { display: flex; flex-wrap: wrap; align-content: start; gap: .35rem; min-height: 3.5rem; padding: .35rem; border: 1px solid #aa8a60; border-radius: .5rem; background: #fffdf7; }
+.moulin-dizaine { display: grid; grid-template-columns: repeat(5, 1.1rem); gap: .18rem; padding: .3rem; border: 1px solid #b59b75; border-radius: .35rem; background: #f5ead2; }
+.moulin-mesure { display: block; width: 1.1rem; height: 1.1rem; border: 2px solid #806147; border-radius: .2rem .2rem .4rem .4rem; background: #d5b883; }
+.moulin-vide { align-self: center; color: #755a38; }
+.moulin-reservoir { display: flex; min-height: 6rem; margin-block: .5rem; border: 2px solid #70563a; border-radius: .6rem; overflow: hidden; background: #fff; }
+.moulin-secteur { flex: 1 1 0; border-right: 1px solid #70563a; background: #fff9eb; }
+.moulin-secteur:last-child { border-right: 0; }
+.moulin-secteur-ouvert { background: #8bc2d3; }
+@media (max-width: 38rem) { .moulin-atelier { padding-inline: .15rem; } }

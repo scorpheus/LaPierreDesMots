@@ -19,6 +19,7 @@ export { interieurDuSvg } from '../monde/carte/modele.js';
 export interface ProprietesEcranCarte {
   readonly surAllerCampement?: () => void;
   readonly surVoirOuverture?: () => void;
+  readonly surAllerMaths?: () => void;
 }
 
 interface DepartDemande {
@@ -33,7 +34,8 @@ type ErreurDepart =
 
 export function EcranCarte({
   surAllerCampement,
-  surVoirOuverture
+  surVoirOuverture,
+  surAllerMaths
 }: ProprietesEcranCarte = {}): ReactElement {
   const magasin = useMagasin();
   const services = useServices();
@@ -252,9 +254,10 @@ export function EcranCarte({
           {surVoirOuverture === undefined ? null : <button type="button" className="cible cible-secondaire" data-vers="ouverture" aria-label="Écouter l’histoire de la Pierre" onClick={surVoirOuverture}>L’histoire de la Pierre</button>}
         </section>
         <section className="carte-monde" aria-label="Carte du monde">
-          <CarteMonde regions={regions} decorSvg={requeteDecor.data} animationsDesactivees={animationsDesactivees} conclusionAccessible={monde !== null && conclusionCentraleAccessible(monde.carte)} surChoisirRegion={fixerRegionChoisie} surChoisirConclusion={() => fixerConclusionOuverte(true)} />
+          <CarteMonde regions={regions} decorSvg={requeteDecor.data} animationsDesactivees={animationsDesactivees} conclusionAccessible={monde !== null && conclusionCentraleAccessible(monde.carte)} surChoisirRegion={fixerRegionChoisie} surChoisirConclusion={() => fixerConclusionOuverte(true)} surAllerMaths={surAllerMaths} />
           <div className="carte-monde__legende">
             <h2 className="titre">Où veux-tu aller ?</h2>
+            {surAllerMaths === undefined ? null : <button type="button" className="cible carte-monde__destination" data-depart="mathematiques" onClick={surAllerMaths}>La Vallée des Nombres<span>Jouer avec les nombres</span></button>}
             {monde !== null && conclusionCentraleAccessible(monde.carte) ? <button type="button" className="cible carte-monde__destination" data-depart-conclusion="pierre" onClick={() => fixerConclusionOuverte(true)}>La Pierre t’attend !<span>Va au centre.</span></button> : null}
             {ANCRES_CARTE.map(([code, , , libelle]) => {
               const destinationListe = destinationDe(code);

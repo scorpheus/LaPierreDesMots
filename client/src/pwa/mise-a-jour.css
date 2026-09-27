@@ -1,0 +1,69 @@
+.mise-a-jour {
+  padding: 1rem;
+  border: var(--epaisseur-trait) solid var(--trait);
+  border-radius: var(--rayon-carte);
+  box-shadow: var(--ombre-bd);
+  overflow-wrap: anywhere;
+}
+
+.mise-a-jour-panneau,
+.mise-a-jour-notification,
+.mise-a-jour-dialogue[open] {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.mise-a-jour h2,
+.mise-a-jour p {
+  margin: 0;
+}
+
+.mise-a-jour h2 {
+  font-size: 1.25rem;
+}
+
+.mise-a-jour-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.mise-a-jour-actions .cible {
+  max-inline-size: 100%;
+  animation: none;
+  transition: none;
+}
+
+.mise-a-jour-actions .cible:active {
+  transform: none;
+}
+
+.mise-a-jour-version {
+  font-family: monospace;
+}
+
+.mise-a-jour-notification {
+  position: fixed;
+  z-index: 80;
+  inset-inline-end: max(1rem, env(safe-area-inset-right));
+  inset-block-end: max(1rem, env(safe-area-inset-bottom));
+  inline-size: min(36rem, calc(100% - 2rem));
+  max-block-size: calc(100dvh - 2rem);
+  overflow-y: auto;
+}
+
+.mise-a-jour-dialogue {
+  margin: auto;
+  inline-size: min(30rem, calc(100% - 2rem));
+  max-block-size: calc(100dvh - 2rem);
+}
+
+.mise-a-jour-dialogue::backdrop {
+  background: rgb(27 36 64 / 65%);
+}
+
+@media (max-width: 420px) {
+  .mise-a-jour-actions .cible {
+    flex: 1 1 100%;
+  }
+}

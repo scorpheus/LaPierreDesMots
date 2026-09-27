@@ -7,6 +7,8 @@
 // en direct, zéro réseau. `client.ts` choisit laquelle charger au démarrage.
 import type { CreationProfil, IdExercice, IdNoeud, IdProfil, PaquetNoeud, Profil, ProgressionNoeud, ReponseSante, ReponseTentative, TentativeAEnregistrer } from '@pierre/partage';
 import type { ComparaisonTypographie, ReglagesLecture } from '@pierre/partage/lecture';
+import type { PortApiMaths } from '@pierre/partage/mathematiques';
+import type { DepotRepriseLecture } from '../etat/reprise-lecture-depot.js';
 import type { CodeCompagnon, EtatMaitrise, ItemLeitner, PlanSortie } from '@pierre/partage/pedagogie';
 import type { CodeObjetCampement, EtatMonde } from '@pierre/partage/monde';
 import type {
@@ -32,6 +34,8 @@ export interface DashboardParent extends ResumeDashboard {
 }
 
 export interface PortApi {
+  readonly mathematiques: PortApiMaths;
+  readonly repriseLecture: DepotRepriseLecture;
   lireSante(): Promise<ReponseSante>;
 
   listerProfils(): Promise<readonly Profil[]>;

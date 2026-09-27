@@ -26,6 +26,7 @@ interface LigneProfil {
   readonly cree_le: string;
   readonly dernier_acces_le: string;
   readonly generation_progression: number;
+  readonly generation_maths: number;
 }
 
 /** Ce que le client peut envoyer sur `POST /api/profils`, avant toute validation. */
@@ -35,7 +36,7 @@ export interface DemandeCreationProfil {
   readonly paletteVariante: string;
 }
 
-const CHAMPS = 'id, prenom, avatar_json, palette_variante, cree_le, dernier_acces_le, generation_progression';
+const CHAMPS = 'id, prenom, avatar_json, palette_variante, cree_le, dernier_acces_le, generation_progression, generation_maths';
 
 /**
  * Un `avatar_json` illisible ne doit pas faire tomber la liste des profils : l'enfant verrait un
@@ -57,7 +58,8 @@ function versProfil(ligne: LigneProfil): Profil {
     paletteVariante: String(ligne.palette_variante) as CodeRegion,
     creeLe: String(ligne.cree_le) as Horodatage,
     dernierAccesLe: String(ligne.dernier_acces_le) as Horodatage,
-    generationProgression: Number(ligne.generation_progression)
+    generationProgression: Number(ligne.generation_progression),
+    generationMaths: Number(ligne.generation_maths)
   };
 }
 
@@ -109,13 +111,14 @@ export async function creerProfil(
   const prenom = demande.prenom.trim();
   const id = await deriverIdentifiant(base, prenom, instant);
 
-  await base.lancer(`INSERT INTO profils (${CHAMPS}) VALUES (?, ?, ?, ?, ?, ?, ?)`, [
+  await base.lancer(`INSERT INTO profils (${CHAMPS}) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`, [
     id,
     prenom,
     JSON.stringify(demande.avatar),
     demande.paletteVariante,
     instant,
     instant,
+    0,
     0
   ]);
 

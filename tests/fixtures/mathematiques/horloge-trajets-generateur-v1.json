@@ -1,0 +1,112 @@
+{
+  "format": 1,
+  "id": "mat-hor-03-exploration-16-tableau-1020-975-540-915",
+  "famille": "MAT-HOR-03",
+  "niveau": "exploration",
+  "modeleId": "horloge-03-v1",
+  "versionModele": 1,
+  "versionGenerateur": 1,
+  "graine": 22,
+  "signature": "tableau:1020:975,540,915",
+  "parametres": {
+    "destinations": [
+      "Jardin",
+      "Marché",
+      "Moulin"
+    ],
+    "moments": [
+      "matin",
+      "apres-midi",
+      "soir"
+    ],
+    "trajets": [
+      {
+        "id": "trajet-0",
+        "destination": "Jardin",
+        "moment": "apres-midi",
+        "departMinutes": 975,
+        "arriveeMinutes": 1020
+      },
+      {
+        "id": "trajet-1",
+        "destination": "Marché",
+        "moment": "matin",
+        "departMinutes": 540,
+        "arriveeMinutes": 570
+      },
+      {
+        "id": "trajet-2",
+        "destination": "Moulin",
+        "moment": "apres-midi",
+        "departMinutes": 915,
+        "arriveeMinutes": 975
+      }
+    ],
+    "arriveeVoulueMinutes": 1020,
+    "nombreAPlacer": 3
+  },
+  "stock": [
+    {
+      "id": "trajet-0",
+      "destination": "Jardin",
+      "moment": "apres-midi",
+      "departMinutes": 975,
+      "arriveeMinutes": 1020
+    },
+    {
+      "id": "trajet-1",
+      "destination": "Marché",
+      "moment": "matin",
+      "departMinutes": 540,
+      "arriveeMinutes": 570
+    },
+    {
+      "id": "trajet-2",
+      "destination": "Moulin",
+      "moment": "apres-midi",
+      "departMinutes": 915,
+      "arriveeMinutes": 975
+    }
+  ],
+  "etatInitial": {
+    "objets": {},
+    "placements": {},
+    "selection": null,
+    "historique": []
+  },
+  "consigne": {
+    "texte": "Place chaque trajet dans le tableau, selon le lieu et le moment de la journée. Pour arriver au plus tard à 17 h 00, choisis le départ qui te permet d’arriver à l’heure.",
+    "segments": [
+      {
+        "texte": "Place chaque trajet dans le tableau, selon le lieu et le moment de la journée. Pour arriver au plus tard à 17 h 00, choisis le départ qui te permet d’arriver à l’heure.",
+        "audio": "maths/horloge/MAT-HOR-03/consigne"
+      }
+    ]
+  },
+  "unite": "minute",
+  "aide": {
+    "indice": {
+      "texte": "Regarde les quarts d’heure et le moment de la journée.",
+      "segments": [
+        {
+          "texte": "Regarde les quarts d’heure et le moment de la journée.",
+          "audio": "maths/horloge/MAT-HOR-03/indice"
+        }
+      ]
+    },
+    "demonstration": {
+      "texte": "Gobi montre un repère sur la frise. À toi de placer.",
+      "segments": [
+        {
+          "texte": "Gobi montre un repère sur la frise. À toi de placer.",
+          "audio": "maths/horloge/MAT-HOR-03/demonstration"
+        }
+      ]
+    }
+  },
+  "reglesValidation": {
+    "version": 1,
+    "minutesEntieres": true,
+    "memeJournee": true
+  }
+}

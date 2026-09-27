@@ -1,0 +1,49 @@
+.jardin-atelier { display: grid; gap: 1rem; width: min(100%, 56rem); min-width: 0; max-width: 100%; margin-inline: auto; color: #302518; font-family: Andika, sans-serif; }
+.jardin-atelier *, .jardin-atelier *::before, .jardin-atelier *::after { box-sizing: border-box; }
+.jardin-atelier h2, .jardin-atelier p { margin: 0; }
+.jardin-atelier button { min-height: 64px; min-width: 64px; padding: .55rem .8rem; border: 2px solid #71593e; border-radius: .8rem; color: inherit; background: #fffdf7; font: inherit; font-weight: 700; cursor: pointer; touch-action: manipulation; overflow-wrap: anywhere; }
+.jardin-atelier button:focus-visible { outline: 4px solid #235395; outline-offset: 2px; }
+.jardin-atelier button:disabled { opacity: .53; cursor: default; }
+.jardin-groupe, .jardin-plateau { min-width: 0; margin: 0; padding: .8rem; border: 2px solid #86674b; border-radius: 1rem; background: #fff9eb; }
+.jardin-groupe legend { padding-inline: .35rem; font-weight: 700; }
+.jardin-groupes { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr)); gap: .7rem; margin-top: .6rem; }
+.jardin-groupes .jardin-groupe { display: grid; gap: .35rem; }
+.jardin-pictogramme { display: inline-grid; align-items: center; justify-items: start; min-height: 3.3rem; color: #94681f; }
+.jardin-pictogramme > i { font-size: 1.5rem; font-style: normal; }
+.jardin-dix { display: grid; grid-template-columns: repeat(5, .28rem); gap: .08rem; }
+.jardin-dix i { font-size: .45rem; font-style: normal; line-height: .5rem; }
+.jardin-cent { display: grid; grid-template-columns: repeat(5, max-content); gap: .14rem; padding: .2rem; border: 2px solid #86674b; border-radius: .3rem; }
+.jardin-cent .jardin-dix { padding: .08rem; border: 1px solid #b58a55; border-radius: .2rem; }
+.jardin-caisses { display: flex; flex-wrap: wrap; gap: .3rem; max-height: 11rem; overflow-y: auto; }
+.jardin-caisse { display: grid; grid-template-columns: repeat(5, .55rem); gap: .1rem; padding: .3rem; border: 2px solid #86674b; border-radius: .3rem; background: #dfb675; }
+.jardin-caisse i { font-size: .6rem; font-style: normal; line-height: .65rem; color: #96552a; }
+.jardin-actions, .jardin-transferts { display: flex; flex-wrap: wrap; gap: .5rem; min-width: 0; }
+.jardin-actions button, .jardin-transferts button { flex: 1 1 min(100%, 9rem); }
+.jardin-echanges button { flex-basis: min(100%, 16rem); }
+.jardin-parts { display: flex; width: 100%; min-height: 6rem; margin-block: .5rem; border: 2px solid #70563a; border-radius: .5rem; overflow: hidden; background: #fff; }
+.jardin-part { flex: 1 1 0; border-right: 1px solid #70563a; background: #fff9eb; }
+.jardin-part:last-child { border-right: 0; }
+.jardin-part-pleine { background: #8fc577; }
+.jardin-inventaire { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .65rem; }
+.jardin-inventaire > div { min-width: 0; padding: .4rem; border-radius: .5rem; background: #f5ead2; }
+.jardin-inventaire strong { display: block; overflow-wrap: anywhere; }
+.jardin-jetons { display: flex; flex-wrap: wrap; min-height: 2rem; gap: .15rem; color: #805b30; }
+.jardin-tableau { display: grid; grid-template-columns: repeat(auto-fit, minmax(64px, 1fr)); gap: .25rem; margin-block: .55rem; }
+.jardin-atelier .jardin-case { min-width: 64px; min-height: 64px; padding: .2rem; border-radius: .3rem; background: #fffdf7; }
+.jardin-atelier .jardin-case-marquee { background: #8fc577; border-color: #315d3e; }
+.jardin-barre { display: flex; min-height: 3.5rem; margin-top: .55rem; border: 2px solid #4c573b; border-radius: .35rem; overflow: hidden; }
+.jardin-barre-case { flex: 1 1 0; min-width: 0; border-right: 1px solid #9b9d80; background: #fffdf7; }
+.jardin-barre-case:last-child { border-right: 0; }
+.jardin-barre-case:nth-child(5n) { border-right: 2px solid #4c573b; }
+.jardin-barre-case-pleine { background: #8fc577; }
+.jardin-barre-reperes { display: flex; justify-content: space-between; font-size: .9rem; font-weight: 700; }
+.jardin-echelle { display: grid; gap: .2rem; margin-block: .4rem; font-weight: 700; }
+.jardin-echelle input { width: 100%; min-width: 0; height: 64px; margin: 0; appearance: none; background: transparent; cursor: pointer; touch-action: pan-y; }
+.jardin-echelle input::-webkit-slider-runnable-track { height: 16px; border: 1px solid #4c573b; border-radius: 1rem; background: repeating-linear-gradient(90deg, #c9d8ac 0 7px, #688e66 7px 8px); }
+.jardin-echelle input::-webkit-slider-thumb { width: 64px; height: 64px; margin-top: -25px; appearance: none; border: 3px solid #315d3e; border-radius: 50%; background: #f7e6aa; }
+.jardin-echelle input::-moz-range-track { height: 16px; border: 1px solid #4c573b; border-radius: 1rem; background: repeating-linear-gradient(90deg, #c9d8ac 0 7px, #688e66 7px 8px); }
+.jardin-echelle input::-moz-range-thumb { width: 58px; height: 58px; border: 3px solid #315d3e; border-radius: 50%; background: #f7e6aa; }
+.jardin-transferts { margin-top: .7rem; }
+.jardin-transferts p { flex-basis: 100%; }
+.jardin-annuler { justify-self: start; }
+@media (max-width: 38rem) { .jardin-inventaire { grid-template-columns: 1fr; } .jardin-atelier { padding-inline: .15rem; } }

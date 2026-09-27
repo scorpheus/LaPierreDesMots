@@ -71,6 +71,58 @@ self.addEventListener('install', (evenement) => {
   evenement.waitUntil(mettreEnCacheNoyau());
 });
 
+function estFenetreDuJeu(client) {
+  if (client?.type !== 'window' || typeof client.url !== 'string') return false;
+  try {
+    const url = new URL(client.url);
+    return url.origin === self.location.origin && url.pathname.startsWith(BASE);
+  } catch {
+    return false;
+  }
+}
+
+self.addEventListener('message', (evenement) => {
+  const type = evenement.data?.type;
+  const port = evenement.ports?.[0];
+  if (port === undefined || (type !== 'pierre:version' && type !== 'pierre:activer')) return;
+
+  evenement.waitUntil((async () => {
+    try {
+      if (type === 'pierre:activer') {
+        if (!estFenetreDuJeu(evenement.source)) {
+          port.postMessage({ ok: false, message: 'La demande doit venir d’une fenêtre du jeu.' });
+          return;
+        }
+        if (evenement.data.version !== VERSION) {
+          port.postMessage({ ok: false, message: 'La version demandée ne correspond plus à cette mise à jour.' });
+          return;
+        }
+      }
+
+      // Un second onglet peut être ouvert avant de recevoir son contrôleur : il compte aussi.
+      const fenetres = (await self.clients.matchAll({ type: 'window', includeUncontrolled: true }))
+        .filter(estFenetreDuJeu);
+      if (type === 'pierre:version') {
+        port.postMessage({ ok: true, version: VERSION, fenetres: fenetres.length });
+        return;
+      }
+      if (fenetres.some((client) => client.id !== evenement.source.id)) {
+        port.postMessage({
+          ok: false,
+          message: 'Fermez les autres onglets du jeu avant d’installer la mise à jour.',
+        });
+        return;
+      }
+
+      // L’installation seule ne force jamais le remplacement du worker encore utilisé.
+      await self.skipWaiting();
+      port.postMessage({ ok: true, version: VERSION });
+    } catch {
+      port.postMessage({ ok: false, message: 'Impossible de préparer la mise à jour. Réessayez.' });
+    }
+  })());
+});
+
 self.addEventListener('activate', (evenement) => {
   evenement.waitUntil(
     (async () => {

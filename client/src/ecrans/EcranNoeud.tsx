@@ -242,6 +242,9 @@ export function EcranNoeud(): ReactElement {
   const racine = useRef<HTMLElement | null>(null);
   const [pret, fixerPret] = useState(false);
   const [appuye, fixerAppuye] = useState(false);
+  const retourVerrouille = useRef(false);
+  const [retourEnCours, fixerRetourEnCours] = useState(false);
+  const [erreurRetour, fixerErreurRetour] = useState<string | null>(null);
   // `niveauAide` est MONOTONE CROISSANT pour la tentative entière (§ 5.6) : une aide obtenue
   // n'est jamais retirée. `aide` peut redevenir `null` quand le moteur l'a consommée ; le
   // palier atteint, lui, ne redescend pas — c'est ce que `data-aide` doit refléter.
@@ -290,8 +293,26 @@ export function EcranNoeud(): ReactElement {
    * ════════════════════════════════════════════════════════════════════════════════════════
    */
   const retourCarte = useCallback((): void => {
-    effacerParticules();
-    magasin.getState().naviguer('carte');
+    if (retourVerrouille.current) return;
+    retourVerrouille.current = true;
+    fixerErreurRetour(null);
+    // Les aperçus parent et l'ancien écran sans profil n'ont pas de reprise enfant à écrire.
+    if (magasin.getState().profil === null || !magasin.getState().reprisePersistable) {
+      effacerParticules();
+      magasin.getState().naviguer('carte');
+      retourVerrouille.current = false;
+      return;
+    }
+    fixerRetourEnCours(true);
+    void magasin.getState().suspendreLecture().then(() => {
+      effacerParticules();
+      magasin.getState().naviguer('carte');
+    }).catch(() => {
+      fixerErreurRetour('On n’a pas pu garder ta partie. Touche encore « La carte ».');
+    }).finally(() => {
+      retourVerrouille.current = false;
+      fixerRetourEnCours(false);
+    });
   }, [magasin]);
 
   // La couche de particules est globale : sa durée ne doit jamais dépasser celle du nœud.
@@ -446,6 +467,8 @@ export function EcranNoeud(): ReactElement {
         <button type="button" className="cible" data-vers="carte" onClick={retourCarte}>
           La carte
         </button>
+        {retourEnCours ? <p role="status">On garde ta partie…</p> : null}
+        {erreurRetour === null ? null : <p role="alert">{erreurRetour}</p>}
       </main>
     );
   }
@@ -500,6 +523,7 @@ export function EcranNoeud(): ReactElement {
       // crochet de test : c'est l'IMPLANTATION de la règle des 100 ms de la v2 § 8. La marque
       // est posée dans le gestionnaire lui-même, donc avant tout traitement.
       data-appui={appuye ? 'oui' : 'non'}
+      aria-busy={retourEnCours}
       onPointerDown={surAppui}
       style={styleHabillage}
     >
@@ -533,6 +557,9 @@ export function EcranNoeud(): ReactElement {
           </p>
         ))}
       </EnteteActivite>
+
+      {retourEnCours ? <p role="status">On garde ta partie…</p> : null}
+      {erreurRetour === null ? null : <p role="alert">{erreurRetour}</p>}
 
       <CadreSceneActivite decor={<DecorDeFond habillage={paquet.habillage} moteur={codeMoteur} />}>
         <ComposantMoteurMonte

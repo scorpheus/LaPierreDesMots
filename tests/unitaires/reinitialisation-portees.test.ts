@@ -1,18 +1,11 @@
 /**
- * Les deux portées de remise à zéro, en pur — lot H2. Annexe T § T1.
+ * Les quatre portées de remise à zéro, en pur — lot H2 et Vallée § 9.3.
  *
  * ═══════════════════════════════════════════════════════════════════════════════════════════
- * LA PROPRIÉTÉ QUI COMPTE : ON EFFACE PAR DÉFAUT, ON CONSERVE PAR EXCEPTION
+ * LA PROPRIÉTÉ QUI COMPTE : UNE TABLE NON CLASSÉE BLOQUE L'EFFACEMENT
  *
- * C'est la leçon de D48 appliquée à l'effacement. Si `porteeEfface` fonctionnait par liste de
- * tables À effacer, une table ajoutée par une migration future survivrait en silence à la
- * remise à zéro — et le profil « remis à zéro » garderait une projection périmée, c'est-à-dire
- * exactement le défaut que cette campagne corrige. On ne répare pas un état périmé avec un
- * mécanisme qui périme.
- *
- * `fast-check` tire donc des noms de tables au hasard et exige qu'ils soient TOUS effacés,
- * sauf les deux nommés. Ce n'est pas un test décoratif : il échoue le jour où quelqu'un
- * retourne la logique en liste blanche.
+ * La découverte du schéma garde l'inventaire exhaustif ; la classification explicite impose
+ * un arbitrage lecture, maths ou partagé avant toute suppression.
  * ═══════════════════════════════════════════════════════════════════════════════════════════
  */
 import fc from 'fast-check';
@@ -33,29 +26,18 @@ import {
 
 import type { EtatRegionProfil } from '@partage/parent/reinitialisation';
 
-describe('porteeEfface — on efface par défaut', () => {
-  it('la portée « complete » n’épargne AUCUNE table, quel qu’en soit le nom', () => {
-    fc.assert(
-      fc.property(fc.string({ minLength: 1, maxLength: 40 }), (table) => {
-        expect(porteeEfface('complete', table)).toBe(true);
-      }),
-      { numRuns: 300 }
-    );
-  });
-
-  it('la portée « progression » n’épargne QUE les deux tables nommées', () => {
-    fc.assert(
-      fc.property(fc.string({ minLength: 1, maxLength: 40 }), (table) => {
-        const attendu = !TABLES_CONSERVEES_PAR_PROGRESSION.includes(table);
-        expect(porteeEfface('progression', table)).toBe(attendu);
-      }),
-      { numRuns: 300 }
-    );
-  });
-
-  it('une table INCONNUE — celle qu’une migration future ajoutera — est effacée par les deux', () => {
+describe('porteeEfface — classification fermée', () => {
+  it('une table inconnue bloque toutes les portées avant effacement', () => {
     for (const portee of PORTEES_REINITIALISATION) {
-      expect(porteeEfface(portee, 'table_qui_n_existe_pas_encore')).toBe(true);
+      expect(() => porteeEfface(portee, 'table_qui_n_existe_pas_encore')).toThrow(/non classifiée/);
+    }
+  });
+
+  it('les tables partagées ne sont jamais effacées avec le profil conservé', () => {
+    for (const portee of PORTEES_REINITIALISATION) {
+      for (const table of ['profils', 'code_parent', 'verrou_parent', 'schema_migrations']) {
+        expect(porteeEfface(portee, table)).toBe(false);
+      }
     }
   });
 
@@ -68,7 +50,7 @@ describe('porteeEfface — on efface par défaut', () => {
 });
 
 describe('estPorteeReinitialisation — aucune valeur par défaut', () => {
-  it('n’accepte que les deux portées, et rien qui leur ressemble', () => {
+  it('n’accepte que les quatre portées, et rien qui leur ressemble', () => {
     for (const valeur of PORTEES_REINITIALISATION) {
       expect(estPorteeReinitialisation(valeur)).toBe(true);
     }
@@ -118,7 +100,7 @@ describe('ce qui est perdu et ce qui est gardé', () => {
     expect(progression.join(' ')).not.toContain('réglages de lecture');
   });
 
-  it('les deux portées gardent toujours le prénom et l’avatar', () => {
+  it('les quatre portées gardent toujours le prénom et l’avatar', () => {
     for (const portee of PORTEES_REINITIALISATION) {
       const gardes = conservesParLaPortee(portee).join(' ');
       expect(gardes, portee).toContain('prénom');

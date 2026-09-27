@@ -21,6 +21,7 @@ import { creerMagasin } from './etat/magasin.js';
 import { creerServicesParDefaut, resoudreGraineParDefaut } from './etat/services.js';
 import { appliquerVariablesPalette } from './habillages/chargeur.js';
 import { demanderPersistanceStockage } from './pwa/persistance-stockage.js';
+import { depotRepriseLecture, definirPreparationSauvegarde } from './api/client.js';
 
 // Idempotent, et appelé par CHAQUE racine de composition (§ 4.3) : client, serveur, tests.
 initialiserRegistreMoteurs();
@@ -34,7 +35,8 @@ if (variablesEcrites === 0) {
 
 const graine = resoudreGraineParDefaut();
 const services = creerServicesParDefaut(graine);
-const magasin = creerMagasin(services, graine);
+const magasin = creerMagasin(services, graine, undefined, undefined, depotRepriseLecture);
+definirPreparationSauvegarde(async () => { await magasin.getState().suspendreLecture(); });
 const fileDAttente = creerFileDAttente();
 
 if (import.meta.env.MODE === 'pwa') {

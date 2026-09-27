@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lapierredesmots.local/schemas/mathematiques/instance.v1.schema.json",
+  "title": "Instance mathématique résolue V1",
+  "type": "object",
+  "required": ["format", "id", "famille", "niveau", "modeleId", "versionModele", "versionGenerateur", "graine", "signature", "parametres", "stock", "etatInitial", "consigne", "unite", "aide", "reglesValidation"],
+  "properties": {
+    "format": { "const": 1 },
+    "id": { "type": "string", "minLength": 1 },
+    "famille": { "type": "string", "pattern": "^MAT-(JAR|PON|MOU|MAR|CHA|HOR)-0[123]$" },
+    "niveau": { "enum": ["decouverte", "exploration", "defi"] },
+    "modeleId": { "type": "string", "minLength": 1 },
+    "versionModele": { "type": "integer", "minimum": 1 },
+    "versionGenerateur": { "type": "integer", "minimum": 1 },
+    "graine": { "type": "integer", "minimum": 0, "maximum": 4294967295 },
+    "signature": { "type": "string", "minLength": 1 },
+    "parametres": { "type": "object" },
+    "stock": { "type": "array" },
+    "etatInitial": { "$ref": "#/$defs/etat" },
+    "consigne": { "$ref": "#/$defs/consigne" },
+    "unite": { "type": "string" },
+    "aide": {
+      "type": "object",
+      "required": ["indice", "demonstration"],
+      "properties": {
+        "indice": { "$ref": "#/$defs/consigne" },
+        "demonstration": { "$ref": "#/$defs/consigne" }
+      }
+    },
+    "reglesValidation": { "type": "object" },
+    "projet": {
+      "type": "object",
+      "required": ["sessionId", "projetId", "versionProjet", "etape", "variables", "plan", "transformationId", "cadeauId", "cadeauType"],
+      "properties": {
+        "sessionId": { "type": "string", "minLength": 1 },
+        "projetId": { "type": "string", "pattern": "^MAT-(JAR|PON|MOU|MAR|CHA|HOR)-P0[123]$" },
+        "versionProjet": { "type": "integer", "minimum": 1 },
+        "etape": { "type": "integer", "minimum": 0 },
+        "variables": { "type": "object", "additionalProperties": { "type": "integer" } },
+        "plan": {
+          "type": "array", "minItems": 3, "maxItems": 5,
+          "items": {
+            "type": "object", "required": ["rang", "famille", "niveau", "instanceId"],
+            "properties": {
+              "rang": { "type": "integer", "minimum": 0 },
+              "famille": { "type": "string", "pattern": "^MAT-(JAR|PON|MOU|MAR|CHA|HOR)-0[123]$" },
+              "niveau": { "enum": ["decouverte", "exploration", "defi"] },
+              "instanceId": { "type": "string", "minLength": 1 }
+            }
+          }
+        },
+        "transformationId": { "type": "string", "minLength": 1 },
+        "cadeauId": { "type": ["string", "null"] },
+        "cadeauType": { "enum": ["souvenir", "objet", "fete", null] }
+      }
+    }
+  },
+  "$defs": {
+    "consigne": {
+      "type": "object",
+      "required": ["texte", "segments"],
+      "properties": {
+        "texte": { "type": "string", "minLength": 1 },
+        "segments": {
+          "type": "array", "minItems": 1,
+          "items": {
+            "type": "object", "required": ["texte", "audio"],
+            "properties": { "texte": { "type": "string", "minLength": 1 }, "audio": { "type": "string", "minLength": 1 } }
+          }
+        }
+      }
+    },
+    "etat": {
+      "type": "object",
+      "required": ["objets", "placements", "selection", "historique"],
+      "properties": {
+        "objets": { "type": "object" },
+        "placements": { "type": "object" },
+        "selection": { "type": ["string", "null"] },
+        "historique": { "type": "array", "items": { "$ref": "#/$defs/etat" } }
+      }
+    }
+  }
+}

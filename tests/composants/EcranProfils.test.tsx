@@ -233,6 +233,25 @@ describe('la carte de profil RÉPOND au tap (M25)', () => {
     expect(magasin.getState().sortie?.etapes).toHaveLength(4);
   });
 
+  it('la pastille ouvre le paquet durable avant le plan préparé en arrière-plan', async () => {
+    const { magasin } = await monterEtAttendre();
+    const demarrer = vi.fn();
+    magasin.setState({
+      chargerProfilEtReprise: async (profil: typeof PROFILS[number]) => {
+        magasin.setState({ profil, ecran: 'campement',
+          paquet: { noeud: { id: 'noeud-repris' } }, moteur: {} as never,
+          reprisePersistable: true, resume: null } as never);
+      },
+      demarrerNoeud: demarrer,
+    } as never);
+    const pastille = document.querySelector('[data-pastille-sortie="prf-1"]');
+    expect(pastille).not.toBeNull();
+    fireEvent.click(pastille!);
+    await waitFor(() => expect(magasin.getState().ecran).toBe('noeud'));
+    expect(magasin.getState().paquet?.noeud.id).toBe('noeud-repris');
+    expect(demarrer).not.toHaveBeenCalled();
+  });
+
   it('la pastille relit les acquis invalidés et prépare la reprise suivante', async () => {
     const { client } = await monterEtAttendre();
     const pastille = document.querySelector('[data-pastille-sortie="prf-1"]');

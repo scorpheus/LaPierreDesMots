@@ -64,6 +64,8 @@ const alias = {
   // `exports` du package — sans cette ligne, tout import de `@pierre/partage/base` échoue au
   // chargement des tests avec « Cannot find module », quel que soit le contenu du fichier.
   '@pierre/partage/base': racine('./partage/src/base/index.ts'),
+  '@pierre/partage/mathematiques': racine('./partage/src/mathematiques/index.ts'),
+  '@pierre/partage/reprise-lecture': racine('./partage/src/reprise-lecture/index.ts'),
   '@pierre/partage': racine('./partage/src/index.ts'),
   // Réservés aux tests — contrat § 11.3.
   '@partage': racine('./partage/src'),

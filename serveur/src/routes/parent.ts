@@ -87,6 +87,7 @@ import {
 } from '@pierre/partage/base';
 import { synchroniserBrouillons } from '../referentiels/brouillons.js';
 import { enregistrerRoutesParentGalerie } from './parent-galerie.js';
+import { enregistrerRoutesParentMathematiques } from './mathematiques.js';
 // AJOUT H2 — les deux routes « profil » de la zone parent (etat reel, remise a zero).
 import { enregistrerRoutesParentProfil } from './parent-profil.js';
 
@@ -430,6 +431,7 @@ export function enregistrerRoutesParent(app: FastifyInstance, contexte: Contexte
   // `jetonValide` lui est passe tel quel : la galerie est protegee par le MEME garde que le
   // dashboard, sans qu'aucune seconde implantation ne puisse deriver de la premiere.
   enregistrerRoutesParentGalerie(app, contexte, jetonValide);
+  enregistrerRoutesParentMathematiques(app, contexte, jetonValide);
 
   // ───────────────── GET /api/parent/:profil/etat et POST .../reinitialiser — lot H2
   //

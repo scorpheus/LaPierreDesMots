@@ -22,6 +22,7 @@ export interface ProprietesCarteMonde {
   readonly conclusionAccessible: boolean;
   readonly surChoisirRegion: (code: CodeRegion) => void;
   readonly surChoisirConclusion: () => void;
+  readonly surAllerMaths?: (() => void) | undefined;
 }
 
 export function CarteMonde({
@@ -30,7 +31,8 @@ export function CarteMonde({
   animationsDesactivees,
   conclusionAccessible,
   surChoisirRegion,
-  surChoisirConclusion
+  surChoisirConclusion,
+  surAllerMaths
 }: ProprietesCarteMonde): ReactElement {
   const support = useRef<HTMLDivElement>(null);
   const [rayonPrise, fixerRayonPrise] = useState(RAYON_PRISE);
@@ -118,6 +120,16 @@ export function CarteMonde({
             <circle data-conclusion-centrale="pierre" data-ancre-raster="600,470" cx={ANCRE_CONCLUSION[0]} cy={ANCRE_CONCLUSION[1]} r={rayonPrise} fill="var(--parchemin)" fillOpacity={0} role="button" tabIndex={0} aria-label="La Pierre des Mots est entière" style={{ cursor: 'pointer' }} onClick={surChoisirConclusion} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') surChoisirConclusion(); }} />
           </g>
         ) : null}
+        {surAllerMaths === undefined ? null : <g data-destination="mathematiques">
+          <g aria-hidden="true" style={{ pointerEvents: 'none' }}>
+            <rect x={438} y={132} width={324} height={112} rx={22} fill="var(--parchemin)" stroke="var(--trait)" strokeWidth={5} />
+            <text x={600} y={177} textAnchor="middle" fontSize={30} fill="var(--trait)">La Vallée</text>
+            <text x={600} y={215} textAnchor="middle" fontSize={30} fill="var(--trait)">des Nombres</text>
+          </g>
+          <rect x={438} y={Math.max(0, 188 - rayonPrise)} width={324} height={Math.max(112, rayonPrise * 2)} rx={22}
+            fill="transparent" role="button" tabIndex={0} aria-label="Entrer dans la Vallée des Nombres" style={{ cursor: 'pointer' }}
+            onClick={surAllerMaths} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); surAllerMaths(); } }} />
+        </g>}
       </Parchemin>
     </div>
   );

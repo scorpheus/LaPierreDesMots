@@ -31,6 +31,8 @@ import { enregistrerRoutesReglages } from './routes/reglages.js';
 import { enregistrerRoutesPedagogie } from './routes/pedagogie.js';
 import { enregistrerRoutesSortie } from './routes/sortie.js';
 import { enregistrerRoutesMonde } from './routes/monde.js';
+import { enregistrerRoutesMathematiques } from './routes/mathematiques.js';
+import { enregistrerRoutesRepriseLecture } from './routes/reprise-lecture.js';
 import { enregistrerRoutesParent } from './routes/parent.js';
 // Lot N2 (contrat de finition v3 § 8) — le manifeste des voix et les clips Opus.
 import { enregistrerRoutesAudio } from './routes/audio.js';
@@ -130,6 +132,8 @@ export function construireApplication(options: OptionsApplication): FastifyInsta
   enregistrerRoutesPedagogie(app, contexte); // L2-D — maitrise, revisions
   enregistrerRoutesSortie(app, contexte); // L2-D — composition d'une sortie
   enregistrerRoutesMonde(app, contexte); // L2-F — monde, campement
+  enregistrerRoutesMathematiques(app, contexte);
+  enregistrerRoutesRepriseLecture(app, contexte);
   enregistrerRoutesParent(app, contexte); // L2-H — zone parent
 
   // N2 — `GET /api/audio/manifeste` et le service statique de `contenu/audio/`. Enregistre

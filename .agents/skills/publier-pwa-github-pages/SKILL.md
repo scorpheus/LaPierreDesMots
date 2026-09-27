@@ -64,6 +64,13 @@ versions du vrai worker sur une origine locale isolée, injecte un 503 et vérif
 naturel, le hors-ligne et les témoins localStorage/OPFS. Compléter par la recette `qa:pwa` du vrai
 jeu pour SQLite. Ne pas confondre ces deux niveaux de preuve.
 
+Pour le bouton de mise à jour, ajouter `pwa-mise-a-jour.test.ts` et `MiseAJourPwa.test.tsx`,
+puis `node scripts/qa/verifier-mise-a-jour-pwa.mjs` avec le build courant. Cette recette joue
+une tentative réelle, compare le journal et les récompenses avant/après le tap, vérifie le
+report, le refus d'un autre onglet, le dialogue modal, le rechargement unique et la reprise
+hors ligne. Elle sert deux versions du worker avec les mêmes bundles et le même schéma SQL ;
+elle ne prouve donc pas une migration SQL. Rapports et profils isolés dans le bac à sable.
+
 Après un build PWA, une seconde `node scripts/preparer-publication-pages.mjs --finaliser` doit
 conserver la version de `version-build.json` et le SHA-256 du worker. Le modèle source du worker
 participe à l'empreinte ; les fichiers générés `service-worker.js` et `version-build.json` n'en

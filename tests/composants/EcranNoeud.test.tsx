@@ -25,14 +25,15 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { cleanup, fireEvent, render } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { Exercice, Noeud } from '@pierre/partage';
+import type { Exercice, Noeud, Profil } from '@pierre/partage';
 import { EcranNoeud } from '@client/ecrans/EcranNoeud';
 import { creerMagasin } from '@client/etat/magasin';
 import type { MagasinJeu } from '@client/etat/magasin';
+import type { DepotRepriseLecture } from '@client/etat/reprise-lecture-depot';
 import { FournisseurJeu } from '@client/etat/services';
 import { creerHaptiqueMuette } from '@client/gamefeel/haptique-navigateur';
 import { creerRetourSensoriel } from '@client/gamefeel/retour';
@@ -101,10 +102,15 @@ function installerFetchLocal(): void {
 }
 
 /** Monte l'écran sur un nœud démarré, et rend le magasin pour observer l'écran courant. */
-function monter(): { readonly magasin: MagasinJeu; readonly racine: ParentNode } {
+function monter(depot?: DepotRepriseLecture): { readonly magasin: MagasinJeu; readonly racine: ParentNode } {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const jeu = services();
-  const magasin = creerMagasin(jeu);
+  const magasin = depot === undefined ? creerMagasin(jeu)
+    : creerMagasin(jeu, 1, null, () => undefined, depot);
+  if (depot !== undefined) {
+    magasin.getState().choisirProfil({ id: 'profil-retour', prenom: 'Alma',
+      generationProgression: 0 } as Profil);
+  }
   magasin.getState().demarrerNoeud(PAQUET as never);
   render(
     <QueryClientProvider client={client}>
@@ -162,6 +168,39 @@ describe('l’écran du nœud a une sortie, et elle mène ailleurs (M2)', () => 
   it('efface l’onde en quittant le nœud pour la carte', () => {
     monter();
     fireEvent.click(document.querySelector('[data-vers="carte"]')!);
+    expect(effacementsParticules).toHaveBeenCalledTimes(1);
+  });
+
+  it('attend l’ACK de suspension, bloque le double tap et laisse réessayer après un refus', async () => {
+    let numero = 0;
+    let refuser!: (cause: Error) => void;
+    const secondeEcriture = new Promise<number>((_resoudre, rejeter) => { refuser = rejeter; });
+    const depot: DepotRepriseLecture = {
+      lire: vi.fn(async () => null),
+      ecrire: vi.fn(async () => {
+        numero += 1;
+        if (numero === 2) return secondeEcriture;
+        return numero;
+      }),
+      effacer: vi.fn(async () => undefined),
+    };
+    const { magasin } = monter(depot);
+    await magasin.getState().attendreEcrituresLecture();
+    const sortie = document.querySelector('[data-vers="carte"]')!;
+    fireEvent.click(sortie);
+    fireEvent.click(sortie);
+    await waitFor(() => expect(depot.ecrire).toHaveBeenCalledTimes(2));
+    expect(magasin.getState().ecran).toBe('noeud');
+    expect(document.querySelector('[role="status"]')?.textContent).toContain('On garde ta partie');
+
+    await act(async () => { refuser(new Error('SQLite indisponible')); });
+    await waitFor(() => expect(document.querySelector('[role="alert"]')?.textContent)
+      .toContain('Touche encore'));
+    expect(magasin.getState().ecran).toBe('noeud');
+    expect(magasin.getState().suspenduLeMs).toBeNull();
+    fireEvent.click(sortie);
+    await waitFor(() => expect(magasin.getState().ecran).toBe('carte'));
+    expect(depot.ecrire).toHaveBeenCalledTimes(3);
     expect(effacementsParticules).toHaveBeenCalledTimes(1);
   });
 

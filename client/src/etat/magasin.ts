@@ -25,6 +25,14 @@ import type {
   SeuilsCascade
 } from '@pierre/partage';
 import type { PlanSortie } from '@pierre/partage/pedagogie';
+import {
+  adapterAncienneRepriseLecture,
+  encoderEtatLecture,
+  reprendreEtatLecture,
+  verifierInstantaneLecture,
+  VERSION_REPRISE_LECTURE
+} from '@pierre/partage/reprise-lecture';
+import type { InstantaneRepriseLecture } from '@pierre/partage/reprise-lecture';
 import { ETAT_CASCADE_VIDE } from '@pierre/partage/recompenses';
 import type { PaquetNoeudAttendu } from '../api/client.js';
 import { conserverTentativeTerminee } from '../api/client.js';
@@ -32,6 +40,7 @@ import type { TentativeSansCle } from '../api/tentatives-en-attente.js';
 import { memoriserProfil, oublierProfil } from './profil-memorise.js';
 import type { ServicesJeu } from '../moteurs/types.js';
 import { maintenantIso } from './services.js';
+import type { DepotRepriseLecture } from './reprise-lecture-depot.js';
 
 /**
  * Le refus du dernier geste, s'il y en a un.
@@ -77,6 +86,10 @@ export interface EtatMagasin {
   readonly tentativeEnvoyee: boolean;
   /** Échec de la copie synchrone : le résultat reste en mémoire et sa sauvegarde est réessayable. */
   readonly erreurConservation: string | null;
+  readonly erreurRepriseLecture: string | null;
+  /** Barrière du routeur : un lien profond attend la lecture SQLite du profil. */
+  readonly hydratationRepriseLecture: 'en-attente' | 'en-cours' | 'terminee' | 'echec';
+  readonly suspenduLeMs: number | null;
   /**
    * Cette partie compte-t-elle dans le journal de l'enfant ? — R30.
    *
@@ -91,6 +104,8 @@ export interface EtatMagasin {
    * Porté par le magasin, il se lit sur `data-journalise` et une recette peut l'exiger.
    */
   readonly journalise: boolean;
+  /** Un essai lancé depuis la galerie parent ne remplace pas la reprise de l'enfant. */
+  readonly reprisePersistable: boolean;
 
   readonly graine: number;
   readonly animationsDesactivees: boolean;
@@ -113,6 +128,8 @@ export interface EtatMagasin {
 
   naviguer(ecran: CodeEcran): void;
   choisirProfil(profil: Profil): void;
+  /** Attend la sauvegarde du profil précédent puis restaure le nouveau depuis SQLite. */
+  chargerProfilEtReprise(profil: Profil): Promise<void>;
   quitterProfil(): void;
   demarrerSortie(sortie: PlanSortie): void;
   cloreSortie(): void;
@@ -142,6 +159,14 @@ export interface EtatMagasin {
   appliquerGainCascade(gain: GainCascade): void;
   /** Recharge les compteurs persistants sans annoncer de nouveau gain. */
   hydraterCascade(profilId: string, cascade: EtatCascade): void;
+  /** Recharge sans appeler `creerEtat`, `reduire`, l'audio ni la soumission. */
+  hydraterRepriseLecture(instantane: InstantaneRepriseLecture): void;
+  /** Suspend le temps du moteur et écrit l'instantané avant de quitter le nœud. */
+  suspendreLecture(): Promise<void>;
+  /** Reprend un nœud monté en écartant le temps d'absence. */
+  reprendreLecture(): void;
+  /** Barrière pour la navigation et l'arrêt propre. */
+  attendreEcrituresLecture(): Promise<void>;
 }
 
 export type MagasinJeu = StoreApi<EtatMagasin>;
@@ -180,12 +205,65 @@ export function creerMagasin(
    */
   seuilsInitiaux: SeuilsCascade | null = null,
   /** Injection sans transport, appelée avant de publier la réussite. */
-  conserverTerminee: (tentative: TentativeSansCle) => void = (tentative) => conserverTentativeTerminee(tentative)
+  conserverTerminee: (tentative: TentativeSansCle) => void = (tentative) => conserverTentativeTerminee(tentative),
+  depotRepriseLecture?: DepotRepriseLecture
 ): MagasinJeu {
   const animationsInitiales = mouvementReduitDemande();
   refleterAnimations(animationsInitiales);
+  const revisionsReprise = new Map<string, number>();
+  let fileEcritures: Promise<void> = Promise.resolve();
+  let chargementProfil: Promise<void> | null = null;
+  let identifiantChargement: string | null = null;
 
-  return createStore<EtatMagasin>()((fixer, lire) => ({
+  const garderErreur = (cause: unknown): void => {
+    const message = cause instanceof Error ? cause.message : String(cause);
+    magasin.setState({ erreurRepriseLecture: message });
+  };
+
+  const ecrireReprise = (): void => {
+    if (depotRepriseLecture === undefined) return;
+    const etat = magasin.getState();
+    if (etat.profil === null || !etat.reprisePersistable || etat.paquet === null || etat.moteur === null ||
+        etat.codeMoteur === null || etat.demarreLe === null) return;
+    const maintenantMs = services.horloge.maintenantMs();
+    const cle = `${String(etat.profil.id)}:${String(etat.profil.generationProgression ?? 0)}`;
+    const rang = etat.sortie?.etapes.find((etape) => etape.noeud === etat.paquet?.noeud.id)?.rang ?? null;
+    const instantane: InstantaneRepriseLecture = {
+      versionContrat: VERSION_REPRISE_LECTURE,
+      profil: etat.profil.id,
+      generationProgression: etat.profil.generationProgression ?? 0,
+      revision: revisionsReprise.get(cle) ?? 0,
+      sortie: etat.sortie,
+      rangSortie: rang,
+      paquet: etat.paquet,
+      codeMoteur: etat.codeMoteur,
+      versionMoteur: etat.moteur.version,
+      graine: etat.graine,
+      etatMoteur: etat.etatMoteur,
+      demarreLe: etat.demarreLe,
+      journalise: etat.journalise,
+      serie: etat.serie,
+      resume: etat.resume,
+      etoiles: etat.etoiles,
+      termineLe: etat.termineLe,
+      tentativeEnvoyee: etat.tentativeEnvoyee,
+      erreurConservation: etat.erreurConservation,
+      suspenduLeMs: etat.suspenduLeMs ?? maintenantMs
+    };
+    // Détecte immédiatement une donnée moteur impossible à écrire, avant la mise en file.
+    try { encoderEtatLecture(instantane); }
+    catch (cause) { garderErreur(cause); return; }
+    fileEcritures = fileEcritures.then(async () => {
+      const attendue = revisionsReprise.get(cle) ?? null;
+      const suivante = await depotRepriseLecture.ecrire(
+        { ...instantane, revision: attendue ?? 0 }, attendue
+      );
+      revisionsReprise.set(cle, suivante);
+      magasin.setState({ erreurRepriseLecture: null });
+    }).catch(garderErreur);
+  };
+
+  const magasin = createStore<EtatMagasin>()((fixer, lire) => ({
     ecran: 'chargement',
     profil: null,
     sortie: null,
@@ -203,9 +281,13 @@ export function creerMagasin(
     termineLe: null,
     tentativeEnvoyee: false,
     erreurConservation: null,
+    erreurRepriseLecture: null,
+    hydratationRepriseLecture: 'en-attente',
+    suspenduLeMs: null,
     // Vrai par défaut : c'est l'enfant qui joue. Un défaut à `false` serait la pire valeur
     // possible — un journal muet ne se voit nulle part avant que la pédagogie n'ait dérivé.
     journalise: true,
+    reprisePersistable: true,
 
     graine: graineInitiale,
     animationsDesactivees: animationsInitiales,
@@ -217,6 +299,11 @@ export function creerMagasin(
     dernierAppui: [0, 0],
 
     naviguer(ecran: CodeEcran): void {
+      if (lire().ecran === 'noeud' && ecran !== 'noeud' && lire().resume === null &&
+          lire().suspenduLeMs === null) {
+        fixer({ suspenduLeMs: services.horloge.maintenantMs() });
+        ecrireReprise();
+      }
       fixer({ ecran });
     },
 
@@ -257,20 +344,78 @@ export function creerMagasin(
       const memeProfil = lire().profil?.id === profil.id;
       const sortie = memeProfil ? lire().sortie : null;
       fixer({ profil, sortie, ecran: 'campement',
-        ...(memeProfil ? {} : { cascade: ETAT_CASCADE_VIDE, dernierGain: null }) });
+        ...(memeProfil ? {} : {
+          paquet: null, moteur: null, codeMoteur: null, etatMoteur: null,
+          progression: null, aide: null, resume: null, etoiles: null,
+          demarreLe: null, termineLe: null, tentativeEnvoyee: false,
+          erreurConservation: null, erreurRepriseLecture: null,
+          suspenduLeMs: null, reprisePersistable: true,
+          cascade: ETAT_CASCADE_VIDE, dernierGain: null, serie: 0
+        }) });
+    },
+
+    chargerProfilEtReprise(profil: Profil): Promise<void> {
+      if (chargementProfil !== null) {
+        if (identifiantChargement === String(profil.id)) return chargementProfil;
+        return chargementProfil.catch(() => undefined).then(() => lire().chargerProfilEtReprise(profil));
+      }
+      identifiantChargement = String(profil.id);
+      const precedent = lire().hydratationRepriseLecture;
+      fixer({ hydratationRepriseLecture: 'en-cours', erreurRepriseLecture: null });
+      const charger = async (): Promise<void> => {
+        try {
+          // Ne change ni le joueur mémorisé ni son nœud tant que l'écriture précédente échoue.
+          if (lire().profil !== null) await lire().suspendreLecture();
+          const instantane = depotRepriseLecture === undefined ? null : await depotRepriseLecture.lire(profil.id);
+          if (depotRepriseLecture !== undefined && instantane === null &&
+              lire().profil?.id === profil.id && lire().moteur !== null &&
+              lire().reprisePersistable && lire().resume === null) {
+            throw new Error('La reprise écrite vient de disparaître de SQLite.');
+          }
+          if (instantane !== null) {
+            const compatible = adapterAncienneRepriseLecture(instantane);
+            verifierInstantaneLecture(compatible, profil.id,
+              profil.generationProgression ?? 0, obtenirMoteur(compatible.codeMoteur).version);
+          }
+          lire().choisirProfil(profil);
+          if (instantane !== null) {
+            lire().hydraterRepriseLecture(instantane);
+            // Le campement présente la reprise ; seul un geste explicite rebascule vers le nœud.
+            await lire().attendreEcrituresLecture();
+            if (lire().erreurRepriseLecture !== null) throw new Error(lire().erreurRepriseLecture ?? 'Écriture impossible.');
+          }
+          fixer({ hydratationRepriseLecture: 'terminee' });
+        } catch (cause) {
+          const message = cause instanceof Error ? cause.message : String(cause);
+          fixer({ hydratationRepriseLecture: precedent === 'terminee' ? 'terminee' : 'echec',
+            erreurRepriseLecture: message });
+          throw cause;
+        }
+      };
+      chargementProfil = charger().finally(() => {
+        chargementProfil = null;
+        identifiantChargement = null;
+      });
+      return chargementProfil;
     },
 
     demarrerSortie(sortie: PlanSortie): void {
       fixer({ sortie });
+      if (lire().ecran === 'noeud' && lire().resume === null) ecrireReprise();
     },
 
     cloreSortie(): void {
       fixer({ sortie: null });
+      if (lire().ecran === 'noeud' && lire().resume === null) ecrireReprise();
     },
 
     quitterProfil(): void {
       // Changer de joueur EFFACE la mémoire : sans ça, le prochain démarrage rouvrirait la
       // partie de l'enfant précédent, ce qui est pire que de redemander.
+      if (lire().profil !== null && lire().moteur !== null && lire().resume === null) {
+        fixer({ suspenduLeMs: lire().suspenduLeMs ?? services.horloge.maintenantMs() });
+        ecrireReprise();
+      }
       oublierProfil();
       fixer({
         profil: null,
@@ -288,6 +433,10 @@ export function creerMagasin(
         termineLe: null,
         tentativeEnvoyee: false,
         erreurConservation: null,
+        erreurRepriseLecture: null,
+        hydratationRepriseLecture: 'en-attente',
+        suspenduLeMs: null,
+        reprisePersistable: true,
         // La cascade appartient au PROFIL : elle repart de zéro quand on en change. Les seuils,
         // eux, appartiennent au jeu et restent chargés.
         cascade: ETAT_CASCADE_VIDE,
@@ -320,14 +469,18 @@ export function creerMagasin(
         termineLe: null,
         tentativeEnvoyee: false,
         erreurConservation: null,
+        erreurRepriseLecture: null,
+        suspenduLeMs: null,
         // Même un ancien lien direct vers l'activité libre ne peut promettre un acquis
         // que le serveur refusera (progression:false). La règle appartient au lancement.
         journalise: options.journalise && paquet.noeud.progression !== false,
+        reprisePersistable: options.journalise,
         ecran: 'noeud',
         // Nouveau nœud, nouvelle série : la hauteur du son repart de la tonique (v2 § 8).
         serie: 0
       });
       services.retour.reinitialiserSerie();
+      ecrireReprise();
     },
 
     /**
@@ -350,6 +503,7 @@ export function creerMagasin(
       if (moteur === null) {
         return;
       }
+      if (lire().suspenduLeMs !== null) return;
       // Une tentative terminée n'accepte plus d'action : c'est ce qui rend le double-tap
       // final inoffensif (annexe T § T1) et l'écran de récompense stable.
       if (resume !== null) {
@@ -422,10 +576,12 @@ export function creerMagasin(
           // requête est en vol ; `appliquerGainCascade` le repose dès que la réponse arrive.
           dernierGain: null
         });
+        ecrireReprise();
         return;
       }
 
       fixer({ etatMoteur: suivant, progression, aide, serie });
+      if (suivant !== etatMoteur) ecrireReprise();
     },
 
     rejouer(): void {
@@ -451,6 +607,74 @@ export function creerMagasin(
 
     marquerTentativeEnvoyee(): void {
       fixer({ tentativeEnvoyee: true });
-    }
+      ecrireReprise();
+    },
+
+    hydraterRepriseLecture(instantane: InstantaneRepriseLecture): void {
+      const profil = lire().profil;
+      if (profil === null) throw new Error('Choisir le profil avant la reprise lecture.');
+      const moteur = obtenirMoteur(instantane.codeMoteur);
+      const compatible = adapterAncienneRepriseLecture(instantane);
+      verifierInstantaneLecture(compatible, profil.id, profil.generationProgression ?? 0, moteur.version);
+      revisionsReprise.set(`${String(profil.id)}:${String(profil.generationProgression ?? 0)}`, compatible.revision);
+      // Aucun réducteur, aucun son, aucune validation : seul l'état sauvegardé est publié.
+      fixer({
+        sortie: compatible.sortie,
+        paquet: compatible.paquet,
+        moteur,
+        codeMoteur: compatible.codeMoteur,
+        etatMoteur: compatible.etatMoteur,
+        progression: moteur.progression(compatible.etatMoteur),
+        aide: moteur.aideProposee(compatible.etatMoteur),
+        resume: compatible.resume,
+        etoiles: compatible.etoiles,
+        demarreLe: compatible.demarreLe,
+        termineLe: compatible.termineLe,
+        tentativeEnvoyee: compatible.tentativeEnvoyee,
+        erreurConservation: compatible.erreurConservation,
+        erreurRepriseLecture: null,
+        journalise: compatible.journalise,
+        reprisePersistable: true,
+        graine: compatible.graine,
+        serie: compatible.serie,
+        suspenduLeMs: compatible.suspenduLeMs
+      });
+    },
+
+    async suspendreLecture(): Promise<void> {
+      if (lire().moteur !== null && lire().resume === null && lire().suspenduLeMs === null) {
+        fixer({ suspenduLeMs: services.horloge.maintenantMs() });
+        ecrireReprise();
+      }
+      await fileEcritures;
+      if (lire().erreurRepriseLecture !== null) {
+        const etat = lire();
+        if (etat.suspenduLeMs !== null && etat.moteur !== null) {
+          const etatMoteur = reprendreEtatLecture(etat.etatMoteur,
+            Math.max(0, services.horloge.maintenantMs() - etat.suspenduLeMs));
+          fixer({ etatMoteur, progression: etat.moteur.progression(etatMoteur),
+            aide: etat.moteur.aideProposee(etatMoteur), suspenduLeMs: null });
+        }
+        throw new Error(lire().erreurRepriseLecture ?? 'Écriture impossible.');
+      }
+    },
+
+    reprendreLecture(): void {
+      const etat = lire();
+      if (etat.moteur === null || etat.suspenduLeMs === null) return;
+      const absenceMs = Math.max(0, services.horloge.maintenantMs() - etat.suspenduLeMs);
+      const etatMoteur = reprendreEtatLecture(etat.etatMoteur, absenceMs);
+      fixer({
+        etatMoteur,
+        progression: etat.moteur.progression(etatMoteur),
+        aide: etat.moteur.aideProposee(etatMoteur),
+        suspenduLeMs: null,
+        ecran: etat.resume === null ? 'noeud' : 'recompense'
+      });
+      ecrireReprise();
+    },
+
+    attendreEcrituresLecture(): Promise<void> { return fileEcritures; }
   }));
+  return magasin;
 }

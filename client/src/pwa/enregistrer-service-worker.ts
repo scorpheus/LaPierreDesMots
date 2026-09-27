@@ -1,4 +1,5 @@
 /** Enregistrement du service worker, strictement reserve au build `--mode pwa`. */
+import { signalerErreurMiseAJour, suivreInscriptionPwa, verifierMiseAJour } from './mise-a-jour.js';
 
 declare global {
   interface WindowEventMap {
@@ -18,6 +19,14 @@ async function enregistrer(): Promise<void> {
         updateViaCache: 'none'
       }
     );
+    await suivreInscriptionPwa(inscription);
+    const verifierAuRetour = (): void => {
+      if (document.visibilityState === 'visible') void verifierMiseAJour();
+    };
+    window.addEventListener('online', verifierAuRetour);
+    window.addEventListener('focus', verifierAuRetour);
+    document.addEventListener('visibilitychange', verifierAuRetour);
+    void verifierMiseAJour();
     await navigator.serviceWorker.ready;
     window.dispatchEvent(
       new CustomEvent('pierre:pwa-prete', { detail: { portee: inscription.scope } })
@@ -25,6 +34,7 @@ async function enregistrer(): Promise<void> {
   } catch (cause) {
     const message = cause instanceof Error ? cause.message : String(cause);
     console.warn('[pwa] service worker indisponible :', cause);
+    signalerErreurMiseAJour(cause);
     window.dispatchEvent(new CustomEvent('pierre:pwa-erreur', { detail: { message } }));
   }
 }

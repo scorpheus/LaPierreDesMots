@@ -175,7 +175,7 @@ function appliquerDecision(
 
 export const moteurAttrape: Moteur<ContenuAttrape, EtatAttrape, ActionAttrape> = {
   code: 'attrape',
-  version: 1,
+  version: 2,
   capacites: {
     ordreEtapesImpose: true,
     recolorieLeDecor: false,
@@ -209,6 +209,7 @@ export const moteurAttrape: Moteur<ContenuAttrape, EtatAttrape, ActionAttrape> =
     return {
       indexEtape: 0,
       etapes,
+      ordreAffichage: null,
       cibles: [...entree.contenu.cibles],
       competence: entree.contenu.competence,
       acquis: {},
@@ -228,6 +229,13 @@ export const moteurAttrape: Moteur<ContenuAttrape, EtatAttrape, ActionAttrape> =
     const etape = etat.etapes[etat.indexEtape];
 
     switch (action.type) {
+      case 'fixerOrdreAffichage': {
+        if (etat.ordreAffichage !== null) return etat;
+        const attendus = etat.cibles.map((cible) => cible.id).sort();
+        const recus = [...action.ordre].sort();
+        if (recus.length !== attendus.length || recus.some((id, rang) => id !== attendus[rang])) return etat;
+        return { ...etat, ordreAffichage: [...action.ordre] };
+      }
       case 'toucher': {
         const decision = evaluerAttrape(etat, action.cible);
         return appliquerDecision(

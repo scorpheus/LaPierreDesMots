@@ -356,8 +356,15 @@ async function stabiliser(session: Session): Promise<boolean> {
         setTimeout(resoudre, 0);
       });
     });
-    const occupe = session.file.isFetching() > 0 || session.file.isMutating() > 0;
-    const maintenant = `${ecranCourant()}|${String(document.body.innerHTML.length)}`;
+    const ecran = ecranCourant();
+    // Les imports lazy et le carnet maths utilisent aussi des promesses hors React Query.
+    // Deux tours au même nombre d'octets pouvaient figer « chargement » avant leur résolution.
+    const ouvertureMaths = document.querySelector('[data-ecran="mathematiques"]')?.textContent
+      ?.includes('Ouverture du carnet des nombres…') ?? false;
+    const occupe = session.file.isFetching() > 0 || session.file.isMutating() > 0 ||
+      ecran === 'chargement' || ouvertureMaths ||
+      document.querySelector('[aria-busy="true"]') !== null;
+    const maintenant = `${ecran}|${document.body.innerHTML}`;
     if (!occupe && maintenant === empreinte) {
       calmes += 1;
       if (calmes >= 2) return true;

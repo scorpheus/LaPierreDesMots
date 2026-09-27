@@ -202,6 +202,8 @@ function creerEtat(entree: EntreeMoteur<ContenuPlace>): EtatPlace {
     // La géométrie est recopiée UNE fois, ici, et ne change plus : `reduire` ne reçoit pas
     // le contenu (écart n° 2, documenté sur `EtatPlace.zones`).
     zones: [...entree.contenu.zones],
+    reserveCatalogue: [...entree.contenu.reserve],
+    reserveMelangee: null,
     places: {},
     elementSaisi: null,
     pointCourant: null,
@@ -316,6 +318,13 @@ function reduire(etat: EtatPlace, action: ActionPlace, contexte: ContexteMoteur)
   const instant = contexte.horloge.maintenantMs();
 
   switch (action.type) {
+    case 'fixerReserveMelangee': {
+      if (etat.reserveMelangee !== null) return etat;
+      const attendus = etat.reserveCatalogue.map((element) => element.id).sort();
+      const recus = action.reserve.map((element) => element.id).sort();
+      if (recus.length !== attendus.length || recus.some((id, rang) => id !== attendus[rang])) return etat;
+      return { ...etat, reserveMelangee: [...action.reserve] };
+    }
     case 'saisir': {
       if (etat.termineMs !== null) return etat;
       // Un élément déjà posé ne se reprend pas : un acquis n'est jamais repris (R14).
@@ -427,7 +436,7 @@ export function niveauAideGlobal(etat: EtatPlace): NiveauAide {
 
 export const moteurPlace: Moteur<ContenuPlace, EtatPlace, ActionPlace> = {
   code: 'place',
-  version: 1,
+  version: 2,
   capacites: {
     // Ordre imposé ENTRE consignes, libre À L'INTÉRIEUR d'une consigne — même règle que
     // `colorie` (contrat v1 § 5.3).

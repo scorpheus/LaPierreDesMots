@@ -1,4 +1,4 @@
-/** Recette Chromium du vrai service worker : migration de cache, incident réseau et OPFS. */
+/** Recette Chromium du vrai service worker : activation naturelle ou explicite, cache et OPFS. */
 /* global self, caches */
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -33,10 +33,92 @@ const serveur = createServer((requete, reponse) => {
   } else if (chemin === BASE || chemin === `${BASE}index.html`) {
     reponse.setHeader('Content-Type', 'text/html; charset=utf-8');
     reponse.end(`<!doctype html><html lang="fr"><title>Recette PWA</title><body>
-      <h1>${version}</h1><script>navigator.serviceWorker.register('${BASE}service-worker.js',
-      {scope:'${BASE}', updateViaCache:'none'}).catch(console.error);</script></body></html>`);
+      <h1>${version}</h1><button id="installer">Installer la mise à jour</button><output id="resultat"></output>
+      <script>
+      navigator.serviceWorker.register('${BASE}service-worker.js',
+        {scope:'${BASE}', updateViaCache:'none'}).catch(console.error);
+      function envoyer(worker, message) {
+        return new Promise((resoudre, rejeter) => {
+          const canal = new MessageChannel();
+          const expiration = setTimeout(() => {
+            canal.port1.close();
+            rejeter(new Error('Le service worker ne répond pas.'));
+          }, 5000);
+          canal.port1.onmessage = (evenement) => {
+            clearTimeout(expiration);
+            canal.port1.close();
+            resoudre(evenement.data);
+          };
+          worker.postMessage(message, [canal.port2]);
+        });
+      }
+      document.querySelector('#installer').addEventListener('click', async () => {
+        const inscription = await navigator.serviceWorker.getRegistration();
+        const worker = inscription.waiting;
+        if (!worker) throw new Error('Aucune mise à jour en attente.');
+        const description = await envoyer(worker, {type:'pierre:version'});
+        let nouveauControleur;
+        const changement = new Promise((resoudre) => { nouveauControleur = resoudre; });
+        navigator.serviceWorker.addEventListener('controllerchange', nouveauControleur, {once:true});
+        const resultat = await envoyer(worker, {type:'pierre:activer', version:description.version});
+        document.querySelector('#resultat').textContent = JSON.stringify(resultat);
+        if (!resultat.ok) {
+          navigator.serviceWorker.removeEventListener('controllerchange', nouveauControleur);
+          return;
+        }
+        await changement;
+        const nombre = Number(sessionStorage.getItem('rechargements-recette') ?? '0');
+        sessionStorage.setItem('rechargements-recette', String(nombre + 1));
+        location.reload();
+      });
+      </script></body></html>`);
   } else reponse.writeHead(404).end('Absente');
 });
+
+async function interrogerWorkerEnAttente(page, message) {
+  return page.evaluate(async (demande) => {
+    const worker = (await navigator.serviceWorker.getRegistration())?.waiting;
+    if (worker === null || worker === undefined) throw new Error('Aucune mise à jour en attente.');
+    return new Promise((resoudre, rejeter) => {
+      const canal = new MessageChannel();
+      const expiration = setTimeout(() => {
+        canal.port1.close();
+        rejeter(new Error('Le service worker ne répond pas.'));
+      }, 5000);
+      canal.port1.onmessage = (evenement) => {
+        clearTimeout(expiration);
+        canal.port1.close();
+        resoudre(evenement.data);
+      };
+      worker.postMessage(demande, [canal.port2]);
+    });
+  }, message);
+}
+
+async function verifierRepriseHorsConnexion(page, contexte, versionAttendue, versionsPerimees) {
+  await contexte.setOffline(true);
+  await page.reload();
+  await expect(page.locator('h1')).toHaveText(versionAttendue);
+  const apres = await page.evaluate(async () => {
+    const racine = await navigator.storage.getDirectory();
+    const fichier = await racine.getFileHandle('journal-recette.txt');
+    return {
+      progression: localStorage.getItem('progression-recette'),
+      journal: await (await fichier.getFile()).text(),
+      version: await (await fetch('/LaPierreDesMots/version.txt')).text(),
+      caches: await caches.keys(),
+      autre: await (await (await caches.open('autre-application')).match('/autre')).text(),
+    };
+  });
+  assert.equal(apres.progression, 'trois exercices acquis');
+  assert.equal(apres.journal, 'tentative-1\ntentative-2\ntentative-3');
+  assert.equal(apres.version, versionAttendue);
+  assert.equal(apres.autre, 'conserver');
+  for (const perimee of versionsPerimees) {
+    assert.ok(!apres.caches.includes(`pierre-des-mots-pwa-noyau-${perimee}`));
+  }
+  assert.ok(apres.caches.includes(`pierre-des-mots-pwa-noyau-${versionAttendue}`));
+}
 
 await new Promise((resoudre, rejeter) => {
   serveur.once('error', rejeter);
@@ -95,29 +177,48 @@ try {
   page.on('pageerror', (erreur) => erreursPage.push(erreur.message));
   await page.goto(`${origine}${BASE}campement?reprise=oui#carte`);
   await expect(page.locator('h1')).toHaveText('nouvelle');
-  await contexte.setOffline(true);
-  await page.reload();
+  await verifierRepriseHorsConnexion(page, contexte, 'nouvelle', ['ancienne']);
+  await contexte.setOffline(false);
+
+  // Une seconde migration doit attendre le geste même après interrogation de sa version.
+  version = 'explicite';
+  await page.evaluate(async () => (await navigator.serviceWorker.ready).update());
+  await expect.poll(() => page.evaluate(async () =>
+    (await navigator.serviceWorker.getRegistration())?.waiting?.state)).toBe('installed');
+  assert.deepEqual(await interrogerWorkerEnAttente(page, { type: 'pierre:version' }),
+    { ok: true, version: 'explicite', fenetres: 1 });
+  assert.equal(await page.evaluate(async () => (await fetch('version.txt')).text()), 'nouvelle');
   await expect(page.locator('h1')).toHaveText('nouvelle');
-  const apres = await page.evaluate(async () => {
-    const racine = await navigator.storage.getDirectory();
-    const fichier = await racine.getFileHandle('journal-recette.txt');
-    return {
-      progression: localStorage.getItem('progression-recette'),
-      journal: await (await fichier.getFile()).text(),
-      version: await (await fetch('/LaPierreDesMots/version.txt')).text(),
-      caches: await caches.keys(),
-      autre: await (await (await caches.open('autre-application')).match('/autre')).text(),
-    };
-  });
-  assert.equal(apres.progression, 'trois exercices acquis');
-  assert.equal(apres.journal, 'tentative-1\ntentative-2\ntentative-3');
-  assert.equal(apres.version, 'nouvelle');
-  assert.equal(apres.autre, 'conserver');
-  assert.ok(!apres.caches.includes('pierre-des-mots-pwa-noyau-ancienne'));
-  assert.ok(apres.caches.includes('pierre-des-mots-pwa-noyau-nouvelle'));
+  const versionRefusee = await interrogerWorkerEnAttente(page, { type: 'pierre:activer', version: 'nouvelle' });
+  assert.equal(versionRefusee.ok, false);
+  assert.match(versionRefusee.message, /version/iu);
+
+  // Un véritable second onglet du jeu empêche l’activation demandée dans le premier.
+  const autrePage = await contexte.newPage();
+  autrePage.on('pageerror', (erreur) => erreursPage.push(erreur.message));
+  await autrePage.goto(`${origine}${BASE}`);
+  await expect(autrePage.locator('h1')).toHaveText('nouvelle');
+  await expect.poll(async () => (await interrogerWorkerEnAttente(page, { type: 'pierre:version' })).fenetres).toBe(2);
+  await page.locator('#installer').click();
+  await expect(page.locator('#resultat')).toContainText('Fermez les autres onglets');
+  const refus = await page.locator('#resultat').textContent();
+  assert.equal(JSON.parse(refus).ok, false);
+  assert.equal(await page.evaluate(async () => (await fetch('version.txt')).text()), 'nouvelle');
+  assert.equal(await page.evaluate(() => sessionStorage.getItem('rechargements-recette')), null);
+  assert.ok((await page.evaluate(() => caches.keys())).includes('pierre-des-mots-pwa-noyau-nouvelle'));
+
+  await autrePage.close();
+  await expect.poll(async () => (await interrogerWorkerEnAttente(page, { type: 'pierre:version' })).fenetres).toBe(1);
+  await page.locator('#installer').click();
+  await expect(page.locator('h1')).toHaveText('explicite');
+  assert.equal(await page.evaluate(() => sessionStorage.getItem('rechargements-recette')), '1');
+  assert.equal(page.url(), `${origine}${BASE}campement?reprise=oui#carte`);
+  await verifierRepriseHorsConnexion(page, contexte, 'explicite', ['ancienne', 'nouvelle']);
   assert.deepEqual(erreursPage, []);
   console.log(JSON.stringify({ migration: 'réussite', incident503Repris: true,
-    ancienneVersionStablePendantInstallation: true, rechargementHorsConnexion: true,
+    ancienneVersionStablePendantInstallation: true, activationNaturelle: true,
+    activationParClic: true, refusSecondOnglet: true, refusVersionDifferente: true,
+    rechargementUniqueApresClic: true, routeConservee: true, rechargementHorsConnexion: true,
     localStorageEtOpfsConserves: true, autreApplicationConservee: true }, null, 2));
   await contexte.close();
 } finally {

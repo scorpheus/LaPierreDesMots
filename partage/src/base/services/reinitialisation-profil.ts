@@ -1,58 +1,10 @@
 /**
- * Remise à zéro d'un profil — lot H2. Déplacé de `serveur/src/services/` au Lot 2 du portage
- * Android (Docs/addendum-portage-android.md § 6bis) : c'est un geste que le parent doit pouvoir
- * faire aussi bien depuis le serveur LAN que depuis l'app autonome sur la tablette.
+ * Remise à zéro partagée par le LAN et la PWA. Le schéma réel est inventorié, puis chaque
+ * table doit avoir une classification explicite. Une migration oubliée bloque l'aperçu et
+ * l'effacement avant toute suppression (Vallée des Nombres, § 9.3).
  *
- * ═════════════════════════════════════════════════════════════════════════════════════════
- * POURQUOI LES TABLES SONT DÉCOUVERTES ET NON ÉNUMÉRÉES
- *
- * D48 : « auditer une propriété, c'est énumérer les OBJETS qui devraient la porter, pas les
- * occurrences de l'attribut ». Une liste de tables écrite à la main dans ce fichier serait une
- * liste d'occurrences : elle décrirait le schéma du jour où on l'a écrite. Une migration
- * ajoutant une table porteuse de `profil_id` la laisserait derrière, et le profil « remis à
- * zéro » garderait une projection périmée — **exactement le défaut que cette campagne
- * corrige**. On ne peut pas réparer un état périmé par un mécanisme qui périme.
- *
- * `tablesPorteusesDeProfil` interroge donc `sqlite_master` puis `PRAGMA table_info` : la
- * réponse vient du schéma réel, à l'instant où on efface.
- *
- * Mesuré le 2026-08-02 sur `donnees/pierre.db` (9 migrations appliquées) :
- *
- *     AVEC profil_id (17) : campement, compagnons, essais_typographie, etagere_rang,
- *                           etapes_tentative, formes_gobi, items_leitner,
- *                           maitrise_competence, ouverture_vue, points_visites,
- *                           progression_cascade, progression_noeud, progression_region,
- *                           reglages_lecture, sorties, stade_gobi, tentatives
- *     SANS profil_id  (5) : code_parent, profils, relecture_contenu, schema_migrations,
- *                           verrou_parent
- *
- * Les cinq sans `profil_id` ne sont jamais touchées, et il le faut : effacer `code_parent`
- * enfermerait le parent dehors (contrat de finition v3 § 7.3), effacer `schema_migrations`
- * rejouerait les migrations sur une base déjà migrée.
- * ═════════════════════════════════════════════════════════════════════════════════════════
- *
- * ═════════════════════════════════════════════════════════════════════════════════════════
- * POURQUOI CE FICHIER EFFACE `tentatives`, QUI EST APPEND-ONLY
- *
- * `001_socle.sql` porte en toutes lettres : « Journal append-only. Aucun UPDATE, aucun DELETE
- * n'est jamais écrit contre cette table. » Ce fichier en écrit un. L'exception est délibérée
- * et bornée :
- *
- * — la règle append-only gouverne **le chemin de jeu**. Elle existe pour qu'aucune mécanique
- *   ne puisse réviser l'histoire de l'enfant à son insu, et pour que tout indicateur reste
- *   recalculable depuis le journal ;
- * — une remise à zéro n'est pas une mécanique de jeu : c'est un geste d'administration,
- *   demandé par un adulte, derrière un code à quatre chiffres, confirmé en retapant le prénom
- *   de l'enfant ;
- * — surtout, **l'épargner serait pire**. Un journal conservé face à des projections effacées
- *   rendrait le premier recalcul venu — celui du lot H1 — au profil tout ce qu'on vient de
- *   lui retirer. La remise à zéro serait annulée par la réparation. Le seul état cohérent
- *   après une remise à zéro est : journal vide, projections vides.
- *
- * L'invariant est donc préservé, pas rompu : après passage ici, tout indicateur recalculé
- * depuis le journal vaut ce que la base porte. C'est ce qu'assied
- * `tests/api/parent-reinitialisation.test.ts`.
- * ═════════════════════════════════════════════════════════════════════════════════════════
+ * La purge parentale est l'exception administrative aux journaux append-only du jeu :
+ * journal et projections d'un même domaine disparaissent ensemble, dans une transaction.
  */
 
 import type { Horloge } from '../../horloge.js';
@@ -63,7 +15,7 @@ import type {
   RapportReinitialisation
 } from '../../parent/reinitialisation.js';
 import {
-  TABLES_CONSERVEES_PAR_PROGRESSION,
+  TABLES_PAR_DOMAINE,
   porteeEfface,
   totalLignesEffacees
 } from '../../parent/reinitialisation.js';
@@ -80,20 +32,26 @@ interface LigneColonne {
   readonly name: string;
 }
 
+interface LigneCleEtrangere {
+  readonly table: string;
+}
+
+function nomSql(nom: string): string {
+  return `"${nom.replaceAll('"', '""')}"`;
+}
+
 /**
- * Les tables du schéma qui portent une colonne `profil_id`, triées par nom.
+ * Les tables du schéma qui portent `profil_id`, triées par nom. L'inventaire contrôle aussi
+ * les tables partagées sans cette colonne : aucune table inconnue ne passe sous silence.
  *
- * **Découvertes, jamais énumérées** — voir l'en-tête. Le tri par nom rend l'ordre stable d'une
- * machine à l'autre, donc le rapport comparable d'une exécution à l'autre.
- *
- * `sqlite_%` est écarté : ce sont les tables internes de SQLite, dont `sqlite_sequence`.
+ * Le préfixe `sqlite_` est écarté : ce sont les tables internes, dont `sqlite_sequence`.
  * Aucune ne porte `profil_id`, mais les nommer dans une requête `DELETE` échouerait sur
  * certaines et masquerait le vrai travail derrière une erreur.
  */
 export async function tablesPorteusesDeProfil(base: Base): Promise<readonly string[]> {
   const tables = await base.lignes<LigneTable>(
     `SELECT name FROM sqlite_master
-     WHERE type = 'table' AND name NOT LIKE 'sqlite_%'
+     WHERE type = 'table' AND name NOT GLOB 'sqlite_*'
      ORDER BY name`
   );
 
@@ -102,12 +60,58 @@ export async function tablesPorteusesDeProfil(base: Base): Promise<readonly stri
     const nom = String(table.name);
     // `PRAGMA table_info(?)` n'accepte pas de paramètre lié en SQLite ; le nom vient de
     // `sqlite_master`, donc du schéma lui-même, et non d'une entrée réseau.
-    const colonnes = await base.lignes<LigneColonne>(`PRAGMA table_info(${nom})`);
-    if (colonnes.some((colonne) => String(colonne.name) === 'profil_id')) {
+    if (!Object.hasOwn(TABLES_PAR_DOMAINE, nom)) {
+      throw new Error(`Table non classifiée pour la remise à zéro : ${nom}`);
+    }
+    const colonnes = await base.lignes<LigneColonne>(`PRAGMA table_info(${nomSql(nom)})`);
+    const porteProfil = colonnes.some((colonne) => String(colonne.name) === 'profil_id');
+    if (porteProfil && TABLES_PAR_DOMAINE[nom] === 'partage') {
+      throw new Error(`Table classifiée comme partagée mais portant profil_id : ${nom}`);
+    }
+    if (!porteProfil && TABLES_PAR_DOMAINE[nom] !== 'partage') {
+      throw new Error(`Table classifiée par domaine sans profil_id : ${nom}`);
+    }
+    if (porteProfil) {
       porteuses.push(nom);
     }
   }
   return porteuses;
+}
+
+/** Enfants avant parents : les FK font l'ordre, pas le nom alphabétique. */
+async function ordonnerSuppressions(base: Base, tables: readonly string[]): Promise<readonly string[]> {
+  const ensemble = new Set(tables);
+  const parents = new Map<string, Set<string>>();
+  const enfantsRestants = new Map<string, number>(
+    tables.map((table): [string, number] => [table, 0]));
+  for (const table of tables) {
+    const references = await base.lignes<LigneCleEtrangere>(
+      `PRAGMA foreign_key_list(${nomSql(table)})`);
+    const cibles = new Set(references.map((ligne) => ligne.table)
+      .filter((parent) => parent !== table && ensemble.has(parent)));
+    parents.set(table, cibles);
+    for (const parent of cibles) {
+      enfantsRestants.set(parent, enfantsRestants.get(parent)! + 1);
+    }
+  }
+  const ordonnees: string[] = [];
+  const disponibles = tables.filter((table) => enfantsRestants.get(table) === 0).sort();
+  while (disponibles.length > 0) {
+    const enfant = disponibles.shift()!;
+    ordonnees.push(enfant);
+    for (const parent of parents.get(enfant) ?? []) {
+      const restant = enfantsRestants.get(parent)! - 1;
+      enfantsRestants.set(parent, restant);
+      if (restant === 0) {
+        disponibles.push(parent);
+        disponibles.sort();
+      }
+    }
+  }
+  if (ordonnees.length !== tables.length) {
+    throw new Error('Dépendance circulaire entre tables de profil à remettre à zéro.');
+  }
+  return ordonnees;
 }
 
 /** Ce qu'une remise à zéro effacerait, table par table, SANS rien effacer. */
@@ -120,7 +124,7 @@ export async function previsualiserReinitialisation(
   const lignes: LigneRapportReinitialisation[] = [];
   for (const table of tables) {
     const compte = await base.uneLigne<{ readonly n: number }>(
-      `SELECT COUNT(*) AS n FROM ${table} WHERE profil_id = ?`,
+      `SELECT COUNT(*) AS n FROM ${nomSql(table)} WHERE profil_id = ?`,
       [profilId]
     );
     lignes.push({ table, lignesEffacees: Number(compte?.n ?? 0) });
@@ -128,23 +132,40 @@ export async function previsualiserReinitialisation(
   return lignes;
 }
 
-/**
- * Efface les données du profil selon la portée, en une seule transaction.
- *
- * `PRAGMA defer_foreign_keys = ON` plutôt qu'un ordre de suppression calculé : `etapes_tentative`
- * référence `tentatives`, et une table ajoutée demain référencera autre chose. Différer le
- * contrôle des clés étrangères jusqu'au `COMMIT` rend l'ordre indifférent tout en gardant la
- * garantie — si l'effacement laissait une référence pendante, le `COMMIT` échouerait et la
- * transaction serait annulée en entier. Le pragma est **local à la transaction** : SQLite le
- * remet à zéro au `COMMIT` comme au `ROLLBACK`.
- *
- * Le rapport compte AVANT d'effacer : `changes()` n'est pas lisible table par table à travers
- * `node:sqlite` sans requête supplémentaire, et un `SELECT COUNT(*)` préalable dans la même
- * transaction dit exactement la même chose.
- *
- * Lève si le profil n'existe pas — on n'efface jamais « dans le vide » en rendant un rapport
- * vert : le parent croirait avoir remis à zéro un profil qu'il vient de mal désigner.
- */
+interface BilanPurge {
+  readonly lignes: readonly LigneRapportReinitialisation[];
+  readonly tablesConservees: readonly string[];
+}
+
+/** Inventaire, comptes, puis purge et générations dans la transaction de l'appelant. */
+async function purgerProfilDansTransaction(
+  transaction: Base, profilId: string, portee: PorteeReinitialisation, effectueLe: string,
+): Promise<BilanPurge> {
+  const tables = await tablesPorteusesDeProfil(transaction);
+  const aEffacer = tables.filter((table) => porteeEfface(portee, table));
+  const tablesConservees = tables.filter((table) => !porteeEfface(portee, table));
+  const lignes: LigneRapportReinitialisation[] = [];
+  // Compter toutes les tables avant toute suppression : les cascades ne faussent pas le rapport.
+  for (const table of aEffacer) {
+    const compte = await transaction.uneLigne<{ readonly n: number }>(
+      `SELECT COUNT(*) AS n FROM ${nomSql(table)} WHERE profil_id = ?`, [profilId]);
+    lignes.push({ table, lignesEffacees: Number(compte?.n ?? 0) });
+  }
+  const ordre = await ordonnerSuppressions(transaction, aEffacer);
+  for (const table of ordre) {
+    await transaction.lancer(`DELETE FROM ${nomSql(table)} WHERE profil_id = ?`, [profilId]);
+  }
+  const miseAJour = await transaction.lancer(
+    `UPDATE profils SET dernier_acces_le = ?,
+     generation_progression = generation_progression + ?,
+     generation_maths = generation_maths + ? WHERE id = ?`,
+    [effectueLe, portee === 'maths' ? 0 : 1, portee === 'lecture' ? 0 : 1, profilId],
+  );
+  if (miseAJour.changements !== 1) throw new Error(`Profil inconnu : ${profilId}`);
+  return { lignes, tablesConservees };
+}
+
+/** Efface le domaine choisi, et conserve le profil et les autres domaines. */
 export async function reinitialiserProfil(
   base: Base,
   profilId: string,
@@ -158,32 +179,8 @@ export async function reinitialiserProfil(
 
   const effectueLe = String(horloge.maintenant());
 
-  const lignes = await base.transaction(async (transaction) => {
-    await transaction.executer('PRAGMA defer_foreign_keys = ON;');
-
-    const comptes: LigneRapportReinitialisation[] = [];
-    for (const table of await tablesPorteusesDeProfil(transaction)) {
-      if (!porteeEfface(portee, table)) {
-        continue;
-      }
-      const compte = await transaction.uneLigne<{ readonly n: number }>(
-        `SELECT COUNT(*) AS n FROM ${table} WHERE profil_id = ?`,
-        [profilId]
-      );
-      await transaction.lancer(`DELETE FROM ${table} WHERE profil_id = ?`, [profilId]);
-      comptes.push({ table, lignesEffacees: Number(compte?.n ?? 0) });
-    }
-
-    // `dernier_acces_le` est touché dans la même transaction : le profil vient d'être
-    // manipulé, et l'écran d'état doit le dire. `prenom` et `avatar_json` ne bougent JAMAIS —
-    // les deux portées les conservent, c'est l'enfant qui reste.
-    await transaction.lancer(
-      'UPDATE profils SET dernier_acces_le = ?, generation_progression = generation_progression + 1 WHERE id = ?',
-      [effectueLe, profilId]
-    );
-
-    return comptes;
-  });
+  const { lignes, tablesConservees } = await base.transaction((transaction) =>
+    purgerProfilDansTransaction(transaction, profilId, portee, effectueLe));
 
   return {
     profil: profilId as IdProfil,
@@ -192,7 +189,7 @@ export async function reinitialiserProfil(
     effectueLe: effectueLe as RapportReinitialisation['effectueLe'],
     lignes,
     lignesEffaceesTotal: totalLignesEffacees(lignes),
-    tablesConservees: portee === 'complete' ? [] : TABLES_CONSERVEES_PAR_PROGRESSION
+    tablesConservees
   };
 }
 
@@ -217,27 +214,7 @@ export async function tablesNonVidees(
   );
 }
 
-/**
- * ══════════════════════════════════════════════════════════════════════════════════════════════
- * SUPPRIMER UN PROFIL — R29, demandé par le père le 2026-08-03.
- *
- * « tu as créé plein de comptes de joueurs qui s'appellent Mesure, déjà il faudrait les enlever.
- * Et dans l'espace des parents, il faudrait pouvoir les supprimer en fait, supprimer un compte. »
- *
- * Le besoin est né d'un dégât que j'ai causé : **six profils « Mesure » écrits dans sa vraie
- * base** par mes sondes de mise en page, qui pointaient sur le serveur de jeu au lieu d'une base
- * jetable. Un outil de mesure qui écrit dans les données du joueur n'est pas un outil de mesure.
- *
- * ── POURQUOI CE N'EST PAS UNE ROUTE DE PLUS, MAIS LA MÊME AVEC UNE LIGNE EN FIN ────────────────
- * Supprimer = remettre à zéro en portée `complete`, puis retirer la ligne de `profils`. Réécrire
- * une seconde énumération de tables aurait créé la pire dette possible : deux listes qui doivent
- * rester d'accord, dont l'une ne se voit qu'au moment d'un effacement.
- *
- * `tablesPorteusesDeProfil` DÉCOUVRE les tables par le schéma. Une table ajoutée demain avec une
- * colonne `profil_id` est vidée toute seule, par les deux chemins à la fois. C'est la seule forme
- * qui ne pourrit pas.
- * ══════════════════════════════════════════════════════════════════════════════════════════════
- */
+/** Supprimer un profil reprend exactement la purge complète, dans la même transaction. */
 export interface RapportSuppression {
   readonly profil: IdProfil;
   readonly prenom: string;
@@ -260,21 +237,20 @@ export async function supprimerProfil(
     throw new Error(`Profil inconnu : ${profilId}`);
   }
 
-  // La portée `complete` d'abord — elle vide TOUTES les tables porteuses de `profil_id`, y
-  // compris celles que la portée `progression` conserve (prénom, avatar, réglages de lecture).
-  const rapport = await reinitialiserProfil(base, profilId, 'complete', horloge);
-
-  await base.transaction(async (transaction) => {
-    await transaction.executer('PRAGMA defer_foreign_keys = ON;');
-    await transaction.lancer('DELETE FROM profils WHERE id = ?', [profilId]);
+  const effectueLe = String(horloge.maintenant());
+  const bilan = await base.transaction(async (transaction) => {
+    const purge = await purgerProfilDansTransaction(transaction, profilId, 'complete', effectueLe);
+    const retrait = await transaction.lancer('DELETE FROM profils WHERE id = ?', [profilId]);
+    if (retrait.changements !== 1) throw new Error(`Profil inconnu : ${profilId}`);
+    return purge;
   });
 
   return {
     profil: profilId as IdProfil,
     prenom: profil.prenom,
-    effectueLe: rapport.effectueLe,
-    lignes: rapport.lignes,
-    lignesEffaceesTotal: rapport.lignesEffaceesTotal,
+    effectueLe,
+    lignes: bilan.lignes,
+    lignesEffaceesTotal: totalLignesEffacees(bilan.lignes),
     // ── LE CONTRAT DE SORTIE : ON RELIT, ON NE CROIT PAS ────────────────────────────────────
     // `lireProfil` doit maintenant rendre `null`. Un service qui se contenterait d'annoncer
     // « supprimé » parce qu'il a exécuté un DELETE est un service qui s'auto-certifie — et

@@ -11,12 +11,13 @@ import type { ContexteJeu } from './etat/services.js';
 import type { MagasinJeu } from './etat/magasin.js';
 import type { ServicesJeu } from './moteurs/types.js';
 import { Particules } from './composants/Particules.js';
-import { lireProfil, reprendreTentativesEnAttente } from './api/client.js';
+import { ErreurReseau, lireProfil, reprendreTentativesEnAttente } from './api/client.js';
 import { lireProfilMemorise, oublierProfil } from './etat/profil-memorise.js';
 import type { IdProfil } from '@pierre/partage';
 import { FournisseurReglagesDuProfil } from './lecture/reglages-du-profil.js';
 import { Routeur } from './routeur.js';
 import { protegerChangementEcran } from './interaction/proteger-changement-ecran.js';
+import { NotificationMiseAJourPwa } from './pwa/MiseAJourPwa.js';
 
 /**
  * Réglages de TanStack Query pour une application HORS-LIGNE servie sur le LAN.
@@ -58,6 +59,12 @@ export interface ProprietesApplication {
 function CoucheParticules(): ReactElement | null {
   const animationsDesactivees = useEtatJeu((etat) => etat.animationsDesactivees);
   return <Particules animationsDesactivees={animationsDesactivees} />;
+}
+
+/** Le téléchargement reste en fond ; proposer le redémarrage seulement hors activité. */
+function MiseAJourHorsActivite(): ReactElement | null {
+  const ecran = useEtatJeu((etat) => etat.ecran);
+  return <NotificationMiseAJourPwa visible={ecran === 'profils' || ecran === 'campement' || ecran === 'carte'} />;
 }
 
 /** La reprise ne fabrique aucun gain : seuls les caches relus depuis le journal sont actualisés. */
@@ -104,6 +111,8 @@ export function Application({
 }: ProprietesApplication): ReactElement {
   const [file] = useState(() => fileDAttente ?? creerFileDAttente());
   const [contexte] = useState<ContexteJeu>(() => ({ magasin, services }));
+  const [erreurRestauration, fixerErreurRestauration] = useState<string | null>(null);
+  const [numeroEssai, fixerNumeroEssai] = useState(0);
   useEffect(() => protegerChangementEcran(document), []);
 
   // ══════════════════════════════════════════════════════════════════════════════════════════
@@ -117,9 +126,8 @@ export function Application({
   // On relit donc l'identifiant retenu et on recharge le profil. Trois garde-fous, et chacun a
   // sa raison :
   //   • un identifiant périmé — profil effacé depuis — est OUBLIÉ plutôt que réessayé en boucle ;
-  //   • l'échec réseau retombe sur le choix de profil, jamais sur un écran vide ;
-  //   • l'exercice en cours n'est PAS restauré : son état vit dans le moteur, et le journal
-  //     porte des tentatives, pas des frappes. On perd un exercice, jamais la partie.
+  //   • l'échec de lecture conserve le profil et la sauvegarde, avec un nouvel essai possible ;
+  //   • le nœud commencé et son plan sont relus avant de résoudre une URL profonde.
   // ══════════════════════════════════════════════════════════════════════════════════════════
   useEffect(() => {
     if (magasin.getState().ecran !== 'chargement') {
@@ -127,6 +135,7 @@ export function Application({
     }
     const memorise = lireProfilMemorise();
     if (memorise === null) {
+      magasin.setState({ hydratationRepriseLecture: 'terminee' });
       magasin.getState().naviguer('profils');
       return undefined;
     }
@@ -134,20 +143,25 @@ export function Application({
     const restaurationEncoreDemandee = (): boolean =>
       vivant && magasin.getState().ecran === 'chargement' && lireProfilMemorise() === memorise;
     void lireProfil(memorise as IdProfil)
-      .then((profil) => {
+      .then(async (profil) => {
         if (!restaurationEncoreDemandee()) return;
-        magasin.getState().choisirProfil(profil);
+        await magasin.getState().chargerProfilEtReprise(profil);
       })
-      .catch(() => {
-        if (!restaurationEncoreDemandee()) return;
-        // Profil disparu (base remise à zéro, autre appareil) : on oublie et on redemande.
-        oublierProfil();
-        magasin.getState().naviguer('profils');
+      .catch((cause: unknown) => {
+        if (!vivant || lireProfilMemorise() !== memorise) return;
+        // Seul un profil réellement disparu est oublié par lireProfil (404). Un défaut
+        // de lecture SQLite, de version ou de réseau conserve les données et permet de réessayer.
+        if (cause instanceof ErreurReseau && cause.statut === 404) {
+          oublierProfil();
+          magasin.getState().naviguer('profils');
+        } else {
+          fixerErreurRestauration('Impossible de retrouver ta partie pour le moment.');
+        }
       });
     return () => {
       vivant = false;
     };
-  }, [magasin]);
+  }, [magasin, numeroEssai]);
 
   // Les seuils de la cascade sont **chargés au démarrage** (convention C2, D13) : ils vivent
   // en données, jamais dans le code, parce qu'ils seront recalibrés. Un magasin déjà pourvu
@@ -167,10 +181,25 @@ export function Application({
     };
   }, [magasin]);
 
+  if (erreurRestauration !== null) {
+    return <main data-ecran="chargement" style={{ padding: '2rem' }}>
+      <p role="alert">{erreurRestauration}</p>
+      <button type="button" className="cible" onClick={() => {
+        fixerErreurRestauration(null);
+        fixerNumeroEssai((numero) => numero + 1);
+      }}>Réessayer</button>
+      <button type="button" className="cible" onClick={() => {
+        fixerErreurRestauration(null);
+        magasin.getState().naviguer('profils');
+      }}>Choisir un autre joueur</button>
+    </main>;
+  }
+
   return (
     <QueryClientProvider client={file}>
       <FournisseurJeu valeur={contexte}>
         <RepriseDesTentatives />
+        <MiseAJourHorsActivite />
         {/* Q7 — LE RÉGLAGE DE LECTURE DU PARENT ATTEINT TOUT CE QUI SE LIT.
             Il est DANS `FournisseurJeu` (il lit le profil courant) et AUTOUR du routeur (tout
             écran affiche du texte à déchiffrer). Avant le 2026-08-08, `FournisseurReglagesLecture`

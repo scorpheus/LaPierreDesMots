@@ -23,6 +23,7 @@ import { DessinButin } from '../monde/Butin.js';
 import { eclatDeRegion } from '../monde/eclats.js';
 import { Etagere, useCatalogueFormes } from '../monde/Etagere.js';
 import { FicheObjet } from '../monde/FicheObjet.js';
+import { CollectionMaths } from '../mathematiques/CollectionMaths.js';
 import '../styles/collections.css';
 
 export interface ProprietesEcranCoffre {
@@ -298,6 +299,11 @@ export function EcranCoffre({
         >
           <Etagere etagere={etagere} titre="Les formes de Gobi" compacte />
         </section>
+
+        <CollectionMaths
+          profilId={profil === null ? null : String(profil.id)}
+          emplacement="coffre"
+        />
 
         <section
           className="collection-coffre"

@@ -227,7 +227,8 @@ describe('les trois onglets, et la porte qui referme la zone parent', () => {
       onglet.getAttribute('data-onglet-parent')
     );
     console.log(`[QA-2 · dashboard] onglets : ${onglets.join(', ')}`);
-    expect(onglets).toEqual(['suivi', 'galerie', 'profil']);
+    // Le suivi de la vallée ajoute son journal sans fusionner les indicateurs de lecture.
+    expect(onglets).toEqual(['suivi', 'maths', 'galerie', 'profil']);
     expect(document.querySelectorAll('[data-onglet-actif="oui"]')).toHaveLength(1);
     expect(document.querySelector('[role="tablist"]')).not.toBeNull();
   });

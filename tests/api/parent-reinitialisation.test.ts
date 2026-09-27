@@ -132,6 +132,61 @@ const SEMEURS: Readonly<Record<string, Semeur>> = {
       .run(`srt-${m}`, p, 'clairiere', null, '{}', INSTANT_DE_REFERENCE, null),
   stade_gobi: (b, p) =>
     b.prepare('INSERT INTO stade_gobi VALUES (?, ?, ?, ?)').run(p, 'eveille', 2, INSTANT_DE_REFERENCE),
+  reprises_lecture: (b, p) =>
+    b.prepare(`INSERT INTO reprises_lecture
+      (profil_id, generation_progression, revision, version_contrat, version_moteur,
+       instantane_json, maj_le) VALUES (?, 0, 0, 1, 1, '{}', ?)`)
+      .run(p, INSTANT_DE_REFERENCE),
+  sessions_projets_maths: (b, p, m) =>
+    b.prepare(`INSERT INTO sessions_projets_maths
+      (id, profil_id, generation_maths, cle_creation, empreinte_creation, projet_id,
+       version_projet, variables_json, plan_json, transformation_id, cadeau_id, cadeau_type, cree_le)
+      VALUES (?, ?, 0, ?, 'empreinte', 'MAT-PON-P01', 1, '{}', '[]',
+        'ponts-premiere-traversee', 'maths-souvenir-ponts', 'souvenir', ?)`)
+      .run(`prj-${m}`, p, `projet-${m}`, INSTANT_DE_REFERENCE),
+  instances_maths: (b, p, m) =>
+    b.prepare(`INSERT INTO instances_maths
+      (id, profil_id, generation_maths, cle_creation, empreinte_creation, famille,
+       niveau, modele_id, version_modele, version_generateur, graine, signature,
+       session_projet_id, projet_id, projet_etape, instance_json, cree_le)
+      VALUES (?, ?, 0, ?, 'empreinte', 'MAT-PON-01', 'decouverte',
+        'ponts-planches-v1', 1, 1, 1, 'temoin', ?, 'MAT-PON-P01', 0, '{}', ?)`)
+      .run(`mat-${m}`, p, `instance-${m}`, `prj-${m}`, INSTANT_DE_REFERENCE),
+  reprises_maths: (b, p, m) =>
+    b.prepare(`INSERT INTO reprises_maths
+      (instance_id, profil_id, generation_maths, revision, version_etat, statut,
+       reprise_json, maj_le) VALUES (?, ?, 0, 1, 1, 'terminee', '{}', ?)`)
+      .run(`mat-${m}`, p, INSTANT_DE_REFERENCE),
+  actions_maths: (b, p, m) =>
+    b.prepare(`INSERT INTO actions_maths
+      (instance_id, profil_id, generation_maths, revision_avant, revision_apres,
+       cle_geste, empreinte_requete, version_action, type_action, action_json,
+       effet_json, inscrit_le)
+      VALUES (?, ?, 0, 0, 1, ?, 'empreinte', 1, 'validation', '{}', '{}', ?)`)
+      .run(`mat-${m}`, p, `geste-${m}`, INSTANT_DE_REFERENCE),
+  tentatives_maths: (b, p, m) =>
+    b.prepare(`INSERT INTO tentatives_maths
+      (id, instance_id, profil_id, generation_maths, cle_geste, empreinte_requete,
+       famille, niveau, session_projet_id, projet_id, projet_etape, nb_erreurs,
+       aide_utilisee, etoiles, solution_json, notions_json, contexte_json, termine_le)
+      VALUES (?, ?, ?, 0, ?, 'empreinte', 'MAT-PON-01', 'decouverte',
+        ?, 'MAT-PON-P01', 0, 0, 'aucune', 3, '{}', '[]', '{}', ?)`)
+      .run(`tma-${m}`, `mat-${m}`, p, `fin-${m}`, `prj-${m}`, INSTANT_DE_REFERENCE),
+  progression_maths: (b, p) =>
+    b.prepare(`INSERT INTO progression_maths
+      (profil_id, famille, niveau, projet_id, etoiles, nb_tentatives, dernier_le)
+      VALUES (?, 'MAT-PON-01', 'decouverte', 'MAT-PON-P01', 3, 1, ?)`)
+      .run(p, INSTANT_DE_REFERENCE),
+  progression_projets_maths: (b, p) =>
+    b.prepare(`INSERT INTO progression_projets_maths
+      (profil_id, projet_id, etapes_terminees, nombre_etapes, transformation_id, termine_le)
+      VALUES (?, 'MAT-PON-P01', 1, 3, 'ponts-premiere-traversee', NULL)`)
+      .run(p),
+  recompenses_maths: (b, p, m) =>
+    b.prepare(`INSERT INTO recompenses_maths
+      (profil_id, projet_id, session_id, cadeau_id, categorie, attribue_le)
+      VALUES (?, 'MAT-PON-P01', ?, 'maths-souvenir-ponts', 'souvenir', ?)`)
+      .run(p, `prj-${m}`, INSTANT_DE_REFERENCE),
   tentatives: (b, p, m) =>
     b
       .prepare(
@@ -146,8 +201,7 @@ const SEMEURS: Readonly<Record<string, Semeur>> = {
 };
 
 /**
- * Sème une ligne dans chaque table porteuse de `profil_id`. `tentatives` d'abord — c'est la
- * seule référencée par une clé étrangère (`etapes_tentative`).
+ * Sème une ligne dans chaque table porteuse de `profil_id`, parents avant enfants.
  *
  * `marque` distingue les clés primaires GLOBALES (`tentatives.id`, `etapes_tentative.id`,
  * `sorties.id`, `essais_typographie.id`) : elles ne sont pas préfixées par le profil, deux
@@ -155,8 +209,10 @@ const SEMEURS: Readonly<Record<string, Semeur>> = {
  */
 function semer(base: DatabaseSync, profil: string, marque = '1'): void {
   SEMEURS['tentatives']?.(base, profil, marque);
+  SEMEURS['sessions_projets_maths']?.(base, profil, marque);
+  SEMEURS['instances_maths']?.(base, profil, marque);
   for (const [table, poser] of Object.entries(SEMEURS)) {
-    if (table !== 'tentatives') {
+    if (!['tentatives', 'sessions_projets_maths', 'instances_maths'].includes(table)) {
       poser(base, profil, marque);
     }
   }
@@ -204,9 +260,8 @@ describe('l’inventaire des tables à remettre à zéro', () => {
       'semeurs qui visent une table disparue du schéma'
     ).toEqual([]);
 
-    // CHIFFRE DU LOT, mesuré et non affirmé : 17 tables portent `profil_id`, 5 n'en portent
-    // pas (code_parent, profils, relecture_contenu, schema_migrations, verrou_parent).
-    expect(declarees.length).toBe(17);
+    // 17 tables de lecture/réglages et 9 nouvelles tables de la vallée.
+    expect(declarees.length).toBe(26);
   });
 });
 
@@ -279,7 +334,7 @@ describe('POST /api/parent/:profil/reinitialiser — les gardes', () => {
 });
 
 describe('POST /api/parent/:profil/reinitialiser — portée « complete »', () => {
-  it('LE TEST QUI GARDE LE RISQUE : les 17 tables sont vidées, aucune exceptée', async () => {
+  it('LE TEST QUI GARDE LE RISQUE : les 26 tables sont vidées, aucune exceptée', async () => {
     const profil = await creerProfil();
     semer(contexte.base, profil);
     const entetes = { [ENTETE_JETON_PARENT]: await jeton() };
@@ -328,9 +383,9 @@ describe('POST /api/parent/:profil/reinitialiser — portée « complete »', ()
 
     expect(rapport.portee).toBe('complete');
     expect(rapport.prenom).toBe(PRENOM);
-    expect(rapport.lignes).toHaveLength(17);
+    expect(rapport.lignes).toHaveLength(26);
     // Une ligne semée par table : le total EST le nombre de tables.
-    expect(rapport.lignesEffaceesTotal).toBe(17);
+    expect(rapport.lignesEffaceesTotal).toBe(26);
     expect(rapport.tablesConservees).toEqual([]);
   });
 
@@ -402,7 +457,7 @@ describe('POST /api/parent/:profil/reinitialiser — portée « progression »',
 
     const rapport = reponse.json() as { tablesConservees: string[]; lignes: unknown[] };
     expect([...rapport.tablesConservees].sort()).toEqual([...TABLES_CONSERVEES_PAR_PROGRESSION].sort());
-    expect(rapport.lignes).toHaveLength(15);
+    expect(rapport.lignes).toHaveLength(24);
   });
 
   it('les réglages restent lisibles par la route de lecture, inchangés', async () => {
@@ -423,6 +478,95 @@ describe('POST /api/parent/:profil/reinitialiser — portée « progression »',
   });
 });
 
+describe('POST /api/parent/:profil/reinitialiser — domaines séparés', () => {
+  it('efface les maths seules et incrémente seulement leur génération', async () => {
+    const profil = await creerProfil();
+    semer(contexte.base, profil);
+    const entetes = { [ENTETE_JETON_PARENT]: await jeton() };
+    const reponse = await reinitialiser(profil,
+      { portee: 'maths', confirmation: PRENOM }, entetes);
+    expect(reponse.statusCode).toBe(200);
+    const rapport = reponse.json() as {
+      lignes: { table: string; lignesEffacees: number }[]; lignesEffaceesTotal: number;
+    };
+    expect(rapport.lignes).toHaveLength(8);
+    expect(rapport.lignesEffaceesTotal).toBe(8);
+    for (const { table } of rapport.lignes) expect(compter(contexte.base, table, profil)).toBe(0);
+    for (const table of ['tentatives', 'etapes_tentative', 'reprises_lecture',
+      'progression_noeud', 'reglages_lecture']) {
+      expect(compter(contexte.base, table, profil)).toBe(1);
+    }
+    expect(contexte.base.prepare(`SELECT generation_progression, generation_maths
+      FROM profils WHERE id = ?`).get(profil))
+      .toEqual({ generation_progression: 0, generation_maths: 1 });
+  });
+
+  it('efface la lecture seule, puis garde projets et cadeaux des maths', async () => {
+    const profil = await creerProfil();
+    semer(contexte.base, profil);
+    const entetes = { [ENTETE_JETON_PARENT]: await jeton() };
+    const reponse = await reinitialiser(profil,
+      { portee: 'lecture', confirmation: PRENOM }, entetes);
+    expect(reponse.statusCode).toBe(200);
+    const rapport = reponse.json() as {
+      lignes: { table: string; lignesEffacees: number }[]; lignesEffaceesTotal: number;
+    };
+    expect(rapport.lignes).toHaveLength(16);
+    expect(rapport.lignesEffaceesTotal).toBe(16);
+    for (const { table } of rapport.lignes) expect(compter(contexte.base, table, profil)).toBe(0);
+    for (const table of ['sessions_projets_maths', 'instances_maths', 'tentatives_maths',
+      'progression_projets_maths', 'recompenses_maths', 'reglages_lecture']) {
+      expect(compter(contexte.base, table, profil)).toBe(1);
+    }
+    expect(contexte.base.prepare(`SELECT generation_progression, generation_maths
+      FROM profils WHERE id = ?`).get(profil))
+      .toEqual({ generation_progression: 1, generation_maths: 0 });
+  });
+
+  it('refuse aperçu et effacement si une table du profil est inconnue', async () => {
+    const profil = await creerProfil();
+    semer(contexte.base, profil);
+    contexte.base.exec(`CREATE TABLE table_non_classee (
+      profil_id TEXT NOT NULL REFERENCES profils(id), valeur TEXT NOT NULL) STRICT;`);
+    contexte.base.prepare(`INSERT INTO table_non_classee VALUES (?, 'à garder')`).run(profil);
+    const entetes = { [ENTETE_JETON_PARENT]: await jeton() };
+    const avant = contexte.base.prepare(`SELECT generation_progression, generation_maths
+      FROM profils WHERE id = ?`).get(profil);
+    const apercu = await reinitialiser(profil,
+      { portee: 'complete', apercu: true }, entetes);
+    expect(apercu.statusCode).toBeGreaterThanOrEqual(400);
+    const effacement = await reinitialiser(profil,
+      { portee: 'complete', confirmation: PRENOM }, entetes);
+    expect(effacement.statusCode).toBeGreaterThanOrEqual(400);
+    expect(compter(contexte.base, 'table_non_classee', profil)).toBe(1);
+    expect(compter(contexte.base, 'tentatives', profil)).toBe(1);
+    expect(compter(contexte.base, 'recompenses_maths', profil)).toBe(1);
+    expect(contexte.base.prepare(`SELECT generation_progression, generation_maths
+      FROM profils WHERE id = ?`).get(profil)).toEqual(avant);
+  });
+});
+
+describe('DELETE /api/parent/:profil — atomicité', () => {
+  it('annule la purge complète si le retrait du profil échoue', async () => {
+    const profil = await creerProfil();
+    semer(contexte.base, profil);
+    const entetes = { [ENTETE_JETON_PARENT]: await jeton() };
+    contexte.base.exec(`CREATE TRIGGER bloquer_retrait_profil BEFORE DELETE ON profils
+      BEGIN SELECT RAISE(ABORT, 'retrait bloqué'); END;`);
+    const reponse = await contexte.application.inject({
+      method: 'DELETE', url: `/api/parent/${profil}`,
+      payload: { confirmation: PRENOM }, headers: entetes,
+    });
+    expect(reponse.statusCode).toBeGreaterThanOrEqual(400);
+    expect(compter(contexte.base, 'tentatives', profil)).toBe(1);
+    expect(compter(contexte.base, 'etapes_tentative', profil)).toBe(1);
+    expect(compter(contexte.base, 'tentatives_maths', profil)).toBe(1);
+    expect(compter(contexte.base, 'recompenses_maths', profil)).toBe(1);
+    expect(contexte.base.prepare('SELECT COUNT(*) AS n FROM profils WHERE id = ?').get(profil))
+      .toEqual({ n: 1 });
+  });
+});
+
 describe('l’aperçu, avant de confirmer', () => {
   it('dit ce qui SERAIT effacé, sans rien effacer, et sans exiger le prénom', async () => {
     const profil = await creerProfil();
@@ -436,7 +580,7 @@ describe('l’aperçu, avant de confirmer', () => {
       lignes: { table: string; lignesEffacees: number }[];
       pertes: string[];
     };
-    expect(apercu.lignes).toHaveLength(17);
+    expect(apercu.lignes).toHaveLength(26);
     expect(apercu.pertes.length).toBeGreaterThan(0);
     // Le mot du contrat : la portée complète annonce la perte des réglages de lecture.
     expect(apercu.pertes.join(' ')).toContain('réglages de lecture');

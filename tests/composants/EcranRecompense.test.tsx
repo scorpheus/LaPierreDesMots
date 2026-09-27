@@ -287,7 +287,48 @@ describe('la fin de partie est une réussite, quoi qu’il arrive (R14)', () => 
     expect(document.querySelector('[data-fin="reussite"]')).not.toBeNull();
     expect(document.querySelectorAll('[data-etat="echec"]')).toHaveLength(0);
     expect(etoilesAcquises()).toBe(3);
+    await waitFor(() => {
+      expect(document.querySelector('[data-action="reessayer-sauvegarde"]')).not.toBeNull();
+    });
     vi.mocked(console.warn).mockRestore();
+  });
+
+  it('laisse demander la carte pendant l’écriture et ne navigue qu’une fois après son ACK', async () => {
+    let resoudre: ((valeur: unknown) => void) | null = null;
+    promesseEnregistrement = new Promise((resolution) => {
+      resoudre = resolution;
+    });
+
+    const magasin = monter({
+      etoiles: 3,
+      profil: { id: 'prf-1', prenom: 'Alma' },
+      paquet: {
+        noeud: { id: 'clairiere-01' },
+        exercice: { id: 'clairiere-ecole-01', jeu: { moteur: 'colorie' } },
+        habillage: { id: 'ecole', timings: { interEtoilesMs: 180 } }
+      },
+      resume: resume(0, false),
+      demarreLe: '2026-09-01T08:00:00.000Z',
+      termineLe: '2026-09-01T08:00:42.000Z'
+    });
+    const naviguer = vi.spyOn(magasin.getState(), 'naviguer');
+
+    await waitFor(() => expect(enregistrements).toHaveLength(1));
+    const carte = document.querySelector<HTMLButtonElement>('[data-action="voir-carte"]');
+    expect(carte?.disabled).toBe(false);
+    fireEvent.click(carte!);
+    fireEvent.click(carte!);
+    expect(naviguer).not.toHaveBeenCalled();
+
+    resoudre?.({ gainCascade: {
+      etat: { etoilesTotal: 3, etoilesDepuisIntermediaire: 3, intermediairesTotal: 0,
+        intermediairesDepuisRare: 0, raresTotal: 0, dernierPalierLe: null },
+      paliersFranchis: [], recompenses: [], jauges: []
+    } });
+
+    await waitFor(() => expect(naviguer).toHaveBeenCalledWith('carte'));
+    expect(naviguer).toHaveBeenCalledTimes(1);
+    expect(enregistrements).toHaveLength(1);
   });
 
   it('une ancienne réponse réseau ne marque pas la tentative suivante comme déjà envoyée', async () => {

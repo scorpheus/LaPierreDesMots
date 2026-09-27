@@ -7,9 +7,10 @@
  */
 
 import type { Database, SAHPoolUtil, Sqlite3Static } from '@sqlite.org/sqlite-wasm';
+import { ErreurWorkerSqlite, verifierIntegriteEtTables } from './validation-sauvegarde-sqlite.js';
 
 import type {
-  CodeErreurSqliteWasm,
+
   ConfigurationSqliteWasm,
   ErreurSqliteWasmSerialisee,
   ReponseSqliteWasm,
@@ -32,12 +33,7 @@ interface ConfigurationGlobaleSqlite {
   };
 }
 
-class ErreurWorkerSqlite extends Error {
-  constructor(readonly code: CodeErreurSqliteWasm, message: string) {
-    super(message);
-    this.name = 'ErreurWorkerSqlite';
-  }
-}
+
 
 const contexte = globalThis as unknown as ContexteWorker;
 
@@ -52,33 +48,7 @@ let resoudreLiberationVerrou: (() => void) | null = null;
 
 const TAILLE_MAX_SAUVEGARDE = 64 * 1024 * 1024;
 const SIGNATURE_SQLITE = new TextEncoder().encode('SQLite format 3\0');
-// À relever avec toute nouvelle migration. Une sauvegarde d'une version antérieure connue sera
-// migrée au rechargement ; une version future est refusée pour ne jamais ouvrir un schéma inconnu.
-const VERSION_SCHEMA_MAXIMA = 12;
-const TABLES_REQUISES = [
-  { nom: 'schema_migrations', depuis: 1 },
-  { nom: 'profils', depuis: 1 },
-  { nom: 'tentatives', depuis: 1 },
-  { nom: 'progression_noeud', depuis: 1 },
-  { nom: 'reglages_lecture', depuis: 2 },
-  { nom: 'essais_typographie', depuis: 2 },
-  { nom: 'etapes_tentative', depuis: 3 },
-  { nom: 'maitrise_competence', depuis: 3 },
-  { nom: 'items_leitner', depuis: 3 },
-  { nom: 'sorties', depuis: 3 },
-  { nom: 'progression_cascade', depuis: 4 },
-  { nom: 'progression_region', depuis: 5 },
-  { nom: 'compagnons', depuis: 5 },
-  { nom: 'formes_gobi', depuis: 5 },
-  { nom: 'stade_gobi', depuis: 5 },
-  { nom: 'campement', depuis: 5 },
-  { nom: 'points_visites', depuis: 5 },
-  { nom: 'code_parent', depuis: 6 },
-  { nom: 'verrou_parent', depuis: 6 },
-  { nom: 'relecture_contenu', depuis: 6 },
-  { nom: 'ouverture_vue', depuis: 7 },
-  { nom: 'etagere_rang', depuis: 8 }
-] as const;
+
 
 function estConfiguration(valeur: unknown): valeur is ConfigurationSqliteWasm {
   if (typeof valeur !== 'object' || valeur === null) return false;
@@ -279,58 +249,7 @@ function ouvrirBaseDansPool(nomBase: string): Database {
   return ouverte;
 }
 
-function verifierIntegriteEtTables(cible: Database): void {
-  const integrite = cible.selectValue('PRAGMA integrity_check;');
-  if (integrite !== 'ok') {
-    throw new ErreurWorkerSqlite(
-      'sauvegarde-invalide',
-      `La vérification SQLite a échoué : ${String(integrite ?? 'résultat absent')}.`
-    );
-  }
 
-  const presentes = new Set(
-    cible
-      .selectValues("SELECT name FROM sqlite_schema WHERE type = 'table';")
-      .filter((nom): nom is string => typeof nom === 'string')
-  );
-  if (!presentes.has('schema_migrations')) {
-    throw new ErreurWorkerSqlite(
-      'sauvegarde-invalide',
-      'La sauvegarde ne porte pas de version de schéma La Pierre des Mots.'
-    );
-  }
-
-  const versions = cible
-    .selectValues('SELECT version FROM schema_migrations ORDER BY version;')
-    .map((version) => Number(version));
-  const suiteValide =
-    versions.length > 0 &&
-    versions.every(
-      (version, index) => Number.isInteger(version) && version === index + 1
-    );
-  const versionCourante = versions.at(-1) ?? 0;
-  if (!suiteValide || versionCourante > VERSION_SCHEMA_MAXIMA) {
-    throw new ErreurWorkerSqlite(
-      'sauvegarde-invalide',
-      `Version de sauvegarde inconnue ou incomplète : ${String(versionCourante)}.`
-    );
-  }
-
-  const absentes = TABLES_REQUISES.filter(
-    (table) => table.depuis <= versionCourante && !presentes.has(table.nom)
-  ).map((table) => table.nom);
-  if (absentes.length > 0) {
-    throw new ErreurWorkerSqlite(
-      'sauvegarde-invalide',
-      `La sauvegarde ne correspond pas à La Pierre des Mots (tables absentes : ${absentes.join(', ')}).`
-    );
-  }
-  if (versionCourante >= 12 && Number(cible.selectValue(
-    "SELECT COUNT(*) FROM pragma_table_info('profils') WHERE name = 'generation_progression';"
-  )) !== 1) {
-    throw new ErreurWorkerSqlite('sauvegarde-invalide', 'La génération de progression manque dans la sauvegarde.');
-  }
-}
 
 async function validerSauvegardeSansToucherLaBase(donnees: Uint8Array): Promise<void> {
   const vfs = exigerPool();

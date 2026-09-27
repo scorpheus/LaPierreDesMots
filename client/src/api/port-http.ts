@@ -4,6 +4,7 @@
 // jamais, voir `client.ts`).
 import { CHEMINS_API } from '@pierre/partage';
 import { CHEMINS_OUVERTURE } from '@pierre/partage/ouverture';
+import type { ResultatApiMaths } from '@pierre/partage/mathematiques';
 import type {
   CreationProfil,
   IdExercice,
@@ -93,7 +94,40 @@ function corpsJson(valeur: unknown): RequestInit {
   return { method: 'POST', body: JSON.stringify(valeur) };
 }
 
+async function demanderMaths<T>(chemin: string, options?: RequestInit): Promise<ResultatApiMaths<T>> {
+  try { return await demander<ResultatApiMaths<T>>(chemin, options); }
+  catch (cause) {
+    if (cause instanceof ErreurReseau && cause.corps?.['ok'] === false && typeof cause.corps['erreur'] === 'object') {
+      return cause.corps as unknown as ResultatApiMaths<T>;
+    }
+    throw cause;
+  }
+}
+const cheminPartieMaths = (id: string): string => `/api/mathematiques/parties/${encodeURIComponent(id)}`;
+const cheminRepriseLecture = (id: string): string => `/api/profils/${encodeURIComponent(id)}/reprise-lecture`;
+
 export const portHttp: PortApi = {
+  mathematiques: {
+    lireEtat: (profil) => demanderMaths(`/api/mathematiques/etat?profilId=${encodeURIComponent(profil)}`),
+    choisirNiveau: (commande) => demanderMaths('/api/mathematiques/niveaux', { method: 'PUT', body: JSON.stringify(commande) }),
+    creerPartie: (commande) => demanderMaths('/api/mathematiques/parties', corpsJson(commande)),
+    creerProjet: (commande) => demanderMaths('/api/mathematiques/projets', corpsJson(commande)),
+    lirePartie: (profil, instance) => demanderMaths(`${cheminPartieMaths(instance)}?profilId=${encodeURIComponent(profil)}`),
+    manipuler: (commande) => demanderMaths(`${cheminPartieMaths(commande.instanceId)}/actions`, corpsJson(commande)),
+    pause: (commande) => demanderMaths(`${cheminPartieMaths(commande.instanceId)}/pause`, corpsJson(commande)),
+    terminer: (commande) => demanderMaths(`${cheminPartieMaths(commande.instanceId)}/terminer`, corpsJson(commande)),
+    lireBilanParent: (profil) => demanderMaths(`/api/parent/${encodeURIComponent(profil)}/mathematiques`, { headers: entetesParent() }),
+  },
+  repriseLecture: {
+    lire: (profil) => demander(cheminRepriseLecture(profil)),
+    ecrire: async (instantane, revisionAttendue) => {
+      const resultat = await demander<{ revision: number }>(cheminRepriseLecture(instantane.profil), corpsJson({ instantane, revisionAttendue }));
+      return resultat.revision;
+    },
+    effacer: async (profil, generationProgression, revisionAttendue) => {
+      await demander(`${cheminRepriseLecture(profil)}/effacer`, corpsJson({ generationProgression, revisionAttendue }));
+    },
+  },
   lireSante(): Promise<ReponseSante> {
     return demander<ReponseSante>(CHEMINS_API.sante);
   },

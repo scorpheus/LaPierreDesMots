@@ -1,0 +1,17 @@
+.suivi-maths { gap: 1.25rem; }
+.suivi-maths__entete { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 1rem; }
+.suivi-maths__entete > div { max-inline-size: 48rem; }
+.suivi-maths h2, .suivi-maths h3, .suivi-maths p { margin: 0; }
+.suivi-maths h2 { font-size: clamp(1.5rem, 3vw, 2rem); }
+.suivi-maths__entete p, .suivi-maths__attente { color: var(--texte-secondaire); }
+.suivi-maths__erreur, .suivi-maths__conseils { display: grid; gap: .75rem; padding: 1rem; border: 1px solid color-mix(in srgb, var(--trait) 26%, transparent); border-radius: .75rem; background: color-mix(in srgb, var(--parchemin) 82%, white); }
+.suivi-maths__historique { display: grid; gap: 1rem; }
+.suivi-maths__filtres { display: flex; flex-wrap: wrap; gap: .75rem; }
+.suivi-maths__filtres label { display: grid; gap: .25rem; font-weight: 700; }
+.suivi-maths__filtres select { min-block-size: 64px; min-inline-size: 64px; border: 2px solid var(--trait); border-radius: .5rem; padding-inline: .5rem; font: inherit; color: inherit; background: var(--parchemin); }
+.suivi-maths__tableau { overflow-x: auto; border: 1px solid color-mix(in srgb, var(--trait) 24%, transparent); border-radius: .75rem; }
+.suivi-maths table { inline-size: 100%; min-inline-size: 44rem; border-collapse: collapse; }
+.suivi-maths caption { padding: .75rem 1rem; text-align: left; font-weight: 700; }
+.suivi-maths th, .suivi-maths td { padding: .6rem .75rem; text-align: left; vertical-align: top; border-block-start: 1px solid color-mix(in srgb, var(--trait) 18%, transparent); }
+.suivi-maths tbody tr:nth-child(even) { background: color-mix(in srgb, var(--lagon) 5%, transparent); }
+@media (max-width: 700px) { .suivi-maths__entete > .cible { inline-size: 100%; } }

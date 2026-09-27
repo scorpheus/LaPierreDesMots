@@ -227,6 +227,9 @@ describe('chaque dérogation est nommée, motivée, ET couverte par un fichier q
       .map((transition) => `${transition.depuis} → ${transition.vers}`)
       .sort();
     expect(horsPortee).toEqual([
+      // La reprise exige un exercice suspendu : NavigationMathematiques.test.tsx
+      // construit cet état et vérifie la reprise exacte, absente du parcours à vide.
+      'mathematiques → noeud',
       // R19 — les deux prises du récit d'ouverture. Elles sont sur SOI-MÊME : l'explorateur
       // compare des écrans, donc il ne peut ni les distinguer d'un tap sans effet, ni voir que
       // le TABLEAU a changé. Et « ← Revoir » est en plus CONDITIONNELLE, absente du premier

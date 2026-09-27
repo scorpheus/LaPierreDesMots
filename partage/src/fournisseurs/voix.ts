@@ -51,6 +51,12 @@ export interface DemandeVoix {
 export interface FournisseurVoix {
   /** Résout quand la lecture est terminée. Une demande pendant une lecture l'interrompt. */
   dire(demande: DemandeVoix): Promise<void>;
+  /**
+   * Joue des segments préproduits l'un après l'autre. Optionnel pour ne pas imposer une
+   * file audio aux moteurs existants ; un appelant maths vérifie sa présence avant de proposer
+   * une consigne composée. La séquence entière se tait si l'un de ses clips manque.
+   */
+  direSequence?(demandes: readonly DemandeVoix[]): Promise<void>;
   /** Coupe la lecture en cours, sans erreur s'il n'y en a pas. */
   taire(): void;
   /** Faux quand aucune voix n'est disponible : l'appelant ne doit alors rien attendre. */

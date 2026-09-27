@@ -32,6 +32,7 @@ import { memoriserProfil } from './etat/profil-memorise.js';
 // Les outils parent se chargent à leur ouverture, après le premier écran de jeu.
 const EcranDashboard = lazy(async () => ({ default: (await import('./ecrans/EcranDashboard.js')).EcranDashboard }));
 const EcranGalerieParent = lazy(async () => ({ default: (await import('./ecrans/EcranGalerieParent.js')).EcranGalerieParent }));
+const EcranMathematiques = lazy(async () => ({ default: (await import('./mathematiques/EcranMathematiques.js')).EcranMathematiques }));
 const VisiteDesEcrans = lazy(async () => ({ default: (await import('./parent/VisiteDesEcrans.js')).VisiteDesEcrans }));
 
 // Le banc parent local ne fait pas partie du premier chargement du jeu.
@@ -47,7 +48,8 @@ const CHEMIN_PAR_ECRAN: Readonly<Record<CodeEcran, string>> = {
   campement: '/campement',
   carte: '/carte',
   noeud: '/noeud',
-  recompense: '/recompense'
+  recompense: '/recompense',
+  mathematiques: '/mathematiques'
 };
 
 /** Base publique du routeur : `/` en LAN, `/LaPierreDesMots/` sur GitHub Pages. */
@@ -129,8 +131,10 @@ function RacineOuProfils(): ReactElement {
 
 function HoteCarte(): ReactElement {
   const naviguer = useNavigate();
+  const magasin = useMagasin();
   return (
     <EcranCarte
+      surAllerMaths={() => { magasin.getState().naviguer('mathematiques'); }}
       surAllerCampement={() => {
         void naviguer({ to: CHEMINS.campement });
       }}
@@ -162,8 +166,12 @@ function HoteOuverture(): ReactElement {
 /** Le campement câble ses destinations réelles, dont la réécoute du récit. */
 function HoteCampement(): ReactElement {
   const naviguer = useNavigate();
+  const magasin = useMagasin();
+  const reprise = useEtatJeu((etat) => etat.paquet !== null && etat.suspenduLeMs !== null);
   return (
     <EcranCampement
+      surAllerMaths={() => { magasin.getState().naviguer('mathematiques'); }}
+      surReprendreLecture={reprise ? () => magasin.getState().reprendreLecture() : undefined}
       surAllerCarte={() => {
         void naviguer({ to: CHEMIN_PAR_ECRAN.carte });
       }}
@@ -377,24 +385,33 @@ function HoteDashboard(): ReactElement {
   const { profilSuivi, fixerProfilSuivi } = useZoneParent();
   const profil = profilDeSession ?? profilSuivi;
   const [relecture, fixerRelecture] = useState<{
-    id: Profil['id']; session: boolean; erreur: string | null;
+    id: Profil['id']; session: boolean; portee: RapportReinitialisation['portee'];
+    generationLectureAvant: number; generationMathsAvant: number; erreur: string | null;
   } | null>(null);
   const monte = useRef(true);
   useEffect(() => { monte.current = true; return () => { monte.current = false; }; }, []);
 
-  const relireApresEffacement = async (id: Profil['id'], session: boolean): Promise<void> => {
-    fixerRelecture({ id, session, erreur: null });
+  const relireApresEffacement = async (contexte: NonNullable<typeof relecture>): Promise<void> => {
+    const { id, session, portee, generationLectureAvant, generationMathsAvant } = contexte;
+    fixerRelecture({ ...contexte, erreur: null });
     try {
       const frais = await lireProfil(id);
-      if (frais.id !== id || frais.generationProgression === undefined) {
-        throw new Error('Le profil rechargé ne confirme pas la nouvelle progression.');
+      if (frais.id !== id ||
+          (portee !== 'maths' && (!Number.isSafeInteger(frais.generationProgression) ||
+            (frais.generationProgression ?? -1) <= generationLectureAvant)) ||
+          (portee !== 'lecture' && (!Number.isSafeInteger(frais.generationMaths) ||
+            (frais.generationMaths ?? -1) <= generationMathsAvant))) {
+        throw new Error('Le profil rechargé ne confirme pas les nouvelles générations.');
       }
       if (!monte.current) return;
       fixerProfilSuivi((suivi) => suivi === null || suivi.id === id ? frais : suivi);
-      if (session && magasin.getState().profil === null) magasin.setState({ profil: frais });
+      if (session && (magasin.getState().profil === null || magasin.getState().profil?.id === id)) {
+        magasin.setState({ profil: frais,
+          ...(portee === 'maths' ? {} : { hydratationRepriseLecture: 'terminee' }) });
+      }
       fixerRelecture(null);
     } catch {
-      if (monte.current) fixerRelecture({ id, session,
+      if (monte.current) fixerRelecture({ ...contexte,
         erreur: 'La remise à zéro est faite. Le profil doit être rechargé avant de rejouer.' });
     }
   };
@@ -402,16 +419,22 @@ function HoteDashboard(): ReactElement {
   const apresReinitialisation = (rapport: RapportReinitialisation): Promise<void> => {
     const id = rapport.profil as Profil['id'];
     const session = magasin.getState().profil?.id === id;
+    const avant = session ? magasin.getState().profil : profilSuivi;
+    const contexte = { id, session, portee: rapport.portee,
+      generationLectureAvant: avant?.generationProgression ?? 0,
+      generationMathsAvant: avant?.generationMaths ?? 0, erreur: null };
     fixerProfilSuivi((suivi) => suivi?.id === id ? null : suivi);
-    if (session) {
+    if (session && rapport.portee !== 'maths') {
       // Le résumé reste celui de l'ancienne partie : on l'abandonne, on ne le régénère pas.
       // On conserve l'écran parent ; aucun changement d'URL intermédiaire vers les profils.
       magasin.setState({ profil: null, sortie: null, paquet: null, moteur: null, codeMoteur: null,
         etatMoteur: null, progression: null, aide: null, resume: null, etoiles: null,
         demarreLe: null, termineLe: null, tentativeEnvoyee: false, erreurConservation: null,
+        erreurRepriseLecture: null, suspenduLeMs: null, reprisePersistable: true,
+        hydratationRepriseLecture: 'en-attente', journalise: true,
         cascade: magasin.getInitialState().cascade, dernierGain: null, serie: 0 });
     }
-    return relireApresEffacement(id, session);
+    return relireApresEffacement(contexte);
   };
 
   const rendreLaMainAuJeu = (): void => {
@@ -438,7 +461,7 @@ function HoteDashboard(): ReactElement {
     return <main className="dashboard-parent" data-ecran="dashboard">
       <p role="status">{relecture.erreur ?? 'La remise à zéro est faite. On recharge le profil…'}</p>
       {relecture.erreur === null ? null : <button type="button" className="cible"
-        onClick={() => { void relireApresEffacement(relecture.id, relecture.session); }}>
+        onClick={() => { void relireApresEffacement(relecture); }}>
         Recharger le profil
       </button>}
       <button type="button" className="cible cible-secondaire" onClick={rendreLaMainAuJeu}>
@@ -680,6 +703,20 @@ function BandeauRetourVisite(): ReactElement | null {
 
 // Type de retour volontairement inféré : `createRouter` est générique sur l'arbre de routes,
 // et l'écrire à la main reviendrait à recopier cet arbre.
+function HoteMathematiques(): ReactElement {
+  const magasin = useMagasin();
+  const profil = useEtatJeu((etat) => etat.profil);
+  if (profil === null) return <RacineOuProfils />;
+  return <Suspense fallback={<EcranChargement />}><EcranMathematiques
+    profil={profil}
+    surRetour={() => magasin.getState().naviguer('campement')}
+    surReprendreLecture={() => {
+      if (magasin.getState().paquet !== null && magasin.getState().suspenduLeMs !== null) magasin.getState().reprendreLecture();
+      else magasin.getState().naviguer('carte');
+    }}
+  /></Suspense>;
+}
+
 function construireRouteur() {
   // Le bandeau de visite entoure toutes les routes.
   const routeRacine = createRootRoute({ component: RacineRouteur });
@@ -694,6 +731,7 @@ function construireRouteur() {
     }),
     createRoute({ getParentRoute: () => routeRacine, path: '/', component: RacineOuProfils }),
     createRoute({ getParentRoute: () => routeRacine, path: '/carte', component: HoteCarte }),
+    createRoute({ getParentRoute: () => routeRacine, path: '/mathematiques', component: HoteMathematiques }),
     createRoute({ getParentRoute: () => routeRacine, path: '/noeud', component: EcranNoeud }),
     createRoute({
       getParentRoute: () => routeRacine,
@@ -795,7 +833,7 @@ export function Routeur(): ReactElement {
     };
     const lireHistorique = (restauration = false): void => {
       const etat = magasin.getState();
-      if (etat.ecran === 'chargement' || estBancLocal()) return;
+      if (etat.ecran === 'chargement' || etat.hydratationRepriseLecture === 'en-cours' || estBancLocal()) return;
       const chemin = cheminActuel();
       const parent = chemin === CHEMINS.parent || chemin.startsWith(`${CHEMINS.parent}/`);
       const connue = estRouteConnue(chemin) && chemin !== CHEMINS.debugRecompenses;
@@ -805,6 +843,12 @@ export function Routeur(): ReactElement {
         const repli = etat.profil === null ? 'profils' : 'campement';
         fixerEcran(repli);
         aller(repli, true);
+        return;
+      }
+      // Une URL profonde est un choix explicite : elle rouvre l'instantané suspendu.
+      // La racine et le choix du profil laissent cet instantané visible au campement.
+      if ((chemin === '/noeud' || chemin === '/recompense') && etat.suspenduLeMs !== null) {
+        magasin.getState().reprendreLecture();
         return;
       }
       // À la racine, restaurer le joueur ouvre son campement. Les URL stables restent exactes,
@@ -818,6 +862,11 @@ export function Routeur(): ReactElement {
     };
 
     const arreterMagasin = magasin.subscribe((etat, precedent) => {
+      if (etat.hydratationRepriseLecture === 'en-cours') return;
+      if (etat.hydratationRepriseLecture === 'terminee' && precedent.hydratationRepriseLecture === 'en-cours') {
+        lireHistorique(true);
+        return;
+      }
       if (synchronisation || etat.ecran === precedent.ecran) return;
       if (precedent.ecran === 'chargement') lireHistorique(true);
       else aller(etat.ecran);

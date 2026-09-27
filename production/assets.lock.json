@@ -1213,6 +1213,35 @@
       },
       "valide_par": "demande parent du 2026-09-10 ; contrôle esthétique final dans le jeu à faire",
       "valide_le": "2026-09-10"
+    },
+    {
+      "id": "mathematiques.ponts-des-rives.v1",
+      "fichier": "contenu/assets/mathematiques/ponts-des-rives-v1.png",
+      "empreinte": "sha256:557A4C29D36149A5CB8436B15046EB28732A5BA39D25C205A8CD927008471367",
+      "generation": {
+        "outil": "image_gen intégré à Codex",
+        "workflow": null,
+        "checkpoint": null,
+        "modele": null,
+        "graine": null,
+        "etapes": null,
+        "cfg": null,
+        "sampler": null,
+        "resolution": [
+          1536,
+          1024
+        ],
+        "prompt": "Use case: illustration-story. Create one new wide landscape 1536x1024 painted game environment asset for the French children's adventure La Pierre des Mots. Reference image 1 (campement-v6) is STYLE ONLY: same hand-painted storybook gouache appearance, gentle light, organic tree shapes, textured wood, muted forest green, warm ochre and slate blue. This is a NEW location, Les Ponts des Rives, in the Vallée des Nombres. Foreground and middle-ground: a calm turquoise river dividing two broad low grassy banks, a straight HORIZONTAL gap between the banks across the middle of the frame. Flat top-down-oblique readable space to construct a small wooden bridge across this gap later with separately rendered game pieces. The gap must be EMPTY: no bridge, no plank extending across it. Left bank with a small carpenter's workbench and neatly stacked unmarked planks near lower left; right bank with a short path leading to a tiny distant village and a subtle unlit lantern. A soft wooded valley and distant watermill in the background. Edge foliage frames scene, foreground bottom center has uncluttered warm stone work area. Inviting, peaceful, adventure atmosphere matching the supplied world. This is the background asset only: no characters, no words, letters, symbols, digits, rulers, math answers, UI panels, watermark, or border. No photorealism, no vector clipart. Keep the middle work area quiet and legible for gameplay overlays.",
+        "source": "contenu/assets/campement/campement-v6.png"
+      },
+      "qc": {
+        "technique": "PNG 1536 × 1024, empreinte du fichier conservée",
+        "semantique": "Décor relu puis approuvé par le parent ; aucun chiffre pédagogique dans le raster.",
+        "integration": "Fond des Ponts des Rives ; manipulations et mesures portées par les composants DOM. Recette de cadrage à exécuter.",
+        "tentatives": 1
+      },
+      "valide_par": "parent dans le chat : Oui, intégrer ce décor",
+      "valide_le": "2026-09-26"
     }
   ]
 }

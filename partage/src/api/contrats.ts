@@ -41,6 +41,8 @@ export interface Profil {
   readonly dernierAccesLe: Horodatage;
   /** Incrémentée à chaque remise à zéro ; absente seulement sur les anciens clients. */
   readonly generationProgression?: number;
+  /** Génération indépendante du journal maths ; exposée depuis la migration 013. */
+  readonly generationMaths?: number;
 }
 
 /** Corps de `POST /api/profils`. Le serveur pose l'identifiant et les deux horodatages. */
@@ -223,6 +225,17 @@ export const CHEMINS_API = {
     sante: '/api/sante',
     profils: '/api/profils',
     profil: '/api/profils/:id',
+    repriseLecture: '/api/profils/:id/reprise-lecture',
+    repriseLectureEffacer: '/api/profils/:id/reprise-lecture/effacer',
+    mathematiquesEtat: '/api/mathematiques/etat',
+    mathematiquesNiveaux: '/api/mathematiques/niveaux',
+    mathematiquesParties: '/api/mathematiques/parties',
+    mathematiquesProjets: '/api/mathematiques/projets',
+    mathematiquesPartie: '/api/mathematiques/parties/:id',
+    mathematiquesActions: '/api/mathematiques/parties/:id/actions',
+    mathematiquesPause: '/api/mathematiques/parties/:id/pause',
+    mathematiquesTerminer: '/api/mathematiques/parties/:id/terminer',
+    parentMathematiques: '/api/parent/:profil/mathematiques',
     progression: '/api/profils/:id/progression',
     noeud: '/api/contenu/noeuds/:id',
     asset: '/api/contenu/assets/*',

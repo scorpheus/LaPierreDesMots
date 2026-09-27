@@ -1,0 +1,74 @@
+.ecran-mathematiques { min-block-size: 100%; min-inline-size: 0; padding: clamp(1rem, 3vw, 2.5rem); color: #24444a; font-family: Andika, sans-serif; background: linear-gradient(155deg, #e8f5ed, #c8e8ec 54%, #f6e8be); }
+.ecran-mathematiques button { min-block-size: 64px; min-inline-size: 64px; padding: .65rem 1rem; font: inherit; cursor: pointer; touch-action: manipulation; }
+.ecran-mathematiques button:disabled { opacity: .58; cursor: default; }
+.ecran-mathematiques button:focus-visible { outline: 4px solid #173f7b; outline-offset: 3px; }
+.maths-entete { display: grid; grid-template-columns: minmax(9rem, 1fr) 2fr minmax(9rem, 1fr); align-items: center; gap: 1rem; max-inline-size: 70rem; margin: auto; }
+.maths-entete h1 { margin: 0; font-family: Andika, sans-serif; text-align: center; font-size: clamp(1.55rem, 4vw, 2.5rem); }
+.maths-surtitre { margin: 0; text-align: center; color: #6c6851; }
+.maths-lieux, .maths-ponts, .scene-ponts, .maths-reussite { max-inline-size: 70rem; margin: 2rem auto; }
+.maths-lieux { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+.maths-intro { grid-column: 1 / -1; max-inline-size: 42rem; font-size: 1.15rem; }
+.maths-lieu { min-block-size: 9rem !important; display: grid; place-items: center; gap: .35rem; border: 2px solid #547578; border-radius: 1.25rem; background: #fffce9; color: inherit; }
+.maths-lieu[data-disponibilite='jouable'] { background: #f9e6a9; box-shadow: 0 .45rem 0 #b79f64; }
+.maths-lieu > span { font-size: 2.4rem; }
+.maths-lieu small { color: #6d6657; }
+.maths-rives { position: relative; min-block-size: clamp(12rem, 28vw, 20rem); display: flex; justify-content: space-between; align-items: end; gap: 1rem; padding: 1rem; border-radius: 2rem; background-color: #78c7d0; background-size: cover; background-position: center 57%; }
+.maths-rives > span { position: relative; z-index: 2; padding: .6rem 1rem; border-radius: 1rem; background: rgba(255, 253, 229, .93); font-weight: bold; }
+.maths-pont-durable { position: absolute; z-index: 1; left: 35%; bottom: 15%; width: 30%; height: 28%; pointer-events: none; }
+.maths-pont-durable__tablier { position: absolute; display: block; left: 0; right: 0; top: 58%; height: 20%; border: 3px solid #59402a; border-radius: .4rem; background: repeating-linear-gradient(90deg, #ae7641 0 12%, #81512e 12% 13%); box-shadow: 0 .4rem .3rem #193f4966; transform: perspective(8rem) rotateX(13deg); }
+.maths-pont-durable__borne { position: absolute; display: block; left: 8%; top: 20%; width: .8rem; height: 55%; border: 2px solid #59402a; border-radius: .35rem .35rem 0 0; background: #c6a474; }
+.maths-pont-durable__lanterne { position: absolute; display: block; right: 8%; top: 13%; width: 1.5rem; height: 2rem; border: 3px solid #56371d; border-radius: .3rem; background: #ffe9a0; box-shadow: 0 0 1.2rem .45rem #ffe6a0bb; }
+.maths-chemin-messager { position: absolute; left: 12%; bottom: 11%; width: 30%; height: 7%; border-radius: 50%; background: #e7c486; transform: rotate(-12deg); box-shadow: 0 3px 0 #896c44; }
+.maths-rampe-secours { position: absolute; right: 21%; bottom: 13%; width: 17%; height: 10%; border: 3px solid #644830; border-radius: .3rem; background: repeating-linear-gradient(90deg, #ba8850 0 12%, #886038 12% 14%); transform: rotate(12deg); }
+.maths-projet, .maths-familles article, .maths-gobi, .maths-message, .maths-reussite { padding: 1rem; border: 2px solid #547578; border-radius: 1rem; background: #fffdf1; }
+.maths-projet { margin-block: 1.5rem; }
+.maths-niveaux { display: flex; gap: .6rem; flex-wrap: wrap; margin: 1rem 0; border: 0; padding: 0; }
+.maths-niveaux legend { font-weight: bold; }
+.maths-niveaux button[aria-pressed='true'] { outline: .24rem solid #e27a3f; background: #fff1bd; }
+.maths-familles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+.maths-familles article { min-width: 0; }
+.maths-familles .maths-niveaux { display: grid; grid-template-columns: repeat(auto-fit, minmax(6.5rem, 1fr)); }
+.maths-incompatibilite { color: #703820; font-weight: 700; }
+.maths-transformation, .maths-souvenir { padding: .8rem; border-radius: .8rem; background: #dff3d9; }
+.maths-souvenir { background: #fff0c4; }
+.maths-navigation-scene { max-inline-size: 70rem; margin: 1.25rem auto 0; }
+.scene-ponts { display: grid; grid-template-columns: minmax(0, 2fr) minmax(15rem, 1fr); gap: 1rem; }
+.scene-ponts__illustration { grid-column: 1 / -1; position: relative; min-block-size: clamp(12rem, 27vw, 21rem); overflow: hidden; border-radius: 1.5rem; background-color: #79cbd5; background-size: cover; background-position: center 56%; }
+.scene-ponts__illustration img { position: absolute; z-index: 2; inline-size: 9rem; right: 18%; bottom: 1rem; }
+.scene-ponts__illustration .maths-compagnon-scene { right: 3%; inline-size: 7rem; }
+.decor-vallee svg { position: absolute; inset: 0; inline-size: 100%; block-size: 100%; }
+.maths-ponts > .scene-ponts__illustration { margin-block: 1.2rem; }
+.maths-compagnons { display: flex; gap: .75rem; flex-wrap: wrap; max-inline-size: 70rem; margin: 1.2rem auto; border: 0; }
+.maths-compagnons button { display: flex; align-items: center; gap: .4rem; border-radius: 1rem; background: #fff7de; }
+.maths-compagnons img { inline-size: 3rem; block-size: 3rem; object-fit: contain; }
+.maths-compagnons [aria-pressed='true'], .maths-livre-projets [aria-pressed='true'] { outline: 3px solid #ac6236; outline-offset: 2px; }
+.maths-fete { grid-column: 1 / -1; border: 2px solid #987646; background: #fff4d1; padding: 1rem; border-radius: 1.2rem; }
+.maths-livre-projets { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; }
+.maths-livre-projets button { background: #fff9e9; border: 2px solid #977758; border-radius: .8rem; }
+.maths-replique-compagnon { grid-column: 1 / -1; background: #fff8e6; padding: .7rem; margin: 0; border-radius: .8rem; }
+.scene-ponts__consigne { grid-column: 1 / -1; font-size: 1.2rem; }
+.scene-ponts__consigne { background: #fff6dc; border: 1px solid #cdb880; border-radius: .8rem; padding: 1rem; }
+.scene-ponts__consigne p { margin-block-start: 0; }
+.maths-gobi { align-self: start; background: #fff4d6; }
+.maths-proposition { padding: .75rem; border-left: .3rem solid #b17032; background: #fff9ea; }
+.maths-message { max-inline-size: 70rem; margin: 1rem auto; }
+.maths-message button { margin-inline-start: 1rem; }
+.scene-ponts__actions, .maths-reussite__actions { grid-column: 1 / -1; display: flex; gap: .7rem; flex-wrap: wrap; }
+.maths-reussite { text-align: center; }
+.maths-reussite__etoiles { margin: 0; color: #bb6b12; font-size: clamp(2.5rem, 9vw, 5rem); letter-spacing: .2rem; }
+.maths-reussite__actions { justify-content: center; }
+@media (max-width: 720px) {
+  .maths-entete { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: .7rem; }
+  .maths-entete > div { grid-column: 1 / -1; grid-row: 1; }
+  .maths-entete button { padding: .6rem; }
+  .maths-entete h1, .maths-surtitre { text-align: left; }
+  .maths-lieux, .maths-familles, .scene-ponts { grid-template-columns: 1fr; }
+  .maths-livre-projets { grid-template-columns: 1fr; }
+  .scene-ponts__illustration { min-block-size: 10rem; }
+  .scene-ponts__illustration img { inline-size: 6rem; }
+  .scene-ponts__consigne { grid-column: auto; }
+}
+/* Les sorties restent accessibles sans repousser tout le jeu sous le premier écran. */
+.maths-entete .cible-secondaire{background:#fff7df;border-color:#53777a;color:#24444a;box-shadow:0 .2rem 0 #7e9994}
+.maths-navigation-scene{margin-block-start:.5rem}.scene-ponts{margin-block-start:.75rem}
+@media(max-width:720px){.maths-entete h1{font-size:1.4rem}.maths-entete button{font-size:1rem}.scene-ponts__illustration{min-block-size:8rem}.scene-ponts__illustration img{bottom:.5rem}.scene-ponts__consigne{padding:.75rem}.scene-ponts__consigne p{margin-block-end:.35rem}}

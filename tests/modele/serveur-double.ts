@@ -50,8 +50,13 @@
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { CHEMINS_API } from '@pierre/partage';
+import { CHEMINS_API, calculerEtoiles, creerAlea } from '@pierre/partage';
 import type { Profil } from '@pierre/partage';
+import { analyserInstantaneLecture } from '@pierre/partage/reprise-lecture';
+import type { InstantaneRepriseLecture } from '@pierre/partage/reprise-lecture';
+import { appliquerGestePont, CATALOGUE_MATHS, creerProjetPremiereTraversee, genererPont, validerPont } from '@pierre/partage/mathematiques';
+import type { BilanParentMaths, EtatMaths, InstancePont, NiveauMaths, ProjetMathsEnCours, RepriseMaths, TentativeMaths } from '@pierre/partage/mathematiques';
+import type { CreerPartieMaths, CreerProjetMaths, EcrirePreferenceNiveauMaths, EcritureMaths, ManipulerPartieMaths, TerminerPartieMaths } from '@pierre/partage/mathematiques';
 import { REGLAGES_PAR_DEFAUT } from '@pierre/partage/lecture';
 import type { ReglagesLecture } from '@pierre/partage/lecture';
 import { MANIFESTE_VIDE } from '@pierre/partage/voix';
@@ -179,6 +184,7 @@ type Gestionnaire = (contexte: {
   readonly methode: string;
   readonly parametres: readonly string[];
   readonly corps: unknown;
+  readonly recherche: URLSearchParams;
 }) => ReponseDouble;
 
 function json(valeur: unknown, statut = 200): ReponseDouble {
@@ -268,9 +274,334 @@ export function creerDoubleDeReseau(): DoubleDeReseau {
   let reglages: ReglagesLecture = REGLAGES_PAR_DEFAUT;
   /** Le code du foyer. `null` = jamais posé : c'est l'état d'une installation neuve. */
   let codeParent: string | null = null;
+  const reprisesLecture = new Map<string, InstantaneRepriseLecture>();
+
+  const profilConnu = (id: string): Profil | undefined =>
+    profils.find((profil) => String(profil.id) === id);
+  const erreurLecture = (code: string, statut: number): ReponseDouble => json({ code, message: code }, statut);
+
+  /** Le double conserve les mêmes révisions et générations que le dépôt de reprise réel. */
+  const repriseLecture: Gestionnaire = ({ methode, parametres, corps }) => {
+    const id = String(parametres[0]);
+    const profil = profilConnu(id);
+    if (!profil) return erreurLecture('profil-introuvable', 404);
+    const generation = profil.generationProgression ?? 0;
+    const ancienne = reprisesLecture.get(id);
+    if (methode === 'GET') return json(ancienne ?? null);
+    if (methode !== 'POST' || typeof corps !== 'object' || corps === null) {
+      return erreurLecture('instantane-corrompu', 400);
+    }
+    const demande = corps as { instantane?: unknown; revisionAttendue?: unknown };
+    let instantane: InstantaneRepriseLecture;
+    try { instantane = analyserInstantaneLecture(demande.instantane); }
+    catch { return erreurLecture('instantane-corrompu', 400); }
+    if (instantane.profil !== id || instantane.generationProgression !== generation) {
+      return erreurLecture('generation-perimee', 409);
+    }
+    const attendue = demande.revisionAttendue;
+    if (!(attendue === null || (typeof attendue === 'number' && Number.isSafeInteger(attendue) && attendue >= 0)) ||
+        instantane.revision !== (attendue ?? 0)) return erreurLecture('revision-conflictuelle', 409);
+    if (ancienne !== undefined) {
+      if (ancienne.generationProgression !== generation) return erreurLecture('generation-perimee', 409);
+      const contenu = (valeur: InstantaneRepriseLecture): string => JSON.stringify({ ...valeur, revision: 0 });
+      if (contenu(ancienne) === contenu(instantane)) return json({ revision: ancienne.revision });
+      if (attendue !== ancienne.revision) return erreurLecture('revision-conflictuelle', 409);
+      reprisesLecture.set(id, { ...instantane, revision: ancienne.revision + 1 });
+      return json({ revision: ancienne.revision + 1 });
+    }
+    if (attendue !== null) return erreurLecture('revision-conflictuelle', 409);
+    reprisesLecture.set(id, { ...instantane, revision: 1 });
+    return json({ revision: 1 });
+  };
+
+  const effacerRepriseLecture: Gestionnaire = ({ parametres, corps }) => {
+    const id = String(parametres[0]);
+    const profil = profilConnu(id);
+    if (!profil) return erreurLecture('profil-introuvable', 404);
+    const demande = corps as { generationProgression?: unknown; revisionAttendue?: unknown } | null;
+    if (demande?.generationProgression !== (profil.generationProgression ?? 0)) {
+      return erreurLecture('generation-perimee', 409);
+    }
+    const ancienne = reprisesLecture.get(id);
+    if (ancienne !== undefined && demande?.revisionAttendue !== ancienne.revision) {
+      return erreurLecture('revision-conflictuelle', 409);
+    }
+    reprisesLecture.delete(id);
+    return json(null);
+  };
+
+  type CarnetDouble = { etat: EtatMaths; reprises: Map<string, RepriseMaths>; commandes: Map<string, unknown> };
+  const carnets = new Map<string, CarnetDouble>();
+  let numeroPartie = 0;
+  const carnet = (profilId: string): CarnetDouble | null => {
+    const profil = profilConnu(profilId);
+    if (!profil) return null;
+    let courant = carnets.get(profilId);
+    if (!courant) {
+      courant = { etat: {
+        generationMaths: profil.generationMaths ?? 0, reprise: null, projetSuspendu: null,
+        preferencesNiveaux: Object.fromEntries(CATALOGUE_MATHS.map((famille) =>
+          [famille.id, { niveau: 'decouverte', revision: 0 }])) as EtatMaths['preferencesNiveaux'],
+        progression: [], projets: [], recompenses: [], tentatives: [],
+      }, reprises: new Map(), commandes: new Map() };
+      carnets.set(profilId, courant);
+    }
+    return courant;
+  };
+  const erreurMaths = (code: 'absente' | 'conflit' | 'requete-invalide', statut: number): ReponseDouble =>
+    json({ ok: false, erreur: { code, message: code } }, statut);
+  const succesMaths = (valeur: unknown): ReponseDouble => json({ ok: true, valeur });
+  const commandeCourante = (corps: unknown): { demande: EcritureMaths; carnet: CarnetDouble; reprise: RepriseMaths } | ReponseDouble => {
+    const demande = corps as EcritureMaths | null;
+    if (!demande || typeof demande.profilId !== 'string' || typeof demande.instanceId !== 'string' ||
+        typeof demande.cleGeste !== 'string') return erreurMaths('requete-invalide', 400);
+    const courant = carnet(demande.profilId);
+    if (!courant) return erreurMaths('absente', 404);
+    if (demande.generationMaths !== courant.etat.generationMaths) return erreurMaths('conflit', 409);
+    const reprise = courant.reprises.get(demande.instanceId);
+    if (!reprise) return erreurMaths('absente', 404);
+    if (demande.revisionAttendue !== reprise.revision) return erreurMaths('conflit', 409);
+    return { demande, carnet: courant, reprise };
+  };
+  const estReponseDouble = (valeur: unknown): valeur is ReponseDouble =>
+    typeof valeur === 'object' && valeur !== null && 'statut' in valeur;
+  const memoriserReprise = (courant: CarnetDouble, reprise: RepriseMaths, suspendue = false): void => {
+    courant.reprises.set(reprise.instance.id, reprise);
+    courant.etat = { ...courant.etat,
+      reprise: suspendue ? null : reprise,
+      projetSuspendu: suspendue && reprise.projet !== null ? reprise : null,
+    };
+  };
+  const creerReprise = (profilId: string, generationMaths: number, instance: InstancePont,
+    projet: ProjetMathsEnCours | null): RepriseMaths => ({
+    profilId, generationMaths, revision: 0, instance, etat: instance.etatInitial,
+    erreursValidees: 0, aide: 'aucune', projet, signaturesRecentes: { [instance.famille]: [instance.signature] },
+  });
+
+  const mathematiquesEtat: Gestionnaire = ({ recherche }) => {
+    const courant = carnet(recherche.get('profilId') ?? '');
+    return courant ? succesMaths(courant.etat) : erreurMaths('absente', 404);
+  };
+  const mathematiquesNiveaux: Gestionnaire = ({ methode, corps }) => {
+    if (methode !== 'PUT') return erreurMaths('requete-invalide', 400);
+    const demande = corps as EcrirePreferenceNiveauMaths | null;
+    if (!demande || typeof demande.profilId !== 'string' || typeof demande.cleGeste !== 'string') {
+      return erreurMaths('requete-invalide', 400);
+    }
+    const courant = carnet(demande.profilId);
+    if (!courant) return erreurMaths('absente', 404);
+    if (demande.generationMaths !== courant.etat.generationMaths) return erreurMaths('conflit', 409);
+    const deja = courant.commandes.get(demande.cleGeste);
+    if (deja) return succesMaths(deja);
+    const avant = courant.etat.preferencesNiveaux[demande.famille];
+    if (!avant || !['decouverte', 'exploration', 'defi'].includes(demande.niveau) ||
+        demande.revisionAttendue !== avant.revision) return erreurMaths('conflit', 409);
+    const apres = { niveau: demande.niveau, revision: avant.revision + 1 };
+    courant.etat = { ...courant.etat, preferencesNiveaux: {
+      ...courant.etat.preferencesNiveaux, [demande.famille]: apres,
+    } };
+    courant.commandes.set(demande.cleGeste, apres);
+    return succesMaths(apres);
+  };
+  const mathematiquesPartie: Gestionnaire = ({ parametres, recherche }) => {
+    const courant = carnet(recherche.get('profilId') ?? '');
+    const reprise = courant?.reprises.get(String(parametres[0]));
+    return reprise ? succesMaths(reprise) : erreurMaths('absente', 404);
+  };
+  const mathematiquesParties: Gestionnaire = ({ corps }) => {
+    const demande = corps as CreerPartieMaths | null;
+    if (!demande || typeof demande.profilId !== 'string') return erreurMaths('requete-invalide', 400);
+    const courant = carnet(demande.profilId);
+    if (!courant) return erreurMaths('absente', 404);
+    if (demande.generationMaths !== courant.etat.generationMaths) return erreurMaths('conflit', 409);
+    const deja = courant.commandes.get(demande.cleGeste);
+    if (deja) return succesMaths({ ...(deja as object), deja: true });
+    let instance: InstancePont;
+    try {
+      instance = genererPont(demande.famille as InstancePont['famille'], demande.niveau,
+        creerAlea(demande.graine));
+    } catch { return erreurMaths('requete-invalide', 400); }
+    numeroPartie += 1;
+    instance = { ...instance, id: `mat-double-${String(numeroPartie)}` };
+    const reprise = creerReprise(demande.profilId, demande.generationMaths, instance, null);
+    memoriserReprise(courant, reprise);
+    const resultat = { deja: false, reprise };
+    courant.commandes.set(demande.cleGeste, resultat);
+    return succesMaths(resultat);
+  };
+  const mathematiquesProjets: Gestionnaire = ({ corps }) => {
+    const demande = corps as CreerProjetMaths | null;
+    if (!demande || typeof demande.profilId !== 'string' || demande.projetId !== 'MAT-PON-P01') {
+      return erreurMaths('requete-invalide', 400);
+    }
+    const courant = carnet(demande.profilId);
+    if (!courant) return erreurMaths('absente', 404);
+    if (demande.generationMaths !== courant.etat.generationMaths) return erreurMaths('conflit', 409);
+    const deja = courant.commandes.get(demande.cleGeste);
+    if (deja) return succesMaths({ ...(deja as object), deja: true });
+    numeroPartie += 1;
+    const sessionId = `prj-double-${String(numeroPartie)}`;
+    let projet: ReturnType<typeof creerProjetPremiereTraversee>;
+    try {
+      projet = creerProjetPremiereTraversee(demande.niveaux as readonly [NiveauMaths, NiveauMaths, NiveauMaths],
+        creerAlea(demande.graine), sessionId);
+    } catch { return erreurMaths('requete-invalide', 400); }
+    const commun: ProjetMathsEnCours = {
+      id: projet.id, sessionId, version: projet.version, variables: projet.variables,
+      plan: projet.plan, transformationId: projet.transformationId, cadeauId: projet.cadeauId,
+      cadeauType: projet.cadeauType, etapeCourante: 0,
+      instances: projet.plan.map((etape) => etape.instanceId), etoilesEtapes: [], suspendu: false,
+    };
+    for (const [rang, instance] of projet.etapes.entries()) {
+      courant.reprises.set(instance.id, creerReprise(demande.profilId, demande.generationMaths,
+        instance, { ...commun, suspendu: rang !== 0 }));
+    }
+    const reprise = courant.reprises.get(projet.etapes[0].id)!;
+    memoriserReprise(courant, reprise);
+    const resultat = { deja: false, sessionId, reprise };
+    courant.commandes.set(demande.cleGeste, resultat);
+    return succesMaths(resultat);
+  };
+  const mathematiquesActions: Gestionnaire = ({ parametres, corps }) => {
+    const preparation = commandeCourante(corps);
+    if (estReponseDouble(preparation)) return preparation;
+    const { demande, carnet: courant, reprise } = preparation;
+    if (demande.instanceId !== parametres[0]) return erreurMaths('requete-invalide', 400);
+    const geste = (corps as ManipulerPartieMaths).geste;
+    if (!geste || typeof geste !== 'object') return erreurMaths('requete-invalide', 400);
+    const aide = geste.type === 'aide'
+      ? (geste.niveau === 'demonstration' || reprise.aide === 'demonstration' ? 'demonstration' : 'indice')
+      : reprise.aide;
+    const suivante: RepriseMaths = { ...reprise, revision: reprise.revision + 1, aide,
+      etat: appliquerGestePont(reprise.instance as InstancePont, reprise.etat, geste),
+      projet: reprise.projet === null ? null : { ...reprise.projet, suspendu: false },
+    };
+    memoriserReprise(courant, suivante);
+    return succesMaths({ deja: false, reprise: suivante });
+  };
+  const mathematiquesPause: Gestionnaire = ({ parametres, corps }) => {
+    const preparation = commandeCourante(corps);
+    if (estReponseDouble(preparation)) return preparation;
+    const { demande, carnet: courant, reprise } = preparation;
+    if (demande.instanceId !== parametres[0]) return erreurMaths('requete-invalide', 400);
+    const suivante: RepriseMaths = { ...reprise, revision: reprise.revision + 1,
+      projet: reprise.projet === null ? null : { ...reprise.projet, suspendu: true },
+    };
+    memoriserReprise(courant, suivante, true);
+    return succesMaths({ deja: false, reprise: suivante });
+  };
+  const mathematiquesTerminer: Gestionnaire = ({ parametres, corps }) => {
+    const preparation = commandeCourante(corps);
+    if (estReponseDouble(preparation)) return preparation;
+    const { demande, carnet: courant, reprise } = preparation;
+    if (demande.instanceId !== parametres[0] ||
+        (corps as TerminerPartieMaths).reponse?.famille !== reprise.instance.famille) {
+      return erreurMaths('requete-invalide', 400);
+    }
+    const validation = validerPont(reprise.instance as InstancePont, reprise.etat);
+    const erreurs = reprise.erreursValidees + (validation.statut === 'incorrecte' ? 1 : 0);
+    let suivante: RepriseMaths = { ...reprise, revision: reprise.revision + 1, erreursValidees: erreurs,
+      projet: reprise.projet === null ? null : { ...reprise.projet, suspendu: false },
+    };
+    let tentative: TentativeMaths | null = null;
+    let prochaineReprise: RepriseMaths | null = null;
+    if (validation.statut === 'correcte') {
+      const etoiles = calculerEtoiles({ reussi: true, nbErreurs: erreurs,
+        aideUtilisee: reprise.aide, dureeMs: 0, etapes: [] }) as 1 | 2 | 3;
+      tentative = {
+        id: `tma-double-${String(courant.etat.tentatives.length + 1)}`,
+        instanceId: reprise.instance.id, famille: reprise.instance.famille,
+        niveau: reprise.instance.niveau, projetId: reprise.instance.projet?.projetId ?? null,
+        erreursValidees: erreurs, aide: reprise.aide, solution: validation.solution,
+        etoiles, notions: [], contexte: reprise.instance.projet?.variables ?? {},
+      };
+      if (suivante.projet !== null) {
+        suivante = { ...suivante, projet: { ...suivante.projet,
+          etapeCourante: suivante.projet.etapeCourante + 1,
+          etoilesEtapes: [...suivante.projet.etoilesEtapes, etoiles],
+        } };
+        const prochaine = suivante.projet.plan[suivante.projet.etapeCourante];
+        if (prochaine) {
+          const brute = courant.reprises.get(prochaine.instanceId)!;
+          prochaineReprise = { ...brute, projet: { ...suivante.projet, suspendu: false } };
+          courant.reprises.set(prochaine.instanceId, prochaineReprise);
+        }
+      }
+      const tentatives = [...courant.etat.tentatives, tentative];
+      let projets = courant.etat.projets;
+      let recompenses = courant.etat.recompenses;
+      if (suivante.projet) {
+        const etapesTerminees = suivante.projet.etapeCourante;
+        projets = [{ projetId: suivante.projet.id, etapesTerminees,
+          nombreEtapes: suivante.projet.plan.length, transformationId: suivante.projet.transformationId,
+          termineLe: etapesTerminees === suivante.projet.plan.length ? MAINTENANT : null }];
+        if (etapesTerminees === suivante.projet.plan.length && suivante.projet.cadeauId &&
+            !recompenses.some((cadeau) => cadeau.projetId === suivante.projet!.id)) {
+          recompenses = [...recompenses, { projetId: suivante.projet.id,
+            cadeauId: suivante.projet.cadeauId, categorie: 'souvenir' as const, attribueLe: MAINTENANT }];
+        }
+      }
+      courant.etat = { ...courant.etat, tentatives, projets, recompenses };
+    }
+    courant.reprises.set(reprise.instance.id, suivante);
+    courant.etat = { ...courant.etat, reprise: prochaineReprise ?? (validation.statut === 'correcte' ? null : suivante),
+      projetSuspendu: null };
+    return succesMaths({ deja: false, reprise: suivante, validation, tentative,
+      recompenses: courant.etat.recompenses, prochaineReprise });
+  };
+  const parentMathematiques: Gestionnaire = ({ parametres }) => {
+    const courant = carnet(String(parametres[0]));
+    if (!courant) return erreurMaths('absente', 404);
+    const groupes = new Map<string, {
+      famille: TentativeMaths['famille']; niveau: NiveauMaths; occasions: number;
+      reussites: number; erreurs: number; aides: number; seul: boolean;
+    }>();
+    const groupe = (famille: TentativeMaths['famille'], niveau: NiveauMaths) => {
+      const cle = `${famille}|${niveau}`;
+      let valeur = groupes.get(cle);
+      if (!valeur) {
+        valeur = { famille, niveau, occasions: 0, reussites: 0, erreurs: 0, aides: 0, seul: false };
+        groupes.set(cle, valeur);
+      }
+      return valeur;
+    };
+    for (const tentative of courant.etat.tentatives) {
+      const valeur = groupe(tentative.famille, tentative.niveau);
+      valeur.occasions += 1;
+      valeur.reussites += 1;
+      valeur.erreurs += tentative.erreursValidees;
+      valeur.aides += tentative.aide === 'aucune' ? 0 : 1;
+      valeur.seul ||= tentative.aide === 'aucune';
+    }
+    for (const reprise of courant.reprises.values()) {
+      if (courant.etat.tentatives.some((t) => t.instanceId === reprise.instance.id) || reprise.revision === 0) continue;
+      const valeur = groupe(reprise.instance.famille, reprise.instance.niveau);
+      valeur.occasions += 1;
+      valeur.erreurs += reprise.erreursValidees;
+      valeur.aides += reprise.aide === 'aucune' ? 0 : 1;
+    }
+    const bilan: BilanParentMaths[] = [...groupes.values()].map((valeur) => ({
+      famille: valeur.famille, niveau: valeur.niveau,
+      statut: valeur.seul ? 'reussi-seul' : valeur.reussites > 0 ? 'reussi-avec-aide' : 'essaye',
+      occasions: valeur.occasions, reussites: valeur.reussites,
+      erreursValidees: valeur.erreurs, aides: valeur.aides, notions: [],
+    }));
+    return succesMaths(bilan);
+  };
 
   const gestionnaires: Readonly<Record<string, Gestionnaire>> = {
     sante: () => json({ statut: 'ok', version: 'double', maintenant: MAINTENANT, base: 'ouverte' }),
+    repriseLecture,
+    repriseLectureEffacer: effacerRepriseLecture,
+    mathematiquesEtat,
+    mathematiquesNiveaux,
+    mathematiquesPartie,
+    mathematiquesParties,
+    mathematiquesProjets,
+    mathematiquesActions,
+    mathematiquesPause,
+    mathematiquesTerminer,
+    parentMathematiques,
 
     profils: ({ methode, corps }) => {
       if (methode === 'POST') {
@@ -517,6 +848,7 @@ export function creerDoubleDeReseau(): DoubleDeReseau {
 
   const repondre = (chemin: string, methode: string, corps: unknown): ReponseDouble => {
     const sansRequete = chemin.split('?')[0] ?? chemin;
+    const recherche = new URLSearchParams(chemin.split('?')[1] ?? '');
     for (const route of routes) {
       const trouve = route.expression.exec(sansRequete);
       if (trouve === null) continue;
@@ -525,7 +857,7 @@ export function creerDoubleDeReseau(): DoubleDeReseau {
         sansGestionnaire.push(`${methode} ${sansRequete} (motif ${route.nom} non servi)`);
         return json({ message: 'motif sans gestionnaire' }, 501);
       }
-      return gestionnaire({ chemin: sansRequete, methode, parametres: trouve.slice(1), corps });
+      return gestionnaire({ chemin: sansRequete, methode, parametres: trouve.slice(1), corps, recherche });
     }
     if (MOTIF_CLIP_AUDIO.test(sansRequete)) {
       // Aucun clip n'est livré au double : 404 est la réponse RÉELLE d'une installation où

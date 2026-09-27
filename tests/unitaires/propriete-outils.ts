@@ -56,6 +56,7 @@ import { contenuLibre } from '../fixtures/moteurs/libre.js';
 import { contenuPaires } from '../fixtures/moteurs/paires.js';
 import { contenuPhrase } from '../fixtures/moteurs/phrase.js';
 import { contenuTri } from '../fixtures/moteurs/tri.js';
+import type { ContenuPlace } from '@partage/moteurs/place/types';
 
 /**
  * La graine de TOUTES les propriétés de ce lot. Fixée, jamais tirée de l'horloge.
@@ -198,8 +199,12 @@ export const CAS_MOTEURS: readonly CasMoteurPropriete[] = [
     code: 'attrape',
     contenu: contenuAttrape,
     habillage: 'contenu/habillages/clairiere/lucioles.habillage.json',
-    actionsPropres: ['toucher'],
-    arbitraireActionsPropres: (p) => arbCible(p).map((cible) => ({ type: 'toucher', cible })),
+    actionsPropres: ['toucher', 'fixerOrdreAffichage'],
+    arbitraireActionsPropres: (p) => fc.oneof(
+      arbCible(p).map((cible) => ({ type: 'toucher', cible })),
+      fc.shuffledSubarray(contenuAttrape.cibles.map((cible) => cible.id))
+        .map((ordre) => ({ type: 'fixerOrdreAffichage', ordre })),
+    ),
   },
   {
     code: 'tri',
@@ -309,13 +314,15 @@ export const CAS_MOTEURS: readonly CasMoteurPropriete[] = [
     code: 'place',
     contenu: contenuDeLExercice('contenu/exercices/clairiere/ecole-02-place.json'),
     habillage: HABILLAGE_PLACE,
-    actionsPropres: ['saisir', 'glisser', 'deposer', 'abandonner'],
+    actionsPropres: ['saisir', 'glisser', 'deposer', 'abandonner', 'fixerReserveMelangee'],
     arbitraireActionsPropres: (p) =>
       fc.oneof(
         arbCible(p).map((element) => ({ type: 'saisir', element })),
         arbPoint.map((point) => ({ type: 'glisser', point })),
         arbPoint.map((point) => ({ type: 'deposer', point })),
         fc.constant({ type: 'abandonner' }),
+        fc.shuffledSubarray((contenuDeLExercice('contenu/exercices/clairiere/ecole-02-place.json') as ContenuPlace).reserve)
+          .map((reserve) => ({ type: 'fixerReserveMelangee', reserve })),
       ),
   },
   {

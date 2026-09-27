@@ -23,15 +23,11 @@
  *
  * ── POURQUOI `localStorage` ET NON UN COOKIE OU LE SERVEUR ────────────────────────────────────
  * Le même raisonnement que `reglages-foyer.ts` : c'est une préférence D'APPAREIL, pas une donnée
- * de progression. La progression, elle, vit dans le journal côté serveur et se recalcule (« le
- * journal fait foi »). Rien ici n'est une source de vérité : au pire, on redemande qui joue.
+ * de progression. Les acquis vivent dans le journal et le nœud commencé dans SQLite. Rien ici
+ * n'est une source de vérité : au pire, on redemande qui joue.
  *
- * ── CE QUI EST DÉLIBÉRÉMENT NON RESTAURÉ ──────────────────────────────────────────────────────
- * L'exercice EN COURS. Son état vit dans le moteur, en mémoire, et le restaurer supposerait de
- * journaliser chaque geste — ce que le projet refuse (le journal porte des tentatives, pas des
- * frappes). Un rafraîchissement pendant un exercice ramène donc à la carte, avec le bon enfant :
- * on perd un exercice, jamais la partie. C'est très exactement la différence entre un désagrément
- * et un état sans issue.
+ * La reprise durable de l'exercice vit désormais dans SQLite, sous le profil et sa génération.
+ * Cette clé ne garde que l'identifiant choisi : elle ne contient aucun geste ni acquis.
  */
 
 /** Clé unique. Préfixée comme celle du foyer, pour qu'un vidage de l'appareil les prenne toutes. */

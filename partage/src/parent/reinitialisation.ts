@@ -10,12 +10,9 @@
  * ═════════════════════════════════════════════════════════════════════════════════════════
  * LES QUATRE PROPRIÉTÉS OPPOSABLES DE CE CONTRAT
  *
- * 1. **On efface par défaut, on conserve par exception.** La portée « progression » est
- *    définie comme *toutes les tables porteuses de `profil_id`, MOINS une liste blanche
- *    courte et explicite*. Jamais l'inverse. C'est la leçon de D48 appliquée à l'effacement :
- *    si l'on énumérait ce qu'il faut effacer, une table ajoutée par une migration future
- *    survivrait en silence à la remise à zéro — et le profil garderait une projection périmée,
- *    c'est-à-dire exactement le défaut que cette campagne corrige.
+ * 1. Chaque table est classée par domaine. Une table inconnue bloque l'effacement : elle
+ *    ne survit pas silencieusement et n'est pas effacée dans le mauvais domaine. Ce contrat
+ *    étend D48 à la coexistence lecture/maths (Vallée des Nombres §9.3).
  *
  * 2. **La confirmation nomme le profil.** Le serveur exige que le parent ait retapé le prénom
  *    de l'enfant. Un tap distrait ne peut pas produire un prénom ; une requête égarée non
@@ -35,10 +32,10 @@
 import type { CodeRegion, Horodatage, IdNoeud, IdProfil } from '../identifiants.js';
 import { comparerNormalise } from '../texte.js';
 
-// ═══════════════════════════════════════════════════════════════════ les deux portées
+// ═══════════════════════════════════════════════════════════════════ les portées
 
 /**
- * Les deux portées de remise à zéro. Elles ne servent pas la même chose :
+ * Les quatre portées de remise à zéro. Elles ne servent pas la même chose :
  *
  * - `complete` — le profil redevient neuf. Tout ce qui le concerne disparaît, y compris les
  *   réglages de lecture.
@@ -47,23 +44,24 @@ import { comparerNormalise } from '../texte.js';
  *   au terme d'un essai typographique (D19) ; les perdre parce qu'on veut rejouer la Clairière
  *   serait absurde.
  */
-export type PorteeReinitialisation = 'complete' | 'progression';
+export type PorteeReinitialisation = 'complete' | 'progression' | 'lecture' | 'maths';
 
 export const PORTEES_REINITIALISATION: readonly PorteeReinitialisation[] = [
   'complete',
-  'progression'
+  'progression',
+  'lecture',
+  'maths'
 ];
 
 export function estPorteeReinitialisation(valeur: unknown): valeur is PorteeReinitialisation {
-  return valeur === 'complete' || valeur === 'progression';
+  return valeur === 'complete' || valeur === 'progression' || valeur === 'lecture' || valeur === 'maths';
 }
 
 /**
  * Les tables porteuses de `profil_id` que la portée « progression » **conserve**.
  *
- * C'est la SEULE liste blanche du dispositif, et elle tient en deux noms. Tout le reste est
- * effacé, y compris ce qu'une migration future ajoutera — voir la propriété n° 1 en tête de
- * fichier.
+ * Ces réglages survivent aux portées de progression. Toute nouvelle table, même partagée,
+ * doit être classée dans TABLES_PAR_DOMAINE avant un aperçu ou un effacement.
  *
  * - `reglages_lecture` : la typographie réglée pour cet enfant (D19).
  * - `essais_typographie` : la mesure qui a produit ce réglage. La jeter sans jeter le réglage
@@ -78,21 +76,43 @@ export const TABLES_CONSERVEES_PAR_PROGRESSION: readonly string[] = [
   'reglages_lecture'
 ];
 
+export const TABLES_PAR_DOMAINE: Readonly<Record<string, 'lecture' | 'maths' | 'reglages' | 'partage'>> = {
+  tentatives: 'lecture', progression_noeud: 'lecture', etapes_tentative: 'lecture',
+  maitrise_competence: 'lecture', items_leitner: 'lecture', sorties: 'lecture',
+  progression_cascade: 'lecture', progression_region: 'lecture', compagnons: 'lecture',
+  formes_gobi: 'lecture', stade_gobi: 'lecture', campement: 'lecture', points_visites: 'lecture',
+  ouverture_vue: 'lecture', etagere_rang: 'lecture', reprises_lecture: 'lecture',
+  reglages_lecture: 'reglages', essais_typographie: 'reglages',
+  instances_maths: 'maths', actions_maths: 'maths', reprises_maths: 'maths',
+  tentatives_maths: 'maths', progression_maths: 'maths', recompenses_maths: 'maths',
+  sessions_projets_maths: 'maths', progression_projets_maths: 'maths',
+  preferences_niveaux_maths: 'maths',
+  // Tables communes sans profil_id : elles doivent être connues, jamais vidées par un reset.
+  profils: 'partage', code_parent: 'partage', verrou_parent: 'partage',
+  relecture_contenu: 'partage', schema_migrations: 'partage'
+};
+
 /** Vrai quand la portée efface le contenu de cette table pour le profil visé. */
 export function porteeEfface(portee: PorteeReinitialisation, table: string): boolean {
-  if (portee === 'complete') {
-    return true;
-  }
-  return !TABLES_CONSERVEES_PAR_PROGRESSION.includes(table);
+  const domaine = Object.hasOwn(TABLES_PAR_DOMAINE, table) ? TABLES_PAR_DOMAINE[table] : undefined;
+  if (domaine === undefined) throw new Error(`Table non classifiée pour la remise à zéro : ${table}`);
+  if (domaine === 'partage') return false;
+  if (portee === 'complete') return true;
+  if (portee === 'progression') return domaine !== 'reglages';
+  return domaine === portee;
 }
 
 // ═══════════════════════════════════════════════════════════════ ce qui sera perdu
 
 /** Un libellé humain de la portée, pour le titre de l'écran et celui de la commande. */
 export function libellePortee(portee: PorteeReinitialisation): string {
-  return portee === 'complete'
-    ? 'Remise à zéro complète'
-    : 'Remise à zéro de la progression seule';
+  const libelles: Record<PorteeReinitialisation, string> = {
+    complete: 'Remise à zéro complète',
+    progression: 'Toute la progression : lecture et maths',
+    lecture: 'Remise à zéro de la lecture seule',
+    maths: 'Remise à zéro des maths seules'
+  };
+  return libelles[portee];
 }
 
 /**
@@ -104,6 +124,11 @@ export function libellePortee(portee: PorteeReinitialisation): string {
  * pourquoi il est isolé dans une fonction plutôt que dispersé dans deux composants.
  */
 export function pertesDeLaPortee(portee: PorteeReinitialisation): readonly string[] {
+  const maths = [
+    'la progression des maths : projets, étoiles, transformations et cadeaux de la vallée',
+    'le journal des tentatives de maths et les activités en cours'
+  ];
+  if (portee === 'maths') return maths;
   const communes = [
     'toute la progression : les nœuds terminés, les étoiles, les régions recoloriées et les Éclats',
     'la maîtrise mesurée de chaque compétence, et les révisions en attente',
@@ -111,11 +136,12 @@ export function pertesDeLaPortee(portee: PorteeReinitialisation): readonly strin
     'le stade de Gobi, qui redevient celui du premier jour',
     'le journal des tentatives — c’est lui qui fait foi, donc rien ne pourra être reconstruit'
   ];
-  if (portee === 'progression') {
-    return communes;
-  }
+  if (portee === 'lecture') return [...communes, 'la reprise de lecture en cours'];
+  if (portee === 'progression') return [...communes, 'la reprise de lecture en cours', ...maths];
   return [
     ...communes,
+    'la reprise de lecture en cours',
+    ...maths,
     'les réglages de lecture : police, corps, interlettrage, espacement, fond'
   ];
 }
@@ -126,7 +152,14 @@ export function conservesParLaPortee(portee: PorteeReinitialisation): readonly s
   if (portee === 'complete') {
     return communs;
   }
-  return [...communs, 'les réglages de lecture, réglés pour lui (police, espacement, fond)'];
+  return [
+    ...communs,
+    'les réglages de lecture, réglés pour lui (police, espacement, fond)',
+    ...(portee === 'maths' ? ['le journal et les gains de lecture'] : []),
+    ...(portee === 'lecture' ? ['le journal et les cadeaux des maths'] : []),
+    ...(portee === 'maths' ? ['toute la progression et la reprise de lecture'] : []),
+    ...(portee === 'lecture' ? ['toute la progression et la reprise des maths'] : [])
+  ];
 }
 
 // ═══════════════════════════════════════════════════════════════ la confirmation

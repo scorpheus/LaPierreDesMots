@@ -103,6 +103,8 @@ export interface EtatEtapeAttrape {
 export interface EtatAttrape {
   readonly indexEtape: number;
   readonly etapes: readonly EtatEtapeAttrape[];
+  /** Permutation tirée une fois à la création, conservée dans la reprise durable. */
+  readonly ordreAffichage: readonly IdCibleAttrape[] | null;
   /** Catalogue recopié du contenu à la création : la validation n'a besoin de rien d'autre. */
   readonly cibles: readonly CibleAttrape[];
   readonly competence: string;
@@ -119,6 +121,7 @@ export interface EtatAttrape {
 }
 
 export type ActionAttrape =
+  | { readonly type: 'fixerOrdreAffichage'; readonly ordre: readonly IdCibleAttrape[] }
   | { readonly type: 'toucher'; readonly cible: IdCibleAttrape }
   | { readonly type: 'ecouterConsigne' }
   | { readonly type: 'demanderAide' }

@@ -135,6 +135,8 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
   // Garde locale EN PLUS du drapeau du magasin : `StrictMode` monte deux fois en
   // développement, et le POST partirait deux fois avant que le premier n'ait répondu.
   const envoiEnCours = useRef(false);
+  const promesseSauvegarde = useRef<Promise<boolean> | null>(null);
+  const retourCarteDemande = useRef(false);
   const gainAccuse = useRef<{ cle: string; gain: GainCascade } | null>(null);
 
   const nombreEtoiles = etoiles ?? 1;
@@ -171,49 +173,55 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
       etat.termineLe === termineLe && etat.graine === graine;
   }, [magasin, profil, paquet, resume, demarreLe, termineLe, graine]);
 
-  const sauvegarder = useCallback(async (): Promise<boolean> => {
-    if (!sauvegardeNecessaire || dejaEnvoyee) return true;
-    if (envoiEnCours.current || profil === null || paquet === null || resume === null ||
-        demarreLe === null || termineLe === null) return false;
+  const sauvegarder = useCallback((): Promise<boolean> => {
+    if (!sauvegardeNecessaire || dejaEnvoyee) return Promise.resolve(true);
+    if (envoiEnCours.current) return promesseSauvegarde.current ?? Promise.resolve(false);
+    if (profil === null || paquet === null || resume === null || demarreLe === null || termineLe === null) {
+      return Promise.resolve(false);
+    }
     envoiEnCours.current = true;
     fixerSauvegardeEnCours(true);
     fixerMessageSauvegarde(null);
-    try {
-      const profilId = String(profil.id);
-      const cle = await calculerCleIdempotence(profilId, String(paquet.noeud.id), demarreLe, graine);
-      if (!estToujoursLaTentative()) return false;
-      const charge: TentativeAEnregistrer = {
-        cleIdempotence: cle, profil: profil.id, noeud: paquet.noeud.id,
-        generationProgression: profil.generationProgression ?? 0,
-        exercice: paquet.exercice.id, moteur: paquet.exercice.jeu.moteur,
-        habillage: paquet.habillage.id, graine, demarreLe, termineLe, resume
-      };
-      if (gainAccuse.current?.cle !== cle) {
-        const reponse = await enregistrerTentative(charge);
-        gainAccuse.current = { cle, gain: reponse.gainCascade };
+    const operation = (async (): Promise<boolean> => {
+      try {
+        const profilId = String(profil.id);
+        const cle = await calculerCleIdempotence(profilId, String(paquet.noeud.id), demarreLe, graine);
+        if (!estToujoursLaTentative()) return false;
+        const charge: TentativeAEnregistrer = {
+          cleIdempotence: cle, profil: profil.id, noeud: paquet.noeud.id,
+          generationProgression: profil.generationProgression ?? 0,
+          exercice: paquet.exercice.id, moteur: paquet.exercice.jeu.moteur,
+          habillage: paquet.habillage.id, graine, demarreLe, termineLe, resume
+        };
+        if (gainAccuse.current?.cle !== cle) {
+          const reponse = await enregistrerTentative(charge);
+          gainAccuse.current = { cle, gain: reponse.gainCascade };
+        }
+        const gain = gainAccuse.current.gain;
+        // Une panne de lecture retente seulement les caches. Le POST idempotent renverrait
+        // les compteurs sans le cadeau déjà remis : conserver son ACK préserve sa célébration.
+        await Promise.all([
+          fileDAttente.invalidateQueries({ queryKey: ['progression', profilId] }, { throwOnError: true }),
+          fileDAttente.invalidateQueries({ queryKey: ['monde', profilId] }, { throwOnError: true })
+        ]);
+        if (!estToujoursLaTentative()) return false;
+        magasin.getState().appliquerGainCascade(gain);
+        magasin.getState().marquerTentativeEnvoyee();
+        return true;
+      } catch (cause) {
+        // La célébration demeure ; le prochain tap reprend l'envoi ou les lectures restantes.
+        console.warn('[tentative] enregistrement impossible :', cause);
+        if (estToujoursLaTentative()) {
+          fixerMessageSauvegarde(cause instanceof Error ? cause.message : 'La sauvegarde attend. Réessaie.');
+        }
+        return false;
+      } finally {
+        envoiEnCours.current = false;
+        fixerSauvegardeEnCours(false);
       }
-      const gain = gainAccuse.current.gain;
-      // Une panne de lecture retente seulement les caches. Le POST idempotent renverrait
-      // les compteurs sans le cadeau déjà remis : conserver son ACK préserve sa célébration.
-      await Promise.all([
-        fileDAttente.invalidateQueries({ queryKey: ['progression', profilId] }, { throwOnError: true }),
-        fileDAttente.invalidateQueries({ queryKey: ['monde', profilId] }, { throwOnError: true })
-      ]);
-      if (!estToujoursLaTentative()) return false;
-      magasin.getState().appliquerGainCascade(gain);
-      magasin.getState().marquerTentativeEnvoyee();
-      return true;
-    } catch (cause) {
-      // La célébration demeure ; le prochain tap reprend l'envoi ou les lectures restantes.
-      console.warn('[tentative] enregistrement impossible :', cause);
-      if (estToujoursLaTentative()) {
-        fixerMessageSauvegarde(cause instanceof Error ? cause.message : 'La sauvegarde attend. Réessaie.');
-      }
-      return false;
-    } finally {
-      envoiEnCours.current = false;
-      fixerSauvegardeEnCours(false);
-    }
+    })();
+    promesseSauvegarde.current = operation;
+    return operation;
   }, [sauvegardeNecessaire, dejaEnvoyee, profil, paquet, resume, demarreLe, termineLe,
     graine, magasin, fileDAttente, estToujoursLaTentative]);
 
@@ -234,6 +242,25 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
   const retourCarte = useCallback((): void => {
     magasin.getState().naviguer('carte');
   }, [magasin]);
+
+  // Le retour reste une issue pendant l'ACK. Il attend la MÊME promesse que l'effet de
+  // montage : aucun second POST, aucune sortie avant que le gain soit accusé.
+  const demanderRetourCarte = useCallback((): void => {
+    if (retourCarteDemande.current) return;
+    retourCarteDemande.current = true;
+    if (!sauvegardeNecessaire || dejaEnvoyee) {
+      retourCarte();
+      return;
+    }
+    void sauvegarder().then((enregistree) => {
+      if (enregistree) {
+        retourCarte();
+      } else {
+        // L'écran et son résultat restent là, avec le bouton Réessayer.
+        retourCarteDemande.current = false;
+      }
+    });
+  }, [retourCarte, sauvegarder, sauvegardeNecessaire, dejaEnvoyee]);
 
   /**
    * ══════════════════════════════════════════════════════════════════════════════════════════
@@ -565,6 +592,15 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
         {messageVisible === null ? null : <p role="status" className="zone-lecture">
           {messageVisible}
         </p>}
+        {messageVisible === null ? null : <button
+          type="button"
+          className="cible action-recompense"
+          data-action="reessayer-sauvegarde"
+          disabled={sauvegardeEnCours}
+          onClick={() => { void sauvegarder(); }}
+        >
+          Réessayer la sauvegarde
+        </button>}
         {suivant === null ? null : (
           <button
             type="button"
@@ -614,8 +650,7 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
           type="button"
           data-action="voir-carte"
           className={`cible action-recompense${regionTerminee ? ' action-recompense--principale' : ''}`}
-          disabled={sauvegardeEnCours}
-          onClick={() => agirApresSauvegarde(retourCarte)}
+          onClick={demanderRetourCarte}
         >
           Voir la carte
         </button>

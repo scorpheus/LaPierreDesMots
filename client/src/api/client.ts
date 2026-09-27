@@ -18,6 +18,8 @@
 import type { PortApi } from './contrat.js';
 import { creerFileTentatives } from './tentatives-en-attente.js';
 import { ErreurReseau } from './commun.js';
+import { creerBarriereActivites } from './barriere-activites.js';
+import type { ResultatApiMaths } from '@pierre/partage/mathematiques';
 
 export type { PaquetNoeudAttendu, DashboardParent } from './contrat.js';
 export { ErreurReseau, calculerCleIdempotence, fermerZoneParent, jetonParentPose } from './commun.js';
@@ -44,8 +46,39 @@ export const enregistrerTentative = attentes.enregistrer;
 export const conserverTentativeTerminee = attentes.conserver;
 export const reprendreTentativesEnAttente = attentes.reprendre;
 export const viderTentativesEnAttente = attentes.vider;
-export const remplacerDonneesAvecTentatives = attentes.remplacerDonnees;
+const activites = creerBarriereActivites();
+let preparerActivites: () => Promise<void> = async () => undefined;
+export function definirPreparationSauvegarde(preparer: () => Promise<void>): void { preparerActivites = preparer; }
+export const protegerSauvegardeActivites = async <T>(operation: () => Promise<T>): Promise<T> =>
+  activites.proteger(operation, preparerActivites);
+export const remplacerDonneesAvecTentatives: typeof attentes.remplacerDonnees = async (operation) =>
+  protegerSauvegardeActivites(() => attentes.remplacerDonnees(operation));
 export const lireMessageImportInterrompu = attentes.messageSuspension;
+
+export const depotRepriseLecture: PortApi['repriseLecture'] = {
+  lire: (profil) => port.repriseLecture.lire(profil),
+  ecrire: (instantane, revision) => activites.ecrire(`lecture:${instantane.profil}:${instantane.paquet.noeud.id}:${String(revision)}`,
+    () => port.repriseLecture.ecrire(instantane, revision)),
+  effacer: (profil, generation, revision) => activites.ecrire(`lecture:${profil}:effacer:${String(revision)}`,
+    () => port.repriseLecture.effacer(profil, generation, revision)),
+};
+const statutMathsIndetermine = <T>(resultat: ResultatApiMaths<T>): boolean =>
+  !resultat.ok && resultat.erreur.code === 'stockage';
+const erreurMathsIndeterminee = (cause: unknown): boolean =>
+  !(cause instanceof ErreurReseau && [400, 404, 409, 422].includes(cause.statut));
+const optionsMaths = { nonConfirmee: statutMathsIndetermine, erreurIndeterminee: erreurMathsIndeterminee };
+export const apiMathematiques: PortApi['mathematiques'] = {
+  lireEtat: (profil) => port.mathematiques.lireEtat(profil),
+  choisirNiveau: (commande) => activites.ecrire(`maths:${commande.profilId}:${commande.cleGeste}`,
+    () => port.mathematiques.choisirNiveau(commande), optionsMaths),
+  lirePartie: (profil, instance) => port.mathematiques.lirePartie(profil, instance),
+  lireBilanParent: (profil) => port.mathematiques.lireBilanParent(profil),
+  creerPartie: (commande) => activites.ecrire(`maths:${commande.profilId}:${commande.cleGeste}`, () => port.mathematiques.creerPartie(commande), optionsMaths),
+  creerProjet: (commande) => activites.ecrire(`maths:${commande.profilId}:${commande.cleGeste}`, () => port.mathematiques.creerProjet(commande), optionsMaths),
+  manipuler: (commande) => activites.ecrire(`maths:${commande.profilId}:${commande.cleGeste}`, () => port.mathematiques.manipuler(commande), optionsMaths),
+  pause: (commande) => activites.ecrire(`maths:${commande.profilId}:${commande.cleGeste}`, () => port.mathematiques.pause(commande), optionsMaths),
+  terminer: (commande) => activites.ecrire(`maths:${commande.profilId}:${commande.cleGeste}`, () => port.mathematiques.terminer(commande), optionsMaths),
+};
 
 export const lireProfil: PortApi['lireProfil'] = async (id) => {
   try { return await port.lireProfil(id); }
@@ -65,12 +98,16 @@ function oublierApresEffacement(profil: string): void {
 
 export const reinitialiserProfilParent: PortApi['reinitialiserProfilParent'] = async (...arguments_) => {
   const rapport = await port.reinitialiserProfilParent(...arguments_);
-  oublierApresEffacement(String(arguments_[0]));
+  if (arguments_[1] !== 'maths') oublierApresEffacement(String(arguments_[0]));
+  if (arguments_[1] !== 'maths') activites.oublier(`lecture:${String(arguments_[0])}:`);
+  if (arguments_[1] !== 'lecture') activites.oublier(`maths:${String(arguments_[0])}:`);
   return rapport;
 };
 export const supprimerProfilParent: PortApi['supprimerProfilParent'] = async (...arguments_) => {
   const rapport = await port.supprimerProfilParent(...arguments_);
   oublierApresEffacement(String(arguments_[0]));
+  activites.oublier(`lecture:${String(arguments_[0])}:`);
+  activites.oublier(`maths:${String(arguments_[0])}:`);
   return rapport;
 };
 

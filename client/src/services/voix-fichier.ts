@@ -74,15 +74,21 @@ export interface OptionsVoixFichier {
 export function creerVoixFichier(options: OptionsVoixFichier = {}): VoixFichier {
   let manifeste: ManifesteVoix = MANIFESTE_VIDE;
   let lecteur: HTMLAudioElement | null = null;
+  let finirLecture: (() => void) | null = null;
+  let generationLecture = 0;
   let appels = 0;
   const volume = Math.min(1, Math.max(0, options.volume ?? 1));
 
   function taire(): void {
+    generationLecture += 1;
     if (lecteur !== null) {
       lecteur.pause();
       lecteur.currentTime = 0;
       lecteur = null;
     }
+    const fin = finirLecture;
+    finirLecture = null;
+    fin?.();
   }
 
   function aUnClip(cle: CleAudio | null): boolean {
@@ -127,6 +133,51 @@ export function creerVoixFichier(options: OptionsVoixFichier = {}): VoixFichier 
     }
   }
 
+  function clipPour(demande: DemandeVoix) {
+    const cle = demande.cle ?? null;
+    if (cle === null || cle === '') return null;
+    const rendu = renduDemande(demande);
+    return clipDe(manifeste, cle, rendu) ?? clipDe(manifeste, cle, 'normal');
+  }
+
+  async function direSequence(demandes: readonly DemandeVoix[]): Promise<void> {
+    // Le prévol protège la promesse de séquence : un raccord incomplet ne doit pas faire dire
+    // le début d'une consigne puis se taire au milieu.
+    const clips = demandes.map((demande) => ({ demande, clip: clipPour(demande) }));
+    if (clips.length === 0 || clips.some(({ clip }) => clip === null)) return;
+    appels += 1;
+    taire();
+    const generation = generationLecture;
+    for (const { clip } of clips) {
+      if (generation !== generationLecture || clip === null) return;
+      const audio = options.creerLecteur === undefined ? new Audio(urlDuClip(clip.fichier)) : options.creerLecteur(urlDuClip(clip.fichier));
+      audio.preload = 'auto';
+      audio.volume = volume;
+      lecteur = audio;
+      const attenteFin = new Promise<void>((resoudre) => {
+        let fini = false;
+        const finir = (): void => {
+          if (fini) return;
+          fini = true;
+          audio.removeEventListener('ended', finir);
+          audio.removeEventListener('error', finir);
+          if (finirLecture === finir) finirLecture = null;
+          resoudre();
+        };
+        finirLecture = finir;
+        audio.addEventListener('ended', finir);
+        audio.addEventListener('error', finir);
+      });
+      // L'écouteur est armé AVANT `play()`: un lecteur de test, ou un clip très court déjà
+      // décodé, peut finir dans la micro-tâche de `play` et ne doit jamais laisser la séquence
+      // attendre un événement déjà passé.
+      try { await audio.play(); }
+      catch (cause) { console.warn('[voix] lecture impossible :', cause); finirLecture?.(); return; }
+      if (generation !== generationLecture) return;
+      await attenteFin;
+    }
+  }
+
   function chargerManifeste(brut: unknown): void {
     manifeste = lireManifeste(brut);
   }
@@ -147,6 +198,7 @@ export function creerVoixFichier(options: OptionsVoixFichier = {}): VoixFichier 
 
   return {
     dire,
+    direSequence,
     taire,
     aUnClip,
     chargerManifeste,

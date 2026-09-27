@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lapierredesmots.local/schemas/mathematiques/modele.v1.schema.json",
+  "title": "Modèle éditorial mathématique V1",
+  "type": "object",
+  "required": ["modeleId", "versionModele", "famille", "niveau", "unite", "domaine", "invariants", "outilsNeutres", "aides", "audio", "secours"],
+  "properties": {
+    "modeleId": { "type": "string", "minLength": 1 },
+    "versionModele": { "type": "integer", "minimum": 1 },
+    "famille": { "type": "string", "pattern": "^MAT-(JAR|PON|MOU|MAR|CHA|HOR)-0[123]$" },
+    "niveau": { "enum": ["decouverte", "exploration", "defi"] },
+    "unite": { "type": "string", "minLength": 1 },
+    "domaine": { "type": "object", "minProperties": 1 },
+    "invariants": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+    "outilsNeutres": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "aides": {
+      "type": "object", "required": ["indice", "demonstration"],
+      "properties": {
+        "indice": { "type": "string", "minLength": 1 },
+        "demonstration": { "type": "string", "minLength": 1 }
+      }
+    },
+    "audio": {
+      "type": "object", "required": ["phrasesFixes", "nombres", "accords", "raccords"],
+      "properties": {
+        "phrasesFixes": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "nombres": { "type": "array", "items": { "type": "integer", "minimum": 0 } },
+        "accords": { "type": "array", "items": { "type": "string" } },
+        "raccords": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "secours": {
+      "type": "object", "required": ["graine", "parametres"],
+      "properties": {
+        "graine": { "type": "integer", "minimum": 0, "maximum": 4294967295 },
+        "parametres": { "type": "object" }
+      }
+    }
+  }
+}

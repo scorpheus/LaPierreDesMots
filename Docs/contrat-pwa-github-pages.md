@@ -69,6 +69,53 @@ GitHub Pages ne fournit pas le repli SPA de Fastify. Le livrable contient un `40
 le chemin demandé avant de charger `index.html`, afin qu’un rafraîchissement de `/carte` ou
 `/parent/dashboard` revienne dans l’application.
 
+### Mise à jour sur un appareil déjà utilisé
+
+Le parent autorise le 26 septembre 2026 une mise à jour explicite dans le jeu. La recherche
+se fait au démarrage, au retour sur la page et après reconnexion. Une version entièrement
+téléchargée est proposée sur le choix de joueur, la carte et le campement, avec « Mettre à jour »
+et « Plus tard ». Aucun exercice ne déclenche de rechargement automatique. L'espace parent
+présente la version du contrôleur local et permet une nouvelle recherche ; il ne présente
+jamais le manifeste distant comme preuve de la version utilisée.
+
+Avant l'activation, le jeu exige une seule fenêtre sous sa portée, suspend la lecture, attend
+la confirmation des activités et vide les tentatives différées. Un échec conserve la partie
+et interdit le redémarrage. Le worker revérifie la fenêtre et la version lors de la commande
+explicite ; seul ce message autorise `skipWaiting`. Un dialogue modal bloque les gestes pendant
+l'opération. Après changement de contrôleur, SQLite est fermé pour libérer son verrou, puis
+la page est rechargée. Ni OPFS ni localStorage ne sont purgés.
+
+Une tablette utilisant encore une version dépourvue de cette interface doit d'abord fermer
+toutes les fenêtres du jeu après téléchargement, puis rouvrir le site dans le même navigateur.
+Les mises à jour suivantes bénéficient des boutons. La recette de cache couvre activation
+naturelle et explicite, second onglet et conservation des témoins ; la recette du livrable
+complète cette preuve avec le vrai journal SQLite.
+
+L'encart porte « Pour les parents » : ses boutons techniques reprennent les libellés approuvés
+par le parent. Le contrôle avec le lexique de contenu CE1 a été effectué : ce lexique d'exercices
+ne couvre pas « version », « mettre » ou « tard ». Aucun mot n'a été ajouté au référentiel pour
+faire passer ce contrôle ; ces textes appartiennent à la gestion de l'application par l'adulte,
+et n'ajoutent aucune consigne de lecture ou d'exercice.
+
+**Preuves locales du 26 septembre 2026.** Les 82 cas ciblés passent (suivi PWA, worker,
+publication, composants et intégration Application/Dashboard). Le contrôle TypeScript et le lint
+du lot passent. Le cycle Chromium confirme les activations naturelle/explicite, le refus du
+second onglet, la reprise après un 503 et la conservation d'OPFS/localStorage. Le build local
+`abe8d7c665d1c051` passe `qa:pwa` : deux tentatives précédentes conservées, exercice tactile,
+audio hors connexion, reprise, export/import, second onglet et zéro erreur de page.
+
+La recette `node scripts/qa/verifier-mise-a-jour-pwa.mjs` vérifie en plus la vraie interface
+React sur ce build : une réussite réelle sur `clairiere-01`, report, refus multi-onglets, tap
+d'activation, dialogue natif modal et un seul rechargement. Profil, journal et douze tables de
+progression/récompenses sont identiques avant/après ; reprise de la carte illustrée hors ligne.
+Les boutons sont visibles et reçoivent les gestes aux formats 768×1024 et 390×844.
+Rapport daté `2026-09-26T20:50:03.672Z`, code 0, sous
+`bac-a-sable/recette-mise-a-jour-pwa/execution-nqBPi3/rapport.json` ; captures au même endroit.
+La recette change la version du worker servi, avec les mêmes bundles et le même schéma SQL :
+elle ne certifie pas une migration de schéma ni la tablette familiale. Le lot reste à inclure
+dans l'unique campagne `npm run verifier` après gel de la Vallée des Nombres. Aucun commit ni
+déploiement n'est réalisé par ce lot.
+
 ## 5. Publication et règle GitHub
 
 Les sources audio et plusieurs polices nécessaires au build sont volontairement ignorées par Git.

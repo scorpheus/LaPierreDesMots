@@ -11,6 +11,8 @@
  */
 
 export type { Base, ResultatEcriture } from './contrat.js';
+export { creerApiMathematiques } from './services/api-mathematiques.js';
+export { lireRepriseLecture, ecrireRepriseLecture, effacerRepriseLecture, ErreurRepriseLecture } from './depots/reprise-lecture.js';
 
 export type { FichierMigration, RapportMigration } from './migrations.js';
 export { appliquerMigrations } from './migrations.js';

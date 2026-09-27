@@ -1,5 +1,5 @@
 /** Frontière de sauvegarde manuelle : aucun octet ne quitte le navigateur sans geste du parent. */
-import { remplacerDonneesAvecTentatives, viderTentativesEnAttente } from '../api/client.js';
+import { protegerSauvegardeActivites, remplacerDonneesAvecTentatives, viderTentativesEnAttente } from '../api/client.js';
 
 export const TAILLE_MAX_SAUVEGARDE_PWA = 64 * 1024 * 1024;
 
@@ -13,8 +13,10 @@ async function ouvrirBasePwa() {
 
 export async function telechargerSauvegardePwa(): Promise<{ readonly octets: number }> {
   const base = await ouvrirBasePwa();
-  await viderTentativesEnAttente();
-  const donnees = await base.exporter();
+  const donnees = await protegerSauvegardeActivites(async () => {
+    await viderTentativesEnAttente();
+    return base.exporter();
+  });
   const copie = new ArrayBuffer(donnees.byteLength);
   new Uint8Array(copie).set(donnees);
   const url = URL.createObjectURL(

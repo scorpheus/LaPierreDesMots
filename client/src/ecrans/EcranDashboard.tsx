@@ -42,6 +42,7 @@ import { GalerieExercices } from '../parent/GalerieExercices.js';
 // AJOUT H2 — l'onglet « le profil » : ce que l'enfant a réellement fait, et repartir à zéro.
 import { EtatProfil } from '../parent/EtatProfil.js';
 import { ReinitialiserProfil } from '../parent/ReinitialiserProfil.js';
+import { SuiviMathematiques } from '../parent/SuiviMathematiques.js';
 import { SupprimerProfil } from '../parent/SupprimerProfil.js';
 import { BoutonExport } from '../parent/BoutonExport.js';
 import { CarteCouverture } from '../parent/CarteCouverture.js';
@@ -52,6 +53,7 @@ import { TopConfusions } from '../parent/TopConfusions.js';
 import '../styles/parent.css';
 import { EtatStockagePwa } from '../pwa/EtatStockagePwa.js';
 import { SauvegardePwa } from '../pwa/SauvegardePwa.js';
+import { PanneauMiseAJourPwa } from '../pwa/MiseAJourPwa.js';
 
 export interface ProprietesEcranDashboard {
   readonly profil: IdProfil;
@@ -106,7 +108,7 @@ export interface ProprietesEcranDashboard {
  * constate que la carte ment doit trouver le remède sur le même écran que le constat ; les
  * mettre à deux endroits, c'est obliger à se souvenir du chiffre en changeant de page.
  */
-type OngletParent = 'suivi' | 'galerie' | 'profil';
+type OngletParent = 'suivi' | 'galerie' | 'profil' | 'maths';
 
 export function EcranDashboard({
   profil,
@@ -193,6 +195,7 @@ export function EcranDashboard({
       </header>
 
       <EtatStockagePwa />
+      <PanneauMiseAJourPwa />
       <SauvegardePwa />
 
       {/* Les TROIS onglets — « les deux » depuis H2, et le commentaire le disait encore.
@@ -203,6 +206,7 @@ export function EcranDashboard({
         {(
           [
             ['suivi', 'Le suivi'],
+            ['maths', 'Les maths'],
             ['galerie', 'Les exercices'],
             ['profil', 'Le profil']
           ] as const
@@ -224,6 +228,9 @@ export function EcranDashboard({
         ))}
       </div>
 
+      {onglet === 'maths' ? <div role="tabpanel" id="panneau-maths" aria-labelledby="onglet-maths">
+        <SuiviMathematiques profil={profil} />
+      </div> : null}
       {onglet === 'galerie' ? (
         <div role="tabpanel" id="panneau-galerie" aria-labelledby="onglet-galerie">
           {/* La porte du plein ecran. `data-vers` est la meme convention que les sorties du

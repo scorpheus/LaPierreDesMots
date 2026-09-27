@@ -171,6 +171,7 @@ test.describe('R16 — la galerie se manipule avec le pouce', () => {
     );
     expect(codes, 'les onglets déclarés par EcranDashboard').toEqual([
       'suivi',
+      'maths',
       'galerie',
       'profil'
     ]);

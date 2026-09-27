@@ -241,7 +241,9 @@ export function MoteurEclair(
   const [eclairVisible, fixerEclairVisible] = useState(false);
   const idConsigne = consigne === null ? null : String(consigne.id);
   const [porte, fixerPorte] = useState<{ readonly id: string | null; readonly tours: number }>(
-    () => ({ id: idConsigne, tours: 0 }),
+    // La première exposition est un fait du moteur. Après remount/reprise, « Revoir » reste
+    // disponible sans rejouer le flash ni réinitialiser sa latence de reconnaissance.
+    () => ({ id: idConsigne, tours: etat.finExpositionMs === null ? 0 : 1 }),
   );
   const tours = porte.id === idConsigne ? porte.tours : 0;
   const ouvrirLaPorte = useCallback(() => {
@@ -252,7 +254,7 @@ export function MoteurEclair(
   refEmettre.current = emettre;
 
   useEffect(() => {
-    if (consigne === null || tours === 0) {
+    if (consigne === null || tours === 0 || (etat.finExpositionMs !== null && tours === 1)) {
       fixerEclairVisible(false);
       return undefined;
     }
@@ -264,7 +266,7 @@ export function MoteurEclair(
     return () => {
       clearTimeout(identifiant);
     };
-  }, [consigne, dureeMs, tours]);
+  }, [consigne, dureeMs, tours, etat.finExpositionMs]);
 
   const xEclair = emplacementEclair?.x ?? cadreJeu.largeur / 2;
   const yEclair = emplacementEclair?.y ?? cadreJeu.hauteur / 2;

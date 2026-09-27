@@ -169,6 +169,21 @@ export function EcranProfils({ surAccesParent }: ProprietesEcranProfils = {}): R
   const [creationOuverte, fixerCreationOuverte] = useState(false);
   const [prenomSaisi, fixerPrenomSaisi] = useState('');
   const [reglagesPour, fixerReglagesPour] = useState<Profil | null>(null);
+  const [chargementPour, fixerChargementPour] = useState<string | null>(null);
+  const [erreurReprise, fixerErreurReprise] = useState<string | null>(null);
+
+  const charger = useCallback(async (profil: Profil): Promise<void> => {
+    fixerErreurReprise(null);
+    fixerChargementPour(String(profil.id));
+    try {
+      await magasin.getState().chargerProfilEtReprise(profil);
+    } catch {
+      // L'ancien profil et son instantané restent disponibles si la sauvegarde ou la lecture échoue.
+      fixerErreurReprise(`La partie de ${String(profil.prenom)} n'a pas pu être retrouvée. Réessaie.`);
+    } finally {
+      fixerChargementPour(null);
+    }
+  }, [magasin]);
 
   /**
    * La liste des enfants se relit à CHAQUE arrivée sur cet écran.
@@ -196,16 +211,11 @@ export function EcranProfils({ surAccesParent }: ProprietesEcranProfils = {}): R
       await fileDAttente.invalidateQueries({ queryKey: ['profils'] });
       fixerCreationOuverte(false);
       fixerPrenomSaisi('');
-      magasin.getState().choisirProfil(profil);
+      await charger(profil);
     }
   });
 
-  const choisir = useCallback(
-    (profil: Profil): void => {
-      magasin.getState().choisirProfil(profil);
-    },
-    [magasin]
-  );
+  const choisir = useCallback((profil: Profil): void => { void charger(profil); }, [charger]);
 
   const soumettre = useCallback(
     (evenement: FormEvent<HTMLFormElement>): void => {
@@ -249,6 +259,8 @@ export function EcranProfils({ surAccesParent }: ProprietesEcranProfils = {}): R
       </header>
 
       {profils.isPending ? <p>On cherche les joueurs…</p> : null}
+      {chargementPour !== null ? <p role="status">On retrouve ta partie…</p> : null}
+      {erreurReprise !== null ? <p role="alert">{erreurReprise}</p> : null}
 
       {profils.isError ? (
         <div className="zone-lecture" style={{ padding: '1rem' }}>

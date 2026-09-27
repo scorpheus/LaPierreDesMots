@@ -39,8 +39,12 @@ import { createHash } from 'node:crypto';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { ENTETE_JETON_PARENT } from '@partage/parent/types';
+import { estInstancePont, temoinsPont } from '@partage/mathematiques/index';
+import type { Exercice, Habillage, Noeud } from '@pierre/partage';
+import type { InstantaneRepriseLecture } from '@partage/reprise-lecture/index';
 
-import { INSTANT_DE_REFERENCE, monterApplication } from '../configuration/preparation.js';
+import { CHEMIN_EXERCICE_ECOLE, CHEMIN_NOEUD_CLAIRIERE, INSTANT_DE_REFERENCE,
+  habillageEcole, lireJson, monterApplication } from '../configuration/preparation.js';
 import type { ApplicationDeTest } from '../configuration/preparation.js';
 import {
   CHAINES_HOSTILES,
@@ -106,6 +110,8 @@ export function analyserArbreDeRoutes(arbre: string): readonly RouteDeclaree[] {
 interface Contexte {
   readonly profil: string;
   readonly jeton: string;
+  partieMathsId?: string;
+  revisionMaths?: number;
 }
 
 interface Descripteur {
@@ -115,6 +121,8 @@ interface Descripteur {
   readonly params: (c: Contexte) => Readonly<Record<string, string>>;
   /** Corps légitime, ou `undefined` pour une route sans corps. */
   readonly corps?: (c: Contexte) => Record<string, unknown>;
+  /** Query nécessaire au handler ; les cas hostiles la conservent. */
+  readonly query?: (c: Contexte) => Readonly<Record<string, string>>;
   readonly entetes?: (c: Contexte) => Record<string, string>;
   /**
    * Le statut que l'appel NOMINAL doit rendre. C'est l'assertion qui prouve que le fuzz de
@@ -136,6 +144,7 @@ function cleIdempotence(profil: string, noeud: string, demarreLe: string, graine
 let contexte: ApplicationDeTest;
 let jetonParent = '';
 let profilId = '';
+let ordrePartieMaths = 0;
 
 async function injecter(options: {
   methode: string;
@@ -213,6 +222,71 @@ async function poserCodeParent(): Promise<void> {
   });
 }
 
+function urlAvecQuery(d: Descripteur, c: Contexte, params = d.params(c)): string {
+  const chemin = urlDepuis(d.motif, params);
+  const query = d.query?.(c);
+  return query === undefined ? chemin : `${chemin}?${new URLSearchParams(query).toString()}`;
+}
+
+async function preparerPartieMaths(c: Contexte, resoudre = false): Promise<void> {
+  ordrePartieMaths += 1;
+  const reponse = await injecter({ methode: 'POST', url: '/api/mathematiques/parties', corps: {
+    profilId: c.profil, generationMaths: 0, famille: 'MAT-PON-03', niveau: 'decouverte',
+    graine: 100 + ordrePartieMaths, cleGeste: `fuzz-partie-${String(ordrePartieMaths)}`,
+  } });
+  if (reponse.statusCode !== 200) throw new Error(`Préparation maths refusée : ${reponse.body}`);
+  const partie = reponse.json() as { valeur: { reprise: { instance: unknown; revision: number } } };
+  const reprise = partie.valeur.reprise;
+  if (!estInstancePont(reprise.instance) || reprise.instance.famille !== 'MAT-PON-03') {
+    throw new Error('Le nominal maths exige une instance de tablier conservée.');
+  }
+  c.partieMathsId = reprise.instance.id;
+  c.revisionMaths = reprise.revision;
+  if (!resoudre) return;
+  const temoin = temoinsPont(reprise.instance)[0];
+  if (temoin === undefined) throw new Error('Le tablier nominal n’a pas de solution.');
+  for (const [objetId, position] of Object.entries(temoin.placements)) {
+    const action = await injecter({ methode: 'POST', url: `/api/mathematiques/parties/${reprise.instance.id}/actions`, corps: {
+      profilId: c.profil, generationMaths: 0, instanceId: reprise.instance.id,
+      revisionAttendue: c.revisionMaths, cleGeste: `fuzz-resoudre-${String(ordrePartieMaths)}-${objetId}`,
+      geste: { type: 'placer-piece', objetId, position: Number(position) },
+    } });
+    if (action.statusCode !== 200) throw new Error(`Résolution du nominal maths refusée : ${action.body}`);
+    c.revisionMaths = (action.json() as { valeur: { reprise: { revision: number } } }).valeur.reprise.revision;
+  }
+}
+
+function instantaneLecture(c: Contexte): InstantaneRepriseLecture {
+  const exercice = lireJson<Exercice>(CHEMIN_EXERCICE_ECOLE);
+  const noeud = lireJson<Noeud>(CHEMIN_NOEUD_CLAIRIERE);
+  const habillage: Habillage = habillageEcole();
+  return {
+    versionContrat: 1, profil: c.profil as InstantaneRepriseLecture['profil'],
+    generationProgression: 0, revision: 0, sortie: null, rangSortie: null,
+    paquet: { exercice, noeud, habillage }, codeMoteur: exercice.jeu.moteur,
+    versionMoteur: 1, graine: 17, etatMoteur: { indexConsigne: 0, remplissages: {}, nbErreurs: 0, niveauAide: 'aucune' },
+    demarreLe: INSTANT_DE_REFERENCE, journalise: true, serie: 0,
+    resume: null, etoiles: null, termineLe: null, tentativeEnvoyee: false,
+    erreurConservation: null, suspenduLeMs: 1_790_416_800_000,
+  };
+}
+
+async function preparerRepriseLecture(c: Contexte): Promise<void> {
+  const courante = await injecter({ methode: 'GET', url: `/api/profils/${c.profil}/reprise-lecture` });
+  if (courante.statusCode !== 200) throw new Error(`Lecture préalable refusée : ${courante.body}`);
+  const instantane = courante.body.trim() === '' ? null : courante.json() as InstantaneRepriseLecture | null;
+  if (instantane !== null) {
+    const effacement = await injecter({ methode: 'POST', url: `/api/profils/${c.profil}/reprise-lecture/effacer`,
+      corps: { generationProgression: 0, revisionAttendue: instantane.revision } });
+    if (effacement.statusCode !== 200) throw new Error(`Nettoyage de reprise refusé : ${effacement.body}`);
+  }
+  const ecriture = await injecter({ methode: 'POST', url: `/api/profils/${c.profil}/reprise-lecture`,
+    corps: { instantane: instantaneLecture(c), revisionAttendue: null } });
+  if (ecriture.statusCode !== 200 || (ecriture.json() as { revision: number }).revision !== 1) {
+    throw new Error(`Préparation de reprise refusée : ${ecriture.body}`);
+  }
+}
+
 const DESCRIPTEURS: readonly Descripteur[] = [
   { methode: 'GET', motif: '/api/sante', params: () => ({}), statutNominal: 200 },
   { methode: 'GET', motif: '/api/profils', params: () => ({}), statutNominal: 200 },
@@ -255,6 +329,23 @@ const DESCRIPTEURS: readonly Descripteur[] = [
     statutNominal: 200
   },
   {
+    methode: 'GET', motif: '/api/profils/:id/reprise-lecture',
+    params: (c) => ({ id: c.profil }), statutNominal: 200
+  },
+  {
+    methode: 'POST', motif: '/api/profils/:id/reprise-lecture',
+    params: (c) => ({ id: c.profil }),
+    corps: (c) => ({ instantane: instantaneLecture(c), revisionAttendue: null }),
+    statutNominal: 200
+  },
+  {
+    methode: 'POST', motif: '/api/profils/:id/reprise-lecture/effacer',
+    params: (c) => ({ id: c.profil }),
+    corps: () => ({ generationProgression: 0, revisionAttendue: 1 }),
+    avant: preparerRepriseLecture,
+    statutNominal: 200
+  },
+  {
     methode: 'GET',
     motif: '/api/profils/:id/essai-typographie',
     params: (c) => ({ id: c.profil }),
@@ -271,6 +362,52 @@ const DESCRIPTEURS: readonly Descripteur[] = [
     motif: '/api/profils/:id/monde',
     params: (c) => ({ id: c.profil }),
     statutNominal: 200
+  },
+  {
+    methode: 'GET', motif: '/api/mathematiques/etat',
+    params: () => ({}), query: (c) => ({ profilId: c.profil }), statutNominal: 200
+  },
+  {
+    methode: 'GET', motif: '/api/mathematiques/parties/:id',
+    params: (c) => ({ id: c.partieMathsId ?? '' }), query: (c) => ({ profilId: c.profil }),
+    avant: (c) => preparerPartieMaths(c), statutNominal: 200
+  },
+  {
+    methode: 'POST', motif: '/api/mathematiques/parties',
+    params: () => ({}),
+    corps: (c) => ({ profilId: c.profil, generationMaths: 0, famille: 'MAT-PON-03',
+      niveau: 'decouverte', graine: 81, cleGeste: 'fuzz-creation-nominale' }),
+    statutNominal: 200
+  },
+  {
+    methode: 'POST', motif: '/api/mathematiques/projets',
+    params: () => ({}),
+    corps: (c) => ({ profilId: c.profil, generationMaths: 0, projetId: 'MAT-PON-P01',
+      niveaux: ['decouverte', 'decouverte', 'decouverte'], graine: 82, cleGeste: 'fuzz-projet-nominal' }),
+    statutNominal: 200
+  },
+  {
+    methode: 'POST', motif: '/api/mathematiques/parties/:id/actions',
+    params: (c) => ({ id: c.partieMathsId ?? '' }),
+    corps: (c) => ({ profilId: c.profil, generationMaths: 0, instanceId: c.partieMathsId,
+      revisionAttendue: c.revisionMaths, cleGeste: `fuzz-action-${c.partieMathsId}`,
+      geste: { type: 'placer-piece', objetId: 'module-a', position: 0 } }),
+    avant: (c) => preparerPartieMaths(c), statutNominal: 200
+  },
+  {
+    methode: 'POST', motif: '/api/mathematiques/parties/:id/pause',
+    params: (c) => ({ id: c.partieMathsId ?? '' }),
+    corps: (c) => ({ profilId: c.profil, generationMaths: 0, instanceId: c.partieMathsId,
+      revisionAttendue: c.revisionMaths, cleGeste: `fuzz-pause-${c.partieMathsId}` }),
+    avant: (c) => preparerPartieMaths(c), statutNominal: 200
+  },
+  {
+    methode: 'POST', motif: '/api/mathematiques/parties/:id/terminer',
+    params: (c) => ({ id: c.partieMathsId ?? '' }),
+    corps: (c) => ({ profilId: c.profil, generationMaths: 0, instanceId: c.partieMathsId,
+      revisionAttendue: c.revisionMaths, cleGeste: `fuzz-fin-${c.partieMathsId}`,
+      reponse: { famille: 'MAT-PON-03', valeur: {} } }),
+    avant: (c) => preparerPartieMaths(c, true), statutNominal: 200
   },
   {
     methode: 'POST',
@@ -348,6 +485,11 @@ const DESCRIPTEURS: readonly Descripteur[] = [
     params: (c) => ({ profil: c.profil }),
     entetes: (c) => ({ [ENTETE_JETON_PARENT]: c.jeton }),
     statutNominal: 200
+  },
+  {
+    methode: 'GET', motif: '/api/parent/:profil/mathematiques',
+    params: (c) => ({ profil: c.profil }),
+    entetes: (c) => ({ [ENTETE_JETON_PARENT]: c.jeton }), statutNominal: 200
   },
   {
     methode: 'GET',
@@ -503,7 +645,7 @@ const TIRAGES_PAR_ROUTE = 10;
 function casDuDescripteur(d: Descripteur, c: Contexte): readonly Cas[] {
   const cas: Cas[] = [];
   const params = d.params(c);
-  const urlNominale = urlDepuis(d.motif, params);
+  const urlNominale = urlAvecQuery(d, c, params);
   const corpsNominal = d.corps?.(c);
   const alea = aleaFuzz();
 
@@ -512,14 +654,25 @@ function casDuDescripteur(d: Descripteur, c: Contexte): readonly Cas[] {
     for (const hostile of CHAINES_HOSTILES) {
       cas.push({
         nom: `param:${nomParam}=${hostile.slice(0, 24)}`,
-        url: urlDepuis(d.motif, { ...params, [nomParam]: hostile })
+        url: urlAvecQuery(d, c, { ...params, [nomParam]: hostile })
       });
+    }
+  }
+
+  const query = d.query?.(c);
+  if (query !== undefined) {
+    for (const nomQuery of Object.keys(query)) {
+      for (const hostile of CHAINES_HOSTILES) {
+        cas.push({ nom: `query:${nomQuery}=${hostile.slice(0, 24)}`,
+          url: `${urlDepuis(d.motif, params)}?${new URLSearchParams({ ...query, [nomQuery]: hostile }).toString()}` });
+      }
     }
   }
 
   // ── (b) les chaînes de requête
   for (const requete of REQUETES_HOSTILES) {
-    cas.push({ nom: `requete:${requete.slice(0, 24)}`, url: urlNominale + requete });
+    cas.push({ nom: `requete:${requete.slice(0, 24)}`, url: urlNominale +
+      (urlNominale.includes('?') ? `&${requete.slice(1)}` : requete) });
   }
 
   if (corpsNominal !== undefined) {
@@ -642,12 +795,15 @@ function juger(route: string, cas: string, statut: number, corpsBrut: string): v
       echecs.push({ route, cas, statut, motif: 'corps 4xx illisible', extrait });
       return;
     }
-    const objet = corps as { code?: unknown; message?: unknown };
-    if (typeof objet.code !== 'string' || objet.code === '') {
+    const objet = corps as { code?: unknown; message?: unknown; erreur?: { code?: unknown; message?: unknown } };
+    // Les maths gardent l'enveloppe ResultatApiMaths pour le port HTTP/PWA ; elle porte
+    // la même information explicite à l'intérieur de `erreur`.
+    const erreur = objet.erreur ?? objet;
+    if (typeof erreur.code !== 'string' || erreur.code === '') {
       echecs.push({ route, cas, statut, motif: 'refus sans code', extrait });
       return;
     }
-    if (typeof objet.message !== 'string' || objet.message.trim() === '') {
+    if (typeof erreur.message !== 'string' || erreur.message.trim() === '') {
       echecs.push({ route, cas, statut, motif: 'refus sans message', extrait });
     }
   }
@@ -697,12 +853,12 @@ describe('inventaire des routes — il vient du routeur, pas d’une liste écri
     expect(nonDecrites, 'des routes échappent au fuzzer').toEqual([]);
     expect(fantomes, 'le fuzzer décrit des routes qui n’existent plus').toEqual([]);
     // Plancher : sans lui, un `printRoutes` vide rendrait ce cas vert par vacuité.
-    expect(chezFastify.size, 'l’application doit déclarer au moins 29 routes').toBeGreaterThanOrEqual(29);
+    expect(chezFastify.size, 'l’application doit déclarer au moins 40 routes').toBeGreaterThanOrEqual(40);
   });
 });
 
 describe('l’appel NOMINAL de chaque route — la preuve que le fuzz atteint le code', () => {
-  it('les 29 nominaux rendent le statut épinglé', async () => {
+  it('tous les nominaux rendent le statut épinglé', async () => {
     const contexteAppel: Contexte = { profil: profilId, jeton: jetonParent };
     const ecarts: string[] = [];
 
@@ -710,7 +866,7 @@ describe('l’appel NOMINAL de chaque route — la preuve que le fuzz atteint le
       await d.avant?.(contexteAppel);
       const reponse = await injecter({
         methode: d.methode,
-        url: urlDepuis(d.motif, d.params(contexteAppel)),
+        url: urlAvecQuery(d, contexteAppel),
         corps: d.corps?.(contexteAppel),
         entetes: d.entetes?.(contexteAppel)
       });
@@ -736,6 +892,7 @@ describe('le fuzz — aucune route ne rend 500', () => {
       const contexteAppel: Contexte = { profil: profilId, jeton: jetonParent };
 
       for (const d of DESCRIPTEURS) {
+        await d.avant?.(contexteAppel);
         const nom = `${d.methode} ${d.motif}`;
         const entetes = d.entetes?.(contexteAppel);
         for (const cas of casDuDescripteur(d, contexteAppel)) {

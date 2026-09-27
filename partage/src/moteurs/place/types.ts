@@ -128,6 +128,9 @@ export interface EtatPlace {
    * `moteurPlace` et `renduPlace`) : l'ajout ne casse aucune frontière.
    */
   readonly zones: readonly ZoneCible[];
+  readonly reserveCatalogue: readonly ElementPlacable[];
+  /** Réserve mélangée une fois, conservée avec les placements pour la reprise exacte. */
+  readonly reserveMelangee: readonly ElementPlacable[] | null;
   /** Clé = `IdElement`. Une entrée = un élément posé, définitivement. */
   readonly places: Readonly<Record<string, IdZoneCible>>;
   readonly elementSaisi: IdElement | null;
@@ -141,6 +144,7 @@ export interface EtatPlace {
 }
 
 export type ActionPlace =
+  | { readonly type: 'fixerReserveMelangee'; readonly reserve: readonly ElementPlacable[] }
   | { readonly type: 'saisir'; readonly element: IdElement }
   | { readonly type: 'glisser'; readonly point: Point }
   | { readonly type: 'deposer'; readonly point: Point }
