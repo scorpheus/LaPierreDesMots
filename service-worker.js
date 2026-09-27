@@ -11,12 +11,12 @@
  */
 /* global self, caches */
 
-const VERSION = '02931198d63a555a';
+const VERSION = 'e7d538bb622061bd';
 const BASE = '/LaPierreDesMots/';
 const PRECACHE = [
   "/LaPierreDesMots/.vite/manifest.json",
   "/LaPierreDesMots/404.html",
-  "/LaPierreDesMots/assets/adaptateur-sqlite-wasm-DXDw9EJ-.js",
+  "/LaPierreDesMots/assets/adaptateur-sqlite-wasm-CoDvLMrm.js",
   "/LaPierreDesMots/assets/aide-gobi-montre-cible.normal.16d5cf94-D9FLCR52.opus",
   "/LaPierreDesMots/assets/aide-gobi-montre-couleur.normal.293474c6-DY6POJC6.opus",
   "/LaPierreDesMots/assets/aide-gobi-relire-consigne.normal.6e817c2f-CRw15hbc.opus",
@@ -159,6 +159,7 @@ const PRECACHE = [
   "/LaPierreDesMots/assets/collier-Ab_KlpVI.svg",
   "/LaPierreDesMots/assets/commun-BGaluCk_.js",
   "/LaPierreDesMots/assets/competences-OMAh9bxl.json",
+  "/LaPierreDesMots/assets/conseil-parent-CMCmyyh2.js",
   "/LaPierreDesMots/assets/coquillages-BM65uvex.svg",
   "/LaPierreDesMots/assets/coulee-DYHvFA3G.svg",
   "/LaPierreDesMots/assets/cristal-L00bfdnI.svg",
@@ -168,9 +169,10 @@ const PRECACHE = [
   "/LaPierreDesMots/assets/ecole-BK-Txehm.svg",
   "/LaPierreDesMots/assets/ecole-place-jNX_q4hV.svg",
   "/LaPierreDesMots/assets/ecole-v2-DGBEfK6b.svg",
-  "/LaPierreDesMots/assets/EcranDashboard-BBvo2DCr.js",
-  "/LaPierreDesMots/assets/EcranDebugRecompenses-CmPVGqxw.js",
-  "/LaPierreDesMots/assets/EcranGalerieParent-CHfn1tgc.js",
+  "/LaPierreDesMots/assets/EcranDashboard-CtA4B9vJ.js",
+  "/LaPierreDesMots/assets/EcranDebugRecompenses-o8fiOhHV.js",
+  "/LaPierreDesMots/assets/EcranGalerieParent-CtvWUNIm.js",
+  "/LaPierreDesMots/assets/EcranMathematiques-BPsiiJI8.js",
   "/LaPierreDesMots/assets/enseigne-BH2kTI7w.svg",
   "/LaPierreDesMots/assets/etoiles-filantes-BB5-xaYc.svg",
   "/LaPierreDesMots/assets/feuilles-DB99FsvZ.svg",
@@ -231,7 +233,7 @@ const PRECACHE = [
   "/LaPierreDesMots/assets/fresque-murale-75yQBRgW.svg",
   "/LaPierreDesMots/assets/fresque-yWpnM1i8.svg",
   "/LaPierreDesMots/assets/frise-EQvAs4qp.svg",
-  "/LaPierreDesMots/assets/GalerieExercices-BVRxQvPm.js",
+  "/LaPierreDesMots/assets/GalerieExercices-bTXb24zx.js",
   "/LaPierreDesMots/assets/galeries-cristal-bd-01-c1.normal.27a52847-BHvROCkN.opus",
   "/LaPierreDesMots/assets/galeries-cristal-bd-01-c2.normal.54e6a757-x-hqR6vl.opus",
   "/LaPierreDesMots/assets/galeries-cristal-bd-01-c3.normal.54e6a757-DZhDlL0y.opus",
@@ -297,8 +299,8 @@ const PRECACHE = [
   "/LaPierreDesMots/assets/grenouilles-BuCMD2GP.svg",
   "/LaPierreDesMots/assets/guirlande-BoZr2VSf.svg",
   "/LaPierreDesMots/assets/hesitation-BBCjGqUA.svg",
+  "/LaPierreDesMots/assets/index-czusa-xE.js",
   "/LaPierreDesMots/assets/index-DRefDHMM.js",
-  "/LaPierreDesMots/assets/index-uyziQWfi.js",
   "/LaPierreDesMots/assets/joie-C4xsL_9o.svg",
   "/LaPierreDesMots/assets/lianes-Llw4yK2T.svg",
   "/LaPierreDesMots/assets/locuteur-bulle.normal.8dad8c39-B5CjukoM.opus",
@@ -439,7 +441,7 @@ const PRECACHE = [
   "/LaPierreDesMots/assets/paniers-Ci1wActs.svg",
   "/LaPierreDesMots/assets/parapluie-xj_jpAmg.svg",
   "/LaPierreDesMots/assets/paroi-libre-DBhH1Jh2.svg",
-  "/LaPierreDesMots/assets/partage-Cax0073I.js",
+  "/LaPierreDesMots/assets/partage-CiXBmyrY.js",
   "/LaPierreDesMots/assets/pas-japonais-tp6CkWy7.svg",
   "/LaPierreDesMots/assets/passage-BBo75E7t.svg",
   "/LaPierreDesMots/assets/pellicule-dV3TP-hu.svg",
@@ -448,7 +450,7 @@ const PRECACHE = [
   "/LaPierreDesMots/assets/poissons-B2yEcocG.svg",
   "/LaPierreDesMots/assets/ponton-BAopEDcG.svg",
   "/LaPierreDesMots/assets/ponts-DnMR1Jxq.svg",
-  "/LaPierreDesMots/assets/port-local-9kcrxN3Z.js",
+  "/LaPierreDesMots/assets/port-local-BAD3k7fr.js",
   "/LaPierreDesMots/assets/rayonnages-BeJ6vWwN.svg",
   "/LaPierreDesMots/assets/referentiels-CZqLb5_W.js",
   "/LaPierreDesMots/assets/regions-KaGt3j0-.json",
@@ -457,7 +459,7 @@ const PRECACHE = [
   "/LaPierreDesMots/assets/sable-CvRf_qDg.svg",
   "/LaPierreDesMots/assets/soleil-CVU_LB_i.svg",
   "/LaPierreDesMots/assets/souche-DCHNaS0B.svg",
-  "/LaPierreDesMots/assets/sqlite-wasm.worker-CfMYBVXK.js",
+  "/LaPierreDesMots/assets/sqlite-wasm.worker-DvR4hPk5.js",
   "/LaPierreDesMots/assets/sqlite3-BVKGSWc-.wasm",
   "/LaPierreDesMots/assets/sqlite3-opfs-async-proxy-D_xnb1D8.js",
   "/LaPierreDesMots/assets/sqlite3-worker1-B532Kw8W.js",
@@ -472,14 +474,14 @@ const PRECACHE = [
   "/LaPierreDesMots/assets/stade-8-CB2Ros1z.svg",
   "/LaPierreDesMots/assets/stade-9-BPM2raNh.svg",
   "/LaPierreDesMots/assets/stalagmites-D7RvGHa5.svg",
-  "/LaPierreDesMots/assets/style-VIgsEmSV.css",
+  "/LaPierreDesMots/assets/style-DCnfvLu2.css",
   "/LaPierreDesMots/assets/tapis-Do3rL1TA.svg",
   "/LaPierreDesMots/assets/theatre-ombres-sezFftCi.svg",
   "/LaPierreDesMots/assets/train-DUP2gaNd.svg",
   "/LaPierreDesMots/assets/veillee-automne-CS7C5A2G.svg",
   "/LaPierreDesMots/assets/veillee-DjFouPXW.svg",
   "/LaPierreDesMots/assets/veine-20F4Jbxj.svg",
-  "/LaPierreDesMots/assets/VisiteDesEcrans-BygNj_lZ.js",
+  "/LaPierreDesMots/assets/VisiteDesEcrans-Bm67lG-N.js",
   "/LaPierreDesMots/assets/vitrail-D5w1Z3Hp.svg",
   "/LaPierreDesMots/assets/volcan-coulee-chemin-01-c1.normal.5ca70ed2-DxMaFAUC.opus",
   "/LaPierreDesMots/assets/volcan-coulee-chemin-01-c2.normal.2419f2e4-DKRfVG2q.opus",
@@ -1287,6 +1289,58 @@ async function mettreEnCacheNoyau() {
 
 self.addEventListener('install', (evenement) => {
   evenement.waitUntil(mettreEnCacheNoyau());
+});
+
+function estFenetreDuJeu(client) {
+  if (client?.type !== 'window' || typeof client.url !== 'string') return false;
+  try {
+    const url = new URL(client.url);
+    return url.origin === self.location.origin && url.pathname.startsWith(BASE);
+  } catch {
+    return false;
+  }
+}
+
+self.addEventListener('message', (evenement) => {
+  const type = evenement.data?.type;
+  const port = evenement.ports?.[0];
+  if (port === undefined || (type !== 'pierre:version' && type !== 'pierre:activer')) return;
+
+  evenement.waitUntil((async () => {
+    try {
+      if (type === 'pierre:activer') {
+        if (!estFenetreDuJeu(evenement.source)) {
+          port.postMessage({ ok: false, message: 'La demande doit venir d’une fenêtre du jeu.' });
+          return;
+        }
+        if (evenement.data.version !== VERSION) {
+          port.postMessage({ ok: false, message: 'La version demandée ne correspond plus à cette mise à jour.' });
+          return;
+        }
+      }
+
+      // Un second onglet peut être ouvert avant de recevoir son contrôleur : il compte aussi.
+      const fenetres = (await self.clients.matchAll({ type: 'window', includeUncontrolled: true }))
+        .filter(estFenetreDuJeu);
+      if (type === 'pierre:version') {
+        port.postMessage({ ok: true, version: VERSION, fenetres: fenetres.length });
+        return;
+      }
+      if (fenetres.some((client) => client.id !== evenement.source.id)) {
+        port.postMessage({
+          ok: false,
+          message: 'Fermez les autres onglets du jeu avant d’installer la mise à jour.',
+        });
+        return;
+      }
+
+      // L’installation seule ne force jamais le remplacement du worker encore utilisé.
+      await self.skipWaiting();
+      port.postMessage({ ok: true, version: VERSION });
+    } catch {
+      port.postMessage({ ok: false, message: 'Impossible de préparer la mise à jour. Réessayez.' });
+    }
+  })());
 });
 
 self.addEventListener('activate', (evenement) => {

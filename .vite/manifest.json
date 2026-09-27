@@ -735,6 +735,10 @@
     "file": "assets/stade-9-BFxA8hgP.webp",
     "src": "../contenu/assets/gobi/stades/stade-9.webp"
   },
+  "../contenu/assets/mathematiques/ponts-des-rives-v1.png": {
+    "file": "assets/ponts-des-rives-v1-CKOekF0J.png",
+    "src": "../contenu/assets/mathematiques/ponts-des-rives-v1.png"
+  },
   "../contenu/assets/objets/oiseau.svg": {
     "file": "assets/oiseau-FBCoe-WG.svg",
     "src": "../contenu/assets/objets/oiseau.svg"
@@ -2947,20 +2951,27 @@
     "file": "assets/ductus-minuscules-B8XBqC8V.json",
     "src": "../contenu/referentiel/ductus-minuscules.json"
   },
-  "_GalerieExercices-BVRxQvPm.js": {
-    "file": "assets/GalerieExercices-BVRxQvPm.js",
+  "_GalerieExercices-bTXb24zx.js": {
+    "file": "assets/GalerieExercices-bTXb24zx.js",
     "name": "GalerieExercices",
     "imports": [
       "index.html",
-      "_partage-Cax0073I.js"
+      "_partage-CiXBmyrY.js"
     ]
   },
   "_commun-BGaluCk_.js": {
     "file": "assets/commun-BGaluCk_.js",
     "name": "commun"
   },
-  "_partage-Cax0073I.js": {
-    "file": "assets/partage-Cax0073I.js",
+  "_conseil-parent-CMCmyyh2.js": {
+    "file": "assets/conseil-parent-CMCmyyh2.js",
+    "name": "conseil-parent",
+    "imports": [
+      "_partage-CiXBmyrY.js"
+    ]
+  },
+  "_partage-CiXBmyrY.js": {
+    "file": "assets/partage-CiXBmyrY.js",
     "name": "partage"
   },
   "_referentiels-CZqLb5_W.js": {
@@ -2975,31 +2986,33 @@
     ]
   },
   "index.html": {
-    "file": "assets/index-uyziQWfi.js",
+    "file": "assets/index-czusa-xE.js",
     "name": "index",
     "src": "index.html",
     "isEntry": true,
     "imports": [
-      "_partage-Cax0073I.js",
       "_commun-BGaluCk_.js",
+      "_partage-CiXBmyrY.js",
       "_referentiels-CZqLb5_W.js"
     ],
     "dynamicImports": [
+      "src/base/adaptateur-sqlite-wasm.ts",
       "src/api/port-local.ts",
       "src/ecrans/EcranDashboard.tsx",
       "src/ecrans/EcranGalerieParent.tsx",
+      "src/mathematiques/EcranMathematiques.tsx",
       "src/parent/VisiteDesEcrans.tsx",
       "src/ecrans/EcranDebugRecompenses.tsx"
     ]
   },
   "src/api/port-local.ts": {
-    "file": "assets/port-local-9kcrxN3Z.js",
+    "file": "assets/port-local-BAD3k7fr.js",
     "name": "port-local",
     "src": "src/api/port-local.ts",
     "isDynamicEntry": true,
     "imports": [
       "_commun-BGaluCk_.js",
-      "_partage-Cax0073I.js",
+      "_partage-CiXBmyrY.js",
       "_referentiels-CZqLb5_W.js"
     ],
     "dynamicImports": [
@@ -3237,6 +3250,7 @@
       "assets/forge-coloriage-v3-CXSiLROy.png",
       "assets/fresque-coloriage-v3-DAZL4yYP.png",
       "assets/tapis-objets-v2-CCJxXpZ8.png",
+      "assets/ponts-des-rives-v1-CKOekF0J.png",
       "assets/appel-C4SYKruv.png",
       "assets/grisaille-DqK2qfGj.png",
       "assets/habitants-lc5JSFiX.png",
@@ -3741,20 +3755,21 @@
     ]
   },
   "src/base/adaptateur-sqlite-wasm.ts": {
-    "file": "assets/adaptateur-sqlite-wasm-DXDw9EJ-.js",
+    "file": "assets/adaptateur-sqlite-wasm-CoDvLMrm.js",
     "name": "adaptateur-sqlite-wasm",
     "src": "src/base/adaptateur-sqlite-wasm.ts",
     "isDynamicEntry": true
   },
   "src/ecrans/EcranDashboard.tsx": {
-    "file": "assets/EcranDashboard-BBvo2DCr.js",
+    "file": "assets/EcranDashboard-CtA4B9vJ.js",
     "name": "EcranDashboard",
     "src": "src/ecrans/EcranDashboard.tsx",
     "isDynamicEntry": true,
     "imports": [
       "index.html",
-      "_GalerieExercices-BVRxQvPm.js",
-      "_partage-Cax0073I.js",
+      "_GalerieExercices-bTXb24zx.js",
+      "_partage-CiXBmyrY.js",
+      "_conseil-parent-CMCmyyh2.js",
       "_commun-BGaluCk_.js",
       "_referentiels-CZqLb5_W.js"
     ],
@@ -3763,44 +3778,57 @@
     ]
   },
   "src/ecrans/EcranDebugRecompenses.tsx": {
-    "file": "assets/EcranDebugRecompenses-CmPVGqxw.js",
+    "file": "assets/EcranDebugRecompenses-o8fiOhHV.js",
     "name": "EcranDebugRecompenses",
     "src": "src/ecrans/EcranDebugRecompenses.tsx",
     "isDynamicEntry": true,
     "imports": [
       "index.html",
-      "_partage-Cax0073I.js",
+      "_partage-CiXBmyrY.js",
       "_referentiels-CZqLb5_W.js",
       "_commun-BGaluCk_.js"
     ]
   },
   "src/ecrans/EcranGalerieParent.tsx": {
-    "file": "assets/EcranGalerieParent-CHfn1tgc.js",
+    "file": "assets/EcranGalerieParent-CtvWUNIm.js",
     "name": "EcranGalerieParent",
     "src": "src/ecrans/EcranGalerieParent.tsx",
     "isDynamicEntry": true,
     "imports": [
       "index.html",
-      "_GalerieExercices-BVRxQvPm.js",
-      "_partage-Cax0073I.js",
+      "_GalerieExercices-bTXb24zx.js",
+      "_commun-BGaluCk_.js",
+      "_partage-CiXBmyrY.js",
+      "_referentiels-CZqLb5_W.js"
+    ]
+  },
+  "src/mathematiques/EcranMathematiques.tsx": {
+    "file": "assets/EcranMathematiques-BPsiiJI8.js",
+    "name": "EcranMathematiques",
+    "src": "src/mathematiques/EcranMathematiques.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "index.html",
+      "_partage-CiXBmyrY.js",
+      "_conseil-parent-CMCmyyh2.js",
       "_commun-BGaluCk_.js",
       "_referentiels-CZqLb5_W.js"
     ]
   },
   "src/parent/VisiteDesEcrans.tsx": {
-    "file": "assets/VisiteDesEcrans-BygNj_lZ.js",
+    "file": "assets/VisiteDesEcrans-Bm67lG-N.js",
     "name": "VisiteDesEcrans",
     "src": "src/parent/VisiteDesEcrans.tsx",
     "isDynamicEntry": true,
     "imports": [
       "index.html",
-      "_partage-Cax0073I.js",
+      "_partage-CiXBmyrY.js",
       "_commun-BGaluCk_.js",
       "_referentiels-CZqLb5_W.js"
     ]
   },
   "style.css": {
-    "file": "assets/style-VIgsEmSV.css",
+    "file": "assets/style-DCnfvLu2.css",
     "src": "style.css"
   }
 }
