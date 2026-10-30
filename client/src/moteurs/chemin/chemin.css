@@ -20,6 +20,10 @@
 }
 
 .chemin__traits { z-index: 1; pointer-events: none; }
+/* Le SVG porte `height="100%"` : sans cette hauteur explicite, il prend toute la hauteur de
+   `.chemin` en partant SOUS le panneau, déborde d'autant (192 px mesurés le 31 oct. en
+   1017 × 640) et rend `.chemin` défilable par programme : un `scrollIntoView` le décalait. */
+.chemin__traits { block-size: calc(100% - var(--chemin-haut-panneau, 0px) - var(--chemin-haut-bande, 0px)); }
 .chemin__cases { z-index: 2; pointer-events: none; }
 
 /* Grille d'ajustement : de vraies colonnes, les boîtes sont mesurées par le moteur. */

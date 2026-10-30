@@ -290,3 +290,11 @@ paysage large (≥ 1100 px), le calcul passe en colonne à droite des lieux (`.m
 fenêtre de 768 ; R20 vert aux trois formats ; parcours maths 11/11, composants maths 84/84.
 Les quatre rouges Vitest du même passage (`coloriage-chaudron-raster` 13,5 s pour 10 s,
 `exploration-modele`) sont des délais sous la charge de la machine : verts relancés seuls, 2 fois.
+
+**Troisième passage (rotation 6).** `composition-exercices` : chemin `cite-07`, « texte de la
+prise tronqué » en paysage après rotation (6 sur 6 relancé seul ; c'était l'un des rouges de la
+dette `responsive` du 12 oct.). Cause mesurée : le calque SVG des traits porte `height="100%"`,
+part SOUS le panneau (192 px) et dépassait donc `.chemin` d'autant (`scrollHeight` 899 pour 707) :
+`.chemin`, en `overflow: hidden`, devenait défilable par programme, et un `scrollIntoView`
+décalait le plateau sous la scène. Corrigé dans `chemin.css` (hauteur du calque = hauteur de la
+zone) : `.chemin` 707 pour 707 ; composition 26/26, parcours chemin 32/32, socle 98/98.
