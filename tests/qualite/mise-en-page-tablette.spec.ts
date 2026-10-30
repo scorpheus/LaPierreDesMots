@@ -78,10 +78,10 @@ interface DefilementTolere {
   /** Ce qui ÉTEINDRAIT l'exemption. « perpétuelle » se déclare, ne se sous-entend pas. */
   readonly scene: string;
   /**
-   * La largeur de fenêtre à laquelle le grief a été MESURÉ et l'arbitrage RENDU.
+   * Les largeurs de fenêtre auxquelles le grief a été MESURÉ et l'arbitrage RENDU.
    * `null` = tous formats, quand la raison ne dépend pas du format.
    */
-  readonly largeurArbitree: number | null;
+  readonly largeursArbitrees: readonly number[] | null;
   readonly date: string;
 }
 
@@ -94,7 +94,7 @@ const DEFILEMENT_TOLERE = new Map<string, DefilementTolere>([
         'Exiger qu’elle tienne dans 1 200 px reviendrait à exiger qu’il n’y ait jamais plus ' +
         'de six brouillons.',
       scene: 'perpétuelle tant que la liste est non bornée — une pagination l’éteindrait.',
-      largeurArbitree: null,
+      largeursArbitrees: null,
       date: '2026-08-03'
     }
   ],
@@ -103,7 +103,7 @@ const DEFILEMENT_TOLERE = new Map<string, DefilementTolere>([
     {
       raison: 'liste non bornée par nature : la galerie affiche TOUS les assets produits.',
       scene: 'perpétuelle tant que la liste est non bornée — une pagination l’éteindrait.',
-      largeurArbitree: null,
+      largeursArbitrees: null,
       date: '2026-08-03'
     }
   ],
@@ -161,8 +161,35 @@ const DEFILEMENT_TOLERE = new Map<string, DefilementTolere>([
         'perpétuelle tant que le décor est un bloc du flux (le débordement vaut H + 20 px en ' +
         'paysage, donc toute hauteur déborde). Seul un décor en FOND de page, qui cesse de ' +
         's’empiler sous le reste, l’éteindrait.',
-      largeurArbitree: 1920,
+      // Tous formats depuis le 2026-10-31 : le balayage par format (paliers du 9 oct.) mesure aussi
+      // le PC portable (1 263 px) et la tablette portrait (1 055 px). Décision du parent, sur ces
+      // mesures : « Accepter partout » — la raison (un hub qu'on explore) ne dépend pas du format.
+      largeursArbitrees: null,
       date: '2026-08-07'
+    }
+  ],
+  [
+    /**
+     * Décision du parent du 2026-10-31 (« Accepter partout »), rendue sur ces mesures : le coffre
+     * défile de 1 003 px au PC portable, 1 993 px en tablette portrait, 143 px en 1920 ; la visite
+     * des écrans de 391 px au PC portable et 156 px ailleurs. Deux écrans qu'on PARCOURT (les
+     * collections de l'enfant, l'inventaire des écrans pour le parent), pas des exercices.
+     */
+    'coffre',
+    {
+      raison: 'collection qu’on parcourt, pas exercice qu’on enchaîne ; défilement accepté par le parent.',
+      scene: 'une mise en page du coffre qui tient dans la fenêtre l’éteindrait.',
+      largeursArbitrees: null,
+      date: '2026-10-31'
+    }
+  ],
+  [
+    'visite-parent',
+    {
+      raison: 'inventaire des écrans pour le parent, qu’on parcourt ; défilement accepté par le parent.',
+      scene: 'une visite paginée, ou qui tient dans la fenêtre, l’éteindrait.',
+      largeursArbitrees: null,
+      date: '2026-10-31'
     }
   ]
 ]);
@@ -320,7 +347,7 @@ async function exiger(nom: string, ecran: string, page: Page): Promise<void> {
   const tolere = DEFILEMENT_TOLERE.get(ecran);
   if (tolere !== undefined) {
     const largeur = page.viewportSize()?.width ?? 0;
-    if (tolere.largeurArbitree === null || tolere.largeurArbitree === largeur) {
+    if (tolere.largeursArbitrees === null || tolere.largeursArbitrees.includes(largeur)) {
       // On MESURE quand même, et on l'imprime : une exemption muette laisserait le débordement
       // grandir sans que personne ne le voie. Exempté n'est pas invisible.
       console.log(
@@ -333,7 +360,7 @@ async function exiger(nom: string, ecran: string, page: Page): Promise<void> {
     // Le format n'est pas celui où l'arbitrage a été rendu : on ne pardonne pas plus large.
     console.log(
       `[R20] ${nom} — exemption NON applicable : elle a été rendue à ` +
-        `${String(tolere.largeurArbitree)} px de large, le banc mesure ${String(largeur)} px. ` +
+        `${tolere.largeursArbitrees.join(' et ')} px de large, le banc mesure ${String(largeur)} px. ` +
         'L’écran est jugé comme les autres.'
     );
   }

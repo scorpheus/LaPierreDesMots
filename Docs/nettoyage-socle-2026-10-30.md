@@ -257,3 +257,26 @@ sorties : `bac-a-sable/bilan-2026-10-30/sondes/` (`sonde-paires-choix`, `sonde-p
 | Parcours tri (décor, éparpillé, tactile) et paires (cadrage, défilement, PC, sans ordre) | **122 / 123** ; rouge : `marais-jumeau-05` 1100×700, « revenir au format initial » (même instabilité, § 6.3) |
 | Responsive hors bloc sériel | 37 / 37 |
 | Responsive, bloc sériel des lots | lot 1 tablette paysage navigateur rouge (paires cite-12, § 6.3) ; plus tôt dans la journée, avant les derniers réglages de paires, **12 / 12** ; le dernier passage du lot 2 est tombé en délai dépassé sous charge, non relancé |
+
+## 7. Publication du 31 octobre — deux décisions du parent
+
+La préparation de la publication (`publier-site.bat --preparer`, campagne `verifier`, rotation 4)
+est tombée rouge sur des écarts que le travail du 9 au 31 octobre n'avait jamais montrés à une
+campagne complète :
+
+- **7 captures visuelles** différentes de leur référence (3 à 48 % de pixels) : la Vallée des
+  Nombres sur la carte (`carte-voilee`, `carte-eclat`, `carte-monde-v2`), la mise en page du
+  socle (`noeud-gris`, `noeud-colorie`, `decor-ecole-v2`), le stade de Gobi sur la récompense
+  (`recompense-etoiles`). Planches avant/après : `bac-a-sable/bilan-2026-10-30/visuel/`.
+  **Décision du parent : « Oui, mettre à jour ».** Les 7 références régénérées ; la 8e
+  (`police-opendyslexic`), régénérée par `--maj` sans être en échec, remise à sa version.
+- **Défilement de trois écrans de parcours** dès que le balayage par format (paliers du 9 oct.)
+  les mesure ailleurs qu'en 1920 : campement 1 263 px (PC portable) et 1 055 px (tablette
+  portrait), coffre 1 003 / 1 993 / 143 px, visite des écrans 391 / 156 px. **Décision du parent :
+  « Accepter partout »** — `DEFILEMENT_TOLERE` de `mise-en-page-tablette.spec.ts`, tous formats
+  pour ces trois écrans ; l'atteignabilité des commandes reste opposable partout.
+
+Corrigés au passage, sans décision à prendre : `decor-v2` lisait les formes des régions avant le
+chargement de leur calque SVG (0 trouvé une fois sur quatre) — il attend désormais les six chemins ;
+`EcranMathematiques` coupait la voix une image trop tard (course vue sous charge au pre-commit) ;
+deux bilans imprimés non assertés (tests trompeurs, plafond tenu à 93).

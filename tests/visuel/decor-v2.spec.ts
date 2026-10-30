@@ -180,6 +180,9 @@ test.describe('le décor v2 arrive entier jusqu’à l’enfant', () => {
     await preparer(page);
     await ouvrirLaCarte(page);
     await expect(page.locator('[data-region-etat]')).toHaveCount(6);
+    // Le calque SVG des régions se charge après les boutons : attendre ses six chemins (mesuré le
+    // 31 oct. : 0 trouvé une fois sur quatre quand on les lisait sans attendre).
+    await expect(page.locator('#calque-regions [data-region-svg]')).toHaveCount(6);
 
     // La v1 dessinait six hexagones réguliers translatés. On compare les six chemins ramenés à
     // l'origine : deux régions identiques à la translation près sont une légende obligatoire,
