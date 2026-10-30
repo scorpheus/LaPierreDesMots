@@ -2951,27 +2951,50 @@
     "file": "assets/ductus-minuscules-B8XBqC8V.json",
     "src": "../contenu/referentiel/ductus-minuscules.json"
   },
-  "_GalerieExercices-bTXb24zx.js": {
-    "file": "assets/GalerieExercices-bTXb24zx.js",
+  "_CadreSceneActivite-BSs2oYFW.js": {
+    "file": "assets/CadreSceneActivite-BSs2oYFW.js",
+    "name": "CadreSceneActivite",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_EnteteActivite-Ckegp0FI.js": {
+    "file": "assets/EnteteActivite-Ckegp0FI.js",
+    "name": "EnteteActivite",
+    "imports": [
+      "index.html",
+      "_partage-yg0o0Uo8.js",
+      "_activites-DaDSIhik.js"
+    ]
+  },
+  "_GalerieExercices-C0GT-Vt_.js": {
+    "file": "assets/GalerieExercices-C0GT-Vt_.js",
     "name": "GalerieExercices",
     "imports": [
       "index.html",
-      "_partage-CiXBmyrY.js"
+      "_partage-yg0o0Uo8.js"
+    ]
+  },
+  "_activites-DaDSIhik.js": {
+    "file": "assets/activites-DaDSIhik.js",
+    "name": "activites",
+    "imports": [
+      "index.html"
     ]
   },
   "_commun-BGaluCk_.js": {
     "file": "assets/commun-BGaluCk_.js",
     "name": "commun"
   },
-  "_conseil-parent-CMCmyyh2.js": {
-    "file": "assets/conseil-parent-CMCmyyh2.js",
+  "_conseil-parent-CPKM-6if.js": {
+    "file": "assets/conseil-parent-CPKM-6if.js",
     "name": "conseil-parent",
     "imports": [
-      "_partage-CiXBmyrY.js"
+      "_partage-yg0o0Uo8.js"
     ]
   },
-  "_partage-CiXBmyrY.js": {
-    "file": "assets/partage-CiXBmyrY.js",
+  "_partage-yg0o0Uo8.js": {
+    "file": "assets/partage-yg0o0Uo8.js",
     "name": "partage"
   },
   "_referentiels-CZqLb5_W.js": {
@@ -2986,18 +3009,20 @@
     ]
   },
   "index.html": {
-    "file": "assets/index-czusa-xE.js",
+    "file": "assets/index-BhQF9H3y.js",
     "name": "index",
     "src": "index.html",
     "isEntry": true,
     "imports": [
       "_commun-BGaluCk_.js",
-      "_partage-CiXBmyrY.js",
+      "_partage-yg0o0Uo8.js",
       "_referentiels-CZqLb5_W.js"
     ],
     "dynamicImports": [
       "src/base/adaptateur-sqlite-wasm.ts",
       "src/api/port-local.ts",
+      "src/ecrans/EcranChaudron.tsx",
+      "src/ecrans/EcranNoeud.tsx",
       "src/ecrans/EcranDashboard.tsx",
       "src/ecrans/EcranGalerieParent.tsx",
       "src/mathematiques/EcranMathematiques.tsx",
@@ -3006,13 +3031,13 @@
     ]
   },
   "src/api/port-local.ts": {
-    "file": "assets/port-local-BAD3k7fr.js",
+    "file": "assets/port-local-BKfzlVNV.js",
     "name": "port-local",
     "src": "src/api/port-local.ts",
     "isDynamicEntry": true,
     "imports": [
       "_commun-BGaluCk_.js",
-      "_partage-CiXBmyrY.js",
+      "_partage-yg0o0Uo8.js",
       "_referentiels-CZqLb5_W.js"
     ],
     "dynamicImports": [
@@ -3760,16 +3785,30 @@
     "src": "src/base/adaptateur-sqlite-wasm.ts",
     "isDynamicEntry": true
   },
+  "src/ecrans/EcranChaudron.tsx": {
+    "file": "assets/EcranChaudron-Czp2TjL3.js",
+    "name": "EcranChaudron",
+    "src": "src/ecrans/EcranChaudron.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "index.html",
+      "_partage-yg0o0Uo8.js",
+      "_EnteteActivite-Ckegp0FI.js",
+      "_activites-DaDSIhik.js",
+      "_commun-BGaluCk_.js",
+      "_referentiels-CZqLb5_W.js"
+    ]
+  },
   "src/ecrans/EcranDashboard.tsx": {
-    "file": "assets/EcranDashboard-CtA4B9vJ.js",
+    "file": "assets/EcranDashboard-C--9kVZp.js",
     "name": "EcranDashboard",
     "src": "src/ecrans/EcranDashboard.tsx",
     "isDynamicEntry": true,
     "imports": [
       "index.html",
-      "_GalerieExercices-bTXb24zx.js",
-      "_partage-CiXBmyrY.js",
-      "_conseil-parent-CMCmyyh2.js",
+      "_GalerieExercices-C0GT-Vt_.js",
+      "_partage-yg0o0Uo8.js",
+      "_conseil-parent-CPKM-6if.js",
       "_commun-BGaluCk_.js",
       "_referentiels-CZqLb5_W.js"
     ],
@@ -3778,57 +3817,74 @@
     ]
   },
   "src/ecrans/EcranDebugRecompenses.tsx": {
-    "file": "assets/EcranDebugRecompenses-o8fiOhHV.js",
+    "file": "assets/EcranDebugRecompenses-TWu5I1fa.js",
     "name": "EcranDebugRecompenses",
     "src": "src/ecrans/EcranDebugRecompenses.tsx",
     "isDynamicEntry": true,
     "imports": [
       "index.html",
-      "_partage-CiXBmyrY.js",
+      "_partage-yg0o0Uo8.js",
       "_referentiels-CZqLb5_W.js",
       "_commun-BGaluCk_.js"
     ]
   },
   "src/ecrans/EcranGalerieParent.tsx": {
-    "file": "assets/EcranGalerieParent-CtvWUNIm.js",
+    "file": "assets/EcranGalerieParent-Dloe2VSc.js",
     "name": "EcranGalerieParent",
     "src": "src/ecrans/EcranGalerieParent.tsx",
     "isDynamicEntry": true,
     "imports": [
       "index.html",
-      "_GalerieExercices-bTXb24zx.js",
+      "_GalerieExercices-C0GT-Vt_.js",
       "_commun-BGaluCk_.js",
-      "_partage-CiXBmyrY.js",
+      "_partage-yg0o0Uo8.js",
       "_referentiels-CZqLb5_W.js"
     ]
   },
+  "src/ecrans/EcranNoeud.tsx": {
+    "file": "assets/EcranNoeud-YG_Vmcku.js",
+    "name": "EcranNoeud",
+    "src": "src/ecrans/EcranNoeud.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "index.html",
+      "_partage-yg0o0Uo8.js",
+      "_referentiels-CZqLb5_W.js",
+      "_EnteteActivite-Ckegp0FI.js",
+      "_activites-DaDSIhik.js",
+      "_CadreSceneActivite-BSs2oYFW.js",
+      "_commun-BGaluCk_.js"
+    ]
+  },
   "src/mathematiques/EcranMathematiques.tsx": {
-    "file": "assets/EcranMathematiques-BPsiiJI8.js",
+    "file": "assets/EcranMathematiques-DVDVyVf3.js",
     "name": "EcranMathematiques",
     "src": "src/mathematiques/EcranMathematiques.tsx",
     "isDynamicEntry": true,
     "imports": [
       "index.html",
-      "_partage-CiXBmyrY.js",
-      "_conseil-parent-CMCmyyh2.js",
+      "_partage-yg0o0Uo8.js",
+      "_conseil-parent-CPKM-6if.js",
+      "_activites-DaDSIhik.js",
+      "_CadreSceneActivite-BSs2oYFW.js",
       "_commun-BGaluCk_.js",
       "_referentiels-CZqLb5_W.js"
     ]
   },
   "src/parent/VisiteDesEcrans.tsx": {
-    "file": "assets/VisiteDesEcrans-Bm67lG-N.js",
+    "file": "assets/VisiteDesEcrans-CM5mUzpY.js",
     "name": "VisiteDesEcrans",
     "src": "src/parent/VisiteDesEcrans.tsx",
     "isDynamicEntry": true,
     "imports": [
       "index.html",
-      "_partage-CiXBmyrY.js",
+      "_partage-yg0o0Uo8.js",
       "_commun-BGaluCk_.js",
       "_referentiels-CZqLb5_W.js"
     ]
   },
   "style.css": {
-    "file": "assets/style-DCnfvLu2.css",
+    "file": "assets/style-BCcDm0A9.css",
     "src": "style.css"
   }
 }
