@@ -354,9 +354,11 @@ export function EcranMathematiques({ profil, surRetour, surReprendreLecture, api
         effacerConseilParentMaths(profilId, etat.generationMaths); masquerConseil(true);
       }}>Choisir moi-même</button>
     </aside>}
-    {vue === 'lieux' && <EntreeCalcul surChoix={(activite) => fixerCalcul({ activite, graine: services.alea.entier(0, 0x1_0000_0000) })} />}
-    {vue === 'lieux' && <LieuxVallee etat={etat} surLieu={choisirLieu}
-      surFete={() => { choisirProjet(FETE_MATHS.id); fixerVue('ponts'); }} />}
+    {vue === 'lieux' && <div className="maths-accueil">
+      <EntreeCalcul surChoix={(activite) => fixerCalcul({ activite, graine: services.alea.entier(0, 0x1_0000_0000) })} />
+      <LieuxVallee etat={etat} surLieu={choisirLieu}
+        surFete={() => { choisirProjet(FETE_MATHS.id); fixerVue('ponts'); }} />
+    </div>}
     {vue === 'ponts' && <ChoixLieuVallee lieu={lieu} projetId={projetChoisi} surProjetChoisi={choisirProjet}
       niveauxProjet={niveauxProjet} surNiveauxProjet={fixerNiveauxProjet}
       niveauxLibres={niveauxLibres} surNiveauLibre={choisirNiveauLibre}

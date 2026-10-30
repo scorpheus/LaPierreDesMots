@@ -280,3 +280,13 @@ Corrigés au passage, sans décision à prendre : `decor-v2` lisait les formes d
 chargement de leur calque SVG (0 trouvé une fois sur quatre) — il attend désormais les six chemins ;
 `EcranMathematiques` coupait la voix une image trop tard (course vue sous charge au pre-commit) ;
 deux bilans imprimés non assertés (tests trompeurs, plafond tenu à 93).
+
+**Second passage de la préparation (rotation suivante).** Nouveau constat : l'accueil de la Vallée
+des Nombres défilait de 223 px en PC portable (1366 × 768) — le bloc « Calculer avec Gobi »
+(premier jet du calcul, 9 oct., jamais publié jusque-là) faisait 233 px empilés au-dessus des
+lieux. Corrigé sans décision à prendre (R20 s'applique, ce n'est pas un écran de parcours) : en
+paysage large (≥ 1100 px), le calcul passe en colonne à droite des lieux (`.maths-accueil`,
+`styles-mathematiques.css`) ; ailleurs, l'empilement d'origine. Mesuré : page 768 px pour une
+fenêtre de 768 ; R20 vert aux trois formats ; parcours maths 11/11, composants maths 84/84.
+Les quatre rouges Vitest du même passage (`coloriage-chaudron-raster` 13,5 s pour 10 s,
+`exploration-modele`) sont des délais sous la charge de la machine : verts relancés seuls, 2 fois.
