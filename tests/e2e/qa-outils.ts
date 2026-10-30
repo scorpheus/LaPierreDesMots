@@ -537,6 +537,102 @@ export function noeudsLivres(): readonly NoeudLivre[] {
   return noeuds;
 }
 
+/**
+ * Les nœuds d'un BALAYAGE (un cas par nœud), selon le palier de la campagne.
+ *
+ * - `PIERRE_PALIER=complet` (défaut, et `npm run verifier:complet`) : tous les nœuds livrés.
+ * - `PIERRE_PALIER=verifier` : un nœud par moteur, choisi par `PIERRE_ROTATION` (entier) dans la
+ *   liste triée du moteur. La rotation avance d'une campagne à l'autre : chaque nœud est balayé
+ *   en quelques campagnes, et l'exhaustif reste dans `verifier:complet`.
+ *
+ * Le choix ne dépend que de ces deux variables : tous les travailleurs Playwright voient donc
+ * la même liste de cas (sinon Playwright refuse la campagne).
+ */
+export function noeudsBalayes(): readonly NoeudLivre[] {
+  const tous = noeudsLivres();
+  if (process.env['PIERRE_PALIER'] !== 'verifier') return tous;
+  const rotation = Number.parseInt(process.env['PIERRE_ROTATION'] ?? '0', 10);
+  if (!Number.isInteger(rotation) || rotation < 0) {
+    throw new Error(`QA : PIERRE_ROTATION doit être un entier positif, reçu « ${String(process.env['PIERRE_ROTATION'])} ».`);
+  }
+  const parMoteur = new Map<string, NoeudLivre[]>();
+  for (const noeud of [...tous].sort((a, b) => a.id.localeCompare(b.id))) {
+    const liste = parMoteur.get(noeud.moteur) ?? [];
+    liste.push(noeud);
+    parMoteur.set(noeud.moteur, liste);
+  }
+  return [...parMoteur.keys()].sort().map((moteur) => {
+    const liste = parMoteur.get(moteur)!;
+    return liste[rotation % liste.length]!;
+  });
+}
+
+/** Rotation de la campagne `verifier` (`PIERRE_ROTATION`), ou `null` au palier `complet`. */
+export function rotationDuPalier(): number | null {
+  if (process.env['PIERRE_PALIER'] !== 'verifier') return null;
+  return Number.parseInt(process.env['PIERRE_ROTATION'] ?? '0', 10) || 0;
+}
+
+/**
+ * Un échantillon tournant d'une liste balayée : tout en `complet`, `parPalier` éléments au palier
+ * `verifier`, décalés à chaque campagne, de sorte que chaque élément passe en quelques campagnes.
+ */
+export function echantillonDuPalier<T>(liste: readonly T[], parPalier: number): readonly T[] {
+  const rotation = rotationDuPalier();
+  if (rotation === null || liste.length <= parPalier) return liste;
+  return Array.from({ length: parPalier }, (_, rang) => liste[(rotation * parPalier + rang) % liste.length]!);
+}
+
+/** Un format d'écran d'un balayage, en pixels CSS. */
+export interface FormatBalayage {
+  readonly nom: string;
+  readonly width: number;
+  readonly height: number;
+}
+
+/** La tablette en portrait, onglet du navigateur (contrat du socle § 2). */
+export const FORMAT_TABLETTE_PORTRAIT: FormatBalayage = { nom: 'tablette portrait', width: 800, height: 1100 };
+/** Le PC portable courant (contrat du socle § 2). */
+export const FORMAT_PC: FormatBalayage = { nom: 'PC portable', width: 1366, height: 768 };
+/** Le banc historique de l'annexe T § 3, gardé au palier `complet`. */
+export const FORMAT_BANC_HISTORIQUE: FormatBalayage = { nom: 'banc 1920×1200', width: 1920, height: 1200 };
+
+/**
+ * Les cas (élément × format) d'un balayage par écran.
+ *
+ * - `complet` : chaque élément à chacun des trois formats (banc historique, tablette, PC).
+ * - `verifier` : chaque élément à UN format, tablette et PC en alternance (décalée par la
+ *   rotation). Chaque règle est donc mesurée à chaque campagne sur la tablette ET sur le PC,
+ *   pour le même nombre de cas qu'avant.
+ */
+export function formatsDuBalayage<T>(liste: readonly T[]): readonly { readonly element: T; readonly format: FormatBalayage }[] {
+  const rotation = rotationDuPalier();
+  if (rotation === null) {
+    return liste.flatMap((element) =>
+      [FORMAT_BANC_HISTORIQUE, FORMAT_TABLETTE_PORTRAIT, FORMAT_PC].map((format) => ({ element, format })));
+  }
+  return liste.map((element, rang) => ({
+    element,
+    format: (rang + rotation) % 2 === 0 ? FORMAT_TABLETTE_PORTRAIT : FORMAT_PC,
+  }));
+}
+
+/**
+ * Les nœuds d'UN moteur pour une suite qui les rejoue à plusieurs formats.
+ *
+ * Au palier `verifier`, `parPalier` nœuds seulement, en rotation (`PIERRE_ROTATION`) : la mise en
+ * page de CHAQUE nœud à 7 formats reste gardée à chaque campagne par
+ * `tests/qualite/socle-activite.spec.ts` (S1 à S10) ; ces suites gardent, elles, les gestes
+ * (rotation, sélection, balayage au doigt), qui ne dépendent pas du nœud. Tout en `complet`.
+ */
+export function noeudsDuMoteurBalayes(moteur: string, parPalier = 2): readonly NoeudLivre[] {
+  const tous = noeudsLivres().filter((noeud) => noeud.moteur === moteur)
+    .sort((a, b) => a.id.localeCompare(b.id));
+  if (process.env['PIERRE_PALIER'] !== 'verifier' || tous.length <= parPalier) return tous;
+  const rotation = Number.parseInt(process.env['PIERRE_ROTATION'] ?? '0', 10) || 0;
+  return Array.from({ length: parPalier }, (_, rang) => tous[(rotation * parPalier + rang) % tous.length]!);
+}
+
 // ═════════════════════════════════════════════════════════════════ mesures faites sur l'écran
 
 export interface CibleTropPetite {
@@ -704,6 +800,8 @@ export async function entrerDansLeNoeud(
 export async function appliquerReglagesLectureReels(
   page: Page,
   prenom = 'Responsive',
+  // T19 (9 oct. 2026) : la garde de la lecture colorée juge le DÉFAUT du jeu, coloration allumée.
+  options: { readonly colorationSyllabique?: boolean } = {},
 ): Promise<void> {
   await preparer(page, prenom);
   const profilId = await page.locator('[data-profil]').filter({ hasText: prenom }).first()
@@ -716,7 +814,7 @@ export async function appliquerReglagesLectureReels(
       interlettrageEm: 0.06,
       espacementMotsEm: 0.08,
       interligne: 2,
-      colorationSyllabique: false,
+      colorationSyllabique: options.colorationSyllabique ?? false,
       surlignageLigneCourante: false,
       regleDeLecture: false,
       fond: 'parchemin',
@@ -885,7 +983,7 @@ export async function jouerJusquALaRecompense(
  * l'historique du routeur est en mémoire, et un `goto` recharge l'application sur `/` — voir
  * l'en-tête de `qa-outils.ts`, mesure à l'appui.
  */
-export function recettesDEcrans(): readonly EcranQA[] {
+export function recettesDEcrans(noeudsVisites: readonly NoeudLivre[] = noeudsLivres()): readonly EcranQA[] {
   const NOEUDS = noeudsLivres();
   /** Le premier nœud `colorie` : c'est par lui qu'on atteint l'écran de récompense. */
   const NOEUD_COLORIE = NOEUDS.find((n) => n.moteur === 'colorie')?.id ?? NOEUDS[0]!.id;
@@ -909,7 +1007,8 @@ export function recettesDEcrans(): readonly EcranQA[] {
     aller: async (page) => {
       await preparer(page);
       await choisirLeProfil(page);
-      await revenirAuCampement(page);
+      // Depuis le 30 oct., l'histoire se rejoue depuis la carte seule (contrat du socle § 12).
+      await expect(page.locator('[data-ecran="carte"]')).toBeVisible();
       await page.locator('[data-vers="ouverture"]').click();
       // ── ON ATTEND QUE LE RÉCIT SOIT ARRIVÉ, PAS SEULEMENT QUE L'ÉCRAN SOIT MONTÉ.
       //
@@ -960,6 +1059,21 @@ export function recettesDEcrans(): readonly EcranQA[] {
       await choisirLeProfil(page);
       await revenirAuCampement(page);
       await page.locator('[data-vers="coffre"]').click();
+    },
+  },
+  {
+    // La Vallée des Nombres, telle que l'enfant l'ouvre depuis le campement. Ses défauts connus
+    // relèvent de la reconception des maths (tableau des retours, T06) : on les mesure, on ne
+    // les tait pas.
+    nom: 'mathématiques (Vallée des Nombres)',
+    attendu: 'mathematiques',
+    aller: async (page) => {
+      await preparer(page);
+      await choisirLeProfil(page);
+      await revenirAuCampement(page);
+      await page.locator('[data-vers="mathematiques"]').click();
+      // L'écran existe pendant le chargement : on attend les lieux, pas une durée.
+      await expect(page.getByTestId('lieux-maths')).toBeVisible();
     },
   },
   {
@@ -1066,7 +1180,8 @@ export function recettesDEcrans(): readonly EcranQA[] {
       await jouerJusquALaRecompense(page, NOEUD_COLORIE);
     },
   },
-  ...NOEUDS.map((noeud) => ({
+  // Un nœud par recette : tous par défaut, l'échantillon d'un palier si on le demande.
+  ...noeudsVisites.map((noeud) => ({
     nom: `noeud/${noeud.id} (moteur ${noeud.moteur})`,
     attendu: 'noeud',
     aller: async (page: Page) => {

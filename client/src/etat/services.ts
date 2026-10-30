@@ -30,7 +30,8 @@ import { lireSeuilsCascade } from '@pierre/partage/recompenses';
 import type { ServicesJeu } from '../moteurs/types.js';
 import { creerAudioTone } from '../services/audio-tone.js';
 import { creerVoixFichier } from '../services/voix-fichier.js';
-import { creerVoixNavigateur } from '../services/voix-navigateur.js';
+import { brancherReglageVoix } from '../services/voix-reglee.js';
+import { lireReglagesFoyer } from '../parent/reglages-foyer.js';
 import { creerHaptiqueNavigateur } from '../gamefeel/haptique-navigateur.js';
 import { creerRetourSensoriel } from '../gamefeel/retour.js';
 import { emettreSurCanevasCourant } from '../gamefeel/particules.js';
@@ -94,7 +95,9 @@ export function creerServicesParDefaut(graine = resoudreGraineParDefaut()): Serv
   // `creerVoixNavigateur` reste importé et exporté : le § 10 du contrat interdit de le
   // supprimer, et `basculerSurLeRepli` en fait un usage explicite plutôt qu'un import mort.
   // ─────────────────────────────────────────────────────────────────────────────────────
-  const voix = creerVoixFichier();
+  // La parole suit le réglage du foyer, éteinte par défaut (décision du parent du 9 oct. 2026,
+  // `services/voix-reglee.ts`). Lu à chaque appel : la bascule agit sans rechargement.
+  const voix = brancherReglageVoix(creerVoixFichier(), () => lireReglagesFoyer().boutonEcouter);
   void voix.recupererManifeste();
 
   return {
@@ -215,17 +218,4 @@ export function chargerManifesteVoix(services: ServicesJeu, brut: unknown): void
   if (typeof candidat.chargerManifeste === 'function') {
     candidat.chargerManifeste(brut);
   }
-}
-
-/**
- * Le repli de D9, rendu explicite.
- *
- * `voix-navigateur` ne connaît aucun clip : `aUnClip` y vaut toujours `false`, donc D42
- * masque tous les boutons. C'est le comportement voulu sur une installation dont
- * `contenu/audio/` n'a pas été généré — le jeu se lance, il est muet, et il ne ment pas.
- * Cette fonction existe pour que ce choix soit NOMMÉ dans le code plutôt que déduit de la
- * présence d'un import.
- */
-export function creerVoixDeRepli(): ServicesJeu['voix'] {
-  return creerVoixNavigateur();
 }

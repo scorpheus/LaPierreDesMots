@@ -21,6 +21,7 @@
     "lint": "eslint .",
     "construire": "npm run construire -w @pierre/partage && npm run construire -w @pierre/serveur && npm run construire -w @pierre/client",
     "construire:test": "npm run construire:test -w @pierre/client",
+    "construire:test:fige": "npm run construire:test -w @pierre/client -- --outDir ../tests/rapports/client-fige --emptyOutDir",
     "ressources:verifier": "node scripts/verifier-ressources-locales.mjs",
     "construire:autonome": "npm run ressources:verifier && npm run construire -w @pierre/partage && npm run construire:autonome -w @pierre/client",
     "construire:pwa": "npm run ressources:verifier && npm run construire -w @pierre/partage && npm run construire:pwa -w @pierre/client",
@@ -57,7 +58,9 @@
     "qa:trompeurs": "node scripts/qa/tests-trompeurs.mjs",
     "qa:tableau": "node scripts/qa/tableau-de-bord.mjs",
     "qa:controles": "node scripts/qa/controles-positifs.mjs",
-    "verifier": "node scripts/verifier.mjs"
+    "verifier": "node scripts/verifier.mjs",
+    "verifier:complet": "node scripts/verifier.mjs --palier=complet",
+    "verifier:rapide": "node scripts/verifier-rapide.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.0.0",

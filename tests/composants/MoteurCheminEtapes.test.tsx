@@ -47,10 +47,17 @@ it('annonce le nouveau chemin et sa nouvelle lettre sans répéter une longue co
   expect(container.querySelector('[data-regle-courte]')?.textContent).toBe('Avec la lettre b');
   premiereEtape(container);
   expect(container.querySelector('[data-regle-courte]')?.textContent).toBe('Avec la lettre d');
-  const annonce = container.querySelector('[data-annonce="chemin"]');
+  // T10 — refait pour le repère commun : même exigences (annonce vivante, rang du chemin,
+  // nouvelle lettre), et le changement est signalé par le cadre, plus par « Nouveau chemin ».
+  // Le rang est dans le repère (barre de consigne) ; la règle reste près des cases.
+  const annonce = container.querySelector('[data-repere-etape="chemin"]');
   expect(annonce?.getAttribute('aria-live')).toBe('polite');
-  expect(annonce?.textContent).toContain('Nouveau chemin');
-  expect(annonce?.textContent).toContain('2 / 4');
+  expect(annonce?.getAttribute('data-nouvelle-etape')).toBe('oui');
+  expect(annonce?.textContent).toContain('Étape 2 sur 4');
+  // La nouvelle lettre reste annoncée près des cases, dans une région vivante.
+  const regle = container.querySelector('[data-annonce="chemin"]');
+  expect(regle?.getAttribute('aria-live')).toBe('polite');
+  expect(regle?.querySelector('[data-regle-courte]')?.textContent).toBe('Avec la lettre d');
 });
 
 it('les anciennes coches ne marquent plus les réponses de la nouvelle lettre', () => {

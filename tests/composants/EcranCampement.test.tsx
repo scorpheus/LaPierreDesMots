@@ -134,10 +134,10 @@ afterEach(() => {
 });
 
 describe('R11 comptée dans le DOM', () => {
-  it('présente la carte, le coffre et l’histoire comme des cartes illustrées, pas comme une barre technique', () => {
-    monter({ surRejouerOuverture: vi.fn() });
+  it('présente la carte et le coffre comme des cartes illustrées, pas comme une barre technique', () => {
+    monter();
 
-    for (const destination of ['carte', 'coffre', 'ouverture']) {
+    for (const destination of ['carte', 'coffre']) {
       const action = document.querySelector<HTMLElement>(`[data-vers="${destination}"]`);
       expect(action, `${destination} manque dans la barre du campement`).not.toBeNull();
       expect(action?.classList.contains('action-campement')).toBe(true);

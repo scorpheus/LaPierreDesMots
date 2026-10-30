@@ -1,0 +1,112 @@
+/* Moteur `libre` — apparence propre. La disposition vient du socle (DispositionMoteur). */
+
+/* ── La toile : le décor est le jeu, à pleine surface ───────────────────────────────────── */
+
+.libre-toile {
+  position: relative;
+  inline-size: 100%;
+  block-size: 100%;
+  min-inline-size: 0;
+  min-block-size: 0;
+  overflow: hidden;
+}
+
+.pierre-scene-libre {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  cursor: default;
+  touch-action: manipulation;
+}
+
+.pierre-region-libre {
+  cursor: pointer;
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: fill 150ms linear, transform 400ms cubic-bezier(.34, 1.56, .64, 1);
+}
+
+.pierre-region-libre:active { transform: scale(.94); transition: transform 60ms ease-out; }
+
+.pierre-region-libre:focus-visible,
+.pierre-prise-libre:focus-visible {
+  outline: 3px solid var(--soleil, #FFC93C);
+  outline-offset: 2px;
+}
+
+.pierre-prise-libre { cursor: pointer; fill: transparent; pointer-events: all; }
+
+.pierre-scene-libre--calme .pierre-region-libre { transition: none; }
+
+/* ── Le décor raster : fond, couleurs (canvas), trait, prises accessibles ───────────────── */
+
+.libre-raster {
+  position: relative;
+  inline-size: 100%;
+  block-size: 100%;
+  overflow: hidden;
+}
+
+.libre-raster__couche,
+.libre-raster__prises {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.libre-raster__couche { object-fit: contain; }
+.libre-raster__couleurs { cursor: pointer; }
+.libre-raster__trait,
+.libre-raster__prises { pointer-events: none; }
+
+/* La prise reste un bouton pour le clavier ; elle ne reçoit jamais le doigt (le canvas le fait). */
+.libre-raster__prise { pointer-events: none; cursor: pointer; }
+
+/* ── Le nuancier : godets de couleur et bouton de fin ───────────────────────────────────── */
+
+.libre-nuancier {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--socle-espace);
+}
+
+/* Cible ≥ 64 px (R16) ; la couleur elle-même est le fond, posée en ligne (valeur calculée). */
+.libre-godet {
+  inline-size: var(--socle-cible, 64px);
+  block-size: var(--socle-cible, 64px);
+  padding: 0;
+  border: 2px solid var(--trait, #1B2440);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.libre-godet[data-choisie='oui'] {
+  border: 4px solid var(--soleil, #FFC93C);
+  box-shadow: 0 0 0 3px var(--parchemin, #FFF6E3) inset;
+}
+
+.libre-godet:focus-visible {
+  outline: 3px solid var(--soleil, #FFC93C);
+  outline-offset: 3px;
+}
+
+/* Le nom de la couleur reste le nom accessible du godet, sans s'afficher sur le disque. */
+.libre-godet__nom {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.libre-terminer {
+  min-inline-size: var(--socle-cible, 64px);
+  min-block-size: var(--socle-cible, 64px);
+  font-family: var(--font-interface);
+  font-size: var(--socle-texte-interface, 1.125rem);
+  cursor: pointer;
+}

@@ -1,0 +1,97 @@
+/*
+ * Ce qu'on DEMANDE et ce qu'on RÉPOND — T19 (Docs/tableau-retours.md), 9 octobre 2026.
+ * Détail et mesures : Docs/socle-questions-et-lecture-2026-10-09.md.
+ *
+ * Le parent : « les questions et les consignes ont la même couleur dans toute l'application,
+ * distincte des réponses ». La référence est le repère d'étape de E03 / T10, celui qu'il trouve
+ * lisible : une pastille jaune bordée de trait.
+ *
+ *   QUESTION : fond jaune doux, bord de trait, À PLAT (aucune ombre : on ne l'enfonce pas).
+ *              Une seule police et une seule taille dans tout l'élément (E08) : celles de la
+ *              lecture du profil, puisque l'enfant la lit.
+ *   RÉPONSE  : fond parchemin, bord de trait, EN RELIEF (l'ombre du bouton : on la touche).
+ *              Jamais le jaune des questions.
+ *
+ * Un moteur pose `data-theme-role="question"` ou `"reponse"` ; il n'écrit plus ni fond, ni bord,
+ * ni police pour ces éléments. Garde : tests/qualite/socle-questions.spec.ts.
+ */
+
+:root {
+  --question-fond: color-mix(in srgb, var(--soleil, #ffc93c) 28%, var(--parchemin) 72%);
+  /* L'état « ça vient de changer » (nouvelle étape, nouvelle manche) : le cadre s'allume. */
+  --question-fond-signal: var(--soleil, #ffc93c);
+  --question-bord: var(--trait);
+  --question-epaisseur: 2px;
+  --question-encre: var(--trait);
+  --question-famille: var(--lecture-famille, var(--font-lecture));
+  --question-corps: var(--lecture-corps);
+  --question-rayon: 0.9rem;
+
+  --reponse-fond: var(--parchemin);
+  --reponse-bord: var(--trait);
+  --reponse-encre: var(--trait);
+}
+
+[data-theme-role='question'] {
+  box-sizing: border-box;
+  border: var(--question-epaisseur) solid var(--question-bord);
+  border-radius: var(--question-rayon);
+  background-color: var(--question-fond);
+  box-shadow: none;
+  color: var(--question-encre);
+}
+
+/* Une zone de lecture qui est une question : la classe `.zone-lecture` pose son propre fond. */
+.zone-lecture[data-theme-role='question'] {
+  background-color: var(--question-fond);
+  color: var(--question-encre);
+}
+
+/*
+ * Une seule taille, une seule police, dans toute la question (E08) : celles de la lecture.
+ * Le repère d'étape garde la police d'interface de T10 (« Étape 1 sur 3 », `etape.css`) :
+ * l'aligner sur la lecture est proposé au parent, pas fait (Docs/socle-questions-et-lecture-2026-10-09.md § 8).
+ */
+[data-theme-role='question']:not(.repere-etape) {
+  font-family: var(--question-famille);
+  font-size: var(--question-corps);
+  letter-spacing: var(--lecture-interlettrage);
+  word-spacing: var(--lecture-espacement-mots);
+}
+
+[data-theme-role='question']:not(.repere-etape) * {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+/* Ce qui vient de changer : le CADRE s'allume, jusqu'au toucher suivant. Le texte ne bouge pas. */
+[data-theme-role='question'][data-nouvelle-etape='oui'] {
+  background-color: var(--question-fond-signal);
+  outline: 3px solid var(--question-fond-signal);
+  outline-offset: 3px;
+}
+
+/* L'onde : seulement si le mouvement est permis par le système ET par le réglage du jeu.
+   Les images-clés n'animent que `box-shadow` (RepereEtape.test.tsx le vérifie). */
+@media (prefers-reduced-motion: no-preference) {
+  [data-theme-role='question'][data-animations='vives'][data-signal='a'] { animation: question-onde-a 700ms ease-out 3; }
+  [data-theme-role='question'][data-animations='vives'][data-signal='b'] { animation: question-onde-b 700ms ease-out 3; }
+}
+
+@keyframes question-onde-a {
+  from { box-shadow: 0 0 0 0 color-mix(in srgb, var(--soleil, #ffc93c) 95%, transparent); }
+  to { box-shadow: 0 0 0 18px color-mix(in srgb, var(--soleil, #ffc93c) 0%, transparent); }
+}
+
+@keyframes question-onde-b {
+  from { box-shadow: 0 0 0 0 color-mix(in srgb, var(--soleil, #ffc93c) 95%, transparent); }
+  to { box-shadow: 0 0 0 18px color-mix(in srgb, var(--soleil, #ffc93c) 0%, transparent); }
+}
+
+/* Réponse : spécificité nulle (`:where`), pour que les états du moteur (case actuelle, carte
+   retournée, mot placé) gardent la main sans `!important`. */
+:where([data-theme-role='reponse']) {
+  border-color: var(--reponse-bord);
+  background-color: var(--reponse-fond);
+  color: var(--reponse-encre);
+}

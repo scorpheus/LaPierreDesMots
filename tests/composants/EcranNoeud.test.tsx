@@ -305,6 +305,26 @@ describe('l’écran du nœud a une sortie, et elle mène ailleurs (M2)', () => 
     // rougirait pour l'état du harnais, pas pour un défaut du produit.
   });
 
+  it('T10 — le repère d’étape du moteur est dans la barre, juste SOUS la consigne', async () => {
+    monter();
+    // Le repère est rendu par le moteur (`colorie`, 4 étapes), mais il s'affiche dans la barre
+    // de consigne de l'écran : même place dans tous les exercices, quelle que soit la scène.
+    const repere = await waitFor(() => {
+      const trouve = document.querySelector('[data-repere-etape]');
+      expect(trouve).not.toBeNull();
+      return trouve!;
+    });
+    const barre = document.querySelector('.barre-consigne');
+    expect(barre?.contains(repere), 'le repère doit vivre dans la barre de consigne').toBe(true);
+    expect(document.querySelector('.porteur-moteur')?.contains(repere), 'plus dans la scène').toBe(false);
+    const consigne = barre!.querySelector('.activite-consigne-texte');
+    expect(consigne).not.toBeNull();
+    // « Juste sous » : dans l'ordre du document, la consigne précède le repère.
+    expect(consigne!.compareDocumentPosition(repere) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(repere.textContent).toContain('Étape 1 sur 4');
+    expect(document.querySelectorAll('[data-repere-etape]')).toHaveLength(1);
+  });
+
   it('porte la prise `[data-vers="carte"]`, avec un libellé qu’un lecteur d’écran annonce', () => {
     monter();
     const sortie = document.querySelector('[data-vers="carte"]');

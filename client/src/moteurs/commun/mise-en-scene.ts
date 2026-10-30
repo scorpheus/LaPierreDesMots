@@ -26,19 +26,15 @@
  * moteurs.mjs` fait pour prouver, sur du VRAI contenu, que `chevauchements` et `horsBornes`
  * valent 0.
  *
- * ── SON VRAI DOMICILE, ET POURQUOI IL N'Y EST PAS ─────────────────────────────────────────────
- * Il devrait vivre dans `client/src/moteurs/commun/`, comme `phrase/receptacles.tsx` le
- * documente déjà. Il n'y est pas pour la MÊME raison : `tests/unitaires/decor-de-fond.test.ts`
- * énumère tous les sous-dossiers de `client/src/moteurs/` et exige de chacun un composant
- * `Moteur*.tsx` — créer `commun/` ferait échouer ce garde, et `tests/` n'appartient pas à ce
- * lot. Il est donc posé dans `eclair/`, le premier des cinq dossiers que je possède, et importé
- * par les quatre autres. Aucune limite de propriété n'est franchie : les cinq dossiers sont à
- * moi pour ce lot.
+ * ── SON DOMICILE ──────────────────────────────────────────────────────────────────────────────
+ * Longtemps posé dans `eclair/` (un garde exigeait un `Moteur*.tsx` dans chaque sous-dossier de
+ * `moteurs/`), il vit dans `commun/` depuis le 30 oct. 2026, avec `porteur-pose.tsx`, à côté de
+ * `glisser.tsx` et `fentes.tsx`. Importé par eclair, attrape, chemin, grave et histoire.
  * ══════════════════════════════════════════════════════════════════════════════════════════════
  */
 
 import { useEffect, useRef, useState } from 'react';
-import type { CSSProperties, MutableRefObject } from 'react';
+import type { MutableRefObject } from 'react';
 
 import type { Habillage } from '@pierre/partage';
 import type { ReglagesLecture } from '@pierre/partage/lecture';
@@ -122,17 +118,6 @@ export function useMesureCadre(hauteurBandeRepli = HAUTEUR_BANDE_DE_REPLI): Mesu
   }, []);
 
   return { racine, bande, cadre, hauteurBande };
-}
-
-/** Le rectangle que le décor couvre : tout le moteur, moins la bande statique du bas. */
-export function styleZoneDeJeu(hauteurBande: number): CSSProperties {
-  return {
-    position: 'absolute',
-    insetInlineStart: 0,
-    insetInlineEnd: 0,
-    insetBlockStart: 0,
-    insetBlockEnd: `${String(hauteurBande)}px`,
-  };
 }
 
 export function cadreJeuEtBornes(cadre: Cadre, hauteurBande: number): { cadreJeu: Cadre; bornes: Bornes } {

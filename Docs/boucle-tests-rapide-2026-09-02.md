@@ -131,3 +131,40 @@ La même campagne a révélé qu’un client de test dont le bundle ne se charge
 crochet apparaît normalement dès l’évaluation du bundle ; cette attente porte désormais son propre
 garde-fou de 10 secondes. Un incident de navigateur reste rouge, mais ne monopolise plus un
 travailleur pendant quatre minutes et demie avant de le dire.
+
+## Ajout du 9 octobre 2026 — trois paliers
+
+Détail et mesures : [retravail des tests après le socle](rework-tests-socle-2026-10-09.md), § 6.
+
+| Palier | Commande | Quand | Contenu |
+|---|---|---|---|
+| rapide | `npm run verifier:rapide` (ou `-- <fichiers>`) | pendant le développement | lint des fichiers touchés, `tsc -b`, `test:contenu`, Vitest des tests qui portent le nom du fichier touché (`related` pour la logique de `partage` et `serveur`), garde du socle pour les moteurs touchés (entière si le socle ou un style commun change), specs Playwright modifiées |
+| verifier | `npm run verifier` | avant un push (crochet `pre-push`) | toute la chaîne, sans couverture ; les balayages exhaustifs prennent un nœud par moteur, différent à chaque campagne (`PIERRE_PALIER=verifier`, `PIERRE_ROTATION`) |
+| complet | `npm run verifier:complet` | avant une publication, ou la nuit | tous les nœuds, tous les lots, couverture par zone (annexe T § 7) |
+
+Règles :
+
+- **Rien n'est retiré.** Ce que le palier `verifier` échantillonne tourne en entier au palier
+  `complet`. La garde `tests/qualite/socle-activite.spec.ts` (tous les nœuds × 7 formats)
+  tourne à chaque palier `verifier` : c'est elle qui garde la mise en page de chaque nœud
+  pendant que les suites par moteur sont échantillonnées.
+- **Construction figée.** `verifier` sert `tests/rapports/client-fige/` (`PIERRE_CLIENT_TEST`).
+  Un autre écrivain peut donc relancer des tests ciblés, qui reconstruisent
+  `client/dist-test/`, sans polluer la campagne.
+- **Machine partagée.** Playwright tourne à 2 à 4 travailleurs au plus
+  (`npm run verifier -- --travailleurs=N`, 4 par défaut), et e2e, visuel et qualité passent
+  l'un après l'autre.
+- **Mesures.** Le palier rapide prend 9,2 s pour un moteur touché, et 42 à 49 s quand le socle
+  et la logique le sont. Pour `verifier` au plafond de 4 travailleurs, l'estimation est de
+  9 à 10 min. Les deux campagnes mesurées à 8 travailleurs (320 et 334 s) l'ont été sous la
+  charge d'autres projets : elles sont à refaire sur machine calme. L'objectif de 5 min n'est
+  pas atteint ; les pistes sont au § 6.3 du document cité.
+
+## Ajout du 30 octobre — un rouge du palier rapide sous charge se relance isolé
+
+`verifier:rapide` lance la garde du socle et les specs touchées **en parallèle**, 4 travailleurs
+chacune. Sous `PIERRE_FILS=6`, machine occupée, la garde a pris 4,6 min (57 s le 9 oct.) et
+7 cas sont tombés en délai dépassé ; relancés seuls (`--workers=2` ou `3`, même client figé
+`PIERRE_CLIENT_TEST=tests/rapports/client-fige-rapide`), tous verts. Commande :
+`node scripts/playwright.mjs test <spec> --project=parcours --no-deps --workers=2 --reporter=line`.
+Détail : [nettoyage du 30 octobre](nettoyage-socle-2026-10-30.md) § 3.

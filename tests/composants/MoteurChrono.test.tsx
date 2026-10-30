@@ -179,22 +179,33 @@ describe('moteur chrono', () => {
     expect(image).not.toBeNull();
     expect(image?.getAttribute('src')).toContain('assets/vignettes/reveil.png');
     expect(vignette?.textContent).toContain('il se réveille');
-    expect(vignette?.style.flexDirection).toBe('column');
+    // L'image précède la légende dans la carte ; la disposition en colonne vient de chrono.css.
+    expect(vignette?.firstElementChild).toBe(image);
+    expect(vignette?.lastElementChild?.tagName).toBe('SPAN');
   });
 
-  it('affiche une règle locale et la progression de la séquence', () => {
+  it('la frise accueille une vignette glissée : elle est enregistrée comme cible de dépôt', () => {
+    // Sans cible, `ZoneDeGlisser` ne reçoit jamais de dépôt : glisser une image ne faisait rien.
     const { container } = render(<Harnais />);
-    const cartouche = container.querySelector('[data-cartouche-chrono="etape"]');
-    expect(cartouche?.textContent).toContain('Remets les images dans l’ordre.');
+    const frise = container.querySelector('[data-fentes="histoire"]');
+    expect(frise?.getAttribute('data-survolee')).toBe('non');
+  });
+
+  // T10 — refait pour le repère commun, SANS perdre l'exigence du 3 septembre (pas de numéro
+  // d'étape ni de fraction : Docs/correctif-chronologies-2026-09-03.md). La règle du geste
+  // (« Range les images dans le bon ordre ») est dans la barre de consigne de l'écran.
+  it('affiche ce qui reste à ranger dans le repère commun, sans compteur d’étape', () => {
+    const { container } = render(<Harnais />);
+    const cartouche = container.querySelector('[data-repere-etape="chrono"]');
+    expect(cartouche).not.toBeNull();
     expect(cartouche?.textContent).not.toMatch(/Étape|rangée|\d+\s*\/\s*\d+/i);
     expect(cartouche?.textContent).toContain('3 images');
   });
 
   it('donne une consigne courte et compréhensible sans compteur technique', () => {
     const { container } = render(<Harnais />);
-    const cartouche = container.querySelector('[data-cartouche-chrono="etape"]');
-    expect(cartouche?.textContent).toContain('Remets les images dans l’ordre.');
-    expect(cartouche?.textContent).toContain('3 images');
+    const cartouche = container.querySelector('[data-repere-etape="chrono"]');
+    expect(cartouche?.textContent).toContain('3 images à ranger.');
     expect(cartouche?.textContent).not.toContain('0 / 3');
   });
 

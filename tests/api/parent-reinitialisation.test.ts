@@ -187,6 +187,11 @@ const SEMEURS: Readonly<Record<string, Semeur>> = {
       (profil_id, projet_id, session_id, cadeau_id, categorie, attribue_le)
       VALUES (?, 'MAT-PON-P01', ?, 'maths-souvenir-ponts', 'souvenir', ?)`)
       .run(p, `prj-${m}`, INSTANT_DE_REFERENCE),
+  preferences_niveaux_maths: (b, p, m) =>
+    b.prepare(`INSERT INTO preferences_niveaux_maths
+      (profil_id, generation_maths, famille, niveau, revision, cle_geste, modifie_le)
+      VALUES (?, 0, 'MAT-PON-01', 'exploration', 1, ?, ?)`)
+      .run(p, `pref-${m}`, INSTANT_DE_REFERENCE),
   tentatives: (b, p, m) =>
     b
       .prepare(
@@ -261,7 +266,7 @@ describe('l’inventaire des tables à remettre à zéro', () => {
     ).toEqual([]);
 
     // 17 tables de lecture/réglages et 9 nouvelles tables de la vallée.
-    expect(declarees.length).toBe(26);
+    expect(declarees.length).toBe(27);
   });
 });
 
@@ -334,7 +339,7 @@ describe('POST /api/parent/:profil/reinitialiser — les gardes', () => {
 });
 
 describe('POST /api/parent/:profil/reinitialiser — portée « complete »', () => {
-  it('LE TEST QUI GARDE LE RISQUE : les 26 tables sont vidées, aucune exceptée', async () => {
+  it('LE TEST QUI GARDE LE RISQUE : les 27 tables sont vidées, aucune exceptée', async () => {
     const profil = await creerProfil();
     semer(contexte.base, profil);
     const entetes = { [ENTETE_JETON_PARENT]: await jeton() };
@@ -383,9 +388,9 @@ describe('POST /api/parent/:profil/reinitialiser — portée « complete »', ()
 
     expect(rapport.portee).toBe('complete');
     expect(rapport.prenom).toBe(PRENOM);
-    expect(rapport.lignes).toHaveLength(26);
+    expect(rapport.lignes).toHaveLength(27);
     // Une ligne semée par table : le total EST le nombre de tables.
-    expect(rapport.lignesEffaceesTotal).toBe(26);
+    expect(rapport.lignesEffaceesTotal).toBe(27);
     expect(rapport.tablesConservees).toEqual([]);
   });
 
@@ -457,7 +462,7 @@ describe('POST /api/parent/:profil/reinitialiser — portée « progression »',
 
     const rapport = reponse.json() as { tablesConservees: string[]; lignes: unknown[] };
     expect([...rapport.tablesConservees].sort()).toEqual([...TABLES_CONSERVEES_PAR_PROGRESSION].sort());
-    expect(rapport.lignes).toHaveLength(24);
+    expect(rapport.lignes).toHaveLength(25);
   });
 
   it('les réglages restent lisibles par la route de lecture, inchangés', async () => {
@@ -489,8 +494,8 @@ describe('POST /api/parent/:profil/reinitialiser — domaines séparés', () => 
     const rapport = reponse.json() as {
       lignes: { table: string; lignesEffacees: number }[]; lignesEffaceesTotal: number;
     };
-    expect(rapport.lignes).toHaveLength(8);
-    expect(rapport.lignesEffaceesTotal).toBe(8);
+    expect(rapport.lignes).toHaveLength(9);
+    expect(rapport.lignesEffaceesTotal).toBe(9);
     for (const { table } of rapport.lignes) expect(compter(contexte.base, table, profil)).toBe(0);
     for (const table of ['tentatives', 'etapes_tentative', 'reprises_lecture',
       'progression_noeud', 'reglages_lecture']) {
@@ -515,7 +520,7 @@ describe('POST /api/parent/:profil/reinitialiser — domaines séparés', () => 
     expect(rapport.lignesEffaceesTotal).toBe(16);
     for (const { table } of rapport.lignes) expect(compter(contexte.base, table, profil)).toBe(0);
     for (const table of ['sessions_projets_maths', 'instances_maths', 'tentatives_maths',
-      'progression_projets_maths', 'recompenses_maths', 'reglages_lecture']) {
+      'progression_projets_maths', 'recompenses_maths', 'preferences_niveaux_maths', 'reglages_lecture']) {
       expect(compter(contexte.base, table, profil)).toBe(1);
     }
     expect(contexte.base.prepare(`SELECT generation_progression, generation_maths
@@ -580,7 +585,7 @@ describe('l’aperçu, avant de confirmer', () => {
       lignes: { table: string; lignesEffacees: number }[];
       pertes: string[];
     };
-    expect(apercu.lignes).toHaveLength(26);
+    expect(apercu.lignes).toHaveLength(27);
     expect(apercu.pertes.length).toBeGreaterThan(0);
     // Le mot du contrat : la portée complète annonce la perte des réglages de lecture.
     expect(apercu.pertes.join(' ')).toContain('réglages de lecture');

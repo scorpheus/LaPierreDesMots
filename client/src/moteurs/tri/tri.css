@@ -1,0 +1,256 @@
+/* Moteur `tri` — apparence propre. La disposition vient du socle (DispositionMoteur). */
+
+/* ── La scène : le décor en fond, le plateau devant ─────────────────────────────────────── */
+
+.tri-cadre {
+  position: relative;
+  inline-size: 100%;
+  block-size: 100%;
+  min-inline-size: 0;
+  min-block-size: 0;
+  overflow: hidden;
+  border-radius: var(--rayon-carte);
+}
+
+.tri-plateau {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* La géométrie du plateau ne se transitionne JAMAIS. `global.css` et `composants.css` posent
+   `transition-duration: 1ms !important` sur `*` quand le mouvement est réduit ou les animations
+   éteintes ; la propriété transitionnée valant `all` par défaut, chaque position et chaque
+   taille posée en ligne glissait alors pendant 1 ms. La mesure après rendu (`useLayoutEffect`)
+   lisait la position D'AVANT, trouvait un panneau hors du cadre, et la scène basculait en grille
+   (mesuré le 12 oct. : 55 cas sur 55 en grille sous mouvement réduit, contre 26 sur 55 sans).
+   Les boutons `.cible` gardent leur propre transition (`transform`, `box-shadow`), qui n'en
+   déplace aucune boîte. */
+.tri-plateau,
+.tri-mots,
+.tri-receptacles,
+.tri-cadre [data-porte-element],
+.tri-panneau,
+.tri-panneau [data-receptacle],
+.tri-panneau [data-fente] {
+  transition-property: none;
+}
+
+/* La fente de `tri` n'est qu'un accusé de réception : typographie d'interface. `commun/fentes.css`
+   pose celle de lecture par défaut ; l'espacement redevient celui du panneau. */
+[data-moteur='tri'] .fente,
+[data-moteur='tri'] .cible.jeton-en-vol {
+  font-family: var(--font-interface);
+  font-size: var(--socle-texte-interface);
+  letter-spacing: inherit;
+  word-spacing: inherit;
+  line-height: inherit;
+}
+
+.tri-vol {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+/* Mise en scène : mots et grottes se POSENT sur le décor, à des positions dérivées et posées en
+   ligne. Les deux groupes quittent la boîte pour que ces positions se lisent dans le cadre. */
+.tri-cadre--decor .tri-mots,
+.tri-cadre--decor .tri-receptacles { display: contents; }
+
+.tri-cadre--decor [data-porte-element],
+.tri-cadre--decor .tri-panneau { position: absolute; }
+
+/* Repli en grille : paniers puis mots (décision du parent, T22), en flux dans le cadre. Le plateau est dans le flux
+   (jamais en position absolue) : sur petit écran, la scène prend la hauteur réelle du contenu. */
+.tri-cadre--grille .tri-plateau {
+  position: relative;
+  inset: auto;
+  min-block-size: 100%;
+  display: grid;
+  grid-template-rows: auto auto;
+  align-content: space-evenly;
+  gap: var(--socle-espace);
+  padding: var(--socle-espace);
+}
+
+.tri-cadre--grille .tri-mots {
+  --tri-ecart-mots: 0.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+  justify-content: center;
+  gap: var(--tri-ecart-mots);
+  min-inline-size: 0;
+}
+
+/* Au plus quatre mots par rangée (photo tablette du parent : six mots en ruban à 800 px) :
+   chaque mot réserve au moins le quart de la rangée, cinq n'y entrent donc jamais. Plafonné à
+   12rem, pour que l'écran large n'en fasse pas des boutons démesurés. */
+.tri-cadre--grille .tri-mots > [data-porte-element] {
+  justify-content: center;
+  min-inline-size: min(calc((100% - 4 * var(--tri-ecart-mots)) / 4), 12rem);
+}
+
+.tri-cadre--grille .tri-receptacles {
+  /* Les paniers en haut, toujours — même en grille (T22). */
+  order: -1;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: var(--socle-espace);
+  min-inline-size: 0;
+}
+
+.tri-cadre--grille .tri-panneau {
+  flex: 1 1 0;
+  min-inline-size: 0;
+  max-inline-size: 26rem;
+}
+
+/* Grille serrée (mesurée) : les marges cèdent, jamais le texte à lire ni les cibles. */
+.tri-cadre--grille[data-serre='oui'] .tri-plateau { gap: 4px; padding: 0; }
+.tri-cadre--grille[data-serre='oui'] .tri-mots { --tri-ecart-mots: 0.3rem; }
+.tri-cadre--grille[data-serre='oui'] .tri-panneau { gap: 0; padding: 0; }
+.tri-cadre--grille[data-serre='oui'] [data-receptacle] { gap: 2px; padding: 2px; }
+
+/* ── Les mots ───────────────────────────────────────────────────────────────────────────── */
+
+/* Le porteur centre le mot (R54) ; sa position est calculée et posée en ligne. */
+[data-porte-element] {
+  display: inline-flex;
+  max-inline-size: 100%;
+  pointer-events: none;
+}
+
+/* Texte à déchiffrer : police et corps de lecture du profil. */
+[data-moteur='tri'] [data-element] {
+  background-color: var(--lecture-fond, var(--parchemin));
+  color: var(--lecture-encre, var(--trait));
+  font-family: var(--lecture-famille, var(--font-lecture));
+  font-size: var(--lecture-corps, 1.5rem);
+  letter-spacing: var(--lecture-interlettrage, normal);
+  word-spacing: var(--lecture-espacement-mots, normal);
+  line-height: var(--lecture-interligne, 1.4);
+  max-inline-size: 100%;
+  padding-block: 0.25rem;
+  padding-inline: 0.9rem;
+  pointer-events: auto;
+  touch-action: none;
+}
+
+/* Le mot en main se voit — par un liseré qui ne change AUCUNE taille. Plus de gras : le mot pris
+   s'élargissait, la disposition se recalculait, et paniers et mots glissaient au moment même où le
+   doigt allait vers le panier (jusqu'à 16 éléments déplacés, 2 dépôts tactiles sur 44 perdus,
+   mesuré le 12 oct. ; garde : parcours-tri-eparpille « prendre un mot ne déplace rien »). */
+[data-moteur='tri'] [data-element][data-saisi='oui'] {
+  outline: 4px solid var(--soleil, #FFC93C);
+  outline-offset: 3px;
+}
+
+/* Rangé : il ne s'efface jamais (R14), il se calme. */
+[data-moteur='tri'] [data-element][data-range='oui'] { opacity: 0.55; }
+
+/* ── Les réceptacles ────────────────────────────────────────────────────────────────────── */
+
+/* Le panneau EST la grotte : son cadre porte la couleur, le critère en est l'en-tête, et le
+   bouton de dépôt occupe le reste. */
+.tri-panneau {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.25rem;
+  min-block-size: var(--hauteur-receptacle, 0);
+  max-inline-size: 100%;
+  padding: 0.25rem;
+  border: var(--epaisseur-trait) dashed var(--trait);
+  border-radius: var(--rayon-carte);
+  background-color: color-mix(in srgb, var(--couleur-receptacle) 22%, var(--parchemin) 78%);
+  box-shadow: var(--ombre-bd-appui);
+  pointer-events: none;
+}
+
+.tri-panneau:has([data-receptacle][data-attend='oui']),
+.tri-panneau:has([data-receptacle][data-survol='oui']) {
+  border-style: solid;
+  box-shadow: var(--ombre-bd);
+}
+
+.tri-panneau:has([data-receptacle][data-survol='oui']) { background-color: var(--couleur-receptacle); }
+
+/* Le critère se lit sur le fond de la grotte, sans second cadre. */
+/* T19 : le critère porte le thème question du socle (ZoneDeLecture question). */
+
+[data-moteur='tri'] [data-receptacle] {
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-content: flex-start;
+  gap: 0.3rem;
+  inline-size: 100%;
+  /* Jamais sous une cible tactile, même pendant la première image (polices pas encore chargées). */
+  min-inline-size: var(--socle-cible);
+  min-block-size: var(--socle-cible);
+  padding: 0.25rem;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  touch-action: manipulation;
+  pointer-events: auto;
+}
+
+/* ── Retours ────────────────────────────────────────────────────────────────────────────── */
+
+.tri-message {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0.5rem;
+  z-index: 4;
+  inline-size: fit-content;
+  max-inline-size: min(90%, 42rem);
+  margin-inline: auto;
+  padding: 0.5rem 1rem;
+  border: 3px solid var(--trait);
+  border-radius: 999px;
+  background: var(--parchemin);
+  box-shadow: var(--ombre-bd-appui);
+  color: var(--encre, #19233f);
+  font-family: var(--font-interface);
+  font-size: var(--socle-texte-interface);
+  font-weight: 700;
+  text-align: center;
+  pointer-events: none;
+}
+
+/* Le pied : le geste attendu, en style d'interface (pas de repère d'étape : T10 / E03). */
+/* Pied compact (sans dépendre de la mesure, qui en dépend) : deux lignes au plus, serrées. */
+[data-moteur='tri'] .disposition-moteur__pied {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0 0.75rem;
+}
+
+/* T19 : la consigne du geste porte le thème question du socle (fond, bord, police, corps). */
+.tri-geste {
+  justify-self: center;
+  margin: 0;
+  padding-inline: 0.75rem;
+  line-height: 1.35;
+}
+
+/* Lu par les lecteurs d'écran, jamais vu. */
+.tri-annonce {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.tri-annonce > p { margin: 0; }

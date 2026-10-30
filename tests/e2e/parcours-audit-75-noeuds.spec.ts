@@ -70,8 +70,8 @@ async function stabiliserEtMesurer(page: Page, noeud: (typeof NOEUDS)[number], v
     const hauteur = window.innerHeight;
     const elements = [...document.querySelectorAll<HTMLElement>(
       '[data-ecran="noeud"] button, [data-ecran="noeud"] [role="button"], ' +
-      '[data-ecran="noeud"] [data-plateau], [data-ecran="noeud"] [data-cartouche-tri], ' +
-      '[data-ecran="noeud"] [data-cartouche-chrono], [data-ecran="noeud"] [data-cartouche-paires], ' +
+      // T10 : les cartouches d'étape des moteurs sont devenus le repère commun, sous la consigne.
+      '[data-ecran="noeud"] [data-plateau], [data-ecran="noeud"] [data-repere-etape], ' +
       '[data-ecran="noeud"] [data-message-chemin]'
     )];
     const visibles = elements.filter((element) => {
@@ -100,18 +100,18 @@ async function stabiliserEtMesurer(page: Page, noeud: (typeof NOEUDS)[number], v
     const attr = (selector: string): string => document.querySelector(selector)?.textContent?.trim() ?? '';
     const selecteurCible: Readonly<Record<string, string>> = {
       assemble: '[data-plateau="mot"]',
-      attrape: '[data-plateau="etape-attrape"]',
+      attrape: '[data-repere-etape="attrape"]',
       chemin: '[data-message-chemin]',
-      chrono: '[data-cartouche-chrono]',
+      chrono: '[data-repere-etape="chrono"]',
       colorie: '[data-cible-colorie]',
-      eclair: '[data-plateau="etape-eclair"]',
+      eclair: '[data-repere-etape="eclair"]',
       grave: '[data-plateau="etape-grave"]',
       histoire: '[data-plateau="etape-histoire"]',
-      paires: '[data-cartouche-paires]',
-      phrase: '[data-plateau="etape-phrase"]',
-      place: '[data-plateau="etape-place"]',
+      paires: '[data-repere-etape="paires"]',
+      phrase: '[data-repere-etape="phrase"]',
+      place: '[data-repere-etape="place"]',
       trace: '[data-plateau="cible-trace"]',
-      tri: '[data-cartouche-tri]',
+      tri: '[data-consigne-geste]',
     };
     const cibleElement = document.querySelector(selecteurCible[moteur] ?? '[data-plateau]');
     return {

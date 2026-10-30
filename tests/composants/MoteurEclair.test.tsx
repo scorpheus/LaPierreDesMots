@@ -323,11 +323,14 @@ describe('moteur eclair', () => {
       const { container } = render(<Harnais />);
       const plateau = container.querySelector('[data-plateau="eclair"]');
       const commande = container.querySelector('[data-plateau="commande-eclair"]');
-      const etape = container.querySelector('[data-plateau="etape-eclair"]');
+      const etape = container.querySelector('[data-repere-etape="eclair"]');
       const controles = container.querySelector('[data-plateau="controles"]');
 
       expect(commande?.querySelector('[data-action="pret"]')).not.toBeNull();
-      expect(commande?.parentElement).toBe(etape?.parentElement);
+      // T10 — refait : le repère d'étape a quitté la bande de la commande pour la barre de
+      // consigne de l'écran ; la commande reste seule dans sa bande, hors des réponses.
+      expect(etape).not.toBeNull();
+      expect(commande?.parentElement?.contains(etape)).toBe(false);
       expect(commande?.parentElement?.classList.contains('eclair-barre-superieure')).toBe(true);
       expect(plateau?.querySelector('[data-action="pret"]')).toBeNull();
       expect(controles?.querySelector('[data-action="pret"]')).toBeNull();
@@ -348,13 +351,17 @@ describe('moteur eclair', () => {
 
   it('rend le changement de mot explicite dans un repère stable', () => {
     const { container } = render(<HarnaisDeuxEtapes />);
-    const etape = (): HTMLElement | null => container.querySelector('[data-plateau="etape-eclair"]');
+    const etape = (): HTMLElement | null => container.querySelector('[data-repere-etape="eclair"]');
     expect(etape()?.textContent).toContain('Un nouveau mot t’attend');
+    expect(etape()?.textContent).toContain('Étape 1 sur 2');
     expect(etape()?.textContent).not.toContain('roue');
 
     taper(container, ['[data-action="pret"]']);
     taper(container, ['[data-option="opt-roue"]']);
     expect(etape()?.textContent).toContain('Un nouveau mot t’attend');
+    expect(etape()?.textContent).toContain('Étape 2 sur 2');
+    // T10 — le changement d'étape est signalé par le cadre du repère.
+    expect(etape()?.getAttribute('data-nouvelle-etape')).toBe('oui');
     expect(etape()?.textContent).not.toContain('boule');
   });
 
@@ -398,7 +405,7 @@ describe('moteur eclair', () => {
       act(() => {
         vi.advanceTimersByTime(5000);
       });
-      expect(container.querySelector('[data-plateau="etape-eclair"]')?.textContent).toContain(
+      expect(container.querySelector('[data-repere-etape="eclair"]')?.textContent).toContain(
         'Quelle voyelle lis-tu',
       );
     } finally {

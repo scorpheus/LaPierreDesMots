@@ -26,7 +26,7 @@ test.describe('retours parent — lucioles et coffre', () => {
     await expect(page.locator('[data-consigne="c1"]')).toHaveText(
       'Lis le mot. Retrouve ensuite la luciole qui porte ce mot.'
     );
-    await expect(page.locator('[data-plateau="etape-eclair"]')).not.toContainText('rouge');
+    await expect(page.locator('[data-repere-etape="eclair"]')).not.toContainText('rouge');
 
     for (const luciole of await lucioles.all()) {
       const boite = await luciole.boundingBox();

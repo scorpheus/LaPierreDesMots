@@ -13,6 +13,8 @@
  * L'habillage n'est PAS fabriqué : il est lu sur disque, parmi les trois écrits pour ce
  * moteur. Un test qui invente son décor ne dit rien de celui qui atteint l'enfant.
  */
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { useCallback, useState } from 'react';
 import type { ReactElement } from 'react';
 import { cleanup, fireEvent, render } from '@testing-library/react';
@@ -158,9 +160,14 @@ describe('moteur phrase', () => {
     expect(container.querySelector('[data-plateau="modele"]')?.classList).toContain(
       'modele-phrase-centre',
     );
-    expect(
-      container.querySelector<HTMLElement>('[data-fentes="phrase"]')?.style.justifyContent,
-    ).toBe('center');
+    // Le centrage de la ligne de fentes vit dans `phrase.css`, sur `[data-fentes='phrase']`.
+    expect(container.querySelector('[data-fentes="phrase"]')).not.toBeNull();
+    const css = readFileSync(resolve(process.cwd(), 'client/src/moteurs/phrase/phrase.css'), 'utf8');
+    const debut = css.indexOf("[data-fentes='phrase'] {");
+    expect(debut).toBeGreaterThanOrEqual(0);
+    expect(css.slice(css.indexOf('{', debut), css.indexOf('}', debut))).toContain(
+      'justify-content: center',
+    );
   });
 
   it('le contenu de ce test est conforme au schéma que le moteur publie', () => {

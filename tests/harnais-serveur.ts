@@ -187,8 +187,10 @@ async function demarrerInstance(portImpose?: number): Promise<Omit<ServeurIsole,
         // Base éphémère, propre au cas : aucune recette ne touche `donnees/pierre.db`.
         PIERRE_BASE: ':memory:',
         PIERRE_CONTENU: 'contenu',
-        // Contrat § 7.3 : en test on sert `client/dist-test/`, jamais `client/dist/`.
-        PIERRE_CLIENT: 'client/dist-test',
+        // Contrat § 7.3 : en test on sert une construction `--mode test`, jamais `client/dist/`.
+        // `PIERRE_CLIENT_TEST` permet à une campagne de servir SA construction, figée au départ,
+        // pendant qu'un autre écrivain reconstruit `client/dist-test/`.
+        PIERRE_CLIENT: process.env['PIERRE_CLIENT_TEST'] ?? 'client/dist-test',
         ATELIER_GRAINE: GRAINE
       },
       stdio: 'ignore'

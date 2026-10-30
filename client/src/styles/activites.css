@@ -1,24 +1,12 @@
-/* Le cadre possède la place disponible. Les moteurs conservent leurs gestes et leur contenu. */
-.ecran-activite {
-  --activite-espace: clamp(8px, 1.25vmin, 20px);
-  --activite-scene-min: 320px;
-  display: flex;
-  flex-direction: column;
-  gap: var(--activite-espace);
-  inline-size: min(100%, 1600px);
-  block-size: 100dvh;
-  min-block-size: min-content;
-  margin-inline: auto;
-  padding: var(--activite-espace);
-  padding-block-end: max(var(--activite-espace), env(safe-area-inset-bottom));
-  background: color-mix(in srgb, var(--parchemin) 94%, var(--grisaille));
-}
+/*
+ * En-tête des activités et écrans annexes. La disposition de l'écran d'exercice (bandeau,
+ * scène, guide) et les tailles communes sont dans client/src/activite/socle.css.
+ */
 
 .entete-activite {
   position: relative;
   z-index: 2;
   display: grid;
-  flex: 0 0 auto;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   column-gap: clamp(12px, 2vw, 32px);
@@ -35,7 +23,7 @@
   gap: 8px;
   padding: 8px 16px;
   align-self: center;
-  font-size: 1rem;
+  font-size: var(--socle-texte-interface, 1.125rem);
   white-space: nowrap;
 }
 
@@ -46,9 +34,13 @@
   text-align: center;
 }
 
+/* T19 : la consigne porte le thème question du socle (fond, bord, police : activite/questions.css).
+   Une pastille qui épouse le texte ; le bord ne coûte aucune hauteur de plus que 4 px. */
 .activite-consigne-texte {
+  display: inline-block;
+  max-inline-size: 100%;
   margin: 0;
-  font-size: var(--lecture-corps, 1.5rem);
+  padding-inline: 0.75rem;
   line-height: var(--lecture-interligne, 1.5);
   overflow-wrap: break-word;
 }
@@ -57,7 +49,7 @@
   margin: 0 0 4px;
   color: var(--texte-secondaire);
   font-family: var(--font-interface);
-  font-size: 0.875rem;
+  font-size: var(--socle-texte-interface, 1.125rem);
   font-weight: 700;
   line-height: 1.35;
 }
@@ -81,17 +73,6 @@
   line-height: 1.2;
 }
 
-.cadre-scene-activite {
-  position: relative;
-  isolation: isolate;
-  flex: 1 1 0;
-  min-inline-size: 0;
-  min-block-size: var(--activite-scene-min);
-  border: 2px solid color-mix(in srgb, var(--trait) 16%, transparent);
-  border-radius: var(--rayon-carte);
-  background: var(--parchemin);
-}
-
 .porteur-moteur {
   position: relative;
   z-index: 1;
@@ -99,44 +80,6 @@
   block-size: 100%;
   min-inline-size: 0;
   min-block-size: 0;
-}
-
-/* Le pied suit toujours le plateau. Sa bulle peut grandir, sans superposition avec le jeu. */
-.ecran-activite > .gobi {
-  flex: 0 0 auto;
-  flex-wrap: wrap;
-  min-inline-size: 0;
-  border-radius: var(--rayon-carte);
-  background: var(--parchemin);
-}
-
-.ecran-activite > .gobi > .gobi-bulle {
-  min-inline-size: min(220px, 100%);
-  max-inline-size: 100%;
-}
-
-.ecran-activite > .gobi > .cible {
-  flex-shrink: 0;
-}
-
-/* Un plateau intrinsèquement long étend le document ; son aide vient après sa dernière ligne. */
-.ecran-activite:has([data-plateau-defilant='oui']),
-.ecran-activite:has([data-moteur='attrape']) {
-  block-size: auto;
-  min-block-size: 100dvh;
-}
-
-.ecran-activite .scene-noeud:has([data-plateau-defilant='oui']),
-.ecran-activite .scene-noeud:has([data-moteur='attrape']) {
-  flex: 1 0 auto;
-  block-size: auto;
-}
-
-.porteur-moteur:has(> [data-plateau-defilant='oui']),
-.porteur-moteur:has(> [data-moteur='attrape']) {
-  display: flex;
-  flex-direction: column;
-  block-size: auto;
 }
 
 .activite-chaudron {
@@ -171,7 +114,6 @@
 
 @media (max-width: 700px) {
   .entete-activite {
-    grid-template-columns: auto minmax(0, 1fr) auto;
     column-gap: 8px;
   }
 
@@ -198,41 +140,10 @@
   .entete-activite > .bouton-ecouter > span {
     display: none;
   }
-
-  .ecran-activite > .gobi > .gobi-bulle {
-    flex-basis: calc(100% - 100px);
-    min-inline-size: 0;
-  }
-
-  .ecran-activite > .gobi > .cible {
-    margin-inline-start: auto;
-  }
-}
-
-@media (max-height: 700px), (max-width: 600px) {
-  .ecran-activite {
-    block-size: auto;
-    min-block-size: 100svh;
-  }
-
-  .cadre-scene-activite {
-    flex: 0 0 auto;
-    block-size: max(400px, 60svh);
-  }
 }
 
 @media (max-width: 420px) {
   .activite-retour > span:last-child {
     display: none;
   }
-}
-
-/* Le nuancier ne doit pas absorber la toile sur les écrans étroits. */
-@media (max-width: 700px) {
-  .cadre-scene-activite:has([data-moteur='assemble']),
-  .cadre-scene-activite:has([data-moteur='libre']),
-  .porteur-moteur:has(> [data-moteur='assemble']),
-  .porteur-moteur:has(> [data-moteur='libre']) { block-size: auto; }
-  .cadre-scene-activite:has([data-moteur='eclair']) { block-size: max(600px, 70svh); }
-  [data-moteur='libre'] { grid-template-rows: auto minmax(280px, 1fr) !important; }
 }

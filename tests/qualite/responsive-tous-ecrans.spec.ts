@@ -89,25 +89,102 @@ test('chemin étroit — le repli reste stable après rotation et redimensionnem
  */
 const SONDES_PAR_MOTEUR: Readonly<Record<string, readonly string[]>> = {
   assemble: ['[data-plateau="blocs"]', '[data-plateau="mot"]'],
-  attrape: ['[data-plateau="etape-attrape"]', '[data-plateau="cibles"]', '[data-plateau="controles"]'],
+  // T10 : le repère d'étape (attrape, eclair, place…) vit dans la barre de consigne de l'écran,
+  // hors de la racine du moteur ; il n'est plus une pièce du plateau.
+  attrape: ['[data-plateau="cibles"]', '[data-plateau="controles"]'],
   chemin: ['[data-plateau="cases"]', '[data-message-chemin="oui"]'],
   chrono: ['[data-plateau="vignettes"]', '[data-plateau="histoire"]', '[data-fente]'],
   colorie: ['svg.pierre-scene', '.pierre-palette', '[data-cible-colorie]'],
-  eclair: ['[data-plateau="etape-eclair"]', '[data-plateau="commande-eclair"]', '[data-plateau="options"]'],
+  eclair: ['[data-plateau="commande-eclair"]', '[data-plateau="options"]'],
   grave: ['[data-mot-central="oui"]', '[data-plateau="clavier"]'],
   histoire: ['[data-plateau="recit"]', '[data-plateau="etape-histoire"]', '[data-plateau="options"]'],
   libre: ['[data-plateau="nuancier"]', '[data-plateau="regions"]'],
   paires: ['[data-plateau="cartes"]'],
   phrase: ['[data-plateau="modele"]', '[data-plateau="etiquettes"]', '[data-plateau="phrase"]'],
-  place: ['[data-plateau="etape-place"]', '[data-scene="place"]', '[data-zone-cible]', '[data-reserve="place"]'],
+  place: ['[data-scene="place"]', '[data-zone-cible]', '[data-reserve="place"]'],
   trace: ['[data-plateau="cible-trace"]', '[data-scene="trace"]'],
   tri: ['[data-plateau="elements"]', '[data-plateau="receptacles"]'],
 };
+
+/**
+ * Décision du parent du 30 oct. (contrat du socle § 12, point 3) : une phrase de récit n'a pas de
+ * largeur minimale en pixels ; on juge le RÉSULTAT. Aucun mot coupé en fin de ligne (la coupure
+ * au trait d'union d'un mot composé reste permise, c'est la typographie française), aucun mot
+ * qui dépasse sa carte, et des lignes d'au moins 15 caractères — la dernière ligne exceptée,
+ * qui finit la phrase où elle peut.
+ */
+async function defautsDesLignesDeRecit(page: Page, ecran: string): Promise<DefautResponsive[]> {
+  return page.locator('[data-moteur="chrono"] [data-vignette]').evaluateAll((cartes, nomEcran) => {
+    const defauts: DefautResponsive[] = [];
+    for (const carte of cartes) {
+      const cadre = carte.getBoundingClientRect();
+      if (cadre.width === 0 || cadre.height === 0 || getComputedStyle(carte).display === 'none') continue;
+      // La lecture colorée pose une syllabe par élément : le texte réel de la carte se reconstitue
+      // donc en mettant bout à bout ses nœuds texte, et un mot se mesure par une plage qui peut
+      // enjamber plusieurs nœuds. Un texte réservé au lecteur d'écran (sans surface) est écarté ;
+      // un blanc, jamais : en fin de ligne il n'a pas de surface, mais il sépare deux mots.
+      const morceaux: Array<{ noeud: Text; debut: number }> = [];
+      let complet = '';
+      const arbre = document.createTreeWalker(carte, NodeFilter.SHOW_TEXT);
+      for (let noeud = arbre.nextNode() as Text | null; noeud !== null; noeud = arbre.nextNode() as Text | null) {
+        const valeur = noeud.nodeValue ?? '';
+        if (valeur.trim() !== '') {
+          const plage = document.createRange();
+          plage.selectNodeContents(noeud);
+          if (![...plage.getClientRects()].some((r) => r.width > 1 && r.height > 1)) continue;
+        }
+        morceaux.push({ noeud, debut: complet.length });
+        complet += valeur;
+      }
+      const position = (decalage: number, fin: boolean): [Text, number] => {
+        const morceau = [...morceaux].reverse().find((m) => (fin ? m.debut < decalage : m.debut <= decalage))!;
+        return [morceau.noeud, decalage - morceau.debut];
+      };
+      const libelle = complet.trim();
+      const mots: Array<{ debut: number; fin: number; haut: number }> = [];
+      for (const trouve of complet.matchAll(/[^\s-]+-?/gu)) {
+        const plage = document.createRange();
+        plage.setStart(...position(trouve.index, false));
+        plage.setEnd(...position(trouve.index + trouve[0].length, true));
+        const rectangles = [...plage.getClientRects()].filter((r) => r.width > 1 && r.height > 1);
+        if (rectangles.length === 0) continue;
+        const hauteur = Math.min(...rectangles.map((r) => r.height));
+        const hauts = rectangles.map((r) => r.top);
+        if (Math.max(...hauts) - Math.min(...hauts) > hauteur / 2) {
+          defauts.push({ ecran: nomEcran, raison: `mot coupé en fin de ligne : « ${trouve[0]} » dans « ${libelle} »` });
+        }
+        const gauche = Math.min(...rectangles.map((r) => r.left));
+        const droite = Math.max(...rectangles.map((r) => r.right));
+        if (gauche < cadre.left - 1 || droite > cadre.right + 1) {
+          defauts.push({ ecran: nomEcran, raison: `mot qui dépasse sa carte : « ${trouve[0]} » dans « ${libelle} »` });
+        }
+        mots.push({ debut: trouve.index, fin: trouve.index + trouve[0].length, haut: Math.min(...hauts) });
+      }
+      const lignes: Array<{ haut: number; debut: number; fin: number }> = [];
+      for (const mot of mots) {
+        const ligne = lignes.find((l) => Math.abs(l.haut - mot.haut) <= 4);
+        if (ligne === undefined) lignes.push({ ...mot });
+        else ligne.fin = mot.fin;
+      }
+      const ordonnees = lignes.sort((a, b) => a.haut - b.haut).map((l) => complet.slice(l.debut, l.fin));
+      for (const ligne of ordonnees.slice(0, -1)) {
+        if (ligne.length < 15) {
+          defauts.push({ ecran: nomEcran, raison: `ligne de récit trop courte (${String(ligne.length)} caractères) : « ${ligne} » dans « ${libelle} »` });
+        }
+      }
+    }
+    return defauts;
+  }, ecran);
+}
 
 async function defautsDe(page: Page, ecran: string): Promise<DefautResponsive[]> {
   // Un ResizeObserver peut encore changer le repli après deux frames. La sonde commune
   // exige trois cadres identiques et refuse les images cassées, sans masquer leurs erreurs.
   await attendreGeometrieStable(page);
+  return [...await defautsDeLaCoque(page, ecran), ...await defautsDesLignesDeRecit(page, ecran)];
+}
+
+async function defautsDeLaCoque(page: Page, ecran: string): Promise<DefautResponsive[]> {
   return page.evaluate((nomEcran) => {
     const defauts: DefautResponsive[] = [];
     const racine = document.documentElement;
@@ -222,7 +299,7 @@ async function defautsDe(page: Page, ecran: string): Promise<DefautResponsive[]>
         Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top));
       const cartes = visibles('[data-vignette]');
       const fentes = visibles('[data-fente]');
-      const cartouche = chrono.querySelector('[data-cartouche-chrono="etape"]');
+      const cartouche = document.querySelector('[data-repere-etape="chrono"]');
       const recouvrements = [
         ...cartes.flatMap((carte) =>
           fentes.map((fente) => intersection(boite(carte), boite(fente))),
@@ -244,17 +321,7 @@ async function defautsDe(page: Page, ecran: string): Promise<DefautResponsive[]>
           raison: `frise du récit surdimensionnée (${String(Math.round(hauteurMaxFente))} px de haut)`,
         });
       }
-      if (innerWidth <= 900 && innerWidth < innerHeight && cartes.length > 0) {
-        const largeurMinCarte = Math.min(...cartes.map((carte) => boite(carte).width));
-        const largeurAttendue = Math.min(480, boite(chrono).width - 48);
-        if (largeurMinCarte < largeurAttendue) {
-          defauts.push({
-            ecran: nomEcran,
-            raison: `phrase narrative tassée dans ${String(Math.round(largeurMinCarte))} px ` +
-              `(minimum ${String(Math.round(largeurAttendue))} px en portrait)`,
-          });
-        }
-      }
+      // La largeur des cartes de récit ne se juge plus en pixels : `defautsDesLignesDeRecit`.
     }
 
     const tri = document.querySelector<HTMLElement>('[data-moteur="tri"]');
@@ -307,7 +374,7 @@ async function defautsDe(page: Page, ecran: string): Promise<DefautResponsive[]>
     const eclair = document.querySelector<HTMLElement>('[data-moteur="eclair"]');
     if (eclair !== null && innerWidth <= 900) {
       const barre = eclair.querySelector<HTMLElement>('.eclair-barre-superieure');
-      const etape = eclair.querySelector<HTMLElement>('[data-plateau="etape-eclair"]');
+      const etape = document.querySelector<HTMLElement>('[data-repere-etape="eclair"]');
       const commande = eclair.querySelector<HTMLElement>('[data-plateau="commande-eclair"]');
       const boiteBarre = barre?.getBoundingClientRect();
       const boiteEtape = etape?.getBoundingClientRect();
@@ -321,7 +388,10 @@ async function defautsDe(page: Page, ecran: string): Promise<DefautResponsive[]>
       if (
         boiteEtape !== undefined &&
         boiteCommande !== undefined &&
-        Math.min(boiteEtape.right, boiteCommande.right) - Math.max(boiteEtape.left, boiteCommande.left) > 1
+        // T10 : repère (barre de consigne) et commande (scène) ne partagent plus une même
+        // bande ; le recouvrement se mesure donc dans les deux axes.
+        Math.min(boiteEtape.right, boiteCommande.right) - Math.max(boiteEtape.left, boiteCommande.left) > 1 &&
+        Math.min(boiteEtape.bottom, boiteCommande.bottom) - Math.max(boiteEtape.top, boiteCommande.top) > 1
       ) {
         defauts.push({ ecran: nomEcran, raison: 'repère et commande du mot flash se recouvrent' });
       }
@@ -615,7 +685,7 @@ test('photo tablette — le placement sur l’école garde scène, cible et rés
 
   const mesure = await moteur.evaluate((racine) => {
     const scene = racine.querySelector<SVGSVGElement>('[data-scene="place"]');
-    const etape = racine.querySelector<HTMLElement>('[data-plateau="etape-place"]');
+    const etape = document.querySelector<HTMLElement>('[data-repere-etape="place"]');
     const reserve = racine.querySelector<HTMLElement>('[data-reserve="place"]');
     const cible = racine.querySelector<SVGGraphicsElement>('[data-zone-cible]');
     const boiteRacine = racine.getBoundingClientRect();
@@ -664,7 +734,11 @@ test('photo tablette — le récit à remettre en ordre garde trois zones lisibl
   await appliquerReglagesLectureReels(page, prenom);
   await entrerDansLeNoeud(page, 'galeries-09', prenom);
   await expect(page.locator('[data-moteur="chrono"]')).toBeVisible();
-  await defautsDe(page, 'galeries-09');
+  await attendreGeometrieStable(page);
+  expect(
+    await defautsDesLignesDeRecit(page, 'galeries-09'),
+    'une phrase de récit garde des mots entiers, dans sa carte, en lignes d’au moins 15 caractères',
+  ).toEqual([]);
 
   const mesure = await page.locator('[data-moteur="chrono"]').evaluate((racine) => {
     const boite = (element: Element): DOMRect => element.getBoundingClientRect();
@@ -679,7 +753,7 @@ test('photo tablette — le récit à remettre en ordre garde trois zones lisibl
 
     const cartes = visibles('[data-vignette]');
     const fentes = visibles('[data-fente]');
-    const cartouche = racine.querySelector('[data-cartouche-chrono="etape"]');
+    const cartouche = document.querySelector('[data-repere-etape="chrono"]');
     const recouvrements = [
       ...cartes.flatMap((carte) =>
         fentes.map((fente) => intersection(boite(carte), boite(fente))),
@@ -688,12 +762,9 @@ test('photo tablette — le récit à remettre en ordre garde trois zones lisibl
         ? []
         : cartes.map((carte) => intersection(boite(cartouche), boite(carte)))),
     ].filter((surface) => surface > 1);
-    const cadreRacine = boite(racine);
     return {
       nbCartes: cartes.length,
       nbFentes: fentes.length,
-      largeurRacine: Math.round(cadreRacine.width),
-      largeurMinCarte: Math.round(Math.min(...cartes.map((carte) => boite(carte).width))),
       hauteurMaxFente: Math.round(Math.max(...fentes.map((fente) => boite(fente).height))),
       recouvrements,
     };
@@ -709,10 +780,6 @@ test('photo tablette — le récit à remettre en ordre garde trois zones lisibl
 
   expect(mesure.nbCartes, 'les trois images du triplet doivent être visibles').toBe(3);
   expect(mesure.nbFentes, 'les trois places de l’histoire doivent être visibles').toBe(3);
-  expect(
-    mesure.largeurMinCarte,
-    `à ${String(mesure.largeurRacine)} px, une phrase narrative ne doit pas être tassée dans un tiers de l'écran`,
-  ).toBeGreaterThanOrEqual(Math.min(480, mesure.largeurRacine - 48));
   expect(
     mesure.hauteurMaxFente,
     'une place vide doit annoncer un rang, pas réserver la hauteur d’une carte illustrée entière',
@@ -796,7 +863,7 @@ test('photo tablette — la commande de lecture ne masque pas le décor', async 
 
   const mesure = await moteur.evaluate((racine) => {
     const barre = racine.querySelector<HTMLElement>('.eclair-barre-superieure');
-    const etape = racine.querySelector<HTMLElement>('[data-plateau="etape-eclair"]');
+    const etape = document.querySelector<HTMLElement>('[data-repere-etape="eclair"]');
     const commande = racine.querySelector<HTMLElement>('[data-plateau="commande-eclair"]');
     const boiteRacine = racine.getBoundingClientRect();
     const boiteBarre = barre?.getBoundingClientRect();
@@ -806,10 +873,13 @@ test('photo tablette — la commande de lecture ne masque pas le décor', async 
       hauteurRacine: boiteRacine.height,
       hauteurBarre: boiteBarre?.height ?? Number.POSITIVE_INFINITY,
       hauteurEtape: boiteEtape?.height ?? Number.POSITIVE_INFINITY,
+      // T10 : le repère est dans la barre de consigne, la commande dans la scène : on mesure
+      // la surface commune (deux axes), plus seulement l'axe horizontal d'une bande partagée.
       recouvrementHorizontal:
         boiteEtape === undefined || boiteCommande === undefined
           ? Number.POSITIVE_INFINITY
-          : Math.max(0, Math.min(boiteEtape.right, boiteCommande.right) - Math.max(boiteEtape.left, boiteCommande.left)),
+          : Math.max(0, Math.min(boiteEtape.right, boiteCommande.right) - Math.max(boiteEtape.left, boiteCommande.left)) *
+            Math.max(0, Math.min(boiteEtape.bottom, boiteCommande.bottom) - Math.max(boiteEtape.top, boiteCommande.top)),
     };
   });
 

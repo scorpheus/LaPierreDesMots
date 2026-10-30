@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type ReactElement } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactElement } from 'react';
 import type { CodeStadeGobi, Profil, Compagnon } from '@pierre/partage';
 import type { DemandeVoix } from '@pierre/partage';
 import {
@@ -6,7 +6,7 @@ import {
   estInstancePont, estInstanceJardin, estInstanceMoulin, estInstanceMarche, estInstanceChantier, estInstanceHorloge,
   type AideMaths, type ConsigneMaths, type EtatMaths, type GesteMaths,
   type InstanceVallee, type FamilleMaths, type LieuMaths, type ProjetMathsId, type NiveauMaths, type PortApiMaths, type RepriseMaths,
-  type ResultatApiMaths, type TentativeMaths,
+  type ResultatApiMaths, type TentativeMaths, type ActiviteCalcul,
 } from '@pierre/partage/mathematiques';
 import { apiMathematiques, lireMonde, urlAsset } from '../api/client.js';
 import { assetDeStadeGobi } from '../composants/Gobi.js';
@@ -23,6 +23,8 @@ import { LIEUX_MATHS, lieuFamille, nomLieu, nomProjet, incompatibiliteProjet, pr
 import { nomCadeauMaths } from './collection.js';
 import { descriptionGesteMaths } from './description-geste.js';
 import { lireConseilParentMaths, effacerConseilParentMaths } from './conseil-parent.js';
+import { EcranCalcul } from './calcul/EcranCalcul.js';
+import { EntreeCalcul } from './calcul/EntreeCalcul.js';
 import './styles-mathematiques.css';
 
 export interface ProprietesEcranMathematiques {
@@ -86,6 +88,9 @@ export function EcranMathematiques({ profil, surRetour, surReprendreLecture, api
   const [compagnonChoisi, fixerCompagnonChoisi] = useState<string | null>(null);
   const [conseilMasque, masquerConseil] = useState(false);
   const [familleAVoir, fixerFamilleAVoir] = useState<FamilleMaths | null>(null);
+  // Le calcul (premier jet, Docs/maths-calcul-premier-jet-2026-10-09.md) : l'activité ouverte
+  // et sa graine, tirée dans `services.alea`. `null` : l'accueil de la vallée.
+  const [calcul, fixerCalcul] = useState<{ readonly activite: ActiviteCalcul; readonly graine: number } | null>(null);
   const ordre = useRef(0);
   const verrou = useRef(false);
 
@@ -311,6 +316,8 @@ export function EcranMathematiques({ profil, surRetour, surReprendreLecture, api
   };
   const compagnon = compagnons.find((c) => c.code === compagnonChoisi) ?? null;
   const conseil = etat && !conseilMasque ? lireConseilParentMaths(profilId, etat.generationMaths) : null;
+  if (calcul !== null) return <EcranCalcul key={calcul.graine} activite={calcul.activite} graine={calcul.graine}
+    stade={stade} surQuitter={() => fixerCalcul(null)} />;
   if (chargement) return <main className="ecran-mathematiques" data-ecran="mathematiques" aria-busy="true">
     Ouverture du carnet des nombres…<button type="button" onClick={surRetour}>Retour</button></main>;
   if (erreurChargement || etat === null) return <main className="ecran-mathematiques" data-ecran="mathematiques">
@@ -347,6 +354,7 @@ export function EcranMathematiques({ profil, surRetour, surReprendreLecture, api
         effacerConseilParentMaths(profilId, etat.generationMaths); masquerConseil(true);
       }}>Choisir moi-même</button>
     </aside>}
+    {vue === 'lieux' && <EntreeCalcul surChoix={(activite) => fixerCalcul({ activite, graine: services.alea.entier(0, 0x1_0000_0000) })} />}
     {vue === 'lieux' && <LieuxVallee etat={etat} surLieu={choisirLieu}
       surFete={() => { choisirProjet(FETE_MATHS.id); fixerVue('ponts'); }} />}
     {vue === 'ponts' && <ChoixLieuVallee lieu={lieu} projetId={projetChoisi} surProjetChoisi={choisirProjet}
@@ -386,7 +394,9 @@ function ScenePonts({ reprise, stade, compagnon, etat, etapesTerminees, attente,
   const lieu = lieuFamille(instance.famille);
   const codeLieu = LIEUX_MATHS.find((l) => l.id === lieu)!.prefixe;
   const termines = etat.projets.filter((p) => p.projetId.startsWith(`MAT-${codeLieu}-`) && p.termineLe !== null).length;
-  useEffect(() => () => services.voix.taire(), [services.voix, instance.id]);
+  // Nettoyage synchrone : la voix se tait dans le rendu même qui ferme la scène, pas une image
+  // plus tard (mesuré le 31 oct. : sous charge, l'écran suivant était affiché avant le `taire`).
+  useLayoutEffect(() => () => services.voix.taire(), [services.voix, instance.id]);
   const jouer = (demandes: readonly DemandeVoix[]): void => {
     if (services.voix.direSequence) void services.voix.direSequence(demandes);
     else void (async () => { for (const demande of demandes) await services.voix.dire(demande); })();

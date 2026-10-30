@@ -1,10 +1,10 @@
 import { resolve } from 'node:path';
 import { expect, test } from './invariants.js';
-import { appliquerReglagesLectureReels, entrerDansLeNoeud, noeudsLivres, deuxImages } from './qa-outils.js';
+import { appliquerReglagesLectureReels, entrerDansLeNoeud, noeudsDuMoteurBalayes, deuxImages } from './qa-outils.js';
 import { toucherPrise } from './gestes-dom.js';
 import { attendreGeometrieStable } from '../qualite/aides-composition.js';
 
-const fiches = noeudsLivres().filter((n) => n.moteur === 'chemin');
+const fiches = noeudsDuMoteurBalayes('chemin');
 const dossier = resolve('bac-a-sable/attrape-chemins-2026-09-05');
 for (const format of [{ width: 720, height: 1017 }, { width: 1080, height: 670 },
   { width: 390, height: 700 }, { width: 844, height: 340 }]) {
@@ -31,10 +31,12 @@ for (const format of [{ width: 720, height: 1017 }, { width: 1080, height: 670 }
       const moteur = page.locator('[data-moteur="chemin"]');
       for (const [rang, consigne] of contenu.consignes.entries()) {
         await expect(moteur).toHaveAttribute('data-etape', consigne.id);
-        const annonce = moteur.locator('[data-annonce="chemin"]');
+        // T10 : l'annonce du chemin est le repère commun, dans la barre de consigne de l'écran ;
+        // le changement de chemin est signalé par son cadre (`data-nouvelle-etape`).
+        const annonce = page.locator('[data-repere-etape="chemin"]');
         await annonce.scrollIntoViewIfNeeded();
-        await expect(annonce).toContainText(`${rang + 1} / ${contenu.consignes.length}`);
-        if (rang > 0) await expect(annonce).toContainText('Nouveau chemin');
+        await expect(annonce).toContainText(`Étape ${rang + 1} sur ${contenu.consignes.length}`);
+        if (rang > 0) await expect(annonce).toHaveAttribute('data-nouvelle-etape', 'oui');
         await expect(moteur.locator('[data-franchie="oui"]')).toHaveCount(0);
         if (fiche.id === 'galeries-08' && rang === 0) {
           await expect(moteur.locator('[data-case="pierre-robe"]')).toHaveCount(0);

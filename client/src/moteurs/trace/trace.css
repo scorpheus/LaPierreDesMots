@@ -1,0 +1,85 @@
+/* Moteur `trace` — apparence propre. La disposition vient du socle (DispositionMoteur). */
+
+/* La scène : la lettre travaillée au-dessus, l'ardoise dessous qui prend tout le reste. */
+.trace-scene {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  justify-items: center;
+  row-gap: var(--socle-espace);
+  inline-size: 100%;
+  block-size: 100%;
+  min-inline-size: 0;
+  min-block-size: 0;
+}
+
+/* Texte à déchiffrer : police et corps de lecture du profil, aucune animation (v2 § 9.3). */
+.trace-refus {
+  font-family: var(--lecture-famille, var(--font-lecture));
+  font-size: var(--lecture-corps);
+  line-height: var(--lecture-interligne);
+  letter-spacing: var(--lecture-interlettrage);
+  word-spacing: var(--lecture-espacement-mots);
+  background-color: var(--lecture-fond);
+  color: var(--lecture-encre);
+  animation: none;
+  transition: none;
+}
+
+.trace-cible {
+  position: static;
+  max-inline-size: min(92%, 30rem);
+  padding: 0.35rem 0.85rem;
+  /* T19 : fond, bord, police et corps viennent du thème question du socle. */
+  line-height: var(--lecture-interligne);
+  font-weight: 700;
+  text-align: center;
+  white-space: nowrap;
+  overflow-wrap: anywhere;
+  pointer-events: none;
+}
+
+.trace-ardoise {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 100%;
+  block-size: 100%;
+  min-block-size: 0;
+}
+
+.trace-ardoise > svg {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  max-inline-size: min(100%, 70rem);
+  max-block-size: 100%;
+  background: var(--parchemin, #FBF6EA);
+  border-radius: var(--rayon-carte, 1rem);
+  box-shadow: 0 4px 18px rgba(27, 36, 64, 0.15);
+  touch-action: none;
+}
+
+/* ── Le pied : retour bienveillant et nom du trait attendu ──────────────────────────────── */
+
+.trace-pied {
+  display: grid;
+  justify-items: center;
+  gap: 0.35rem;
+}
+
+/* La grille réserve toutes les variantes du message : rien ne bouge au premier refus. */
+.trace-refus {
+  display: grid;
+  margin: 0;
+  text-align: center;
+}
+
+.trace-refus__reserve,
+.trace-refus__message { grid-area: 1 / 1; }
+
+.trace-refus__reserve { visibility: hidden; }
+
+.trace-libelle {
+  padding-inline: 0.75rem;
+  font-weight: 700;
+}

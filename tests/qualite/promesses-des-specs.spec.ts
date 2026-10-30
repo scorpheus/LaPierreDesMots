@@ -171,7 +171,9 @@ function sourceDuMoteur(code: string, fabriquee?: string): string {
   let entier = '';
   const propres: string[] = [];
   for (const fichier of readdirSync(dossier)) {
-    if (!/[.]tsx?$/.test(fichier)) continue;
+    // La feuille propre du moteur compte aussi : depuis le socle (contrat § 7.3), le mouvement
+    // d'une cible (`@keyframes`) vit dans `<moteur>.css` et non plus dans un `<style>` du TSX.
+    if (!/[.](tsx?|css)$/.test(fichier)) continue;
     const brut = readFileSync(`${dossier}/${fichier}`, 'utf8');
     propres.push(brut);
     entier += `
@@ -182,7 +184,7 @@ ${sansCommentaires(brut)}`;
   }
 
   // Les imports relatifs qui SORTENT du dossier du moteur : `../commun/glisser.js`,
-  // `../phrase/receptacles.js`. On essaie `.tsx` puis `.ts` : la source porte l'extension `.js`
+  // `../commun/fentes.js`. On essaie `.tsx` puis `.ts` : la source porte l'extension `.js`
   // de sortie, jamais celle du fichier reel.
   const vus = new Set<string>();
   for (const brut of propres) {

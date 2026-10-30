@@ -380,7 +380,6 @@
 
 .action-campement--carte { background: linear-gradient(150deg, #e6f7ef 0%, #9fdcc8 100%); }
 .action-campement--coffre { background: linear-gradient(150deg, #fff4c8 0%, #f5bd64 100%); }
-.action-campement--histoire { background: linear-gradient(150deg, #eee7ff 0%, #c8b5e9 100%); }
 
 .action-campement:focus-visible {
   outline: 0.28rem solid var(--framboise);
@@ -410,10 +409,6 @@
 
 .action-campement-vignette--coffre {
   background-position: 16% 58%;
-}
-
-.action-campement-vignette--histoire {
-  background-position: 42% 80%;
 }
 
 .action-campement [data-action-campement-texte="nom"] {
@@ -573,7 +568,6 @@
 .cascade-embleme--intermediaire { background: #f5dfef; color: #a74f7d; }
 .cascade-embleme--rare { background: #dff2e8; color: #247e6e; }
 
-.cascade-recompense-detail { font-size: 0.84em; font-weight: 700; }
 
 .cascade-recompense-jauges {
   display: flex;
@@ -1003,4 +997,20 @@ html[data-animations='desactivees'] .compagnon-portrait--tuile .compagnon-sprite
 }
 @media (prefers-reduced-motion: reduce) {
   .compagnon-sprite { animation: none !important; }
+}
+
+/* La bulle de Gobi, partout où il parle. */
+.gobi-bulle {
+  flex: 1 1 auto;
+  padding: 0.75rem 1rem;
+  border: var(--epaisseur-trait) solid var(--trait);
+  border-radius: var(--rayon-carte);
+}
+
+/* Gobi, partout où il guide : dessin, bulle et commandes alignés. */
+.gobi {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
 }

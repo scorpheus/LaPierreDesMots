@@ -54,7 +54,9 @@ import { MessageStable } from '../../composants/MessageStable.js';
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import type { CSSProperties, ReactElement } from 'react';
 import type { ActionAttrape, ContenuAttrape, EtatAttrape } from '@pierre/partage';
-import { styleDeLecture, useReglagesLecture } from '../../lecture/ZoneDeLecture.js';
+import { useReglagesLecture } from '../../lecture/ZoneDeLecture.js';
+import { DispositionMoteur } from '../../activite/DispositionMoteur.js';
+import { RepereEtape } from '../../activite/RepereEtape.js';
 import { SceneDecor } from '../../habillages/SceneDecor.js';
 import type { ProprietesMoteur } from '../types.js';
 import {
@@ -66,14 +68,17 @@ import {
   planifierCascade,
   regionsAllumeesDepuisAcquis,
   regionsColoriables,
-  styleZoneDeJeu,
   transformeMeet,
   useDerniereAllumee,
   useMesureCadre,
   versPixels,
-} from '../eclair/mise-en-scene.js';
-import { PorteurPose } from '../eclair/porteur-pose.js';
+} from '../commun/mise-en-scene.js';
+import { PorteurPose } from '../commun/porteur-pose.js';
 import { urlAsset } from '../../api/client.js';
+
+import './attrape.css';
+import { ROLE_REPONSE } from '../../activite/Question.js';
+import { TexteColore } from '../../lecture/TexteColore.js';
 
 /** Cadence du `battementHorloge`. Le moteur ne connaît aucun `setTimeout` : c'est ici. */
 const PERIODE_BATTEMENT_MS = 1000;
@@ -87,22 +92,6 @@ const MESSAGES_DE_REFUS: Readonly<Record<string, string>> = {
   'cible-deja-attrapee': 'Cette cible est déjà attrapée.',
   'cible-inconnue': 'Ce n’est pas la bonne cible à attraper.',
 };
-
-/**
- * La feuille de style de la dérive. UNE SEULE règle, injectée une fois : chaque cible choisit
- * son amplitude et sa durée par des variables CSS, jamais par une image-clé recopiée.
- */
-const FEUILLE_DE_DERIVE = `
-@keyframes pierre-derive-cible {
-  0%, 100% { transform: translate(0, 0); }
-  25%      { transform: translate(var(--derive-dx), calc(var(--derive-dy) * -1)); }
-  50%      { transform: translate(0, 0); }
-  75%      { transform: translate(calc(var(--derive-dx) * -1), var(--derive-dy)); }
-}
-[data-derive="oui"] {
-  animation: pierre-derive-cible var(--derive-duree) ease-in-out var(--derive-delai) infinite;
-}
-`;
 
 /** Hachage pur et stable — aucun `Math.random`, aucun `Date.now` (règle non négociable). */
 function hacher(texte: string): number {
@@ -154,6 +143,9 @@ interface BoiteCible {
   readonly largeur: number;
   readonly hauteur: number;
 }
+
+/** Côté court minimal d'une image de contenu (`--socle-image-min`, contrat du socle S4). */
+const IMAGE_MIN = 96;
 
 /** `.cible` : padding 20 × 12 px et trait 4 px, comme `mesurerTexte`. */
 const GARNITURE_CIBLE_X = 20 + 4;
@@ -303,10 +295,10 @@ export function MoteurAttrape(
 
   // --- la typographie de lecture ---------------------------------------------
   const reglages = useReglagesLecture();
-  const styleLecture = useMemo(() => styleDeLecture(reglages), [reglages]);
 
   // --- la mesure du cadre -----------------------------------------------------
-  const { racine, bande, cadre, hauteurBande } = useMesureCadre();
+  // Les messages vivent dans le pied du socle : aucune bande n'est retranchée à la scène.
+  const { racine, cadre, hauteurBande } = useMesureCadre(0);
   const { cadreJeu, bornes } = useMemo(() => cadreJeuEtBornes(cadre, hauteurBande), [cadre, hauteurBande]);
 
   const regions = useMemo(() => regionsColoriables(habillage), [habillage]);
@@ -340,8 +332,12 @@ export function MoteurAttrape(
         (cadre.largeur - 2 * MARGE - 2 * margeDerive - 2 * GARNITURE_CIBLE_X) / Math.max(1, cible.taille[0]),
       ));
       const illustree = cible.asset !== null && cible.asset !== undefined;
-      const largeurRaster = illustree ? cible.taille[0] * echelleRaster : 0;
-      const hauteurRaster = illustree ? cible.taille[1] * echelleRaster : 0;
+      // Une image ne descend jamais sous IMAGE_MIN de côté court : c'est la grille qui s'adapte.
+      const brutL = illustree ? cible.taille[0] * echelleRaster : 0;
+      const brutH = illustree ? cible.taille[1] * echelleRaster : 0;
+      const grossir = illustree ? Math.max(1, IMAGE_MIN / Math.max(1, Math.min(brutL, brutH))) : 1;
+      const largeurRaster = brutL * grossir;
+      const hauteurRaster = brutH * grossir;
       const largeurBouton = Math.max(CIBLE_MIN, texte.largeur, largeurRaster + 2 * GARNITURE_CIBLE_X);
       const hauteurBouton = Math.max(CIBLE_MIN, texte.hauteur, hauteurRaster + 2 * GARNITURE_CIBLE_Y);
       return {
@@ -364,7 +360,7 @@ export function MoteurAttrape(
     [boitesCibles],
   );
   const hauteurMinimumScene = useMemo(() => {
-    // La bande basse est hors de la grille, mais dans le cadre mesuré par le moteur.
+    // Le pied est hors de la zone : seule la grille compte.
     return `${String(grilleCibles.hauteur + hauteurBande)}px`;
   }, [grilleCibles.hauteur, hauteurBande]);
 
@@ -398,252 +394,173 @@ export function MoteurAttrape(
     etat.dernierRefus === null ? '' : (MESSAGES_DE_REFUS[etat.dernierRefus.motif] ?? '');
 
   return (
-    <div
-      data-moteur="attrape"
+    <DispositionMoteur
+      moteur="attrape"
       data-habillage={habillage.id}
       data-termine={etat.termineMs === null ? 'non' : 'oui'}
       data-aide={etat.niveauAide}
       data-etape={etape === undefined ? '' : etape.identifiant}
       data-regions-allumees={String(allumees.length)}
-      style={{
-        position: 'relative',
-        blockSize: 'auto',
-        flex: '1 0 auto',
-        minBlockSize: 0,
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'visible',
-        borderRadius: 'var(--rayon-carte)',
-      }}
-    >
-      <style>{FEUILLE_DE_DERIVE}</style>
+      scene={
+        // La zone mesurée porte le décor et les cibles ; sa hauteur minimale est celle de la grille.
+        <div
+          ref={racine}
+          data-zone-jeu="attrape"
+          className="attrape-zone"
+          style={{ minBlockSize: hauteurMinimumScene }}
+        >
+          {/* le décor, en fond */}
+          <div className="attrape-calque">
+            <SceneDecor
+              habillage={habillage}
+              allumees={allumees}
+              derniere={derniere}
+              animationsDesactivees={animationsDesactivees}
+              ajustement="contenir"
+            />
+          </div>
 
-      {/* Le geste générique est porté par la barre haute de l'écran. Ce cartouche garde
-          seulement la cible concrète de l'étape sous les yeux de l'enfant. */}
-      <div
-        data-plateau="etape-attrape"
-        aria-live="polite"
-        style={{
-          position: 'relative',
-          alignSelf: 'flex-start',
-          flex: '0 0 auto',
-          margin: '0.75rem 0.75rem 0',
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '0.65rem',
-          padding: '0.45rem 0.8rem',
-          border: '3px solid var(--trait)',
-          borderRadius: '1rem',
-          background: 'var(--parchemin)',
-          boxShadow: 'var(--ombre-bd)',
-          ...styleLecture,
-        } as CSSProperties}
-      >
-        <span style={{ fontWeight: 700 }}>{`Étape ${String(etat.indexEtape + 1)} / ${String(etat.etapes.length)}`}</span>
-        <span aria-hidden="true" style={{ color: 'var(--soleil)', fontSize: '1.25em' }}>✦</span>
-        <span style={{ fontWeight: 800 }}>
-          {ciblesDeLEtape.length === 0
-            ? 'Cible suivante'
-            : `À attraper maintenant : ${ciblesDeLEtape.map((cible) => cible.libelle).join(' · ')}`}
-        </span>
-      </div>
+          {/* les cibles, MOBILES */}
+          <div
+            data-plateau="cibles"
+            data-chevauchements={String(grilleCibles.chevauchements)}
+            data-hors-bornes={String(grilleCibles.horsBornes)}
+            data-disposition="grille-intrinseque"
+            className="attrape-calque attrape-cibles"
+          >
+            {ciblesAffichees.map((cible) => {
+              const largeur = Math.max(CIBLE_MIN, cible.taille[0] * t.echelle);
+              const hauteur = Math.max(CIBLE_MIN, cible.taille[1] * t.echelle);
+              const boite = boiteCibleParId.get(cible.id);
+              const largeurBouton = boite?.largeurBouton ?? largeur;
+              const hauteurBouton = boite?.hauteurBouton ?? hauteur;
+              // ── LE DÉCOR EST COUVERT, PAS CONTENU (R52) — UNE CIBLE PEUT DONC TOMBER DANS LA
+              //     PARTIE ROGNÉE, EXACTEMENT COMME UNE RÉGION PEUT TOMBER HORS ÉCRAN ────────────
+              //
+              // Mesuré, sortie citée (`bac-a-sable/mesurer-mise-en-scene-cinq-moteurs.mjs`) : sur
+              // les 7 exercices réels, entre 2 et 8 cibles sur 8 à 14 tombaient hors du cadre —
+              // c'est-à-dire une cible qu'on ne peut jamais attraper. `deriverEmplacements` (pour
+              // `phrase`, les options, le clavier, les cases) CLAMPE déjà ses pastilles dans les
+              // bornes ; une cible transformée par le seul `versPixels` ne l'était pas. On applique
+              // donc la MÊME discipline ici : le point reste celui du contenu, mais son rendu ne
+              // sort jamais de la zone jouable — sans quoi une cible « bonne » deviendrait
+              // structurellement inatteignable, le pire défaut possible sur ce moteur.
+              const [xBrut, yBrut] = versPixels(cible.depart, t);
+              // Marge pour la DÉRIVE (14 à 30 px) : la cible ne doit pas sortir du cadre à l'apogée
+              // de son mouvement non plus.
+              const margeDerive = animationsDesactivees ? 0 : 30;
+              const demiL = largeur / 2 + margeDerive;
+              const demiH = hauteur / 2 + margeDerive;
+              const x = Math.min(
+                Math.max(xBrut, bornes.xMin + demiL),
+                Math.max(bornes.xMax - demiL, bornes.xMin + demiL),
+              );
+              const y = Math.min(
+                Math.max(yBrut, bornes.yMin + demiH),
+                Math.max(bornes.yMax - demiH, bornes.yMin + demiH),
+              );
+              const emplacement = grilleCibles.positions.get(cible.id);
+              const attrapee = etat.acquis[cible.id] !== undefined;
+              const refusee = etiquetteRefusee === cible.id;
+              // Les lucioles portent directement le mot utile : la classe dédiée renforce sa
+              // hiérarchie de lecture sans imposer une règle au moteur pour les autres habillages.
+              const classes = ['cible', 'attrape-cible'];
+              if (cible.id.startsWith('luciole-')) classes.push('cible-luciole');
+              if (!animationsDesactivees && refusee) classes.push('oscillation');
 
-      {/* Le cartouche est dans le flux, hors de ce cadre mesuré : aucune cible ne peut être
-          masquée par une règle ou par un changement de profil de lecture. */}
-      <div
-        ref={racine}
-        data-zone-jeu="attrape"
-        style={{
-          position: 'relative',
-          flex: `1 0 ${hauteurMinimumScene}`,
-          minBlockSize: hauteurMinimumScene,
-          overflow: 'hidden',
-        }}
-      >
+              const h = hacher(cible.id);
+              const derive: CSSProperties = animationsDesactivees
+                ? {}
+                : ({
+                    '--derive-dx': `${String(14 + (h % 5) * 4)}px`,
+                    '--derive-dy': `${String(10 + ((h >> 3) % 4) * 3)}px`,
+                    '--derive-duree': `${String(2600 + (h % 900))}ms`,
+                    '--derive-delai': `-${String(h % 2600)}ms`,
+                  } as CSSProperties);
 
-      {/* ------------------------------------------------------------- le décor, en fond */}
-      <div style={styleZoneDeJeu(hauteurBande)}>
-        <SceneDecor
-          habillage={habillage}
-          allumees={allumees}
-          derniere={derniere}
-          animationsDesactivees={animationsDesactivees}
-          ajustement="contenir"
-        />
-      </div>
-
-      {/* --------------------------------------------------------- les cibles, MOBILES */}
-      <div
-        data-plateau="cibles"
-        data-chevauchements={String(grilleCibles.chevauchements)}
-        data-hors-bornes={String(grilleCibles.horsBornes)}
-        data-disposition="grille-intrinseque"
-        style={{ ...styleZoneDeJeu(hauteurBande), zIndex: 1, pointerEvents: 'none' }}
-      >
-        {ciblesAffichees.map((cible) => {
-          const largeur = Math.max(CIBLE_MIN, cible.taille[0] * t.echelle);
-          const hauteur = Math.max(CIBLE_MIN, cible.taille[1] * t.echelle);
-          const boite = boiteCibleParId.get(cible.id);
-          const largeurBouton = boite?.largeurBouton ?? largeur;
-          const hauteurBouton = boite?.hauteurBouton ?? hauteur;
-          // ── LE DÉCOR EST COUVERT, PAS CONTENU (R52) — UNE CIBLE PEUT DONC TOMBER DANS LA
-          //     PARTIE ROGNÉE, EXACTEMENT COMME UNE RÉGION PEUT TOMBER HORS ÉCRAN ────────────
-          //
-          // Mesuré, sortie citée (`bac-a-sable/mesurer-mise-en-scene-cinq-moteurs.mjs`) : sur
-          // les 7 exercices réels, entre 2 et 8 cibles sur 8 à 14 tombaient hors du cadre —
-          // c'est-à-dire une cible qu'on ne peut jamais attraper. `deriverEmplacements` (pour
-          // `phrase`, les options, le clavier, les cases) CLAMPE déjà ses pastilles dans les
-          // bornes ; une cible transformée par le seul `versPixels` ne l'était pas. On applique
-          // donc la MÊME discipline ici : le point reste celui du contenu, mais son rendu ne
-          // sort jamais de la zone jouable — sans quoi une cible « bonne » deviendrait
-          // structurellement inatteignable, le pire défaut possible sur ce moteur.
-          const [xBrut, yBrut] = versPixels(cible.depart, t);
-          // Marge pour la DÉRIVE (14 à 30 px) : la cible ne doit pas sortir du cadre à l'apogée
-          // de son mouvement non plus.
-          const margeDerive = animationsDesactivees ? 0 : 30;
-          const demiL = largeur / 2 + margeDerive;
-          const demiH = hauteur / 2 + margeDerive;
-          const x = Math.min(
-            Math.max(xBrut, bornes.xMin + demiL),
-            Math.max(bornes.xMax - demiL, bornes.xMin + demiL),
-          );
-          const y = Math.min(
-            Math.max(yBrut, bornes.yMin + demiH),
-            Math.max(bornes.yMax - demiH, bornes.yMin + demiH),
-          );
-          const emplacement = grilleCibles.positions.get(cible.id);
-          const attrapee = etat.acquis[cible.id] !== undefined;
-          const refusee = etiquetteRefusee === cible.id;
-          // Les lucioles portent directement le mot utile : la classe dédiée renforce sa
-          // hiérarchie de lecture sans imposer une règle au moteur pour les autres habillages.
-          const classes = ['cible'];
-          if (cible.id.startsWith('luciole-')) classes.push('cible-luciole');
-          if (!animationsDesactivees && refusee) classes.push('oscillation');
-
-          const h = hacher(cible.id);
-          const derive: CSSProperties = animationsDesactivees
-            ? {}
-            : ({
-                '--derive-dx': `${String(14 + (h % 5) * 4)}px`,
-                '--derive-dy': `${String(10 + ((h >> 3) % 4) * 3)}px`,
-                '--derive-duree': `${String(2600 + (h % 900))}ms`,
-                '--derive-delai': `-${String(h % 2600)}ms`,
-              } as CSSProperties);
-
-          return (
-            <PorteurPose key={cible.id} x={emplacement?.[0] ?? x} y={emplacement?.[1] ?? y}>
-              <div data-derive={animationsDesactivees ? 'non' : 'oui'} style={derive}>
-                <button
-                  key={refusee ? `${cible.id}-${String(marqueRefusCourante)}` : cible.id}
-                  type="button"
-                  data-cible={cible.id}
-                  data-attrapee={attrapee ? 'oui' : 'non'}
-                  data-refusee={refusee ? 'oui' : 'non'}
-                  className={classes.join(' ')}
-                  hidden={attrapee}
-                  style={
-                    {
-                      ...styleLecture,
-                      pointerEvents: 'auto',
-                      whiteSpace: 'nowrap',
-                      boxSizing: 'border-box',
-                      inlineSize: `${String(largeurBouton)}px`,
-                      blockSize: `${String(hauteurBouton)}px`,
-                      minInlineSize: `${String(largeurBouton)}px`,
-                      minBlockSize: `${String(hauteurBouton)}px`,
-                    } as CSSProperties
-                  }
-                  onClick={(evenement) => {
-                    jouer({ type: 'toucher', cible: cible.id }, evenement);
-                  }}
-                >
-                  {cible.asset === null || cible.asset === undefined ? null : (
-                    <img
-                      src={urlAsset(String(cible.asset))}
-                      alt=""
-                      aria-hidden="true"
-                      draggable={false}
-                      data-illustration-cible="oui"
+              return (
+                <PorteurPose key={cible.id} x={emplacement?.[0] ?? x} y={emplacement?.[1] ?? y}>
+                  <div data-derive={animationsDesactivees ? 'non' : 'oui'} style={derive}>
+                    <button
+                      key={refusee ? `${cible.id}-${String(marqueRefusCourante)}` : cible.id}
+                      type="button"
+                      {...ROLE_REPONSE}
+                      data-cible={cible.id}
+                      data-attrapee={attrapee ? 'oui' : 'non'}
+                      data-refusee={refusee ? 'oui' : 'non'}
+                      className={classes.join(' ')}
+                      hidden={attrapee}
+                      // Boîte calculée par la grille : bordure et remplissage compris.
                       style={{
-                        display: 'block',
-                        inlineSize: `${String(boite?.largeurRaster ?? largeur)}px`,
-                        blockSize: `${String(boite?.hauteurRaster ?? hauteur)}px`,
-                        maxInlineSize: '100%',
-                        maxBlockSize: '100%',
-                        objectFit: 'contain',
-                        pointerEvents: 'none',
+                        boxSizing: 'border-box',
+                        inlineSize: `${String(largeurBouton)}px`,
+                        blockSize: `${String(hauteurBouton)}px`,
+                        minInlineSize: `${String(largeurBouton)}px`,
+                        minBlockSize: `${String(hauteurBouton)}px`,
                       }}
-                    />
-                  )}
-                  <span
-                    style={
-                      cible.asset === null || cible.asset === undefined
-                        ? undefined
-                        : {
-                            position: 'absolute',
-                            inlineSize: '1px',
-                            blockSize: '1px',
-                            overflow: 'hidden',
-                            clipPath: 'inset(50%)',
-                            whiteSpace: 'nowrap',
-                          }
-                    }
-                  >
-                    {cible.libelle}
-                  </span>
-                </button>
-              </div>
-            </PorteurPose>
-          );
-        })}
-      </div>
+                      onClick={(evenement) => {
+                        jouer({ type: 'toucher', cible: cible.id }, evenement);
+                      }}
+                    >
+                      {cible.asset === null || cible.asset === undefined ? null : (
+                        <img
+                          src={urlAsset(String(cible.asset))}
+                          alt=""
+                          aria-hidden="true"
+                          draggable={false}
+                          data-illustration-cible="oui"
+                          style={{
+                            inlineSize: `${String(boite?.largeurRaster ?? largeur)}px`,
+                            blockSize: `${String(boite?.hauteurRaster ?? hauteur)}px`,
+                          }}
+                        />
+                      )}
+                      <span className={cible.asset === null || cible.asset === undefined ? undefined : 'attrape-libelle-cache'}>
+                        <TexteColore texte={cible.libelle} />
+                      </span>
+                    </button>
+                  </div>
+                </PorteurPose>
+              );
+            })}
+          </div>
+        </div>
+      }
+      pied={
+        <>
+          {/* T10 — le repère d'étape commun : rendu ici, affiché sous la consigne de l'écran.
+              La cible concrète est un mot à lire : style de lecture, immobile. */}
+          <RepereEtape
+            moteur="attrape"
+            rang={etat.indexEtape + 1}
+            total={etat.etapes.length}
+            detail={ciblesDeLEtape.length === 0
+              ? 'Cible suivante'
+              : `À attraper : ${ciblesDeLEtape.map((cible) => cible.libelle).join(' · ')}`}
+            detailALire
+            animationsDesactivees={animationsDesactivees}
+          />
 
-      {/* ------------------------------------------------------------ la bande statique */}
-      <div
-        ref={bande}
-        data-plateau="controles"
-        style={{
-          position: 'absolute',
-          insetInlineStart: 0,
-          insetInlineEnd: 0,
-          insetBlockEnd: 0,
-          zIndex: 2,
-          display: 'grid',
-          gap: '0.5rem',
-          padding: '0.75rem',
-        }}
-      >
-        <p
-          role="status"
-          aria-live="polite"
-          data-refus-texte={messageDeRefus === '' ? 'non' : 'oui'}
-          data-animations={animationsDesactivees ? 'calmes' : 'vives'}
-          style={{ ...styleLecture, margin: 0, minBlockSize: '1.5em' } as CSSProperties}
-        >
-          <MessageStable messages={Object.values(MESSAGES_DE_REFUS)}>{messageDeRefus === '' ? (etat.aide === null ? '' : (etat.aide.texte ?? '')) : messageDeRefus}</MessageStable>
-        </p>
+          <div data-plateau="controles" className="attrape-controles">
+            <p
+              role="status"
+              aria-live="polite"
+              data-refus-texte={messageDeRefus === '' ? 'non' : 'oui'}
+              data-animations={animationsDesactivees ? 'calmes' : 'vives'}
+              className="attrape-retour"
+            >
+              <MessageStable messages={Object.values(MESSAGES_DE_REFUS)}>{messageDeRefus === '' ? (etat.aide === null ? '' : (etat.aide.texte ?? '')) : messageDeRefus}</MessageStable>
+            </p>
 
-        <p
-          role="status"
-          aria-live="polite"
-          data-annonce="coloriage"
-          style={{
-            position: 'absolute',
-            inlineSize: 1,
-            blockSize: 1,
-            overflow: 'hidden',
-            clip: 'rect(0 0 0 0)',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          {derniere === null
-            ? ''
-            : `${regions.find((r) => r.id === derniere.id)?.libelle ?? derniere.id} reprend ses couleurs.`}
-        </p>
-      </div>
-
-      {/* ── LES DEUX CONTRÔLES SONT PORTÉS PAR L'ÉCRAN, PAS PAR LE MOTEUR (R10) ────────────── */}
-      </div>
-    </div>
+            <p role="status" aria-live="polite" data-annonce="coloriage" className="attrape-annonce">
+              {derniere === null
+                ? ''
+                : `${regions.find((r) => r.id === derniere.id)?.libelle ?? derniere.id} reprend ses couleurs.`}
+            </p>
+            {/* LES DEUX CONTRÔLES SONT PORTÉS PAR L'ÉCRAN, PAS PAR LE MOTEUR (R10). */}
+          </div>
+        </>
+      }
+    />
   );
 }

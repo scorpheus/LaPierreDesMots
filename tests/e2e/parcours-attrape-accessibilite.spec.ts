@@ -1,8 +1,8 @@
 import { expect, test } from './invariants.js';
-import { appliquerReglagesLectureReels, entrerDansLeNoeud, noeudsLivres, deuxImages } from './qa-outils.js';
+import { appliquerReglagesLectureReels, entrerDansLeNoeud, noeudsDuMoteurBalayes, deuxImages } from './qa-outils.js';
 import { attendreGeometrieStable } from '../qualite/aides-composition.js';
 
-const fiches = noeudsLivres().filter((fiche) => fiche.moteur === 'attrape');
+const fiches = noeudsDuMoteurBalayes('attrape');
 for (const format of [{ width: 720, height: 1017 }, { width: 1080, height: 670 },
   { width: 390, height: 700 }, { width: 844, height: 340 }, { width: 1920, height: 1200 }]) {
   for (const fiche of fiches) {

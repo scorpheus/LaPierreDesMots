@@ -12,7 +12,7 @@
  *
  * Le décor COUVRE désormais la zone de jeu et se RALLUME à mesure que les bonnes options sont
  * trouvées (R52). Les options sont posées à des emplacements DÉRIVÉS des régions de l'habillage
- * (`client/src/moteurs/eclair/mise-en-scene.ts`), jamais écrits à la main : ajouter un
+ * (`client/src/moteurs/commun/mise-en-scene.ts`), jamais écrits à la main : ajouter un
  * habillage à `eclair` continue de coûter zéro ligne de code.
  *
  * ── LE MOT FLASHÉ TROUVE ENFIN UNE PLACE DANS LE DÉCOR ────────────────────────────────────────
@@ -34,11 +34,13 @@
  */
 
 import { MessageStable } from '../../composants/MessageStable.js';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { CSSProperties, ReactElement } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import type { CSSProperties, ReactElement, ReactNode } from 'react';
 import { hexDeCouleur } from '@pierre/partage';
 import type { ActionEclair, ContenuEclair, EtatEclair } from '@pierre/partage';
-import { ZoneDeLecture, styleDeLecture, useReglagesLecture } from '../../lecture/ZoneDeLecture.js';
+import { ZoneDeLecture, useReglagesLecture } from '../../lecture/ZoneDeLecture.js';
+import { DispositionMoteur } from '../../activite/DispositionMoteur.js';
+import { RepereEtape } from '../../activite/RepereEtape.js';
 import { SceneDecor } from '../../habillages/SceneDecor.js';
 import type { ProprietesMoteur } from '../types.js';
 import {
@@ -47,18 +49,23 @@ import {
   planifierCascade,
   regionsAllumeesDepuisAcquis,
   regionsColoriables,
-  styleZoneDeJeu,
   useDerniereAllumee,
   useMesureCadre,
-} from './mise-en-scene.js';
-import { PorteurPose } from './porteur-pose.js';
+} from '../commun/mise-en-scene.js';
+import { PorteurPose } from '../commun/porteur-pose.js';
+
+import './eclair.css';
+import { ROLE_QUESTION, ROLE_REPONSE } from '../../activite/Question.js';
+import { TexteColore } from '../../lecture/TexteColore.js';
 
 /** Cadence du `battementHorloge`. Le moteur ne connaît aucun `setTimeout` : c'est ici. */
 const PERIODE_BATTEMENT_MS = 1000;
 
-/** Préfixe de la clé synthétique qui réserve, dans la même cascade que les options, la place du
- *  mot flashé. Aucun habillage ne le connaît : c'est une position parmi d'autres. */
-const PREFIXE_ECLAIR = '__eclair-';
+/** Écart entre la bande du mot montré et la première option, en px. */
+const ECART_BANDE_ECLAIR_PX = 10;
+
+/** Largeur que prend la pastille de couleur d'une option : 28 px + 2 × 3 px de trait + 6,4 px de marge. */
+const PASTILLE_COULEUR_PX = 41;
 
 /** CE QUE LE REFUS DIT — jamais l'option attendue (v2 § 5.4, même discipline que `phrase`). */
 const MESSAGES_DE_REFUS: Readonly<Record<string, string>> = {
@@ -68,18 +75,10 @@ const MESSAGES_DE_REFUS: Readonly<Record<string, string>> = {
   'option-inconnue': 'On cherche une autre option pour ce mot-là.',
 };
 
-/** Les lucioles flottent doucement ; le texte de la consigne et le mot restent immobiles. */
-const FEUILLE_DE_LUCIOLES = `
-@keyframes pierre-luciole-derive {
-  0%, 100% { transform: translate(0, 0) rotate(0deg); }
-  25% { transform: translate(var(--luciole-dx), calc(var(--luciole-dy) * -1)) rotate(-2deg); }
-  50% { transform: translate(0, 0) rotate(1deg); }
-  75% { transform: translate(calc(var(--luciole-dx) * -1), var(--luciole-dy)) rotate(-1deg); }
+/** Posé sur le décor, ou simple élément de flux quand la place manque. */
+function Porteur({ enFlux, x, y, children }: { readonly enFlux: boolean; readonly x: number; readonly y: number; readonly children: ReactNode }): ReactElement {
+  return enFlux ? <span className="eclair-porte-flux">{children}</span> : <PorteurPose x={x} y={y}>{children}</PorteurPose>;
 }
-[data-luciole-animee="oui"] {
-  animation: pierre-luciole-derive var(--luciole-duree) ease-in-out var(--luciole-delai) infinite;
-}
-`;
 
 function hacher(texte: string): number {
   let h = 0;
@@ -145,10 +144,10 @@ export function MoteurEclair(
 
   // --- la typographie de lecture ---------------------------------------------
   const reglages = useReglagesLecture();
-  const styleLecture = useMemo(() => styleDeLecture(reglages), [reglages]);
 
   // --- la mesure du cadre -----------------------------------------------------
-  const { racine, bande, cadre, hauteurBande } = useMesureCadre();
+  // Les messages vivent dans le pied du socle : aucune bande n'est retranchée à la scène.
+  const { racine, cadre, hauteurBande } = useMesureCadre(0);
   const barreSuperieure = useRef<HTMLDivElement | null>(null);
   const [basBarre, fixerBasBarre] = useState(0);
   useEffect(() => {
@@ -161,11 +160,20 @@ export function MoteurEclair(
     observateur.observe(barre);
     return () => observateur.disconnect();
   }, []);
-  const { cadreJeu, bornes } = useMemo(() => {
+  // ── LA BANDE DU MOT MONTRÉ (retours du parent, 9 oct., E02) ─────────────────────────────────
+  // Le mot apparaît toujours au même endroit, juste sous la commande « Montre-moi le mot », et
+  // aucune option n'est jamais posée dessous : une luciole cachée sous le mot ne se touchait plus.
+  // La hauteur de la bande est MESURÉE sur une copie invisible de la carte du mot, avec le mot le
+  // plus large de l'exercice (`mesureFlash` plus bas), jamais estimée.
+  const mesureFlash = useRef<HTMLDivElement | null>(null);
+  const [hauteurBandeEclair, fixerHauteurBandeEclair] = useState(0);
+  const { cadreJeu, bornes, hautBandeEclair } = useMemo(() => {
     const mesure = cadreJeuEtBornes(cadre, hauteurBande);
-    // Aucune option ne doit se retrouver derrière la commande gratuite « Revoir ».
-    return { ...mesure, bornes: { ...mesure.bornes, yMin: Math.max(mesure.bornes.yMin, basBarre + 10) } };
-  }, [cadre, hauteurBande, basBarre]);
+    // Aucune option ne doit se retrouver derrière la commande gratuite « Revoir », ni sous le mot.
+    const haut = Math.max(mesure.bornes.yMin, basBarre + ECART_BANDE_ECLAIR_PX);
+    const yMin = haut + hauteurBandeEclair + (hauteurBandeEclair > 0 ? ECART_BANDE_ECLAIR_PX : 0);
+    return { ...mesure, hautBandeEclair: haut, bornes: { ...mesure.bornes, yMin } };
+  }, [cadre, hauteurBande, basBarre, hauteurBandeEclair]);
 
   const regions = useMemo(() => regionsColoriables(habillage), [habillage]);
   const centroideParRegion = useMemo(
@@ -177,25 +185,34 @@ export function MoteurEclair(
     () => new Map(contenu.options.map((o) => [o.id, o] as const)),
     [contenu.options],
   );
-  const motParEtape = useMemo(
-    () => new Map(contenu.consignes.map((c) => [c.id, c.mot] as const)),
-    [contenu.consignes],
-  );
+  // Le mot le plus large de l'exercice : c'est lui qui taille la bande du mot montré.
+  const motLePlusLarge = useMemo(() => contenu.consignes.reduce<string>((plus, c) =>
+    (mesurerTexte(c.mot, reglages).largeur > mesurerTexte(plus, reglages).largeur ? c.mot : plus), ''),
+  [contenu.consignes, reglages]);
+  useLayoutEffect(() => {
+    const noeud = mesureFlash.current;
+    if (noeud === null) return undefined;
+    const relever = (): void => { fixerHauteurBandeEclair(Math.ceil(noeud.getBoundingClientRect().height)); };
+    relever();
+    if (typeof ResizeObserver !== 'function') return undefined;
+    const observateur = new ResizeObserver(relever);
+    observateur.observe(noeud);
+    return () => observateur.disconnect();
+  }, [motLePlusLarge]);
 
   const mesurer = useCallback(
     (cle: string) => {
-      if (cle.startsWith(PREFIXE_ECLAIR)) {
-        const mot = motParEtape.get(cle.slice(PREFIXE_ECLAIR.length)) ?? '';
-        return mesurerTexte(mot, reglages);
-      }
-      return mesurerTexte(optionParId.get(cle)?.libelle ?? '', reglages);
+      const option = optionParId.get(cle);
+      const boite = mesurerTexte(option?.libelle ?? '', reglages);
+      // La pastille de couleur (1,75 rem + 3 px de trait de chaque côté + 0,4 rem de marge) s'ajoute au mot.
+      return option?.couleur === undefined ? boite : { ...boite, largeur: boite.largeur + PASTILLE_COULEUR_PX };
     },
-    [motParEtape, optionParId, reglages],
+    [optionParId, reglages],
   );
 
-  // --- la dérivation : le mot flashé PUIS les options, en cascade par étape ---
+  // --- la dérivation : les options, en cascade par étape, sous la bande du mot ---
   const listesParEtape = useMemo(
-    () => etat.etapes.map((e) => [`${PREFIXE_ECLAIR}${e.identifiant}`, ...e.ordreOptions]),
+    () => etat.etapes.map((e) => [...e.ordreOptions]),
     [etat.etapes],
   );
   const plans = useMemo(
@@ -212,11 +229,45 @@ export function MoteurEclair(
   );
   const planCourant = plans[etat.indexEtape] ?? null;
   const emplacements = planCourant?.resultat.emplacements ?? [];
-  const emplacementEclair =
-    etape === undefined
-      ? undefined
-      : emplacements.find((e) => e.cle === `${PREFIXE_ECLAIR}${etape.identifiant}`);
-  const emplacementsOptions = emplacements.filter((e) => !e.cle.startsWith(PREFIXE_ECLAIR));
+  const emplacementsOptions = emplacements;
+
+  // Mesure réelle après rendu : si deux options se recouvrent ou sortent de la zone (place très
+  // réduite), elles passent en flux (retour à la ligne) au lieu de rester posées sur le décor.
+  // Petit écran (la page défile, `socle.css`) : en flux, la zone prend la hauteur de ses options
+  // au lieu de les faire défiler sous un bord qui les rogne. Sa hauteur suit donc le flux, et la
+  // clé n'en dépend pas — sans quoi la zone qui grandit relancerait l'essai posé, qui la rétrécit.
+  const [petitEcran, fixerPetitEcran] = useState(false);
+  useLayoutEffect(() => {
+    const cadreScene = racine.current?.closest('.cadre-scene-activite') ?? null;
+    const libre = cadreScene !== null && getComputedStyle(cadreScene).containerType !== 'size';
+    fixerPetitEcran((avant) => (avant === libre ? avant : libre));
+  }, [racine, cadre.largeur, cadre.hauteur]);
+  const cleDeMesure = `${String(Math.round(cadre.largeur))}x${petitEcran ? 'libre' : String(Math.round(cadre.hauteur))}|${String(etat.indexEtape)}|${String(reglages.corpsPx)}|${String(basBarre)}`;
+  const [repli, fixerRepli] = useState<{ readonly cle: string; readonly actif: boolean }>({ cle: '', actif: false });
+  const enFlux = repli.cle === cleDeMesure && repli.actif;
+  useLayoutEffect(() => {
+    if (repli.cle === cleDeMesure) return;
+    const zone = racine.current;
+    if (zone === null) return;
+    const cadreZone = zone.getBoundingClientRect();
+    const boites = [...zone.querySelectorAll<HTMLElement>('[data-option]')]
+      .map((n) => n.getBoundingClientRect())
+      .filter((r) => r.width > 0 && r.height > 0);
+    const barre = barreSuperieure.current?.getBoundingClientRect();
+    const dedans = (r: DOMRect): boolean =>
+      r.left >= cadreZone.left - 1 && r.right <= cadreZone.right + 1 &&
+      r.top >= cadreZone.top - 1 && r.bottom <= cadreZone.bottom + 1;
+    const croise = (a: DOMRect, b: DOMRect): boolean =>
+      Math.min(a.right, b.right) - Math.max(a.left, b.left) > 1 &&
+      Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top) > 1;
+    let casse = false;
+    boites.forEach((r, i) => {
+      if (!dedans(r)) casse = true;
+      if (barre !== undefined && barre.height > 0 && croise(r, barre)) casse = true;
+      for (let j = i + 1; j < boites.length; j += 1) if (croise(r, boites[j] as DOMRect)) casse = true;
+    });
+    fixerRepli({ cle: cleDeMesure, actif: casse });
+  }, [repli.cle, cleDeMesure, racine, emplacementsOptions.length]);
 
   const allumees = useMemo(
     () => regionsAllumeesDepuisAcquis(plans, etat.acquis, centroideParRegion),
@@ -268,8 +319,8 @@ export function MoteurEclair(
     };
   }, [consigne, dureeMs, tours, etat.finExpositionMs]);
 
-  const xEclair = emplacementEclair?.x ?? cadreJeu.largeur / 2;
-  const yEclair = emplacementEclair?.y ?? cadreJeu.hauteur / 2;
+  const xEclair = cadreJeu.largeur / 2;
+  const yEclair = hautBandeEclair + hauteurBandeEclair / 2;
   const chercheVoyelle = useMemo(() => {
     if (consigne === null) return false;
     const libelles = consigne.options
@@ -278,229 +329,188 @@ export function MoteurEclair(
     return libelles.length > 0 && libelles.every((libelle) => /^[aeiouyéèêàâîïôöùûü]$/u.test(libelle));
   }, [consigne, optionParId]);
 
+  const messageAffiche =
+    messageDeRefus === '' ? (etat.aide === null ? '' : (etat.aide.texte ?? '')) : messageDeRefus;
+
   return (
-    <div
-      ref={racine}
-      data-moteur="eclair"
+    <DispositionMoteur
+      moteur="eclair"
+      hauteurPetitEcran={enFlux ? 'contenu' : 'cadre'}
       data-habillage={habillage.id}
       data-termine={etat.termineMs === null ? 'non' : 'oui'}
       data-aide={etat.niveauAide}
       data-etape={etape === undefined ? '' : etape.identifiant}
       data-regions-allumees={String(allumees.length)}
-      style={{
-        position: 'relative',
-        blockSize: '100%',
-        minBlockSize: 0,
-        overflow: 'hidden',
-        borderRadius: 'var(--rayon-carte)',
-      }}
-    >
-      <style>{FEUILLE_DE_LUCIOLES}</style>
-
-      {/* Une seule bande supérieure : le repère d'étape et la commande ne peuvent plus se
-          superposer. Sur petit écran, le CSS condense les libellés sans réduire la cible. */}
-      <div ref={barreSuperieure} className="eclair-barre-superieure">
-        {consigne === null ? null : (
-          <div
-            data-plateau="etape-eclair"
-            data-visible={eclairVisible ? 'non' : 'oui'}
-            aria-live="polite"
-            className="eclair-etape"
-          >
-            <span className="eclair-rang-etape">
-              Étape {String(etat.indexEtape + 1)} sur {String(etat.etapes.length)}
-            </span>
-            <span aria-hidden="true" className="eclair-separateur-etape">✦</span>
-            <span className="eclair-detail-etape">
-              {tours === 0
+      scene={
+        <div ref={racine} className="eclair-zone">
+          {/* T10 — le repère commun, affiché sous la consigne de l'écran ; la bande haute ne
+              porte plus que la commande. Quand la place manque, le CSS condense son libellé
+              sans réduire la cible. */}
+          {consigne === null ? null : (
+            <RepereEtape
+              moteur="eclair"
+              rang={etat.indexEtape + 1}
+              total={etat.etapes.length}
+              detail={tours === 0
                 ? 'Un nouveau mot t’attend.'
                 : chercheVoyelle
                   ? 'Quelle voyelle lis-tu dans ce mot ?'
                   : 'Retrouve le mot que tu viens de lire.'}
-            </span>
-          </div>
-        )}
-
-        <div data-plateau="commande-eclair" className="eclair-commande-zone">
-          <button
-            type="button"
-            data-action={tours === 0 ? 'pret' : 'revoir'}
-            className="commande-eclair"
-            aria-label={tours === 0 ? 'Montre-moi le mot' : 'Revoir le mot'}
-            style={{ pointerEvents: 'auto' }}
-            onClick={() => {
-              if (tours > 0) emettre({ type: 'revoirEclair' } as ActionEclair);
-              ouvrirLaPorte();
-            }}
-          >
-            <span aria-hidden="true">👁</span>
-            <span className="commande-eclair-libelle-long">
-              {tours === 0 ? 'Montre-moi le mot' : 'Revoir le mot'}
-            </span>
-            <span className="commande-eclair-libelle-court" aria-hidden="true">
-              {tours === 0 ? 'Voir' : 'Revoir'}
-            </span>
-          </button>
-          {tours === 0 ? null : (
-            <small data-note="revoir-gratuit" className="commande-eclair-note">
-              Tu peux le revoir autant que tu veux.
-            </small>
+              animationsDesactivees={animationsDesactivees}
+            />
           )}
-        </div>
-      </div>
-
-      {/* ------------------------------------------------------------- le décor, en fond */}
-      <div style={styleZoneDeJeu(hauteurBande)}>
-        <SceneDecor
-          habillage={habillage}
-          allumees={allumees}
-          derniere={derniere}
-          animationsDesactivees={animationsDesactivees}
-          ajustement="contenir"
-        />
-      </div>
-
-      {/* ------------------------------------------------------- les options, posées dessus */}
-      <div
-        data-plateau="options"
-        style={{ ...styleZoneDeJeu(hauteurBande), zIndex: 1, pointerEvents: 'none' }}
-      >
-        {emplacementsOptions.map((emplacement) => {
-          const option = optionParId.get(emplacement.cle);
-          if (option === undefined) return null;
-          const refusee = etiquetteRefusee === emplacement.cle;
-          const classes = ['cible'];
-          if (!animationsDesactivees && refusee) classes.push('oscillation');
-          const h = hacher(emplacement.cle);
-          const derive: CSSProperties = animationsDesactivees
-            ? {}
-            : ({
-                '--luciole-dx': `${String(5 + (h % 4) * 2)}px`,
-                '--luciole-dy': `${String(4 + ((h >> 3) % 3) * 2)}px`,
-                '--luciole-duree': `${String(4200 + (h % 1200))}ms`,
-                '--luciole-delai': `-${String(h % 3600)}ms`,
-              } as CSSProperties);
-          return (
-            <PorteurPose key={emplacement.cle} x={emplacement.x} y={emplacement.y}>
-              <div
-                data-luciole-animee={animationsDesactivees || !option.id.startsWith('luciole-') ? 'non' : 'oui'}
-                style={derive}
+          <div ref={barreSuperieure} className="eclair-barre-superieure">
+            <div data-plateau="commande-eclair" className="eclair-commande-zone">
+              <button
+                type="button"
+                data-action={tours === 0 ? 'pret' : 'revoir'}
+                className="commande-eclair"
+                aria-label={tours === 0 ? 'Montre-moi le mot' : 'Revoir le mot'}
+                onClick={() => {
+                  if (tours > 0) emettre({ type: 'revoirEclair' } as ActionEclair);
+                  ouvrirLaPorte();
+                }}
               >
-                <button
-                  key={refusee ? `${emplacement.cle}-${String(marqueRefusCourante)}` : emplacement.cle}
-                  type="button"
-                  data-option={emplacement.cle}
-                  data-option-couleur={option.couleur ?? undefined}
-                  className={`${classes.join(' ')}${option.id.startsWith('luciole-') ? ' cible-luciole' : ''}`}
-                  style={{ ...styleLecture, pointerEvents: 'auto', whiteSpace: 'nowrap' } as CSSProperties}
-                  onClick={(evenement) => {
-                    jouer({ type: 'repondre', option: emplacement.cle }, evenement);
-                  }}
-                >
-                {/* R11 — une couleur se MONTRE, elle ne se lit pas : la pastille porte la
-                    teinte, le mot reste à côté pour qui veut le lire. */}
-                {option.couleur === undefined ? null : (
-                  <span
-                    aria-hidden="true"
-                    data-pastille={option.couleur}
-                    style={{
-                      display: 'inline-block',
-                      inlineSize: '1.75rem',
-                      blockSize: '1.75rem',
-                      marginInlineEnd: '0.4rem',
-                      verticalAlign: 'middle',
-                      borderRadius: '50%',
-                      background: hexDeCouleur(option.couleur),
-                      border: '3px solid var(--trait, #1B2440)',
-                    }}
-                  />
-                )}
-                  {option.libelle}
-                </button>
-              </div>
-            </PorteurPose>
-          );
-        })}
-      </div>
-
-      {/* ── LE MOT FLASHÉ — posé au même titre qu'une option, jamais animé une fois affiché.
-          L'élément reste MONTÉ même invisible (`data-visible="non"`) : c'est ce que la
-          recette « Revoir » observe. */}
-      <PorteurPose x={xEclair} y={yEclair}>
-        <div
-          data-plateau="eclair"
-          data-visible={eclairVisible ? 'oui' : 'non'}
-          style={{
-            display: 'grid',
-            placeItems: 'center',
-            minBlockSize: '5rem',
-            minInlineSize: '12rem',
-            borderRadius: 'var(--rayon-carte)',
-            boxShadow: eclairVisible
-              ? '0 0 0 6px color-mix(in srgb, var(--soleil) 70%, transparent), var(--ombre-bd)'
-              : 'none',
-            pointerEvents: eclairVisible ? 'none' : 'auto',
-            background: eclairVisible ? 'var(--parchemin)' : 'transparent',
-            border: eclairVisible ? '3px solid var(--trait)' : '0',
-            padding: eclairVisible ? '0.85rem 1.2rem' : 0,
-            color: 'var(--trait)',
-          }}
-        >
-          {eclairVisible && consigne !== null ? (
-            <div style={{ display: 'grid', justifyItems: 'center', gap: '0.25rem' }}>
-              <span style={{ fontSize: '0.78rem', fontWeight: 700, opacity: 0.75 }}>Lis ce mot</span>
-              <ZoneDeLecture texte={consigne.mot} motsCles={[consigne.mot]} etiquette={`Le mot : ${consigne.mot}`} />
+                <span aria-hidden="true">👁</span>
+                <span className="commande-eclair-libelle-long">
+                  {tours === 0 ? 'Montre-moi le mot' : 'Revoir le mot'}
+                </span>
+                <span className="commande-eclair-libelle-court" aria-hidden="true">
+                  {tours === 0 ? 'Voir' : 'Revoir'}
+                </span>
+              </button>
+              {/* Toujours rendue, seulement cachée avant le premier « Montre-moi » : la barre garde
+                  sa hauteur, donc le décor et le mot montré ne bougent pas d'une étape à l'autre. */}
+              <small
+                data-note="revoir-gratuit"
+                className="commande-eclair-note"
+                aria-hidden={tours === 0 ? true : undefined}
+                style={tours === 0 ? { visibility: 'hidden' } : undefined}
+              >
+                Tu peux le revoir autant que tu veux.
+              </small>
             </div>
-          ) : null}
+          </div>
+
+          {/* le décor, en fond */}
+          <div className="eclair-calque">
+            <SceneDecor
+              habillage={habillage}
+              allumees={allumees}
+              derniere={derniere}
+              animationsDesactivees={animationsDesactivees}
+              ajustement="contenir"
+            />
+          </div>
+
+          {/* les options, posées dessus */}
+          <div
+            data-plateau="options"
+            data-disposition={enFlux ? 'flux' : 'posee'}
+            className={`eclair-calque eclair-options${enFlux ? ' eclair-options--flux' : ''}`}
+            style={enFlux ? { paddingBlockStart: `${String(bornes.yMin)}px` } : undefined}
+          >
+            {emplacementsOptions.map((emplacement) => {
+              const option = optionParId.get(emplacement.cle);
+              if (option === undefined) return null;
+              const refusee = etiquetteRefusee === emplacement.cle;
+              const classes = ['cible', 'eclair-option'];
+              if (!animationsDesactivees && refusee) classes.push('oscillation');
+              const h = hacher(emplacement.cle);
+              const derive: CSSProperties = animationsDesactivees
+                ? {}
+                : ({
+                    '--luciole-dx': `${String(5 + (h % 4) * 2)}px`,
+                    '--luciole-dy': `${String(4 + ((h >> 3) % 3) * 2)}px`,
+                    '--luciole-duree': `${String(4200 + (h % 1200))}ms`,
+                    '--luciole-delai': `-${String(h % 3600)}ms`,
+                  } as CSSProperties);
+              return (
+                <Porteur key={emplacement.cle} enFlux={enFlux} x={emplacement.x} y={emplacement.y}>
+                  <div
+                    data-luciole-animee={animationsDesactivees || !option.id.startsWith('luciole-') ? 'non' : 'oui'}
+                    style={derive}
+                  >
+                    <button
+                      key={refusee ? `${emplacement.cle}-${String(marqueRefusCourante)}` : emplacement.cle}
+                      type="button"
+                      {...ROLE_REPONSE}
+                      data-option={emplacement.cle}
+                      data-option-couleur={option.couleur ?? undefined}
+                      className={`${classes.join(' ')}${option.id.startsWith('luciole-') ? ' cible-luciole' : ''}`}
+                      onClick={(evenement) => {
+                        jouer({ type: 'repondre', option: emplacement.cle }, evenement);
+                      }}
+                    >
+                      {/* R11 — une couleur se MONTRE, elle ne se lit pas : la pastille porte la
+                          teinte, le mot reste à côté pour qui veut le lire. */}
+                      {option.couleur === undefined ? null : (
+                        <span
+                          aria-hidden="true"
+                          className="eclair-pastille"
+                          data-pastille={option.couleur}
+                          style={{ background: hexDeCouleur(option.couleur) }}
+                        />
+                      )}
+                      <TexteColore texte={option.libelle} />
+                    </button>
+                  </div>
+                </Porteur>
+              );
+            })}
+          </div>
+
+          {/* ── LE MOT FLASHÉ — posé au même titre qu'une option, jamais animé une fois affiché.
+              L'élément reste MONTÉ même invisible (`data-visible="non"`) : c'est ce que la
+              recette « Revoir » observe. */}
+          {/* Copie invisible de la carte, avec le mot le plus large : elle MESURE la bande. */}
+          <div ref={mesureFlash} aria-hidden="true" className="eclair-flash eclair-flash--mesure" data-visible="oui">
+            <div className="eclair-flash__contenu">
+              <span className="eclair-flash__legende"><TexteColore texte="Lis ce mot" /></span>
+              <ZoneDeLecture dansUneQuestion texte={motLePlusLarge} motsCles={[]} etiquette="" />
+            </div>
+          </div>
+          <div className="eclair-calque eclair-calque-flash">
+          <PorteurPose x={xEclair} y={yEclair}>
+            <div
+              className="eclair-flash"
+              data-plateau="eclair"
+              data-visible={eclairVisible ? 'oui' : 'non'}
+              // T19 : le mot montré est ce qu'on DEMANDE de retrouver — thème question, une fois visible.
+              {...(eclairVisible ? ROLE_QUESTION : {})}
+            >
+              {eclairVisible && consigne !== null ? (
+                <div className="eclair-flash__contenu">
+                  <span className="eclair-flash__legende"><TexteColore texte="Lis ce mot" /></span>
+                  <ZoneDeLecture dansUneQuestion texte={consigne.mot} motsCles={[consigne.mot]} etiquette={`Le mot : ${consigne.mot}`} />
+                </div>
+              ) : null}
+            </div>
+          </PorteurPose>
+          </div>
         </div>
-      </PorteurPose>
+      }
+      pied={
+        // La porte, « Revoir » et le message de refus/aide : jamais sur le décor qui s'agite.
+        <div data-plateau="controles" className="eclair-controles">
+          <p
+            role="status"
+            aria-live="polite"
+            data-refus-texte={messageDeRefus === '' ? 'non' : 'oui'}
+            data-animations={animationsDesactivees ? 'calmes' : 'vives'}
+            className="eclair-retour"
+          >
+            <MessageStable messages={Object.values(MESSAGES_DE_REFUS)}>{messageAffiche}</MessageStable>
+          </p>
 
-      {/* ------------------------------------------------------------ la bande statique
-          La porte, « Revoir » et le message de refus/aide : jamais sur le décor qui s'agite. */}
-      <div
-        ref={bande}
-        data-plateau="controles"
-        style={{
-          position: 'absolute',
-          insetInlineStart: 0,
-          insetInlineEnd: 0,
-          insetBlockEnd: 0,
-          zIndex: 2,
-          display: 'grid',
-          gap: '0.5rem',
-          padding: '0.75rem',
-        }}
-      >
-        <p
-          role="status"
-          aria-live="polite"
-          data-refus-texte={messageDeRefus === '' ? 'non' : 'oui'}
-          data-animations={animationsDesactivees ? 'calmes' : 'vives'}
-          style={{ ...styleLecture, margin: 0, minBlockSize: '1.5em' } as CSSProperties}
-        >
-          <MessageStable messages={Object.values(MESSAGES_DE_REFUS)}>{messageDeRefus === '' ? (etat.aide === null ? '' : (etat.aide.texte ?? '')) : messageDeRefus}</MessageStable>
-        </p>
-
-        <p
-          role="status"
-          aria-live="polite"
-          data-annonce="coloriage"
-          style={{
-            position: 'absolute',
-            inlineSize: 1,
-            blockSize: 1,
-            overflow: 'hidden',
-            clip: 'rect(0 0 0 0)',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          {derniere === null
-            ? ''
-            : `${regions.find((r) => r.id === derniere.id)?.libelle ?? derniere.id} reprend ses couleurs.`}
-        </p>
-      </div>
-
-      {/* ── LES DEUX CONTRÔLES SONT PORTÉS PAR L'ÉCRAN, PAS PAR LE MOTEUR (R10) ────────────── */}
-    </div>
+          <p role="status" aria-live="polite" data-annonce="coloriage" className="eclair-annonce">
+            {derniere === null
+              ? ''
+              : `${regions.find((r) => r.id === derniere.id)?.libelle ?? derniere.id} reprend ses couleurs.`}
+          </p>
+          {/* LES DEUX CONTRÔLES SONT PORTÉS PAR L'ÉCRAN, PAS PAR LE MOTEUR (R10). */}
+        </div>
+      }
+    />
   );
 }

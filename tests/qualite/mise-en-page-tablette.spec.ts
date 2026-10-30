@@ -46,12 +46,12 @@
 // `client/dist-test/`, la seule construction qui embarque `window.__test`.
 import { expect, test } from '../harnais-serveur.js';
 
-import { noeudsLivres, recettesDEcrans } from '../e2e/qa-outils.js';
+import { formatsDuBalayage, noeudsBalayes, noeudsLivres, recettesDEcrans } from '../e2e/qa-outils.js';
 
 import type { Page } from '@playwright/test';
 
 /** 87 recettes : les 11 écrans écrits à la main, plus UNE PAR NŒUD LIVRÉ — les 14 moteurs. */
-const ECRANS = recettesDEcrans();
+const ECRANS = recettesDEcrans(noeudsBalayes());
 
 /** Les moteurs couverts, pour le contrat de sortie. */
 const MOTEURS = [...new Set(noeudsLivres().map((noeud) => noeud.moteur))].sort();
@@ -416,8 +416,9 @@ test.describe('R20 — rien ne dépasse sur la tablette', () => {
     ).toContain('Bouton introuvable');
   });
 
-  for (const ecran of ECRANS) {
-    test(`« ${ecran.nom} » tient entièrement dans l’écran`, async ({ page }) => {
+  for (const { element: ecran, format } of formatsDuBalayage(ECRANS)) {
+    test(`« ${ecran.nom} » tient entièrement dans l’écran — ${format.nom}`, async ({ page }) => {
+      await page.setViewportSize(format);
       await ecran.aller(page);
       // On VÉRIFIE qu'on est arrivé : mesurer une page qui n'est pas celle qu'on croit rendrait
       // « 0 px de débordement » pour la pire des raisons.
@@ -443,8 +444,12 @@ test.describe('R20 — rien ne dépasse sur la tablette', () => {
           .map(([ecran, px]) => `${ecran} ${String(px)} px`)
           .join(', ')}`
     );
-    expect(ECRANS.length, 'l’inventaire des écrans est vide : rien n’aurait été gardé')
+    // Le plancher porte sur l'inventaire complet ; le palier `verifier` n'en balaie qu'un nœud
+    // par moteur, et chaque moteur doit y rester représenté.
+    expect(recettesDEcrans().length, 'l’inventaire des écrans est vide : rien n’aurait été gardé')
       .toBeGreaterThanOrEqual(80);
     expect(MOTEURS.length, 'les 14 moteurs doivent tous être gardés').toBe(14);
+    expect(ECRANS.length, 'le balayage garde au moins un écran par moteur').toBeGreaterThanOrEqual(MOTEURS.length);
+    expect([...new Set(noeudsBalayes().map((noeud) => noeud.moteur))].sort()).toEqual(MOTEURS);
   });
 });

@@ -10,6 +10,7 @@ export const REFUS_ASSEMBLE_COMPTE_ERREUR: Readonly<Record<MotifRefusAssemble, b
   'bloc-hors-ordre': true,
   'bloc-intrus': true,
   'bloc-deja-pose': false,
+  'case-occupee': false,
   'bloc-inconnu': false,
 };
 
@@ -44,7 +45,12 @@ const REFUS = (
   acquis: null,
 });
 
-export function evaluerAssemble(etat: EtatAssemble, bloc: IdBloc): DecisionAssemble {
+export function evaluerAssemble(
+  etat: EtatAssemble,
+  bloc: IdBloc,
+  rangCase?: number,
+  solution?: readonly IdBloc[],
+): DecisionAssemble {
   const etape = etat.etapes[etat.indexEtape];
   if (etape === undefined || etat.termineMs !== null) return REFUS('bloc-hors-ordre');
 
@@ -52,7 +58,16 @@ export function evaluerAssemble(etat: EtatAssemble, bloc: IdBloc): DecisionAssem
   if (declare === undefined) return REFUS('bloc-inconnu');
   if (etat.acquis[bloc] !== undefined) return REFUS('bloc-deja-pose');
 
-  const attendu = etape.restantes[0];
+  // Sans case : la case suivante. Avec case : le bloc de la solution à CE rang, et la case
+  // doit être libre (son bloc n'est pas encore acquis).
+  let attendu: IdBloc | undefined;
+  if (rangCase === undefined) {
+    attendu = etape.restantes[0];
+  } else {
+    attendu = solution?.[rangCase];
+    if (attendu === undefined) return REFUS('bloc-hors-ordre');
+    if (etat.acquis[attendu] !== undefined) return REFUS('case-occupee');
+  }
   if (attendu === undefined) return REFUS('bloc-hors-ordre');
 
   if (attendu !== bloc) {
@@ -69,7 +84,8 @@ export function evaluerAssemble(etat: EtatAssemble, bloc: IdBloc): DecisionAssem
     return REFUS(declare.intrus ? 'bloc-intrus' : 'bloc-hors-ordre', confusion);
   }
 
-  const restantes = etape.restantes.slice(1);
+  const restantes =
+    rangCase === undefined ? etape.restantes.slice(1) : etape.restantes.filter((r) => r !== bloc);
   const etapeSatisfaite = restantes.length === 0;
   return {
     acceptee: true,
@@ -78,6 +94,6 @@ export function evaluerAssemble(etat: EtatAssemble, bloc: IdBloc): DecisionAssem
     etapeSatisfaite,
     exerciceTermine: etapeSatisfaite && etat.indexEtape === etat.etapes.length - 1,
     confusion: null,
-    acquis: [bloc, String(etape.restantes.length)],
+    acquis: [bloc, rangCase === undefined ? String(etape.restantes.length) : String(rangCase + 1)],
   };
 }

@@ -1,0 +1,211 @@
+/* Moteur `chemin` — apparence propre. La disposition vient du socle (DispositionMoteur). */
+
+/* Le plateau mesuré : le moteur lit sa taille et pose les cases à l'intérieur, sans défiler. */
+.chemin {
+  position: relative;
+  inline-size: 100%;
+  block-size: 100%;
+  min-inline-size: 0;
+  min-block-size: var(--chemin-min, 0px);
+  overflow: hidden;
+  border-radius: var(--rayon-carte);
+}
+
+/* Décor, traits et cases partagent le même rectangle : sous le panneau, au-dessus de la bande. */
+.chemin__zone {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-start: var(--chemin-haut-panneau, 0px);
+  inset-block-end: var(--chemin-haut-bande, 0px);
+}
+
+.chemin__traits { z-index: 1; pointer-events: none; }
+.chemin__cases { z-index: 2; pointer-events: none; }
+
+/* Grille d'ajustement : de vraies colonnes, les boîtes sont mesurées par le moteur. */
+.chemin__cases[data-disposition='grille'] {
+  display: grid;
+  grid-template-columns: repeat(var(--chemin-colonnes, 1), minmax(0, 1fr));
+  align-content: center;
+  justify-items: stretch;
+  gap: var(--socle-espace);
+  padding: var(--socle-espace);
+  box-sizing: border-box;
+}
+
+.chemin[data-serre='oui'] .chemin__cases[data-disposition='grille'] { gap: 4px; padding: 4px; }
+/* Le filet sur tablette et PC : la scène du socle défile, le plateau garde sa hauteur naturelle. */
+[data-moteur='chemin'][data-filet-defilement='oui'] .disposition-moteur__scene {
+  overflow-y: auto;
+  align-items: flex-start;
+}
+
+/* Petit écran : la grille prend sa hauteur naturelle, la scène la réclame et la page défile. */
+.chemin[data-petit-ecran='oui'] .chemin__cases[data-disposition='grille'] { inset-block-end: auto; }
+.chemin[data-serre='oui'] .chemin__case { padding: 0.1rem 0.3rem; }
+/* Le panneau ne change pas avec l'étage : sa hauteur entre dans le choix de l'étage. */
+
+/* ── Les cases : le texte à déchiffrer prend le réglage de lecture du profil ───────────── */
+
+.chemin__case {
+  pointer-events: auto;
+  position: relative;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 0.08rem;
+  min-inline-size: var(--socle-cible);
+  min-block-size: var(--socle-cible);
+  max-inline-size: clamp(8.5rem, 30cqi, 14rem);
+  padding: 0.35rem 0.5rem;
+  box-sizing: border-box;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  font-family: var(--lecture-famille, var(--font-lecture));
+  font-size: var(--lecture-corps);
+  letter-spacing: var(--lecture-interlettrage);
+  word-spacing: var(--lecture-espacement-mots);
+  line-height: var(--lecture-interligne);
+}
+
+/* En grille d'ajustement, la taille est calculée : plus de plafond de largeur. */
+.chemin__case[data-en-grille='oui'] { max-inline-size: none; min-inline-size: 0; }
+
+.chemin__case[data-statut-chemin='actuelle'] {
+  background-color: color-mix(in srgb, var(--lagon) 28%, var(--parchemin));
+}
+
+.chemin__case[data-franchie='oui'],
+.chemin__case[data-consommee='oui'] {
+  background-color: color-mix(in srgb, var(--menthe) 32%, var(--parchemin));
+}
+
+.chemin__case[data-consommee='oui'] { opacity: 0.82; }
+
+/* E08, point 3 : la case où se tient le pion n'est pas une case « éteinte ». Elle reste
+   intouchable (on y est déjà), mais pleinement lisible ; au départ, elle se nomme. */
+.chemin__case[data-pion='oui'] { opacity: 1; cursor: default; }
+
+/* L'étiquette ne prend aucune place dans la case (les plateaux denses sont mesurés au pixel) :
+   elle est posée à cheval sur le bord bas, comme un écriteau. */
+.chemin__depart {
+  position: absolute;
+  inset-block-end: -0.75em;
+  inset-inline-start: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-family: var(--font-interface);
+  font-size: var(--socle-texte-interface);
+  font-weight: 800;
+  line-height: 1.1;
+  padding: 0.05rem 0.5rem;
+  border-radius: 999px;
+  background: var(--trait);
+  color: var(--parchemin);
+}
+
+/* Halo statique (aucune image-clé) : les captures restent stables. */
+.chemin__case[data-atteignable='oui'] { box-shadow: 0 0 0 4px var(--soleil), var(--ombre-bd); }
+
+.chemin__case[data-aide-cible='oui'] {
+  box-shadow: 0 0 0 6px var(--lagon), 0 0 0 10px var(--parchemin), var(--ombre-bd);
+}
+
+.chemin__coche {
+  position: absolute;
+  inset-inline-end: 0.2rem;
+  inset-block-start: 0.05rem;
+  font-size: 0.62em;
+  font-weight: 900;
+}
+
+.chemin__pion {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  font-size: 1.75rem;
+  line-height: 1;
+  filter: drop-shadow(0 2px 0 var(--trait));
+}
+
+.chemin__cases[data-mouvement='vif'] .chemin__pion {
+  transition: inset-inline-start 320ms ease-out, inset-block-start 320ms ease-out;
+}
+
+/* ── La notice, en haut de la scène ─────────────────────────────────────────────────────
+   Fond, bord, police et taille : le thème question du socle (activite/questions.css, T19).
+   Ici, seulement la place et l'arrangement. */
+
+.chemin__panneau-porteur {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+  z-index: 4;
+  padding-block-end: 3px;
+  pointer-events: none;
+}
+
+.chemin__panneau {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: baseline;
+  column-gap: 1rem;
+  margin: 0;
+  padding: 0.1rem 0.65rem;
+  /* L'interligne du profil n'est jamais réduit (contrat du socle § 8). */
+  line-height: var(--lecture-interligne);
+  text-align: center;
+}
+
+.chemin__annonce {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: baseline;
+  column-gap: 1rem;
+}
+
+/* La lettre cible : soulignée de TRAIT, épais. Jamais du bleu : le bleu est celui de l'indice
+   de Gobi (« une case possible brille en bleu ») et des syllabes colorées (E08, point 4). */
+.chemin [data-grapheme-repere] {
+  font-weight: 800;
+  text-decoration-line: underline;
+  text-decoration-color: var(--trait);
+  text-decoration-thickness: 0.14em;
+  text-underline-offset: 0.18em;
+}
+
+.chemin__position { font-weight: 700; }
+
+/* Position et retour partagent une seule cellule : la hauteur réservée est celle du plus long. */
+.chemin__ligne-etat {
+  display: grid;
+  flex: 1 1 100%;
+  /* Une ligne d'état, pas un paragraphe : interligne serré comme le repère d'étape (T10). */
+  line-height: 1.35;
+}
+
+.chemin__ligne-etat > * { grid-area: 1 / 1; }
+.chemin__ligne-etat[data-ligne-etat='position'] > .chemin__retour,
+.chemin__ligne-etat[data-ligne-etat='retour'] > .chemin__position { visibility: hidden; }
+
+@container scene (max-width: 700px) {
+  .chemin__panneau { padding-inline: 0.5rem; }
+}
+
+/* ── La bande statique : lue par les lecteurs d'écran, invisible ───────────────────────── */
+
+.chemin__bande {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0;
+  z-index: 3;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.chemin__bande p { margin: 0; min-block-size: 1.5em; }
+.chemin__bande [data-annonce='coloriage'] { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; }

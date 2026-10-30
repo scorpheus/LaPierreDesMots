@@ -44,13 +44,14 @@
  * ──────────────────────────────────────────────────────────────────────────────────────────
  */
 import { act, cleanup, fireEvent, render } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { BoutonEcouter } from '@client/composants/BoutonEcouter';
 import { creerMagasin } from '@client/etat/magasin';
 import { FournisseurJeu } from '@client/etat/services';
 import { creerHaptiqueMuette } from '@client/gamefeel/haptique-navigateur';
 import { creerRetourSensoriel } from '@client/gamefeel/retour';
+import { CLE_STOCKAGE_FOYER, ecrireReglagesFoyer, oublierReglagesFoyer } from '@client/parent/reglages-foyer';
 
 import type { ContenuTrace } from '@partage/moteurs/trace/index';
 import type { CleAudio, Exercice } from '@pierre/partage';
@@ -91,8 +92,16 @@ function monter(cle: CleAudio | null): void {
 
 const bouton = (): Element | null => document.querySelector('[data-action="ecouter"]');
 
+// Ce fichier juge le bouton quand la voix est ALLUMÉE par le parent : depuis le 9 oct. 2026, la
+// parole est éteinte par défaut (`tests/composants/voix-reglee.test.ts`).
+beforeEach(() => {
+  ecrireReglagesFoyer({ boutonEcouter: true });
+});
+
 afterEach(() => {
   cleanup();
+  globalThis.localStorage?.removeItem(CLE_STOCKAGE_FOYER);
+  oublierReglagesFoyer();
 });
 
 describe('D42 — le bouton « écouter » est masqué tant qu’aucun audio n’existe', () => {

@@ -8,66 +8,11 @@
 import { useState } from 'react';
 import type { ReactElement } from 'react';
 
+import './colorie.css';
+
 /** Valeurs de confort opposables aux régressions de la loupe. */
 export const TAILLE_COMMANDE_LOUPE_PX = 64;
 export const LARGEUR_MINIMALE_LOUPE_PX = 1280;
-
-const STYLES_CADRE_COLORIAGE = `
-.pierre-cadre-coloriage {
-  display: flex;
-  flex: 1 1 auto;
-  flex-direction: column;
-  gap: .5rem;
-  min-inline-size: 0;
-  min-block-size: 0;
-}
-.pierre-cadre-coloriage__commande {
-  align-self: center;
-  min-inline-size: ${String(TAILLE_COMMANDE_LOUPE_PX)}px;
-  min-block-size: ${String(TAILLE_COMMANDE_LOUPE_PX)}px;
-  padding: .45rem .85rem;
-  border: 2px solid var(--trait, #1B2440);
-  border-radius: .75rem;
-  background: var(--parchemin, #FFF6E3);
-  color: var(--trait, #1B2440);
-  font: inherit;
-  font-weight: 700;
-}
-.pierre-cadre-coloriage__commande:focus-visible {
-  outline: 3px solid var(--soleil, #FFC93C);
-  outline-offset: 3px;
-}
-.pierre-cadre-coloriage__fenetre {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-inline-size: 0;
-  min-block-size: 0;
-  overflow: hidden;
-}
-@media (min-width: 1200px) and (min-height: 801px),
-       (orientation: landscape) and (max-height: 520px) {
-  .pierre-cadre-coloriage__fenetre { flex: 1 1 0; }
-}
-.pierre-cadre-coloriage[data-loupe="oui"] .pierre-cadre-coloriage__fenetre {
-  align-items: flex-start;
-  justify-content: flex-start;
-  overflow: auto;
-  overscroll-behavior: contain;
-  touch-action: pan-x pan-y;
-  border: 2px solid color-mix(in srgb, var(--trait, #1B2440) 35%, transparent);
-  border-radius: .75rem;
-}
-.pierre-cadre-coloriage[data-loupe="oui"] .pierre-scene {
-  align-self: flex-start !important;
-  flex: none !important;
-  min-inline-size: ${String(LARGEUR_MINIMALE_LOUPE_PX)}px;
-  inline-size: 100% !important;
-  max-inline-size: none !important;
-  max-block-size: none !important;
-  block-size: auto !important;
-}
-`;
 
 export interface ProprietesCadreColoriage {
   /** La scène reçoit l’état de loupe mais reste le même sous-arbre React. */
@@ -80,7 +25,6 @@ export function CadreColoriage({ enfants }: ProprietesCadreColoriage): ReactElem
 
   return (
     <section className="pierre-cadre-coloriage" data-loupe-coloriage data-loupe={loupeActive ? 'oui' : 'non'}>
-      <style>{STYLES_CADRE_COLORIAGE}</style>
       <button
         type="button"
         className="pierre-cadre-coloriage__commande"

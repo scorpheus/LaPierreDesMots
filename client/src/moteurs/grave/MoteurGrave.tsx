@@ -37,21 +37,29 @@
 
 import { MessageStable } from '../../composants/MessageStable.js';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import type { CSSProperties, ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import type { ActionGrave, ContenuGrave, EtatGrave } from '@pierre/partage';
 
 import { SceneDecor } from '../../habillages/SceneDecor.js';
-import { ZoneDeLecture, styleDeLecture, useReglagesLecture } from '../../lecture/ZoneDeLecture.js';
+import { ZoneDeLecture, useReglagesLecture } from '../../lecture/ZoneDeLecture.js';
+import { DispositionMoteur } from '../../activite/DispositionMoteur.js';
+import { RepereEtape } from '../../activite/RepereEtape.js';
+import { CibleDeDepot, ZoneDeGlisser, useJetonGlissable } from '../commun/glisser.js';
 import type { ProprietesMoteur } from '../types.js';
 import {
   cadreJeuEtBornes,
   planifierCascade,
   regionsAllumeesDepuisAcquis,
   regionsColoriables,
-  styleZoneDeJeu,
   useDerniereAllumee,
   useMesureCadre,
-} from '../eclair/mise-en-scene.js';
+} from '../commun/mise-en-scene.js';
+import './grave.css';
+import { ROLE_QUESTION, ROLE_REPONSE } from '../../activite/Question.js';
+import { TexteColore } from '../../lecture/TexteColore.js';
+
+/** Côté court minimal du décor (px), comme `--socle-image-min`. */
+const TAILLE_DECOR_MIN = 96;
 
 /** Cadence du `battementHorloge`. Le moteur ne connaît aucun `setTimeout` : c'est ici. */
 const PERIODE_BATTEMENT_MS = 1000;
@@ -127,7 +135,6 @@ export function MoteurGrave(
 
   // --- la typographie de lecture ---------------------------------------------
   const reglages = useReglagesLecture();
-  const styleLecture = useMemo(() => styleDeLecture(reglages), [reglages]);
   const reglagesMot = useMemo(
     // Le mot reste nettement plus grand que les touches, tout en suivant réellement le
     // réglage de lecture du parent. Un plafond fixe à 48 px rendait le réglage inopérant.
@@ -192,201 +199,164 @@ export function MoteurGrave(
     return morceaux.join('');
   }, [consigne, etat.acquis]);
 
+  const scene = (
+    <div className="grave-scene">
+      {/* T10 — le repère commun (le rang du mot), affiché sous la consigne de l'écran. */}
+      <RepereEtape
+        moteur="grave"
+        rang={etat.indexEtape + 1}
+        total={etat.etapes.length}
+        animationsDesactivees={animationsDesactivees}
+      />
+      {/* Le modèle est explicite : on reconstitue son orthographe avec les touches.
+          Ce n'est ni un exercice de tracé, ni une devinette sonore sans contexte. */}
+      <div data-plateau="etape-grave" aria-live="polite" className="grave-cartouche" {...ROLE_QUESTION}>
+        <span className="grave-cartouche__texte">
+          <TexteColore texte={consigne === null
+            ? 'Mot à compléter'
+            : trouCourant === null
+              ? `Le mot « ${consigne.mot} » est complet`
+              : `Modèle : ${consigne.mot}`} />
+        </span>
+      </div>
+
+      {/* Le cartouche est dans le flux, hors du cadre qui contient le décor et le mot. */}
+      <div ref={racine} data-zone-jeu="grave" className="grave-zone">
+        {/* ------------------------------------------------------------- le décor, en fond */}
+        {/* Un décor écrasé n'a aucun sens : sous 96 px de côté court, on le masque. Il reste
+            dans la page, car l'écran attend son SVG pour se déclarer prêt. */}
+        <div
+          className="grave-decor"
+          hidden={Math.min(cadre.largeur, cadre.hauteur - hauteurBande) < TAILLE_DECOR_MIN}
+          style={{ insetBlockEnd: `${String(hauteurBande)}px` }}
+        >
+          <SceneDecor
+            habillage={habillage}
+            allumees={allumees}
+            derniere={derniere}
+            animationsDesactivees={animationsDesactivees}
+            ajustement="contenir"
+          />
+        </div>
+
+        {/* Le mot est aussi la zone d'accueil du glisser (T11) : une lettre lâchée dessus va
+            dans le trou courant, exactement comme une touche tapée. */}
+        <CibleDeDepot id={ZONE_DU_MOT}>
+          {(accueil) => (
+            <div ref={accueil.brancher} data-mot-central="oui" data-corps-minimal="48"
+              data-survolee={accueil.survolee ? 'oui' : 'non'} className="grave-mot-central">
+              <ZoneDeLecture
+                texte={motAffiche}
+                motsCles={consigne === null ? [] : consigne.motsCles}
+                reglages={reglagesMot}
+                etiquette={consigne === null ? 'Le mot à compléter.' : `Le mot à compléter : ${consigne.mot}`}
+              />
+            </div>
+          )}
+        </CibleDeDepot>
+
+        {/* ------------------------------------------------------------ la bande de lecture
+            Le mot à trous : c'est ce qu'il y a de plus précis à déchiffrer, il reste donc
+            immobile, sur fond parchemin, jamais sur le décor qui s'agite. */}
+        <div ref={bande} data-plateau="mot" className="grave-bande">
+          <p
+            role="status"
+            aria-live="polite"
+            data-refus-texte={messageDeRefus === '' ? 'non' : 'oui'}
+            data-animations={animationsDesactivees ? 'calmes' : 'vives'}
+            className="grave-refus"
+          >
+            <MessageStable messages={Object.values(MESSAGES_DE_REFUS)}><TexteColore texte={messageDeRefus === '' ? (etat.aide === null ? '' : (etat.aide.texte ?? '')) : messageDeRefus} /></MessageStable>
+          </p>
+
+          <p role="status" aria-live="polite" data-annonce="coloriage" className="grave-annonce">
+            {derniere === null
+              ? ''
+              : `${regions.find((r) => r.id === derniere.id)?.libelle ?? derniere.id} reprend ses couleurs.`}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Le clavier est ce qu'on prend : il va dans la réserve du socle, sous ou à côté du mot.
+  const clavier = (
+    <div data-plateau="clavier" className="grave-clavier">
+      {contenu.clavier.map((cle) => {
+        const refusee = lettreRefusee === cle;
+        const classes = ['cible', 'grave-touche'];
+        if (!animationsDesactivees && refusee) classes.push('oscillation');
+        return (
+          <ToucheSaisissable
+            key={refusee ? `${cle}-${String(marqueRefusCourante)}` : cle}
+            cle={cle}
+            classes={classes}
+            surTap={(evenement) => {
+              jouer({ type: 'graver', lettre: cle }, evenement);
+            }}
+          />
+        );
+      })}
+    </div>
+  );
+
   return (
-    <div
-      data-moteur="grave"
+    <ZoneDeGlisser
+      surDepot={(lettre) => {
+        // Même action que le tap ; l'origine du retour est le mot, là où la lettre arrive.
+        const boite = racine.current?.querySelector('[data-mot-central]')?.getBoundingClientRect();
+        jouer({ type: 'graver', lettre }, {
+          clientX: boite === undefined ? 0 : boite.left + boite.width / 2,
+          clientY: boite === undefined ? 0 : boite.top + boite.height / 2,
+        });
+      }}
+    >
+    <DispositionMoteur
+      moteur="grave"
+      disposition="empilee"
       data-habillage={habillage.id}
       data-termine={etat.termineMs === null ? 'non' : 'oui'}
       data-aide={etat.niveauAide}
       data-etape={etape === undefined ? '' : etape.identifiant}
       data-regions-allumees={String(allumees.length)}
-      style={{
-        position: 'relative',
-        blockSize: '100%',
-        minBlockSize: 0,
-        display: 'flex',
-        flexDirection: 'column',
-        overflowX: 'hidden',
-        overflowY: 'auto',
-        borderRadius: 'var(--rayon-carte)',
-      }}
+      scene={scene}
+      reserve={clavier}
+    />
+    </ZoneDeGlisser>
+  );
+}
+
+/** La zone d'accueil unique : le mot. C'est le trou courant qui décide où va la lettre. */
+const ZONE_DU_MOT = 'mot-a-completer';
+
+/**
+ * UNE TOUCHE DU CLAVIER, TAPABLE ET SAISISSABLE (T11) — les deux gestes, une seule action.
+ * Sous 8 px de déplacement, le geste reste un tap (`SEUIL_DE_GLISSE_PX`).
+ */
+function ToucheSaisissable({
+  cle,
+  classes,
+  surTap,
+}: {
+  readonly cle: string;
+  readonly classes: readonly string[];
+  readonly surTap: (evenement: { clientX: number; clientY: number }) => void;
+}): ReactElement {
+  const prise = useJetonGlissable(cle);
+  return (
+    <button
+      {...prise.attributs}
+      {...prise.ecouteurs}
+      ref={prise.brancher}
+      type="button"
+      {...ROLE_REPONSE}
+      className={classes.join(' ')}
+      data-lettre={cle}
+      data-glisse={prise.enVol ? 'oui' : 'non'}
+      style={prise.style}
+      onClick={surTap}
     >
-      <style>{`
-        [data-moteur="grave"] [data-mot-central="oui"] {
-          inset-block-start: 27%;
-          max-inline-size: min(88%, 30rem);
-        }
-        [data-moteur="grave"] [data-plateau="etape-grave"] {
-          max-inline-size: calc(100% - 1.5rem);
-          overflow-wrap: anywhere;
-        }
-      `}</style>
-      {/* Le modèle est explicite : on reconstitue son orthographe avec les touches.
-          Ce n'est ni un exercice de tracé, ni une devinette sonore sans contexte. */}
-      <div
-        data-plateau="etape-grave"
-        aria-live="polite"
-        style={{
-          position: 'relative',
-          alignSelf: 'center',
-          flex: '0 0 auto',
-          margin: '0.75rem 0.75rem 0',
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '0.65rem',
-          padding: '0.45rem 0.8rem',
-          border: '3px solid var(--trait)',
-          borderRadius: '1rem',
-          background: 'var(--parchemin)',
-          boxShadow: 'var(--ombre-bd)',
-          ...styleLecture,
-        } as CSSProperties}
-      >
-        <span style={{ fontWeight: 800 }}>
-          {consigne === null
-            ? 'Mot à compléter'
-            : trouCourant === null
-              ? `Le mot « ${consigne.mot} » est complet`
-              : `Modèle : ${consigne.mot}`}
-        </span>
-      </div>
-
-      {/* Le cartouche est dans le flux, hors du cadre qui contient les prises. Si ce cadre ne
-          tient plus (petit paysage ou gros profil de lecture), le parent le fait défiler au
-          lieu de poser une lettre derrière un texte. */}
-      <div
-        ref={racine}
-        data-zone-jeu="grave"
-        style={{
-          position: 'relative',
-          flex: '1 0 30rem',
-          minBlockSize: '30rem',
-          overflow: 'hidden',
-        }}
-      >
-
-      {/* ------------------------------------------------------------- le décor, en fond */}
-      <div style={styleZoneDeJeu(hauteurBande)}>
-        <SceneDecor
-          habillage={habillage}
-          allumees={allumees}
-          derniere={derniere}
-          animationsDesactivees={animationsDesactivees}
-          ajustement="contenir"
-        />
-      </div>
-
-      {/* ------------------------------------------------------- le clavier, posé dessus */}
-      <div
-        data-plateau="clavier"
-        style={{
-                position: 'absolute',
-                insetInlineStart: 0,
-                insetInlineEnd: 0,
-                insetBlockStart: '58%',
-                zIndex: 3,
-                display: 'flex',
-                flexWrap: 'wrap',
-                justifyContent: 'center',
-                gap: '0.75rem',
-                paddingInline: '0.75rem',
-                pointerEvents: 'none',
-        }}
-      >
-        {contenu.clavier.map((cle) => {
-          const refusee = lettreRefusee === cle;
-          const classes = ['cible'];
-          if (!animationsDesactivees && refusee) classes.push('oscillation');
-          return (
-              <button
-                key={refusee ? `${cle}-${String(marqueRefusCourante)}` : cle}
-                type="button"
-                className={classes.join(' ')}
-                data-lettre={cle}
-                style={{ ...styleLecture, pointerEvents: 'auto', whiteSpace: 'nowrap' } as CSSProperties}
-                onClick={(evenement) => {
-                  jouer({ type: 'graver', lettre: cle }, evenement);
-                }}
-              >
-                {cle}
-              </button>
-          );
-        })}
-      </div>
-
-      <div
-        data-mot-central="oui"
-        data-corps-minimal="48"
-        style={{
-          position: 'absolute',
-          insetBlockStart: '27%',
-          insetInlineStart: '50%',
-          transform: 'translate(-50%, -50%)',
-          zIndex: 2,
-          minInlineSize: '12rem',
-          padding: '0.5rem 1rem',
-          border: '4px solid var(--trait)',
-          borderRadius: 'var(--rayon-carte)',
-          background: 'var(--parchemin)',
-          boxShadow: 'var(--ombre-bd)',
-          textAlign: 'center',
-          maxInlineSize: 'min(88%, 30rem)',
-          pointerEvents: 'none',
-        }}
-      >
-        <ZoneDeLecture
-          texte={motAffiche}
-          motsCles={consigne === null ? [] : consigne.motsCles}
-          reglages={reglagesMot}
-          etiquette={consigne === null ? 'Le mot à compléter.' : `Le mot à compléter : ${consigne.mot}`}
-        />
-      </div>
-
-      {/* ------------------------------------------------------------ la bande de lecture
-          Le mot à trous : c'est ce qu'il y a de plus précis à déchiffrer, il reste donc
-          immobile, sur fond parchemin, jamais sur le décor qui s'agite. */}
-      <div
-        ref={bande}
-        data-plateau="mot"
-        style={{
-          position: 'absolute',
-          insetInlineStart: 0,
-          insetInlineEnd: 0,
-          insetBlockEnd: 0,
-          zIndex: 2,
-        }}
-      >
-        <p
-          role="status"
-          aria-live="polite"
-          data-refus-texte={messageDeRefus === '' ? 'non' : 'oui'}
-          data-animations={animationsDesactivees ? 'calmes' : 'vives'}
-          style={{ ...styleLecture, margin: 0, minBlockSize: '1.5em' } as CSSProperties}
-        >
-          <MessageStable messages={Object.values(MESSAGES_DE_REFUS)}>{messageDeRefus === '' ? (etat.aide === null ? '' : (etat.aide.texte ?? '')) : messageDeRefus}</MessageStable>
-        </p>
-
-        <p
-          role="status"
-          aria-live="polite"
-          data-annonce="coloriage"
-          style={{
-            position: 'absolute',
-            inlineSize: 1,
-            blockSize: 1,
-            overflow: 'hidden',
-            clip: 'rect(0 0 0 0)',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          {derniere === null
-            ? ''
-            : `${regions.find((r) => r.id === derniere.id)?.libelle ?? derniere.id} reprend ses couleurs.`}
-        </p>
-      </div>
-
-      {/* ── LES DEUX CONTRÔLES SONT PORTÉS PAR L'ÉCRAN, PAS PAR LE MOTEUR (R10) ────────────── */}
-      </div>
-    </div>
+      <TexteColore texte={cle} />
+    </button>
   );
 }

@@ -38,6 +38,7 @@ import type { ReglagesLecture } from '@pierre/partage/lecture';
 
 import { lireReglagesLecture } from '../api/client.js';
 import { useEtatJeu } from '../etat/services.js';
+import { familleDe } from './polices.js';
 import { FournisseurReglagesLecture } from './ZoneDeLecture.js';
 
 /** La clé de cache, partagée avec `EcranReglagesLecture`. Une seule vérité. */
@@ -133,7 +134,13 @@ export function FournisseurReglagesDuProfil({
    */
   useEffect(() => {
     const racine = document.documentElement;
-    const variables = { ...variablesCss(reglages), '--lecture-echelle': String(echelleDeLecture(reglages)) };
+    // `--lecture-famille` aussi : les feuilles des moteurs la lisent (`var(--lecture-famille, …)`),
+    // et sans elle la police choisie par le parent n'atteignait que les `ZoneDeLecture` (30 oct.).
+    const variables = {
+      ...variablesCss(reglages),
+      '--lecture-famille': familleDe(reglages.police),
+      '--lecture-echelle': String(echelleDeLecture(reglages)),
+    };
     for (const [nom, valeur] of Object.entries(variables)) {
       racine.style.setProperty(nom, valeur);
     }

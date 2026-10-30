@@ -122,7 +122,7 @@ function abonner(prevenir: () => void): () => void {
  * Réagit à l'arrivée du lexique. Le premier rendu se fait à la règle seule ; le second, si le
  * référentiel arrive, corrige les mots qu'il couvre. Aucun écran d'attente, aucun texte vide.
  */
-function useLexique(): LexiqueSyllabation {
+export function useLexique(): LexiqueSyllabation {
   const [lexique, fixer] = useState<LexiqueSyllabation>(lexiqueCourant);
   useEffect(() => {
     const desabonner = abonner(() => {

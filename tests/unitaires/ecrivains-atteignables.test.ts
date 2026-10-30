@@ -394,7 +394,9 @@ describe('Q1 — tout écrivain d’état est atteignable depuis un geste d’en
       ANALYSE.ecrivains.some((e) => e.nom === 'ecrireTemoinQ1'),
       'le témoin fabriqué a fui dans l’analyse du dépôt réel : la mesure laisse sa propre trace.',
     ).toBe(false);
-  });
+    // Délai de garde, pas d'assertion assouplie : l'analyse relit tout le dépôt (2 à 3 s seule,
+    // mesuré) et dépasse les 5 s par défaut quand la campagne lance ses étapes en parallèle.
+  }, 60_000);
 
   test('CONTRÔLE NÉGATIF — un écrivain FABRIQUÉ qu’une route appelle n’est PAS signalé', () => {
     // Le pendant, et il est aussi important : un instrument qui déclarerait TOUT inatteignable
@@ -426,7 +428,7 @@ describe('Q1 — tout écrivain d’état est atteignable depuis un geste d’en
       'Q1 déclare inatteignable un écrivain qu’une route HTTP appelle : il fabrique des morts, ' +
         'et un rapport de faux positifs ne se lit pas.',
     ).toBe(false);
-  });
+  }, 60_000);
 
   test('LE DÉFAUT — aucun écrivain d’état n’est inatteignable', () => {
     // Le resume de population est RE-IMPRIME ici : `vitest.config.ts` pose

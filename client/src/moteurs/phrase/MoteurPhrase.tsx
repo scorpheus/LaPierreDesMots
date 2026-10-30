@@ -44,7 +44,7 @@
 
 import { MessageStable } from '../../composants/MessageStable.js';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { CSSProperties, ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import type { ActionPhrase, ContenuPhrase, EtatPhrase, Habillage } from '@pierre/partage';
 
 import { SceneDecor } from '../../habillages/SceneDecor.js';
@@ -58,17 +58,16 @@ import type {
   RegionDHabillage,
   ResultatDerivation,
 } from '../../habillages/emplacements.js';
-import { ZoneDeLecture, styleDeLecture, useReglagesLecture } from '../../lecture/ZoneDeLecture.js';
+import { DispositionMoteur } from '../../activite/DispositionMoteur.js';
+import { RepereEtape } from '../../activite/RepereEtape.js';
+import { ZoneDeLecture, useReglagesLecture } from '../../lecture/ZoneDeLecture.js';
 import type { ProprietesMoteur } from '../types.js';
-import {
-  FEUILLE_DU_VOL,
-  Fente,
-  JetonEnVol,
-  centreDuReceptacle,
-  decalageEntre,
-} from './receptacles.js';
-import { ZoneDeGlisser, useCibleDeDepot, useJetonGlissable } from '../commun/glisser.js';
-import type { VolDuJeton } from './receptacles.js';
+import { Fente, JetonEnVol, centreDuReceptacle, decalageEntre } from '../commun/fentes.js';
+import './phrase.css';
+import { CibleDeDepot, ZoneDeGlisser, useJetonGlissable } from '../commun/glisser.js';
+import type { VolDuJeton } from '../commun/fentes.js';
+import { ROLE_REPONSE } from '../../activite/Question.js';
+import { TexteColore } from '../../lecture/TexteColore.js';
 
 /** Cadence du `battementHorloge`. Le moteur ne connaît aucun `setTimeout` : c'est ici. */
 const PERIODE_BATTEMENT_MS = 1000;
@@ -80,8 +79,6 @@ const PERIODE_BATTEMENT_MS = 1000;
  * premier `ResizeObserver` et remplace tout.
  */
 const CADRE_DE_REPLI: Cadre = { largeur: 900, hauteur: 1000 };
-const HAUTEUR_BANDE_DE_REPLI = 160;
-const HAUTEUR_MODELE_DE_REPLI = 100;
 
 /** Respiration entre une pastille et le bord du cadre, en pixels. */
 const MARGE = 14;
@@ -220,7 +217,6 @@ function EtiquetteSaisissable({
   classes,
   region,
   placee,
-  styleTexte,
   surTap,
 }: {
   readonly cle: string;
@@ -228,7 +224,6 @@ function EtiquetteSaisissable({
   readonly classes: readonly string[];
   readonly region: string;
   readonly placee: boolean;
-  readonly styleTexte: CSSProperties;
   readonly surTap: (evenement: { clientX: number; clientY: number }) => void;
 }): ReactElement {
   const prise = useJetonGlissable(cle, placee);
@@ -238,25 +233,18 @@ function EtiquetteSaisissable({
       {...prise.ecouteurs}
       ref={prise.brancher}
       type="button"
+      {...ROLE_REPONSE}
       className={classes.join(' ')}
       data-etiquette={cle}
       data-placee={placee ? 'oui' : 'non'}
       data-glisse={prise.enVol ? 'oui' : 'non'}
       data-region-visee={region}
       hidden={placee}
-      style={
-        {
-          ...styleTexte,
-          ...prise.style,
-          pointerEvents: 'auto',
-          // La pastille porte SON PROPRE FOND OPAQUE — c'est la réponse à R37. Le contraste du
-          // mot ne dépend donc jamais de ce qui passe derrière.
-          whiteSpace: 'nowrap',
-        } as CSSProperties
-      }
+      // Le fond opaque et la lecture sont dans `phrase.css` (R37) ; ici, seulement la prise du glisser.
+      style={prise.style}
       onClick={surTap}
     >
-      {mot}
+      <TexteColore texte={mot} />
     </button>
   );
 }
@@ -358,16 +346,15 @@ export function MoteurPhrase(
   //
   // R39 : le banc mesure en PAYSAGE, l'enfant joue en PORTRAIT. On ne suppose donc aucun format
   // — on mesure celui qu'on reçoit, quel qu'il soit, et la mise en scène s'y adapte.
-  const racine = useRef<HTMLDivElement | null>(null);
-  const modele = useRef<HTMLDivElement | null>(null);
-  const bande = useRef<HTMLDivElement | null>(null);
-  const coucheMots = useRef<HTMLDivElement | null>(null);
+  // `decor` est la zone que le décor couvre, et le repère des emplacements dérivés ; `racine`
+  // (la disposition entière) sert de repère au vol, qui va des mots aux fentes.
+  const decor = useRef<HTMLDivElement | null>(null);
   const [cadre, fixerCadre] = useState<Cadre>(CADRE_DE_REPLI);
-  const [hauteurModele, fixerHauteurModele] = useState(HAUTEUR_MODELE_DE_REPLI);
-  const [hauteurBande, fixerHauteurBande] = useState(HAUTEUR_BANDE_DE_REPLI);
+  const racine = (): HTMLElement | null =>
+    decor.current?.closest<HTMLElement>('.disposition-moteur') ?? null;
 
   useEffect(() => {
-    const noeud = racine.current;
+    const noeud = decor.current;
     if (noeud === null) return undefined;
 
     const relever = (): void => {
@@ -375,10 +362,6 @@ export function MoteurPhrase(
       if (rect.width > 0 && rect.height > 0) {
         fixerCadre({ largeur: rect.width, hauteur: rect.height });
       }
-      const hautModele = modele.current?.getBoundingClientRect().height ?? 0;
-      if (hautModele > 0) fixerHauteurModele(hautModele);
-      const hautBande = bande.current?.getBoundingClientRect().height ?? 0;
-      if (hautBande > 0) fixerHauteurBande(hautBande);
     };
 
     relever();
@@ -388,25 +371,15 @@ export function MoteurPhrase(
     if (typeof ResizeObserver !== 'function') return undefined;
     const observateur = new ResizeObserver(relever);
     observateur.observe(noeud);
-    if (modele.current !== null) observateur.observe(modele.current);
-    if (bande.current !== null) observateur.observe(bande.current);
     return () => {
       observateur.disconnect();
     };
   }, []);
 
   // --- la typographie des mots ---------------------------------------------
-  //
-  // R35 — « le texte est trop petit ». Les mots à déchiffrer étaient à `1.25rem` (20 px) EN DUR
-  // dans onze moteurs sur quatorze, alors que le profil demande 27 px avec interlettrage. Ils
-  // héritent maintenant des réglages de lecture, comme la consigne.
-  //
-  // Ce que cela ne règle PAS, et il faut le dire : `FournisseurReglagesLecture` n'est monté
-  // nulle part dans l'application. Le contexte rend donc `REGLAGES_PAR_DEFAUT` — 24 px, Andika.
-  // C'est déjà mieux que 20 px sans interlettrage, et le jour où le fournisseur sera monté, ces
-  // mots suivront sans qu'on retouche une ligne ici.
+  // Le style des mots vient du CSS (`phrase.css`, variables `--lecture-*` du profil). Les
+  // réglages ne servent plus qu'à estimer l'encombrement d'un mot.
   const reglages = useReglagesLecture();
-  const styleLecture = useMemo(() => styleDeLecture(reglages), [reglages]);
 
   const etiquetteParId = useMemo(
     () => new Map(contenu.etiquettes.map((e) => [e.id, e] as const)),
@@ -458,12 +431,9 @@ export function MoteurPhrase(
   const cadreJeu = useMemo<Cadre>(
     () => ({
       largeur: cadre.largeur,
-      hauteur: Math.max(
-        cadre.hauteur - hauteurModele - hauteurBande,
-        CIBLE_MIN + 2 * MARGE,
-      ),
+      hauteur: Math.max(cadre.hauteur, CIBLE_MIN + 2 * MARGE),
     }),
-    [cadre, hauteurModele, hauteurBande],
+    [cadre],
   );
 
   const bornes = useMemo<Bornes>(
@@ -610,24 +580,20 @@ export function MoteurPhrase(
    * puisque `capacites.ordreEtapesImpose` vaut `true`. Si le tap est refusé, la visée est
    * simplement jetée — l'effet ne la consomme que si `acquis` a grandi.
    *
-   * Tout est en coordonnées du moteur : `racine` est le bloc contenant de la couche des mots,
-   * donc les mêmes pixels que ceux qu'a produits la dérivation. Un décor et ses prises
-   * partagent un seul référentiel, et le vol aussi.
+   * Le vol se joue dans le repère de `racine()` (la disposition entière) ; les emplacements
+   * dérivés sont dans celui du décor, d'où le décalage mesuré ci-dessous.
    */
   const viser = (emplacement: Emplacement, mot: string): void => {
     volVise.current = null;
     const cible = restants[0];
     if (cible === undefined) return;
-    const arrivee = centreDuReceptacle(racine.current, refFentes.current.get(cible) ?? null);
+    const arrivee = centreDuReceptacle(racine(), refFentes.current.get(cible) ?? null);
     if (arrivee === null) return;
-    // Le départ vient de la DÉRIVATION — donc du repère de la couche des mots — et l'arrivée
-    // d'une MESURE dans le repère du moteur. Depuis que la phrase modèle occupe le haut (R60),
-    // ces deux repères ne coïncident plus : sans ce décalage, le vol partirait exactement
-    // `hauteurModele` pixels trop haut. C'est le défaut de R40, mot pour mot — et on le mesure
-    // au lieu de l'écrire en dur, pour qu'il reste juste à la prochaine mise en page.
-    const [decX, decY] = decalageEntre(racine.current, coucheMots.current);
-    const prise = racine.current?.querySelector(`[data-etiquette="${CSS.escape(emplacement.cle)}"]`) ?? null;
-    const departReel = centreDuReceptacle(racine.current, prise as HTMLElement | null);
+    // Le départ de repli vient de la DÉRIVATION (repère du décor), l'arrivée d'une MESURE (repère
+    // de la disposition) : on mesure le décalage au lieu de l'écrire en dur (défaut R40).
+    const [decX, decY] = decalageEntre(racine(), decor.current);
+    const prise = racine()?.querySelector(`[data-etiquette="${CSS.escape(emplacement.cle)}"]`) ?? null;
+    const departReel = centreDuReceptacle(racine(), prise as HTMLElement | null);
     volVise.current = {
       cle: emplacement.cle,
       texte: mot,
@@ -647,7 +613,6 @@ export function MoteurPhrase(
    * destination — c'est l'ORDRE qui fait la règle — donc plusieurs cibles inventeraient une
    * décision qu'il ne prend pas. C'est `moteurPhrase` qui dira si le mot lâché était le bon.
    */
-  const accueilPhrase = useCibleDeDepot('fentes-de-la-phrase');
 
   const deposerLEtiquette = useCallback(
     (cle: string) => {
@@ -665,372 +630,176 @@ export function MoteurPhrase(
 
   return (
     <ZoneDeGlisser surDepot={(jeton) => { deposerLEtiquette(jeton); }}>
-    <div
-      ref={racine}
-      data-moteur="phrase"
-      data-plateau-defilant="oui"
-      data-habillage={habillage.id}
-      data-termine={etat.termineMs === null ? 'non' : 'oui'}
-      data-aide={etat.niveauAide}
-      data-etape={etape === undefined ? '' : etape.identifiant}
-      data-regions-allumees={String(allumees.length)}
-      data-mots-affiches={String(ordre.length)}
-      style={{
-        position: 'relative',
-        display: 'grid',
-        gridTemplateRows: 'auto minmax(220px, 1fr) auto auto',
-        gap: '0.75rem',
-        blockSize: 'auto',
-        minBlockSize: '100%',
-        overflow: 'visible',
-        borderRadius: 'var(--rayon-carte)',
-      }}
-    >
-      <style>{FEUILLE_DU_VOL}</style>
+      <DispositionMoteur
+        moteur="phrase"
+        disposition="empilee"
+        data-habillage={habillage.id}
+        data-termine={etat.termineMs === null ? 'non' : 'oui'}
+        data-aide={etat.niveauAide}
+        data-etape={etape === undefined ? '' : etape.identifiant}
+        data-regions-allumees={String(allumees.length)}
+        data-mots-affiches={String(ordre.length)}
+        scene={
+          <>
+            <div className="phrase-scene">
+              {/* ── R60 — LA PHRASE MODÈLE, AU-DESSUS DU DESSIN ───────────────────────────────
+                  Le père : « la phrase doit être au-dessus du dessin. » Le jeton part des mots
+                  et descend vers les fentes, jamais à travers elle : « aucune animation dans le
+                  champ de lecture » tient par la géométrie. */}
+              <div data-plateau="modele" className="modele-phrase-centre phrase-modele">
+                {/* T10 — le repère commun, affiché sous la consigne de l'écran. */}
+                <RepereEtape
+                  moteur="phrase"
+                  rang={etat.indexEtape + 1}
+                  total={etat.etapes.length}
+                  animationsDesactivees={animationsDesactivees}
+                />
+                {/* T19 : la phrase modèle est ce qu'on DEMANDE de reconstruire. */}
+                <ZoneDeLecture
+                  question
+                  texte={consigne === null ? '' : consigne.phrase}
+                  motsCles={consigne === null ? [] : consigne.motsCles}
+                  etiquette={
+                    consigne === null ? 'La phrase à composer.' : `La phrase à lire : ${consigne.phrase}`
+                  }
+                />
+              </div>
 
-      {/* ── R60 — LA PHRASE MODÈLE, AU-DESSUS DU DESSIN ──────────────────────────────────
-          > « mais la phrase est juste après, il faut l'enlever, la phrase doit être
-          >   au-dessus du dessin. »
+              {/* Le décor est le fond. Il couvre cette zone, et les emplacements dérivés se
+                  mesurent dans le même rectangle : un décor et ses prises partagent UN référentiel
+                  (la leçon de R40). */}
+              <div ref={decor} className="phrase-decor" data-plateau="illustration-phrase">
+                <SceneDecor
+                  habillage={habillage}
+                  allumees={allumees}
+                  derniere={derniere}
+                  animationsDesactivees={animationsDesactivees}
+                  ajustement="contenir"
+                />
+              </div>
+            </div>
 
-          Elle était sous les cases — je l'y avais mise pour que le vol ne la traverse jamais,
-          et j'avais posé la question. Le père a tranché : au-dessus, et au-dessus du DÉCOR.
+            {/* Le mot qui traverse va DANS la fente (R59). Une copie, jamais l'élément réel. */}
+            {vol === null ? null : (
+              <div key={vol.marque} className="phrase-vol">
+                <JetonEnVol vol={vol} dureeMs={DUREE_VOL_MS} />
+              </div>
+            )}
+          </>
+        }
+        reserve={
+          <div className="phrase-reserve" data-plateau="phrase">
+            {/* Les mots à prendre. La couche ne prend pas le doigt : seules les pastilles le
+                prennent. */}
+            <div className="phrase-mots" data-plateau="etiquettes">
+              {planCourant === null
+                ? null
+                : planCourant.resultat.emplacements.map((emplacement) => {
+                    const etiquette = etiquetteParId.get(emplacement.cle);
+                    if (etiquette === undefined) return null;
+                    const placee = etat.acquis[emplacement.cle] !== undefined;
 
-          Le conflit que je redoutais n'existe plus, et c'est la géométrie qui le dit : le
-          jeton part du décor et descend vers les cases, toutes deux SOUS cette bande. La
-          trajectoire est monotone vers le bas et ne remonte jamais. « Aucune animation dans le
-          champ de lecture » tient donc encore par construction — le contrat de sortie le
-          mesure en pixels.
-
-          ⚠ R35 borne la taille : `FournisseurReglagesLecture` n'est monté nulle part, donc
-          24 px (défaut) au lieu des 27 px du profil. Aucune valeur n'est écrite ici. */}
-      <div
-        ref={modele}
-        data-plateau="modele"
-        className="modele-phrase-centre"
-        style={{
-          gridArea: '1 / 1',
-          position: 'relative',
-          zIndex: 2,
-          display: 'grid',
-          justifyItems: 'center',
-          justifyContent: 'center',
-          gap: '0.25rem',
-        }}
-      >
-        <div
-          data-plateau="etape-phrase"
-          aria-live="polite"
-          style={{
-            display: 'grid',
-            justifyItems: 'center',
-            gap: '0.1rem',
-            padding: '0.25rem 0.75rem',
-            border: '3px solid var(--trait)',
-            borderRadius: '1rem',
-            background: 'var(--parchemin)',
-            boxShadow: 'var(--ombre-bd)',
-            textAlign: 'center',
-            fontWeight: 800,
-            ...styleLecture,
-          } as CSSProperties}
-        >
-          <span style={{ fontWeight: 700 }}>
-            {`Étape ${String(etat.indexEtape + 1)} / ${String(etat.etapes.length)}`}
-          </span>
-          <span data-cible-phrase="oui">Phrase à construire</span>
-        </div>
-        <ZoneDeLecture
-          texte={consigne === null ? '' : consigne.phrase}
-          motsCles={consigne === null ? [] : consigne.motsCles}
-          etiquette={
-            consigne === null ? 'La phrase à composer.' : `La phrase à lire : ${consigne.phrase}`
-          }
-        />
-      </div>
-
-      {/* ---------------------------------------------------------------- le décor, en fond
-          Il couvre la ZONE DE JEU — entre la phrase modèle et la ligne de cases — et les mots
-          sont positionnés dans le même rectangle : un décor et ses prises doivent partager UN
-          SEUL référentiel (la leçon de R40). */}
-      <div
-        data-plateau="illustration-phrase"
-        style={{ gridArea: '2 / 1', position: 'relative', minBlockSize: 220, zIndex: 0 }}
-      >
-        <SceneDecor
-          habillage={habillage}
-          allumees={allumees}
-          derniere={derniere}
-          animationsDesactivees={animationsDesactivees}
-          ajustement="contenir"
-        />
-      </div>
-
-      {/* ------------------------------------------------------- les mots, devant, aux régions
-          La couche ne prend PAS le doigt : seules les pastilles le prennent. Une couche pleine
-          qui intercepterait rendrait le décor intapable pour les moteurs qui, demain, voudront
-          le taper. */}
-      <div
-        ref={coucheMots}
-        data-plateau="etiquettes"
-        style={{
-          gridArea: '3 / 1',
-          position: 'relative',
-          display: 'flex',
-          flexWrap: 'wrap',
-          justifyContent: 'center',
-          alignItems: 'center',
-          gap: '0.75rem',
-          padding: '0.5rem',
-          zIndex: 1,
-          pointerEvents: 'none',
-        }}
-      >
-        {planCourant === null
-          ? null
-          : planCourant.resultat.emplacements.map((emplacement) => {
-              const etiquette = etiquetteParId.get(emplacement.cle);
-              if (etiquette === undefined) return null;
-              const placee = etat.acquis[emplacement.cle] !== undefined;
-
-              // R50 — SEULS LES MOTS DE LA CONSIGNE COURANTE. Le rendu partait de
-              // `contenu.etiquettes`, donc des DIX étiquettes de l'exercice pour une consigne
-              // qui en demande quatre : la capture du père montre « Le feu est rouge. Les
-              // voitures sont sur la route. » en une rangée. Ici la population est
-              // `consigne.ordre`, et rien d'autre ne peut y entrer.
-              //
-              // Un mot rangé quitte le décor pour rejoindre la phrase, et sa région s'allume.
-              // Il reste dans le DOM, `hidden` : le réducteur seul décide qu'un second appui ne
-              // coûte rien (`etiquette-deja-placee`), et le retirer ferait porter cette règle
-              // au rendu.
-              const classes = ['cible'];
-              if (!animationsDesactivees && cibleDeLAide === emplacement.cle) {
-                classes.push('halo-demonstration');
-              }
-              if (!animationsDesactivees && etiquetteRefusee === emplacement.cle) {
-                classes.push('oscillation');
-              }
-
-              // ── R54 — DEUX ÉLÉMENTS, ET C'EST TOUT LE CORRECTIF ────────────────────────
-              //
-              // > « quand on a faux, le mot se décale en bas à droite et vibre, il faudrait
-              // >   qu'il vibre mais autour de sa position initiale. »
-              //
-              // Cause, et elle est mécanique. La pastille était CENTRÉE sur son point par
-              // `transform: translate(-50%, -50%)`. `.oscillation` (`global.css:374`) anime
-              // la même propriété :
-              //
-              //     @keyframes pierre-oscillation {
-              //       0%, 100% { transform: translateX(0); }   ← REMPLACE le centrage
-              //       25%      { transform: translateX(-6px); }
-              //     }
-              //
-              // Une image-clé ne COMPOSE pas avec la transformation en place, elle la
-              // REMPLACE. Dès la première image, le centrage disparaît : le coin haut-gauche
-              // saute du point moins la demi-boîte au point lui-même — soit, pour « rouge. »
-              // dont la boîte mesure 152 × 68, **+ 76 px vers la droite et + 34 px vers le
-              // bas**. Exactement le décalage décrit, et il tenait à une propriété partagée.
-              //
-              // Le remède n'est pas de réécrire les images-clés — elles servent aux quatorze
-              // moteurs — mais de rendre les deux transformations DISJOINTES : un porteur qui
-              // centre, un bouton qui oscille. Chacun sa propriété, aucune composition.
-              //
-              // Bénéfice non demandé, même cause : `.cible:active` pose
-              // `scale(0.96) translateY(3px)`. Il écrasait le centrage lui aussi — chaque
-              // appui faisait donc sauter le mot avant de le rendre. Il est réparé du même
-              // coup, sans qu'on y touche.
-              return (
-                <span
-                  key={emplacement.cle}
-                  data-porte-etiquette={emplacement.cle}
-                  hidden={placee}
-                  style={{
-                    position: 'relative',
-                    display: placee ? 'none' : 'inline-flex',
-                    maxInlineSize: '100%',
-                    pointerEvents: 'none',
-                  }}
-                >
-                  <EtiquetteSaisissable
-                    key={
-                      emplacement.cle === etiquetteRefusee
-                        ? `${emplacement.cle}-${String(marqueRefusCourante)}`
-                        : emplacement.cle
+                    // R50 — seuls les mots de la consigne courante. Un mot rangé quitte les mots
+                    // pour rejoindre la phrase ; il reste dans le DOM, `hidden` : le réducteur
+                    // seul décide qu'un second appui ne coûte rien (`etiquette-deja-placee`).
+                    const classes = ['cible'];
+                    if (!animationsDesactivees && cibleDeLAide === emplacement.cle) {
+                      classes.push('halo-demonstration');
                     }
-                    cle={emplacement.cle}
-                    mot={etiquette.mot}
-                    classes={classes}
-                    region={emplacement.region ?? ''}
-                    placee={placee}
-                    styleTexte={styleLecture as CSSProperties}
-                    surTap={(evenement) => {
-                      // Viser AVANT d'émettre : après, la case est remplie et n'existe plus.
-                      // Un tap interrompt aussi le vol en cours — aucune animation ne bloque
-                      // le geste suivant (v2 § 8).
-                      fixerVol(null);
-                      viser(emplacement, etiquette.mot);
-                      jouer({ type: 'placer', etiquette: emplacement.cle }, evenement);
+                    if (!animationsDesactivees && etiquetteRefusee === emplacement.cle) {
+                      classes.push('oscillation');
+                    }
+
+                    // R54 — DEUX ÉLÉMENTS : un porteur et un bouton. `.oscillation` anime
+                    // `transform` ; si le porteur centrait par `transform` lui aussi, l'image-clé
+                    // remplacerait le centrage et le mot se décalerait.
+                    return (
+                      <span
+                        key={emplacement.cle}
+                        className="phrase-porteur"
+                        data-porte-etiquette={emplacement.cle}
+                        hidden={placee}
+                      >
+                        <EtiquetteSaisissable
+                          key={
+                            emplacement.cle === etiquetteRefusee
+                              ? `${emplacement.cle}-${String(marqueRefusCourante)}`
+                              : emplacement.cle
+                          }
+                          cle={emplacement.cle}
+                          mot={etiquette.mot}
+                          classes={classes}
+                          region={emplacement.region ?? ''}
+                          placee={placee}
+                          surTap={(evenement) => {
+                            // Viser AVANT d'émettre : après, la case est remplie et n'existe plus.
+                            // Un tap interrompt aussi le vol en cours (v2 § 8).
+                            fixerVol(null);
+                            viser(emplacement, etiquette.mot);
+                            jouer({ type: 'placer', etiquette: emplacement.cle }, evenement);
+                          }}
+                        />
+                      </span>
+                    );
+                  })}
+            </div>
+
+            {/* ── R59 — LA LIGNE DE FENTES *EST* LA PHRASE QU'ON RECONSTRUIT ─────────────────
+                Une case vide est une promesse de place : chaque fente garde sa place du début à
+                la fin, réserve la boîte de son futur mot, et le porte au même endroit. */}
+            <CibleDeDepot id="fentes-de-la-phrase">{(accueilPhrase) => (
+            <div
+              ref={accueilPhrase.brancher}
+              className="phrase-fentes"
+              data-survolee={accueilPhrase.survolee ? 'oui' : 'non'}
+              data-fentes="phrase"
+              data-restantes={String(restants.length)}
+            >
+              {ordre.map((id) => {
+                const placee = etat.acquis[id] !== undefined;
+                return (
+                  <Fente
+                    key={id}
+                    cle={id}
+                    texte={placee ? (etiquetteParId.get(id)?.mot ?? '') : null}
+                    boite={mesurer(id)}
+                    prochaine={!placee && restants[0] === id}
+                    // C'est ce nœud que `viser` mesure au moment du tap.
+                    brancher={(noeud) => {
+                      refFentes.current.set(id, noeud);
                     }}
                   />
-                </span>
-              );
-            })}
+                );
+              })}
+            </div>
+            )}</CibleDeDepot>
+          </div>
+        }
+        pied={
+          <>
+            {/* CE QUE LE REFUS DIT : ce qu'on ATTEND, jamais ce qui a raté ni le mot attendu. Il
+                s'efface tout seul, le réducteur remet `dernierRefus` à `null` au geste suivant. */}
+            <p
+              className="phrase-message"
+              role="status"
+              aria-live="polite"
+              data-refus-texte={messageDeRefus === '' ? 'non' : 'oui'}
+              data-animations={animationsDesactivees ? 'calmes' : 'vives'}
+            >
+              <MessageStable messages={Object.values(MESSAGES_DE_REFUS)}>{messageDeRefus === '' ? (etat.aide === null ? '' : (etat.aide.texte ?? '')) : messageDeRefus}</MessageStable>
+            </p>
 
-      </div>
-
-      {/* ── LE MOT QUI TRAVERSE — R59 : il va DANS la case, plus au-dessus ─────────────────
-          Cette couche couvre TOUT le moteur, décor et bande comprise : c'est ce qui permet au
-          jeton d'atteindre réellement son réceptacle. Elle ne traverse pourtant JAMAIS le
-          champ de lecture, et ce n'est pas une promesse — c'est la géométrie : la ligne de
-          fentes est posée AU-DESSUS de `ZoneDeLecture` dans la bande, donc la trajectoire
-          s'arrête avant elle. Le contrat de sortie mesure cet écart en pixels.
-
-          Une COPIE, jamais l'élément réel : le vrai bouton est déjà parti, la fente est déjà
-          tenue. L'animation est donc purement additive. */}
-      {vol === null ? null : (
-        <div
-          key={vol.marque}
-          style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 3 }}
-        >
-          <JetonEnVol vol={vol} dureeMs={DUREE_VOL_MS} styleTexte={styleLecture as CSSProperties} />
-        </div>
-      )}
-
-      {/* ------------------------------------------------------------ la bande de lecture
-          « Le décor s'agite, le texte jamais » (v2 § 9.3). Cette bande est le champ de
-          déchiffrage : fond parchemin opaque, police de lecture, aucune animation.
-
-          Elle porte la PHRASE EN TRAIN DE SE FAIRE, et non la consigne. C'est délibéré :
-          `EcranNoeud` affiche déjà la consigne en en-tête, et la répéter ici était le défaut
-          R49 — « pour un enfant qui déchiffre, lire deux fois la même ligne n'est pas
-          neutre : il cherche la différence entre les deux ». */}
-      <div
-        ref={bande}
-        data-plateau="phrase"
-        style={{
-          gridArea: '4 / 1',
-          position: 'relative',
-          zIndex: 2,
-        }}
-      >
-        {/* ── R59 — LA LIGNE DE FENTES *EST* LA PHRASE QU'ON RECONSTRUIT ───────────────────
-            > « dès qu'on trouve un mot ça le met au-dessus de ces cases-là, ça devrait
-            >   remplacer au même endroit la case sinon les cases vides n'ont aucun sens. »
-
-            Il a raison, et l'argument est plus fort que l'esthétique : **une case vide est une
-            promesse de place**. Ce qui était rendu, mesuré sur l'arbre du DOM :
-
-                <p data-ligne="0">  « Le »            ← le mot atterrissait ICI
-                <span data-fente="mot-le" hidden>     ← et sa case DISPARAISSAIT
-
-            La case ne recevait rien et s'effaçait : elle n'avait jamais rien promis.
-
-            Maintenant il n'y a plus qu'UNE ligne, et c'est la phrase elle-même. Chaque fente
-            garde sa place du début à la fin ; vide elle attend, tenue elle porte son mot **au
-            même endroit**. Aucune ne disparaît jamais.
-
-            ── ET C'EST LA RÉSERVATION QUI REND LA CHOSE VRAIE ──────────────────────────────
-            Chaque fente réserve dès le départ la boîte de son futur mot — la MÊME que celle
-            de la pastille, puisque `mesurer` est la même fonction et la typographie la même.
-            La remplir ne recompose donc rien : ni elle, ni ses voisines. Sans cette
-            réservation, la ligne se réajusterait à chaque mot et la case visée aurait bougé
-            avant l'arrivée du jeton.
-
-            ── POURQUOI AU-DESSUS DE `ZoneDeLecture`, ET NON EN DESSOUS ─────────────────────
-            Le jeton vient du décor, donc d'en haut. Posée au-dessus du champ de lecture, la
-            ligne de fentes l'intercepte : la trajectoire s'arrête avant `ZoneDeLecture`, et
-            « aucune animation dans le champ de lecture » tient **par géométrie** et non par
-            promesse. Posée en dessous, chaque mot traverserait la phrase à lire. */}
-        <div
-          ref={accueilPhrase.brancher}
-          data-survolee={accueilPhrase.survolee ? 'oui' : 'non'}
-          data-fentes="phrase"
-          data-restantes={String(restants.length)}
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '0.5rem',
-            marginBlockEnd: '0.6rem',
-          }}
-        >
-          {ordre.map((id) => {
-            const placee = etat.acquis[id] !== undefined;
-            return (
-              <Fente
-                key={id}
-                cle={id}
-                texte={placee ? (etiquetteParId.get(id)?.mot ?? '') : null}
-                boite={mesurer(id)}
-                prochaine={!placee && restants[0] === id}
-                styleTexte={styleLecture as CSSProperties}
-                // C'est ce nœud que `viser` mesure au moment du tap.
-                brancher={(noeud) => {
-                  refFentes.current.set(id, noeud);
-                }}
-              />
-            );
-          })}
-        </div>
-
-        {/* CE QUE LE REFUS DIT — il était muet, et un geste muet ne s'apprend pas.
-            Il dit ce qu'on ATTEND, jamais ce qui a raté : ni « tu », ni « non », ni
-            « erreur », et surtout pas le mot attendu — le nommer ferait du refus une aide
-            gratuite, et il n'y aurait plus rien à déchiffrer.
-            Il s'efface tout seul : le réducteur remet `dernierRefus` à `null` dès qu'un
-            geste est pris. Aucun minuteur, donc aucun texte qui traîne.
-
-            Il est resté AVEC LES CASES, et non sous la phrase modèle : il commente le geste,
-            il ne commente pas la phrase à lire. La typographie vient de `styleDeLecture`, la
-            dérivation exportée par `ZoneDeLecture` — c'est ce qui empêche ce texte de diverger
-            du champ de lecture le jour où le profil changera. ÉCART SIGNALÉ au rapport : le
-            contrat § 5.1 réserve l'affichage du texte à déchiffrer au seul `ZoneDeLecture`. */}
-          <p
-            role="status"
-            aria-live="polite"
-            data-refus-texte={messageDeRefus === '' ? 'non' : 'oui'}
-            data-animations={animationsDesactivees ? 'calmes' : 'vives'}
-            style={{
-              ...styleLecture,
-              margin: 0,
-              minBlockSize: '1.5em',
-              textAlign: 'center'
-            } as CSSProperties}
-          >
-            <MessageStable messages={Object.values(MESSAGES_DE_REFUS)}>{messageDeRefus === '' ? (etat.aide === null ? '' : (etat.aide.texte ?? '')) : messageDeRefus}</MessageStable>
-          </p>
-
-          {/* Ce que le décor NE DIT PAS aux lecteurs d'écran, le moteur le dit en clair. Le SVG
-              est `aria-hidden` — un décor décrit bavarde par-dessus la consigne — mais la
-              récompense, elle, doit s'entendre. */}
-          <p
-            role="status"
-            aria-live="polite"
-            data-annonce="coloriage"
-            style={{
-              position: 'absolute',
-              inlineSize: 1,
-              blockSize: 1,
-              overflow: 'hidden',
-              clip: 'rect(0 0 0 0)',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            {derniere === null
-              ? ''
-              : `${
-                  regions.find((r) => r.id === derniere.id)?.libelle ?? derniere.id
-                } reprend ses couleurs.`}
-          </p>
-      </div>
-
-      {/* ── LES DEUX CONTRÔLES SONT PORTÉS PAR L'ÉCRAN, PAS PAR LE MOTEUR (R10) ──────────────
-          `EcranNoeud` monte le vrai `BoutonEcouter` (qui joue le clip, et DISPARAÎT quand il
-          n'y en a pas — D42) et le vrai `<Gobi>`, qui porte la prise `data-action="aide"`.
-          Un moteur ne peut pas héberger le vrai bouton d'écoute : il lui faudrait la clé
-          `<exercice>/<consigne>`, et `ProprietesMoteur` ne porte pas l'identifiant
-          d'exercice. Seul l'écran le connaît. */}
-    </div>
+            {/* Ce que le décor ne dit pas aux lecteurs d'écran, le moteur le dit en clair. */}
+            <p className="phrase-annonce" role="status" aria-live="polite" data-annonce="coloriage">
+              {derniere === null
+                ? ''
+                : `${
+                    regions.find((r) => r.id === derniere.id)?.libelle ?? derniere.id
+                  } reprend ses couleurs.`}
+            </p>
+          </>
+        }
+      />
     </ZoneDeGlisser>
   );
 }

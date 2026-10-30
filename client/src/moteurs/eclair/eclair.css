@@ -1,0 +1,273 @@
+/* Moteur `eclair` — apparence propre. La disposition vient du socle (DispositionMoteur). */
+
+/* ── La zone de jeu : décor en fond, options posées dessus ──────────────────────────────── */
+
+.eclair-zone {
+  position: relative;
+  inline-size: 100%;
+  block-size: 100%;
+  min-inline-size: 0;
+  min-block-size: 0;
+  overflow: hidden;
+  border-radius: var(--rayon-carte);
+  font-family: var(--font-interface);
+  font-size: var(--socle-texte-interface);
+}
+
+.eclair-calque {
+  position: absolute;
+  inset: 0;
+}
+
+.eclair-options {
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* ── La barre haute : la commande « Montre-moi le mot » ─────────────────────────────────
+   Le repère d'étape est dans la barre de consigne de l'écran (T10, RepereEtape). */
+
+.eclair-barre-superieure {
+  position: absolute;
+  z-index: 3;
+  inset-block-start: 0.75rem;
+  inset-inline: 0.75rem;
+  display: flex;
+  justify-content: flex-end;
+  align-items: start;
+  gap: 0.75rem;
+  pointer-events: none;
+}
+
+.eclair-commande-zone {
+  display: grid;
+  justify-items: end;
+  gap: 0.25rem;
+  pointer-events: none;
+}
+
+.commande-eclair {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  min-block-size: var(--socle-cible);
+  min-inline-size: var(--socle-cible);
+  padding: 0.7rem 1.25rem;
+  border: 3px solid var(--trait, #1b2440);
+  border-radius: 999px;
+  background: linear-gradient(180deg, #fff8d8 0%, #ffd86b 100%);
+  box-shadow: 0 5px 0 var(--trait, #1b2440), 0 9px 20px rgb(27 36 64 / 22%);
+  color: var(--trait, #1b2440);
+  font-family: var(--font-interface);
+  font-size: var(--socle-texte-interface);
+  font-weight: 800;
+  line-height: 1.2;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.commande-eclair:hover,
+.commande-eclair:focus-visible {
+  filter: brightness(1.04);
+  translate: 0 -2px;
+}
+
+.commande-eclair:active {
+  translate: 0 3px;
+  box-shadow: 0 2px 0 var(--trait, #1b2440), 0 5px 12px rgb(27 36 64 / 18%);
+}
+
+.commande-eclair-libelle-court { display: none; }
+
+.commande-eclair-note {
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: rgb(255 248 216 / 92%);
+  color: var(--trait, #1b2440);
+  font-size: var(--socle-texte-interface);
+  font-weight: 700;
+}
+
+/* Place comptée : la barre se serre, la cible de la commande ne rétrécit pas. */
+@container scene (max-inline-size: 900px) {
+  .eclair-barre-superieure {
+    inset-block-start: 0.5rem;
+    inset-inline: 0.5rem;
+    gap: 0.5rem;
+  }
+
+  .commande-eclair-note { display: none; }
+
+  .commande-eclair { padding: 0.55rem 0.85rem; }
+}
+
+@container scene (max-inline-size: 700px) {
+  .eclair-barre-superieure { gap: 0.4rem; }
+
+  .commande-eclair-libelle-long { display: none; }
+  .commande-eclair-libelle-court { display: inline; }
+
+  .commande-eclair {
+    padding: 0.45rem 0.75rem;
+    border-width: 2px;
+    box-shadow: 0 3px 0 var(--trait, #1b2440), 0 6px 12px rgb(27 36 64 / 18%);
+  }
+}
+
+/* ── Les options : mots à lire, police et corps de lecture du profil, aucune animation ──── */
+
+[data-moteur='eclair'] .eclair-option {
+  background-color: var(--lecture-fond, var(--parchemin));
+  color: var(--lecture-encre, var(--trait));
+  font-family: var(--lecture-famille, var(--font-lecture));
+  font-size: var(--lecture-corps);
+  letter-spacing: var(--lecture-interlettrage);
+  word-spacing: var(--lecture-espacement-mots);
+  line-height: var(--lecture-interligne);
+  white-space: nowrap;
+  pointer-events: auto;
+}
+
+.eclair-pastille {
+  display: inline-block;
+  inline-size: 1.75rem;
+  block-size: 1.75rem;
+  margin-inline-end: 0.4rem;
+  vertical-align: middle;
+  border: 3px solid var(--trait, #1b2440);
+  border-radius: 50%;
+}
+
+/* Les lucioles flottent doucement ; le texte de la consigne et le mot restent immobiles. */
+@keyframes pierre-luciole-derive {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(var(--luciole-dx), calc(var(--luciole-dy) * -1)) rotate(-2deg); }
+  50% { transform: translate(0, 0) rotate(1deg); }
+  75% { transform: translate(calc(var(--luciole-dx) * -1), var(--luciole-dy)) rotate(-1deg); }
+}
+
+[data-luciole-animee='oui'] {
+  animation: pierre-luciole-derive var(--luciole-duree) ease-in-out var(--luciole-delai) infinite;
+}
+
+/* ── Le mot flashé ──────────────────────────────────────────────────────────────────────── */
+
+/* Le calque du mot montré : au-dessus des options (calque 1), sous la barre (calque 3). Quand le
+   mot apparaît, rien ne le cache (retour du parent, E02 : une luciole posée devant le mot
+   bloquait la partie). Le z-index va sur le calque : le porteur, transformé, isole ses enfants. */
+.eclair-calque-flash {
+  z-index: 2;
+  pointer-events: none;
+}
+
+.eclair-flash {
+  display: grid;
+  place-items: center;
+  min-block-size: 5rem;
+  min-inline-size: 12rem;
+  padding: 0;
+  border-radius: var(--rayon-carte);
+  color: var(--trait);
+  /* Jamais touchable, même invisible : posé au-dessus des options, il ne doit voler aucun toucher. */
+  pointer-events: none;
+}
+
+/* Caché, la carte n'a ni fond ni bord. Ces deux règles ne visent QUE l'état caché : posées sur
+   `.eclair-flash`, elles venaient après le thème question du socle (même spécificité) et lui
+   retiraient son fond jaune une fois le mot montré (retour du parent, tableau E11). */
+.eclair-flash[data-visible='non'] {
+  border: 0;
+  background: transparent;
+}
+
+/* T19 : visible, le mot porte le thème question du socle (fond, bord, police, corps). */
+.eclair-flash[data-visible='oui'] {
+  padding: 0.85rem 1.2rem;
+  pointer-events: none;
+}
+
+/* La copie qui mesure garde la même police que la carte réelle (thème question). */
+.eclair-flash--mesure .eclair-flash__legende {
+  font-family: var(--lecture-famille, var(--font-lecture));
+  font-size: var(--lecture-corps);
+}
+
+/* La copie qui mesure la bande du mot : rendue, jamais vue, jamais touchée. */
+.eclair-flash--mesure {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  /* Le bord du thème question, que la carte réelle porte une fois montrée : même hauteur. */
+  border: var(--question-epaisseur) solid transparent;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.eclair-flash__contenu {
+  display: grid;
+  justify-items: center;
+  gap: 0.25rem;
+}
+
+.eclair-flash__legende {
+  font-weight: 700;
+}
+
+/* ── Le pied : retour bienveillant ──────────────────────────────────────────────────────── */
+
+.eclair-controles { position: relative; }
+
+.eclair-retour {
+  min-block-size: 1.5em;
+  margin: 0;
+  font-family: var(--font-interface);
+  font-size: var(--socle-texte-interface);
+  text-align: center;
+}
+
+/* Annonce pour lecteur d'écran seulement. */
+.eclair-annonce {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  font-family: var(--font-interface);
+  font-size: var(--socle-texte-interface);
+}
+
+/* ── Place très réduite : les options passent à la ligne au lieu de se superposer ───────── */
+
+.eclair-options--flux {
+  display: flex;
+  flex-wrap: wrap;
+  /* « safe » : trop haut, le flux descend (et défile) au lieu de remonter sous la barre. */
+  align-content: safe center;
+  overflow-y: auto;
+  pointer-events: auto;
+  justify-content: center;
+  gap: var(--socle-espace);
+  padding-inline: var(--socle-espace);
+  padding-block-end: var(--socle-espace);
+}
+
+/* Petit écran (la page défile) : le flux prend sa hauteur naturelle et la zone le suit ; aucune
+   option ne défile sous le bord de la zone, qui la rognerait (`MoteurEclair`, clé « libre »). */
+@media (max-width: 600px), (max-height: 500px) {
+  .eclair-zone:has(> .eclair-options--flux) { min-block-size: 55svh; }
+
+  .eclair-options--flux {
+    position: relative;
+    inset: auto;
+    overflow-y: visible;
+  }
+}
+
+.eclair-porte-flux {
+  display: inline-flex;
+  max-inline-size: 100%;
+  pointer-events: none;
+}

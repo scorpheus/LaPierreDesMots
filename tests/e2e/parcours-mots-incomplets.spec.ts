@@ -2,10 +2,10 @@ import { resolve } from 'node:path';
 import type { Page } from '@playwright/test';
 import { expect, test } from './invariants.js';
 import { appliquerReglagesLectureReels, entrerDansLeNoeud, etatDuJeu, deuxImages,
-  fixtureProfil, noeudsLivres, preparer, choisirLeProfil, ouvrirVueRegion } from './qa-outils.js';
+  fixtureProfil, noeudsDuMoteurBalayes, noeudsLivres, preparer, choisirLeProfil, ouvrirVueRegion } from './qa-outils.js';
 import { jouerProchainGesteDom, toucherPrise } from './gestes-dom.js';
 
-const fiches = noeudsLivres().filter((noeud) => noeud.moteur === 'grave');
+const fiches = noeudsDuMoteurBalayes('grave');
 const dossier = resolve('bac-a-sable/compagnon-mots-incomplets-2026-09-05');
 
 async function attendreImages(page: Page): Promise<void> {

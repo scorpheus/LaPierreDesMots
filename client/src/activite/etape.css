@@ -1,0 +1,104 @@
+/*
+ * Le repère d'étape commun — T10, 9 octobre 2026 (RepereEtape.tsx).
+ * Style repris de E03 (`tri`), le plus lisible selon le parent : pastille bordée de trait,
+ * fond jaune, police d'interface. Il vit dans la barre de consigne, juste sous la consigne.
+ *
+ * Le signal de changement d'étape ne porte que sur le CADRE (fond, liseré, onde d'ombre) :
+ * le texte ne bouge jamais (« le décor s'agite, le texte jamais »). Sans mouvement permis,
+ * reste l'état allumé, qui n'est pas une animation.
+ */
+
+/*
+ * La ligne sous la consigne : le repère d'étape (fente) et la jauge du palier, côte à côte.
+ * Partager la rangée de la jauge coûte ~17 px à la scène au lieu de ~37 px pour une rangée de
+ * plus (mesuré : bac-a-sable/socle-etape/entete-diagnostic.spec.ts, paires cite-des-histoires-02
+ * en 1100×700 cachait 8 cartes avec une rangée de plus).
+ */
+.entete-activite > .entete-suivi {
+  grid-column: 2;
+  grid-row: 2;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.25rem 0.75rem;
+  min-inline-size: 0;
+}
+
+.entete-activite > .entete-suivi:empty { display: none; }
+
+.entete-suivi > .jauge-palier { min-inline-size: 0; }
+
+/* Sans repère (moteur sans étapes, ou étapes non contraignantes), la fente ne prend aucune place. */
+.fente-repere-etape {
+  display: flex;
+  justify-content: center;
+  min-inline-size: 0;
+}
+
+.fente-repere-etape:empty { display: none; }
+
+/* Écran étroit (même seuil que activites.css) : la consigne passe sur toute la largeur en
+   rangée 2 ; le repère vient dessous, la jauge reste en haut entre « La carte » et « Écouter ». */
+@media (max-width: 700px) {
+  .entete-activite > .entete-suivi { display: contents; }
+
+  .entete-suivi > .fente-repere-etape { grid-column: 1 / -1; grid-row: 3; }
+
+  .entete-suivi > .jauge-palier { grid-column: 2; grid-row: 1; justify-self: center; }
+}
+
+.repere-etape {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  max-inline-size: 100%;
+  padding: 0.05rem 0.7rem;
+  border: 2px solid var(--trait);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--soleil, #ffc93c) 28%, var(--parchemin) 72%);
+  color: var(--trait);
+  font-family: var(--font-interface);
+  font-size: var(--socle-texte-interface);
+  font-weight: 700;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.repere-etape__detail { font-weight: 800; }
+
+/* Une cible à déchiffrer garde le style de lecture du profil, comme la consigne au-dessus. */
+.repere-etape__detail--lecture {
+  font-family: var(--lecture-famille, var(--font-lecture));
+  font-size: var(--lecture-corps);
+  letter-spacing: var(--lecture-interlettrage);
+  word-spacing: var(--lecture-espacement-mots);
+  font-weight: 700;
+}
+
+.repere-etape__point { font-weight: 400; }
+
+/* Nouvelle étape : le cadre s'allume et le reste jusqu'au toucher suivant. */
+.repere-etape[data-nouvelle-etape='oui'] {
+  background: var(--soleil, #ffc93c);
+  outline: 3px solid var(--soleil, #ffc93c);
+  outline-offset: 3px;
+}
+
+/* L'onde : seulement si le mouvement est permis par le système ET par le réglage du jeu. */
+@media (prefers-reduced-motion: no-preference) {
+  .repere-etape[data-animations='vives'][data-signal='a'] { animation: repere-etape-onde-a 700ms ease-out 3; }
+  .repere-etape[data-animations='vives'][data-signal='b'] { animation: repere-etape-onde-b 700ms ease-out 3; }
+}
+
+@keyframes repere-etape-onde-a {
+  from { box-shadow: 0 0 0 0 color-mix(in srgb, var(--soleil, #ffc93c) 95%, transparent); }
+  to { box-shadow: 0 0 0 18px color-mix(in srgb, var(--soleil, #ffc93c) 0%, transparent); }
+}
+
+@keyframes repere-etape-onde-b {
+  from { box-shadow: 0 0 0 0 color-mix(in srgb, var(--soleil, #ffc93c) 95%, transparent); }
+  to { box-shadow: 0 0 0 18px color-mix(in srgb, var(--soleil, #ffc93c) 0%, transparent); }
+}

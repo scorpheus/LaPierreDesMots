@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import type { Page } from '@playwright/test';
 import { expect, test } from './invariants.js';
-import { choisirLeProfil, preparer, etatDuJeu, deuxImages } from './qa-outils.js';
+import { choisirLeProfil, preparer, etatDuJeu, deuxImages, echantillonDuPalier } from './qa-outils.js';
 import { decoderPng } from '../../scripts/sprites/png.mjs';
 import reperes from '../fixtures/coloriages-reperes.json' with { type: 'json' };
 
@@ -47,7 +47,8 @@ async function etat(page: Page): Promise<EtatColoriage> {
 }
 
 for (const format of [{ width: 720, height: 1017 }, { width: 1080, height: 670 }, { width: 390, height: 700 }, { width: 844, height: 340 }]) {
-  for (const scene of reperes) {
+  // Palier `verifier` : deux scènes par campagne, en rotation (toutes en `complet`).
+  for (const scene of echantillonDuPalier(reperes, 2)) {
     test(`${scene.noeud} : tous les objets au doigt en ${format.width}×${format.height}`, async ({ page }) => {
       await page.setViewportSize(format);
       await preparer(page, 'ReperesColoriage');

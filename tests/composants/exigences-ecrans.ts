@@ -98,9 +98,8 @@ function horsDePortee(element: Element): boolean {
  * deux choses, toutes deux fausses :
  *
  *   • **un faux défaut.** Les godets de la palette `colorie` déclarent leur taille dans la
- *     feuille locale de `PaletteConsigne.tsx` — mesuré, sortie citée :
- *         client/src/moteurs/colorie/PaletteConsigne.tsx:21  const COTE_GODET_PX = 72;
- *     72 px, donc conformes ; simplement déclarés par une classe qui n'est pas `.cible`. Un
+ *     feuille du moteur `client/src/moteurs/colorie/colorie.css` :
+ *     `calc(var(--socle-cible) + 8px)`, soit 72 px, donc conformes ; simplement déclarés par une classe qui n'est pas `.cible`. Un
  *     audit qui les relèverait crierait sur du code juste, et un audit qui crie faux finit
  *     par ne plus être lu.
  *   • **un doublon.** Les quatorze moteurs ont chacun leur test de composant (14/14, audit

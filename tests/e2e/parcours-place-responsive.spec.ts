@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 import { expect, test } from './invariants.js';
 import { appliquerReglagesLectureReels, entrerDansLeNoeud } from './qa-outils.js';
 
-test('clairiere-04 — le cartouche ne masque jamais la zone place active sur tablette', async ({ page }) => {
+test('clairiere-04 — le repère d’étape ne masque jamais la zone place active sur tablette', async ({ page }) => {
   await page.setViewportSize({ width: 800, height: 1100 });
   const prenom = 'PlaceResponsive';
   await appliquerReglagesLectureReels(page, prenom);
@@ -11,26 +11,29 @@ test('clairiere-04 — le cartouche ne masque jamais la zone place active sur ta
 
   const moteur = page.locator('[data-moteur="place"]');
   await expect(moteur).toBeVisible();
-  const mesurer = (zoneActive: string) => moteur.evaluate((racine, zoneAttendue) => {
-    const rect = (selecteur: string): DOMRect => {
-      const element = racine.querySelector(selecteur);
-      if (element === null) throw new Error(`sélecteur absent: ${selecteur}`);
-      return element.getBoundingClientRect();
+  // T10 (9 octobre) : l'étape de `place` est dans le repère commun, dans la barre de consigne,
+  // au-dessus de la scène — plus « sous le dessin ». Refait sans perdre ce qui est gardé : le
+  // repère ne recouvre jamais la zone active, la scène garde sa hauteur, les objets suivent.
+  const mesurer = (zoneActive: string) => page.evaluate((zoneAttendue) => {
+    const element = (selecteur: string): Element => {
+      const trouve = document.querySelector(selecteur);
+      if (trouve === null) throw new Error(`sélecteur absent: ${selecteur}`);
+      return trouve;
     };
+    const rect = (selecteur: string): DOMRect => element(selecteur).getBoundingClientRect();
     const recouvre = (a: DOMRect, b: DOMRect): number =>
       Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left)) *
       Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top));
-    const cartouche = rect('[data-plateau="etape-place"]');
+    const cartouche = rect('[data-repere-etape="place"]');
     const scene = rect('[data-scene="place"]');
     const reserve = rect('[data-reserve="place"]');
     const cible = rect(`[data-zone-cible="${zoneAttendue}"]`);
     return {
       recouvrementCartoucheCible: recouvre(cartouche, cible),
       espaceScene: scene.height,
-      cartoucheSousScene: cartouche.top >= scene.bottom - 1,
+      cartoucheDansLaBarre: element('[data-repere-etape="place"]').closest('.barre-consigne') !== null,
+      cartoucheAuDessusScene: cartouche.bottom <= scene.top + 1,
       reserveSousCartouche: reserve.top >= cartouche.bottom - 1,
-      espaceAvantCartouche: Math.max(0, cartouche.top - scene.bottom),
-      espaceAvantReserve: Math.max(0, reserve.top - cartouche.bottom),
     };
   }, zoneActive);
 
@@ -38,10 +41,9 @@ test('clairiere-04 — le cartouche ne masque jamais la zone place active sur ta
 
   expect(mesure.recouvrementCartoucheCible, 'le cartouche ne doit pas recouvrir la cible active').toBe(0);
   expect(mesure.espaceScene, 'la scène doit utiliser l’espace vertical restant').toBeGreaterThanOrEqual(260);
-  expect(mesure.cartoucheSousScene, 'l’étape variable doit venir sous le dessin').toBe(true);
+  expect(mesure.cartoucheDansLaBarre, 'l’étape est dans la barre de consigne (T10)').toBe(true);
+  expect(mesure.cartoucheAuDessusScene, 'l’étape est en haut, au-dessus du dessin (T10)').toBe(true);
   expect(mesure.reserveSousCartouche, 'les objets à choisir doivent suivre l’étape').toBe(true);
-  expect(mesure.espaceAvantCartouche, 'aucun grand vide avant l’étape').toBeLessThanOrEqual(24);
-  expect(mesure.espaceAvantReserve, 'aucun grand vide avant les objets').toBeLessThanOrEqual(24);
 
   // Le second cas réel de la fiche remet en jeu une zone haute (le toit) après le soleil.
   await moteur.locator('[data-element="soleil"]').click();

@@ -137,6 +137,9 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
   const envoiEnCours = useRef(false);
   const promesseSauvegarde = useRef<Promise<boolean> | null>(null);
   const retourCarteDemande = useRef(false);
+  // Ce que l'enfant VOIT de sa demande pendant l'accusé : sans lui, le tap ne changeait rien à
+  // l'écran (geste mort, Q5, 12 oct.). La garde ci-dessus reste la seule qui décide.
+  const [retourCarteEnAttente, fixerRetourCarteEnAttente] = useState(false);
   const gainAccuse = useRef<{ cle: string; gain: GainCascade } | null>(null);
 
   const nombreEtoiles = etoiles ?? 1;
@@ -252,12 +255,14 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
       retourCarte();
       return;
     }
+    fixerRetourCarteEnAttente(true);
     void sauvegarder().then((enregistree) => {
       if (enregistree) {
         retourCarte();
       } else {
         // L'écran et son résultat restent là, avec le bouton Réessayer.
         retourCarteDemande.current = false;
+        fixerRetourCarteEnAttente(false);
       }
     });
   }, [retourCarte, sauvegarder, sauvegardeNecessaire, dejaEnvoyee]);
@@ -532,6 +537,9 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
       // Une seule valeur possible, aujourd'hui et toujours.
       data-fin="reussite"
       data-animations={animationsDesactivees ? 'non' : 'oui'}
+      // L'accusé du serveur est arrivé et son gain est appliqué : ce qui doit être annoncé l'est.
+      // Un test qui lit les paliers annoncés attend cet état, jamais une durée.
+      data-tentative-envoyee={!journalise ? 'hors-journal' : dejaEnvoyee ? 'oui' : 'non'}
     >
       <section
         className="recompense-scene"
@@ -649,6 +657,8 @@ export function EcranRecompense({ surFinSortie }: ProprietesEcranRecompense = {}
         <button
           type="button"
           data-action="voir-carte"
+          data-attente={retourCarteEnAttente ? 'oui' : 'non'}
+          aria-busy={retourCarteEnAttente}
           className={`cible action-recompense${regionTerminee ? ' action-recompense--principale' : ''}`}
           onClick={demanderRetourCarte}
         >

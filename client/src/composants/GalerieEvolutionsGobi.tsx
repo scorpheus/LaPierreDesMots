@@ -12,15 +12,12 @@ import type { CodeStadeGobi } from '@pierre/partage';
 import type { StadeGobi } from '@pierre/partage/monde';
 
 import { urlAsset } from '../api/client.js';
+import { assetDeStadeGobi } from './Gobi.js';
 
 export interface ProprietesGalerieEvolutionsGobi {
   readonly stades: readonly StadeGobi[];
   readonly stadeActuel: CodeStadeGobi;
   readonly surFermer: () => void;
-}
-
-function assetRaster(rang: number): string {
-  return `assets/gobi/stades/stade-${String(rang)}.webp`;
 }
 
 function styleMasque(asset: string): CSSProperties {
@@ -114,7 +111,7 @@ export function GalerieEvolutionsGobi({
                 </span>
                 {acquis ? (
                   <img
-                    src={urlAsset(assetRaster(stade.rang))}
+                    src={urlAsset(assetDeStadeGobi(stade.code))}
                     alt=""
                     aria-hidden="true"
                     draggable={false}

@@ -368,6 +368,13 @@ const DESCRIPTEURS: readonly Descripteur[] = [
     params: () => ({}), query: (c) => ({ profilId: c.profil }), statutNominal: 200
   },
   {
+    methode: 'PUT', motif: '/api/mathematiques/niveaux',
+    params: () => ({}),
+    corps: (c) => ({ profilId: c.profil, generationMaths: 0, famille: 'MAT-PON-03',
+      niveau: 'exploration', revisionAttendue: 0, cleGeste: 'fuzz-niveau-nominal' }),
+    statutNominal: 200
+  },
+  {
     methode: 'GET', motif: '/api/mathematiques/parties/:id',
     params: (c) => ({ id: c.partieMathsId ?? '' }), query: (c) => ({ profilId: c.profil }),
     avant: (c) => preparerPartieMaths(c), statutNominal: 200

@@ -77,15 +77,6 @@ export interface ProprietesEcranCampement {
    * contenu (`campement.coloriageLibre`), jamais d'ici.
    */
   readonly surOuvrirChaudron?: (noeud: IdNoeud) => void;
-  /**
-   * Rejoue la séquence d'ouverture — D35, point 3.
-   *
-   * Le rappel vient du routeur, qui est le seul à connaître `CHEMINS.ouverture` (lot N4,
-   * contrat v3 § 6.2 : `routeur.tsx` appartient à N4). Tant que N4 ne l'a pas câblé, le bouton
-   * n'est simplement pas rendu : un bouton qui ne mènerait nulle part serait pire que son
-   * absence, et ce lot refuse d'en poser un.
-   */
-  readonly surRejouerOuverture?: () => void;
 }
 
 /** `0 0 1200 800` → `[1200, 800]`. Retombe sur le gabarit par défaut si la chaîne est illisible. */
@@ -116,7 +107,6 @@ export function EcranCampement({
   surAllerCoffre,
   surAccesParent,
   surOuvrirChaudron,
-  surRejouerOuverture,
 }: ProprietesEcranCampement = {}): ReactElement {
   const magasin = useMagasin();
   const profil = useEtatJeu((etat) => etat.profil);
@@ -355,27 +345,10 @@ export function EcranCampement({
           <span data-action-campement-texte="detail">Mes trouvailles</span>
         </button>
 
-        {/* D35, point 3 : l'histoire du début se rejoue à volonté, et seulement d'ici — jamais
-            imposée une seconde fois. Le rappel vient du routeur (N4) ; sans lui, pas de bouton. */}
-        {surRejouerOuverture === undefined ? null : (
-          <button
-            type="button"
-            className="cible action-campement action-campement--histoire"
-            data-vers="ouverture"
-            data-pictogramme="ouverture"
-            aria-label="Revoir l’histoire du début"
-            onClick={surRejouerOuverture}
-          >
-            <span
-              aria-hidden="true"
-            className="action-campement-vignette action-campement-vignette--histoire"
-            data-illustration-campement="histoire"
-            style={{ backgroundImage: `url(${urlAsset('assets/campement/campement-v6.png')})` }}
-          >📖</span>
-            <span data-action-campement-texte="nom">Revoir l’histoire</span>
-            <span data-action-campement-texte="detail">La Pierre raconte</span>
-          </button>
-        )}
+        {/* « Revoir l’histoire » n'est plus dans cette barre (décision du parent du 30 oct.,
+            Docs/contrat-socle-activite.md § 12) : cinq cartes de 64 px ne tenaient pas sur un
+            petit téléphone. L'histoire du début reste rejouable à volonté depuis la carte
+            (« L’histoire de la Pierre », `EcranCarte`). */}
       </header>
 
       <div data-campement-grille="oui" className="campement-grille">

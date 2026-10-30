@@ -16,7 +16,7 @@
  *   1. le décor est le FOND, il se colore avec l'avancée (`SceneDecor`, `emplacements.ts`) ;
  *   2. les vignettes à numéroter sont posées DEVANT, à des emplacements DÉRIVÉS de l'habillage ;
  *   3. une case vide est une PROMESSE DE PLACE (R59) — le réceptacle réserve sa boîte dès le
- *      départ, le jeton atterrit sur son centre MESURÉ (`../phrase/receptacles.js`, réutilisé
+ *      départ, le jeton atterrit sur son centre MESURÉ (`../commun/fentes.js`, réutilisé
  *      tel quel, jamais recopié).
  *
  * Propre à `chrono` : la population des fentes est `consigne.ordre` (les vignettes, dans l'ordre
@@ -35,7 +35,7 @@
  */
 
 import { MessageStable } from '../../composants/MessageStable.js';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { CSSProperties, ReactElement } from 'react';
 import type { ActionChrono, ContenuChrono, EtatChrono, Habillage } from '@pierre/partage';
 
@@ -51,16 +51,25 @@ import type {
   RegionDHabillage,
   ResultatDerivation,
 } from '../../habillages/emplacements.js';
-import { styleDeLecture, useReglagesLecture } from '../../lecture/ZoneDeLecture.js';
+import { useReglagesLecture } from '../../lecture/ZoneDeLecture.js';
+import { DispositionMoteur } from '../../activite/DispositionMoteur.js';
+import { RepereEtape } from '../../activite/RepereEtape.js';
 import type { ProprietesMoteur } from '../types.js';
-// LE MODULE GÉNÉRIQUE — écrit pour `phrase`, adopté ici tel quel. Ne rien recopier.
+// LE MODULE COMMUN des fentes et du vol (`commun/fentes.tsx`). Ne rien recopier.
+import { JetonEnVol, centreDuReceptacle } from '../commun/fentes.js';
+import { CibleDeDepot, ZoneDeGlisser, useJetonGlissable } from '../commun/glisser.js';
+import type { VolDuJeton } from '../commun/fentes.js';
+
 import {
-  FEUILLE_DU_VOL,
-  JetonEnVol,
-  centreDuReceptacle,
-} from '../phrase/receptacles.js';
-import { ZoneDeGlisser, useJetonGlissable } from '../commun/glisser.js';
-import type { VolDuJeton } from '../phrase/receptacles.js';
+  choisirDispositionChrono,
+  dispositionEnPile,
+  largeurDeLaPile,
+  largeurUtileDePhrase,
+} from './disposition-des-phrases.js';
+import type { DispositionChrono, PlaceDeLaFrise } from './disposition-des-phrases.js';
+import './chrono.css';
+import { ROLE_REPONSE } from '../../activite/Question.js';
+import { TexteColore } from '../../lecture/TexteColore.js';
 
 /** Cadence du `battementHorloge`. Le moteur ne connaît aucun `setTimeout` : c'est ici. */
 const PERIODE_BATTEMENT_MS = 1000;
@@ -80,6 +89,9 @@ const PADDING_X = 20;
 const PADDING_Y = 12;
 const BORDURE = 4;
 const CIBLE_MIN = 64;
+
+/** Côté minimal d'une image de contenu (`--socle-image-min`, contrat du socle S4). */
+const IMAGE_MIN = 96;
 
 /** Largeur moyenne d'un glyphe d'Andika, en fraction du corps — reprise à l'identique. */
 const LARGEUR_GLYPHE = 0.66;
@@ -207,8 +219,6 @@ function VignetteSaisissable({
   numero,
   region,
   placee,
-  largeurMax,
-  styleTexte,
   surTap,
 }: {
   readonly cle: string;
@@ -218,8 +228,6 @@ function VignetteSaisissable({
   readonly numero: number | string;
   readonly region: string;
   readonly placee: boolean;
-  readonly largeurMax: number;
-  readonly styleTexte: CSSProperties;
   readonly surTap: (evenement: { clientX: number; clientY: number }) => void;
 }): ReactElement {
   const prise = useJetonGlissable(cle, placee);
@@ -229,6 +237,7 @@ function VignetteSaisissable({
       {...prise.ecouteurs}
       ref={prise.brancher}
       type="button"
+      {...ROLE_REPONSE}
       className={[...classes, 'chrono-vignette'].join(' ')}
       data-vignette={cle}
       data-numero={numero}
@@ -236,23 +245,8 @@ function VignetteSaisissable({
       data-glisse={prise.enVol ? 'oui' : 'non'}
       data-region-visee={region}
       hidden={placee}
-      style={
-        {
-          ...styleTexte,
-          ...prise.style,
-          pointerEvents: 'auto',
-          // Une légende peut ENJAMBER — c'est `mesurer()` qui en tient compte : `nowrap` ferait
-          // déborder la pastille de la boîte que la dérivation lui a réservée.
-          whiteSpace: 'normal',
-          maxInlineSize: `${String(largeurMax)}px`,
-          textAlign: 'center',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          boxSizing: 'border-box',
-        } as CSSProperties
-      }
+      // Seul le style du glisser reste en ligne : sa translation suit le doigt.
+      style={prise.style}
       onClick={surTap}
     >
       {asset === null ? null : (
@@ -262,18 +256,9 @@ function VignetteSaisissable({
           alt=""
           aria-hidden="true"
           draggable={false}
-          style={{
-            display: 'block',
-            inlineSize: '100%',
-            maxInlineSize: '200px',
-            aspectRatio: '4 / 3',
-            objectFit: 'cover',
-            borderRadius: '0.8rem',
-            marginBlockEnd: '0.45rem',
-          }}
         />
       )}
-      <span>{libelle}</span>
+      <span><TexteColore texte={libelle} /></span>
     </button>
   );
 }
@@ -314,33 +299,11 @@ function FenteChrono({
       data-placee={placee ? 'oui' : 'non'}
       data-prochaine={prochaine ? 'oui' : 'non'}
       aria-label={placee ? `${String(rang)}. ${libelle}` : `Place ${String(rang)}`}
-      style={{
-        position: 'relative',
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        inlineSize: `${String(boite.largeur)}px`,
-        blockSize: `${String(boite.hauteur)}px`,
-        flex: `0 1 ${String(boite.largeur)}px`,
-        overflow: 'hidden',
-        borderRadius: 'clamp(0.75rem, 1.8vw, var(--rayon-carte))',
-        border: `var(--epaisseur-trait) ${placee ? 'solid' : 'dashed'} var(--trait)`,
-        backgroundColor: placee
-          ? 'var(--parchemin)'
-          : prochaine
-            ? 'var(--soleil)'
-            : 'color-mix(in srgb, var(--grisaille) 12%, var(--parchemin))',
-        boxShadow: placee ? 'var(--ombre-bd)' : 'var(--ombre-bd-appui)',
-      }}
+      // La boîte est celle que la dérivation a réservée : elle ne bouge pas au remplissage.
+      style={{ inlineSize: `${String(boite.largeur)}px`, blockSize: `${String(boite.hauteur)}px` }}
     >
       {placee && asset !== null ? (
-        <img
-          src={urlAsset(asset)}
-          alt=""
-          aria-hidden="true"
-          draggable={false}
-          style={{ inlineSize: '100%', blockSize: '100%', objectFit: 'cover' }}
-        />
+        <img src={urlAsset(asset)} alt="" aria-hidden="true" draggable={false} />
       ) : (
         <span className="chrono-fente__numero" aria-hidden="true">{rang}</span>
       )}
@@ -458,7 +421,6 @@ export function MoteurChrono(
 
   // --- la typographie --------------------------------------------------------
   const reglages = useReglagesLecture();
-  const styleLecture = useMemo(() => styleDeLecture(reglages), [reglages]);
 
   const vignetteParId = useMemo(
     () => new Map(contenu.vignettes.map((v) => [v.id, v] as const)),
@@ -588,11 +550,98 @@ export function MoteurChrono(
   const ordre = consigne === null ? [] : consigne.ordre;
   const restants = ordre.filter((id) => etat.acquis[id] === undefined);
 
+  // --- la place d'une phrase de récit (décision du parent du 30 oct.) ----------
+  // Un étalon caché, dans la typographie réelle du profil, mesure la largeur où chaque légende
+  // garde des lignes d'au moins 15 caractères ; `choisirDispositionChrono` en déduit colonnes,
+  // pile ou pile haute. Mesuré avant la peinture : l'enfant ne voit jamais l'essai.
+  const plateau = useRef<HTMLDivElement | null>(null);
+  const etalon = useRef<HTMLSpanElement | null>(null);
+  const etalonImage = useRef<HTMLSpanElement | null>(null);
+  const [policesChargees, fixerPolicesChargees] = useState(0);
+  const [placeDesPhrases, fixerPlaceDesPhrases] = useState<{
+    readonly disposition: DispositionChrono;
+    readonly frise: PlaceDeLaFrise;
+    readonly largeurCarte: number | null;
+    readonly filet: boolean;
+  }>({ disposition: 'colonnes', frise: 'dessous', largeurCarte: null, filet: false });
+  const empreinteLegendes = ordre.map((id) => vignetteParId.get(id)?.libelle ?? '').join('\n');
+
+  useEffect(() => {
+    if (typeof document === 'undefined' || !('fonts' in document)) return undefined;
+    let actif = true;
+    const relancer = (): void => {
+      if (actif) fixerPolicesChargees((n) => n + 1);
+    };
+    void document.fonts.ready.then(relancer);
+    document.fonts.addEventListener('loadingdone', relancer);
+    return () => {
+      actif = false;
+      document.fonts.removeEventListener('loadingdone', relancer);
+    };
+  }, []);
+
+  useLayoutEffect(() => {
+    const scene = racine.current;
+    const zone = plateau.current;
+    const mesure = etalon.current;
+    const image = etalonImage.current;
+    const moteur = scene?.closest<HTMLElement>('[data-moteur="chrono"]') ?? null;
+    if (scene === null || zone === null || mesure === null || image === null || moteur === null) return;
+    const largeurTexte = largeurUtileDePhrase(empreinteLegendes.split('\n'), (texte) => {
+      mesure.textContent = texte;
+      return mesure.getBoundingClientRect().width;
+    }) + 2;
+    mesure.textContent = '';
+    const carte = zone.querySelector<HTMLElement>('.chrono-vignette:not([hidden])');
+    // Toutes les vignettes rangées : plus rien à disposer, la dernière disposition reste.
+    if (carte === null || largeurTexte <= 2) return;
+    const styleCarte = getComputedStyle(carte);
+    const habillageCarte = ['paddingLeft', 'paddingRight', 'borderLeftWidth', 'borderRightWidth']
+      .reduce((somme, cle) => somme + (Number.parseFloat(styleCarte[cle as 'paddingLeft']) || 0), 0);
+    const styleScene = getComputedStyle(scene);
+    const mesures = {
+      largeurPlateau: scene.clientWidth
+        - (Number.parseFloat(styleScene.paddingLeft) || 0) - (Number.parseFloat(styleScene.paddingRight) || 0),
+      nombreDeVignettes: ordre.length,
+      ecart: Number.parseFloat(getComputedStyle(zone).columnGap) || 0,
+      habillageCarte,
+      imageACote: image.getBoundingClientRect().width,
+      largeurTexte,
+    };
+    const largeurCarte = Math.ceil(largeurTexte + habillageCarte);
+
+    // Chaque essai est posé sur le DOM, mesuré, puis remplacé par le suivant : tout se joue avant
+    // la peinture. Le dernier appliqué est celui retenu, et React le repose à l'identique.
+    const appliquer = (disposition: DispositionChrono, frise: PlaceDeLaFrise): boolean => {
+      moteur.setAttribute('data-disposition-chrono', disposition);
+      moteur.setAttribute('data-frise-chrono', frise);
+      zone.style.setProperty('--chrono-largeur-carte', `${String(largeurCarte)}px`);
+      return scene.scrollHeight <= scene.clientHeight + 1 && scene.scrollWidth <= scene.clientWidth + 1;
+    };
+    let disposition = choisirDispositionChrono(mesures);
+    let frise: PlaceDeLaFrise = 'dessous';
+    // Des colonnes qui débordent en hauteur se rangent en pile.
+    if (disposition === 'colonnes' && !appliquer('colonnes', 'dessous')) disposition = dispositionEnPile(mesures);
+    if (disposition !== 'colonnes' && !appliquer(disposition, 'dessous')) {
+      // Scène plus large que haute : la frise à côté, si les vignettes y gardent leur largeur.
+      const tient = appliquer(disposition, 'a-cote') && zone.clientWidth >= largeurDeLaPile(mesures, disposition);
+      if (tient) frise = 'a-cote';
+    }
+    // Sinon, le filet : la scène défile (`chrono.css`), aucun texte n'est rogné.
+    const filet = !appliquer(disposition, frise);
+    fixerPlaceDesPhrases((avant) =>
+      avant.disposition === disposition && avant.frise === frise && avant.largeurCarte === largeurCarte
+        && avant.filet === filet
+        ? avant
+        : { disposition, frise, largeurCarte, filet });
+  }, [cadre.largeur, cadre.hauteur, reglages, empreinteLegendes, ordre.length, policesChargees, restants.length]);
+
   const boiteFente = useMemo<Boite>(() => {
     const nb = Math.max(ordre.length, 1);
     const largeurDisponible = Math.max(cadre.largeur - 2 * MARGE - (nb - 1) * 10, CIBLE_MIN * nb);
-    const largeur = Math.max(CIBLE_MIN, Math.min(168, Math.floor(largeurDisponible / nb)));
-    return { largeur, hauteur: Math.max(CIBLE_MIN, Math.round(largeur * 0.75)) };
+    // Une fente garde son image 4:3 à 96 px au moins : si la ligne ne tient pas, elle passe à la ligne.
+    const largeur = Math.max((IMAGE_MIN * 4) / 3, Math.min(168, Math.floor(largeurDisponible / nb)));
+    return { largeur, hauteur: Math.max(IMAGE_MIN, Math.round(largeur * 0.75)) };
   }, [cadre.largeur, ordre.length]);
 
   const messageDeRefus =
@@ -623,6 +672,8 @@ export function MoteurChrono(
    * la vignette lâchée était la suivante.
    */
 
+  // La frise est la seule zone d'accueil : une vignette lâchée dessus prend la place suivante.
+
   const deposerLaVignette = useCallback(
     (cle: string) => {
       const emplacement = planCourant?.resultat.emplacements.find((e: { cle: string }) => e.cle === cle);
@@ -636,232 +687,182 @@ export function MoteurChrono(
     [vignetteParId, planCourant, jouer],
   );
 
+  const messageAffiche =
+    messageDeRefus === '' ? (etat.aide === null ? '' : (etat.aide.texte ?? '')) : messageDeRefus;
+
   return (
     <ZoneDeGlisser surDepot={(jeton) => { deposerLaVignette(jeton); }}>
-    <div
-      ref={racine}
-      className="moteur-chrono"
-      data-moteur="chrono"
-      data-habillage={habillage.id}
-      data-termine={etat.termineMs === null ? 'non' : 'oui'}
-      data-aide={etat.niveauAide}
-      data-etape={etape === undefined ? '' : etape.identifiant}
-      data-regions-allumees={String(allumees.length)}
-      data-vignettes-affichees={String(ordre.length)}
-      style={{
-        position: 'relative',
-        blockSize: '100%',
-        minBlockSize: 0,
-        overflow: 'hidden',
-        borderRadius: 'var(--rayon-carte)',
-      }}
-    >
-      <style>{FEUILLE_DU_VOL}</style>
-
-      {/* Repère local stable : la barre haute porte la consigne parlée ; ce cartouche rappelle
-          le geste et la progression concrète, sans révéler l'image suivante ni déplacer le
-          plateau. */}
-      {consigne === null ? null : (
-        <div
-          className="chrono-cartouche"
-          data-cartouche-chrono="etape"
-          aria-live="polite"
-          style={{
-            position: 'relative',
-            zIndex: 3,
-            display: 'inline-flex',
-            flexWrap: 'wrap',
-            alignItems: 'center',
-            gap: '0.65rem',
-            padding: '0.45rem 0.8rem',
-            border: '2px solid var(--trait)',
-            borderRadius: '999px',
-            background: 'color-mix(in srgb, var(--soleil, #ffc93c) 28%, var(--parchemin) 72%)',
-            color: 'var(--trait)',
-            boxShadow: 'var(--ombre-bd)',
-            pointerEvents: 'none',
-            maxInlineSize: 'min(100%, 36rem)',
-          } as CSSProperties}
-        >
-          <span style={{ fontWeight: 800 }}>Remets les images dans l’ordre.</span>
-          <span aria-hidden="true" style={{ opacity: 0.72 }}>·</span>
-          <span>{
-            restants.length === 0
-              ? 'Histoire terminée !'
-              : `${String(restants.length)} ${restants.length === 1 ? 'image' : 'images'} à ranger.`
-          }</span>
-        </div>
-      )}
-
-      {/* ---------------------------------------------------------------- le décor, en fond */}
-      <div className="chrono-decor" style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
-        <SceneDecor
-          habillage={habillage}
-          allumees={allumees}
-          derniere={derniere}
-          animationsDesactivees={animationsDesactivees}
-          ajustement="contenir"
-        />
-      </div>
-
-      {/* ------------------------------------------------------- les vignettes, devant */}
-      <div
-        className="chrono-vignettes"
-        data-plateau="vignettes"
-        style={{
-          position: 'relative',
-          zIndex: 1,
-          pointerEvents: 'none',
-          gridTemplateColumns: `repeat(${String(Math.max(ordre.length, 1))}, minmax(0, 1fr))`,
-        }}
-      >
-        {planCourant === null
-          ? null
-          : emplacementsAlignes.map((emplacement) => {
-              const vignette = vignetteParId.get(emplacement.cle);
-              if (vignette === undefined) return null;
-              const placee = etat.acquis[emplacement.cle] !== undefined;
-
-              const classes = ['cible'];
-              if (!animationsDesactivees && cibleDeLAide === emplacement.cle) {
-                classes.push('halo-demonstration');
-              }
-              if (!animationsDesactivees && vignetteRefusee === emplacement.cle) {
-                classes.push('oscillation');
-              }
-
-              // R54 — porteur qui centre, bouton qui oscille : deux transformations disjointes.
-              return (
-                <span
-                  key={emplacement.cle}
-                  ref={(noeud) => {
-                    refVignettes.current.set(emplacement.cle, noeud);
-                  }}
-                  className="chrono-porte-vignette"
-                  data-porte-vignette={emplacement.cle}
-                  style={{
-                    position: 'relative',
-                    display: 'inline-flex',
-                    pointerEvents: 'none',
-                  }}
-                >
-                  <VignetteSaisissable
-                    key={
-                      emplacement.cle === vignetteRefusee
-                        ? `${emplacement.cle}-${String(marqueRefusCourante)}`
-                        : emplacement.cle
-                    }
-                    cle={emplacement.cle}
-                    libelle={vignette.libelle}
-                    asset={vignette.asset === null ? null : String(vignette.asset)}
-                    classes={classes}
-                    numero={etat.acquis[emplacement.cle] ?? ''}
-                    region={emplacement.region ?? ''}
-                    placee={placee}
-                    largeurMax={LARGEUR_MAX_PASTILLE}
-                    styleTexte={styleLecture as CSSProperties}
-                    surTap={(evenement) => {
-                      fixerVol(null);
-                      viser(emplacement.cle, vignette.libelle);
-                      jouer({ type: 'numeroter', vignette: emplacement.cle }, evenement);
-                    }}
-                  />
-                </span>
-              );
-            })}
-      </div>
-
-      {/* ── LA VIGNETTE QUI TRAVERSE — R59 : elle va DANS la fente, plus au-dessus ──────────── */}
-      {vol === null ? null : (
-        <div
-          key={vol.marque}
-          style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 3 }}
-        >
-          <JetonEnVol vol={vol} dureeMs={DUREE_VOL_MS} styleTexte={styleLecture as CSSProperties} />
-        </div>
-      )}
-
-      {/* ------------------------------------------------------------ la bande de lecture
-          Porte l'HISTOIRE EN TRAIN DE SE RANGER (les fentes), pas la consigne (déjà dans
-          l'en-tête de `EcranNoeud`, R49). */}
-      <div
-        ref={bande}
-        className="chrono-histoire"
-        data-plateau="histoire"
-        style={{
-          position: 'relative',
-          zIndex: 2,
-        }}
-      >
-        {/* ── R59 — LA LIGNE DE FENTES *EST* L'HISTOIRE QU'ON RECONSTRUIT ──────────────────── */}
-        <div
-          data-fentes="histoire"
-          data-restantes={String(restants.length)}
-          style={{
-            display: 'flex',
-            flexWrap: 'nowrap',
-            justifyContent: 'center',
-            alignItems: 'center',
-            gap: '0.5rem',
-            marginBlockEnd: '0.6rem',
-          }}
-        >
-          {ordre.map((id, index) => {
-            const placee = etat.acquis[id] !== undefined;
-            const vignette = vignetteParId.get(id);
-            return (
-              <FenteChrono
-                key={id}
-                cle={id}
-                rang={index + 1}
-                libelle={vignette?.libelle ?? ''}
-                asset={vignette?.asset === null || vignette?.asset === undefined ? null : String(vignette.asset)}
-                placee={placee}
-                boite={boiteFente}
-                prochaine={!placee && restants[0] === id}
-                brancher={(noeud) => {
-                  refFentes.current.set(id, noeud);
-                }}
+      <DispositionMoteur
+        moteur="chrono"
+        data-habillage={habillage.id}
+        data-termine={etat.termineMs === null ? 'non' : 'oui'}
+        data-aide={etat.niveauAide}
+        data-etape={etape === undefined ? '' : etape.identifiant}
+        data-regions-allumees={String(allumees.length)}
+        data-vignettes-affichees={String(ordre.length)}
+        data-disposition-chrono={placeDesPhrases.disposition}
+        data-frise-chrono={placeDesPhrases.frise}
+        data-filet-defilement={placeDesPhrases.filet ? 'oui' : 'non'}
+        scene={
+          <div ref={racine} className="chrono-scene">
+            {/* T10 — le repère commun, affiché sous la consigne de l'écran : ce qui reste à
+                ranger, sans révéler l'image suivante. SANS « Étape n sur N » : le parent l'a
+                retiré le 3 septembre comme « compteur technique » (Docs/correctif-chronologies-
+                2026-09-03.md) ; question reposée au parent après T10. */}
+            {consigne === null ? null : (
+              <RepereEtape
+                moteur="chrono"
+                rang={etat.indexEtape + 1}
+                total={etat.etapes.length}
+                afficherRang={false}
+                detail={restants.length === 0
+                  ? 'Histoire terminée !'
+                  : `${String(restants.length)} ${restants.length === 1 ? 'image' : 'images'} à ranger.`}
+                animationsDesactivees={animationsDesactivees}
               />
-            );
-          })}
-        </div>
+            )}
 
-        {/* CE QUE LE REFUS DIT — jamais ce qui a raté, jamais quelle vignette est attendue. */}
-        <p
-          role="status"
-          aria-live="polite"
-          data-refus-texte={messageDeRefus === '' ? 'non' : 'oui'}
-          data-animations={animationsDesactivees ? 'calmes' : 'vives'}
-          className="chrono-retour"
-          style={{ margin: 0 } as CSSProperties}
-        >
-          <MessageStable messages={Object.values(MESSAGES_DE_REFUS)}>{messageDeRefus === '' ? (etat.aide === null ? '' : (etat.aide.texte ?? '')) : messageDeRefus}</MessageStable>
-        </p>
+            {/* le décor, en fond */}
+            <div className="chrono-decor">
+              <SceneDecor
+                habillage={habillage}
+                allumees={allumees}
+                derniere={derniere}
+                animationsDesactivees={animationsDesactivees}
+                ajustement="contenir"
+              />
+            </div>
 
-        <p
-          role="status"
-          aria-live="polite"
-          data-annonce="coloriage"
-          style={{
-            position: 'absolute',
-            inlineSize: 1,
-            blockSize: 1,
-            overflow: 'hidden',
-            clip: 'rect(0 0 0 0)',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          {derniere === null
-            ? ''
-            : `${
-                regions.find((r) => r.id === derniere.id)?.libelle ?? derniere.id
-              } reprend ses couleurs.`}
-        </p>
-      </div>
+            {/* les vignettes, devant ; une colonne par image de l'histoire */}
+            <div
+              ref={plateau}
+              className="chrono-vignettes"
+              data-plateau="vignettes"
+              style={{
+                '--chrono-colonnes': String(Math.max(ordre.length, 1)),
+                ...(placeDesPhrases.largeurCarte === null ? {} : { '--chrono-largeur-carte': `${String(placeDesPhrases.largeurCarte)}px` }),
+              } as CSSProperties}
+            >
+              <span className="chrono-etalons" aria-hidden="true">
+                <span ref={etalon} className="chrono-etalon" />
+                <span ref={etalonImage} className="chrono-etalon-image" />
+              </span>
+              {planCourant === null
+                ? null
+                : emplacementsAlignes.map((emplacement) => {
+                    const vignette = vignetteParId.get(emplacement.cle);
+                    if (vignette === undefined) return null;
+                    const placee = etat.acquis[emplacement.cle] !== undefined;
 
-      {/* ── LES DEUX CONTRÔLES SONT PORTÉS PAR L'ÉCRAN, PAS PAR LE MOTEUR (R10) ────────────── */}
-    </div>
+                    const classes = ['cible'];
+                    if (!animationsDesactivees && cibleDeLAide === emplacement.cle) {
+                      classes.push('halo-demonstration');
+                    }
+                    if (!animationsDesactivees && vignetteRefusee === emplacement.cle) {
+                      classes.push('oscillation');
+                    }
+
+                    // R54 — porteur qui centre, bouton qui oscille : deux transformations disjointes.
+                    return (
+                      <span
+                        key={emplacement.cle}
+                        ref={(noeud) => {
+                          refVignettes.current.set(emplacement.cle, noeud);
+                        }}
+                        className="chrono-porte-vignette"
+                        data-porte-vignette={emplacement.cle}
+                      >
+                        <VignetteSaisissable
+                          key={
+                            emplacement.cle === vignetteRefusee
+                              ? `${emplacement.cle}-${String(marqueRefusCourante)}`
+                              : emplacement.cle
+                          }
+                          cle={emplacement.cle}
+                          libelle={vignette.libelle}
+                          asset={vignette.asset === null ? null : String(vignette.asset)}
+                          classes={classes}
+                          numero={etat.acquis[emplacement.cle] ?? ''}
+                          region={emplacement.region ?? ''}
+                          placee={placee}
+                          surTap={(evenement) => {
+                            fixerVol(null);
+                            viser(emplacement.cle, vignette.libelle);
+                            jouer({ type: 'numeroter', vignette: emplacement.cle }, evenement);
+                          }}
+                        />
+                      </span>
+                    );
+                  })}
+            </div>
+
+            {/* LA VIGNETTE QUI TRAVERSE — R59 : elle va DANS la fente, plus au-dessus. */}
+            {vol === null ? null : (
+              <div key={vol.marque} className="chrono-vol">
+                <JetonEnVol vol={vol} dureeMs={DUREE_VOL_MS} />
+              </div>
+            )}
+
+            {/* La bande de lecture porte l'HISTOIRE EN TRAIN DE SE RANGER (les fentes), pas la
+                consigne (déjà dans l'en-tête de `EcranNoeud`, R49). */}
+            <div ref={bande} className="chrono-histoire" data-plateau="histoire">
+              {/* R59 — LA LIGNE DE FENTES *EST* L'HISTOIRE QU'ON RECONSTRUIT */}
+              <CibleDeDepot id="frise-chrono">{(accueilFrise) => (
+              <div
+                ref={accueilFrise.brancher}
+                className="chrono-fentes"
+                data-fentes="histoire"
+                data-restantes={String(restants.length)}
+                data-survolee={accueilFrise.survolee ? 'oui' : 'non'}
+              >
+                {ordre.map((id, index) => {
+                  const placee = etat.acquis[id] !== undefined;
+                  const vignette = vignetteParId.get(id);
+                  return (
+                    <FenteChrono
+                      key={id}
+                      cle={id}
+                      rang={index + 1}
+                      libelle={vignette?.libelle ?? ''}
+                      asset={vignette?.asset === null || vignette?.asset === undefined ? null : String(vignette.asset)}
+                      placee={placee}
+                      boite={boiteFente}
+                      prochaine={!placee && restants[0] === id}
+                      brancher={(noeud) => {
+                        refFentes.current.set(id, noeud);
+                      }}
+                    />
+                  );
+                })}
+              </div>
+              )}</CibleDeDepot>
+            </div>
+          </div>
+        }
+        pied={
+          <>
+            {/* CE QUE LE REFUS DIT — jamais ce qui a raté, jamais quelle vignette est attendue. */}
+            <p
+              role="status"
+              aria-live="polite"
+              data-refus-texte={messageDeRefus === '' ? 'non' : 'oui'}
+              data-animations={animationsDesactivees ? 'calmes' : 'vives'}
+              className="chrono-retour"
+            >
+              <MessageStable messages={Object.values(MESSAGES_DE_REFUS)}>{messageAffiche}</MessageStable>
+            </p>
+
+            <p role="status" aria-live="polite" data-annonce="coloriage" className="chrono-annonce">
+              {derniere === null
+                ? ''
+                : `${
+                    regions.find((r) => r.id === derniere.id)?.libelle ?? derniere.id
+                  } reprend ses couleurs.`}
+            </p>
+            {/* LES DEUX CONTRÔLES SONT PORTÉS PAR L'ÉCRAN, PAS PAR LE MOTEUR (R10). */}
+          </>
+        }
+      />
     </ZoneDeGlisser>
   );
 }

@@ -26,6 +26,7 @@
  * explicitement (contrat § 8.2, « l'installation est réservée à l'orchestrateur »).
  */
 import { spawnSync } from 'node:child_process';
+import './priorite-basse.mjs';
 import { existsSync, readdirSync, statSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -77,6 +78,9 @@ export function constructionTestPerimee() {
 
 /** Ne reconstruit que lorsqu'une source servie par Playwright a réellement changé. */
 export function assurerConstructionTest() {
+  // Une campagne qui sert sa propre construction figée (`PIERRE_CLIENT_TEST`) ne doit pas voir
+  // `client/dist-test/` reconstruit sous elle : elle gère sa construction elle-même.
+  if (process.env['PIERRE_CLIENT_TEST'] !== undefined) return { status: 0 };
   if (!constructionTestPerimee()) return { status: 0 };
   console.log('Playwright : sources modifiées, reconstruction rapide de client/dist-test…');
   const npmCli = join(dirname(process.execPath), 'node_modules', 'npm', 'bin', 'npm-cli.js');

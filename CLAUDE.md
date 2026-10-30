@@ -194,7 +194,11 @@ qui les enfreint n'est pas terminé, il est à refaire.
 - **L'aide de Gobi ne coûte rien** et n'est jamais présentée comme un échec — elle change seulement
   le nombre d'étoiles. C'est l'enfant qui choisit sa difficulté.
 - **Aucune consigne n'existe uniquement à l'écrit.** Tout est audible en un tap, réécoutable sans
-  limite, sans coût en étoiles.
+  limite, sans coût en étoiles. **Révisé par le parent le 9 oct. 2026** : la voix de Gobi est
+  **éteinte par défaut** (« faire écouter, ou en tout cas parler, par défaut à false ») ; elle se
+  rallume dans la zone parent, et la règle vaut alors pleinement. Un seul interrupteur,
+  `client/src/services/voix-reglee.ts` — ne pas le contourner, ne pas remettre le défaut à vrai.
+  Mise à jour de la v2 § 5.4 proposée, non faite (tableau des retours, T18).
 - **Le décor s'agite, le texte jamais.** Dès qu'il y a du déchiffrage : fond parchemin, police
   Andika, aucune animation dans le champ de lecture.
 - **Aucun `Math.random`, aucun `Date.now`, aucun `new Date()`** hors de `Alea` et `Horloge` — règle
@@ -246,6 +250,16 @@ npm run test:qualite      # T5, a11y + perf + budget de bundle
 npm run test:rejeu        # rejeu des journaux de référence
 npm run verifier          # tout, un seul code de sortie, rapport consolidé
 ```
+
+**Trois paliers** (9 octobre, détail : [boucle de tests rapide](Docs/boucle-tests-rapide-2026-09-02.md)) :
+`npm run verifier:rapide` pendant le développement (fichiers touchés seulement, < 60 s) ;
+`npm run verifier` avant un push (un nœud par moteur, en rotation, sans couverture) ;
+`npm run verifier:complet` avant une publication (balayages exhaustifs et couverture).
+Machine partagée : 2 à 4 travailleurs au plus (`-- --travailleurs=N`, 4 par défaut), suites
+navigateur en séquence. Tous les tests (Vitest, Playwright, navigateurs compris) sont **cantonnés à
+8 fils logiques sur 32, en priorité basse** (`scripts/priorite-basse.mjs`, `PIERRE_FILS=N` ;
+`PIERRE_PRIORITE=normale` le lève pour mesurer une durée sur machine calme). Demande du parent :
+ne jamais prendre tout le processeur.
 
 Chaque commande écrit un rapport machine dans `tests/rapports/*.json` **et** un résumé lisible dans
 `tests/rapports/RAPPORT.md` ; les artefacts d'échec vont dans `tests/rapports/artefacts/`.

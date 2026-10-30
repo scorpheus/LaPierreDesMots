@@ -1,0 +1,102 @@
+/* Moteur `place` — apparence propre. La disposition vient du socle (DispositionMoteur). */
+
+/* ── La scène : le dessin tient dans sa zone, entier ────────────────────────────────────── */
+
+.place-scene {
+  inline-size: 100%;
+  block-size: 100%;
+  max-inline-size: 100%;
+  max-block-size: 100%;
+  touch-action: none;
+}
+
+.place-scene [data-zone-cible] { cursor: pointer; }
+
+/* ── La réserve : cible de l'étape, puis les objets ─────────────────────────────────────── */
+
+.place-reserve {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--socle-espace);
+  min-inline-size: 0;
+}
+
+/* Une vignette qui ne tient pas fait perdre une colonne, jamais de la taille à l'image. */
+.place-jetons {
+  display: grid;
+  grid-template-columns:
+    repeat(auto-fit, minmax(calc(var(--socle-image-min) + 1.25rem), 1fr));
+  gap: var(--socle-espace);
+  inline-size: 100%;
+  font-family: var(--font-interface);
+  font-size: var(--socle-texte-interface);
+}
+
+/* Plus de quatre objets : trois colonnes, donc deux rangées ; la colonne de réserve s'élargit. */
+.place-jetons:has(> :nth-child(n + 6)) {
+  grid-template-columns: repeat(3, minmax(calc(var(--socle-image-min) + 0.5rem), 1fr));
+}
+
+.place-jetons__compteur {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 0.1rem 0.6rem;
+  line-height: 1.35;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* Réserve sous la scène (choix mesuré, `MoteurPlace`) : les jetons s'étalent sur une rangée
+   avant d'en ouvrir une seconde, pour rendre la hauteur au décor. */
+[data-moteur='place'][data-disposition-socle='empilee'] .place-jetons {
+  grid-template-columns:
+    repeat(auto-fit, minmax(calc(var(--socle-image-min) + 1.25rem), 1fr));
+}
+
+/* Cibles ≥ 64 px (R16) ; le dessin garde 96 px au moins. */
+.place-jeton {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 0;
+  line-height: 1.15;
+  min-inline-size: var(--socle-cible, 64px);
+  min-block-size: var(--socle-cible, 64px);
+  padding: 0.15rem 0.2rem;
+  border: 1.5px solid var(--trait, #1B2440);
+  border-radius: 1rem;
+  background: var(--jeton, #FFFFFF);
+  color: var(--trait, #1B2440);
+  font-family: var(--font-interface);
+  font-size: var(--socle-texte-interface);
+  font-weight: 700;
+  cursor: pointer;
+  touch-action: none;
+}
+
+.place-jeton[data-saisi='oui'] {
+  border-width: 3px;
+  background: var(--jeton-actif, #F2C14E);
+}
+
+/* Un objet posé s'estompe ; il ne disparaît pas et ne devient jamais rouge (R14). */
+.place-jeton[data-place='oui'] { opacity: 0.45; cursor: default; }
+
+.place-jeton img {
+  display: block;
+  inline-size: var(--socle-image-min);
+  block-size: var(--socle-image-min);
+  object-fit: contain;
+  pointer-events: none;
+}
+
+
+/* ── Le pied : rappel bienveillant ──────────────────────────────────────────────────────── */
+
+[data-moteur='place'] p[role='status'] {
+  margin: 0;
+  font-family: var(--font-interface);
+  font-size: var(--socle-texte-interface);
+  text-align: center;
+}

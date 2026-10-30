@@ -1,0 +1,120 @@
+/* Moteur `grave` — apparence propre. La disposition vient du socle (DispositionMoteur). */
+
+/* La scène : le modèle au-dessus, la zone de jeu (décor, mot à trous, messages) dessous. */
+.grave-scene {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--socle-espace);
+  inline-size: 100%;
+  block-size: 100%;
+  min-inline-size: 0;
+  min-block-size: 0;
+}
+
+/* Texte à déchiffrer : police et corps de lecture du profil, aucune animation (v2 § 9.3). */
+.grave-refus {
+  font-family: var(--lecture-famille, var(--font-lecture));
+  font-size: var(--lecture-corps);
+  line-height: var(--lecture-interligne);
+  letter-spacing: var(--lecture-interlettrage);
+  word-spacing: var(--lecture-espacement-mots);
+  background-color: var(--lecture-fond);
+  color: var(--lecture-encre);
+  animation: none;
+  transition: none;
+}
+
+/* T19 : le modèle est ce qu'on DEMANDE. Fond, bord, police, corps : thème question du socle. */
+.grave-cartouche {
+  position: relative;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  max-inline-size: calc(100% - 1.5rem);
+  padding: 0.45rem 0.8rem;
+  line-height: var(--lecture-interligne);
+  overflow-wrap: anywhere;
+  animation: none;
+  transition: none;
+}
+
+.grave-cartouche__texte { font-weight: 800; }
+
+.grave-zone {
+  position: relative;
+  flex: 1 1 0;
+  inline-size: 100%;
+  min-inline-size: 0;
+  min-block-size: 0;
+  overflow: hidden;
+  border-radius: var(--rayon-carte);
+}
+
+/* `insetBlockEnd` (hauteur mesurée de la bande) est posé en ligne : c'est une valeur calculée. */
+.grave-decor {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-start: 0;
+}
+
+/* Le mot à compléter : grand cartouche statique, sur parchemin opaque, au centre du décor. */
+.grave-mot-central {
+  position: absolute;
+  inset-block-start: 27%;
+  inset-inline-start: 50%;
+  z-index: 2;
+  transform: translate(-50%, -50%);
+  min-inline-size: min(12rem, 100%);
+  max-inline-size: min(88%, 30rem);
+  padding: 0.5rem 1rem;
+  border: 4px solid var(--trait);
+  border-radius: var(--rayon-carte);
+  background: var(--parchemin);
+  box-shadow: var(--ombre-bd);
+  text-align: center;
+  pointer-events: none;
+}
+
+.grave-bande {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0;
+  z-index: 2;
+}
+
+.grave-refus {
+  margin: 0;
+  min-block-size: 1.5em;
+}
+
+.grave-annonce {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ── Le clavier : la réserve, une rangée centrée ────────────────────────────────────────── */
+
+.grave-clavier {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--socle-espace);
+}
+
+.grave-touche {
+  font-family: var(--lecture-famille, var(--font-lecture));
+  font-size: var(--lecture-corps);
+  line-height: var(--lecture-interligne);
+  letter-spacing: var(--lecture-interlettrage);
+  background-color: var(--lecture-fond);
+  color: var(--lecture-encre);
+  white-space: nowrap;
+}
+
+.grave-decor[hidden] { display: none; }

@@ -13,6 +13,7 @@
  * L'habillage n'est PAS fabriqué : il est lu sur disque, parmi les trois écrits pour ce
  * moteur. Un test qui invente son décor ne dit rien de celui qui atteint l'enfant.
  */
+import { readFileSync } from 'node:fs';
 import { useCallback, useState } from 'react';
 import type { ReactElement } from 'react';
 import { cleanup, fireEvent, render } from '@testing-library/react';
@@ -62,16 +63,30 @@ const services = servicesJeuDeTest();
 
 import { contenuAssemble as contenu } from '../fixtures/moteurs/assemble.js';
 
+/** Les déclarations d'un sélecteur dans une feuille (règles groupées comprises, commentaires ôtés). */
+function bloc(css: string, selecteur: string): string {
+  const sansCommentaires = css.replace(/\/\*[\s\S]*?\*\//g, '');
+  const corps: string[] = [];
+  for (const m of sansCommentaires.matchAll(/([^{}]+)\{([^}]*)\}/g)) {
+    if ((m[1] ?? '').split(',').map((x) => x.trim()).includes(selecteur)) corps.push(m[2] ?? '');
+  }
+  return corps.join('\n');
+}
+
 /**
  * Le harnais expose le résumé et la progression en `data-*`. C'est volontaire : les
  * assertions portent alors sur ce que le composant DONNE À VOIR et sur ce que le moteur
  * CALCULE, jamais sur un état interne qu'aucun écran ne montrerait.
  */
 function Harnais(): ReactElement {
+  // Les actions réellement émises par le composant, dans l'ordre : prendre un bloc n'en émet
+  // aucune (contrat assemble-pose-par-case § 2.1).
+  const [actions, fixerActions] = useState<readonly ActionAssemble[]>([]);
   const [etat, setEtat] = useState<EtatAssemble>(() =>
     moteurAssemble.creerEtat({ contenu, habillage, alea, horloge }),
   );
   const emettre = useCallback((action: ActionAssemble) => {
+    if (action.type === 'poser') fixerActions((precedentes) => [...precedentes, action]);
     setEtat((precedent) => moteurAssemble.reduire(precedent, action, { alea, horloge }));
   }, []);
 
@@ -81,6 +96,8 @@ function Harnais(): ReactElement {
   return (
     <div
       data-harnais="oui"
+      data-poses={JSON.stringify(actions)}
+      data-refus={etat.dernierRefus === null ? '' : etat.dernierRefus.motif}
       data-erreurs={String(resume.nbErreurs)}
       data-reussi={String(resume.reussi)}
       data-aide-resume={resume.aideUtilisee}
@@ -171,17 +188,24 @@ describe('moteur assemble', () => {
     const fentes = container.querySelector('[data-fentes="mot"]') as HTMLElement | null;
     expect(bande).not.toBeNull();
     expect(fentes).not.toBeNull();
-    expect(bande?.style.display).toBe('flex');
-    expect(bande?.style.alignItems).toBe('center');
-    expect(bande?.style.textAlign).toBe('center');
+    // La mise en page vit dans la feuille du moteur (assemble.css), pas dans des styles en ligne.
+    const css = readFileSync('client/src/moteurs/assemble/assemble.css', 'utf8');
+    expect(bande?.classList.contains('assemble-bande')).toBe(true);
+    expect(fentes?.classList.contains('assemble-fentes')).toBe(true);
+    expect(bloc(css, '.assemble-bande')).toMatch(/display:\s*flex/);
+    expect(bloc(css, '.assemble-bande')).toMatch(/align-items:\s*center/);
+    expect(bloc(css, '.assemble-bande')).toMatch(/text-align:\s*center/);
     expect(fentes?.getAttribute('data-alignement')).toBe('centre');
-    expect(fentes?.style.justifyContent).toBe('center');
-    expect(fentes?.style.inlineSize).toBe('100%');
+    expect(bloc(css, '.assemble-fentes')).toMatch(/justify-content:\s*center/);
+    expect(bloc(css, '.assemble-fentes')).toMatch(/inline-size:\s*100%/);
   });
 
-  it('bonne réponse : l’étape avance, aucune erreur, aucun écran d’échec', () => {
+  it('bonne réponse : on prend le bloc, on le pose dans la case ; aucune erreur, aucun écran d’échec', () => {
     const { container } = render(<Harnais />);
-    taper(container, ['[data-bloc="bloc-ta"]', '[data-bloc="bloc-pis"]']);
+    taper(container, [
+      '[data-bloc="bloc-ta"]', '[data-case="0"]',
+      '[data-bloc="bloc-pis"]', '[data-case="1"]',
+    ]);
     const h = harnais(container);
     expect(h.getAttribute('data-erreurs')).toBe('0');
     expect(h.getAttribute('data-etapes-finies')).toBe('1');
@@ -189,16 +213,65 @@ describe('moteur assemble', () => {
     expect(container.querySelector('[data-etat="echec"]')).toBeNull();
   });
 
-  it('mauvaise réponse : une erreur comptée, rien de rouge, la tentative reste réussie', () => {
+  it('toucher un bloc le PREND : ni action, ni refus, ni erreur ; retoucher le repose', () => {
     const { container } = render(<Harnais />);
-    taper(container, ['[data-bloc="bloc-bis"]']);
+    taper(container, ['[data-bloc="bloc-pis"]']);
+    let h = harnais(container);
+    expect(h.getAttribute('data-poses')).toBe('[]');
+    expect(h.getAttribute('data-refus')).toBe('');
+    expect(h.getAttribute('data-erreurs')).toBe('0');
+    expect(container.querySelector('[data-bloc="bloc-pis"]')?.getAttribute('data-pris')).toBe('oui');
+    // Un autre bloc : le bloc pris change, toujours rien d'émis.
+    taper(container, ['[data-bloc="bloc-ta"]']);
+    h = harnais(container);
+    expect(h.getAttribute('data-poses')).toBe('[]');
+    expect(container.querySelector('[data-bloc="bloc-pis"]')?.getAttribute('data-pris')).toBe('non');
+    expect(container.querySelector('[data-bloc="bloc-ta"]')?.getAttribute('data-pris')).toBe('oui');
+    // Retoucher le même bloc le repose dans la réserve.
+    taper(container, ['[data-bloc="bloc-ta"]']);
+    expect(container.querySelector('[data-bloc="bloc-ta"]')?.getAttribute('data-pris')).toBe('non');
+    // Toucher une case sans bloc pris ne fait rien non plus.
+    taper(container, ['[data-case="0"]']);
+    h = harnais(container);
+    expect(h.getAttribute('data-poses')).toBe('[]');
+    expect(h.getAttribute('data-refus')).toBe('');
+  });
+
+  it('toucher un bloc puis une case émet `poser` avec le rang de la case', () => {
+    const { container } = render(<Harnais />);
+    taper(container, ['[data-bloc="bloc-pis"]', '[data-case="1"]']);
+    const h = harnais(container);
+    expect(JSON.parse(h.getAttribute('data-poses') ?? '[]')).toEqual([
+      { type: 'poser', bloc: 'bloc-pis', case: 1 },
+    ]);
+    // L'ordre de remplissage est libre : pis en case 2 d'abord est ACCEPTÉ.
+    expect(h.getAttribute('data-refus')).toBe('');
+    expect(h.getAttribute('data-erreurs')).toBe('0');
+    expect(container.querySelector('[data-fentes="mot"]')?.getAttribute('data-restantes')).toBe('1');
+  });
+
+  it('mauvaise réponse : le bloc posé dans la mauvaise case compte une erreur et revient', () => {
+    const { container } = render(<Harnais />);
+    taper(container, ['[data-bloc="bloc-bis"]', '[data-case="1"]']);
     const h = harnais(container);
     expect(h.getAttribute('data-erreurs')).toBe('1');
     expect(h.getAttribute('data-reussi')).toBe('true');
     expect(container.querySelector('[data-etat="echec"]')).toBeNull();
-    // D23 : un refus de lecture journalise l'étiquette attendue et celle qui a été lue.
-    // Sans ce champ, le top 10 du dashboard serait vide et personne ne s'en apercevrait.
-    expect(h.getAttribute('data-confusion')).toBe('ta>bis');
+    // D23 : un refus de lecture journalise l'étiquette attendue (à CE rang) et celle qui a été lue.
+    expect(h.getAttribute('data-confusion')).toBe('pis>bis');
+    // R14 : rien ne se perd, le bloc revient dans la réserve, plus pris.
+    expect(container.querySelector('[data-bloc="bloc-bis"]')?.getAttribute('data-pris')).toBe('non');
+  });
+
+  it('case occupée : refus sans erreur', () => {
+    const { container } = render(<Harnais />);
+    taper(container, [
+      '[data-bloc="bloc-ta"]', '[data-case="0"]',
+      '[data-bloc="bloc-pis"]', '[data-case="0"]',
+    ]);
+    const h = harnais(container);
+    expect(h.getAttribute('data-refus')).toBe('case-occupee');
+    expect(h.getAttribute('data-erreurs')).toBe('0');
   });
 
   it('aide de Gobi : exactement le palier `indice`, jamais davantage', () => {
@@ -216,7 +289,11 @@ describe('moteur assemble', () => {
 
   it('double-tap : le second appui ne compte aucune erreur', () => {
     const { container } = render(<Harnais />);
-    taper(container, ['[data-bloc="bloc-ta"]', '[data-bloc="bloc-ta"]', '[data-bloc="bloc-pis"]']);
+    // Deux appuis sur le même bloc le prennent puis le reposent ; un double appui sur la case
+    // ne pose rien deux fois.
+    taper(container, ['[data-bloc="bloc-ta"]', '[data-bloc="bloc-ta"]']);
+    taper(container, ['[data-bloc="bloc-ta"]', '[data-case="0"]', '[data-case="0"]']);
+    taper(container, ['[data-bloc="bloc-pis"]', '[data-case="1"]']);
     expect(harnais(container).getAttribute('data-erreurs')).toBe('0');
   });
 

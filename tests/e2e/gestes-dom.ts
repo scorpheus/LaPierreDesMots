@@ -127,7 +127,14 @@ export async function jouerProchainGesteDom(page: Page, moteur: string, tour: nu
     await toucherPrise(racine.locator(selecteur(attribut, id!)));
   };
   switch (moteur) {
-    case 'assemble': await toucher('data-bloc', attendu); return;
+    case 'assemble': {
+      // Contrat assemble-pose-par-case : toucher le bloc le PREND, toucher sa case le pose.
+      await toucher('data-bloc', attendu);
+      const rang = (etat.etapes?.[etat.indexEtape ?? 0] as { solution?: string[] } | undefined)?.solution?.indexOf(attendu!) ?? -1;
+      expect(rang, 'assemble : la case du bloc attendu existe').toBeGreaterThanOrEqual(0);
+      await toucher('data-case', String(rang));
+      return;
+    }
     case 'attrape': await toucher('data-cible', attendu); return;
     case 'chemin': await toucher('data-case', attendu); return;
     case 'chrono': await toucher('data-vignette', attendu); return;

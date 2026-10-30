@@ -217,6 +217,7 @@ export const moteurAssemble: Moteur<ContenuAssemble, EtatAssemble, ActionAssembl
         // impose `minItems: 2`, donc jamais de valeur dégénérée.
         nbElements: etape.solution.length,
         confusion: null,
+        solution: [...etape.solution],
       }),
     );
 
@@ -243,7 +244,14 @@ export const moteurAssemble: Moteur<ContenuAssemble, EtatAssemble, ActionAssembl
 
     switch (action.type) {
       case 'poser': {
-        const decision = evaluerAssemble(etat, action.bloc);
+        // La solution de l'étape courante vient du contenu : l'état ne porte que `restantes`,
+        // qui perd ses blocs et ne dit plus quel rang une case occupée tenait.
+        const decision = evaluerAssemble(
+          etat,
+          action.bloc,
+          action.case,
+          etape?.solution,
+        );
         return appliquerDecision(
           etat,
           decision,

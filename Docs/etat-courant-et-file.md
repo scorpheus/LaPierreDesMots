@@ -1,9 +1,52 @@
 # État courant et file de travail
 
-Mise à jour : 27 septembre 2026. Cette page porte uniquement l'état actif.
+Mise à jour : 30 octobre 2026. Cette page porte uniquement l'état actif.
 Le contrat de la reconstruction est [le plan de réhabilitation](plan-rehabilitation-site.md).
 
 ## Décision et demande active
+
+**30 octobre (suite) — décisions du parent sur la densité, implantées.** Découper d'abord, défiler
+en filet déclaré, ne jamais rogner (contrat du socle § 12 et § 12.1) : vagues en tri et paires,
+plateau réduit puis filet en chemin, dispositions mesurées en chrono et place, éclair au
+téléphone, « Revoir l'histoire » sorti du campement. Vérifié sur le client final : garde du
+socle 98/98, parcours tri et paires 122/123, Vitest 3 168/3 168 (13 délais sous charge, verts
+relancés seuls), `tsc` et lint verts. **31 oct. — disposition de `paires` corrigée** : le dernier
+choix mesurait une géométrie qui changeait ensuite sans que la scène bouge (phrase repliée sur
+4 lignes après coup ; image choisie sur un état transitoire de rotation) ; les cartes sont
+désormais observées et le choix refait, au plus deux corrections par taille de scène. Lot 1
+responsive 6/6 (3 à 5 rouges sur 6 avant), `parcours-paires-cadrage` 96/96 répété, autres
+parcours paires 56/56, socle 98/98, responsive complet 46/46 — détail au § 6.3 du
+[nettoyage du 30 octobre](nettoyage-socle-2026-10-30.md). Rien n'est commité.
+
+**30 octobre — bilan et nettoyage du socle.** Détail : [nettoyage du 30 octobre](nettoyage-socle-2026-10-30.md).
+Bilan : `tsc` et lint verts, 3 153 tests de logique verts ; dernière campagne complète (12 oct.)
+rouge sur visuel 7/13 et défilements (décisions du parent T13/T15), E70, et un geste mort sur
+l'écran « Bravo ». Corrigés : police du profil enfin transmise aux moteurs (`--lecture-famille`
+à la racine) ; un seul module de fentes (`moteurs/commun/fentes.tsx`) pour phrase, tri,
+assemble et chrono ; « Voir la carte » répond pendant la sauvegarde ; code mort de chemin
+retiré. Garde du socle 97/98 (reste E70). **Toujours rien de commité.** Puis, avec l'accord
+du parent : orphelins supprimés, mise en scène partagée déménagée dans `moteurs/commun/`,
+7 exports et 4 classes CSS morts retirés. Budget de bundle tenu : 292 → 233,5 Ko gzip
+(écrans du nœud et du chaudron chargés à part, préchargés au démarrage). Dette `responsive`
+triée (ligne de la file ci-dessous).
+
+**12 octobre — retours du parent sur la Clairière et les Galeries.** Tri : mots mélangés et
+éparpillés, paniers en haut partout (E16, E25, T22) ; assemble : pose case par case (E19).
+Détail : [tri](tri-mots-eparpilles-2026-10-12.md), [assemble](assemble-pose-par-case-2026-10-12.md),
+[tableau des retours](tableau-retours.md).
+
+**9 octobre, après-midi — socle d'activité commun en cours.** Les 14 moteurs sont migrés sur
+`DispositionMoteur` ; `moteurs.css` n'est plus importé. Garde `tests/qualite/socle-activite.spec.ts`
+(7 formats, règles S1–S10) : 91 cas verts sur 98. Gobi au stade réel pendant les exercices,
+glisser-déposer de chrono réparé. **Rien n'est commité** : la dernière campagne complète est ROUGE
+(78 échecs E2E). Une partie a été corrigée depuis (grave, tri), et le reste attend des décisions
+du parent. Détail et décisions en attente : [contrat du socle](contrat-socle-activite.md) § 8–9.
+
+**9 octobre — bilan et audit demandés par le parent.** État mesuré, durée des tests, constat
+maths sur la version publiée et liste des tâches jusqu'au jeu fini : voir
+[le bilan du 9 octobre](bilan-audit-2026-10-09.md). Aucun code modifié. Le parent précise
+qu'il n'y a plus qu'un seul agent sur le projet : le verrou périmé `bac-a-sable/verification.lock`
+(PID 33648, 27 septembre) a été retiré à sa demande, et une campagne complète de référence a été relancée.
 
 **Publication anticipée autorisée le 27 septembre.** Le parent demande explicitement :
 « on verra plus tard pour finir proprement, skip toutes les procedure, et commit push deploy
@@ -172,6 +215,8 @@ source `0477867`, `gh-pages` `74dc513f`, action Pages `34854401493` réussie ; v
 | R4 — livraison et présentation | Après migration complète et contrôles | Version entière prête aux essais du parent et de sa famille ; livrable identifié, recette finale, visa parent et publication explicitement autorisée. |
 | Protocole de livraison | Réutilisation implantée, qualification dans le rapport courant | Une seule campagne par contenu ; mesure des gardes de réutilisation et conservation des contrôles distants. |
 | Nettoyage du 22 septembre | Clos localement : 15/15 étapes vertes, recette PWA et visa parent obtenus | Références approuvées intégrées et 13 comparaisons visuelles réussies. Publication réalisée et vérifiée en HTTPS. |
+| Nettoyage du socle (30 oct.) | Fait, vérifié ciblé ; pas de campagne complète (machine à ménager) | Campagne `npm run verifier` dans une fenêtre où la machine est libre. |
+| Dette `responsive` (constat du 12 oct.) | 11 rouges reproductibles, antérieurs aux changements du 12 oct. (mesuré : rouges aussi avec le code tri d’avant) | Le projet Playwright `responsive` n’entre ni dans `npm run verifier` ni dans `verifier:complet` ; seul `verifier:rapide` le lance. Rouges : composition après rotation (tri cite-08, chemin cite-07, paires cite-02, chrono cite-06), lot 1 tablette portrait, en-tête du campement trop haut sur petit téléphone (179 px pour 125), chrono tablette, photos tablette (place, récit, tri en grande police). À trier avec le parent avant d’y toucher. **30 oct.**, relancé seul : histoire et phrase passent (délais de charge) ; en-tête du campement mesuré, 5 cibles de 64 px ne tiennent pas en 299 px, déplacer ou retirer « revoir l’histoire » est au parent ; chrono « ≥ 480 px » heurte S1 ; chrono cite-06 en paysage mesuré : 3 légendes de 5 lignes (465 px) dans 284 px, même question de densité que E70 ; détail dans [nettoyage du 30 octobre](nettoyage-socle-2026-10-30.md) § 5. |
 
 Les anciens sujets ne sont pas effacés : F1 progression rejoint R2/R3 ; F2 cadrage et calques
 rejoint R1/R3 ; F3 accueil/carte/campement rejoint R1/R3 ; F4 informations parent et version

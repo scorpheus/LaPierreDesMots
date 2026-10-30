@@ -1,0 +1,301 @@
+/* Moteur `chrono` — apparence propre. La disposition vient du socle (DispositionMoteur). */
+
+/* ── La scène : décor en fond, vignettes à ranger, fentes de l'histoire ───────────────────── */
+
+.chrono-scene {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  /* Le repère d'étape est dans la barre de consigne de l'écran (T10) : deux rangées. */
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: var(--socle-espace);
+  flex: 1 1 auto;
+  align-self: stretch;
+  min-inline-size: 0;
+  min-block-size: 0;
+  padding: var(--socle-espace);
+  overflow: hidden;
+  border-radius: var(--rayon-carte);
+  font-family: var(--font-interface);
+  font-size: var(--socle-texte-interface);
+}
+
+.chrono-decor {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  opacity: 0.28;
+  pointer-events: none;
+}
+
+/* ── Les vignettes à numéroter ──────────────────────────────────────────────────────────── */
+
+.chrono-vignettes {
+  position: relative;
+  z-index: 1;
+  grid-row: 1;
+  display: grid;
+  grid-template-columns: repeat(var(--chrono-colonnes, 3), minmax(0, 1fr));
+  align-items: center;
+  gap: var(--socle-espace);
+  min-inline-size: 0;
+  min-block-size: 0;
+  pointer-events: none;
+}
+
+.chrono-porte-vignette {
+  position: relative;
+  display: inline-flex;
+  justify-content: center;
+  align-self: stretch;
+  min-inline-size: 0;
+  pointer-events: none;
+}
+
+/* Le texte de la légende est du texte à déchiffrer : police et corps de lecture du profil. */
+.chrono-vignette {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+  box-sizing: border-box;
+  /* Assez large pour que la légende garde des lignes d'au moins 15 caractères : la largeur est
+     MESURÉE dans la police du profil (`disposition-des-phrases.ts`), jamais fixée en pixels. */
+  inline-size: min(100%, max(15rem, var(--chrono-largeur-carte, 15rem)));
+  max-inline-size: 100%;
+  min-block-size: var(--socle-cible);
+  padding: clamp(0.45rem, 1vw, 0.8rem);
+  background-color: var(--lecture-fond, var(--parchemin));
+  color: var(--lecture-encre, var(--trait));
+  font-family: var(--lecture-famille, var(--font-lecture));
+  font-size: var(--lecture-corps);
+  letter-spacing: var(--lecture-interlettrage);
+  word-spacing: var(--lecture-espacement-mots);
+  line-height: var(--lecture-interligne);
+  white-space: normal;
+  text-align: center;
+  pointer-events: auto;
+  animation: none;
+}
+
+.chrono-vignette > img {
+  display: block;
+  inline-size: 100%;
+  max-inline-size: 200px;
+  min-block-size: var(--socle-image-min);
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  margin-block-end: 0.45rem;
+  border-radius: 0.8rem;
+}
+
+/* ── L'histoire qu'on reconstruit : une fente par image ─────────────────────────────────── */
+
+.chrono-histoire {
+  position: relative;
+  z-index: 2;
+  grid-row: 2;
+  min-inline-size: 0;
+}
+
+/* Une fente garde son image à 96 px au moins : si la ligne ne tient pas, elle passe à la ligne. */
+.chrono-fentes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.chrono-fente {
+  position: relative;
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: var(--epaisseur-trait) dashed var(--trait);
+  border-radius: clamp(0.75rem, 1.8vw, var(--rayon-carte));
+  background-color: color-mix(in srgb, var(--grisaille) 12%, var(--parchemin));
+  box-shadow: var(--ombre-bd-appui);
+}
+
+.chrono-fente[data-prochaine='oui'] { background-color: var(--soleil); }
+
+.chrono-fente[data-placee='oui'] {
+  border-style: solid;
+  background-color: var(--parchemin);
+  box-shadow: var(--ombre-bd);
+}
+
+.chrono-fente > img {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+/* Le rang est un chiffre d'interface : même corps que le reste de l'interface. */
+.chrono-fente__numero {
+  font-family: var(--font-interface);
+  font-size: var(--socle-texte-interface);
+  font-weight: 800;
+  line-height: 1;
+}
+
+.chrono-fente__rang {
+  position: absolute;
+  inset-block-start: 0.3rem;
+  inset-inline-start: 0.3rem;
+  display: grid;
+  place-items: center;
+  inline-size: 2rem;
+  block-size: 2rem;
+  border: 2px solid var(--trait);
+  border-radius: 999px;
+  background: var(--soleil);
+  color: var(--trait);
+  font-family: var(--font-interface);
+  font-size: var(--socle-texte-interface);
+  font-weight: 800;
+  line-height: 1;
+}
+
+/* ── La vignette qui traverse ───────────────────────────────────────────────────────────── */
+
+.chrono-vol {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.chrono-vol [data-vol-du-mot] {
+  background-color: var(--lecture-fond, var(--parchemin));
+  color: var(--lecture-encre, var(--trait));
+  font-family: var(--lecture-famille, var(--font-lecture));
+  font-size: var(--lecture-corps);
+  letter-spacing: var(--lecture-interlettrage);
+  word-spacing: var(--lecture-espacement-mots);
+  line-height: var(--lecture-interligne);
+}
+
+/* Position et images-clés du vol : `commun/fentes.css`. */
+
+/* ── Le pied : retour bienveillant ──────────────────────────────────────────────────────── */
+
+.chrono-retour {
+  min-block-size: 1.5em;
+  margin: 0;
+  font-family: var(--font-interface);
+  font-size: var(--socle-texte-interface);
+  line-height: 1.3;
+  text-align: center;
+}
+
+/* Annonce pour lecteur d'écran seulement. */
+.chrono-annonce {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  font-family: var(--font-interface);
+  font-size: var(--socle-texte-interface);
+}
+
+/* ── Pile : une vignette par rangée quand une colonne ne laisserait pas sa ligne à la légende ─
+   Décidé par la mesure (`data-disposition-chrono`, `data-frise-chrono`, `MoteurChrono`).
+   Décision du parent du 30 oct. : si rien ne tient, la scène défile — c'est le filet — et un
+   texte n'est jamais rogné. Les rangées prennent la hauteur de leur contenu, jamais moins. */
+
+[data-disposition-chrono^='pile'] .chrono-scene {
+  grid-template-rows: max-content max-content;
+  align-content: safe center;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+/* Scène plus large que haute : la frise de l'histoire se range à côté des vignettes. */
+[data-disposition-chrono^='pile'][data-frise-chrono='a-cote'] .chrono-scene {
+  grid-template-columns: minmax(0, 1fr) max-content;
+  grid-template-rows: max-content;
+}
+
+[data-frise-chrono='a-cote'] .chrono-vignettes { grid-row: 1; grid-column: 1; }
+
+[data-frise-chrono='a-cote'] .chrono-histoire {
+  grid-row: 1;
+  grid-column: 2;
+  align-self: safe center;
+}
+
+[data-frise-chrono='a-cote'] .chrono-fentes {
+  flex-direction: column;
+  flex-wrap: nowrap;
+}
+
+[data-disposition-chrono^='pile'] .chrono-vignettes {
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+}
+
+[data-disposition-chrono^='pile'] .chrono-vignette {
+  inline-size: 100%;
+  max-inline-size: 100%;
+}
+
+[data-disposition-chrono='pile'] .chrono-vignette {
+  flex-direction: row;
+  justify-content: flex-start;
+  gap: 0.6rem;
+  text-align: start;
+}
+
+[data-disposition-chrono='pile'] .chrono-vignette > img {
+  flex: 0 0 auto;
+  inline-size: calc(var(--socle-image-min) * 4 / 3);
+  margin-block-end: 0;
+}
+
+/* Place étroite (téléphone) : la scène garde une hauteur de jeu, la page défile. */
+@container scene (max-inline-size: 640px) {
+  [data-moteur='chrono'] .disposition-moteur__scene {
+    block-size: auto;
+    min-block-size: 55svh;
+    align-items: stretch;
+  }
+
+  .chrono-scene { block-size: auto; overflow: visible; }
+}
+
+/* L'étalon de mesure : la typographie exacte d'une légende, sans place ni surface à l'écran. */
+.chrono-etalons {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  inline-size: 0;
+  block-size: 0;
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.chrono-etalon {
+  position: absolute;
+  inline-size: max-content;
+  white-space: pre;
+  font-family: var(--lecture-famille, var(--font-lecture));
+  font-size: var(--lecture-corps);
+  letter-spacing: var(--lecture-interlettrage);
+  word-spacing: var(--lecture-espacement-mots);
+}
+
+/* L'image d'une vignette en pile, et l'écart qui la sépare de sa légende. */
+.chrono-etalon-image {
+  position: absolute;
+  inline-size: calc(var(--socle-image-min) * 4 / 3 + 0.6rem);
+  block-size: 1px;
+}

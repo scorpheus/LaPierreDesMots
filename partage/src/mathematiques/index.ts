@@ -13,3 +13,4 @@ export * from './jeux/moulin/index.js';
 export * from './jeux/marche/index.js';
 export * from './jeux/chantier/index.js';
 export * from './jeux/horloge/index.js';
+export * from './jeux/calcul/index.js';

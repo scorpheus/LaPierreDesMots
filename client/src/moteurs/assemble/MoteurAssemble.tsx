@@ -17,7 +17,7 @@
  *   2. les éléments à ranger sont posés DEVANT, à des emplacements DÉRIVÉS de l'habillage —
  *      jamais une coordonnée écrite à la main ;
  *   3. une case vide est une PROMESSE DE PLACE (R59) — le réceptacle réserve sa boîte dès le
- *      départ, le jeton atterrit sur son centre MESURÉ (`../phrase/receptacles.js`, réutilisé
+ *      départ, le jeton atterrit sur son centre MESURÉ (`../commun/fentes.js`, réutilisé
  *      tel quel, jamais recopié).
  *
  * Propre à `assemble` : la population des fentes est `consigne.solution` (les blocs-syllabes,
@@ -82,18 +82,25 @@ import type {
 import { styleDeLecture, useReglagesLecture } from '../../lecture/ZoneDeLecture.js';
 import type { ProprietesMoteur } from '../types.js';
 // LE MODULE GÉNÉRIQUE — écrit pour `phrase`, adopté ici tel quel (§ en-tête du fichier).
-// Ne rien recopier : `Fente`, `JetonEnVol`, `centreDuReceptacle`, `decalageEntre` ne connaissent
+// Ne rien recopier : `Fente`, `JetonEnVol`, `centreDuReceptacle`, `decalageEntre` (`commun/`) ne connaissent
 // ni bloc, ni consigne, ni habillage — seulement des jetons porteurs d'un texte et des
 // réceptacles qui leur gardent la place.
 import {
-  FEUILLE_DU_VOL,
   Fente,
   JetonEnVol,
   centreDuReceptacle,
   decalageEntre,
-} from '../phrase/receptacles.js';
-import { ZoneDeGlisser, useCibleDeDepot, useJetonGlissable } from '../commun/glisser.js';
-import type { VolDuJeton } from '../phrase/receptacles.js';
+} from '../commun/fentes.js';
+import { CibleDeDepot, ZoneDeGlisser, useJetonGlissable } from '../commun/glisser.js';
+import { DispositionMoteur } from '../../activite/DispositionMoteur.js';
+import { RepereEtape } from '../../activite/RepereEtape.js';
+import './assemble.css';
+import type { VolDuJeton } from '../commun/fentes.js';
+import { ROLE_REPONSE } from '../../activite/Question.js';
+import { TexteColore } from '../../lecture/TexteColore.js';
+
+/** Identifiant dnd-kit d'une case : le préfixe, puis son rang (base 0). */
+const PREFIXE_CASE = 'case:';
 
 /** Cadence du `battementHorloge`. Le moteur ne connaît aucun `setTimeout` : c'est ici. */
 const PERIODE_BATTEMENT_MS = 1000;
@@ -117,38 +124,12 @@ const PADDING_Y = 12;
 const BORDURE = 4;
 const CIBLE_MIN = 64;
 
-/** Le plateau assemble doit laisser l'écran porter le défilement : couper le moteur masque
- * les derniers blocs ou la ligne de réponse sur téléphone court. */
-const FEUILLE_RESPONSIVE_ASSEMBLE = `
-  [data-moteur="assemble"] { overflow: visible !important; }
-  [data-moteur="assemble"] [data-plateau="blocs"] { overflow: visible; }
-  [data-moteur="assemble"] [data-plateau="mot"] { max-inline-size: 100%; }
-  @media (max-width: 600px) {
-    [data-moteur="assemble"] [data-plateau="mot"] { padding-inline: 0.5rem !important; }
-  }
-`;
-
 /**
  * Largeur moyenne d'un glyphe d'Andika, en fraction du corps. Reprise à l'identique de
  * `MoteurPhrase.tsx` — même police, même profil de lecture, même parti pris (se tromper du
  * côté qui laisse de l'espace plutôt que de faire chevaucher).
  */
 const LARGEUR_GLYPHE = 0.66;
-
-/**
- * Le rectangle occupé par le décor ET par les blocs : tout, sauf la bande de lecture. Sans
- * bandeau modèle (R49, deuxième passe), il n'y a plus qu'une seule hauteur à retrancher.
- * Écrit une fois, employé deux fois — deux littéraux qui doivent rester égaux finiraient par
- * diverger.
- */
-function ZONE_DE_JEU(hauteurBande: number): CSSProperties {
-  return {
-    insetInlineStart: 0,
-    insetInlineEnd: 0,
-    insetBlockStart: 0,
-    insetBlockEnd: `${String(hauteurBande)}px`,
-  };
-}
 
 /** Durée du vol du bloc vers sa fente — identique à `phrase` : c'est le retour au geste, pas
  * une propriété du décor, donc pas prise dans `habillage.timings`. */
@@ -164,6 +145,7 @@ const MESSAGES_DE_REFUS: Readonly<Record<string, string>> = {
   'bloc-hors-ordre': 'On cherche la syllabe qui vient à cette place-là.',
   'bloc-intrus': 'Cette syllabe-là n’est pas dans ce mot.',
   'bloc-deja-pose': 'Cette syllabe est déjà rangée dans le mot.',
+  'case-occupee': 'Cette place est déjà prise.',
   'bloc-inconnu': 'On cherche la syllabe qui vient à cette place-là.',
 };
 
@@ -237,6 +219,7 @@ function BlocSaisissable({
   classes,
   region,
   placee,
+  pris,
   styleTexte,
   surTap,
 }: {
@@ -245,6 +228,8 @@ function BlocSaisissable({
   readonly classes: readonly string[];
   readonly region: string;
   readonly placee: boolean;
+  /** Le bloc que l'enfant tient (toucher le prend, sans rien juger). */
+  readonly pris: boolean;
   readonly styleTexte: CSSProperties;
   readonly surTap: (evenement: { clientX: number; clientY: number }) => void;
 }): ReactElement {
@@ -255,24 +240,55 @@ function BlocSaisissable({
       {...prise.ecouteurs}
       ref={prise.brancher}
       type="button"
+      {...ROLE_REPONSE}
       className={classes.join(' ')}
       data-bloc={cle}
       data-pose={placee ? 'oui' : 'non'}
+      data-pris={pris ? 'oui' : 'non'}
+      aria-pressed={pris}
       data-glisse={prise.enVol ? 'oui' : 'non'}
       data-region-visee={region}
       hidden={placee}
-      style={
-        {
-          ...styleTexte,
-          ...prise.style,
-          pointerEvents: 'auto',
-          whiteSpace: 'nowrap',
-        } as CSSProperties
-      }
+      style={{ ...styleTexte, ...prise.style } as CSSProperties}
       onClick={surTap}
     >
-      {libelle}
+      <TexteColore texte={libelle} />
     </button>
+  );
+}
+
+/**
+ * UNE CASE DU MOT — là où l'on POSE un bloc (contrat assemble-pose-par-case, 12 oct. 2026).
+ *
+ * Elle enveloppe la `Fente` commune (`commun/fentes.tsx`, qu'on ne modifie pas) d'un élément qui
+ * reçoit le toucher et le dépôt. Le verdict n'est pas ici : le composant émet `poser` avec le
+ * rang de la case, et le réducteur juge.
+ */
+function CaseAssemble({
+  rang,
+  surToucher,
+  children,
+}: {
+  readonly rang: number;
+  readonly surToucher: (rang: number) => void;
+  readonly children: ReactElement;
+}): ReactElement {
+  return (
+    <CibleDeDepot id={`${PREFIXE_CASE}${String(rang)}`}>
+      {(accueil) => (
+        <span
+          ref={accueil.brancher}
+          data-case={String(rang)}
+          data-survolee={accueil.survolee ? 'oui' : 'non'}
+          className="assemble-case"
+          onClick={() => {
+            surToucher(rang);
+          }}
+        >
+          {children}
+        </span>
+      )}
+    </CibleDeDepot>
   );
 }
 
@@ -300,12 +316,23 @@ export function MoteurAssemble(
 
   /**
    * LE VOL — l'état, et la cible VISÉE AU MOMENT DU TAP. Mécanique identique à `phrase`
-   * (`receptacles.tsx`) : la fente existe encore au moment du geste, c'est elle qu'on mesure.
+   * (`commun/fentes.tsx`) : la fente existe encore au moment du geste, c'est elle qu'on mesure.
    */
   const refFentes = useRef(new Map<string, HTMLElement | null>());
   const volVise = useRef<Omit<VolDuJeton, 'marque'> | null>(null);
   const [vol, fixerVol] = useState<VolDuJeton | null>(null);
   const marqueVol = useRef(0);
+
+  /**
+   * LE BLOC PRIS — une sélection d'interface, pas un acte pédagogique : il vit ici et jamais
+   * dans le réducteur ni au journal. Toucher un bloc le prend, sans verdict ni son ; la case
+   * touchée (ou le dépôt sur elle) émet `poser` avec son rang.
+   */
+  const [prisId, fixerPris] = useState<string | null>(null);
+  useEffect(() => {
+    // Nouvelle étape, ou bloc rangé : plus rien n'est tenu.
+    fixerPris(null);
+  }, [etat.indexEtape, nbAcquis]);
 
   useEffect(() => {
     if (nbAcquis > precedents.current) {
@@ -469,30 +496,6 @@ export function MoteurAssemble(
       .map((b) => b.id);
   }, [contenu, etat.indexEtape, blocParId]);
 
-  // Dimensionner le petit écran pour les boîtes de toutes les étapes, intrus compris.
-  // La hauteur reste constante pendant les réponses ; seul un changement de largeur la recalcule.
-  const hauteurBlocs = useMemo(() => Math.max(0, ...etat.etapes.map((etape) => {
-    const libelles = new Set(etape.ordreAffichage.map((cle) => blocParId.get(cle)?.libelle));
-    const cles = [...etape.ordreAffichage, ...contenu.blocs
-      .filter((bloc) => bloc.intrus && bloc.confusionAvec !== null && libelles.has(bloc.confusionAvec))
-      .map((bloc) => bloc.id)];
-    const largeur = Math.max(1, cadre.largeur - 2 * MARGE);
-    let largeurLigne = 0;
-    let hauteurLigne = 0;
-    let hauteur = 0;
-    for (const cle of cles) {
-      const boite = mesurer(cle);
-      if (largeurLigne > 0 && largeurLigne + 10 + boite.largeur > largeur) {
-        hauteur += hauteurLigne + 10;
-        largeurLigne = 0;
-        hauteurLigne = 0;
-      }
-      largeurLigne += (largeurLigne > 0 ? 10 : 0) + boite.largeur;
-      hauteurLigne = Math.max(hauteurLigne, boite.hauteur);
-    }
-    return hauteur + hauteurLigne + 2 * MARGE;
-  })), [etat.etapes, blocParId, contenu.blocs, cadre.largeur, mesurer]);
-
   /**
    * Les régions déjà réservées par les étapes PRÉCÉDENTES — le même calcul que `planifier()`
    * fait en interne pour la disponibilité de l'étape courante, reproduit ici pour poser les
@@ -604,9 +607,9 @@ export function MoteurAssemble(
     etat.dernierRefus === null ? '' : (MESSAGES_DE_REFUS[etat.dernierRefus.motif] ?? '');
 
   /** Vise la fente où ce bloc ira, AVANT d'émettre l'action — la fente existe encore. */
-  const viser = (emplacement: Emplacement, libelle: string): void => {
+  const viser = (emplacement: Emplacement, libelle: string, rang: number): void => {
     volVise.current = null;
-    const cible = restants[0];
+    const cible = solution[rang];
     if (cible === undefined) return;
     const arrivee = centreDuReceptacle(racine.current, refFentes.current.get(cible) ?? null);
     if (arrivee === null) return;
@@ -619,7 +622,6 @@ export function MoteurAssemble(
     };
   };
 
-  const accueil = useCibleDeDepot('fentes-du-mot');
 
   /**
    * LE GLISSER, EN PLUS DU TAP — R16, et la promesse « faire glisser des blocs-syllabes ».
@@ -631,45 +633,53 @@ export function MoteurAssemble(
    * La cible est unique : la ligne du mot. `assemble` n'a pas de choix de destination — l'ordre
    * fait la règle — donc offrir plusieurs zones inventerait une décision qui n'existe pas.
    */
-  const deposerLeBloc = useCallback(
-    (bloc: string) => {
+  const poserDansLaCase = useCallback(
+    (bloc: string, rang: number) => {
       const emplacement = planAffiche?.resultat.emplacements.find((e) => e.cle === bloc);
       if (emplacement === undefined) return;
       const libelle = blocParId.get(bloc)?.libelle ?? '';
       fixerVol(null);
-      viser(emplacement, libelle);
-      // Le glisser n'a pas de coordonnées de clic : on note le centre du bloc, qui est
+      viser(emplacement, libelle, rang);
+      // Rien ne se perd (R14) : refusé ou accepté, le bloc n'est plus tenu.
+      fixerPris(null);
+      // Le geste n'a pas toujours de coordonnées de clic : on note le centre du bloc, qui est
       // précisément d'où le jeton part.
-      jouer({ type: 'poser', bloc }, { clientX: emplacement.x, clientY: emplacement.y });
+      jouer({ type: 'poser', bloc, case: rang }, { clientX: emplacement.x, clientY: emplacement.y });
     },
     // `viser` est une fonction de rendu (pas un `useCallback`) : la lister ici la rendrait
     // instable à chaque image. Les valeurs qu'elle lit sont des `ref`, jamais du state.
-    [blocParId, planAffiche, jouer],
+    [blocParId, planAffiche, jouer, solution],
   );
 
-  return (
-    <ZoneDeGlisser surDepot={(jeton) => { deposerLeBloc(jeton); }}>
-    <div
-      ref={racine}
-      data-moteur="assemble"
-      data-habillage={habillage.id}
-      data-termine={etat.termineMs === null ? 'non' : 'oui'}
-      data-aide={etat.niveauAide}
-      data-etape={etape === undefined ? '' : etape.identifiant}
-      data-regions-allumees={String(allumees.length)}
-      data-blocs-affiches={String(solution.length + intrusPertinents.length)}
-      style={{
-        position: 'relative',
-        blockSize: '100%',
-        minBlockSize: hauteurBlocs + hauteurBande,
-        overflow: 'hidden',
-        borderRadius: 'var(--rayon-carte)',
-      }}
-    >
-      <style>{FEUILLE_DU_VOL}{FEUILLE_RESPONSIVE_ASSEMBLE}</style>
+  /** Toucher une case : pose le bloc tenu, s'il y en a un. Sans bloc pris, rien ne se passe. */
+  const toucherUneCase = useCallback(
+    (rang: number) => {
+      if (prisId === null) return;
+      poserDansLaCase(prisId, rang);
+    },
+    [prisId, poserDansLaCase],
+  );
 
+  /** Toucher un bloc le prend (ou le repose s'il l'était) — aucun verdict, aucune action. */
+  const toucherUnBloc = useCallback((bloc: string) => {
+    fixerPris((courant) => (courant === bloc ? null : bloc));
+  }, []);
+
+  /** Le dépôt d'un glissé : la même pose que le toucher, sur la case survolée. */
+  const deposerLeBloc = useCallback(
+    (bloc: string, cible: string) => {
+      if (!cible.startsWith(PREFIXE_CASE)) return;
+      const rang = Number(cible.slice(PREFIXE_CASE.length));
+      if (!Number.isInteger(rang)) return;
+      poserDansLaCase(bloc, rang);
+    },
+    [poserDansLaCase],
+  );
+
+  const plateau = (
+    <div ref={racine} className="assemble-plateau">
       {/* ---------------------------------------------------------------- le décor, en fond */}
-      <div style={{ position: 'absolute', ...ZONE_DE_JEU(hauteurBande), zIndex: 0 }}>
+      <div className="assemble-decor" style={{ insetBlockEnd: `${String(hauteurBande)}px` }}>
         <SceneDecor
           habillage={habillage}
           allumees={allumees}
@@ -683,12 +693,8 @@ export function MoteurAssemble(
       <div
         ref={coucheBlocs}
         data-plateau="blocs"
-        style={{
-          position: 'absolute',
-          ...ZONE_DE_JEU(hauteurBande),
-          zIndex: 1,
-          pointerEvents: 'none',
-        }}
+        className="assemble-blocs"
+        style={{ insetBlockEnd: `${String(hauteurBande)}px` }}
       >
         {planAffiche === null
           ? null
@@ -704,21 +710,19 @@ export function MoteurAssemble(
               if (!animationsDesactivees && blocRefuse === emplacement.cle) {
                 classes.push('oscillation');
               }
+              if (prisId === emplacement.cle) classes.push('assemble-bloc-pris');
 
               // R54 — DEUX ÉLÉMENTS, PORTEUR QUI CENTRE ET BOUTON QUI OSCILLE, jamais la même
               // transform sur les deux : c'est la loi que `phrase` a établie et qu'on reprend
-              // sans y toucher (voir l'en-tête de `receptacles.tsx`).
+              // sans y toucher (voir l'en-tête de `commun/fentes.tsx`).
               return (
                 <span
                   key={emplacement.cle}
                   data-porte-bloc={emplacement.cle}
+                  className="assemble-porte-bloc"
                   style={{
-                    position: 'absolute',
                     insetInlineStart: `${String(emplacement.x)}px`,
                     insetBlockStart: `${String(emplacement.y)}px`,
-                    transform: 'translate(-50%, -50%)',
-                    display: 'inline-flex',
-                    pointerEvents: 'none',
                   }}
                 >
                   <BlocSaisissable
@@ -732,11 +736,10 @@ export function MoteurAssemble(
                     classes={classes}
                     region={emplacement.region ?? ''}
                     placee={placee}
+                    pris={prisId === emplacement.cle}
                     styleTexte={styleLecture as CSSProperties}
-                    surTap={(evenement) => {
-                      fixerVol(null);
-                      viser(emplacement, bloc.libelle);
-                      jouer({ type: 'poser', bloc: emplacement.cle }, evenement);
+                    surTap={() => {
+                      toucherUnBloc(emplacement.cle);
                     }}
                   />
                 </span>
@@ -747,11 +750,8 @@ export function MoteurAssemble(
       {/* ── LE BLOC QUI TRAVERSE — R59 : il va DANS la fente, plus au-dessus ─────────────────
           Couche qui couvre tout le moteur ; copie transitoire, purement additive. */}
       {vol === null ? null : (
-        <div
-          key={vol.marque}
-          style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 3 }}
-        >
-          <JetonEnVol vol={vol} dureeMs={DUREE_VOL_MS} styleTexte={styleLecture as CSSProperties} />
+        <div key={vol.marque} className="assemble-vol">
+          <JetonEnVol vol={vol} dureeMs={DUREE_VOL_MS} />
         </div>
       )}
 
@@ -759,64 +759,32 @@ export function MoteurAssemble(
           « Le décor s'agite, le texte jamais » : fond parchemin, police de lecture, aucune
           animation. Porte le MOT EN TRAIN DE SE FAIRE (les fentes), pas la consigne — la
           consigne est déjà dans l'en-tête de `EcranNoeud` (R49). */}
-      <div
-        ref={bande}
-        data-plateau="mot"
-        style={{
-          position: 'absolute',
-          insetInlineStart: 0,
-          insetInlineEnd: 0,
-          insetBlockEnd: 0,
-          zIndex: 2,
-          /* La réponse se lit sous l'illustration, jamais collée au bord gauche. */
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          textAlign: 'center',
-          paddingInline: 'clamp(0.75rem, 4vw, 3rem)',
-          boxSizing: 'border-box',
-        }}
-      >
-        {/* ── R59 — LA LIGNE DE FENTES *EST* LE MOT QU'ON RECONSTRUIT ──────────────────────── */}
+      <div ref={bande} data-plateau="mot" className="assemble-bande">
         {/* LA LIGNE DU MOT EST LA ZONE D'ACCUEIL DU GLISSER. Une seule cible, et c'est voulu :
-            `assemble` n'offre aucun choix de destination — c'est l'ORDRE qui fait la règle —
-            donc plusieurs zones inventeraient une décision que le moteur ne prend pas.
-            Le liseré n'apparaît QUE pendant le survol : une affordance permanente ferait du
-            bruit pour l'enfant qui joue au tap, c'est-à-dire pour le chemin principal. */}
+            `assemble` n'offre aucun choix de destination — c'est l'ORDRE qui fait la règle.
+            Le liseré n'apparaît QUE pendant le survol (voir assemble.css). */}
         <div
-          ref={accueil.brancher}
           data-fentes="mot"
           data-alignement="centre"
           data-restantes={String(restants.length)}
-          data-survolee={accueil.survolee ? 'oui' : 'non'}
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            alignItems: 'center',
-            justifyContent: 'center',
-            inlineSize: '100%',
-            maxInlineSize: '72rem',
-            gap: '0.5rem',
-            marginBlockEnd: '0.6rem',
-            outline: accueil.survolee ? '3px dashed var(--soleil)' : undefined,
-            outlineOffset: '4px',
-            borderRadius: 'var(--rayon-carte)',
-          }}
+          className="assemble-fentes"
         >
-          {solution.map((id) => {
+          {solution.map((id, rang) => {
             const placee = etat.acquis[id] !== undefined;
             return (
-              <Fente
-                key={id}
-                cle={id}
-                texte={placee ? (blocParId.get(id)?.libelle ?? '') : null}
-                boite={mesurer(id)}
-                prochaine={!placee && restants[0] === id}
-                styleTexte={styleLecture as CSSProperties}
-                brancher={(noeud) => {
-                  refFentes.current.set(id, noeud);
-                }}
-              />
+              <CaseAssemble key={id} rang={rang} surToucher={toucherUneCase}>
+                <Fente
+                  cle={id}
+                  texte={placee ? (blocParId.get(id)?.libelle ?? '') : null}
+                  boite={mesurer(id)}
+                  // L'ordre est libre : aucune case n'est « la prochaine » — sauf quand l'enfant
+                  // a RÉCLAMÉ l'aide, qui désigne alors le bloc de la première case vide.
+                  prochaine={!placee && cibleDeLAide === id}
+                  brancher={(noeud) => {
+                    refFentes.current.set(id, noeud);
+                  }}
+                />
+              </CaseAssemble>
             );
           })}
         </div>
@@ -828,34 +796,22 @@ export function MoteurAssemble(
           aria-live="polite"
           data-refus-texte={messageDeRefus === '' ? 'non' : 'oui'}
           data-animations={animationsDesactivees ? 'calmes' : 'vives'}
-          style={{ ...styleLecture, margin: 0, display: 'grid' } as CSSProperties}
+          className="assemble-refus"
         >
           {/* La bande est mesurée pour dimensionner le décor. Réserver tous les refus,
               y compris leurs retours à la ligne, évite de réduire l'image au mauvais geste. */}
           {Array.from(new Set(Object.values(MESSAGES_DE_REFUS))).map((message) => (
-            <span key={message} aria-hidden="true" style={{ gridArea: '1 / 1', visibility: 'hidden' }}>
+            <span key={message} aria-hidden="true" className="assemble-refus__reserve">
               {message}
             </span>
           ))}
-          <span data-message-refus="oui" style={{ gridArea: '1 / 1' }}>
+          <span data-message-refus="oui" className="assemble-refus__message">
             {messageDeRefus === '' ? (etat.aide === null ? '' : (etat.aide.texte ?? '')) : messageDeRefus}
           </span>
         </p>
 
         {/* Ce que le décor NE DIT PAS aux lecteurs d'écran, le moteur le dit en clair. */}
-        <p
-          role="status"
-          aria-live="polite"
-          data-annonce="coloriage"
-          style={{
-            position: 'absolute',
-            inlineSize: 1,
-            blockSize: 1,
-            overflow: 'hidden',
-            clip: 'rect(0 0 0 0)',
-            whiteSpace: 'nowrap',
-          }}
-        >
+        <p role="status" aria-live="polite" data-annonce="coloriage" className="assemble-annonce">
           {derniere === null
             ? ''
             : `${
@@ -863,9 +819,30 @@ export function MoteurAssemble(
               } reprend ses couleurs.`}
         </p>
       </div>
-
-      {/* ── LES DEUX CONTRÔLES SONT PORTÉS PAR L'ÉCRAN, PAS PAR LE MOTEUR (R10) ────────────── */}
     </div>
+  );
+
+  return (
+    <ZoneDeGlisser surDepot={(jeton, cible) => { deposerLeBloc(jeton, cible); }}>
+      <DispositionMoteur
+        moteur="assemble"
+        data-habillage={habillage.id}
+        data-termine={etat.termineMs === null ? 'non' : 'oui'}
+        data-aide={etat.niveauAide}
+        data-etape={etape === undefined ? '' : etape.identifiant}
+        data-regions-allumees={String(allumees.length)}
+        data-blocs-affiches={String(solution.length + intrusPertinents.length)}
+        scene={plateau}
+        // T10 — le repère commun : affiché sous la consigne de l'écran, le pied reste vide.
+        pied={
+          <RepereEtape
+            moteur="assemble"
+            rang={etat.indexEtape + 1}
+            total={etat.etapes.length}
+            animationsDesactivees={animationsDesactivees}
+          />
+        }
+      />
     </ZoneDeGlisser>
   );
 }

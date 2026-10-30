@@ -36,6 +36,10 @@ import { effacerParticules } from '../gamefeel/particules.js';
 import { EnteteActivite } from '../composants/activite/EnteteActivite.js';
 import { CadreSceneActivite } from '../composants/activite/CadreSceneActivite.js';
 import '../styles/activites.css';
+import '../activite/socle.css';
+import { FenteRepereEtape, FournisseurRepereEtape } from '../activite/RepereEtape.js';
+import { ROLE_QUESTION } from '../activite/Question.js';
+import { TexteColore } from '../lecture/TexteColore.js';
 
 /**
  * Trois actions que TOUT moteur doit accepter pour que la coquille reste générique.
@@ -240,6 +244,8 @@ export function EcranNoeud(): ReactElement {
   const etapeSortie = rangSortie < 0 ? null : sortie?.etapes[rangSortie] ?? null;
 
   const racine = useRef<HTMLElement | null>(null);
+  // T10 — la fente du repère d'étape, sous la consigne : le moteur y rend son repère.
+  const [fenteEtape, fixerFenteEtape] = useState<HTMLElement | null>(null);
   const [pret, fixerPret] = useState(false);
   const [appuye, fixerAppuye] = useState(false);
   const retourVerrouille = useRef(false);
@@ -540,9 +546,16 @@ export function EcranNoeud(): ReactElement {
             surEcoute={() => emettre(ACTION_ECOUTE)}
           />
         )}
-        progression={jaugeIntermediaire === null ? null : (
-          <JaugePalier jauge={jaugeIntermediaire} taille={16} avecLibelle={false} />
-        )}
+        // T10 — sous la consigne : le repère d'étape du moteur (fente) et la jauge du palier,
+        // sur une même ligne, pour ne pas prendre une rangée de plus à la scène (activite/etape.css).
+        progression={
+          <div className="entete-suivi">
+            <FenteRepereEtape brancher={fixerFenteEtape} />
+            {jaugeIntermediaire === null ? null : (
+              <JaugePalier jauge={jaugeIntermediaire} taille={16} avecLibelle={false} />
+            )}
+          </div>
+        }
       >
         {etapeSortie === null || sortie === null ? null : (
           <p className="activite-etape" data-progression-sortie>
@@ -552,8 +565,9 @@ export function EcranNoeud(): ReactElement {
         {etapes.map((etape, index) => index !== indexCourant ? (
           <span key={etape.id} data-consigne={etape.id} hidden />
         ) : (
-          <p key={etape.id} className="activite-consigne-texte" data-consigne={etape.id}>
-            {texteCadreDeConsigne(codeMoteur, paquet.exercice.id, etape.texte)}
+          // T19 : la consigne est ce qu'on DEMANDE — thème question du socle, lue en couleurs.
+          <p key={etape.id} className="activite-consigne-texte" data-consigne={etape.id} {...ROLE_QUESTION}>
+            <TexteColore texte={texteCadreDeConsigne(codeMoteur, paquet.exercice.id, etape.texte)} />
           </p>
         ))}
       </EnteteActivite>
@@ -562,14 +576,16 @@ export function EcranNoeud(): ReactElement {
       {erreurRetour === null ? null : <p role="alert">{erreurRetour}</p>}
 
       <CadreSceneActivite decor={<DecorDeFond habillage={paquet.habillage} moteur={codeMoteur} />}>
-        <ComposantMoteurMonte
-          contenu={paquet.exercice.jeu.contenu}
-          habillage={paquet.habillage}
-          etat={etatMoteur}
-          emettre={emettre}
-          services={services}
-          animationsDesactivees={animationsDesactivees}
-        />
+        <FournisseurRepereEtape fente={fenteEtape}>
+          <ComposantMoteurMonte
+            contenu={paquet.exercice.jeu.contenu}
+            habillage={paquet.habillage}
+            etat={etatMoteur}
+            emettre={emettre}
+            services={services}
+            animationsDesactivees={animationsDesactivees}
+          />
+        </FournisseurRepereEtape>
       </CadreSceneActivite>
       <Gobi
         aide={aide}
@@ -577,6 +593,7 @@ export function EcranNoeud(): ReactElement {
         surDemande={() => emettre(ACTION_AIDE)}
         aideResolue={aideDeGobi}
         compagnon={compagnonAide}
+        stade={requeteMonde.data?.gobi.stade ?? 'oeuf'}
       />
     </main>
   );

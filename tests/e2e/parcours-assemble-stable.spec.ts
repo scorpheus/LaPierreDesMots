@@ -18,7 +18,9 @@ for (const format of [
       return [matrice.a, matrice.d, matrice.e, matrice.f];
     });
     const avant = await mesurer();
+    // Contrat assemble-pose-par-case : toucher prend le bloc, la case le pose et c'est elle qui juge.
     await moteur.locator('[data-bloc="bloc-din"]').click();
+    await moteur.locator('[data-case="0"]').click();
     await expect(moteur.locator('[data-refus-texte="oui"] [data-message-refus="oui"]')).toHaveText(
       'On cherche la syllabe qui vient à cette place-là.',
     );
@@ -26,6 +28,7 @@ for (const format of [
     expect(await mesurer(), 'le décor garde son échelle et sa position après le refus').toEqual(avant);
     await expect(moteur.locator('[data-fentes="mot"]')).toHaveAttribute('data-restantes', '2');
     await moteur.locator('[data-bloc="bloc-jar"]').click();
+    await moteur.locator('[data-case="0"]').click();
     await expect(moteur.locator('[data-fentes="mot"]')).toHaveAttribute('data-restantes', '1');
     await expect(moteur.locator('[data-bloc="bloc-jar"]')).toBeHidden();
     await expect(moteur.locator('[data-bloc="bloc-din"]')).toBeVisible();

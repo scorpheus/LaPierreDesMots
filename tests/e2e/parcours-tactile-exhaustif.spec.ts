@@ -1,11 +1,14 @@
 /** Chaque exercice jusqu'au bout avec de vrais taps, profil agrandi et rotation en cours. */
 import { test, expect } from './invariants.js';
 import {
-  appliquerReglagesLectureReels, entrerDansLeNoeud, etatDuJeu, moteursDeclares, noeudsLivres,
+  appliquerReglagesLectureReels, entrerDansLeNoeud, etatDuJeu, moteursDeclares, noeudsBalayes, noeudsLivres,
 } from './qa-outils.js';
 import { jalonDom, jouerProchainGesteDom, lireEtatDom, MOTEURS_GESTES_DOM, toucherPrise } from './gestes-dom.js';
 
-const NOEUDS = noeudsLivres();
+/** Tous les nœuds livrés : la population que le pilote doit couvrir. */
+const TOUS = noeudsLivres();
+/** Ceux que ce palier joue jusqu'au bout (tous en `complet`, un par moteur en `verifier`). */
+const NOEUDS = noeudsBalayes();
 const FORMATS = [
   { nom: 'tablette', debut: { width: 800, height: 1100 }, tourne: { width: 1100, height: 700 } },
   { nom: 'telephone', debut: { width: 360, height: 640 }, tourne: { width: 640, height: 360 } },
@@ -13,8 +16,10 @@ const FORMATS = [
 
 test('le pilote tactile couvre chaque moteur livré, activité libre comprise', () => {
   expect([...MOTEURS_GESTES_DOM].sort()).toEqual([...moteursDeclares()].sort());
+  expect([...new Set(TOUS.map((noeud) => noeud.moteur))].sort()).toEqual([...MOTEURS_GESTES_DOM].sort());
+  expect(TOUS.length).toBeGreaterThanOrEqual(76);
+  // L'échantillon d'un palier garde chaque moteur.
   expect([...new Set(NOEUDS.map((noeud) => noeud.moteur))].sort()).toEqual([...MOTEURS_GESTES_DOM].sort());
-  expect(NOEUDS.length).toBeGreaterThanOrEqual(76);
 });
 
 for (const format of FORMATS) {

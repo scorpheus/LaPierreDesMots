@@ -18,14 +18,14 @@ test('le sapin du marais est accepté avant les paires du premier groupe', async
   const image = page.locator('[data-carte="image-sapin"]');
   await expect(mot).toBeVisible();
   await expect(image).toBeVisible();
-  await expect(page.locator('[data-cartouche-paires="etape"]')).toContainText('0 / 6 paires');
+  await expect(page.locator('[data-repere-etape="paires"]')).toContainText('0 / 6 paires');
 
   await image.click();
   await mot.click();
 
   await expect(image).toHaveAttribute('data-appariee', 'oui');
   await expect(mot).toHaveAttribute('data-appariee', 'oui');
-  await expect(page.locator('[data-cartouche-paires="etape"]')).toContainText('1 / 6 paires');
+  await expect(page.locator('[data-repere-etape="paires"]')).toContainText('1 / 6 paires');
   await expect(page.locator('[data-moteur="paires"]')).not.toContainText(
     'On garde cette carte pour une autre fois.',
   );

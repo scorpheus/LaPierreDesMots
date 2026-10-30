@@ -22,7 +22,7 @@
  *   3. **les mots sont devant**, à des emplacements DÉRIVÉS (`deriverEmplacements`), jamais
  *      écrits à la main ;
  *   4. **le mot atterrit DANS le réceptacle** — chaque réceptacle réserve, dès le départ, une
- *      `Fente` (`../phrase/receptacles.js`, le module générique écrit pour être adopté) par
+ *      `Fente` (`../commun/fentes.js`, le module commun des fentes) par
  *      élément qui lui est destiné ; le vol vise le CENTRE MESURÉ de cette fente ;
  *   5. **le refus est une oscillation centrée** — porteur qui centre, bouton qui oscille,
  *      propriétés disjointes (R54) ;
@@ -32,7 +32,7 @@
  *      `touch-action: none`. Le tap-puis-tap reste le chemin PRINCIPAL.
  *
  * ── CE QUI N'EST PAS RÉUTILISABLE TEL QUEL, ET POURQUOI ──────────────────────────────────────
- * `Fente` de `receptacles.tsx` réserve UNE boîte pour UN texte. Un réceptacle de `tri` en reçoit
+ * `Fente` de `commun/fentes.tsx` réserve UNE boîte pour UN texte. Un réceptacle de `tri` en reçoit
  * PLUSIEURS au fil de l'exercice (tous les éléments dont `receptacleAttendu` le désigne, sur
  * TOUTES les consignes). La loi ne change pas — chaque fente réserve sa boîte dès le départ,
  * pour ne jamais faire bouger la case visée — seule la POPULATION change : au lieu d'une ligne
@@ -63,7 +63,7 @@
  * ══════════════════════════════════════════════════════════════════════════════════════════════
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { CSSProperties, ReactElement } from 'react';
 import { DndContext, PointerSensor, useDraggable, useDroppable, useSensor, useSensors } from '@dnd-kit/core';
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
@@ -86,16 +86,16 @@ import type {
   Emplacement,
   TransformeDecor,
 } from '../../habillages/emplacements.js';
-import { ZoneDeLecture, styleDeLecture, useReglagesLecture } from '../../lecture/ZoneDeLecture.js';
+import { DispositionMoteur } from '../../activite/DispositionMoteur.js';
+import { MOTS_PAR_RANGEE_MAX, alignementTolere, plusGrandAlignement, semerEnQuinconce } from './semis.js';
+import { ZoneDeLecture, useReglagesLecture } from '../../lecture/ZoneDeLecture.js';
 import type { ProprietesMoteur } from '../types.js';
-import {
-  FEUILLE_DU_VOL,
-  Fente,
-  JetonEnVol,
-  centreDuReceptacle,
-  decalageEntre,
-} from '../phrase/receptacles.js';
-import type { VolDuJeton } from '../phrase/receptacles.js';
+import { Fente, JetonEnVol, centreDuReceptacle } from '../commun/fentes.js';
+import type { VolDuJeton } from '../commun/fentes.js';
+import { decouperEnVagues, policesChargees, vagueDeLEtape } from '../commun/vagues.js';
+import './tri.css';
+import { ROLE_QUESTION, ROLE_REPONSE } from '../../activite/Question.js';
+import { TexteColore } from '../../lecture/TexteColore.js';
 
 /**
  * `ElementTri` et `ReceptacleTri` ne figurent pas au barillet (`@pierre/partage` n'exporte que
@@ -111,17 +111,11 @@ const PERIODE_BATTEMENT_MS = 1000;
 
 /** Cadre servi tant que rien n'est mesuré — premier rendu, `happy-dom`, `ResizeObserver` absent. */
 const CADRE_DE_REPLI: Cadre = { largeur: 900, hauteur: 1000 };
-// R49 — la consigne n'est plus redite ici (`EcranNoeud` la porte déjà) : le bandeau du haut ne
-// tient plus qu'une ligne de geste, d'où une hauteur de repli bien plus basse qu'avant.
-const HAUTEUR_BANDEAU_REPLI = 56;
-const HAUTEUR_PIED_REPLI = 56;
 
 /** Respiration entre une pastille et le bord du cadre, en pixels. */
 const MARGE = 14;
 /** Sous cette distance d'un bord, une région n'est presque pas dessinée : on ne l'utilise pas. */
 const MARGE_VISIBILITE = 28;
-/** Respiration entre la zone des mots et le haut des panneaux de réceptacles. */
-const ESPACE_AVANT_RECEPTACLES = 16;
 
 /** `.cible` — `padding: 0.75rem 1.25rem`, `border: 4px`. Sert à estimer l'encombrement. */
 const PADDING_X = 20;
@@ -131,52 +125,27 @@ const CIBLE_MIN = 64;
 const LARGEUR_GLYPHE = 0.66;
 
 /** La fente d'un réceptacle est un accusé de réception, pas la cible de lecture principale :
- * l'enfant a déjà déchiffré le mot pour choisir sa pastille. Elle reste lisible, en plus petit. */
-const FENTE_CORPS_PX = 16;
+ * l'enfant a déjà déchiffré le mot pour choisir sa pastille. Elle prend le style d'interface. */
+const FENTE_CORPS_PX = 18;
 const FENTE_PADDING_X = 8;
 const FENTE_PADDING_Y = 6;
 const FENTE_BORDURE = 3;
 const FENTE_MIN = 40;
+/** En grille, une fente vide ne dépasse pas cette largeur : un livre range ses fentes sur deux colonnes. */
+const FENTE_LARGEUR_GRILLE_MAX = 160;
+const FENTE_HAUTEUR_GRILLE_MAX = 30;
 
-/**
- * Les zones du contenu décrivent les objets dessinés dans le viewBox. Avec un rendu `slice`,
- * les recopier comme largeur/hauteur CSS transformait un panier en panneau de 700 × 500 px.
- * Elles restent la source de POSITION, mais l'interface visible garde une taille de plateau.
- */
-const LARGEUR_RECEPTACLE_MAX = 420;
-const HAUTEUR_RECEPTACLE_MAX = 156;
-/* Le critère est une vraie `ZoneDeLecture`, avec sa hauteur tactile et non une simple ligne de
- * 42 px. À 1920×1080, sous-estimer cette réserve poussait les deux boutons de panier derrière la
- * bande de Gobi. Le panneau entier garde désormais la hauteur d'une cible avant d'être borné. */
+/* Les grottes se dimensionnent en proportion du cadre mesuré, jamais en pixels fixes. Leur côté
+ * court reste une cible tactile (CIBLE_MIN). */
+/* Le critère est une vraie `ZoneDeLecture` : on lui réserve une cible au-dessus de la grotte. */
 const HAUTEUR_CRITERE_RECEPTACLE = CIBLE_MIN + 8;
+/** Respiration entre la zone des mots et le haut des panneaux de réceptacles. */
+const ESPACE_AVANT_RECEPTACLES = 16;
+const PART_LARGEUR_RECEPTACLE = 0.34;
+const PART_HAUTEUR_RECEPTACLE = 0.22;
 const ZOOM_DECOR_TRI = 1.2;
 
 const DUREE_VOL_MS = 320;
-
-/** Composition locale : le plateau ne doit jamais couper une cible quand Gobi ou le pied
- * réduisent la hauteur disponible. Le scroll éventuel appartient à l'écran parent. */
-const FEUILLE_RESPONSIVE_TRI = `
-  [data-moteur="tri"] { overflow: visible !important; }
-  [data-moteur="tri"] [data-plateau="geste"] { position: relative !important; inset: auto !important; }
-  [data-moteur="tri"] [data-plateau="elements"],
-  [data-moteur="tri"] [data-plateau="receptacles"] { overflow: visible; }
-  [data-moteur="tri"] [data-cartouche-tri="etape"] { max-inline-size: calc(100% - 1rem); }
-  [data-moteur="tri"] [data-receptacle] { max-inline-size: min(100%, 26rem); }
-  @media (max-width: 600px) {
-    [data-moteur="tri"] [data-cartouche-tri="etape"] { font-size: 0.95rem; gap: 0.35rem; }
-    [data-moteur="tri"] [data-consigne-geste] { font-size: 1rem !important; }
-    [data-moteur="tri"] [data-receptacle] { inline-size: min(100%, 20rem) !important; }
-  }
-`;
-
-function ZONE_DE_JEU(hauteurBandeau: number, hauteurPied: number): CSSProperties {
-  return {
-    insetInlineStart: 0,
-    insetInlineEnd: 0,
-    insetBlockStart: `${String(hauteurBandeau)}px`,
-    insetBlockEnd: `${String(hauteurPied)}px`,
-  };
-}
 
 /**
  * CE QUE LE REFUS DIT — jamais ce qui a raté, jamais le mot attendu (v2 § 5.4, R58).
@@ -215,108 +184,123 @@ interface PanneauReceptacleGeometrie {
   readonly y: number;
   readonly largeur: number;
   readonly hauteur: number;
+  /**
+   * La hauteur que le panneau OCCUPE vraiment : critère + fentes. Estimée au premier rendu
+   * (`hauteur + HAUTEUR_CRITERE_RECEPTACLE`), puis MESURÉE dans le DOM.
+   *
+   * Retour parent E16/E25, mesuré (sonde `parcours-tri-sonde-disposition`, 12 oct.) : un critère
+   * qui passe sur deux lignes et six fentes qui s'enroulent donnent 204 à 243 px de panneau là
+   * où l'estimation en réservait 189. Le panneau débordait du cadre de 1 à 29 px, la mesure
+   * après rendu le voyait, et la scène entière basculait en grille alignée (clairiere-03,
+   * foret-muette-11, marais-jumeau-03, volcan-02/10 entre 1100×700 et 1366×768).
+   */
+  readonly encombrement: number;
 }
 
 /**
- * Sur un cadre compact, les régions du décor ne sont pas assez nombreuses pour porter douze
- * mots : la cascade finit alors par leur donner le même point de repli. Une grille calculée
- * garde la lecture et le toucher disjoints, tout en conservant sur chaque mot la région/couleur
- * issue de l'habillage pour la progression visuelle.
+ * Les panneaux des réceptacles. Leur ORDRE de gauche à droite vient de `receptacle.zone` (la
+ * consigne dit « le panier de gauche ») ; leur HAUTEUR, jamais : ils sont TOUJOURS en haut du
+ * décor, et les mots en dessous.
+ *
+ * Décision du parent, 12 oct. 2026 (tableau T22) : « j'aime bien les paniers en haut, avec les
+ * mots en dessous […] c'est plus lisible par rapport à ce qui est demandé ». Avant, la zone donnait
+ * aussi la hauteur : les Galeries avaient leurs grottes en haut, les dix autres tri leurs paniers
+ * en bas (mesuré sur les 11 tri, 800×1100 et 1920×940). Un seul comportement pour tous.
  */
-function emplacementsCompacts(
-  emplacements: readonly Emplacement[],
-  cadre: Cadre,
-  mesurer: (cle: string) => Boite,
-): readonly Emplacement[] {
-  if (emplacements.length === 0) return emplacements;
-  const espace = 12;
-  const largeurUtile = Math.max(CIBLE_MIN, cadre.largeur - 2 * MARGE);
-  const largeurMax = Math.max(...emplacements.map((emplacement) => mesurer(emplacement.cle).largeur));
-  const colonnes = Math.max(
-    1,
-    Math.min(4, Math.floor((largeurUtile + espace) / (largeurMax + espace))),
-  );
-  const largeurColonne = (largeurUtile - espace * (colonnes - 1)) / colonnes;
-  const hauteurLigne =
-    Math.max(...emplacements.map((emplacement) => mesurer(emplacement.cle).hauteur)) + espace;
-
-  return emplacements.map((emplacement, index) => ({
-    ...emplacement,
-    x: MARGE + largeurColonne / 2 + (index % colonnes) * (largeurColonne + espace),
-    y: MARGE + hauteurLigne / 2 + Math.floor(index / colonnes) * hauteurLigne,
-  }));
-}
-
-function panneauxCompacts(
-  panneaux: readonly PanneauReceptacleGeometrie[],
-  cadre: Cadre,
-  basDesMots: number,
-): readonly PanneauReceptacleGeometrie[] {
-  if (panneaux.length === 0) return panneaux;
-  const espace = 12;
-  const largeurUtile = Math.max(CIBLE_MIN, cadre.largeur - 2 * MARGE);
-  const largeur = Math.min(
-    LARGEUR_RECEPTACLE_MAX,
-    (largeurUtile - espace * (panneaux.length - 1)) / panneaux.length,
-  );
-  const largeurTotale = largeur * panneaux.length + espace * (panneaux.length - 1);
-  const xDepart = Math.max(MARGE, (cadre.largeur - largeurTotale) / 2);
-  const y = basDesMots + ESPACE_AVANT_RECEPTACLES;
-
-  return panneaux.map((panneau, index) => ({
-    ...panneau,
-    x: xDepart + index * (largeur + espace),
-    y,
-    largeur,
-    hauteur: Math.min(panneau.hauteur, HAUTEUR_RECEPTACLE_MAX),
-  }));
-}
-
-/** Les panneaux des réceptacles, dérivés de `receptacle.zone` — AUCUNE coordonnée écrite ici. */
 function panneauxReceptacles(
   receptacles: readonly ReceptacleTri[],
   t: TransformeDecor,
   limites: Bornes,
+  cadre: Cadre,
+  hauteursMesurees: ReadonlyMap<string, number> | null,
 ): readonly PanneauReceptacleGeometrie[] {
-  return receptacles.map((receptacle) => {
+  const largeurMax = Math.max(CIBLE_MIN * 2, cadre.largeur * PART_LARGEUR_RECEPTACLE);
+  const hauteurMax = Math.max(CIBLE_MIN, cadre.hauteur * PART_HAUTEUR_RECEPTACLE);
+  const xMin = limites.xMin + MARGE;
+  const xMax = limites.xMax - MARGE;
+  const haut = limites.yMin + MARGE;
+  const panneaux = receptacles.map((receptacle) => {
     const b = bornesDuPolygone(receptacle.zone);
-    const [x1, y1] = versPixels([b.xMin, b.yMin], t);
-    const [x2, y2] = versPixels([b.xMax, b.yMax], t);
-    const x = Math.min(x1, x2);
-    const y = Math.min(y1, y2);
+    const [x1] = versPixels([b.xMin, b.yMin], t);
+    const [x2] = versPixels([b.xMax, b.yMax], t);
+    const [, y1] = versPixels([b.xMin, b.yMin], t);
+    const [, y2] = versPixels([b.xMax, b.yMax], t);
     const largeurZone = Math.abs(x2 - x1);
-    const hauteurZone = Math.abs(y2 - y1);
-    const largeur = Math.max(CIBLE_MIN * 2, Math.min(largeurZone, LARGEUR_RECEPTACLE_MAX));
-    const hauteur = Math.max(CIBLE_MIN, Math.min(hauteurZone, HAUTEUR_RECEPTACLE_MAX));
-    const xCentre = x + (largeurZone - largeur) / 2;
-    const yCentre = y + (hauteurZone - hauteur) / 2;
+    const largeur = Math.max(CIBLE_MIN * 2, Math.min(largeurZone, largeurMax));
+    const hauteur = Math.max(CIBLE_MIN, Math.min(Math.abs(y2 - y1), hauteurMax));
+    const xCentre = Math.min(x1, x2) + (largeurZone - largeur) / 2;
+    const encombrement = Math.max(
+      hauteur,
+      hauteursMesurees?.get(receptacle.id) ?? hauteur + HAUTEUR_CRITERE_RECEPTACLE,
+    );
     return {
       receptacle,
-      // Le panneau compact reste centré dans la zone dessinée du réceptacle.
-      // Si `slice` rogne le bas du décor sur un écran très large, il est toutefois remonté
-      // dans la partie visible : un panier hors cadre est une destination sans issue.
-      x: Math.max(limites.xMin + MARGE, Math.min(xCentre, limites.xMax - largeur - MARGE)),
-      y: Math.max(
-        limites.yMin + MARGE,
-        Math.min(yCentre, limites.yMax - hauteur - HAUTEUR_CRITERE_RECEPTACLE - MARGE),
-      ),
+      // Centré sur sa zone en largeur, ramené dans la partie visible du décor.
+      x: Math.max(xMin, Math.min(xCentre, xMax - largeur)),
+      y: haut,
       largeur,
       hauteur,
+      encombrement,
     };
   });
+  // Tous sur la même rangée : s'ils se recouvrent (zones superposées dans le dessin), on les
+  // répartit à intervalles égaux, dans leur ordre de gauche à droite. S'ils n'entrent pas, la
+  // mesure après rendu bascule en grille.
+  const ordonnes = [...panneaux].sort((a, b) => a.x - b.x);
+  const recouvrement = ordonnes.some((p, i) => {
+    const suivant = ordonnes[i + 1];
+    return suivant !== undefined && p.x + p.largeur + ESPACE_AVANT_RECEPTACLES > suivant.x;
+  });
+  if (!recouvrement) return panneaux;
+  const somme = ordonnes.reduce((s, p) => s + p.largeur, 0);
+  const intervalle = Math.max(0, (xMax - xMin - somme) / (ordonnes.length + 1));
+  let x = xMin + intervalle;
+  const replaces = new Map<string, number>();
+  for (const p of ordonnes) {
+    replaces.set(p.receptacle.id, x);
+    x += p.largeur + intervalle;
+  }
+  return panneaux.map((p) => ({ ...p, x: replaces.get(p.receptacle.id) ?? p.x }));
 }
 
-// ------------------------------------------------------------------ le mot flottant, sur le décor
+/**
+ * LA BANDE DES MOTS : sous les panneaux, jusqu'au bas du décor (décision du parent, T22). Mots et
+ * panneaux occupent des zones disjointes.
+ */
+function bandeDesMots(limites: Bornes, panneaux: readonly PanneauReceptacleGeometrie[]): Bornes {
+  const xMin = limites.xMin + MARGE;
+  const xMax = Math.max(limites.xMax - MARGE, limites.xMin + MARGE + CIBLE_MIN);
+  const basDuDecor = limites.yMax - MARGE;
+  const yMin =
+    panneaux.length === 0
+      ? limites.yMin + MARGE
+      : Math.max(...panneaux.map((p) => p.y + p.encombrement)) + ESPACE_AVANT_RECEPTACLES;
+  return { xMin, yMin, xMax, yMax: Math.max(basDuDecor, yMin + CIBLE_MIN) };
+}
+
+// ------------------------------------------------------------------ le mot, dans le plateau
 
 interface ProprietesElementFlottant {
   readonly element: ElementTri;
-  readonly emplacement: Emplacement;
+  /** Position dérivée sur le décor ; `null` dans le repli en grille. */
+  readonly emplacement: Emplacement | null;
   readonly saisi: boolean;
   readonly range: boolean;
   readonly enRefus: boolean;
   readonly marqueRefus: number;
-  readonly styleTexte: CSSProperties;
   onTaper(element: ElementTri, evenement: { clientX: number; clientY: number }): void;
+}
+
+/**
+ * Un mot ou un panier qui sort du cadre, même de deux pixels, est rogné pour l'enfant : la
+ * hauteur de défilement du plateau ne le voit pas toujours, la boîte réelle de chaque cible si.
+ */
+function grilleDeborde(cadreTri: HTMLElement, plateauGrille: HTMLElement): boolean {
+  if (cadreTri.clientHeight === 0) return false;
+  if (plateauGrille.scrollHeight > cadreTri.clientHeight + 1) return true;
+  const bas = cadreTri.getBoundingClientRect().top + cadreTri.clientTop + cadreTri.clientHeight;
+  return Array.from(plateauGrille.querySelectorAll('[data-porte-element], [data-receptacle]'))
+    .some((cible) => cible.getBoundingClientRect().bottom > bas + 0.5);
 }
 
 function ElementFlottant({
@@ -326,7 +310,6 @@ function ElementFlottant({
   range,
   enRefus,
   marqueRefus,
-  styleTexte,
   onTaper,
 }: ProprietesElementFlottant): ReactElement {
   // Le glisser, chemin SECOND : `tri` a de vraies destinations, contrairement à `phrase`.
@@ -341,22 +324,25 @@ function ElementFlottant({
   return (
     <span
       data-porte-element={element.id}
-      style={{
-        position: 'absolute',
-        insetInlineStart: `${String(emplacement.x)}px`,
-        insetBlockStart: `${String(emplacement.y)}px`,
-        // Le SEUL rôle de ce porteur : centrer. Aucune classe, donc aucune animation ne peut lui
-        // reprendre cette transformation (R54).
-        transform: `translate(-50%, -50%)${glisse}`,
-        display: 'inline-flex',
-        pointerEvents: 'none',
-        zIndex: saisi ? 1 : 0,
-      }}
+      // Le porteur centre le mot sur son emplacement et porte le glisser ; l'oscillation du
+      // refus est sur le bouton, donc aucune image-clé ne lui reprend cette transformation (R54).
+      style={
+        emplacement === null
+          ? transform === null
+            ? undefined
+            : { transform: glisse.trim() }
+          : {
+              insetInlineStart: `${String(emplacement.x)}px`,
+              insetBlockStart: `${String(emplacement.y)}px`,
+              transform: `translate(-50%, -50%)${glisse}`,
+            }
+      }
     >
       <button
         ref={setNodeRef}
         key={enRefus ? `${element.id}-${String(marqueRefus)}` : element.id}
         type="button"
+        {...ROLE_REPONSE}
         className={classes.join(' ')}
         data-element={element.id}
         data-saisi={saisi ? 'oui' : 'non'}
@@ -373,22 +359,8 @@ function ElementFlottant({
         {...listeners}
         {...attributes}
         aria-pressed={saisi}
-        style={
-          {
-            ...styleTexte,
-            pointerEvents: 'auto',
-            touchAction: 'none',
-            whiteSpace: 'nowrap',
-            outline: saisi ? '4px solid var(--soleil, #FFC93C)' : undefined,
-            outlineOffset: saisi ? '3px' : undefined,
-            fontWeight: saisi ? 700 : undefined,
-            // Rangé : il ne s'efface JAMAIS (R14), il se calme. C'est le seul indice que sa
-            // fente, dans son réceptacle, porte désormais son texte.
-            opacity: range ? 0.55 : 1,
-          } as CSSProperties
-        }
       >
-        {element.libelle}
+        <TexteColore texte={element.libelle} />
       </button>
     </span>
   );
@@ -397,52 +369,54 @@ function ElementFlottant({
 // ------------------------------------------------------------------ le panneau d'un réceptacle
 
 interface ProprietesPanneauReceptacle {
-  readonly geometrie: PanneauReceptacleGeometrie;
+  readonly receptacle: ReceptacleTri;
+  /** Boîte dérivée du décor ; `null` dans le repli en grille. */
+  readonly geometrie: PanneauReceptacleGeometrie | null;
   readonly elements: readonly ElementTri[];
   readonly acquis: Readonly<Record<string, string>>;
-  readonly restantes: readonly string[];
   readonly attend: boolean;
   readonly couleur: string;
-  readonly styleTexteFente: CSSProperties;
   readonly mesurerFente: (id: string) => Boite;
   onDeposer(evenement: { clientX: number; clientY: number }): void;
   brancherFente(id: string, noeud: HTMLElement | null): void;
 }
 
 function PanneauReceptacle({
+  receptacle,
   geometrie,
   elements,
   acquis,
-  restantes,
   attend,
   couleur,
-  styleTexteFente,
   mesurerFente,
   onDeposer,
   brancherFente,
 }: ProprietesPanneauReceptacle): ReactElement {
-  const { receptacle, x, y, largeur, hauteur } = geometrie;
   const { setNodeRef, isOver } = useDroppable({ id: receptacle.id });
 
   return (
     <div
-      style={{
-        position: 'absolute',
-        insetInlineStart: `${String(x)}px`,
-        insetBlockStart: `${String(y)}px`,
-        inlineSize: `${String(largeur)}px`,
-        minBlockSize: `${String(hauteur)}px`,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: '0.35rem',
-      }}
+      className="tri-panneau"
+      style={
+        {
+          '--couleur-receptacle': couleur,
+          ...(geometrie === null
+            ? {}
+            : {
+                insetInlineStart: `${String(geometrie.x)}px`,
+                insetBlockStart: `${String(geometrie.y)}px`,
+                inlineSize: `${String(geometrie.largeur)}px`,
+                '--hauteur-receptacle': `${String(geometrie.hauteur)}px`,
+              }),
+        } as CSSProperties
+      }
     >
       {/* Le critère, HORS du bouton de dépôt : `ZoneDeLecture` peut monter son propre bouton de
           guidage de ligne selon le profil de lecture. Un bouton dans un bouton est une
           infraction `nested-interactive` (la même que `ScenePlace` a réparée) — les deux
           restent donc des FRÈRES, jamais l'un dans l'autre. */}
-      <ZoneDeLecture texte={receptacle.critere} motsCles={[]} />
+      {/* T19 : le critère d'un panier dit ce qu'on DEMANDE d'y ranger. */}
+      <ZoneDeLecture question texte={receptacle.critere} motsCles={[]} />
       {/* MESURÉ, sortie citée (`node scripts/playwright.mjs test
           tests/qualite/a11y-tout-le-site.spec.ts --project=qualite`) : les onze exercices `tri`
           rendaient « button-name (critical) × 2 » (× 3 pour `volcan.wagons`, à trois
@@ -463,25 +437,7 @@ function PanneauReceptacle({
             : `${receptacle.libelle}, ${receptacle.critere}`
         }
         onClick={onDeposer}
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          justifyContent: 'center',
-          alignContent: 'flex-start',
-          gap: '0.3rem',
-          inlineSize: '100%',
-          minBlockSize: `${String(hauteur)}px`,
-          padding: '0.6rem',
-          borderRadius: 'var(--rayon-carte)',
-          border: `var(--epaisseur-trait) ${attend || isOver ? 'solid' : 'dashed'} var(--trait)`,
-          backgroundColor: isOver
-            ? couleur
-            : `color-mix(in srgb, ${couleur} 22%, var(--parchemin) 78%)`,
-          boxShadow: attend ? 'var(--ombre-bd)' : 'var(--ombre-bd-appui)',
-          cursor: 'pointer',
-          touchAction: 'manipulation',
-          pointerEvents: 'auto',
-        }}
+        data-survol={isOver ? 'oui' : 'non'}
       >
         {elements.map((element) => (
           <Fente
@@ -489,8 +445,9 @@ function PanneauReceptacle({
             cle={element.id}
             texte={acquis[element.id] !== undefined ? element.libelle : null}
             boite={mesurerFente(element.id)}
-            prochaine={restantes.includes(element.id)}
-            styleTexte={styleTexteFente}
+            // Jamais jaune : tri n'a plus d'étape visible (E03), une fente marquée « prochaine »
+            // était un reste d'avant (retour du parent, E25).
+            prochaine={false}
             brancher={(noeud) => {
               brancherFente(element.id, noeud);
             }}
@@ -578,13 +535,9 @@ export function MoteurTri(
   );
 
   // --- la mesure du cadre ---------------------------------------------------
+  // Le cadre est la zone de scène que donne le socle : décor, mots et réceptacles s'y posent.
   const racine = useRef<HTMLDivElement | null>(null);
-  const bandeau = useRef<HTMLDivElement | null>(null);
-  const pied = useRef<HTMLDivElement | null>(null);
-  const coucheElements = useRef<HTMLDivElement | null>(null);
   const [cadre, fixerCadre] = useState<Cadre>(CADRE_DE_REPLI);
-  const [hauteurBandeau, fixerHauteurBandeau] = useState(HAUTEUR_BANDEAU_REPLI);
-  const [hauteurPied, fixerHauteurPied] = useState(HAUTEUR_PIED_REPLI);
 
   useEffect(() => {
     const noeud = racine.current;
@@ -595,10 +548,6 @@ export function MoteurTri(
       if (rect.width > 0 && rect.height > 0) {
         fixerCadre({ largeur: rect.width, hauteur: rect.height });
       }
-      const hautBandeau = bandeau.current?.getBoundingClientRect().height ?? 0;
-      if (hautBandeau > 0) fixerHauteurBandeau(hautBandeau);
-      const hautPied = pied.current?.getBoundingClientRect().height ?? 0;
-      if (hautPied > 0) fixerHauteurPied(hautPied);
     };
 
     relever();
@@ -606,20 +555,15 @@ export function MoteurTri(
     if (typeof ResizeObserver !== 'function') return undefined;
     const observateur = new ResizeObserver(relever);
     observateur.observe(noeud);
-    if (bandeau.current !== null) observateur.observe(bandeau.current);
-    if (pied.current !== null) observateur.observe(pied.current);
     return () => {
       observateur.disconnect();
     };
   }, []);
 
   // --- la typographie --------------------------------------------------------
+  // Le style des mots vient du CSS (`tri.css`, variables `--lecture-*` du profil) ; on ne garde
+  // ici que les réglages qui servent à estimer l'encombrement.
   const reglages = useReglagesLecture();
-  const styleLecture = useMemo(() => styleDeLecture(reglages), [reglages]);
-  const styleFente = useMemo<CSSProperties>(
-    () => ({ fontFamily: styleLecture.fontFamily, fontSize: `${String(FENTE_CORPS_PX)}px` }) as CSSProperties,
-    [styleLecture],
-  );
 
   const elementsParId = useMemo(
     () => new Map(contenu.elements.map((e) => [e.id, e] as const)),
@@ -656,17 +600,28 @@ export function MoteurTri(
     [elementsParId],
   );
 
+  const mesurerFenteEnGrille = useCallback(
+    (cle: string): Boite => {
+      const boite = mesurerFente(cle);
+      // La fente n'est pas une cible : le doigt touche le livre entier. Elle peut donc être basse.
+      return { largeur: Math.min(boite.largeur, FENTE_LARGEUR_GRILLE_MAX), hauteur: Math.min(boite.hauteur, FENTE_HAUTEUR_GRILLE_MAX) };
+    },
+    [mesurerFente],
+  );
+
   // --- la dérivation -----------------------------------------------------------
   const regions = useMemo(() => regionsColoriables(habillage), [habillage]);
 
   const cadreJeu = useMemo<Cadre>(
     () => ({
       largeur: cadre.largeur,
-      hauteur: Math.max(cadre.hauteur - hauteurBandeau - hauteurPied, CIBLE_MIN + 2 * MARGE),
+      hauteur: Math.max(cadre.hauteur, CIBLE_MIN + 2 * MARGE),
     }),
-    [cadre, hauteurBandeau, hauteurPied],
+    [cadre],
   );
 
+  // Le cadre de jeu est la boîte MESURÉE de la zone de scène : décor, bornes et grottes en
+  // dérivent, jamais d'une taille fixe.
   const vb = useMemo(() => lireViewBox(habillage.scene.viewBox), [habillage]);
   const transformeDecor = useMemo(
     () => transformeMeet(vb, cadreJeu, ZOOM_DECOR_TRI),
@@ -689,30 +644,64 @@ export function MoteurTri(
     [vb, transformeDecor, cadreJeu],
   );
 
-  const panneaux = useMemo(
-    () => panneauxReceptacles(contenu.receptacles, transformeDecor, limitesDecor),
-    [contenu.receptacles, transformeDecor, limitesDecor],
+  // --- le découpage en vagues (décision du parent du 30 oct., contrat du socle § 12) ----------
+  // Quand même la grille serrée déborde, l'exercice se montre par VAGUES de consignes contiguës
+  // (`commun/vagues.ts`) : la consigne affichée garde toujours ses mots à l'écran, et les mots
+  // déjà rangés restent dans leurs cases. Le nombre de vagues ne fait que croître pour un cadre
+  // donné (cliquet) ; un autre cadre — rotation, autre appareil — repart d'une seule vague.
+  const cleVagues = `${String(Math.round(cadre.largeur))}x${String(Math.round(cadre.hauteur))}`;
+  const [vaguesMesurees, fixerVaguesMesurees] = useState<{ cle: string; nombre: number } | null>(null);
+  const nombreDeVagues = vaguesMesurees !== null && vaguesMesurees.cle === cleVagues ? vaguesMesurees.nombre : 1;
+  const vagues = useMemo(
+    () => decouperEnVagues(contenu.consignes.map((consigne) => consigne.aRanger.length), nombreDeVagues),
+    [contenu.consignes, nombreDeVagues],
+  );
+  const vagueMontree = vagueDeLEtape(vagues, etat.indexEtape);
+  // Deux ensembles : les mots du PLATEAU (la vague en cours — un mot rangé y reste, grisé) et les
+  // CASES des paniers (les vagues passées et la vague en cours ; celles à venir arrivent avec
+  // leurs mots). Un élément qu'aucune consigne ne nomme est de toutes les vagues : jamais perdu.
+  const { idsDuPlateau, idsMontres } = useMemo(() => {
+    const nommes = new Set(contenu.consignes.flatMap((consigne) => consigne.aRanger));
+    const orphelins = contenu.elements.filter((element) => !nommes.has(element.id)).map((element) => element.id);
+    const plateau = new Set<string>(orphelins);
+    const cases = new Set<string>(orphelins);
+    for (const [rang, vague] of vagues.entries()) {
+      if (rang > vagueMontree) break;
+      for (const index of vague) {
+        for (const id of contenu.consignes[index]?.aRanger ?? []) {
+          cases.add(id);
+          if (rang === vagueMontree) plateau.add(id);
+        }
+      }
+    }
+    return { idsDuPlateau: plateau, idsMontres: cases };
+  }, [contenu.consignes, contenu.elements, vagues, vagueMontree]);
+  const elementsMontres = useMemo(
+    () => etat.elements.filter((element) => idsDuPlateau.has(element.id)),
+    [etat.elements, idsDuPlateau],
   );
 
-  const bornes = useMemo<Bornes>(() => {
-    const hautDesReceptacles =
-      panneaux.length === 0
-        ? cadreJeu.hauteur
-        : Math.min(...panneaux.map((p) => p.y));
-    return {
-      xMin: limitesDecor.xMin + MARGE,
-      yMin: limitesDecor.yMin + MARGE,
-      xMax: Math.max(limitesDecor.xMax - MARGE, limitesDecor.xMin + MARGE + CIBLE_MIN),
-      // Les mots ne descendent jamais sous le haut des panneaux de réceptacles : c'est ce qui
-      // évite que la zone des mots et celle des réceptacles se chevauchent.
-      yMax: Math.max(
-        Math.min(limitesDecor.yMax - MARGE, hautDesReceptacles - ESPACE_AVANT_RECEPTACLES),
-        limitesDecor.yMin + MARGE + CIBLE_MIN,
-      ),
-    };
-  }, [limitesDecor, panneaux]);
+  // Les hauteurs RÉELLES des panneaux, relevées après rendu, par cadre et par jeu de mots. Elles
+  // ne dépendent que de la largeur du panneau (donc du cadre) et de son contenu, jamais de sa
+  // position : les reposer ne peut pas les changer, la boucle s'arrête au second rendu.
+  const jeuDeMots = elementsMontres.map((element) => element.id).join('|');
+  const cleHauteurs = `${String(Math.round(cadre.largeur))}x${String(Math.round(cadre.hauteur))}#${jeuDeMots}`;
+  const [hauteursMesurees, fixerHauteursMesurees] = useState<{
+    cle: string;
+    hauteurs: ReadonlyMap<string, number>;
+  } | null>(null);
+  const hauteursCourantes =
+    hauteursMesurees !== null && hauteursMesurees.cle === cleHauteurs ? hauteursMesurees.hauteurs : null;
 
-  const cles = useMemo(() => etat.elements.map((e) => e.id), [etat.elements]);
+  const panneaux = useMemo(
+    () => panneauxReceptacles(contenu.receptacles, transformeDecor, limitesDecor, cadreJeu, hauteursCourantes),
+    [contenu.receptacles, transformeDecor, limitesDecor, cadreJeu, hauteursCourantes],
+  );
+
+  // La bande des mots : sous les panneaux (`bandeDesMots`).
+  const bornes = useMemo<Bornes>(() => bandeDesMots(limitesDecor, panneaux), [limitesDecor, panneaux]);
+
+  const cles = useMemo(() => elementsMontres.map((e) => e.id), [elementsMontres]);
 
   const resultat = useMemo(
     () =>
@@ -729,31 +718,176 @@ export function MoteurTri(
     [habillage, cles, regions, cadreJeu, bornes, mesurer],
   );
 
-  const modeCompact = cadre.largeur <= 900 || resultat.chevauchements > 0 || resultat.horsBornes > 0;
+  // LE SEMIS (retour parent E16/E25). Les régions du décor gardent la main quand elles
+  // éparpillent vraiment les mots : aucun chevauchement, rien hors bornes, aucun repli en lignes,
+  // et pas plus de ⌈n/3⌉ mots sur une même ligne. Sinon — centroïdes trop serrés, ou ramenés par
+  // le clampage sur le bord de la bande —, les mots sont semés en quinconce dans la même bande,
+  // sans chevauchement par construction (`semis.ts`). La région que chaque mot rallume reste
+  // celle que la dérivation lui a donnée : seule la POSITION change.
+  const semis = useMemo(
+    () => semerEnQuinconce(resultat.emplacements.map((e) => e.boite), bornes),
+    [resultat, bornes],
+  );
+  const regionsEparpillent =
+    resultat.repli === 'regions' &&
+    resultat.chevauchements === 0 &&
+    resultat.horsBornes === 0 &&
+    plusGrandAlignement(resultat.emplacements.map((e) => e.y)) <= alignementTolere(resultat.emplacements.length);
+  const semisValide = semis.tient && semis.chevauchements === 0 && semis.horsBornes === 0;
+  const placement: 'regions' | 'semis' = !regionsEparpillent && semisValide ? 'semis' : 'regions';
   const emplacementsRendus = useMemo(
-    () => modeCompact
-      ? emplacementsCompacts(resultat.emplacements, cadreJeu, mesurer)
-      : resultat.emplacements,
-    [modeCompact, resultat.emplacements, cadreJeu, mesurer],
+    () =>
+      placement === 'regions'
+        ? resultat.emplacements
+        : resultat.emplacements.map((emplacement, i) => {
+            const point = semis.points[i] ?? [emplacement.x, emplacement.y];
+            return { ...emplacement, x: point[0], y: point[1] };
+          }),
+    [placement, resultat, semis],
   );
-  const basDesMots = useMemo(
-    () => Math.max(
-      MARGE,
-      ...emplacementsRendus.map((emplacement) =>
-        emplacement.y + mesurer(emplacement.cle).hauteur / 2,
-      ),
-    ),
-    [emplacementsRendus, mesurer],
-  );
-  const panneauxRendus = useMemo(
-    () => modeCompact ? panneauxCompacts(panneaux, cadreJeu, basDesMots) : panneaux,
-    [modeCompact, panneaux, cadreJeu, basDesMots],
-  );
-
+  const chevauchementsRendus = placement === 'semis' ? semis.chevauchements : resultat.chevauchements;
+  const horsBornesRendus = placement === 'semis' ? semis.horsBornes : resultat.horsBornes;
   const emplacementParElement = useMemo(
     () => new Map(emplacementsRendus.map((e) => [e.cle, e] as const)),
     [emplacementsRendus],
   );
+
+  // REPLI EN GRILLE. Le module rend ses propres `chevauchements` et `horsBornes` ; s'il en
+  // compte, ou si la mesure après rendu (ci-dessous) trouve un mot ou une grotte qui sort du
+  // cadre ou en recouvre un autre, les mots et les grottes se rangent en flux dans le cadre.
+  const [repliMesure, fixerRepliMesure] = useState<{ cadre: string; actif: boolean } | null>(null);
+  // Les étiquettes grandissent après coup (police chargée, réglages de lecture) : leur taille
+  // fait partie de la clé, pour que la mesure soit refaite quand elle change.
+  const [versionTailles, fixerVersionTailles] = useState(0);
+  // Le jeu de mots fait partie de la clé : le nœud suivant se remesure, même à cadre égal.
+  const cleCadre = `${String(Math.round(cadre.largeur))}x${String(Math.round(cadre.hauteur))}#${String(versionTailles)}#${jeuDeMots}`;
+  // Le repli en lignes de `deriverEmplacements`, sur le décor, alignait jusqu'à sept mots : au-delà
+  // de `MOTS_PAR_RANGEE_MAX`, c'est la grille, qui en tient quatre par rangée.
+  const lignesTropPeuplees =
+    placement === 'regions' &&
+    resultat.repli === 'lignes' &&
+    plusGrandAlignement(emplacementsRendus.map((e) => e.y)) > MOTS_PAR_RANGEE_MAX;
+  const modeGrille =
+    chevauchementsRendus > 0 ||
+    horsBornesRendus > 0 ||
+    lignesTropPeuplees ||
+    (repliMesure !== null && repliMesure.cadre === cleCadre && repliMesure.actif);
+
+  useLayoutEffect(() => {
+    if (modeGrille) return;
+    if (repliMesure !== null && repliMesure.cadre === cleCadre) return;
+    const noeud = racine.current;
+    if (noeud === null) return;
+    const boite = noeud.getBoundingClientRect();
+    if (boite.width === 0 || boite.height === 0) return;
+    // D'abord les hauteurs réelles des panneaux : si elles diffèrent de celles qui ont servi à
+    // les poser, on les reporte et on juge au rendu suivant (un tour de plus, jamais deux : la
+    // hauteur ne dépend pas de la position).
+    const relevees = new Map<string, number>();
+    for (const panneau of noeud.querySelectorAll<HTMLElement>('.tri-panneau')) {
+      const id = panneau.querySelector('[data-receptacle]')?.getAttribute('data-receptacle');
+      if (id !== null && id !== undefined) relevees.set(id, panneau.getBoundingClientRect().height);
+    }
+    const ecart = panneaux.some((p) => {
+      const reelle = relevees.get(p.receptacle.id);
+      return reelle !== undefined && Math.abs(Math.max(reelle, p.hauteur) - p.encombrement) > 1;
+    });
+    if (ecart) {
+      fixerHauteursMesurees({ cle: cleHauteurs, hauteurs: relevees });
+      return;
+    }
+    const rects = [
+      ...Array.from(noeud.querySelectorAll<HTMLElement>('[data-element]')),
+      ...Array.from(noeud.querySelectorAll<HTMLElement>('.tri-panneau')),
+    ].map((n) => n.getBoundingClientRect());
+    const dehors = rects.some(
+      (r) =>
+        r.left < boite.left - 1 || r.top < boite.top - 1 ||
+        r.right > boite.right + 1 || r.bottom > boite.bottom + 1,
+    );
+    let recouvre = false;
+    for (let i = 0; i < rects.length && !recouvre; i += 1) {
+      for (let j = i + 1; j < rects.length; j += 1) {
+        const a = rects[i];
+        const b = rects[j];
+        if (a === undefined || b === undefined) continue;
+        if (a.left < b.right - 1 && b.left < a.right - 1 && a.top < b.bottom - 1 && b.top < a.bottom - 1) {
+          recouvre = true;
+          break;
+        }
+      }
+    }
+    fixerRepliMesure({ cadre: cleCadre, actif: dehors || recouvre });
+  }, [modeGrille, repliMesure, cleCadre, cleHauteurs, hauteursCourantes, emplacementsRendus, panneaux]);
+
+  // GRILLE SERRÉE. Si la grille déborde du cadre, ses marges se resserrent — jamais le corps ni
+  // l'interligne de lecture. C'est un cliquet par cadre : une fois serrée, elle le reste tant que
+  // le cadre et les mots ne changent pas, donc la bascule ne peut pas osciller.
+  const [serrageMesure, fixerSerrageMesure] = useState<string | null>(null);
+  const grilleSerree = modeGrille && serrageMesure === cleCadre;
+  useLayoutEffect(() => {
+    if (!modeGrille || grilleSerree) return undefined;
+    const noeud = racine.current;
+    const plateauGrille = noeud?.querySelector<HTMLElement>('.tri-plateau');
+    if (noeud === null || noeud === undefined || plateauGrille === null || plateauGrille === undefined) return undefined;
+    const mesurer = (): void => {
+      if (grilleDeborde(noeud, plateauGrille)) fixerSerrageMesure(cleCadre);
+    };
+    mesurer();
+    // Les mots prennent leur taille après coup (police) : le plateau qui grandit relance la mesure.
+    if (typeof ResizeObserver !== 'function') return undefined;
+    const observateur = new ResizeObserver(mesurer);
+    observateur.observe(plateauGrille);
+    return () => {
+      observateur.disconnect();
+    };
+  }, [modeGrille, grilleSerree, cleCadre]);
+
+  // VAGUES. La grille serrée déborde encore : une vague de plus, et toute la cascade (décor,
+  // grille, serrage) se rejoue sur moins de mots. Au-delà d'une consigne par vague, le filet :
+  // le cadre défile (`tri.css`), aucun mot n'est rogné.
+  useLayoutEffect(() => {
+    if (!grilleSerree || nombreDeVagues >= contenu.consignes.length) return undefined;
+    const noeud = racine.current;
+    const plateauGrille = noeud?.querySelector<HTMLElement>('.tri-plateau');
+    if (noeud === null || noeud === undefined || plateauGrille === null || plateauGrille === undefined) return undefined;
+    let actif = true;
+    const mesurer = (): void => {
+      if (actif && grilleDeborde(noeud, plateauGrille) && policesChargees()) {
+        fixerVaguesMesurees({ cle: cleVagues, nombre: nombreDeVagues + 1 });
+      }
+    };
+    mesurer();
+    // Une mesure faite pendant le chargement de la police ne compte pas : la police arrivée, on
+    // remesure. Le plateau, de hauteur minimale fixe, ne change pas toujours de taille quand ses
+    // mots se replient : on observe aussi les mots et les paniers.
+    const polices = typeof document === 'undefined' || !('fonts' in document) ? undefined : document.fonts;
+    polices?.addEventListener('loadingdone', mesurer);
+    void polices?.ready.then(mesurer);
+    const observateur = typeof ResizeObserver === 'function' ? new ResizeObserver(mesurer) : null;
+    observateur?.observe(plateauGrille);
+    plateauGrille.querySelectorAll('.tri-mots, .tri-receptacles').forEach((bloc) => { observateur?.observe(bloc); });
+    return () => {
+      actif = false;
+      observateur?.disconnect();
+      polices?.removeEventListener('loadingdone', mesurer);
+    };
+  }, [grilleSerree, cleCadre, cleVagues, nombreDeVagues, contenu.consignes.length]);
+
+  // En mode décor seulement : un mot ou un panneau qui change de taille relance la mesure.
+  // En grille, on n'observe plus, sinon la bascule pourrait osciller.
+  useEffect(() => {
+    if (modeGrille) return undefined;
+    const noeud = racine.current;
+    if (noeud === null || typeof ResizeObserver !== 'function') return undefined;
+    const observateur = new ResizeObserver(() => {
+      fixerVersionTailles((version) => version + 1);
+    });
+    for (const element of noeud.querySelectorAll('[data-element], .tri-panneau')) observateur.observe(element);
+    return () => {
+      observateur.disconnect();
+    };
+  }, [modeGrille, emplacementsRendus, panneaux]);
 
   const allumees = useMemo<readonly RegionAllumee[]>(() => {
     const centroideParRegion = new Map(regions.map((r) => [r.id, r.centroide] as const));
@@ -786,29 +920,17 @@ export function MoteurTri(
   }, [empreinteAllumees, allumees]);
 
   const etape = etat.etapes[etat.indexEtape];
-  const consigneEtape = contenu.consignes[etat.indexEtape];
-  const receptaclesDeLEtape = useMemo(() => {
-    const ids = new Set(
-      (consigneEtape?.aRanger ?? []).map((id) => elementsParId.get(id)?.receptacleAttendu ?? ''),
-    );
-    return contenu.receptacles.filter((receptacle) => ids.has(receptacle.id));
-  }, [consigneEtape, contenu.receptacles, elementsParId]);
-  const cibleEtape = receptaclesDeLEtape
-    .map((receptacle) => {
-      const critere = receptacle.critere.replace(/^les mots où tu lis /iu, '').replace(/^j’entends /iu, '');
-      return `${critere} → ${receptacle.libelle}`;
-    })
-    .join(' · ');
-
   const elementsParReceptacle = useMemo(() => {
     const carte = new Map<string, ElementTri[]>();
     for (const receptacle of contenu.receptacles) carte.set(receptacle.id, []);
     for (const element of contenu.elements) {
+      // Les cases des vagues à venir n'apparaissent qu'avec leurs mots.
+      if (!idsMontres.has(element.id)) continue;
       const liste = carte.get(element.receptacleAttendu);
       if (liste !== undefined) liste.push(element);
     }
     return carte;
-  }, [contenu.receptacles, contenu.elements]);
+  }, [contenu.receptacles, contenu.elements, idsMontres]);
 
   const elementRefuse = etat.dernierRefus === null ? null : etat.dernierRefus.element;
   const marqueRefusCourante = etat.dernierRefus === null ? 0 : etat.dernierRefus.instantMs;
@@ -822,18 +944,18 @@ export function MoteurTri(
       volVise.current = null;
       const arrivee = centreDuReceptacle(racine.current, refFentes.current.get(elementId) ?? null);
       if (arrivee === null) return;
-      const emplacement = emplacementParElement.get(elementId);
-      if (emplacement === undefined) return;
-      const libelle = elementsParId.get(elementId)?.libelle ?? '';
-      const [decX, decY] = decalageEntre(racine.current, coucheElements.current);
+      // Le départ est le centre mesuré du mot, dans le même repère que l'arrivée.
+      const prise = racine.current?.querySelector(`[data-element="${CSS.escape(elementId)}"]`) ?? null;
+      const depart = centreDuReceptacle(racine.current, prise);
+      if (depart === null) return;
       volVise.current = {
         cle: elementId,
-        texte: libelle,
-        depart: [emplacement.x + decX, emplacement.y + decY],
+        texte: elementsParId.get(elementId)?.libelle ?? '',
+        depart,
         arrivee,
       };
     },
-    [emplacementParElement, elementsParId],
+    [elementsParId],
   );
 
   const taperElement = useCallback(
@@ -876,211 +998,135 @@ export function MoteurTri(
 
   return (
     <DndContext sensors={capteurs} onDragStart={auDebutDuGlisse} onDragEnd={auBoutDuGlisse}>
-      <div
-        ref={racine}
-        data-moteur="tri"
+      <DispositionMoteur
+        moteur="tri"
+        hauteurPetitEcran="contenu"
         data-habillage={habillage.id}
         data-termine={etat.termineMs === null ? 'non' : 'oui'}
         data-aide={etat.niveauAide}
         data-etape={etape === undefined ? '' : etape.identifiant}
         data-regions-allumees={String(allumees.length)}
-        data-disposition={modeCompact ? 'grille' : 'decor'}
-        style={{
-          position: 'relative',
-          blockSize: '100%',
-          minBlockSize: 0,
-          overflow: 'hidden',
-          borderRadius: 'var(--rayon-carte)',
-        }}
-      >
-          <style>{FEUILLE_DU_VOL}{FEUILLE_RESPONSIVE_TRI}</style>
-
-        {/* ── R49 — LA CONSIGNE N'EST PLUS RÉPÉTÉE ICI ────────────────────────────────────
-            `EcranNoeud` la porte déjà, en tête d'écran (`barre-consigne`, `data-consigne`),
-            AVEC le vrai `BoutonEcouter` — et elle y reste affichée tout le temps que l'étape
-            est courante, pas seulement le temps d'une annonce. Le père : « la phrase est en
-            haut et en bas, il y a doublon ». Pour `tri`, la consigne PORTE le critère de tri
-            (« Range les mots où tu entends… ») : vérifié ci-dessus, l'en-tête le garde visible
-            pendant toute l'étape, donc rien n'est perdu à ne plus le redire ici. Ce qui reste,
-            c'est le SEUL texte que `EcranNoeud` ne peut pas connaître : le GESTE, qui dépend
-            de `etat.elementSaisi` (R16). */}
-        <div
-          ref={bandeau}
-          data-plateau="geste"
-          style={{ position: 'absolute', insetInlineStart: 0, insetInlineEnd: 0, insetBlockStart: 0, zIndex: 2 }}
-        >
-          <div
-            data-cartouche-tri="etape"
-            style={{
-              display: 'inline-flex',
-              gap: '0.65rem',
-              alignItems: 'center',
-              marginBlockEnd: '0.35rem',
-              padding: '0.25rem 0.7rem',
-              borderRadius: '999px',
-              background: 'color-mix(in srgb, var(--soleil, #ffc93c) 28%, var(--parchemin) 72%)',
-              border: '2px solid var(--trait)',
-              fontWeight: 700,
-            }}
-          >
-            <span>{`Étape ${String(etat.indexEtape + 1)} / ${String(etat.etapes.length)}`}</span>
-            {cibleEtape === '' ? null : <span aria-label="cible actuelle">{cibleEtape}</span>}
-          </div>
-          <p
-            data-consigne-geste={etat.elementSaisi === null ? 'choisir' : 'deposer'}
-            role="status"
-            aria-live="polite"
-            style={{ margin: 0, fontSize: '1.125rem', opacity: 0.9 }}
-          >
-            {etat.elementSaisi === null
-              ? 'Touche un mot pour le prendre.'
-              : 'Maintenant, touche l’endroit où il va.'}
-          </p>
-        </div>
-
-        {/* ── le décor, en fond : couvre la zone de jeu, se recolorie à mesure ────────────── */}
-        <div style={{ position: 'absolute', ...ZONE_DE_JEU(hauteurBandeau, hauteurPied), zIndex: 0 }}>
-          <SceneDecor
-            habillage={habillage}
-            allumees={allumees}
-            derniere={derniere}
-            animationsDesactivees={animationsDesactivees}
-            ajustement="contenir"
-            zoom={ZOOM_DECOR_TRI}
-          />
-        </div>
-
-        {/* ── les mots, devant, à des emplacements dérivés ────────────────────────────────── */}
-        <div
-          ref={coucheElements}
-          data-plateau="elements"
-          style={{
-            position: 'absolute',
-            ...ZONE_DE_JEU(hauteurBandeau, hauteurPied),
-            zIndex: 1,
-            pointerEvents: 'none',
-          }}
-        >
-          {contenu.elements.map((element) => {
-            const emplacement = emplacementParElement.get(element.id);
-            if (emplacement === undefined) return null;
-            return (
-              <ElementFlottant
-                key={element.id}
-                element={element}
-                emplacement={emplacement}
-                saisi={etat.elementSaisi === element.id}
-                range={etat.acquis[element.id] !== undefined}
-                enRefus={!animationsDesactivees && elementRefuse === element.id}
-                marqueRefus={marqueRefusCourante}
-                styleTexte={styleLecture as CSSProperties}
-                onTaper={taperElement}
-              />
-            );
-          })}
-        </div>
-
-        {/* ── les réceptacles, posés sur le décor : la boîte de `zone`, en pixels ─────────── */}
-        <div
-          data-plateau="receptacles"
-          style={{
-            position: 'absolute',
-            ...ZONE_DE_JEU(hauteurBandeau, hauteurPied),
-            zIndex: 1,
-            // Cette couche couvre toute la scène. Sans cette ligne, sa surface transparente
-            // intercepte le doigt avant les mots placés dans la couche sœur : les tests qui
-            // appelaient `dispatchEvent` directement ne pouvaient pas voir ce défaut réel.
-            pointerEvents: 'none',
-          }}
-        >
-          {panneauxRendus.map((geometrie, rang) => (
-            <PanneauReceptacle
-              key={geometrie.receptacle.id}
-              geometrie={geometrie}
-              elements={elementsParReceptacle.get(geometrie.receptacle.id) ?? []}
-              acquis={etat.acquis}
-              restantes={etape?.restantes ?? []}
-              attend={etat.elementSaisi !== null}
-              // `couleurDeRegion`, jamais un index brut dans `palette.nuancier` : c'est elle qui
-              // écarte les deux teintes NEUTRES (`gris`≡grisaille éteinte, `blanc`≡parchemin) —
-              // sans ce filtre, un réceptacle assigné à l'une des deux se confondrait avec son
-              // propre fond (le défaut mesuré sur `phrase`, `emplacements.ts:169-214`).
-              couleur={couleurDeRegion(habillage, rang)}
-              styleTexteFente={styleFente}
-              mesurerFente={mesurerFente}
-              onDeposer={(evenement) => {
-                deposerDans(geometrie.receptacle.id, evenement);
-              }}
-              brancherFente={(id, noeud) => {
-                refFentes.current.set(id, noeud);
-              }}
+        data-vagues={`${String(vagueMontree + 1)}/${String(vagues.length)}`}
+        data-disposition={modeGrille ? 'grille' : 'decor'}
+        // Ce qui a décidé de la disposition, lisible par les bancs : `aucun` sur le décor ; sinon
+        // la condition qui a fait basculer en grille (comptes du placement, ou mesure après rendu).
+        data-repli={
+          chevauchementsRendus > 0
+            ? 'chevauchements'
+            : horsBornesRendus > 0
+              ? 'hors-bornes'
+              : lignesTropPeuplees
+                ? 'lignes'
+                : modeGrille
+                ? 'mesure'
+                : 'aucun'
+        }
+        // `semis` (quinconce, `semis.ts`), sinon le repli de `deriverEmplacements` : `regions` ou `lignes`.
+        data-placement={placement === 'semis' ? 'semis' : resultat.repli}
+        scene={
+          <div ref={racine} className={`tri-cadre tri-cadre--${modeGrille ? 'grille' : 'decor'}`} data-serre={grilleSerree ? 'oui' : 'non'}>
+            {/* Le décor est le fond : il couvre la scène et se recolorie à mesure. */}
+            <SceneDecor
+              habillage={habillage}
+              allumees={allumees}
+              derniere={derniere}
+              animationsDesactivees={animationsDesactivees}
+              ajustement="contenir"
+              zoom={ZOOM_DECOR_TRI}
             />
-          ))}
-        </div>
 
-        {/* ── le mot qui traverse — il atterrit DANS la fente, jamais au-dessus ───────────── */}
-        {vol === null ? null : (
-          <div
-            key={vol.marque}
-            style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 3 }}
-          >
-            <JetonEnVol vol={vol} dureeMs={DUREE_VOL_MS} styleTexte={styleFente} />
-          </div>
-        )}
+            <div className="tri-plateau" data-plateau="elements">
+              {/* Les mots à ranger, devant le décor — dans l'ordre MÉLANGÉ de l'état, jamais celui
+                  du fichier : en grille, l'ordre du fichier donnait la réponse (tableau, E16). */}
+              <div className="tri-mots">
+                {elementsMontres.map((element) => (
+                  <ElementFlottant
+                    key={element.id}
+                    element={element}
+                    emplacement={modeGrille ? null : (emplacementParElement.get(element.id) ?? null)}
+                    saisi={etat.elementSaisi === element.id}
+                    range={etat.acquis[element.id] !== undefined}
+                    enRefus={!animationsDesactivees && elementRefuse === element.id}
+                    marqueRefus={marqueRefusCourante}
+                    onTaper={taperElement}
+                  />
+                ))}
+              </div>
 
-        {/* ── retour immédiat : superposé au plateau, sans lui prendre de hauteur ───────────
-            Le message était auparavant dans un pied mesuré de 56 px. À chaque refus, ce pied
-            faisait donc rétrécir le décor et donnait l'impression que le jeu « sautait ». Le
-            retour reste une région live minuscule pour l'accessibilité ; la copie visible est
-            une pastille posée au-dessus de l'image, à proximité du geste. */}
-        {(messageDeRefus !== '' || etat.aide !== null) && (
-          <div
-            data-message-tri="visible"
-            style={{
-              position: 'absolute',
-              insetInlineStart: '50%',
-              insetBlockEnd: '1rem',
-              transform: 'translateX(-50%)',
-              zIndex: 4,
-              maxInlineSize: 'min(90%, 42rem)',
-              padding: '0.7rem 1.15rem',
-              borderRadius: '999px',
-              border: '3px solid var(--trait)',
-              background: 'var(--parchemin)',
-              boxShadow: 'var(--ombre-bd-appui)',
-              color: 'var(--encre, #19233f)',
-              textAlign: 'center',
-              fontWeight: 700,
-              pointerEvents: 'none',
-            }}
-          >
-            {messageDeRefus !== '' ? messageDeRefus : (etat.aide?.texte ?? 'Gobi te guide.')}
+              {/* Les réceptacles, sous les mots. */}
+              <div className="tri-receptacles" data-plateau="receptacles">
+                {contenu.receptacles.map((receptacle, rang) => (
+                  <PanneauReceptacle
+                    key={receptacle.id}
+                    receptacle={receptacle}
+                    geometrie={modeGrille ? null : (panneaux.find((p) => p.receptacle.id === receptacle.id) ?? null)}
+                    elements={elementsParReceptacle.get(receptacle.id) ?? []}
+                    acquis={etat.acquis}
+                    attend={etat.elementSaisi !== null}
+                    // `couleurDeRegion`, jamais un index brut dans `palette.nuancier` : elle écarte
+                    // les deux teintes neutres (`gris`, `blanc`) qui se confondraient avec le fond.
+                    couleur={couleurDeRegion(habillage, rang)}
+                    mesurerFente={modeGrille ? mesurerFenteEnGrille : mesurerFente}
+                    onDeposer={(evenement) => {
+                      deposerDans(receptacle.id, evenement);
+                    }}
+                    brancherFente={(id, noeud) => {
+                      refFentes.current.set(id, noeud);
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Le mot qui traverse atterrit DANS la fente, jamais au-dessus. */}
+            {vol === null ? null : (
+              <div key={vol.marque} className="tri-vol">
+                <JetonEnVol vol={vol} dureeMs={DUREE_VOL_MS} />
+              </div>
+            )}
+
+            {/* Retour immédiat, posé sur l'image : il ne prend pas de hauteur à la scène, qui
+                « sautait » à chaque refus quand il vivait dans un pied. */}
+            {(messageDeRefus !== '' || etat.aide !== null) && (
+              <div className="tri-message" data-message-tri="visible">
+                {messageDeRefus !== '' ? messageDeRefus : (etat.aide?.texte ?? 'Gobi te guide.')}
+              </div>
+            )}
           </div>
-        )}
-        <div
-          ref={pied}
-          data-plateau="messages"
-          style={{
-            position: 'absolute',
-            inlineSize: '1px',
-            blockSize: '1px',
-            overflow: 'hidden',
-            clip: 'rect(0 0 0 0)',
-            clipPath: 'inset(50%)',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          <p
-            role="status"
-            aria-live="polite"
-            data-refus-texte={messageDeRefus === '' ? 'non' : 'oui'}
-            data-animations={animationsDesactivees ? 'calmes' : 'vives'}
-            style={{ margin: 0 }}
-          >
-            {messageDeRefus === '' ? (etat.aide === null ? '' : (etat.aide.texte ?? '')) : messageDeRefus}
-          </p>
-        </div>
-      </div>
+        }
+        pied={
+          <>
+            {/* R49 — la consigne est portée par `EcranNoeud` ; ne reste ici que le GESTE, que
+                seul le moteur connaît (`etat.elementSaisi`). */}
+            {/* T10 / E03 — AUCUN repère « Étape n sur N » ici, et c'est mesuré : le réducteur
+                accepte tout mot posé dans son bon panier, quelle que soit l'étape
+                (tests/unitaires/tri-etapes-non-contraignantes.test.ts). Annoncer « Étape 1 sur
+                2 : les mots de couleur à gauche » décrivait une contrainte qui n'existe pas ; la
+                consigne de l'écran (« Range chaque mot dans le bon panier ») suffit. */}
+            <p
+              className="tri-geste"
+              data-consigne-geste={etat.elementSaisi === null ? 'choisir' : 'deposer'}
+              role="status"
+              aria-live="polite"
+              {...ROLE_QUESTION}
+            >
+              <TexteColore texte={etat.elementSaisi === null
+                ? 'Touche un mot pour le prendre.'
+                : 'Maintenant, touche l’endroit où il va.'} />
+            </p>
+            <div className="tri-annonce" data-plateau="messages">
+              <p
+                role="status"
+                aria-live="polite"
+                data-refus-texte={messageDeRefus === '' ? 'non' : 'oui'}
+                data-animations={animationsDesactivees ? 'calmes' : 'vives'}
+              >
+                {messageDeRefus === '' ? (etat.aide === null ? '' : (etat.aide.texte ?? '')) : messageDeRefus}
+              </p>
+            </div>
+          </>
+        }
+      />
     </DndContext>
   );
 }

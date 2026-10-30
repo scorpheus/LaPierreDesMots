@@ -25,6 +25,7 @@
  * ────────────────────────────────────────────────────────────────────────────────────────
  */
 import { readFileSync, readdirSync } from 'node:fs';
+import { allumerLaVoix } from './voix-allumee.js';
 import { fileURLToPath } from 'node:url';
 import { expect, test } from './invariants.js';
 
@@ -250,6 +251,8 @@ test.describe('variété d’une sortie', () => {
   test('aucun bouton « écouter » muet, et un bouton dès qu’un clip existe (D42, R15)', async ({
     page,
   }) => {
+    // Jugé voix ALLUMÉE par le parent : depuis le 9 oct. 2026, elle est éteinte par défaut.
+    await allumerLaVoix(page);
     // ════════════════════════════════════════════════════════════════════════════════════
     // CE CAS A ÉTÉ RÉÉCRIT PARCE QU'IL CONTREDISAIT UNE DÉCISION, PAS PARCE QU'IL GÊNAIT.
     //

@@ -1,0 +1,136 @@
+/* Moteur `assemble` — apparence propre. La disposition vient du socle (DispositionMoteur). */
+
+/* Le plateau remplit la scène : décor au fond, blocs devant, bande de lecture en bas. */
+.assemble-plateau {
+  position: relative;
+  inline-size: 100%;
+  block-size: 100%;
+  min-inline-size: 0;
+  min-block-size: 0;
+  overflow: hidden;
+  border-radius: var(--rayon-carte);
+}
+
+/* `insetBlockEnd` (hauteur mesurée de la bande) est posé en ligne : c'est une valeur calculée. */
+.assemble-decor,
+.assemble-blocs {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-start: 0;
+}
+
+.assemble-decor { z-index: 0; }
+
+.assemble-blocs {
+  /* Au-dessus de la bande : sur un écran très court, un bloc ne doit jamais être recouvert. */
+  z-index: 4;
+  pointer-events: none;
+}
+
+/* La position (x, y) du bloc est calculée : elle reste en ligne ; le centrage est ici. */
+.assemble-porte-bloc {
+  position: absolute;
+  display: inline-flex;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.assemble-blocs .cible {
+  pointer-events: auto;
+  white-space: nowrap;
+}
+
+/* Le bloc qui traverse : une copie transitoire, par-dessus tout. */
+.assemble-vol {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+}
+
+/* Le vol lui-même (position, images-clés, typographie de lecture) vient de `commun/fentes.css`. */
+.assemble-vol [data-vol-du-mot] {
+  background-color: var(--lecture-fond, var(--parchemin));
+  color: var(--lecture-encre, var(--trait));
+}
+
+/* ── La bande de lecture : le mot en train de se faire, immobile sur parchemin ──────────── */
+
+.assemble-bande {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+  max-inline-size: 100%;
+  padding-inline: clamp(0.5rem, 4vw, 3rem);
+  text-align: center;
+}
+
+.assemble-fentes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  inline-size: 100%;
+  max-inline-size: 72rem;
+  gap: 0.5rem;
+  margin-block-end: 0.6rem;
+  border-radius: var(--rayon-carte);
+}
+
+/* Une case : reçoit le toucher et le dépôt. Le liseré n'apparaît que pendant le survol du glisser. */
+.assemble-case {
+  display: inline-flex;
+  border-radius: var(--rayon-carte);
+}
+
+.assemble-case[data-survolee='oui'] {
+  outline: 3px dashed var(--soleil);
+  outline-offset: 4px;
+}
+
+/* Le bloc tenu : liseré, pas d'animation, pas de rouge — ce n'est pas un verdict. */
+.assemble-blocs .cible.assemble-bloc-pris {
+  outline: 4px solid var(--soleil);
+  outline-offset: 3px;
+}
+
+/* Texte à déchiffrer : police et corps de lecture du profil, aucune animation. */
+.assemble-refus {
+  display: grid;
+  margin: 0;
+  font-family: var(--lecture-famille, var(--font-lecture));
+  font-size: var(--lecture-corps);
+  line-height: var(--lecture-interligne);
+  letter-spacing: var(--lecture-interlettrage);
+  word-spacing: var(--lecture-espacement-mots);
+  background-color: var(--lecture-fond);
+  color: var(--lecture-encre);
+  animation: none;
+  transition: none;
+}
+
+.assemble-refus__reserve,
+.assemble-refus__message { grid-area: 1 / 1; }
+
+.assemble-refus__reserve { visibility: hidden; }
+
+.assemble-annonce {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Écran très court (téléphone en paysage) : la bande ne peut pas réserver toutes les lignes de
+   refus, elle recouvrirait les cases — qui se TOUCHENT désormais. Le message prend alors la
+   place qu'il lui faut, quand il paraît. Le décor garde sa réserve partout ailleurs. */
+@media (max-height: 520px) {
+  .assemble-refus__reserve { display: none; }
+}

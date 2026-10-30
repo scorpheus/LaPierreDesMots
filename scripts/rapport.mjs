@@ -178,6 +178,11 @@ export function genererRapport(options = {}) {
   lignes.push(`**Écrit le** ${new Date().toISOString()}`);
   lignes.push(`**Commande** \`${options.commande ?? 'npm run verifier'}\``);
   lignes.push('');
+  // Le palier qui a tourné et ce qu'il n'a pas couvert (verifier.mjs, scripts/paliers.mjs).
+  if (options.entete !== undefined) {
+    lignes.push(...options.entete);
+    lignes.push('');
+  }
 
   if (etapes.length === 0) {
     lignes.push('> Aucun rapport d’étape n’a été trouvé. Lancer `npm run verifier`.');

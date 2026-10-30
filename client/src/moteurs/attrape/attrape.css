@@ -1,0 +1,103 @@
+/* Moteur `attrape` — apparence propre. La disposition vient du socle (DispositionMoteur). */
+
+/* ── La zone de jeu : décor en fond, cibles posées dessus ───────────────────────────────── */
+
+.attrape-zone {
+  position: relative;
+  flex: 1 1 auto;
+  align-self: stretch;
+  inline-size: 100%;
+  min-inline-size: 0;
+  overflow: hidden;
+  border-radius: var(--rayon-carte);
+}
+
+/* La hauteur minimale est posée en ligne : c'est celle de la grille de repli, calculée. */
+[data-moteur='attrape'] .disposition-moteur__scene { align-items: stretch; }
+
+.attrape-calque {
+  position: absolute;
+  inset: 0;
+}
+
+.attrape-cibles {
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* ── Les cibles : un mot ou un dessin à attraper ────────────────────────────────────────── */
+
+/* Texte à déchiffrer : police et corps de lecture du profil. */
+[data-moteur='attrape'] .attrape-cible {
+  position: relative;
+  background-color: var(--lecture-fond, var(--parchemin));
+  color: var(--lecture-encre, var(--trait));
+  font-family: var(--lecture-famille, var(--font-lecture));
+  font-size: var(--lecture-corps);
+  letter-spacing: var(--lecture-interlettrage);
+  word-spacing: var(--lecture-espacement-mots);
+  line-height: var(--lecture-interligne);
+  white-space: nowrap;
+  pointer-events: auto;
+}
+
+/* Le dessin garde son côté court à 96 px au moins ; sa taille exacte vient du moteur. */
+.attrape-cible > img {
+  display: block;
+  max-inline-size: 100%;
+  max-block-size: 100%;
+  min-block-size: var(--socle-image-min);
+  object-fit: contain;
+  pointer-events: none;
+}
+
+/* Le mot d'une cible dessinée reste lisible pour les lecteurs d'écran, sans s'afficher. */
+.attrape-libelle-cache {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* La dérive : une règle, chaque cible règle amplitude et durée par variables CSS. */
+@keyframes pierre-derive-cible {
+  0%, 100% { transform: translate(0, 0); }
+  25%      { transform: translate(var(--derive-dx), calc(var(--derive-dy) * -1)); }
+  50%      { transform: translate(0, 0); }
+  75%      { transform: translate(calc(var(--derive-dx) * -1), var(--derive-dy)); }
+}
+
+[data-derive='oui'] {
+  animation: pierre-derive-cible var(--derive-duree) ease-in-out var(--derive-delai) infinite;
+}
+
+/* ── Le pied : retour bienveillant (l'étape est dans la barre de consigne, T10) ──────────────────────────────────── */
+
+.attrape-controles {
+  position: relative;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.attrape-retour {
+  min-block-size: 1.5em;
+  margin: 0;
+  font-family: var(--font-interface);
+  font-size: var(--socle-texte-interface);
+  text-align: center;
+}
+
+/* Annonce pour lecteur d'écran seulement. */
+.attrape-annonce {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  font-family: var(--font-interface);
+  font-size: var(--socle-texte-interface);
+}

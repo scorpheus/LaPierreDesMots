@@ -24,6 +24,8 @@
  * attendent quelque chose.
  * ══════════════════════════════════════════════════════════════════════════════════════════════
  */
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { useCallback, useState } from 'react';
 import type { ReactElement } from 'react';
 import { cleanup, fireEvent, render } from '@testing-library/react';
@@ -82,6 +84,14 @@ afterEach(() => {
   cleanup();
 });
 
+/** Les déclarations de la règle de `tri.css` dont le sélecteur est exactement `selecteur`. */
+const declarationsCss = (selecteur: string): string => {
+  const css = readFileSync(resolve(process.cwd(), 'client/src/moteurs/tri/tri.css'), 'utf8');
+  const debut = css.indexOf(`${selecteur} {`);
+  if (debut < 0) return '';
+  return css.slice(css.indexOf('{', debut), css.indexOf('}', debut));
+};
+
 const premierElement = (racine: HTMLElement): HTMLElement =>
   racine.querySelector<HTMLElement>('[data-element]') as HTMLElement;
 
@@ -98,15 +108,15 @@ describe('R16 — l’enfant VOIT qu’il a quelque chose en main', () => {
     const { container } = render(<Harnais />);
     const element = premierElement(container);
     expect(element.getAttribute('data-saisi')).toBe('non');
-    const avant = element.getAttribute('style') ?? '';
 
     fireEvent.click(element);
     expect(element.getAttribute('data-saisi')).toBe('oui');
+    // La mise en évidence vit dans `tri.css`, sur `[data-saisi='oui']`.
     expect(
-      element.getAttribute('style') ?? '',
+      declarationsCss("[data-moteur='tri'] [data-element][data-saisi='oui']"),
       'le mot est « en main » dans l’état et RIEN ne le montre : c’est le défaut exact que le ' +
         'père a rencontré — il a cru que son tap n’avait pas marché'
-    ).not.toBe(avant);
+    ).toContain('outline');
   });
 
   it('un tap tactile (pointerdown/pointerup) prend le mot sans exiger un glisser', () => {
@@ -155,7 +165,10 @@ describe('R16 — l’enfant VOIT qu’il a quelque chose en main', () => {
     fireEvent.click(container.querySelector('[data-receptacle]') as Element);
     const range = container.querySelector('[data-element][data-range]:not([data-range="non"])');
     if (range !== null) {
-      expect(range.getAttribute('style') ?? '').toContain('opacity');
+      // Il se calme dans `tri.css`, sur `[data-range='oui']`.
+      expect(declarationsCss("[data-moteur='tri'] [data-element][data-range='oui']")).toContain(
+        'opacity',
+      );
       expect(range.isConnected, 'l’élément rangé a disparu de l’écran').toBe(true);
     }
   });

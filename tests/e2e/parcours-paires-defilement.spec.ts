@@ -1,11 +1,11 @@
 import { resolve } from 'node:path';
 import { expect, test } from './invariants.js';
-import { appliquerReglagesLectureReels, entrerDansLeNoeud, noeudsLivres, etatDuJeu } from './qa-outils.js';
+import { appliquerReglagesLectureReels, entrerDansLeNoeud, noeudsDuMoteurBalayes, etatDuJeu } from './qa-outils.js';
 import { attendreGeometrieStable } from '../qualite/aides-composition.js';
 import { balayerAuDoigt } from './gestes-defilement.js';
 
 test.use({ isMobile: true, hasTouch: true });
-const fiches = noeudsLivres().filter((fiche) => fiche.moteur === 'paires');
+const fiches = noeudsDuMoteurBalayes('paires');
 const formats = [{ width: 800, height: 1100 }, { width: 1100, height: 700 },
   { width: 360, height: 640 }, { width: 640, height: 360 }, { width: 1920, height: 1200 }];
 
@@ -140,9 +140,19 @@ for (const format of formats) for (const fiche of fiches) {
   });
 }
 
-for (const mode of ['souris', 'maintien tactile'] as const) {
+// Deux régimes, depuis T11 (tableau des retours, 9 oct.) :
+// - page qui ne défile pas (PC, tablette) : le doigt glisse la carte tout de suite, sans maintien,
+//   comme le demande le parent (« on a envie de les glisser ») ;
+// - page qui défile (petit écran, `(max-width: 600px), (max-height: 500px)`) : un balayage
+//   appartient au défilement, et c'est le MAINTIEN qui distingue le glisser voulu.
+const MODES = [
+  { mode: 'souris', format: { width: 1920, height: 1200 } },
+  { mode: 'doigt sur une page fixe', format: { width: 1920, height: 1200 } },
+  { mode: 'maintien tactile sur une page qui défile', format: { width: 390, height: 844 } },
+] as const;
+for (const { mode, format } of MODES) {
   test(`paires — le glisser intentionnel reste disponible par ${mode}`, async ({ page }) => {
-    await page.setViewportSize({ width: 1920, height: 1200 });
+    await page.setViewportSize(format);
     await appliquerReglagesLectureReels(page, 'PairesGlisser');
     await entrerDansLeNoeud(page, 'foret-muette-02', 'PairesGlisser');
     await attendreGeometrieStable(page);
@@ -153,7 +163,7 @@ for (const mode of ['souris', 'maintien tactile'] as const) {
     }).map((carte) => carte.getAttribute('data-carte')));
     const paire = etat.cartes.map((carte) => etat.cartes.filter((autre) =>
       autre.paire === carte.paire && visibles.includes(autre.id))).find((cartes) => cartes.length === 2);
-    expect(paire, 'une vraie paire complète doit être disponible sur ce grand écran').toBeDefined();
+    expect(paire, 'une vraie paire complète doit être visible sans défiler').toBeDefined();
     const source = page.locator(`[data-carte="${paire![0]!.id}"]`);
     const cible = page.locator(`[data-carte="${paire![1]!.id}"]`);
     const a = (await source.boundingBox())!;
@@ -168,8 +178,9 @@ for (const mode of ['souris', 'maintien tactile'] as const) {
     } else {
       const cdp = await page.context().newCDPSession(page);
       await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y }] });
-      // L'état du capteur donne le signal : aucune attente arbitraire du délai de maintien.
-      await expect(source).toHaveAttribute('data-retournee', 'oui');
+      // Page qui défile : l'état du capteur donne le signal de la fin du maintien, aucune attente
+      // arbitraire. Page fixe : rien à attendre, le premier mouvement suffit.
+      if (mode === 'maintien tactile sur une page qui défile') await expect(source).toHaveAttribute('data-retournee', 'oui');
       for (let pas = 1; pas <= 16; pas += 1) {
         await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{
           x: x + (b.x + b.width / 2 - x) * pas / 16,

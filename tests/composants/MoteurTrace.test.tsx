@@ -9,6 +9,7 @@
  * Un attribut qui porterait « gauche-droite haut-bas » ferait passer un test naïf et rendrait
  * le top 10 du dashboard illisible.
  */
+import { readFileSync } from 'node:fs';
 import { useCallback, useState } from 'react';
 import { cleanup, fireEvent, render } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -36,6 +37,16 @@ import {
   lireJson,
   servicesDeTest,
 } from '../configuration/preparation.js';
+
+/** Les déclarations d'un sélecteur dans une feuille (règles groupées comprises, commentaires ôtés). */
+function bloc(css: string, selecteur: string): string {
+  const sansCommentaires = css.replace(/\/\*[\s\S]*?\*\//g, '');
+  const corps: string[] = [];
+  for (const m of sansCommentaires.matchAll(/([^{}]+)\{([^}]*)\}/g)) {
+    if ((m[1] ?? '').split(',').map((x) => x.trim()).includes(selecteur)) corps.push(m[2] ?? '');
+  }
+  return corps.join('\n');
+}
 
 const CHEMIN_BD = 'contenu/exercices/galeries/miroir-bd-01.json';
 const CHEMIN_BP = 'contenu/exercices/galeries/miroir-bp-01.json';
@@ -162,7 +173,10 @@ describe('MoteurTrace — data-axe porte UN axe, jamais deux (D23)', () => {
     const cible = document.querySelector('[data-plateau="cible-trace"]');
     expect(cible?.getAttribute('data-cible-lettre')).toBe(contenuBd.lettres[0]!.lettre);
     expect(cible?.textContent).toContain(`Lettre : ${contenuBd.lettres[0]!.lettre}`);
-    expect((cible as HTMLElement | null)?.style.position).toBe('static');
+    // La mise en page vit dans la feuille du moteur (trace.css), pas dans des styles en ligne.
+    const css = readFileSync('client/src/moteurs/trace/trace.css', 'utf8');
+    expect((cible as HTMLElement | null)?.classList.contains('trace-cible')).toBe(true);
+    expect(bloc(css, '.trace-cible')).toMatch(/position:\s*static/);
   });
 
   it('l’exercice b/d annonce gauche-droite, et rien d’autre', () => {

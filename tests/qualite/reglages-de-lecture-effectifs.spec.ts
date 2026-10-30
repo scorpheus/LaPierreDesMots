@@ -66,6 +66,7 @@ import {
   lireTexte,
   noeudsLivres,
   preparer,
+  preparerSansProfil,
   SELECTEUR_INTERACTIF,
 } from '../e2e/qa-outils.js';
 
@@ -219,17 +220,32 @@ const textesDuPlateau = (page: Page): Promise<readonly TexteMesure[]> =>
   textesSous(page, '[data-ecran="noeud"]');
 
 /** Mesure le plateau d'un nœud, à un corps donné, par le chemin de l'enfant. */
-async function mesurerA(
+/**
+ * Mesure des textes du plateau à un corps donné, posé par l'API des réglages du profil (T4) : le
+ * chemin de l'enfant (taper « moins » / « plus ») est déjà prouvé par le contrôle positif de
+ * l'aperçu et par les cas R20 de ce fichier, qui passent par `reglerLeCorps`. Ici, seule compte
+ * la propagation du réglage enregistré jusqu'au plateau de chaque moteur.
+ */
+async function mesurerAvecReglagePose(
   page: Page,
   noeud: string,
   corps: number,
-): Promise<{ readonly corpsPose: number; readonly textes: readonly TexteMesure[] }> {
+): Promise<readonly TexteMesure[]> {
   await preparer(page);
-  const corpsPose = await reglerLeCorps(page, corps);
-  await preparer(page);
+  const profil = await page.locator('[data-profil]').first().getAttribute('data-profil');
+  expect(profil, 'le profil de la recette doit exposer son identifiant').not.toBeNull();
+  const reponse = await page.request.put(`/api/profils/${profil!}/reglages`, {
+    data: {
+      police: 'andika', corpsPx: corps, interlettrageEm: 0.06, espacementMotsEm: 0.08, interligne: 2,
+      colorationSyllabique: false, surlignageLigneCourante: false, regleDeLecture: false, fond: 'parchemin',
+    },
+  });
+  expect(reponse.ok(), `le corps ${String(corps)} px doit être enregistré pour le profil`).toBe(true);
+  // Recharger l'application : le profil relit ses réglages, comme au lancement suivant.
+  await preparerSansProfil(page);
   await entrerDansLeNoeud(page, noeud);
   await deuxImages(page);
-  return { corpsPose, textes: await textesDuPlateau(page) };
+  return textesDuPlateau(page);
 }
 
 test.describe('Q7 — un réglage de lecture atteint tout ce qui se lit', () => {
@@ -321,13 +337,13 @@ test.describe('Q7 — un réglage de lecture atteint tout ce qui se lit', () => 
   for (const moteur of MOTEURS) {
     const noeud = NOEUDS.find((n) => n.moteur === moteur)!.id;
     test(`« ${moteur} » — tout texte à déchiffrer suit le réglage`, async ({ page }) => {
-      const petit = await mesurerA(page, noeud, BORNES.min);
-      const grand = await mesurerA(page, noeud, BORNES.max);
-      const parCle = new Map(petit.textes.map((t) => [t.cle, t] as const));
+      const petit = await mesurerAvecReglagePose(page, noeud, BORNES.min);
+      const grand = await mesurerAvecReglagePose(page, noeud, BORNES.max);
+      const parCle = new Map(petit.map((t) => [t.cle, t] as const));
 
       const figes: string[] = [];
       let compares = 0;
-      for (const apres of grand.textes) {
+      for (const apres of grand) {
         const avant = parCle.get(apres.cle);
         if (avant === undefined) continue;
         compares += 1;

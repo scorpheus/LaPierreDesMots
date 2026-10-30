@@ -52,3 +52,9 @@
   margin-block-start: 0.35rem;
   padding: 0.45rem 0.7rem;
 }
+
+/* T19 — la lecture colorée hors des blocs de lecture (consignes, questions, réponses) :
+   `TexteColore`. Même teinte alternée que `ZoneDeLecture`, sur le rang impair seulement. */
+.texte-colore[data-syllabes="oui"] .syllabe[data-syllabe="1"] {
+  color: var(--lecture-syllabe-alternee);
+}

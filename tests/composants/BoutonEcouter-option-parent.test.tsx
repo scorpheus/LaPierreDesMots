@@ -91,11 +91,19 @@ afterEach(() => {
   oublierReglagesFoyer();
 });
 
-describe('le réglage parent « proposer le bouton Écouter »', () => {
-  it('par défaut le bouton est proposé — R15 tient sans qu’on touche à rien', () => {
-    // Contrôle de la mesure : si ce cas échouait, tous les suivants seraient verts pour la
-    // mauvaise raison (un bouton absent partout « prouve » n'importe quel masquage).
-    expect(lireReglagesFoyer().boutonEcouter).toBe(true);
+describe('le réglage parent « Gobi parle » (bouton Écouter)', () => {
+  // Décision du parent du 9 oct. 2026 : la parole est ÉTEINTE par défaut (« il faut que faire
+  // écouter, ou en tout cas parler, ce soit par défaut à false »). R15 tient dès qu'il l'allume.
+  it('par défaut le bouton n’est pas proposé — décision du parent', () => {
+    expect(lireReglagesFoyer().boutonEcouter).toBe(false);
+    monterBouton();
+    expect(bouton()).toBeNull();
+  });
+
+  it('allumé par le parent, avec un clip, le bouton est proposé', () => {
+    // Contrôle de la mesure : si ce cas échouait, tous les cas « masqué » seraient verts pour
+    // la mauvaise raison (un bouton absent partout « prouve » n'importe quel masquage).
+    ecrireReglagesFoyer({ boutonEcouter: true });
     monterBouton();
     expect(bouton()).not.toBeNull();
   });
@@ -110,6 +118,7 @@ describe('le réglage parent « proposer le bouton Écouter »', () => {
   });
 
   it('la bascule agit sans rechargement, dans les deux sens', () => {
+    ecrireReglagesFoyer({ boutonEcouter: true });
     monterBouton();
     expect(bouton()).not.toBeNull();
 
@@ -139,29 +148,37 @@ describe('le réglage parent « proposer le bouton Écouter »', () => {
     render(<ReglagesParent />);
     const commande = interrupteur();
     expect(commande, 'aucune commande dans la zone parent pour ce réglage').not.toBeNull();
-    expect(commande?.checked).toBe(true);
+    expect(commande?.checked, 'éteint par défaut').toBe(false);
 
     fireEvent.click(commande as HTMLInputElement);
 
-    expect(lireReglagesFoyer().boutonEcouter).toBe(false);
-    expect(interrupteur()?.checked).toBe(false);
+    expect(lireReglagesFoyer().boutonEcouter).toBe(true);
+    expect(interrupteur()?.checked).toBe(true);
 
     // Persistance : le réglage doit survivre à la fermeture de l'onglet, sinon le parent le
     // reposera à chaque session et finira par ne plus s'en servir.
     const stocke = globalThis.localStorage?.getItem(CLE_STOCKAGE_FOYER) ?? 'null';
     expect(
       normaliserReglagesFoyer(JSON.parse(stocke) as Record<string, never>).boutonEcouter
-    ).toBe(false);
+    ).toBe(true);
   });
 
-  it('un enregistrement écrit AVANT ce réglage garde son bouton', () => {
+  it('un enregistrement écrit AVANT ce réglage prend le défaut : parole éteinte', () => {
     // Le foyer a déjà joué : `localStorage` porte les trois réglages d'origine et pas le
-    // quatrième. Lire `=== true` au lieu de `!== false` retirerait le bouton à tout le monde
-    // à la mise à jour — une régression silencieuse, invisible en développement où le
-    // stockage est vide.
+    // quatrième. Le silence vaut le défaut, et le défaut est désormais la parole éteinte
+    // (décision du parent du 9 oct. 2026) : seul un « oui » explicite l'allume.
     globalThis.localStorage?.setItem(
       CLE_STOCKAGE_FOYER,
       JSON.stringify({ volumeEffets: 0.8, volumeVoix: 1, animationsCalmes: false })
+    );
+    oublierReglagesFoyer();
+    expect(lireReglagesFoyer().boutonEcouter).toBe(false);
+  });
+
+  it('un « oui » déjà posé par le parent est gardé', () => {
+    globalThis.localStorage?.setItem(
+      CLE_STOCKAGE_FOYER,
+      JSON.stringify({ volumeEffets: 0.8, volumeVoix: 1, animationsCalmes: false, boutonEcouter: true })
     );
     oublierReglagesFoyer();
     expect(lireReglagesFoyer().boutonEcouter).toBe(true);

@@ -386,3 +386,36 @@ describe('liens parent et visite', () => {
     expect(urlActuelle()).toBe('/parent/visite');
   });
 });
+
+describe('banc local d’un exercice (tableau des retours du parent)', () => {
+  it('ouvre /debug/exercice?noeud=… directement, sans code parent ni choix du joueur, hors journal', async () => {
+    const paquet = {
+      exercice: lireJson<Exercice>(CHEMIN_EXERCICE_ECOLE),
+      noeud: lireJson<Noeud>(CHEMIN_NOEUD_CLAIRIERE), habillage: habillageEcole(),
+    };
+    const lirePaquet = vi.spyOn(await import('@client/api/client'), 'lirePaquetNoeud')
+      .mockResolvedValue(paquet as never);
+    const { magasin } = monter(`/debug/exercice?noeud=${String(paquet.noeud.id)}`);
+    await screen.findByTestId('noeud');
+    expect(lirePaquet).toHaveBeenCalledWith(String(paquet.noeud.id));
+    expect(screen.queryByTestId('code-parent')).toBeNull();
+    expect(screen.queryByTestId('profils')).toBeNull();
+    expect(magasin.getState().profil).toEqual(profil);
+    expect(magasin.getState().journalise).toBe(false);
+    expect(urlActuelle()).toBe('/noeud');
+  });
+
+  it('n’ouvre rien depuis une autre machine (la tablette passe par l’adresse du réseau)', async () => {
+    const lirePaquet = vi.spyOn(await import('@client/api/client'), 'lirePaquetNoeud');
+    const hote = window.location.host;
+    (window as unknown as { happyDOM: { setURL(u: string): void } }).happyDOM.setURL('http://192.168.1.20:8080/');
+    try {
+      monter('/debug/exercice?noeud=clairiere-01');
+      await screen.findByTestId('campement');
+      expect(lirePaquet).not.toHaveBeenCalled();
+      expect(urlActuelle()).toBe('/campement');
+    } finally {
+      (window as unknown as { happyDOM: { setURL(u: string): void } }).happyDOM.setURL(`http://${hote}/`);
+    }
+  });
+});

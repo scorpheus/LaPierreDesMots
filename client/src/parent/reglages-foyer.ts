@@ -32,15 +32,19 @@ export interface ReglagesFoyer {
   /** Animations calmes : le décor bouge moins, le texte ne bouge jamais (v2 § 9.3). */
   readonly animationsCalmes: boolean;
   /**
-   * Le bouton « Écouter » est-il proposé à l'enfant ?
+   * Gobi parle-t-il ? Bouton « Écouter », répliques du campement, consignes des maths : c'est
+   * l'interrupteur de TOUTE parole (`services/voix-reglee.ts`). Le nom du champ est gardé pour
+   * relire les réglages déjà posés sur les appareils.
    *
-   * **Par défaut `true`**, et ce défaut n'est pas un choix de confort : R15 (« aucune consigne
-   * n'existe uniquement à l'écrit ») est une règle non négociable, elle doit donc tenir sans
-   * que personne ait à toucher un réglage. L'éteindre est un geste **délibéré du parent**, pris
-   * dans la zone protégée par le code — l'enfant ne peut pas se le retirer, ni se le rendre.
+   * **Par défaut `false`** — décision du parent du 9 oct. 2026, après l'avoir observé avec son
+   * fils : « il faut que faire écouter, ou en tout cas parler, ce soit par défaut à false ». C'est
+   * un jeu de LECTURE : la voix ne doit pas lire à la place de l'enfant. Le parent la rallume dans
+   * sa zone, protégée par le code. Cela révise R15 (« aucune consigne uniquement à l'écrit ») :
+   * la consigne reste audible dès que le parent allume la voix ; proposition de mise à jour de la
+   * v2 § 5.4 consignée dans `Docs/tableau-retours.md` (T18), le document de référence n'est pas
+   * modifié sans validation.
    *
-   * Ce réglage n'a JAMAIS l'effet inverse : le remettre à `true` ne fait pas réapparaître un
-   * bouton muet, parce que D42 prime (voir `BoutonEcouter.tsx`).
+   * Rallumé, il ne fait PAS réapparaître un bouton muet : D42 prime (voir `BoutonEcouter.tsx`).
    */
   readonly boutonEcouter: boolean;
 }
@@ -49,7 +53,7 @@ export const REGLAGES_FOYER_PAR_DEFAUT: ReglagesFoyer = {
   volumeEffets: 0.8,
   volumeVoix: 1,
   animationsCalmes: false,
-  boutonEcouter: true
+  boutonEcouter: false
 };
 
 function borner(valeur: unknown, defaut: number): number {
@@ -63,10 +67,9 @@ function borner(valeur: unknown, defaut: number): number {
 /**
  * Ramène un enregistrement quelconque à des réglages valides.
  *
- * `boutonEcouter` se lit `!== false` et non `=== true` : un enregistrement **écrit avant
- * l'existence de ce réglage** ne porte pas le champ, et un foyer déjà installé ne doit pas
- * perdre son bouton « Écouter » à la mise à jour. Le silence vaut le défaut, et le défaut est
- * R15.
+ * `boutonEcouter` se lit `=== true` : un enregistrement qui ne porte pas le champ prend le
+ * défaut, et le défaut est désormais « parole éteinte » (décision du parent du 9 oct. 2026).
+ * Seul un « oui » explicite du parent allume la voix.
  */
 export function normaliserReglagesFoyer(bruts: Partial<ReglagesFoyer> | null): ReglagesFoyer {
   if (bruts === null) {
@@ -76,7 +79,7 @@ export function normaliserReglagesFoyer(bruts: Partial<ReglagesFoyer> | null): R
     volumeEffets: borner(bruts.volumeEffets, REGLAGES_FOYER_PAR_DEFAUT.volumeEffets),
     volumeVoix: borner(bruts.volumeVoix, REGLAGES_FOYER_PAR_DEFAUT.volumeVoix),
     animationsCalmes: bruts.animationsCalmes === true,
-    boutonEcouter: bruts.boutonEcouter !== false
+    boutonEcouter: bruts.boutonEcouter === true
   };
 }
 

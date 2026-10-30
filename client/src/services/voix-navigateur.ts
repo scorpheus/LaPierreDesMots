@@ -88,8 +88,3 @@ export async function direTexte(
 ): Promise<void> {
   await voix.dire({ texte, cle, locuteur: locuteur as Locuteur });
 }
-
-/** Coupe la lecture en cours. */
-export function stopperVoix(voix: FournisseurVoix): void {
-  voix.taire();
-}

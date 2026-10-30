@@ -81,7 +81,7 @@
 // « si l'égalité n'est pas atteinte, tu nommes chaque page manquante et pourquoi ». Le calcul
 // complet, avec ses commandes et leurs sorties, est dans le rapport du lot.
 // ═══════════════════════════════════════════════════════════════════════════════════════════
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import type { Profil } from '@pierre/partage';
@@ -210,6 +210,19 @@ export function VisiteDesEcrans({
     queryKey: ['parent', 'galerie', String(profil.id)],
     queryFn: () => lireGalerieParent(profil.id)
   });
+
+  // Lien direct `?exercice=<id>` (tableau des retours du parent) : l'exercice s'ouvre seul,
+  // hors journal, dès que le catalogue est là. Une seule fois par lien.
+  const lienDirectSuivi = useRef(false);
+  useEffect(() => {
+    if (lienDirectSuivi.current || galerie.data === undefined) return;
+    const demande = new URLSearchParams(window.location.search).get('exercice');
+    if (demande === null) return;
+    const entree = galerie.data.entrees.find((e) => String(e.exercice) === demande || String(e.noeud) === demande);
+    if (entree === undefined) return;
+    lienDirectSuivi.current = true;
+    surLancerExercice(entree, LANCEMENT_PARENT);
+  }, [galerie.data, surLancerExercice]);
 
   /**
    * ═══════════════════════════════════════════════════════════════════════════════════════════

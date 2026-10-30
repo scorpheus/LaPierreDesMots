@@ -172,8 +172,8 @@
   .collections-coffre { gap: .65rem; grid-template-rows: auto; }
   .collection-coffre { padding: .65rem; }
   .collection-coffre--formes [data-case-etagere] {
-    inline-size: 7.5rem !important;
-    min-block-size: 7.5rem !important;
+    inline-size: 9rem !important;
+    min-block-size: 9rem !important;
   }
   .case-coffre--compacte { inline-size: 7rem; min-block-size: 7rem; }
 }

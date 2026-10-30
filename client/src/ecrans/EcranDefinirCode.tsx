@@ -98,20 +98,15 @@ export function EcranDefinirCode({
       data-parent="code"
       data-parent-mode="definition"
       data-verrou="inactif"
-      style={{
-        padding: '2rem',
-        display: 'grid',
-        gap: '1.5rem',
-        justifyItems: 'center',
-        maxInlineSize: '30rem',
-        marginInline: 'auto'
-      }}
+      // Les MÊMES classes que la porte (`EcranCodeParent`, parent.css) : une seule mise en page
+      // pour les deux, corrigée une fois (T16 : 96 px de défilement mesurés en 1366×768).
+      className="code-parent-page"
     >
-      <h1 className="titre" style={{ fontSize: '2rem', margin: 0 }}>
+      <h1 className="titre code-parent-titre">
         {redefinition ? 'Changer le code' : 'Choisis le code du foyer'}
       </h1>
 
-      <p style={{ margin: 0, textAlign: 'center' }}>
+      <p className="code-parent-message">
         {redefinition
           ? 'Tape le nouveau code à quatre chiffres. L’ancien cessera de fonctionner.'
           : 'Quatre chiffres, choisis par toi. Ils ouvriront l’espace du parent — le suivi, les ' +
@@ -123,21 +118,13 @@ export function EcranDefinirCode({
         aria-label={`Code choisi : ${saisie === '' ? 'aucun chiffre' : saisie.split('').join(' ')}`}
         data-code-longueur={String(saisie.length)}
         data-code-en-clair="oui"
-        style={{ display: 'flex', gap: '1rem' }}
+        className="code-parent-pastilles"
       >
         {Array.from({ length: LONGUEUR_CODE }, (_, rang) => (
           <span
             key={rang}
             aria-hidden="true"
-            style={{
-              inlineSize: '2.5rem',
-              blockSize: '3rem',
-              display: 'grid',
-              placeItems: 'center',
-              fontSize: '2rem',
-              borderRadius: '0.5rem',
-              border: '3px solid var(--trait)'
-            }}
+            className="code-parent-case"
           >
             {saisie[rang] ?? ''}
           </span>
@@ -147,24 +134,23 @@ export function EcranDefinirCode({
       <div
         role="group"
         aria-label="Pavé numérique"
-        style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(80px, 1fr))', gap: '1rem' }}
+        className="code-parent-pave"
       >
         {TOUCHES.map((chiffre) => (
           <button
             key={chiffre}
             type="button"
-            className="cible"
+            className="cible code-parent-touche"
             data-touche={chiffre}
             disabled={enCours || codeComplet}
             onClick={() => taper(chiffre)}
-            style={{ fontSize: '1.75rem', minBlockSize: 'var(--cible-min)' }}
           >
             {chiffre}
           </button>
         ))}
       </div>
 
-      <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+      <div className="code-parent-actions">
         <button
           type="button"
           className="cible cible-secondaire"
@@ -192,7 +178,7 @@ export function EcranDefinirCode({
       </div>
 
       {message === null ? null : (
-        <p role="status" style={{ margin: 0, fontSize: '1.125rem' }}>
+        <p role="status" className="code-parent-message code-parent-message--important">
           {message}
         </p>
       )}

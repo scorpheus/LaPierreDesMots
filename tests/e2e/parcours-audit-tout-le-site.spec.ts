@@ -58,10 +58,13 @@ import {
   ecransDeclares,
   entrerDansLeNoeud,
   etatDuJeu,
+  formatsDuBalayage,
   lireTexte,
+  noeudsBalayes,
   noeudsLivres,
   ouvrirVueRegion,
   recettesDEcrans,
+  rotationDuPalier,
   preparer,
   taperElement,
 } from './qa-outils.js';
@@ -73,7 +76,7 @@ const ELEMENTS_MAX_AUDITES = 60;
 
 const NOEUDS = noeudsLivres();
 const ECRANS_DECLARES = ecransDeclares();
-const ECRANS = recettesDEcrans();
+const ECRANS = recettesDEcrans(noeudsBalayes());
 
 /** Amène la page sur l'écran de la recette, et VÉRIFIE qu'on y est bien arrivé. */
 async function allerSur(page: Page, ecran: EcranQA): Promise<void> {
@@ -135,8 +138,9 @@ async function chercherUneSortie(
 test.describe('QA — chaque écran du site a une sortie', () => {
   test.slow();
 
-  for (const ecran of ECRANS) {
-    test(`« ${ecran.nom} » a au moins une sortie`, async ({ page }) => {
+  for (const { element: ecran, format } of formatsDuBalayage(ECRANS)) {
+    test(`« ${ecran.nom} » a au moins une sortie — ${format.nom}`, async ({ page }) => {
+      await page.setViewportSize(format);
       const { trouvee, nbInteractifs, depart } = await chercherUneSortie(page, ecran);
       expect(
         trouvee,
@@ -152,10 +156,11 @@ test.describe('QA — chaque écran du site a une sortie', () => {
 test.describe('QA — R16 : aucune cible sous 64 px', () => {
   test.slow();
 
-  for (const ecran of ECRANS) {
-    test(`« ${ecran.nom} » n’offre que des cibles ≥ ${String(CIBLE_MINIMALE_PX)} px`, async ({
+  for (const { element: ecran, format } of formatsDuBalayage(ECRANS)) {
+    test(`« ${ecran.nom} » n’offre que des cibles ≥ ${String(CIBLE_MINIMALE_PX)} px — ${format.nom}`, async ({
       page,
     }) => {
+      await page.setViewportSize(format);
       await allerSur(page, ecran);
       const petites = await ciblesTropPetites(page);
       expect(
@@ -177,11 +182,17 @@ test.describe('QA — R16 : aucune cible sous 64 px', () => {
 test.describe('QA — réactions des commandes inventoriées', () => {
   test.slow();
 
-  // La relecture parent contient plusieurs centaines de commandes. Trois cas isolés gardent
-  // tout l’inventaire et les mêmes assertions sans allonger le délai d’un test individuel.
+  // Les écrans riches en commandes sont partagés en lots : chaque lot rejoue la mise en place et
+  // observe une commande sur `total`. Tout l'inventaire reste couvert, avec les mêmes assertions,
+  // et aucun cas ne dépasse la minute (le plus long fixait la durée de toute la campagne).
+  const LOTS_PAR_ECRAN: Readonly<Record<string, number>> = { dashboard: 16, chaudron: 6, 'visite-parent': 2 };
+  // Au palier `verifier`, un seul lot par écran et par campagne, en rotation : chaque commande
+  // est observée en quelques campagnes, toutes à chaque `verifier:complet`.
+  const rotation = rotationDuPalier();
   const lots = ECRANS.flatMap((ecran) => {
-    const total = ecran.attendu === 'dashboard' ? 3 : 1;
-    return Array.from({ length: total }, (_, index) => ({ ecran, index, total }));
+    const total = LOTS_PAR_ECRAN[ecran.attendu] ?? 1;
+    const tous = Array.from({ length: total }, (_, index) => ({ ecran, index, total }));
+    return rotation === null ? tous : [tous[rotation % total]!];
   });
   for (const { ecran, index, total } of lots) {
     test(`« ${ecran.nom} » : chaque commande inventoriée est observée${total === 1 ? '' : ` — lot ${index + 1}/${total}`}`, async ({ page, serveurIsole }) => {

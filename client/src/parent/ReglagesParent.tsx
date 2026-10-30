@@ -148,7 +148,7 @@ export function ReglagesParent({ surChangement }: ProprietesReglagesParent): Rea
           // pas son etiquette. `--cible-min` vaut 64px (styles/global.css:114).
           style={{ inlineSize: 'var(--cible-min)', blockSize: 'var(--cible-min)' }}
         />
-        Proposer le bouton « Écouter » à l’enfant
+        Gobi parle (bouton « Écouter » et répliques)
       </label>
 
       <p data-note="bouton-ecouter" style={{ margin: 0, color: 'var(--texte-secondaire)' }}>
@@ -158,7 +158,7 @@ export function ReglagesParent({ surChangement }: ProprietesReglagesParent): Rea
             'Le bouton n’apparaît que sur les consignes qui ont déjà une voix enregistrée. ' +
               'Tant qu’aucune voix n’est produite, il reste caché : un bouton qui ne répond pas ' +
               'déçoit plus qu’un bouton absent.'
-          : 'Le bouton « Écouter » est retiré du jeu. Les consignes restent lisibles à l’écran.'}
+          : 'Gobi ne parle pas : aucun bouton « Écouter », aucune réplique. Les consignes restent lisibles à l’écran.'}
       </p>
 
       <p style={{ margin: 0, color: 'var(--texte-secondaire)' }}>

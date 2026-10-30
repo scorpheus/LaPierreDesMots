@@ -10,6 +10,7 @@ import type { Page } from '@playwright/test';
 import { expect, test } from './invariants.js';
 
 import { deuxImages, entrerDansLeNoeud, etatDuJeu, noeudsLivres, preparer } from './qa-outils.js';
+import { attendreGeometrieStable } from '../qualite/aides-composition.js';
 
 const NOEUDS_TRI = noeudsLivres().filter((noeud) => noeud.moteur === 'tri');
 const DOSSIER_CAPTURES = resolve(process.cwd(), 'bac-a-sable', 'captures-correction-tri');
@@ -100,6 +101,9 @@ test.describe('tri — le doigt atteint les mots et les paniers restent compacts
     // les immenses panneaux sur un écran plus large et moins haut.
     await page.setViewportSize({ width: 1906, height: 890 });
     await expect(page.locator('[data-moteur="tri"]')).toBeVisible();
+    // Mesurer la disposition que l'enfant voit, une fois recomposée après le redimensionnement,
+    // et non l'image transitoire où les panneaux portent encore l'ancienne taille.
+    await attendreGeometrieStable(page);
     await expect.poll(() => elementsHorsIllustration(page)).toEqual([]);
     const hauteursLarges = await page.locator('[data-receptacle]').evaluateAll((paniers) =>
       paniers.map((panier) => panier.getBoundingClientRect().height),

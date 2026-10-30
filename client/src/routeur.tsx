@@ -9,25 +9,34 @@ import {
   createRootRoute,
   createRoute,
   createRouter,
+  lazyRouteComponent,
   useNavigate,
   useRouterState
 } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
-import type { CodeEcran, Profil } from '@pierre/partage';
+import type { CodeEcran, IdNoeud, Profil } from '@pierre/partage';
+import { LANCEMENT_PARENT } from '@pierre/partage/parent';
 import type { EntreeGalerie, OptionsLancement, RapportReinitialisation } from '@pierre/partage/parent';
 import { jetonParentPose, lirePaquetNoeud, lireProfil, listerProfils, marquerOuvertureVue } from './api/client.js';
 import { EcranCampement } from './ecrans/EcranCampement.js';
-import { EcranChaudron } from './ecrans/EcranChaudron.js';
 import { EcranCarte } from './ecrans/EcranCarte.js';
 import { EcranCodeParent } from './ecrans/EcranCodeParent.js';
 import { EcranCoffre } from './ecrans/EcranCoffre.js';
-import { EcranNoeud } from './ecrans/EcranNoeud.js';
 import { EcranOuverture } from './ecrans/EcranOuverture.js';
 import { EcranProfils } from './ecrans/EcranProfils.js';
 import { EcranRecompense } from './ecrans/EcranRecompense.js';
 import { EcranReglagesLecture } from './ecrans/EcranReglagesLecture.js';
 import { useEtatJeu, useMagasin } from './etat/services.js';
 import { memoriserProfil } from './etat/profil-memorise.js';
+
+// L'exercice et ses 14 moteurs (avec le glisser) forment le plus gros morceau du jeu. Chargés à
+// part, ils sortent du premier chargement (budget de 250 Ko gzip, v2 § 13.5 : 292 Ko mesurés le
+// 30 oct. avant ce découpage), puis sont préchargés dès le premier écran (`RacineRouteur`).
+// `lazyRouteComponent` fait attendre le module par le routeur avant d'afficher la route : aucun
+// écran d'attente ne s'intercale entre la carte et l'exercice.
+const chargerEcranChaudron = async () => import('./ecrans/EcranChaudron.js');
+const EcranNoeud = lazyRouteComponent(async () => import('./ecrans/EcranNoeud.js'), 'EcranNoeud');
+const EcranChaudron = lazy(async () => ({ default: (await chargerEcranChaudron()).EcranChaudron }));
 
 // Les outils parent se chargent à leur ouverture, après le premier écran de jeu.
 const EcranDashboard = lazy(async () => ({ default: (await import('./ecrans/EcranDashboard.js')).EcranDashboard }));
@@ -85,6 +94,7 @@ function estHoteLocal(): boolean {
  */
 export const CHEMINS = {
   debugRecompenses: '/debug/recompenses',
+  debugExercice: '/debug/exercice',
   campement: '/campement',
   chaudron: '/chaudron',
   coffre: '/coffre',
@@ -106,6 +116,37 @@ function EcranChargement(): ReactElement {
       </h1>
     </main>
   );
+}
+
+/**
+ * Banc local du tableau des retours (`Docs/tableau-retours.md`) : `/debug/exercice?noeud=<id>`
+ * ouvre l'exercice d'un clic, sans code parent ni choix du joueur, pour le profil retenu (sinon le
+ * premier). Seulement sur la machine elle-même : la tablette passe par l'adresse du réseau local
+ * et retombe sur le choix des profils. Toujours hors journal (`LANCEMENT_PARENT`).
+ */
+function HoteBancExercice(): ReactElement {
+  const magasin = useMagasin();
+  const profils = useQuery({ queryKey: ['profils'], queryFn: listerProfils, staleTime: 0 });
+  const lance = useRef(false);
+  const noeud = new URLSearchParams(window.location.search).get('noeud');
+  useEffect(() => {
+    if (lance.current || noeud === null) return;
+    const profil = magasin.getState().profil ?? profils.data?.[0] ?? null;
+    if (profil === null) return;
+    lance.current = true;
+    void lirePaquetNoeud(noeud as IdNoeud).then((paquet) => {
+      if (magasin.getState().profil?.id !== profil.id) magasin.getState().choisirProfil(profil);
+      magasin.getState().demarrerNoeud(paquet, LANCEMENT_PARENT);
+    });
+  }, [magasin, noeud, profils.data]);
+  if (noeud === null || profils.data?.length === 0) {
+    return (
+      <main data-banc="exercice" style={{ padding: '2rem' }}>
+        {noeud === null ? 'Indiquer ?noeud=<id> dans l’adresse.' : 'Créer d’abord un profil.'}
+      </main>
+    );
+  }
+  return <EcranChargement />;
 }
 
 /** Racine : le choix de profil, précédé de l'attente tant que rien n'est chargé. */
@@ -182,9 +223,6 @@ function HoteCampement(): ReactElement {
         // Le chaudron est une activité libre du campement. Il ne passe pas par `demarrerNoeud`.
         void naviguer({ to: CHEMINS.chaudron });
       }}
-      surRejouerOuverture={() => {
-        void naviguer({ to: CHEMINS.ouverture });
-      }}
       surAccesParent={() => {
         void naviguer({ to: CHEMINS.parent });
       }}
@@ -195,6 +233,12 @@ function HoteCampement(): ReactElement {
 /** Aucun hôte ne lit un profil partiel pendant la restauration de la session. */
 function RacineRouteur(): ReactElement {
   const chemin = useRouterState({ select: (etat) => cheminInterne(etat.location.pathname) });
+  // Préchargement des morceaux différés de l'exercice, une fois le premier écran rendu. Un échec
+  // (hors ligne sans cache) n'empêche rien : le module sera redemandé à l'entrée du nœud.
+  useEffect(() => {
+    void EcranNoeud.preload?.().catch(() => undefined);
+    void chargerEcranChaudron().catch(() => undefined);
+  }, []);
   const bancLocal = estHoteLocal() && chemin === CHEMINS.debugRecompenses;
   const indisponible = useEtatJeu((etat) => (!bancLocal && etat.ecran === 'chargement')
     || (chemin === '/noeud' && (etat.profil === null || etat.paquet === null || etat.moteur === null))
@@ -729,6 +773,11 @@ function construireRouteur() {
         ? <Suspense fallback={<EcranChargement />}><EcranDebugRecompenses exercicesInitiaux={Number(new URLSearchParams(window.location.search).get('exercices') ?? '23')} /></Suspense>
         : <RacineOuProfils />
     }),
+    createRoute({
+      getParentRoute: () => routeRacine,
+      path: CHEMINS.debugExercice,
+      component: () => estHoteLocal() ? <HoteBancExercice /> : <RacineOuProfils />
+    }),
     createRoute({ getParentRoute: () => routeRacine, path: '/', component: RacineOuProfils }),
     createRoute({ getParentRoute: () => routeRacine, path: '/carte', component: HoteCarte }),
     createRoute({ getParentRoute: () => routeRacine, path: '/mathematiques', component: HoteMathematiques }),
@@ -836,10 +885,12 @@ export function Routeur(): ReactElement {
       if (etat.ecran === 'chargement' || etat.hydratationRepriseLecture === 'en-cours' || estBancLocal()) return;
       const chemin = cheminActuel();
       const parent = chemin === CHEMINS.parent || chemin.startsWith(`${CHEMINS.parent}/`);
-      const connue = estRouteConnue(chemin) && chemin !== CHEMINS.debugRecompenses;
+      const bancExercice = chemin === CHEMINS.debugExercice;
+      const connue = estRouteConnue(chemin) && chemin !== CHEMINS.debugRecompenses
+        && (!bancExercice || estHoteLocal());
       const manqueExercice = (chemin === '/noeud' && (etat.paquet === null || etat.moteur === null))
         || (chemin === '/recompense' && (etat.paquet === null || etat.resume === null));
-      if (!connue || manqueExercice || (etat.profil === null && !parent && chemin !== '/')) {
+      if (!connue || manqueExercice || (etat.profil === null && !parent && !bancExercice && chemin !== '/')) {
         const repli = etat.profil === null ? 'profils' : 'campement';
         fixerEcran(repli);
         aller(repli, true);

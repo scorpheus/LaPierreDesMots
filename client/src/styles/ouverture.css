@@ -53,7 +53,7 @@
 
 @media (orientation: landscape) and (max-height: 800px) {
   .ouverture-tableau__decor {
-    inline-size: min(100%, 66dvh, 510px);
+    inline-size: min(100%, 60dvh, 510px); /* T16 : 66dvh débordait de 18 px en 1366×768 */
   }
 }
 

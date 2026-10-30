@@ -179,6 +179,9 @@ test.describe("Q3 — ce que l’écran annonce comme gagné existe en base", ()
       await preparer(page, "Q3 enfant");
       await jouerJusquALaRecompense(page, noeud, "Q3 enfant");
       await expect(page.locator('[data-ecran="recompense"]')).toBeVisible();
+      // Le gain vient de l'accusé du serveur : lire avant son arrivée manquait, sous charge, le
+      // palier intermédiaire (1 fois sur 4 mesuré). On attend l'état, pas une durée.
+      await expect(page.locator('[data-ecran="recompense"]')).toHaveAttribute('data-tentative-envoyee', 'oui');
       const vus = await page
         .locator("[data-recompense]")
         .evaluateAll((noeuds) => noeuds.map((n) => n.getAttribute("data-recompense") ?? ""));

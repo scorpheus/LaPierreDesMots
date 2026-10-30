@@ -12,7 +12,9 @@
 
 .campement-entete {
   display: grid;
-  grid-template-columns: minmax(15rem, 1fr) minmax(8rem, 10rem) repeat(3, minmax(4.5rem, 6.5rem));
+  grid-template-columns: minmax(15rem, 1fr);
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(4.5rem, 6.5rem);
   align-items: stretch;
   gap: .75rem;
 }
@@ -82,7 +84,7 @@
 .campement-acces-parent .cible { min-block-size: var(--cible-min); padding-inline: .85rem; opacity: .82; }
 
 @media (orientation: portrait) {
-  .campement-entete { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .campement-entete { grid-template-columns: repeat(auto-fit, minmax(var(--cible-min), 1fr)); grid-auto-flow: row; }
   .campement-introduction { grid-column: 1 / -1; }
 }
 
@@ -118,8 +120,8 @@
 @media (max-width: 620px) {
   .campement-page { padding: .65rem; }
   .campement-entete {
-    grid-template-columns: repeat(4, minmax(var(--cible-min), 1fr));
-    grid-template-rows: auto var(--cible-min);
+    grid-template-columns: repeat(auto-fit, minmax(var(--cible-min), 1fr));
+    grid-auto-flow: row;
   }
   .campement-introduction { grid-column: 1 / -1; }
   .campement-titre { font-size: clamp(1.75rem, 8vw, 2rem); }
@@ -128,7 +130,7 @@
 }
 
 @media (max-width: 900px), (max-height: 520px) {
-  .campement-entete { grid-template-columns: minmax(4rem, 1fr) repeat(4, minmax(var(--cible-min), 4.5rem)); grid-template-rows: auto; gap: .35rem; }
+  .campement-entete { grid-template-columns: minmax(4rem, 1fr); grid-auto-flow: column; grid-auto-columns: minmax(var(--cible-min), 4.5rem); gap: .35rem; }
   .campement-introduction { grid-column: auto; min-inline-size: 0; padding-inline: 0; }
   .campement-surtitre, .campement-accroche { display: none; }
   .campement-titre { font-size: clamp(1.35rem, 3vw, 1.8rem); }
@@ -140,7 +142,7 @@
 }
 
 @media (max-width: 620px) and (orientation: portrait) {
-  .campement-entete { grid-template-columns: repeat(4, minmax(var(--cible-min), 1fr)); }
+  .campement-entete { grid-template-columns: repeat(auto-fit, minmax(var(--cible-min), 1fr)); grid-auto-flow: row; }
   .campement-introduction { grid-column: 1 / -1; }
   .campement-titre { font-size: clamp(1.75rem, 8vw, 2rem); }
 }

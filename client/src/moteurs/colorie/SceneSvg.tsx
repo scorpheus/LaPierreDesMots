@@ -596,15 +596,7 @@ export function SceneSvg(proprietes: ProprietesSceneSvg): ReactElement {
       onPointerMove={loupeActive ? surPointerMove : undefined}
       onPointerUp={loupeActive ? surPointerUp : undefined}
       onPointerCancel={loupeActive ? surPointerCancel : undefined}
-      style={{
-        width: '100%',
-        height: 'auto',
-        maxWidth: '100%',
-        maxHeight: '100%',
-        alignSelf: 'center',
-        flex: '0 1 auto',
-        touchAction: loupeActive ? 'pan-x pan-y' : 'manipulation'
-      }}
+      style={{ touchAction: loupeActive ? 'pan-x pan-y' : 'manipulation' }}
     >
       <style>{STYLES_SCENE}</style>
 

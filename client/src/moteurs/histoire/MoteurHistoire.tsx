@@ -9,9 +9,11 @@
  * ══════════════════════════════════════════════════════════════════════════════════════════════
  * CE QUI A CHANGÉ, ET POURQUOI
  *
- * Le décor COUVRE désormais la zone de jeu et se RALLUME à mesure que les bonnes réponses sont
- * trouvées (R52). Les options sont posées à des emplacements DÉRIVÉS des régions de
- * l'habillage (`client/src/moteurs/eclair/mise-en-scene.ts`), jamais écrits à la main.
+ * Le décor se RALLUME à mesure que les bonnes réponses sont trouvées (R52) ; la cascade de
+ * recoloration se calcule toujours par `mise-en-scene.ts`. Les options, elles, ne sont PAS posées
+ * sur le décor : E09 (retour du parent, 9 octobre 2026) — elles suivent la question, dans un bloc
+ * question + réponses sous le récit. Dérogation à la décision D pour ce moteur, écrite dans
+ * Docs/socle-questions-et-lecture-2026-10-09.md § 5.
  *
  * ── LE RÉCIT RESTE UN CHAMP DE LECTURE, JAMAIS SUR LE DÉCOR ANIMÉ ─────────────────────────────
  * « Le décor s'agite, le texte jamais » (v2 § 9.3). `contenu.recit` peut faire plusieurs
@@ -21,9 +23,8 @@
  * dès le départ : le récit et les options doivent donc rester TAPABLES en même temps. Une
  * première version de ce lot avait fait du récit un panneau qui recouvrait et désactivait les
  * options — la recette l'a attrapé (« bonne réponse » restait bloquée tant que le récit était
- * ouvert, c'est-à-dire tout le temps par défaut). Le récit occupe donc une bande du HAUT dont
- * la hauteur est mesurée, exactement comme la phrase modèle de `phrase` (R60), et le décor
- * avec ses options se replient dans ce qui reste.
+ * ouvert, c'est-à-dire tout le temps par défaut). Le récit occupe donc le HAUT de la scène, et le décor
+ * se replie dans ce qui reste.
  *
  * ── LA QUESTION N'EST PLUS RÉPÉTÉE ICI ────────────────────────────────────────────────────────
  * R49 : `EcranNoeud` affiche déjà `question.texte` dans sa barre de consigne — il lit
@@ -41,6 +42,9 @@
 import { MessageStable } from '../../composants/MessageStable.js';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { CSSProperties, ReactElement } from 'react';
+import { DispositionMoteur } from '../../activite/DispositionMoteur.js';
+import { CadreQuestion, ROLE_REPONSE } from '../../activite/Question.js';
+import { TexteColore } from '../../lecture/TexteColore.js';
 import type { ActionHistoire, ContenuHistoire, EtatHistoire } from '@pierre/partage';
 import { ZoneDeLecture, styleDeLecture, useReglagesLecture } from '../../lecture/ZoneDeLecture.js';
 import { SceneDecor } from '../../habillages/SceneDecor.js';
@@ -53,7 +57,8 @@ import {
   regionsColoriables,
   useDerniereAllumee,
   useMesureCadre,
-} from '../eclair/mise-en-scene.js';
+} from '../commun/mise-en-scene.js';
+import './histoire.css';
 
 /** Cadence du `battementHorloge`. Le moteur ne connaît aucun `setTimeout` : c'est ici. */
 const PERIODE_BATTEMENT_MS = 1000;
@@ -123,20 +128,19 @@ export function MoteurHistoire(
 
   // --- la typographie de lecture ---------------------------------------------
   const reglages = useReglagesLecture();
-  const styleLecture = useMemo(() => styleDeLecture(reglages), [reglages]);
+  // Seules les variables de lecture descendent : les mots les lisent par la feuille de style.
+  const variablesLecture = useMemo(
+    () => Object.fromEntries(Object.entries(styleDeLecture(reglages)).filter(([cle]) => cle.startsWith('--'))),
+    [reglages],
+  );
 
   // --- la mesure du cadre -----------------------------------------------------
-  const { racine, bande, cadre, hauteurBande } = useMesureCadre();
+  const { racine, cadre } = useMesureCadre();
   const regimeCompact = cadre.largeur <= 700 || cadre.hauteur <= 520;
 
-  // Le récit n'est PAS un panneau exclusif qui bloquerait les options : R15 le rend
-  // consultable pendant les questions, gratuitement, donc les deux doivent rester tapables
-  // en même temps. Il occupe une bande en HAUT — même schéma que la phrase modèle de
-  // `phrase` (R60) — et le décor avec ses options se replient dans ce qui reste.
-  const { cadreJeu, bornes } = useMemo(
-    () => cadreJeuEtBornes(cadre, hauteurBande),
-    [cadre, hauteurBande],
-  );
+  // Le récit et les options restent tapables en même temps (R15). Le décor reçoit ce que la
+  // scène lui laisse ; la cascade de recoloration se calcule sur le cadre entier de la scène.
+  const { cadreJeu, bornes } = useMemo(() => cadreJeuEtBornes(cadre, 0), [cadre]);
 
   const regions = useMemo(() => regionsColoriables(habillage), [habillage]);
   const centroideParRegion = useMemo(
@@ -180,51 +184,13 @@ export function MoteurHistoire(
   const messageDeRefus =
     etat.dernierRefus === null ? '' : (MESSAGES_DE_REFUS[etat.dernierRefus.motif] ?? '');
 
-  return (
-    <div
-      ref={racine}
-      data-moteur="histoire"
-      data-habillage={habillage.id}
-      data-termine={etat.termineMs === null ? 'non' : 'oui'}
-      data-aide={etat.niveauAide}
-      data-etape={etape === undefined ? '' : etape.identifiant}
-      data-composition={regimeCompact ? 'compacte' : 'confort'}
-      data-regions-allumees={String(allumees.length)}
-      style={{
-        position: 'relative',
-        display: 'grid',
-        gridTemplateRows: 'auto auto minmax(220px, 1fr) auto',
-        gap: '0.5rem',
-        blockSize: 'auto',
-        minBlockSize: '100%',
-        overflow: 'visible',
-        borderRadius: 'var(--rayon-carte)',
-      }}
-    >
-      {/* ── LE RÉCIT — bande du HAUT, jamais sur le décor animé ─────────────────────────────
-          Basculer est GRATUIT et sans limite (R15), et ne bloque JAMAIS les options : c'est
-          le défaut que la première version de ce lot a introduit et que la recette a attrapé
-          (« bonne réponse » restait à `data-etapes-finies="0"` tant que le récit était ouvert,
-          alors qu'il l'est PAR DÉFAUT — `moteurHistoire.creerEtat` pose `recitVisible: true`).
-          Le récit occupe donc une bande en HAUT, comme la phrase modèle de `phrase` (R60), et
-          le décor avec ses options se replient dans ce qui reste — jamais l'inverse. */}
+  const scene = (
+    <div ref={racine} className="histoire" style={variablesLecture as CSSProperties}>
+      <div className="histoire__grille">
+      {/* ── LE RÉCIT — en haut de la scène, jamais sur le décor animé ──────────────────────
+          Basculer est GRATUIT et sans limite (R15), et ne bloque JAMAIS les options. */}
       {etat.recitVisible ? (
-        <div
-          data-plateau="recit"
-          data-visible="oui"
-          style={{
-            gridArea: '1 / 1',
-            justifySelf: 'center',
-            inlineSize: 'min(100%, 52rem)',
-            zIndex: 2,
-            display: 'grid',
-            alignContent: 'start',
-            padding: regimeCompact ? '0.5rem 0.65rem' : '0.75rem',
-            backgroundColor: 'var(--parchemin)',
-            border: 'var(--epaisseur-trait) solid var(--trait)',
-            borderRadius: 'var(--rayon-carte)',
-          }}
-        >
+        <div data-plateau="recit" data-visible="oui" className="histoire__recit">
           <ZoneDeLecture texte={contenu.recit} motsCles={[]} etiquette={`L’histoire : ${contenu.titre}`} />
         </div>
       ) : (
@@ -233,41 +199,57 @@ export function MoteurHistoire(
         <div data-plateau="recit" data-visible="non" hidden />
       )}
 
-      {/* La règle générale reste dans la barre de `EcranNoeud`. La question, qui change à
-          chaque réponse, reste ici au voisinage des réponses. La carte est superposée et
-          descend sous le récit lorsqu'il est ouvert : ni doublon, ni décor rétréci. */}
-      <div
-        data-plateau="etape-histoire"
-        data-etape-courante={String(Math.min(etat.indexEtape + 1, etat.etapes.length))}
-        data-etapes-total={String(etat.etapes.length)}
-        aria-label={`Question actuelle : ${questionCourante?.texte ?? 'Réponds à la question.'}`}
-        style={{
-          gridArea: '2 / 1',
-          justifySelf: 'center',
-          zIndex: 4,
-          padding: regimeCompact ? '0.25rem 0.5rem' : '0.5rem 0.75rem',
-          backgroundColor: 'var(--parchemin, #FBF6EA)',
-          border: 'var(--epaisseur-trait, 2px) solid var(--trait, #1B2440)',
-          borderRadius: 'var(--rayon-carte, 1rem)',
-          boxShadow: '0 3px 12px rgba(27, 36, 64, 0.16)',
-          pointerEvents: 'none',
-          ...styleLecture,
-          fontWeight: 700,
-          textAlign: 'center',
-          inlineSize: regimeCompact ? '100%' : 'auto',
-          maxInlineSize: regimeCompact ? '100%' : 'min(88%, 42rem)',
-        } as CSSProperties}
-      >
-        <span data-regle-histoire="oui" style={{ display: 'block', fontSize: '0.85em', opacity: 0.72 }}>
-          À toi de choisir
-        </span>
-        <span data-cible-histoire="oui">
-          {questionCourante?.texte ?? 'Réponds à la question.'}
-        </span>
+      {/* E09 / T19 : la question (thème question du socle) et ses réponses (thème réponse)
+          forment UN bloc, juste sous le récit : on lit, on lit la question, on répond dessous.
+          Les réponses ne sont plus dans la réserve à droite, loin de la question, ni posées sur
+          le décor (dérogation à la décision D pour ce moteur : Docs/socle-questions-et-lecture-2026-10-09.md § 5). */}
+      <div className="histoire__bloc-question">
+        <CadreQuestion
+          cle={etat.indexEtape}
+          animationsDesactivees={animationsDesactivees}
+          data-plateau="etape-histoire"
+          className="histoire__question"
+          data-etape-courante={String(Math.min(etat.indexEtape + 1, etat.etapes.length))}
+          data-etapes-total={String(etat.etapes.length)}
+          aria-label={`Question actuelle : ${questionCourante?.texte ?? 'Réponds à la question.'}`}
+        >
+          <span data-regle-histoire="oui" className="histoire__regle">
+            <TexteColore texte="À toi de choisir :" />
+          </span>{' '}
+          <span data-cible-histoire="oui" className="histoire__lecture">
+            <TexteColore texte={questionCourante?.texte ?? 'Réponds à la question.'} />
+          </span>
+        </CadreQuestion>
+
+        {/* Les options sont toujours tapables — y compris pendant que le récit est ouvert :
+            R15 dit « gratuit », pas « exclusif ». */}
+        <div data-plateau="options" className="histoire__options">
+          {(etape?.ordreAffichage ?? []).map((cle) => {
+            const option = optionParId.get(cle);
+            if (option === undefined) return null;
+            const refusee = etiquetteRefusee === cle;
+            const classes = ['cible', 'histoire__option'];
+            if (!animationsDesactivees && refusee) classes.push('oscillation');
+            return (
+              <button
+                key={refusee ? `${cle}-${String(marqueRefusCourante)}` : cle}
+                type="button"
+                {...ROLE_REPONSE}
+                data-option={cle}
+                className={classes.join(' ')}
+                onClick={(evenement) => {
+                  jouer({ type: 'repondre', option: cle }, evenement);
+                }}
+              >
+                <TexteColore texte={option.libelle} />
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      {/* ------------------------------------------------------------- le décor, en fond */}
-      <div style={{ gridArea: '3 / 1', position: 'relative', minBlockSize: 220 }}>
+      {/* ------------------------------------------------------------- le décor */}
+      <div className="histoire__decor">
         <SceneDecor
           habillage={habillage}
           allumees={allumees}
@@ -276,107 +258,56 @@ export function MoteurHistoire(
           ajustement="contenir"
         />
       </div>
-
-      {/* ------------------------------------------------------- les options, posées dessus
-          TOUJOURS tapables — y compris pendant que le récit est ouvert au-dessus : R15 dit
-          « gratuit », pas « exclusif ». */}
-      <div
-        data-plateau="options"
-        style={{
-                gridArea: '3 / 1',
-                position: 'relative',
-                zIndex: 1,
-                pointerEvents: 'none',
-                display: 'flex',
-                flexWrap: 'wrap',
-                alignContent: 'center',
-                justifyContent: 'center',
-                gap: '1rem',
-                padding: '1rem',
-              }}
-      >
-        {(etape?.ordreAffichage ?? []).map((cle) => {
-          const option = optionParId.get(cle);
-          if (option === undefined) return null;
-          const refusee = etiquetteRefusee === cle;
-          const classes = ['cible'];
-          if (!animationsDesactivees && refusee) classes.push('oscillation');
-          return (
-              <button
-                key={refusee ? `${cle}-${String(marqueRefusCourante)}` : cle}
-                type="button"
-                data-option={cle}
-                className={classes.join(' ')}
-                style={{ ...styleLecture, pointerEvents: 'auto', whiteSpace: 'normal', maxInlineSize: '100%', overflowWrap: 'anywhere' } as CSSProperties}
-                onClick={(evenement) => {
-                  jouer({ type: 'repondre', option: cle }, evenement);
-                }}
-              >
-                {option.libelle}
-              </button>
-          );
-        })}
       </div>
+    </div>
+  );
 
-      {/* ------------------------------------------------------------ la bande statique */}
-      <div
-        ref={bande}
-        data-plateau="controles"
-        style={{
-          gridArea: '4 / 1',
-          position: 'relative',
-          zIndex: 3,
-          display: 'grid',
-          gap: regimeCompact ? '0.2rem' : '0.5rem',
-          padding: regimeCompact ? '0.35rem' : '0.75rem',
+  const pied = (
+    <div data-plateau="controles" className="histoire__controles">
+      <button
+        type="button"
+        data-action="recit"
+        className="cible histoire__interface"
+        onClick={() => {
+          emettre({ type: 'basculerRecit' } as ActionHistoire);
         }}
       >
-        <button
-          type="button"
-          data-action="recit"
-          className="cible"
-          style={{ ...styleLecture, justifySelf: 'start' } as CSSProperties}
-          onClick={() => {
-            emettre({ type: 'basculerRecit' } as ActionHistoire);
-          }}
-        >
-          {etat.recitVisible ? 'Cacher l’histoire' : 'Relire l’histoire'}
-        </button>
+        {etat.recitVisible ? 'Cacher l’histoire' : 'Relire l’histoire'}
+      </button>
 
-        <p
-          role="status"
-          aria-live="polite"
-          data-refus-texte={messageDeRefus === '' ? 'non' : 'oui'}
-          data-animations={animationsDesactivees ? 'calmes' : 'vives'}
-          style={{
-            ...styleLecture,
-            margin: 0,
-            minBlockSize: '1.5em',
-          } as CSSProperties}
-        >
-          <MessageStable messages={Object.values(MESSAGES_DE_REFUS)}>{messageDeRefus === '' ? (etat.aide === null ? '' : (etat.aide.texte ?? '')) : messageDeRefus}</MessageStable>
-        </p>
+      <p
+        role="status"
+        aria-live="polite"
+        className="histoire__interface histoire__message"
+        data-refus-texte={messageDeRefus === '' ? 'non' : 'oui'}
+        data-animations={animationsDesactivees ? 'calmes' : 'vives'}
+      >
+        <MessageStable messages={Object.values(MESSAGES_DE_REFUS)}>{messageDeRefus === '' ? (etat.aide === null ? '' : (etat.aide.texte ?? '')) : messageDeRefus}</MessageStable>
+      </p>
 
-        <p
-          role="status"
-          aria-live="polite"
-          data-annonce="coloriage"
-          style={{
-            position: 'absolute',
-            inlineSize: 1,
-            blockSize: 1,
-            overflow: 'hidden',
-            clip: 'rect(0 0 0 0)',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          {derniere === null
-            ? ''
-            : `${regions.find((r) => r.id === derniere.id)?.libelle ?? derniere.id} reprend ses couleurs.`}
-        </p>
-      </div>
-
-      {/* ── LES DEUX CONTRÔLES SONT PORTÉS PAR L'ÉCRAN, PAS PAR LE MOTEUR (R10) ────────────── */}
+      <p role="status" aria-live="polite" data-annonce="coloriage" className="sr-only">
+        {derniere === null
+          ? ''
+          : `${regions.find((r) => r.id === derniere.id)?.libelle ?? derniere.id} reprend ses couleurs.`}
+      </p>
     </div>
+  );
+
+  // Les deux contrôles (écouter, aide) sont portés par l'écran, pas par le moteur (R10).
+  return (
+    <DispositionMoteur
+      moteur="histoire"
+      // Sur petit écran, le récit ouvert et la question réclament leur hauteur : la page défile
+      // plutôt que de laisser la scène déborder sur « Relire l'histoire ».
+      hauteurPetitEcran="contenu"
+      data-habillage={habillage.id}
+      data-termine={etat.termineMs === null ? 'non' : 'oui'}
+      data-aide={etat.niveauAide}
+      data-etape={etape === undefined ? '' : etape.identifiant}
+      data-composition={regimeCompact ? 'compacte' : 'confort'}
+      data-regions-allumees={String(allumees.length)}
+      scene={scene}
+      pied={pied}
+    />
   );
 }

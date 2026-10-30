@@ -1,0 +1,182 @@
+/* Moteur `colorie` — apparence propre. La disposition vient du socle (DispositionMoteur). */
+
+/* ── Le cadre du dessin et sa loupe ─────────────────────────────────────────────────────── */
+
+.pierre-cadre-coloriage {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  inline-size: 100%;
+  block-size: 100%;
+  min-inline-size: 0;
+  min-block-size: 0;
+}
+
+.pierre-cadre-coloriage__commande {
+  align-self: center;
+  min-inline-size: 64px;
+  min-block-size: 64px;
+  padding: 0.45rem 0.85rem;
+  border: 2px solid var(--trait, #1B2440);
+  border-radius: 0.75rem;
+  background: var(--parchemin, #FFF6E3);
+  color: var(--trait, #1B2440);
+  font-family: var(--font-interface);
+  font-size: var(--socle-texte-interface, 1.125rem);
+  font-weight: 700;
+}
+
+.pierre-cadre-coloriage__commande:focus-visible {
+  outline: 3px solid var(--soleil, #FFC93C);
+  outline-offset: 3px;
+}
+
+.pierre-cadre-coloriage__fenetre {
+  display: flex;
+  flex: 1 1 0;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: 0;
+  min-block-size: 0;
+  overflow: hidden;
+}
+
+/* Le dessin occupe toute la fenêtre ; `preserveAspectRatio` le garde entier et centré. */
+.pierre-cadre-coloriage .pierre-scene {
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+/* Loupe : l'enfant a demandé à voir en grand, la fenêtre défile sous son doigt. */
+.pierre-cadre-coloriage[data-loupe='oui'] .pierre-cadre-coloriage__fenetre {
+  align-items: flex-start;
+  justify-content: flex-start;
+  overflow: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-x pan-y;
+  border: 2px solid color-mix(in srgb, var(--trait, #1B2440) 35%, transparent);
+  border-radius: 0.75rem;
+}
+
+.pierre-cadre-coloriage[data-loupe='oui'] .pierre-scene {
+  flex: none;
+  min-inline-size: 1280px;
+  block-size: auto;
+}
+
+/* ── La réserve : cible de l'étape, indice, couleurs ────────────────────────────────────── */
+
+.pierre-palette {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--socle-espace);
+}
+
+.pierre-progression-consignes {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: var(--trait, #1B2440);
+  font-family: var(--font-interface);
+  font-size: var(--socle-texte-interface, 1.125rem);
+  font-weight: 700;
+}
+
+
+.pierre-progression-consignes > span[data-etat] {
+  inline-size: 0.85rem;
+  block-size: 0.85rem;
+  border: 2px solid var(--trait, #1B2440);
+  border-radius: 50%;
+}
+
+.pierre-progression-consignes > span[data-etat='faite'] { background: var(--vert, #2FB344); }
+
+.pierre-progression-consignes > span[data-etat='courante'] {
+  background: var(--soleil, #FFC93C);
+  box-shadow: 0 0 0 3px var(--parchemin, #FFF6E3), 0 0 0 5px var(--trait, #1B2440);
+}
+
+/* Texte à déchiffrer : police et corps de lecture du profil, aucune animation (v2 § 9.3). */
+.pierre-indice-colorie,
+/* T19 : fond, bord, police et corps viennent du thème question du socle (activite/questions.css). */
+.pierre-cible-colorie {
+  padding: 0.55rem 0.8rem;
+  line-height: 1.35;
+  text-align: center;
+  animation: none;
+  transition: none;
+}
+
+.pierre-indice-colorie mark {
+  padding: 0 0.15em;
+  border-radius: 6px;
+  background: var(--soleil, #FFC93C);
+  color: inherit;
+}
+
+.pierre-cible-colorie {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  font-weight: 700;
+}
+
+.pierre-cible-colorie__couleur {
+  flex: 0 0 auto;
+  inline-size: 1.2em;
+  block-size: 1.2em;
+  border: 2px solid var(--trait, #1B2440);
+  border-radius: 50%;
+}
+
+.pierre-palette__godets {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+/* Cibles ≥ 64 px (R16) ; 8 px de marge au bord de l'écran. */
+.pierre-godet {
+  inline-size: calc(var(--socle-cible, 64px) + 8px);
+  block-size: calc(var(--socle-cible, 64px) + 8px);
+  padding: 0;
+  border: 4px solid var(--trait, #1B2440);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 400ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 120ms linear;
+}
+
+.pierre-godet:active { transform: scale(0.94); transition: transform 60ms ease-out; }
+
+.pierre-godet[data-choisie='oui'] {
+  box-shadow: 0 0 0 5px var(--parchemin, #FFF6E3), 0 0 0 9px var(--trait, #1B2440);
+}
+
+.pierre-godet--demonstration { animation: pierre-godet-halo 900ms ease-in-out infinite; }
+
+@keyframes pierre-godet-halo {
+  0%, 100% { filter: none; }
+  50% { filter: drop-shadow(0 0 10px var(--soleil, #FFC93C)); }
+}
+
+.pierre-palette--calme .pierre-godet,
+.pierre-palette--calme .pierre-godet--demonstration { animation: none; transition: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .pierre-godet,
+  .pierre-godet--demonstration { animation: none; transition: none; }
+}
+
+/* ── Le pied : rappel bienveillant ──────────────────────────────────────────────────────── */
+
+[data-moteur='colorie'] p[role='status'] {
+  margin: 0;
+  font-family: var(--font-interface);
+  font-size: var(--socle-texte-interface, 1.125rem);
+  text-align: center;
+}

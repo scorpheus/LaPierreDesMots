@@ -3,6 +3,7 @@
  * Ces tests sont volontairement isolés du moteur : ils vérifient le cadre et la traduction
  * du geste, pas une maquette de progression pédagogique.
  */
+import { readFileSync } from 'node:fs';
 import { useState } from 'react';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -57,8 +58,8 @@ function ScenePourGestes({ loupe, peindre }: { readonly loupe: boolean; peindre:
 
 describe('CadreColoriage', () => {
   it('fixe les deux dimensions de confort demandées', () => {
-    const { container } = render(<CadreColoriage enfants={() => <SceneQuiSeSouvient />} />);
-    const styles = [...container.querySelectorAll('style')].map((style) => style.textContent).join('\n');
+    // Les dimensions sont déclarées dans la feuille du moteur, chargée avec le composant.
+    const styles = readFileSync('client/src/moteurs/colorie/colorie.css', 'utf8');
 
     expect(TAILLE_COMMANDE_LOUPE_PX).toBe(64);
     expect(LARGEUR_MINIMALE_LOUPE_PX).toBe(1280);

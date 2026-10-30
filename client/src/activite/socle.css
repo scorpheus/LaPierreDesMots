@@ -1,0 +1,216 @@
+/*
+ * Socle d'activité — Docs/contrat-socle-activite.md § 4.
+ * Seul endroit où se règlent les tailles et la disposition communes aux 14 moteurs.
+ * Un moteur migré ne pose ni @media ni taille en px : il remplit les zones ci-dessous.
+ */
+
+:root {
+  --socle-espace: clamp(6px, 1.2vmin, 16px);
+  --socle-cible: var(--cible-min, 64px);
+  --socle-guide: clamp(96px, 14vmin, 150px);
+  --socle-image-min: 96px;
+  --socle-texte-interface: 1.125rem;
+}
+
+/* ── L'écran d'exercice : bandeau, scène, guide ─────────────────────────────────────────── */
+
+.ecran-activite {
+  display: grid;
+  grid-template-areas:
+    'entete entete'
+    'scene guide';
+  grid-template-columns: minmax(0, 1fr) clamp(200px, 22vw, 300px);
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: var(--socle-espace);
+  inline-size: min(100%, 1600px);
+  block-size: 100dvh;
+  margin-inline: auto;
+  padding: var(--socle-espace);
+  padding-block-end: max(var(--socle-espace), env(safe-area-inset-bottom));
+  background: color-mix(in srgb, var(--parchemin) 94%, var(--grisaille));
+}
+
+/* Sans guide (le chaudron), la scène prend toute la largeur. */
+.ecran-activite:not(:has(> .gobi)) {
+  grid-template-areas: 'entete' 'scene';
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.ecran-activite > .entete-activite { grid-area: entete; }
+
+/* Les commandes de la coque parlent la langue de l'interface, pas celle du texte à lire. */
+.ecran-activite > .entete-activite .cible,
+.ecran-activite > .gobi > .cible {
+  font-size: var(--socle-texte-interface);
+}
+
+.ecran-activite > p[role='status'],
+.ecran-activite > p[role='alert'] { grid-column: 1 / -1; margin: 0; }
+
+.ecran-activite > .cadre-scene-activite {
+  grid-area: scene;
+  position: relative;
+  isolation: isolate;
+  container: scene / size;
+  min-inline-size: 0;
+  min-block-size: 0;
+  border: 2px solid color-mix(in srgb, var(--trait) 16%, transparent);
+  border-radius: var(--rayon-carte);
+  background: var(--parchemin);
+}
+
+/*
+ * Le guide : Gobi ou le compagnon de la sortie, assez grand pour être reconnu.
+ * Paysage : le dessin en haut, les boutons dessous, puis la bulle. La rangée de la bulle peut
+ * rétrécir : un long texte d'aide défile dans la bulle (il reste écoutable) au lieu d'agrandir
+ * la page ou de pousser la scène.
+ */
+.ecran-activite > .gobi {
+  grid-area: guide;
+  display: grid;
+  /* Deux boutons côte à côte : ils se partagent la largeur et replient leur texte si besoin. */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: auto auto minmax(0, auto);
+  align-content: safe center;
+  justify-content: center;
+  align-items: center;
+  justify-items: center;
+  gap: 0.5rem;
+  min-inline-size: 0;
+  min-block-size: 0;
+  padding-inline: 0.25rem;
+  border-radius: var(--rayon-carte);
+  background: var(--parchemin);
+}
+
+.ecran-activite > .gobi > :first-child { grid-column: 1 / -1; grid-row: 1; }
+.ecran-activite > .gobi > :not(:first-child, .gobi-bulle) { grid-row: 2; max-inline-size: 100%; }
+/* Un seul bouton (dessin, bulle, bouton) : il se centre sous le dessin. */
+.ecran-activite > .gobi > :nth-child(3):last-child { grid-column: 1 / -1; }
+
+.ecran-activite > .gobi svg[role='img'],
+.ecran-activite > .gobi .compagnon-portrait--aide img {
+  inline-size: var(--socle-guide);
+  block-size: var(--socle-guide);
+  object-fit: contain;
+}
+
+.ecran-activite > .gobi > .gobi-bulle {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  justify-self: stretch;
+  align-self: stretch;
+  min-inline-size: 0;
+  min-block-size: 0;
+  overflow-y: auto;
+  overflow-wrap: break-word;
+}
+
+/* Portrait : le guide passe sous la scène. */
+@media (orientation: portrait) {
+  .ecran-activite {
+    grid-template-areas: 'entete' 'scene' 'guide';
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr) auto;
+  }
+}
+
+/*
+ * Portrait assez large : le guide tient en une ligne, dessin, bulle, boutons. Sa hauteur est
+ * fixe (dessin ou deux boutons) : quand Gobi parle, la scène ne rétrécit pas ; un long texte
+ * défile dans la bulle.
+ */
+@media (orientation: portrait) and (min-width: 601px) {
+  .ecran-activite {
+    grid-template-rows: auto minmax(0, 1fr) calc(max(var(--socle-guide), 2 * var(--socle-cible) + 0.5rem) + 1.5rem);
+  }
+
+  .ecran-activite > .gobi {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+    justify-content: stretch;
+  }
+
+  .ecran-activite > .gobi > :first-child { grid-column: 1; grid-row: 1 / span 2; }
+  .ecran-activite > .gobi > .gobi-bulle { grid-column: 2; grid-row: 1 / span 2; }
+  .ecran-activite > .gobi > :not(:first-child, .gobi-bulle) { grid-column: 3; grid-row: auto; }
+  .ecran-activite > .gobi > :nth-child(3):last-child { grid-column: 3; grid-row: 1 / span 2; }
+}
+
+/* Petit écran : la page peut défiler, seulement là (contrat § 3, S2). */
+@media (max-width: 600px), (max-height: 500px) {
+  .ecran-activite {
+    block-size: auto;
+    min-block-size: 100dvh;
+    grid-template-rows: auto minmax(60svh, auto) auto;
+  }
+
+  .ecran-activite > .cadre-scene-activite { container-type: inline-size; }
+
+  /* La scène garde une vraie taille ; la réserve vient dessous et la page défile. */
+  .disposition-moteur {
+    block-size: auto;
+    grid-template-rows: auto auto auto;
+  }
+
+  .disposition-moteur__scene { block-size: 55svh; }
+
+  .disposition-moteur[data-hauteur-petit-ecran='contenu'] > .disposition-moteur__scene {
+    block-size: auto;
+    min-block-size: 55svh;
+  }
+}
+
+/* Téléphone couché : le guide est à côté de la scène et la suit quand la page défile. */
+@media (max-height: 500px) and (orientation: landscape) {
+  .ecran-activite > .gobi {
+    position: sticky;
+    inset-block-start: var(--socle-espace);
+    align-self: start;
+    block-size: calc(100dvh - 2 * var(--socle-espace));
+  }
+}
+
+/* ── La disposition d'un moteur : scène, réserve, pied ──────────────────────────────────── */
+
+.disposition-moteur {
+  display: grid;
+  grid-template-areas: 'scene' 'reserve' 'pied';
+  grid-template-rows: minmax(0, 1fr) auto auto;
+  gap: var(--socle-espace);
+  inline-size: 100%;
+  block-size: 100%;
+  padding: var(--socle-espace);
+}
+
+/* Scène large : la réserve se range à côté au lieu de pousser la scène hors de l'écran. */
+@container scene (aspect-ratio > 1.15) {
+  .disposition-moteur[data-disposition-socle='auto']:has(> .disposition-moteur__reserve) {
+    grid-template-areas: 'scene reserve' 'pied reserve';
+    grid-template-columns: minmax(0, 1fr) minmax(min-content, 30%);
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+}
+
+.disposition-moteur__scene {
+  grid-area: scene;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: 0;
+  min-block-size: 0;
+}
+
+.disposition-moteur__reserve {
+  grid-area: reserve;
+  /* « safe » : un contenu trop haut déborde vers le bas, jamais sous l'en-tête. */
+  align-self: safe center;
+  min-inline-size: 0;
+}
+
+.disposition-moteur__pied {
+  grid-area: pied;
+  min-inline-size: 0;
+}
+
+.disposition-moteur__pied:empty { display: none; }

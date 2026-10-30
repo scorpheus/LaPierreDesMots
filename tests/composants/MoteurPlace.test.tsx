@@ -173,9 +173,12 @@ describe('MoteurPlace — les prises du contrat § 7', () => {
     );
     expect(document.querySelectorAll('[data-element-role="a-placer"]')).toHaveLength(3);
     expect(document.querySelectorAll('[data-element-role="amusant"]')).toHaveLength(2);
-    expect(document.querySelector('[data-element="poisson"]')?.getAttribute('aria-label')).toBe(
-      'un poisson, dessin pour s’amuser',
-    );
+    // Retour du parent du 9 oct. (tableau, E04) : rien ne dit QUEL dessin est un intrus.
+    // C'est à l'enfant de lire la consigne et de décider ; la réponse n'est écrite nulle part.
+    expect(document.querySelector('[data-element="poisson"]')?.getAttribute('aria-label')).toBe('un poisson');
+    for (const jeton of document.querySelectorAll('[data-element]')) {
+      expect(jeton.textContent ?? '').not.toContain('laisser');
+    }
   });
 
   it('place les zones sur le ciel, le toit central et le banc de l’illustration', () => {
@@ -315,13 +318,18 @@ describe('MoteurPlace — R16, les cibles ne sont jamais minuscules', () => {
 
   it('chaque jeton de la réserve déclare au moins 64 px dans les deux dimensions', () => {
     render(<Harnais />);
+    // happy-dom ne charge pas le CSS : on lit la règle déclarée dans `place.css` et le jeton
+    // du socle qu'elle cite ; la mesure réelle reste celle de `tests/qualite/a11y.spec.ts`.
+    const css = readFileSync(join(RACINE_DEPOT, 'client/src/moteurs/place/place.css'), 'utf8');
+    const regle = /\.place-jeton\s*\{([^}]*)\}/u.exec(css)?.[1] ?? '';
+    expect(regle).toMatch(/min-inline-size:\s*var\(--socle-cible/u);
+    expect(regle).toMatch(/min-block-size:\s*var\(--socle-cible/u);
+    const socle = readFileSync(join(RACINE_DEPOT, 'client/src/activite/socle.css'), 'utf8');
+    expect(socle).toMatch(/--socle-cible:\s*var\(--cible-min,\s*64px\)/u);
     for (const element of contenu.reserve) {
       const noeud = document.querySelector<HTMLElement>(`[data-element="${element.id}"]`);
       expect(noeud).not.toBeNull();
-      // happy-dom ne fait pas de mise en page : on lit le style déclaré, et la mesure réelle
-      // reste celle de `tests/qualite/a11y.spec.ts` sur la boîte rendue.
-      expect(Number.parseFloat(noeud!.style.minWidth)).toBeGreaterThanOrEqual(64);
-      expect(Number.parseFloat(noeud!.style.minHeight)).toBeGreaterThanOrEqual(64);
+      expect(noeud!.classList.contains('place-jeton')).toBe(true);
     }
   });
 

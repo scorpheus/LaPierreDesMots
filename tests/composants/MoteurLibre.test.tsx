@@ -13,6 +13,7 @@
  * L'habillage n'est PAS fabriqué : il est lu sur disque, parmi les trois écrits pour ce
  * moteur. Un test qui invente son décor ne dit rien de celui qui atteint l'enfant.
  */
+import { readFileSync } from 'node:fs';
 import { useCallback, useState } from 'react';
 import type { ReactElement } from 'react';
 import { cleanup, fireEvent, render } from '@testing-library/react';
@@ -61,6 +62,16 @@ function servicesJeuDeTest(): ServicesJeu {
 const services = servicesJeuDeTest();
 
 import { contenuLibre as contenu } from '../fixtures/moteurs/libre.js';
+
+/** Les déclarations d'un sélecteur dans une feuille (règles groupées comprises, commentaires ôtés). */
+function bloc(css: string, selecteur: string): string {
+  const sansCommentaires = css.replace(/\/\*[\s\S]*?\*\//g, '');
+  const corps: string[] = [];
+  for (const m of sansCommentaires.matchAll(/([^{}]+)\{([^}]*)\}/g)) {
+    if ((m[1] ?? '').split(',').map((x) => x.trim()).includes(selecteur)) corps.push(m[2] ?? '');
+  }
+  return corps.join('\n');
+}
 
 /**
  * Le harnais expose le résumé et la progression en `data-*`. C'est volontaire : les
@@ -169,8 +180,11 @@ describe('moteur libre', () => {
     const { container } = render(<Harnais />);
     const toile = container.querySelector<HTMLElement>('[data-plateau="regions"]');
     expect(toile).not.toBeNull();
-    expect(toile!.style.minBlockSize).toBe('0');
-    expect(toile!.style.overflow).toBe('hidden');
+    // La mise en page vit dans la feuille du moteur (libre.css), pas dans des styles en ligne.
+    const css = readFileSync('client/src/moteurs/libre/libre.css', 'utf8');
+    expect(toile!.classList.contains('libre-toile')).toBe(true);
+    expect(bloc(css, '.libre-toile')).toMatch(/min-block-size:\s*0\b/);
+    expect(bloc(css, '.libre-toile')).toMatch(/overflow:\s*hidden/);
     expect(container.querySelectorAll('.zone-lecture')).toHaveLength(0);
     expect(container.querySelector('[data-plateau="nuancier"] [data-action="terminer"]')).not.toBeNull();
   });

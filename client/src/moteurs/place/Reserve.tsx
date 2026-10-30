@@ -10,7 +10,7 @@
  * `element-hors-consigne` fait revenir l'objet dans la réserve, et l'exercice continue
  * (R14).
  *
- * RÈGLE DES 64 px (R16) : chaque bouton porte `minWidth`/`minHeight` de 64 px CSS. Ce n'est
+ * RÈGLE DES 64 px (R16) : `.place-jeton` (place.css) porte `min-inline-size`/`min-block-size` de `--socle-cible` (64 px). Ce n'est
  * pas décoratif — c'est ce que `tests/qualite/a11y.spec.ts` mesure sur la boîte réellement
  * rendue, et ce que `data-element` lui donne comme prise.
  */
@@ -20,13 +20,13 @@ import type { ReactElement } from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import type { ElementPlacable } from '@pierre/partage';
 import { urlAsset } from '../../api/client.js';
+import { ROLE_QUESTION, ROLE_REPONSE } from '../../activite/Question.js';
+import { TexteColore } from '../../lecture/TexteColore.js';
 
 type IdElement = string;
 
 /** R16, en toutes lettres : aucune cible sous 64 px CSS. */
 export const CIBLE_MINIMALE_PX = 64;
-
-const TRAIT = 'var(--trait, #1B2440)';
 
 export interface ProprietesReserve {
   readonly elements: readonly ElementPlacable[];
@@ -67,6 +67,7 @@ function Jeton(proprietes: {
     <button
       ref={setNodeRef}
       type="button"
+      {...ROLE_REPONSE}
       data-element={element.id}
       data-element-role={roleAttendu}
       data-place={place ? 'oui' : 'non'}
@@ -80,28 +81,11 @@ function Jeton(proprietes: {
       // l'enfant manipule ; ceux de la bibliothèque décrivent un « draggable item ». C'est le
       // libellé de l'objet que le lecteur d'écran doit dire.
       aria-pressed={saisi}
-      aria-label={
-        roleAttendu === 'amusant' ? `${element.libelle}, dessin pour s’amuser` : element.libelle
-      }
-      style={{
-        minWidth: `${CIBLE_MINIMALE_PX}px`,
-        minHeight: '96px',
-        padding: '0.4rem 0.8rem 0.55rem',
-        borderRadius: '1rem',
-        border: `${saisi ? 3 : 1.5}px solid ${TRAIT}`,
-        // Un élément posé s'estompe ; il ne disparaît pas et ne devient jamais rouge (R14).
-        opacity: place ? 0.45 : 1,
-        background: saisi ? 'var(--jeton-actif, #F2C14E)' : 'var(--jeton, #FFFFFF)',
-        color: TRAIT,
-        cursor: place ? 'default' : 'pointer',
-        touchAction: 'none',
-        transform: deplacement,
-        display: 'grid',
-        justifyItems: 'center',
-        alignContent: 'center',
-        gap: '0.15rem',
-        fontWeight: 700,
-      }}
+      // Le même libellé pour tous : rien ne désigne l'intrus, c'est à l'enfant de le trouver
+      // (retour du parent, tableau E04).
+      aria-label={element.libelle}
+      className="place-jeton"
+      style={deplacement === undefined ? undefined : { transform: deplacement }}
     >
       <img
         data-dessin-objet={element.id}
@@ -109,10 +93,8 @@ function Jeton(proprietes: {
         alt=""
         aria-hidden="true"
         draggable={false}
-        style={{ width: '54px', height: '54px', objectFit: 'contain', pointerEvents: 'none' }}
       />
-      <span>{element.libelle}</span>
-      {roleAttendu === 'amusant' ? <small>à laisser</small> : null}
+      <span className="place-jeton__libelle">{element.libelle}</span>
     </button>
   );
 }
@@ -127,13 +109,11 @@ export function Reserve(proprietes: ProprietesReserve): ReactElement {
       data-reserve="place"
       role="group"
       aria-label={`${nbAttendus} dessins à placer et ${amusants.length} intrus à laisser`}
-      style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0.75rem' }}
+      className="place-jetons"
     >
-      <p
-        data-place-compteur="oui"
-        style={{ flexBasis: '100%', margin: 0, textAlign: 'center', fontWeight: 700 }}
-      >
-        {nbAttendus} dessins à placer · {amusants.length} intrus à laisser
+      {/* T19 : ce que la réserve demande — thème question du socle. */}
+      <p data-place-compteur="oui" className="place-jetons__compteur" {...ROLE_QUESTION}>
+        <TexteColore texte={`${String(nbAttendus)} dessins à placer · ${String(amusants.length)} intrus à laisser`} />
       </p>
       {elements.map((element) => (
         <Jeton

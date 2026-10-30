@@ -26,18 +26,6 @@ export function modeReponseEclair(contenu: ContenuEclair, indexEtape: number): M
   return 'qcm-4';
 }
 
-/**
- * La latence de reconnaissance (D18) : du moment où le mot disparaît au premier geste.
- * `null` quand l'un des deux instants manque — un indicateur inventé vaut moins que rien.
- */
-export function latenceReconnaissanceMs(
-  finExpositionMs: number | null,
-  premiereActionMs: number | null,
-): number | null {
-  if (finExpositionMs === null || premiereActionMs === null) return null;
-  return Math.max(0, premiereActionMs - finExpositionMs);
-}
-
 export interface DecisionEclair {
   readonly acceptee: boolean;
   readonly motif: MotifRefusEclair | null;

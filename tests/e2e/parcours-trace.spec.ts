@@ -15,6 +15,7 @@
  * aucun attribut de nœud sur la carte. Même choix, même motif qu'en `parcours-nominal`.
  */
 import { readFileSync } from 'node:fs';
+import { allumerLaVoix } from './voix-allumee.js';
 import { fileURLToPath } from 'node:url';
 import { expect, test } from './invariants.js';
 import { attendreGeometrieStable } from '../qualite/aides-composition.js';
@@ -125,6 +126,7 @@ async function entrerDansLeNoeud(page: Page): Promise<void> {
 
 test.describe('parcours trace', () => {
   test('le refus ne change ni la taille ni la position de la lettre sur PC', async ({ page }) => {
+    await allumerLaVoix(page);
     await page.setViewportSize({ width: 1366, height: 768 });
     await preparer(page);
     await page.getByText(String(fixtureProfil['prenom']), { exact: false }).first().click();

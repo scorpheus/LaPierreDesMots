@@ -1,0 +1,282 @@
+/*
+ * Le calcul — premier jet (Docs/maths-calcul-premier-jet-2026-10-09.md).
+ * La disposition vient du socle (DispositionMoteur, socle.css). Ici : l'apparence propre,
+ * sans @media ni !important ; les tailles suivent la place par @container (contrat § 7.3).
+ */
+
+/* La scène : le gué (décor), puis l'opération, grande, sur parchemin, immobile. */
+.calcul-scene {
+  container: calcul / size;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--socle-espace);
+  inline-size: 100%;
+  block-size: 100%;
+  min-inline-size: 0;
+  min-block-size: 0;
+}
+
+/* Texte à lire : la police de lecture du profil, aucune animation (« le texte ne bouge jamais »). */
+.calcul-operation {
+  font-family: var(--lecture-famille, var(--font-lecture));
+  font-weight: 700;
+  line-height: 1;
+  color: var(--lecture-encre, var(--trait));
+  background-color: var(--lecture-fond, var(--parchemin));
+  border: 3px solid var(--trait);
+  border-radius: 1rem;
+  box-shadow: var(--ombre-bd);
+  padding: 0.25em 0.4em;
+  animation: none;
+  transition: none;
+}
+
+.calcul-egalite {
+  display: flex;
+  align-items: center;
+  gap: 0.3em;
+  font-size: clamp(40px, min(10cqi, 26cqb), 104px);
+  white-space: nowrap;
+}
+
+.calcul-trou { display: inline-flex; gap: 0.12em; }
+
+/* Une case : un cadre fixe ; la case à remplir est marquée par un cadre épais, immobile. */
+.calcul-case {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 0.95em;
+  block-size: 1.2em;
+  border: 3px dashed var(--grisaille);
+  border-radius: 0.18em;
+  background: #fff;
+}
+
+.calcul-case[data-remplie='oui'] { border-style: solid; border-color: var(--trait); }
+
+.calcul-case[data-marquee='oui'] {
+  border: 6px solid var(--lagon);
+  background: color-mix(in srgb, var(--lagon) 12%, #fff);
+}
+
+.calcul-signe { color: var(--trait); }
+
+/* L'addition posée : colonnes d (dizaines) et u (unités), retenue au-dessus des dizaines. */
+.calcul-colonnes {
+  display: grid;
+  grid-template-areas:
+    '.  ed eu'
+    '.  rd .'
+    '.  hd hu'
+    'op bd bu'
+    'tr tr tr'
+    '.  sd su';
+  grid-template-columns: repeat(3, 1.15em);
+  grid-template-rows: 0.5em 0.75em 1.1em 1.1em 0.12em 1.3em;
+  justify-items: center;
+  align-items: center;
+  row-gap: 0.06em;
+  column-gap: 0.12em;
+  font-size: clamp(36px, min(16cqi, 13cqb), 96px);
+}
+
+.calcul-colonnes [data-zone='ed'] { grid-area: ed; }
+.calcul-colonnes [data-zone='eu'] { grid-area: eu; }
+.calcul-colonnes [data-zone='rd'] { grid-area: rd; }
+.calcul-colonnes [data-zone='hd'] { grid-area: hd; }
+.calcul-colonnes [data-zone='hu'] { grid-area: hu; }
+.calcul-colonnes [data-zone='op'] { grid-area: op; }
+.calcul-colonnes [data-zone='bd'] { grid-area: bd; }
+.calcul-colonnes [data-zone='bu'] { grid-area: bu; }
+.calcul-colonnes [data-zone='tr'] { grid-area: tr; }
+.calcul-colonnes [data-zone='sd'] { grid-area: sd; }
+.calcul-colonnes [data-zone='su'] { grid-area: su; }
+
+.calcul-entete {
+  font-family: var(--font-interface);
+  font-size: 0.4em;
+  color: var(--texte-secondaire);
+}
+
+.calcul-barre {
+  inline-size: 100%;
+  block-size: 100%;
+  background: var(--trait);
+  border-radius: 0.06em;
+}
+
+.calcul-case--retenue {
+  inline-size: 0.6em;
+  block-size: 0.7em;
+  font-size: 0.85em;
+  border-width: 2px;
+}
+
+/* Gobi montre la retenue : un cadre soleil, fixe ; le chiffre ne bouge pas. */
+.calcul-cellule-retenue[data-retenue-montree='oui'] .calcul-case--retenue {
+  border: 5px solid var(--soleil);
+  background: color-mix(in srgb, var(--soleil) 30%, #fff);
+}
+
+/* Le gué : 12 pierres, la barre de progression. Décor seulement. */
+.calcul-gue {
+  display: flex;
+  gap: clamp(4px, 1cqi, 10px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.calcul-gue__pierre {
+  inline-size: clamp(18px, 5cqi, 44px);
+  block-size: clamp(12px, 3cqi, 26px);
+  border: 2px solid var(--trait);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--lagon) 45%, #fff);
+}
+
+.calcul-gue__pierre[data-pierre='sortie'] { background: var(--menthe); }
+.calcul-gue__pierre[data-pierre='devant'] { background: var(--soleil); border-width: 3px; }
+
+/* La réserve : le pavé, disposition de calculatrice (7 8 9 / 4 5 6 / 1 2 3 / 0). */
+.calcul-pave {
+  --calcul-touche: clamp(64px, min(10cqb, 12cqi), 88px);
+  display: grid;
+  grid-template-columns: repeat(3, var(--calcul-touche));
+  grid-auto-rows: var(--calcul-touche);
+  gap: clamp(6px, 1.2cqb, 12px);
+  justify-content: center;
+}
+
+.calcul-touche {
+  min-inline-size: var(--socle-cible);
+  min-block-size: var(--socle-cible);
+  padding: 0;
+  border: 3px solid var(--trait);
+  border-radius: 1rem;
+  background: var(--parchemin);
+  box-shadow: var(--ombre-bd);
+  font-family: var(--font-interface);
+  font-size: calc(var(--calcul-touche) * 0.5);
+  font-weight: 800;
+  color: var(--trait);
+}
+
+.calcul-touche:active { box-shadow: var(--ombre-bd-appui); transform: translateY(3px); }
+
+/* Le 0 sur toute la largeur, comme sur une calculatrice. */
+.calcul-touche[data-chiffre='0'] { grid-column: 1 / -1; }
+
+/* Démonstration de Gobi : la bonne touche s'allume. */
+.calcul-touche[data-montree='oui'],
+.calcul-choix__carte[data-montre='oui'] {
+  background: var(--soleil);
+  outline: 5px solid var(--lagon);
+  outline-offset: 2px;
+}
+
+/* Les réponses à choisir, aux niveaux simples. Une réponse déjà touchée reste là, sans rouge. */
+.calcul-choix {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: clamp(8px, 2cqi, 24px);
+}
+
+.calcul-choix__carte {
+  min-inline-size: clamp(96px, 16cqi, 160px);
+  min-block-size: clamp(96px, 14cqb, 128px);
+  border: 3px solid var(--trait);
+  border-radius: 1rem;
+  background: var(--parchemin);
+  box-shadow: var(--ombre-bd);
+  font-family: var(--lecture-famille, var(--font-lecture));
+  font-size: clamp(40px, 7cqb, 64px);
+  font-weight: 800;
+  color: var(--trait);
+}
+
+.calcul-choix__carte[data-essaye='oui'] { border-style: dashed; color: var(--texte-secondaire); }
+
+/* Le pied : ce que Gobi vient de dire. Hauteur réservée : la scène ne saute pas. */
+.calcul-pied {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--socle-espace);
+  min-block-size: 2.4em;
+  margin: 0;
+  font-family: var(--font-interface);
+  font-size: var(--socle-texte-interface);
+  font-weight: 700;
+  text-align: center;
+}
+
+/* La réussite : dans la scène, à la place de l'opération. */
+.calcul-reussite {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--socle-espace);
+  inline-size: 100%;
+  block-size: 100%;
+  font-family: var(--font-interface);
+  text-align: center;
+}
+
+.calcul-reussite__etoiles { margin: 0; font-size: clamp(48px, 10cqb, 96px); color: var(--soleil); -webkit-text-stroke: 2px var(--trait); }
+.calcul-reussite__texte { margin: 0; font-size: calc(var(--socle-texte-interface) * 1.4); font-weight: 800; }
+.calcul-reussite__actions { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--socle-espace); }
+.calcul-reussite__actions .cible { font-size: var(--socle-texte-interface); padding-inline: 1.5rem; }
+
+/* L'entrée du calcul, en tête de l'accueil de la vallée : deux grandes pierres. */
+.entree-calcul {
+  display: grid;
+  gap: 0.75rem;
+  margin-block-end: 1rem;
+  padding: 1rem;
+  border: 3px solid var(--trait);
+  border-radius: var(--rayon-carte);
+  background: var(--parchemin);
+  box-shadow: var(--ombre-bd);
+}
+
+.entree-calcul__titre { display: flex; align-items: center; justify-content: center; gap: 1rem; }
+.entree-calcul__titre h2 { margin: 0; font-family: var(--font-titre); font-size: clamp(1.4rem, 3vw, 2rem); }
+
+.entree-calcul__jeux {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.entree-calcul__jeu {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-block-size: 140px;
+  padding: 1rem;
+  border: 3px solid var(--trait);
+  border-radius: 1.25rem;
+  background: color-mix(in srgb, var(--lagon) 18%, var(--parchemin));
+  box-shadow: var(--ombre-bd);
+  font-family: var(--font-interface);
+  font-size: 1.35rem;
+}
+
+.entree-calcul__jeu[data-calcul-entree='pose'] { background: color-mix(in srgb, var(--soleil) 28%, var(--parchemin)); }
+
+.entree-calcul__exemple {
+  font-family: var(--font-lecture);
+  font-size: 2rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.entree-calcul__exemple--pose { display: grid; justify-items: end; line-height: 1.05; border-block-end: 3px solid var(--trait); }

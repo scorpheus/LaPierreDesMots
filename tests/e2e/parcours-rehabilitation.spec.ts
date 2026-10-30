@@ -1,5 +1,6 @@
 /** Deux parcours vécus, avec serveur et base en mémoire propres à chaque cas. */
 import type { Locator, Page, Response } from '@playwright/test';
+import { allumerLaVoix } from './voix-allumee.js';
 import type { EtatMonde, ReponseTentative } from '@pierre/partage';
 import { expect, test } from './invariants.js';
 import { CIBLE_MINIMALE_PX, appliquerReglagesLectureReels, etatDuJeu, noeudsLivres } from './qa-outils.js';
@@ -168,6 +169,7 @@ async function lireSauvegarde(sauvegardes: readonly Response[], rang: number, no
 }
 
 test('téléphone : profil, campement, monde, région, activité jouée et vrai retour au campement', async ({ page }) => {
+  await allumerLaVoix(page);
   await page.setViewportSize({ width: 390, height: 844 });
   const profil = await choisirProfilAuCampement(page, 'RehabilitationTelephone');
   const reseau = observerReseau(page);
@@ -188,6 +190,7 @@ test('téléphone : profil, campement, monde, région, activité jouée et vrai 
 });
 
 test('tablette : rechargement, même profil, revisite réellement jouée et aucun crédit supplémentaire', async ({ page }) => {
+  await allumerLaVoix(page);
   await page.setViewportSize({ width: 1100, height: 800 });
   const profil = await choisirProfilAuCampement(page, 'RehabilitationReprise');
   const reseau = observerReseau(page);
@@ -200,11 +203,17 @@ test('tablette : rechargement, même profil, revisite réellement jouée et aucu
 
   // Aucun preparer/chargerProfil après ce point : le même contexte et la même base survivent.
   await page.reload();
-  await expect(page.locator('[data-ecran="campement"]')).toBeVisible();
+  // Décision du parent (9 octobre) : un rechargement sur « Bravo » y reste, sans étoile de plus.
+  await expect(page.locator('[data-ecran="recompense"]')).toBeVisible();
   await expect.poll(async () => (await etatDuJeu(page)).profil).toBe(profil);
   await interdireRaccourcis(page);
   await verifierAcquis(page, profil, [noeud]);
   expect(await lireMonde(page, profil)).toEqual(mondeAcquis);
+  // Puis on rejoint le campement par les commandes de l'écran, comme l'enfant.
+  await toucherPrise(page.locator('[data-action="voir-carte"]'));
+  await expect(page.locator('[data-ecran="carte"]')).toBeVisible();
+  await toucherPrise(page.locator('[data-ecran="carte"] [data-vers="campement"]'));
+  await expect(page.locator('[data-ecran="campement"]')).toBeVisible();
   const region = await ouvrirRegionDepuisCampement(page);
   await expect(region.locator(`[data-lieu="${noeud}"]`)).toHaveAttribute('data-etat-lieu', 'acquis');
   await toucherPrise(region.locator(`[data-revisiter="${noeud}"]`));

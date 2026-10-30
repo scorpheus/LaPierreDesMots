@@ -146,11 +146,13 @@ export const MUTATIONS = [
     titre: 'Les cibles du moteur `attrape` passent de 64 à 40 px — le doigt de l’enfant rate',
     regle: 'R16 — toute cible ≥ 64 px',
     fichier: 'client/src/moteurs/attrape/MoteurAttrape.tsx',
+    // Ancrage repris le 2026-10-09 : la boîte d'une cible est désormais calculée sur le texte
+    // mesuré et l'illustration agrandie ; le plancher CIBLE_MIN porte sur `largeurBouton`.
     ancrage:
-      /[ ]{10}const largeur = Math\.max\(CIBLE_MIN, cible\.taille\[0\] \* t\.echelle\);\r?\n[ ]{10}const hauteur = Math\.max\(CIBLE_MIN, cible\.taille\[1\] \* t\.echelle\);/,
+      /[ ]{6}const largeurBouton = Math\.max\(CIBLE_MIN, texte\.largeur, largeurRaster \+ 2 \* GARNITURE_CIBLE_X\);\r?\n[ ]{6}const hauteurBouton = Math\.max\(CIBLE_MIN, texte\.hauteur, hauteurRaster \+ 2 \* GARNITURE_CIBLE_Y\);/,
     remplacement:
-      '          const largeur = Math.max(40, cible.taille[0] * t.echelle);\n' +
-      '          const hauteur = Math.max(40, cible.taille[1] * t.echelle);',
+      '      const largeurBouton = Math.max(40, texte.largeur, largeurRaster + 2 * GARNITURE_CIBLE_X);\n' +
+      '      const hauteurBouton = Math.max(40, texte.hauteur, hauteurRaster + 2 * GARNITURE_CIBLE_Y);',
     attendu: 'SURVIT',
     couvertPar: 'e2e',
     assertionE2E:

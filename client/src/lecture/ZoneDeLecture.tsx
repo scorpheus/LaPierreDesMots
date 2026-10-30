@@ -68,6 +68,12 @@ export function styleDeLecture(reglages: ReglagesLecture): Record<string, string
   };
 }
 
+/** Une zone de lecture qui est une QUESTION : le fond et l'encre viennent du thème question. */
+function styleDeQuestion(reglages: ReglagesLecture): Record<string, string> {
+  const { backgroundColor: _fond, color: _encre, ...reste } = styleDeLecture(reglages);
+  return reste;
+}
+
 // ------------------------------------------------------------------ le composant
 
 export interface ProprietesZoneDeLecture {
@@ -92,6 +98,14 @@ export interface ProprietesZoneDeLecture {
   readonly etiquette?: string;
   /** Contenu ajouté sous le texte : un bouton d'écoute, une aide. Jamais du texte à déchiffrer. */
   readonly children?: ReactNode;
+  /**
+   * Vrai quand ce texte est ce qu'on DEMANDE (la phrase modèle, le critère d'un panier) : la
+   * zone porte le thème question du socle (T19, `activite/questions.css`) au lieu du fond de
+   * lecture. Police, corps, interligne et coloration restent ceux du profil.
+   */
+  readonly question?: boolean;
+  /** Vrai quand la zone est posée DANS une question déjà habillée : ni fond ni encre propres. */
+  readonly dansUneQuestion?: boolean;
 }
 
 /** Ponctuation retirée avant comparaison à `motsCles`. */
@@ -107,6 +121,8 @@ export function ZoneDeLecture({
   motsCles,
   etiquette,
   children,
+  question = false,
+  dansUneQuestion = false,
 }: ProprietesZoneDeLecture): ReactElement {
   const duContexte = useReglagesLecture();
   const reglages = reglagesExplicites ?? duContexte;
@@ -145,7 +161,8 @@ export function ZoneDeLecture({
       data-police={reglages.police}
       data-syllabes={reglages.colorationSyllabique ? 'oui' : 'non'}
       className="zone-lecture zone-lecture-v2"
-      style={styleDeLecture(reglages) as CSSProperties}
+      {...(question ? { 'data-theme-role': 'question' } : {})}
+      style={(question || dansUneQuestion ? styleDeQuestion(reglages) : styleDeLecture(reglages)) as CSSProperties}
       role="group"
       aria-label={etiquette ?? texte}
     >

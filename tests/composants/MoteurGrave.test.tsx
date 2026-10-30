@@ -13,6 +13,7 @@
  * L'habillage n'est PAS fabriqué : il est lu sur disque, parmi les trois écrits pour ce
  * moteur. Un test qui invente son décor ne dit rien de celui qui atteint l'enfant.
  */
+import { readFileSync } from 'node:fs';
 import { useCallback, useState } from 'react';
 import type { ReactElement } from 'react';
 import { cleanup, fireEvent, render } from '@testing-library/react';
@@ -61,6 +62,16 @@ function servicesJeuDeTest(): ServicesJeu {
 const services = servicesJeuDeTest();
 
 import { contenuGrave as contenu } from '../fixtures/moteurs/grave.js';
+
+/** Les déclarations d'un sélecteur dans une feuille (règles groupées comprises, commentaires ôtés). */
+function bloc(css: string, selecteur: string): string {
+  const sansCommentaires = css.replace(/\/\*[\s\S]*?\*\//g, '');
+  const corps: string[] = [];
+  for (const m of sansCommentaires.matchAll(/([^{}]+)\{([^}]*)\}/g)) {
+    if ((m[1] ?? '').split(',').map((x) => x.trim()).includes(selecteur)) corps.push(m[2] ?? '');
+  }
+  return corps.join('\n');
+}
 
 /**
  * Le harnais expose le résumé et la progression en `data-*`. C'est volontaire : les
@@ -199,12 +210,18 @@ describe('moteur grave', () => {
     const mot = container.querySelector<HTMLElement>('[data-mot-central="oui"]');
     const cartouche = container.querySelector<HTMLElement>('[data-plateau="etape-grave"]');
     const zone = container.querySelector<HTMLElement>('[data-zone-jeu="grave"]');
-    expect(mot?.style.insetBlockStart).toBe('27%');
-    expect(mot?.style.transform).toContain('-50%');
-    expect(mot?.style.pointerEvents).toBe('none');
-    expect(cartouche?.style.position).toBe('relative');
+    // La mise en page vit dans la feuille du moteur (grave.css), pas dans des styles en ligne.
+    const css = readFileSync('client/src/moteurs/grave/grave.css', 'utf8');
+    expect(bloc(css, '.grave-mot-central')).toMatch(/inset-block-start:\s*27%/);
+    expect(bloc(css, '.grave-mot-central')).toMatch(/transform:[^;]*-50%/);
+    expect(bloc(css, '.grave-mot-central')).toMatch(/pointer-events:\s*none/);
+    expect(bloc(css, '.grave-cartouche')).toMatch(/position:\s*relative/);
+    expect(mot?.classList.contains('grave-mot-central')).toBe(true);
+    expect(cartouche?.classList.contains('grave-cartouche')).toBe(true);
     expect(zone?.contains(cartouche ?? null)).toBe(false);
-    expect(zone?.style.minBlockSize).toBe('30rem');
+    // Le clavier est la réserve du socle : il ne recouvre plus le décor.
+    const clavier = container.querySelector<HTMLElement>('[data-plateau="clavier"]');
+    expect(zone?.contains(clavier ?? null)).toBe(false);
     const touches = [...container.querySelectorAll<HTMLButtonElement>('[data-lettre]')];
     expect(touches.length).toBeGreaterThan(0);
     expect(touches.every((t) => t.classList.contains('cible'))).toBe(true);

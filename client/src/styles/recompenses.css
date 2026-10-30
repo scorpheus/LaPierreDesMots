@@ -112,6 +112,13 @@
   box-shadow: 0 4px 0 var(--trait);
 }
 
+/* « Voir la carte » touché pendant la sauvegarde : il reste enfoncé jusqu'au départ. */
+.action-recompense[data-attente='oui'] {
+  transform: translateY(3px);
+  box-shadow: none;
+  cursor: progress;
+}
+
 .recompense-bilan {
   display: grid;
   grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
@@ -161,6 +168,35 @@
   inline-size: 100%;
   min-inline-size: 0;
   gap: 16px;
+}
+
+/*
+ * En paysage (PC, tablette couchée), la hauteur manque : le détail des étoiles passe en une
+ * rangée, la progression en une bande dessous (annonce du gain à gauche, jauges à droite), et
+ * la phrase de Gobi n'est plus coupée à 34 caractères. Retour du parent du 9 oct. (T09),
+ * mesuré par bac-a-sable/socle/recompense-diagnostic.spec.ts. Le portrait garde les deux colonnes.
+ */
+@media (orientation: landscape) and (min-width: 701px) {
+  .recompense-bilan {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .recompense-detail-etoiles {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px 20px;
+    padding: 12px 16px;
+  }
+
+  .recompense-message {
+    max-inline-size: none;
+  }
+
+  .ecran-recompense .cascade-recompense {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+  }
 }
 
 .ecran-recompense .cascade-recompense-liste {
@@ -357,4 +393,11 @@
   .recompense-gobi img { max-block-size: 24dvh; }
   .ecran-recompense .jauge-palier { padding: 10px; }
   .ecran-recompense .cascade-recompense { gap: 10px; }
+}
+
+/* Écran bas (portable 1100×700) : on resserre les marges, jamais le texte. */
+@media (orientation: landscape) and (min-width: 701px) and (max-height: 760px) {
+  .ecran-recompense { gap: 8px; padding-block: 12px; }
+  .recompense-scene { padding-block: 12px; }
+  .ecran-recompense .jauge-palier { padding: 8px; }
 }

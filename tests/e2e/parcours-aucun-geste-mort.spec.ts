@@ -51,7 +51,7 @@
  */
 import { expect, test } from "./invariants.js";
 
-import { deuxImages, etatDuJeu, recettesDEcrans, SELECTEUR_INTERACTIF } from "./qa-outils.js";
+import { deuxImages, etatDuJeu, noeudsBalayes, recettesDEcrans, SELECTEUR_INTERACTIF } from "./qa-outils.js";
 
 import type { Page } from "@playwright/test";
 
@@ -59,7 +59,7 @@ import type { Page } from "@playwright/test";
 const PAIRES_MAX = 90;
 const SIMPLES_MAX = 60;
 
-const ECRANS = recettesDEcrans();
+const ECRANS = recettesDEcrans(noeudsBalayes());
 
 // ═══════════════════════════════════════════════════════ ce que l'écran DIT, à un instant t
 

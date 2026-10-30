@@ -6,6 +6,7 @@ import { hexDeCouleur } from '@pierre/partage';
 import { urlAsset } from '../../api/client.js';
 import { CercleAccessible } from '../../composants/CercleAccessible.js';
 import type { ProprietesSceneLibre } from './SceneLibre.js';
+import './libre.css';
 import { indexerRegionsDuMasque, regionAuPixel } from './raster-indexe.js';
 
 const DIAMETRE_PRISE_MINIMAL = 96;
@@ -151,16 +152,16 @@ export function SceneRasterIndexee({
       data-scene-libre={habillage.id}
       data-decor="raster-indexe"
       data-masque-raster={masquePretPour === String(raster.masque) ? 'pret' : 'chargement'}
-      style={{ position: 'relative', inlineSize: '100%', blockSize: '100%', overflow: 'hidden' }}
+      className="libre-raster"
     >
-      <img data-raster-couche="fond" src={urlAsset(String(raster.fond))} alt="" aria-hidden="true" style={{ position: 'absolute', inset: 0, inlineSize: '100%', blockSize: '100%', objectFit: 'contain' }} />
-      <canvas ref={toileRef} data-raster-couche="couleurs" width={raster.largeur} height={raster.hauteur} aria-hidden="true" onClick={colorierDepuisPixel} style={{ position: 'absolute', inset: 0, inlineSize: '100%', blockSize: '100%', objectFit: 'contain', cursor: 'pointer' }} />
-      <img data-raster-couche="trait" src={urlAsset(String(raster.trait))} alt="" aria-hidden="true" style={{ position: 'absolute', inset: 0, inlineSize: '100%', blockSize: '100%', objectFit: 'contain', pointerEvents: 'none' }} />
+      <img data-raster-couche="fond" className="libre-raster__couche" src={urlAsset(String(raster.fond))} alt="" aria-hidden="true" />
+      <canvas ref={toileRef} data-raster-couche="couleurs" width={raster.largeur} height={raster.hauteur} aria-hidden="true" onClick={colorierDepuisPixel} className="libre-raster__couche libre-raster__couleurs" />
+      <img data-raster-couche="trait" className="libre-raster__couche libre-raster__trait" src={urlAsset(String(raster.trait))} alt="" aria-hidden="true" />
       <svg
         viewBox={habillage.scene.viewBox}
         role="group"
         aria-label="Zones à colorier"
-        style={{ position: 'absolute', inset: 0, inlineSize: '100%', blockSize: '100%', pointerEvents: 'none' }}
+        className="libre-raster__prises"
       >
         {regions.filter((region) => offertes.has(String(region.id))).map((region) => (
           <CercleAccessible
@@ -178,7 +179,9 @@ export function SceneRasterIndexee({
             onKeyDown={(evenement) => surClavier(region.id, evenement)}
             // La prise reste un bouton pour le clavier et les technologies d'assistance.
             // Elle ne reçoit jamais le doigt : le canvas nomme la vraie couleur du masque.
-            style={{ pointerEvents: 'none', cursor: 'pointer' }}
+            className="libre-raster__prise"
+            // Le doigt va au canvas, jamais à la prise : posé en ligne, un test le relit tel quel.
+            style={{ pointerEvents: 'none' }}
           />
         ))}
       </svg>

@@ -7,8 +7,6 @@
  */
 
 export type ValeurSqliteWasm = string | number | bigint | null | Uint8Array;
-export type LigneSqliteWasm = Readonly<Record<string, ValeurSqliteWasm>>;
-
 export interface ConfigurationSqliteWasm {
   readonly nomBase: string;
   readonly repertoirePool: string;

@@ -75,6 +75,7 @@ import type {
 } from '@pierre/partage';
 import type { AideResolue } from './aide-de-gobi.js';
 import { BoutonEcouter } from './BoutonEcouter.js';
+import { TexteColore } from '../lecture/TexteColore.js';
 import { urlAsset } from '../api/client.js';
 import { GOBI_VUE } from './gobi-dessin.gen.js';
 
@@ -263,12 +264,6 @@ export function Gobi({
       aria-label={compagnon === null ? 'Aide de Gobi' : `Aide de ${compagnon.libelle}`}
       {...(libelleForme === null ? {} : { 'data-forme-gobi': libelleForme })}
       aria-live="polite"
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '1rem',
-        padding: '0.75rem 1rem'
-      }}
     >
       {/* Gobi lui-même : le dessin de la canonique (D36) — corps crème duveteux à contour
           dentelé, joues orangées, grands yeux ronds à deux reflets, et le cœur de Pierre
@@ -295,14 +290,9 @@ export function Gobi({
 
       <div
         className="zone-lecture gobi-bulle"
-        style={{
-          flex: '1 1 auto',
-          border: 'var(--epaisseur-trait) solid var(--trait)',
-          borderRadius: 'var(--rayon-carte)',
-          padding: '0.75rem 1rem'
-        }}
       >
-        <p style={{ margin: 0 }}>{texte}</p>
+        {/* T19 : ce que Gobi dit, l'enfant le lit — en couleurs, comme tout texte de lecture. */}
+        <p style={{ margin: 0 }}><TexteColore texte={texte} /></p>
       </div>
 
       {/* ── Réécouter l'aide : R15 s'applique à Gobi comme au reste ────────────────────────

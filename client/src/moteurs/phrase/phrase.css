@@ -1,0 +1,122 @@
+/* Moteur `phrase` — apparence propre. La disposition vient du socle (DispositionMoteur). */
+
+/* Le vol va des mots (réserve) aux fentes : son repère est la disposition entière. */
+.disposition-moteur[data-moteur='phrase'] { position: relative; }
+
+/* ── La scène : la phrase modèle, puis le décor ─────────────────────────────────────────── */
+
+.phrase-scene {
+  container: phrase-scene / size;
+  display: flex;
+  flex-direction: column;
+  gap: var(--socle-espace);
+  inline-size: 100%;
+  block-size: 100%;
+  min-inline-size: 0;
+  min-block-size: 0;
+}
+
+.phrase-modele {
+  display: grid;
+  justify-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  min-inline-size: 0;
+}
+
+/* Le décor est le fond : il prend ce que la phrase modèle laisse. */
+.phrase-decor {
+  position: relative;
+  flex: 1 1 0;
+  inline-size: 100%;
+  min-block-size: 0;
+}
+
+/* Scène trop basse pour un décor lisible (≥ 96 px) : on le retire plutôt que de l'écraser. */
+@container phrase-scene (max-height: 320px) {
+  .phrase-decor { display: none; }
+}
+
+.phrase-vol {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+/* ── La réserve : les mots à prendre, puis la phrase qui se construit ──────────────────── */
+
+.phrase-reserve {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--socle-espace);
+}
+
+/* La rangée de mots ne prend pas le doigt : seules les pastilles le prennent. */
+.phrase-mots {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 0.5rem;
+  pointer-events: none;
+}
+
+/* Le porteur et le bouton sont deux éléments (R54) : l'oscillation n'écrase rien. */
+.phrase-porteur {
+  display: inline-flex;
+  max-inline-size: 100%;
+  pointer-events: none;
+}
+
+.phrase-porteur[hidden] { display: none; }
+
+/* Texte à déchiffrer : police et corps du profil, fond opaque (R37), aucune animation. */
+[data-moteur='phrase'] [data-etiquette] {
+  background-color: var(--lecture-fond, var(--parchemin));
+  color: var(--lecture-encre, var(--trait));
+  font-family: var(--lecture-famille, var(--font-lecture));
+  font-size: var(--lecture-corps, 1.5rem);
+  letter-spacing: var(--lecture-interlettrage, normal);
+  word-spacing: var(--lecture-espacement-mots, normal);
+  line-height: var(--lecture-interligne, 1.4);
+  white-space: nowrap;
+  pointer-events: auto;
+}
+
+[data-moteur='phrase'] [data-etiquette][hidden] { display: none; }
+
+[data-fentes='phrase'] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+/* ── Le pied : le refus dit ce qu'on attend ─────────────────────────────────────────────── */
+
+.phrase-message {
+  min-block-size: 1.5em;
+  margin: 0;
+  background-color: var(--lecture-fond, var(--parchemin));
+  color: var(--lecture-encre, var(--trait));
+  font-family: var(--lecture-famille, var(--font-lecture));
+  font-size: var(--lecture-corps, 1.5rem);
+  letter-spacing: var(--lecture-interlettrage, normal);
+  line-height: var(--lecture-interligne, 1.4);
+  text-align: center;
+}
+
+/* Lu par les lecteurs d'écran, jamais vu. */
+.phrase-annonce {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

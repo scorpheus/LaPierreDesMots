@@ -34,7 +34,7 @@
  * la même action que le tap — sans quoi le jeu aurait deux règles selon le doigt de l'enfant.
  * ══════════════════════════════════════════════════════════════════════════════════════════
  */
-import { useMemo } from 'react';
+import { createContext, useContext, useMemo } from 'react';
 import type { CSSProperties, ReactElement, ReactNode } from 'react';
 import { DndContext, PointerSensor, useDraggable, useDroppable, useSensor, useSensors } from '@dnd-kit/core';
 import type { DragEndEvent } from '@dnd-kit/core';
@@ -48,6 +48,23 @@ import type { DragEndEvent } from '@dnd-kit/core';
  * cassé.
  */
 export const SEUIL_DE_GLISSE_PX = 8;
+
+/**
+ * Vrai sous un `ZoneDeGlisser`. Sert de garde : un hook de dnd-kit appelé hors de son
+ * `DndContext` ne lève rien, il s'inscrit auprès d'un contexte vide et le dépôt n'arrive
+ * jamais. C'est exactement le défaut mesuré le 9 octobre sur `phrase`, `assemble` et `chrono`
+ * (T11) : le mot volait sous le doigt, la ligne n'était jamais survolée.
+ */
+const DansUneZoneDeGlisser = createContext(false);
+
+function useExigerLaZone(quoi: string, id: string): void {
+  if (!useContext(DansUneZoneDeGlisser)) {
+    throw new Error(
+      `${quoi} « ${id} » est branché hors de ZoneDeGlisser : il ne recevrait jamais de dépôt. ` +
+        'Rendre la cible avec <CibleDeDepot> (ou un composant enfant) à l’intérieur de la zone.',
+    );
+  }
+}
 
 export interface ProprietesZoneDeGlisser {
   /** Appelé quand un jeton est lâché SUR une zone d'accueil. `cible` est l'id de la zone. */
@@ -79,7 +96,7 @@ export function ZoneDeGlisser({ surDepot, surAbandon, children }: ProprietesZone
         surDepot(String(evenement.active.id), String(evenement.over.id));
       }}
     >
-      {children}
+      <DansUneZoneDeGlisser.Provider value>{children}</DansUneZoneDeGlisser.Provider>
     </DndContext>
   );
 }
@@ -100,6 +117,7 @@ export interface AttachesDeJeton {
  * qu'on rencontre en portant un glisser sur tactile, et il est silencieux au clavier-souris.
  */
 export function useJetonGlissable(id: string, desactive = false): AttachesDeJeton {
+  useExigerLaZone('Le jeton', id);
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id,
     disabled: desactive,
@@ -136,6 +154,22 @@ export interface AttachesDeCible {
 
 /** Rend un élément accueillant pour un jeton glissé. */
 export function useCibleDeDepot(id: string, desactive = false): AttachesDeCible {
+  useExigerLaZone('La cible', id);
   const { setNodeRef, isOver } = useDroppable({ id, disabled: desactive });
   return { brancher: setNodeRef, survolee: isOver };
+}
+
+export interface ProprietesCibleDeDepot {
+  readonly id: string;
+  readonly desactive?: boolean;
+  readonly children: (cible: AttachesDeCible) => ReactNode;
+}
+
+/**
+ * La cible de dépôt sous forme de composant, pour la rendre DANS le `ZoneDeGlisser` que le
+ * moteur rend lui-même : un hook appelé dans le corps du moteur serait au-dessus de la zone.
+ */
+export function CibleDeDepot({ id, desactive = false, children }: ProprietesCibleDeDepot): ReactElement {
+  const cible = useCibleDeDepot(id, desactive);
+  return <>{children(cible)}</>;
 }

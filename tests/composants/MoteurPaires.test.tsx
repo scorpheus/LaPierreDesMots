@@ -166,7 +166,10 @@ describe('moteur paires', () => {
   });
   it('affiche la progression sans répéter la consigne de l’en-tête ni révéler la réponse', () => {
     const { container } = render(<Harnais />);
-    const cartouche = container.querySelector('[data-cartouche-paires="etape"]');
+    // T10 — refait pour le repère commun (même exigences : progression, pas de « Étape »,
+    // pas de consigne répétée, pas de réponse révélée).
+    const cartouche = container.querySelector('[data-repere-etape="paires"]');
+    expect(cartouche).not.toBeNull();
     expect(cartouche?.textContent).not.toContain('Trouve les paires.');
     expect(cartouche?.textContent).not.toContain('Étape');
     expect(cartouche?.textContent).toContain('0 / 1 paires');

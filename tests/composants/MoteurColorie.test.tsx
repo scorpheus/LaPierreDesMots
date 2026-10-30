@@ -205,7 +205,9 @@ describe('MoteurColorie — rendu', () => {
     render(<Harnais />);
     await attendreLaScene();
 
-    const progression = document.querySelector('[data-progression-consignes]');
+    // T10 — refait : le libellé d'étape est dans le repère commun (RepereEtape), plus dans la
+    // jauge de points du nuancier ; l'exigence (l'étape est annoncée visiblement) est la même.
+    const progression = document.querySelector('[data-repere-etape="colorie"]');
     expect(progression?.textContent).toContain(`Étape 1 sur ${String(contenu.consignes.length)}`);
 
     const regionAttendue = habillage.scene.calques

@@ -21,7 +21,7 @@ function depot(avecLanceur = false) {
   ecrire('source.ts', 'export const valeur = 1;');
   ecrire('outils/navigateurs/chromium_headless_shell-1234/chrome-headless-shell-win64/chrome-headless-shell.exe', 'navigateur');
   if (avecLanceur) {
-    for (const fichier of ['verifier.mjs', 'preuve-verification.mjs', 'rapport.mjs', 'couverture-zones.mjs', 'sortie-outils.mjs']) {
+    for (const fichier of ['verifier.mjs', 'preuve-verification.mjs', 'rapport.mjs', 'couverture-zones.mjs', 'sortie-outils.mjs', 'priorite-basse.mjs', 'paliers.mjs']) {
       ecrire(`scripts/${fichier}`, readFileSync(`scripts/${fichier}`, 'utf8'));
     }
   }

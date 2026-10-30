@@ -212,24 +212,31 @@ describe('moteur attrape', () => {
     expect(container.querySelector('[data-etat="echec"]')).toBeNull();
   });
 
-  it('cartouche : la cible concrète et l’étape courante restent visibles et évoluent', () => {
+  // T10 — refait pour le repère commun (`RepereEtape`) : même exigence (rang et cible visibles,
+  // qui évoluent), plus le signal de changement d'étape.
+  it('repère d’étape : la cible concrète et l’étape courante restent visibles et évoluent', () => {
     const { container } = render(<Harnais />);
-    const cartouche = () => container.querySelector<HTMLElement>('[data-plateau="etape-attrape"]');
-    expect(cartouche()?.textContent).toContain('Étape 1 / 2');
+    const cartouche = () => container.querySelector<HTMLElement>('[data-repere-etape="attrape"]');
+    expect(cartouche()?.textContent).toContain('Étape 1 sur 2');
     expect(cartouche()?.textContent).toContain('b');
+    expect(cartouche()?.getAttribute('data-nouvelle-etape')).toBe('non');
     taper(container, ['[data-cible="lettre-b"]']);
-    expect(cartouche()?.textContent).toContain('Étape 2 / 2');
+    expect(cartouche()?.textContent).toContain('Étape 2 sur 2');
+    expect(cartouche()?.getAttribute('data-nouvelle-etape')).toBe('oui');
     expect(cartouche()?.textContent).toContain('p');
     expect(cartouche()?.textContent).not.toContain('aussi');
     expect(cartouche()?.textContent).not.toContain('derniers');
   });
 
-  it('composition : le cartouche reste dans le flux et les prises publiées ne se recouvrent pas', () => {
+  it('composition : le repère reste hors du décor et les prises publiées ne se recouvrent pas', () => {
     const { container } = render(<Harnais />);
-    const cartouche = container.querySelector<HTMLElement>('[data-plateau="etape-attrape"]');
+    const cartouche = container.querySelector<HTMLElement>('[data-repere-etape="attrape"]');
     const zone = container.querySelector<HTMLElement>('[data-zone-jeu="attrape"]');
     const cibles = container.querySelector<HTMLElement>('[data-plateau="cibles"]');
-    expect(cartouche?.style.position).toBe('relative');
+    // Monté seul, le repère se rend dans le pied ; dans l'écran, dans la barre de consigne
+    // (EcranNoeud.test.tsx, T10). Jamais posé sur le décor.
+    expect(cartouche).not.toBeNull();
+    expect(cartouche?.closest('.disposition-moteur__pied')).not.toBeNull();
     expect(zone?.contains(cartouche ?? null)).toBe(false);
     expect(zone?.style.minBlockSize).not.toBe('');
     expect(cibles?.getAttribute('data-disposition')).toBe('grille-intrinseque');

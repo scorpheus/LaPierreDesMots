@@ -60,14 +60,6 @@ export const FICHIERS_EMBARQUES: readonly {
   },
 ];
 
-/** URL d'un fichier de police, servi par le dossier public du client. Jamais un domaine tiers. */
-export function urlDePolice(fichier: string): string {
-  const base = import.meta.env.BASE_URL.endsWith('/')
-    ? import.meta.env.BASE_URL
-    : `${import.meta.env.BASE_URL}/`;
-  return `${base}polices/${fichier}`;
-}
-
 /**
  * Vrai si la police est réellement disponible dans le document.
  *

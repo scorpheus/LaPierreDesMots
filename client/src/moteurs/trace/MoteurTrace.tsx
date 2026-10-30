@@ -18,7 +18,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { CSSProperties, PointerEvent as PointerEventReact, ReactElement } from 'react';
+import type { PointerEvent as PointerEventReact, ReactElement } from 'react';
 import type {
   ActionTrace,
   ContenuTrace,
@@ -28,9 +28,12 @@ import type {
   Point,
 } from '@pierre/partage';
 import type { ProprietesMoteur } from '../types.js';
-import { styleDeLecture, useReglagesLecture } from '../../lecture/ZoneDeLecture.js';
+import { DispositionMoteur } from '../../activite/DispositionMoteur.js';
 import { GuidageLettre } from './GuidageLettre.js';
+import './trace.css';
 import { PAS_ECHANTILLONNAGE, reechantillonner } from './echantillonnage.js';
+import { ROLE_QUESTION } from '../../activite/Question.js';
+import { TexteColore } from '../../lecture/TexteColore.js';
 
 /** Cadence du `battementHorloge`. Le moteur ne connaît aucun `setTimeout` : c'est ici. */
 const PERIODE_BATTEMENT_MS = 1000;
@@ -48,7 +51,6 @@ const RELECTURE_MS = 20_000;
  */
 const TOLERANCE_CSS_PX = 32;
 
-const TRAIT = 'var(--trait, #1B2440)';
 const ENCRE = 'var(--encre, #2E5EAA)';
 
 interface MatriceEcranAffine {
@@ -132,13 +134,6 @@ export function MoteurTrace(
   proprietes: ProprietesMoteur<ContenuTrace, EtatTrace, ActionTrace>,
 ): ReactElement {
   const { contenu, habillage, etat, emettre, services, animationsDesactivees } = proprietes;
-
-  // R35 — mêmes réglages de lecture que `phrase` : la consigne et les deux textes de statut
-  // héritent du profil (police, corps, interlettrage) au lieu des styles du navigateur par
-  // défaut. `FournisseurReglagesLecture` n'étant monté nulle part (dette déjà signalée pour
-  // `phrase`), le contexte rend `REGLAGES_PAR_DEFAUT` ici aussi ; ces textes suivront sans
-  // qu'on y touche le jour où le fournisseur sera monté.
-  const reglages = useReglagesLecture();
 
   const refSvg = useRef<SVGSVGElement | null>(null);
   const [echelle, setEchelle] = useState(1);
@@ -292,107 +287,29 @@ export function MoteurTrace(
 
   /** UN axe, jamais deux (D23). Absent quand l'exercice ne travaille aucune paire. */
   const axe = contenu.paire?.axe;
-  const styleLecture = styleDeLecture(reglages);
-
-  return (
-    <div
-      data-moteur="trace"
-      data-habillage={habillage.id}
-      data-axe={axe}
-      data-termine={etat.termineMs === null ? 'non' : 'oui'}
-      data-lettre={lettre?.lettre ?? ''}
-      data-axe-confondu={etat.axeConfondu ?? undefined}
-      style={{
-        // DEUX LIGNES, LA PREMIÈRE PREND TOUT CE QUI RESTE — même principe que `MoteurPhrase` :
-        // « une hauteur DÉFINIE, la scène s'adapte au reste ». Avant ce lot, ce `<div>` n'avait
-        // pas de `blockSize` propre : sa hauteur était celle de son contenu (consigne + ardoise
-        // plafonnée à 420 px + deux lignes de texte), pas celle du cadre que `EcranNoeud` lui
-        // réserve (`blockSize: '100%'` sur son porteur direct). Sur une tablette en portrait,
-        // l'écart entre les deux se voyait comme du vide sous l'ardoise — la même famille de
-        // défaut que R51 sur `phrase` avant sa mise en scène.
-        //
-        // R49 (le père, 2026-08-07 : « la phrase est en haut et en bas, il y a doublon ») a
-        // retiré la ligne de consigne qui occupait ici la première rangée `auto` : `EcranNoeud`
-        // la porte seule désormais, avec son `BoutonEcouter`. L'ardoise en profite — elle
-        // récupère la place, ce qui réduit encore le vide mesuré ci-dessus.
-        display: 'grid',
-        gridTemplateRows: 'auto minmax(0, 1fr) auto',
-        rowGap: '0.75rem',
-        blockSize: '100%',
-        minBlockSize: 0,
-        justifyItems: 'center',
-        paddingInline: '0.25rem',
-      }}
-    >
-      <style>{`
-        [data-moteur="trace"] [data-plateau="cible-trace"] {
-          position: static !important;
-          transform: none !important;
-          justify-self: center;
-          max-inline-size: min(92%, 30rem);
-          overflow-wrap: anywhere;
-        }
-        [data-moteur="trace"] [data-scene="trace"] {
-          max-inline-size: min(100%, 70rem);
-          max-block-size: 100%;
-        }
-        @media (max-height: 520px) {
-          [data-moteur="trace"] { row-gap: 0.35rem !important; }
-          [data-moteur="trace"] [data-plateau="cible-trace"] {
-            padding-block: 0.2rem !important;
-            font-size: clamp(1rem, 3.5vw, 1.35rem);
-          }
-        }
-      `}</style>
+  const scene = (
+    <div className="trace-scene">
       {/* Cible courante : la consigne détaillée reste dans la barre de `EcranNoeud`, mais le
-          graphème travaillé doit rester visible au voisinage immédiat de l'ardoise. Cette
-          carte est en superposition : elle ne crée aucune rangée supplémentaire et ne
-          rétrécit donc pas la surface de tracé. Elle dérive toujours de `indexLettre`, sans
-          changement implicite de cible. */}
+          graphème travaillé doit rester visible au voisinage immédiat de l'ardoise. Elle
+          dérive toujours de `indexLettre`, sans changement implicite de cible. */}
       <div
         data-plateau="cible-trace"
         data-cible-lettre={lettre?.lettre ?? ''}
         aria-label={lettre === null ? 'Aucune lettre' : `Lettre à tracer : ${lettre.lettre}`}
-        style={{
-          position: 'static',
-          zIndex: 1,
-          padding: '0.35rem 0.85rem',
-          backgroundColor: 'var(--parchemin, #FBF6EA)',
-          border: 'var(--epaisseur-trait, 2px) solid var(--trait, #1B2440)',
-          borderRadius: 'var(--rayon-carte, 1rem)',
-          boxShadow: '0 3px 12px rgba(27, 36, 64, 0.14)',
-          pointerEvents: 'none',
-          ...styleLecture,
-          fontWeight: 700,
-          textAlign: 'center',
-          whiteSpace: 'nowrap',
-        } as CSSProperties}
+        className="trace-cible"
+        {...ROLE_QUESTION}
       >
-        {lettre === null ? 'Aucune lettre' : `Lettre : ${lettre.lettre}`}
+        <TexteColore texte={lettre === null ? 'Aucune lettre' : `Lettre : ${lettre.lettre}`} />
       </div>
 
       {/* ── L'ARDOISE ───────────────────────────────────────────────────────────────────────
-          Avant ce lot : `width: min(100%, 420px)`, un plafond fixe quel que soit l'écran. Sur
-          la tablette du père, en portrait, ce plafond laissait le vrai geste — le tracé — dans
-          une colonne étroite entourée de vide. Le plafond disparaît : l'ardoise remplit
-          maintenant la ligne `1fr`, et c'est `preserveAspectRatio="xMidYMid meet"` (le défaut
-          SVG, posé ici en toutes lettres) qui la contient sans jamais la déformer ni la
-          rogner — aucun trait du modèle ne doit sortir du cadre visible, sans quoi un enfant
-          pourrait viser un point que l'écran ne montre plus.
+          Elle remplit la zone restante ; `preserveAspectRatio="xMidYMid meet"` la contient
+          sans jamais la déformer ni la rogner — aucun trait du modèle ne doit sortir du cadre
+          visible, sans quoi un enfant pourrait viser un point que l'écran ne montre plus.
           `R16` grandit avec elle, jamais en dessous : `RAYON_DEPART` (`GuidageLettre.tsx`) est
           un rayon FIXE en unités `viewBox`, et l'échelle px/unité ne peut que MONTER quand
-          l'ardoise s'agrandit — elle ne redescend jamais sous le `420 / 100` déjà mesuré
-          64 px et plus. */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          inlineSize: '100%',
-          blockSize: '100%',
-          minBlockSize: 0,
-        }}
-      >
+          l'ardoise s'agrandit. */}
+      <div className="trace-ardoise">
         <svg
           ref={refSvg}
           data-scene="trace"
@@ -400,15 +317,6 @@ export function MoteurTrace(
           preserveAspectRatio="xMidYMid meet"
           role="application"
           aria-label={`Trace la lettre ${lettre?.lettre ?? ''}`}
-          style={{
-            inlineSize: '100%',
-            blockSize: '100%',
-            display: 'block',
-            background: 'var(--parchemin, #FBF6EA)',
-            borderRadius: 'var(--rayon-carte, 1rem)',
-            boxShadow: '0 4px 18px rgba(27, 36, 64, 0.15)',
-            touchAction: 'none',
-          }}
           onPointerDown={auContact}
           onPointerMove={auDeplacement}
           onPointerUp={auRelachement}
@@ -448,35 +356,47 @@ export function MoteurTrace(
           )}
         </svg>
       </div>
-
-      <div style={{ display: 'grid', gap: '0.35rem', justifyItems: 'center' }}>
-        <p
-          role="status"
-          aria-live="polite"
-          data-refus={etat.dernierRefus?.motif ?? 'non'}
-          style={{ ...styleLecture, margin: 0, textAlign: 'center', display: 'grid' } as CSSProperties}
-        >
-          {/* Réserver les messages avant le premier refus : leur apparition ne doit
-              déplacer ni redimensionner la lettre sous le pointeur. La grille réserve
-              aussi les retours à la ligne, sans hauteur fixe liée à un écran. */}
-          <span aria-hidden="true" style={{ gridArea: '1 / 1', visibility: 'hidden' }}>
-            On recommence ce trait, tranquillement.
-          </span>
-          {Array.from(new Set(contenu.lettres.flatMap((modele) => modele.traits.map((trait) => trait.libelle))))
-            .map((libelle) => (
-              <span key={libelle} aria-hidden="true" style={{ gridArea: '1 / 1', visibility: 'hidden' }}>
-                {`On commence par ${libelle}, tranquillement.`}
-              </span>
-            ))}
-          <span data-message-refus="oui" style={{ gridArea: '1 / 1' }}>
-            {messageDeRefus(etat, traitAttendu?.libelle ?? null)}
-          </span>
-        </p>
-
-        <span data-trait-libelle="oui" style={{ color: TRAIT, fontWeight: 700 }}>
-          {traitAttendu?.libelle ?? ''}
-        </span>
-      </div>
     </div>
+  );
+
+  const pied = (
+    <div className="trace-pied">
+      <p role="status" aria-live="polite" data-refus={etat.dernierRefus?.motif ?? 'non'} className="trace-refus">
+        {/* Réserver les messages avant le premier refus : leur apparition ne doit
+            déplacer ni redimensionner la lettre sous le pointeur. La grille réserve
+            aussi les retours à la ligne, sans hauteur fixe liée à un écran. */}
+        <span aria-hidden="true" className="trace-refus__reserve">
+          On recommence ce trait, tranquillement.
+        </span>
+        {Array.from(new Set(contenu.lettres.flatMap((modele) => modele.traits.map((trait) => trait.libelle))))
+          .map((libelle) => (
+            <span key={libelle} aria-hidden="true" className="trace-refus__reserve">
+              {`On commence par ${libelle}, tranquillement.`}
+            </span>
+          ))}
+        <span data-message-refus="oui" className="trace-refus__message">
+          <TexteColore texte={messageDeRefus(etat, traitAttendu?.libelle ?? null)} />
+        </span>
+      </p>
+
+      {traitAttendu?.libelle === undefined || traitAttendu.libelle === '' ? null : (
+        <span data-trait-libelle="oui" className="trace-libelle" {...ROLE_QUESTION}>
+          <TexteColore texte={traitAttendu.libelle} />
+        </span>
+      )}
+    </div>
+  );
+
+  return (
+    <DispositionMoteur
+      moteur="trace"
+      data-habillage={habillage.id}
+      data-axe={axe}
+      data-termine={etat.termineMs === null ? 'non' : 'oui'}
+      data-lettre={lettre?.lettre ?? ''}
+      data-axe-confondu={etat.axeConfondu ?? undefined}
+      scene={scene}
+      pied={pied}
+    />
   );
 }

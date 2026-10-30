@@ -1,0 +1,53 @@
+/* Fentes et jeton en vol (`commun/fentes.tsx`), communs à `phrase`, `tri`, `assemble` et `chrono`.
+   Par défaut, typographie de LECTURE : la ligne de fentes est un champ de lecture (aucune
+   animation). Un moteur où la fente n'est qu'un accusé de réception (`tri`) la repasse en
+   typographie d'interface dans sa propre feuille. Le jeton porte aussi `.cible` : `.cible.jeton-en-vol`
+   passe devant les règles de `.cible`, quel que soit l'ordre de chargement des feuilles. */
+
+.fente,
+.cible.jeton-en-vol {
+  font-family: var(--lecture-famille, var(--font-lecture));
+  font-size: var(--lecture-corps, 1.5rem);
+  letter-spacing: var(--lecture-interlettrage, normal);
+  word-spacing: var(--lecture-espacement-mots, normal);
+  line-height: var(--lecture-interligne, 1.4);
+  white-space: nowrap;
+}
+
+.fente {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: var(--epaisseur-trait) dashed var(--trait);
+  border-radius: var(--rayon-carte);
+  background-color: color-mix(in srgb, var(--grisaille) 12%, var(--parchemin));
+  box-shadow: var(--ombre-bd-appui);
+  color: var(--trait);
+  overflow: hidden;
+  animation: none;
+  transition: none;
+}
+
+/* La place attendue (phrase, ou l'aide réclamée dans assemble) : marquée, jamais animée. */
+.fente[data-prochaine='oui'] { background-color: var(--soleil); }
+
+/* Pleine, elle est posée : en relief, trait plein. */
+.fente[data-placee='oui'] {
+  border-style: solid;
+  background-color: var(--parchemin);
+  box-shadow: var(--ombre-bd);
+}
+
+/* Le vol part du point de départ en `inset` et se déplace de (--vol-dx, --vol-dy). Le centrage
+   est dans les deux images-clés : une image-clé remplace la transformation en place (R54). */
+.cible.jeton-en-vol {
+  position: absolute;
+  z-index: 3;
+  pointer-events: none;
+  animation: pierre-vol-du-jeton var(--vol-duree) cubic-bezier(0.33, 0, 0.2, 1) 1 both;
+}
+
+@keyframes pierre-vol-du-jeton {
+  from { transform: translate(-50%, -50%) translate(0, 0); opacity: 1; }
+  to { transform: translate(-50%, -50%) translate(var(--vol-dx), var(--vol-dy)); opacity: 1; }
+}

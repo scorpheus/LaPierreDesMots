@@ -428,12 +428,6 @@ export const TRANSITIONS: readonly TransitionModele[] = [
     motif: 'le coffre aux collections'
   },
   {
-    depuis: 'campement',
-    vers: 'ouverture',
-    prise: { selecteur: '[data-vers="ouverture"]' },
-    motif: 'D35, point 3 — le campement rejoue l’ouverture'
-  },
-  {
     // La pastille de sortie est POSÉE PARTOUT où l'enfant peut vouloir repartir : l'écran
     // d'accueil et le campement. D46 — « aucun écran intermédiaire obligatoire, nulle part ».
     depuis: 'campement',
@@ -757,8 +751,15 @@ export function routesOrphelines(table: TableDesRoutes): readonly string[] {
  * `naviguer`, et son `createRoute` — trois lignes, plus une seule. La route a une entrée ; la
  * seconde moitié de la question Q2-1 (« lui donner une entrée, ou la retirer ? ») est tranchée
  * par le fait, pas par un arbitrage écrit.
+ *
+ * Ajout du 2026-10-09 : `/debug/exercice` n'a volontairement AUCUNE entrée dans le jeu. Son entrée est
+ * externe : les liens « ouvrir » du tableau des retours du parent (`Docs/tableau-retours.md`).
+ * Elle n'existe que sur `localhost` (la tablette retombe sur le jeu normal) et lance hors journal.
+ * Couverte par `tests/composants/ApplicationNavigation.test.tsx` (« banc local d'un exercice »).
  */
-export const ROUTES_ORPHELINES_CONNUES: Readonly<Record<string, string>> = {};
+export const ROUTES_ORPHELINES_CONNUES: Readonly<Record<string, string>> = {
+  '/debug/exercice': 'banc local du tableau des retours : entrée externe (liens du tableau), localhost seulement'
+};
 
 // ──────────────────────────────────────────────────── l'audit du modèle, en fonction PURE
 

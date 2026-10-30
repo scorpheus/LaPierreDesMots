@@ -16,6 +16,8 @@ import type { CouleurColoriage, IdRegionSvg } from '@pierre/partage';
 import { DELAIS_AIDE } from '@pierre/partage';
 import type { ActionColorie, ContenuColorie, EtatColorie } from '@pierre/partage';
 import type { ProprietesMoteur } from '../types.js';
+import { DispositionMoteur } from '../../activite/DispositionMoteur.js';
+import { RepereEtape } from '../../activite/RepereEtape.js';
 import { CadreColoriage } from './CadreColoriage.js';
 import { PaletteConsigne } from './PaletteConsigne.js';
 import { SceneSvg } from './SceneSvg.js';
@@ -156,59 +158,56 @@ export function MoteurColorie(
   );
 
   return (
-    <div
-      data-moteur="colorie"
-      data-plateau-defilant="oui"
+    <DispositionMoteur
+      moteur="colorie"
       data-habillage={habillage.id}
       data-termine={etat.termineMs === null ? 'non' : 'oui'}
-      // La scène peut maintenant rétrécir pour tenir dans la tablette : `SceneSvg` sépare le
-      // dessin de chaque région de sa prise transparente de 80 unités. R16 ne dépend donc plus
-      // de la finesse de l'asset, et R20 n'a plus à payer ce défaut par un long défilement.
-      // R20 — colonne souple : la scène prend l'espace restant tandis que la palette garde
-      // ses cibles de 64 px. Le plateau reste long sur les petits cadres ; le CSS de la coquille
-      // ne le borne au viewport que sur les grands écrans où le dessin sait se contracter.
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '1rem',
-        blockSize: '100%',
-        minBlockSize: 0,
-        overflowY: 'auto'
-      }}
-    >
-      <CadreColoriage
-        enfants={(loupeActive) => (
-          <SceneSvg
-            habillage={habillage}
-            remplissages={etat.remplissages}
-            regionEnDemonstration={regionEnDemonstration}
-            regionEnRefus={etat.dernierRefus === null ? null : etat.dernierRefus.region}
-            marqueRefus={etat.dernierRefus === null ? 0 : etat.dernierRefus.instantMs}
-            animationsDesactivees={animationsDesactivees}
-            nombreRegionsAttendues={nombreRegionsAttendues}
-            regionsActives={etatConsigne?.ciblesRestantes.map((cible) => cible.region) ?? []}
-            loupeActive={loupeActive}
-            svgMarkup={svgMarkup}
-            onPeindre={peindre}
-          />
-        )}
-      />
-
-      <PaletteConsigne
-        consignes={contenu.consignes}
-        indexConsigne={etat.indexConsigne}
-        nuancier={contenu.nuancierAutorise}
-        couleurChoisie={etat.couleurChoisie}
-        niveauAide={etatConsigne === undefined ? 'aucune' : etatConsigne.niveauAide}
-        couleurEnDemonstration={couleurEnDemonstration}
-        cibleCourante={cibleCourante}
-        animationsDesactivees={animationsDesactivees}
-        onChoisir={choisir}
-      />
-
-      <p role="status" aria-live="polite" data-rappel={rappel === '' ? 'non' : 'oui'}>
-        <MessageStable messages={[messageRappel]}>{rappel}</MessageStable>
-      </p>
-    </div>
+      scene={
+        <CadreColoriage
+          enfants={(loupeActive) => (
+            <SceneSvg
+              habillage={habillage}
+              remplissages={etat.remplissages}
+              regionEnDemonstration={regionEnDemonstration}
+              regionEnRefus={etat.dernierRefus === null ? null : etat.dernierRefus.region}
+              marqueRefus={etat.dernierRefus === null ? 0 : etat.dernierRefus.instantMs}
+              animationsDesactivees={animationsDesactivees}
+              nombreRegionsAttendues={nombreRegionsAttendues}
+              regionsActives={etatConsigne?.ciblesRestantes.map((cible) => cible.region) ?? []}
+              loupeActive={loupeActive}
+              svgMarkup={svgMarkup}
+              onPeindre={peindre}
+            />
+          )}
+        />
+      }
+      reserve={
+        <>
+        {/* T10 — le repère commun, affiché sous la consigne de l'écran. */}
+        <RepereEtape
+          moteur="colorie"
+          rang={etat.indexConsigne + 1}
+          total={contenu.consignes.length}
+          animationsDesactivees={animationsDesactivees}
+        />
+        <PaletteConsigne
+          consignes={contenu.consignes}
+          indexConsigne={etat.indexConsigne}
+          nuancier={contenu.nuancierAutorise}
+          couleurChoisie={etat.couleurChoisie}
+          niveauAide={etatConsigne === undefined ? 'aucune' : etatConsigne.niveauAide}
+          couleurEnDemonstration={couleurEnDemonstration}
+          cibleCourante={cibleCourante}
+          animationsDesactivees={animationsDesactivees}
+          onChoisir={choisir}
+        />
+        </>
+      }
+      pied={
+        <p role="status" aria-live="polite" data-rappel={rappel === '' ? 'non' : 'oui'}>
+          <MessageStable messages={[messageRappel]}>{rappel}</MessageStable>
+        </p>
+      }
+    />
   );
 }

@@ -37,9 +37,9 @@ import AxeBuilder from '@axe-core/playwright';
 // `playwright.config.ts`, et c’est lui qui rend `fullyParallel` légitime.
 import { expect, test } from '../harnais-serveur.js';
 
-import { ecransDeclares, recettesDEcrans } from '../e2e/qa-outils.js';
+import { ecransDeclares, formatsDuBalayage, noeudsBalayes, recettesDEcrans } from '../e2e/qa-outils.js';
 
-const ECRANS = recettesDEcrans();
+const ECRANS = recettesDEcrans(noeudsBalayes());
 const ECRANS_DECLARES = ecransDeclares();
 
 /** Les niveaux qui bloquent — mêmes que `a11y-parent.spec.ts` et `a11y-galerie.spec.ts`. */
@@ -50,8 +50,9 @@ test.describe('QA a11y — chaque écran atteignable du site', () => {
 
   const audites = new Set<string>();
 
-  for (const ecran of ECRANS) {
-    test(`« ${ecran.nom} » n’a aucune violation serious ni critical`, async ({ page }) => {
+  for (const { element: ecran, format } of formatsDuBalayage(ECRANS)) {
+    test(`« ${ecran.nom} » n’a aucune violation serious ni critical — ${format.nom}`, async ({ page }) => {
+      await page.setViewportSize(format);
       await ecran.aller(page);
       // On VÉRIFIE qu'on est bien arrivé : auditer une page qui n'est pas celle qu'on croit
       // rendrait zéro violation pour la pire des raisons.

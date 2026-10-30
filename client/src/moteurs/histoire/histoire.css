@@ -1,0 +1,120 @@
+/* Moteur `histoire` — apparence propre. La disposition vient du socle (DispositionMoteur). */
+
+/* La scène est un conteneur : sa propre largeur décide de la disposition. */
+.histoire {
+  container: histoire / inline-size;
+  inline-size: 100%;
+  block-size: 100%;
+  min-inline-size: 0;
+  min-block-size: 0;
+}
+
+/*
+ * E09 (retour du parent, 9 octobre 2026) : le récit est centré et prend toute la largeur utile ;
+ * la question et ses réponses forment un bloc juste dessous ; le décor prend le reste.
+ *
+ * La question et les réponses ne sont JAMAIS rognées : leur rangée a la hauteur de son contenu.
+ * Le récit prend sa hauteur entière quand elle tient ; s'il manque de la place (mesuré : le plus
+ * long récit, galeries-10, en 1100 × 700), il défile dans son cadre plutôt que de passer sous la
+ * question. Le corps et l'interligne du profil ne sont jamais réduits.
+ */
+.histoire__grille {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, max-content) max-content minmax(var(--socle-image-min), 1fr);
+  gap: var(--socle-espace);
+  inline-size: 100%;
+  block-size: 100%;
+  min-block-size: 0;
+}
+
+/* Le récit : toute la largeur, donc centré par construction ; le texte reste aligné à gauche,
+   comme dans un livre (des lignes centrées rendent le retour à la ligne plus dur à suivre). */
+.histoire__recit {
+  inline-size: 100%;
+  min-block-size: 0;
+  overflow-y: auto;
+  padding: 0.5rem 0.75rem;
+  box-sizing: border-box;
+  background-color: var(--parchemin);
+  border: var(--epaisseur-trait) solid var(--trait);
+  border-radius: var(--rayon-carte);
+}
+
+/* La question, puis ses réponses dessous. Fond, bord, police : thème question du socle. */
+.histoire__bloc-question {
+  display: grid;
+  align-content: start;
+  justify-items: center;
+  gap: var(--socle-espace);
+  min-inline-size: 0;
+}
+
+.histoire__question {
+  max-inline-size: 100%;
+  padding: 0.1rem 0.85rem;
+  /* L'interligne du profil n'est jamais réduit. */
+  line-height: var(--lecture-interligne);
+  text-align: center;
+}
+
+.histoire__lecture { font-weight: 700; }
+
+/* Les réponses : le texte à déchiffrer prend le réglage de lecture du profil. */
+.histoire__option {
+  max-inline-size: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  font-family: var(--lecture-famille, var(--font-lecture));
+  font-size: var(--lecture-corps);
+  letter-spacing: var(--lecture-interlettrage);
+  word-spacing: var(--lecture-espacement-mots);
+  line-height: var(--lecture-interligne);
+}
+
+.histoire__options {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--socle-espace);
+}
+
+/* Texte d'interface. */
+.histoire__interface {
+  font-family: var(--font-interface);
+  font-size: var(--socle-texte-interface);
+}
+
+.histoire__decor {
+  position: relative;
+  min-block-size: var(--socle-image-min);
+  min-inline-size: var(--socle-image-min);
+  overflow: hidden;
+  border-radius: var(--rayon-carte);
+}
+
+/* ── Le pied : relire l'histoire et le message ─────────────────────────────────────────── */
+
+.histoire__controles {
+  display: grid;
+  justify-items: start;
+  gap: var(--socle-espace);
+}
+
+.histoire__message { margin: 0; min-block-size: 1.5em; }
+
+/* Scène large (paysage) : sous le récit, la question sur toute la largeur (elle tient alors sur
+   une ligne), puis les réponses à gauche et le décor à droite. En portrait, tout s'empile. */
+@container scene (aspect-ratio > 1.15) {
+  .histoire__grille {
+    grid-template-columns: minmax(0, 3fr) minmax(var(--socle-image-min), 2fr);
+    grid-template-rows: minmax(0, max-content) max-content minmax(max-content, 1fr);
+  }
+
+  .histoire__bloc-question { display: contents; }
+  .histoire__recit { grid-column: 1 / -1; grid-row: 1; }
+  .histoire__question { grid-column: 1 / -1; grid-row: 2; justify-self: center; }
+  .histoire__options { grid-column: 1; grid-row: 3; align-self: start; }
+  .histoire__decor { grid-column: 2; grid-row: 3; }
+}

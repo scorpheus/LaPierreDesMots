@@ -246,9 +246,8 @@ describe('aucune action ne mène ailleurs que prévu', () => {
 describe('aucune transition manquante', () => {
   it('la PRISE de chaque transition déclarée existe sur son écran', () => {
     // C'est le cas qui attrape « le bouton retour a disparu » — et celui qui a trouvé, le
-    // 2026-08-02, que `HoteCampement` ne câblait pas `surRejouerOuverture` : le bouton
-    // « Revoir l’histoire » du campement n'était rendu nulle part, et D35 point 3 restait
-    // sur le papier.
+    // 2026-08-02, que `HoteCampement` ne câblait pas le bouton « Revoir l’histoire » du
+    // campement (D35 point 3, entrée déplacée depuis sur la carte seule, décision du 30 oct.).
     const introuvables = rapport.declareesVerifiees
       .filter((verdict) => !verdict.priseTrouvee)
       .map((verdict) => `${verdict.depuis} : prise « ${verdict.prise.selecteur} » absente`)

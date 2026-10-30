@@ -27,6 +27,7 @@
 .code-parent-pastilles { display: flex; gap: 1rem; }
 .code-parent-pastille { inline-size: 1.5rem; block-size: 1.5rem; border: 3px solid var(--trait); border-radius: 50%; background: transparent; }
 .code-parent-pastille--pleine { background: var(--trait); }
+.code-parent-case { inline-size: 2.5rem; block-size: 3rem; display: grid; place-items: center; font-size: 2rem; border-radius: .5rem; border: 3px solid var(--trait); }
 .code-parent-pave { display: grid; grid-template-columns: repeat(3, minmax(4.5rem, 1fr)); gap: .75rem; inline-size: min(100%, 22rem); }
 .code-parent-touche { min-block-size: var(--cible-min); font-size: 1.75rem; }
 .code-parent-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: .75rem; }
@@ -48,6 +49,30 @@
   .reglages-lecture-titre { font-size: clamp(1.1rem, 3.4vw, 1.65rem); line-height: 1.2; }
   .reglages-entete > .cible { padding-inline: .5rem; }
 }
+/* T14 (2026-10-09) — réglages de lecture en paysage peu haut (PC portable 1366×768 : 131 px de
+ * défilement mesurés). Deux colonnes empilaient trois rangées, dont la dernière gonflée à 250 px
+ * par les quatre bascules repliées sur trois lignes. Trois colonnes : la police (trois choix sur
+ * une ligne) et la taille ; les trois espacements ; les bascules sur toute la largeur, une ligne.
+ * Rien n'est rétréci : ni l'aperçu, ni les cibles (64 px), seulement l'ordre des blocs et les
+ * marges verticales. */
+@media (orientation: landscape) and (min-width: 1000px) and (max-height: 900px) {
+  .ecran-reglages-lecture { max-inline-size: 84rem; padding-block: 1rem; gap: 1rem; }
+  .reglages-grille { grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-areas: "police police corpsPx" "interlettrageEm espacementMotsEm interligne" "options options options"; gap: .75rem; }
+  .reglages-grille > [data-groupe-reglage="police"] { grid-area: police; }
+  .reglages-grille > [data-groupe-reglage="corpsPx"] { grid-area: corpsPx; }
+  .reglages-grille > [data-groupe-reglage="interlettrageEm"] { grid-area: interlettrageEm; }
+  .reglages-grille > [data-groupe-reglage="espacementMotsEm"] { grid-area: espacementMotsEm; }
+  .reglages-grille > [data-groupe-reglage="interligne"] { grid-area: interligne; }
+  .reglages-grille > [data-groupe-reglage="options"] { grid-area: options; }
+}
 .dashboard-parent > *, .panneau-parent > * { min-inline-size: 0; }
 .panneau-parent [data-relecture] { min-inline-size: 0; overflow-wrap: anywhere; }
 .panneau-parent [data-relecture] input { min-inline-size: 0; inline-size: 100%; }
+
+/* T16 (2026-10-09) — porte et définition du code en paysage peu haut (PC portable 1366×768 :
+ * 96 px de défilement mesurés). Le pavé 3 colonnes laissait le 0 seul sur une quatrième rangée :
+ * en 4 colonnes il tient sur 3 rangées. Les touches gardent leur taille (cible ≥ 64 px). */
+@media (orientation: landscape) and (min-width: 701px) and (max-height: 800px) {
+  .code-parent-page { gap: .9rem; max-inline-size: 36rem; }
+  .code-parent-pave { grid-template-columns: repeat(4, minmax(4.5rem, 1fr)); inline-size: min(100%, 28rem); }
+}

@@ -61,6 +61,7 @@ import { chargerSceneHabillage } from '../../habillages/chargeur.js';
 import { corpsDuSvg } from '../../habillages/SceneDecor.js';
 import { SceneRasterIndexee } from './SceneRasterIndexee.js';
 import { CercleAccessible } from '../../composants/CercleAccessible.js';
+import './libre.css';
 
 /** Région non encore peinte. Même jeton que `colorie/SceneSvg.tsx`. */
 const REMPLISSAGE_VIDE = 'var(--region-vide, #D9DEE7)';
@@ -83,22 +84,6 @@ const DIAMETRE_PRISE_MINIMAL = 96;
 function rayonEquivalent(surface: number): number {
   return Math.sqrt(Math.max(surface, 0) / Math.PI);
 }
-
-const STYLES_SCENE = `
-.pierre-scene-libre { cursor: default; touch-action: manipulation; }
-.pierre-region-libre {
-  cursor: pointer;
-  transform-box: fill-box;
-  transform-origin: center;
-  transition: fill 150ms linear, transform 400ms cubic-bezier(.34, 1.56, .64, 1);
-}
-.pierre-region-libre:active { transform: scale(.94); transition: transform 60ms ease-out; }
-.pierre-region-libre:focus-visible { outline: 3px solid var(--soleil, #FFC93C); outline-offset: 2px; }
-.pierre-prise-libre { cursor: pointer; fill: transparent; pointer-events: all; }
-.pierre-prise-libre:focus-visible { outline: 3px solid var(--soleil, #FFC93C); outline-offset: 2px; }
-.pierre-scene-libre--calme .pierre-region-libre { transition: none; }
-@media (prefers-reduced-motion: reduce) { .pierre-region-libre { transition: none; } }
-`;
 
 export interface ProprietesSceneLibre {
   readonly habillage: Habillage;
@@ -249,10 +234,7 @@ function SceneLibreSvg({
       data-scene-libre={habillage.id}
       data-decor={svgMarkup === null ? 'repli' : 'habillage'}
       onClick={surClic}
-      style={{ width: '100%', height: '100%', display: 'block' }}
     >
-      <style>{STYLES_SCENE}</style>
-
       {contenuDecor !== null ? (
         <g data-calque="habillage" dangerouslySetInnerHTML={contenuDecor} />
       ) : (

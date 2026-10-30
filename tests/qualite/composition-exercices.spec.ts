@@ -71,8 +71,10 @@ async function verifierEtat(page: Page, moteur: string, etat: string): Promise<v
     `${moteur} — défauts de composition dans l’état ${etat}`,
   ).toEqual([]);
   if (moteur === 'place') {
+    // T10 : le repère d'étape vit dans la barre de consigne (hors du moteur) ; on le cherche
+    // dans la page, et l'exigence ne change pas : il ne masque ni le dessin ni les cartes.
     const recouvrements = await racine.evaluate((element) => {
-      const carton = element.querySelector('[data-plateau="etape-place"]')!.getBoundingClientRect();
+      const carton = document.querySelector('[data-repere-etape="place"]')!.getBoundingClientRect();
       return ['[data-scene="place"]', '[data-reserve="place"]'].filter((selecteur) => {
         const cible = element.querySelector(selecteur)!.getBoundingClientRect();
         return Math.min(carton.right, cible.right) > Math.max(carton.left, cible.left) + 1 &&

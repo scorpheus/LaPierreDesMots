@@ -20,8 +20,17 @@ for (const [width, height] of [[1366, 768], [1366, 912], [1920, 912]] as const) 
     expect(Math.max(...cartes.map(c => c.width)) - Math.min(...cartes.map(c => c.width))).toBeLessThan(2);
     const image = await page.locator('[data-illustration-carte]').first().boundingBox();
     expect(image!.width).toBeGreaterThanOrEqual(height === 912 ? 192 : 168);
-    const plateau = await page.locator('[data-plateau="cartes"]').boundingBox();
-    expect(Math.abs(plateau!.x + plateau!.width / 2 - width / 2)).toBeLessThan(2);
+    // Le plateau est centré dans la scène du moteur (Gobi a sa colonne à côté) et non tassé en
+    // haut : on compare le centre de la grille des cartes réellement occupée à celui de la scène.
+    const centres = await page.evaluate(() => {
+      const scene = document.querySelector('.disposition-moteur__scene')!.getBoundingClientRect();
+      const cartes = [...document.querySelectorAll('[data-carte]')].map((c) => c.getBoundingClientRect());
+      const gauche = Math.min(...cartes.map((c) => c.left)); const droite = Math.max(...cartes.map((c) => c.right));
+      const haut = Math.min(...cartes.map((c) => c.top)); const bas = Math.max(...cartes.map((c) => c.bottom));
+      return { dx: (gauche + droite) / 2 - (scene.left + scene.right) / 2, dy: (haut + bas) / 2 - (scene.top + scene.bottom) / 2 };
+    });
+    expect(Math.abs(centres.dx), 'cartes centrées horizontalement dans la scène').toBeLessThan(2);
+    expect(Math.abs(centres.dy), 'cartes centrées verticalement dans la scène').toBeLessThan(2);
     expect(cartes.every(c => c.y >= 0 && c.y + c.height <= height)).toBe(true);
   });
 }

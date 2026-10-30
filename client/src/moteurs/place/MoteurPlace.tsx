@@ -17,7 +17,7 @@
  */
 
 import { MessageStable } from '../../composants/MessageStable.js';
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
 import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
@@ -25,6 +25,9 @@ import type { ActionPlace, ContenuPlace, EtatPlace, Point } from '@pierre/partag
 import type { ProprietesMoteur } from '../types.js';
 import { ScenePlace } from './ScenePlace.js';
 import { Reserve } from './Reserve.js';
+import { DispositionMoteur } from '../../activite/DispositionMoteur.js';
+import { RepereEtape } from '../../activite/RepereEtape.js';
+import './place.css';
 import { urlAsset } from '../../api/client.js';
 import { reecrireLiensAssetsDuSvg } from '../../habillages/chargeur.js';
 
@@ -239,53 +242,49 @@ export function MoteurPlace(
       ? messageRappel
       : '';
 
+  // LA RÉSERVE À CÔTÉ OU DESSOUS, MESURÉ. Le décor est un paysage (l'école : 922×615) : à côté de
+  // la réserve, il tombait à 414 px de large sur la tablette en portrait (800×1100, mesure du
+  // 30 oct. 2026) ; dessous, la réserve étale ses jetons sur une rangée. Les deux dispositions
+  // s'essaient avant la peinture et l'on garde celle qui dessine le décor le plus grand. Seule la
+  // taille de la cellule relance le choix : la disposition ne la change pas, rien n'oscille.
+  const reservePlace = useRef<HTMLDivElement | null>(null);
+  const [dispositionReserve, fixerDispositionReserve] = useState<'auto' | 'empilee'>('auto');
+  useLayoutEffect(() => {
+    const racine = reservePlace.current?.closest<HTMLElement>('[data-moteur="place"]') ?? null;
+    const cellule = racine?.parentElement ?? null;
+    if (racine === null || cellule === null) return undefined;
+    const choisir = (): void => {
+      const scene = racine.querySelector<SVGSVGElement>('[data-scene="place"]');
+      if (scene === null) return;
+      const vue = scene.viewBox.baseVal;
+      const rapport = vue.height > 0 ? vue.width / vue.height : 1;
+      const dessin = (disposition: 'auto' | 'empilee'): number => {
+        racine.setAttribute('data-disposition-socle', disposition);
+        const boite = scene.getBoundingClientRect();
+        return Math.min(boite.width, boite.height * rapport);
+      };
+      const aCote = dessin('auto');
+      const dessous = dessin('empilee');
+      const choix = dessous > aCote + 1 ? 'empilee' : 'auto';
+      racine.setAttribute('data-disposition-socle', choix);
+      fixerDispositionReserve(choix);
+    };
+    choisir();
+    if (typeof ResizeObserver !== 'function') return undefined;
+    const observateur = new ResizeObserver(choisir);
+    observateur.observe(cellule);
+    return () => { observateur.disconnect(); };
+  }, []);
+
   return (
     <DndContext sensors={capteurs} onDragStart={auDebutDuGlisse} onDragEnd={auBoutDuGlisse}>
-      <div
-        className="moteur-place"
-        data-plateau-defilant="oui"
-        data-moteur="place"
+      <DispositionMoteur
+        moteur="place"
+        disposition={dispositionReserve}
         data-habillage={habillage.id}
         data-termine={etat.termineMs === null ? 'non' : 'oui'}
         data-consigne={etatConsigne?.id ?? ''}
-        // Paysage large : scène à gauche, étape et réserve à droite. En cadre compact,
-        // global.css rétablit un flux de hauteur naturelle : aucune scène écrasée pour
-        // forcer les commandes dans une fenêtre trop courte, aucun carton sur le dessin.
-        style={{ blockSize: '100%', minBlockSize: 0 }}
-      >
-        <div
-          data-plateau="etape-place"
-          aria-live="polite"
-          style={{
-            position: 'relative',
-            // Une vraie case de la composition : jamais devant une cible du dessin.
-            alignSelf: 'center',
-            display: 'grid',
-            justifyItems: 'center',
-            gap: '0.15rem',
-            maxInlineSize: 'min(88%, 34rem)',
-            padding: '0.45rem 0.8rem',
-            border: '3px solid var(--trait)',
-            borderRadius: '1rem',
-            background: 'var(--parchemin)',
-            boxShadow: 'var(--ombre-bd)',
-            textAlign: 'center',
-            fontWeight: 800,
-          }}
-        >
-          <span style={{ fontWeight: 700 }}>
-            {`Étape ${String(etat.indexConsigne + 1)} / ${String(etat.consignes.length)}`}
-          </span>
-          <span data-cible-place="oui">{cibleCourante}</span>
-        </div>
-        {/* R49 (le père, 2026-08-07 : « la phrase est en haut et en bas, il y a doublon ») —
-            la consigne était redite ici ET dans l'en-tête d'`EcranNoeud`, seul propriétaire du
-            `BoutonEcouter`. La ligne qui la portait (`data-consigne-texte`) est retirée : ce
-            moteur n'a pas de meilleur usage à lui donner, contrairement à `phrase` qui y a mis
-            la phrase en train de se construire. L'exigence d'AFFICHAGE n'a rien perdu — elle
-            vit désormais dans `tests/composants/EcranNoeud.test.tsx`. La scène récupère
-            l'espace : un enfant de plus pour la réserve et les zones, avant le pied. */}
-        <div className="scene-place-defilable">
+        scene={
           <ScenePlace
             contenu={contenu}
             habillage={habillage}
@@ -298,21 +297,34 @@ export function MoteurPlace(
             svgMarkup={svgMarkup}
             onDeposer={deposer}
           />
-        </div>
-
-        <Reserve
-          elements={reserveMelangee}
-          elementsAttendus={elementsAttendus}
-          places={etat.places}
-          elementSaisi={etat.elementSaisi}
-          animationsDesactivees={animationsDesactivees}
-          onSaisir={saisir}
-        />
-
-        <p role="status" aria-live="polite" data-rappel={rappel === '' ? 'non' : 'oui'}>
-          <MessageStable messages={[messageRappel]}>{rappel}</MessageStable>
-        </p>
-      </div>
+        }
+        reserve={
+          <div className="place-reserve" ref={reservePlace}>
+            {/* T10 — la cible concrète de l'étape, dans le repère commun affiché sous la consigne
+                de l'écran ; la consigne parlée reste celle d'`EcranNoeud` (R49). */}
+            <RepereEtape
+              moteur="place"
+              rang={etat.indexConsigne + 1}
+              total={etat.consignes.length}
+              detail={cibleCourante}
+              animationsDesactivees={animationsDesactivees}
+            />
+            <Reserve
+              elements={reserveMelangee}
+              elementsAttendus={elementsAttendus}
+              places={etat.places}
+              elementSaisi={etat.elementSaisi}
+              animationsDesactivees={animationsDesactivees}
+              onSaisir={saisir}
+            />
+          </div>
+        }
+        pied={
+          <p role="status" aria-live="polite" data-rappel={rappel === '' ? 'non' : 'oui'}>
+            <MessageStable messages={[messageRappel]}>{rappel}</MessageStable>
+          </p>
+        }
+      />
     </DndContext>
   );
 }

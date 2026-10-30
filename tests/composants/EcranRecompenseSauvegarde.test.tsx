@@ -115,6 +115,23 @@ describe('la réussite reste sauvegardable jusqu’à son accusé de réception'
     await waitFor(() => expect(magasin.getState().ecran).toBe('carte'));
   });
 
+  // Q5, campagne du 12 oct. : pendant l'accusé, « Voir la carte » ne changeait RIEN à l'écran —
+  // un geste mort pour l'enfant, qui retape ou croit le jeu cassé. Le bouton montre qu'il attend.
+  it('pendant l’accusé, « Voir la carte » montre tout de suite qu’il a été entendu', async () => {
+    const envoi = differer<{ gainCascade: typeof gain }>();
+    api.enregistrer.mockReturnValue(envoi.promesse);
+    const { magasin } = monter();
+    await waitFor(() => expect(api.enregistrer).toHaveBeenCalledTimes(1));
+    const bouton = document.querySelector('[data-action="voir-carte"]')!;
+    expect(bouton.getAttribute('aria-busy')).not.toBe('true');
+    fireEvent.click(bouton);
+    expect(magasin.getState().ecran).toBe('recompense');
+    expect(bouton.getAttribute('aria-busy')).toBe('true');
+    expect(bouton.getAttribute('data-attente')).toBe('oui');
+    await act(async () => { envoi.resoudre({ gainCascade: gain }); });
+    await waitFor(() => expect(magasin.getState().ecran).toBe('carte'));
+  });
+
   it('un tap après une panne renvoie exactement la même tentative puis rejoint la carte', async () => {
     const avertissement = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
     api.enregistrer.mockRejectedValueOnce(new Error('réseau absent'))

@@ -22,7 +22,8 @@
  * Ce script ne fait ni `npm install` ni `npx playwright install` : l'installation est réservée
  * à l'orchestrateur (contrat § 8.2, prérequis).
  */
-import { execFileSync, spawnSync } from 'node:child_process';
+import { execFileSync, spawn } from 'node:child_process';
+import './priorite-basse.mjs';
 import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -43,6 +44,7 @@ import {
 } from './rapport.mjs';
 
 const DOSSIER_JOURNAUX = join(DOSSIER_RAPPORTS, 'artefacts', 'journaux');
+import { enteteDuPalier } from './paliers.mjs';
 import { calculerEntrees, commencerVerification, enregistrerPreuve, lirePreuveValide, verrouillerVerification } from './preuve-verification.mjs';
 
 /**
@@ -59,39 +61,53 @@ const CHAINE = [
   { cle: 'ressources:verifier', script: 'ressources:verifier' },
   { cle: 'qa:coherence', script: 'qa:coherence', propreRapport: true },
   { cle: 'lint', script: 'lint' },
+  // `tsc -b` écrit aussi `serveur/dist/`, que le harnais des suites navigateur démarre.
   { cle: 'typescript', script: 'typescript' },
   {
     cle: 'test',
     script: 'test',
     natif: 'vitest',
     brut: 'tests/rapports/brut/test.vitest.json',
-    // `--coverage` active les seuils PAR ZONE de l'annexe T § 7, déclarés dans
-    // `vitest.config.ts`. Sans ce drapeau, ils seraient configurés mais jamais mesurés.
     argumentsSupplementaires: [
-      '--coverage',
+      // Délai de garde, pas d'assertion assouplie : les étapes tournent en parallèle, et sous
+      // charge des propriétés fast-check de 0,7 s seules ont dépassé les 5 s par défaut.
+      '--testTimeout=30000',
       '--reporter=default',
       '--reporter=json',
       '--outputFile.json=tests/rapports/brut/test.vitest.json'
-    ]
+    ],
+    // `--coverage` active les seuils PAR ZONE de l'annexe T § 7, déclarés dans
+    // `vitest.config.ts`. Ils sont mesurés au palier `complet` : l'instrumentation v8 multiplie
+    // par six le coût du fuzz de contenu (4,8 s → 33 s, mesuré), le palier `verifier` s'en passe.
+    argumentsComplet: ['--coverage']
   },
   { cle: 'test:contenu', script: 'test:contenu', propreRapport: true },
-  { cle: 'construire:test', script: 'construire:test' },
+  // La construction servie aux suites navigateur, FIGÉE dans `tests/rapports/client-fige/` : un autre
+  // écrivain peut reconstruire `client/dist-test/` pendant la campagne sans la polluer.
+  { cle: 'construire:test', script: 'construire:test:fige' },
   {
     cle: 'test:e2e',
     script: 'test:e2e',
     natif: 'playwright',
-    brut: 'tests/rapports/brut/test-e2e.playwright.json'
+    brut: 'tests/rapports/brut/test-e2e.playwright.json',
+    apres: ['typescript', 'construire:test'],
+    travailleurs: 'e2e'
   },
-  { cle: 'test:visuel', script: 'test:visuel', propreRapport: true },
-  { cle: 'construire', script: 'construire' },
+  // Les suites navigateur passent L'UNE APRÈS L'AUTRE (e2e, visuel, qualité) : la machine est
+  // partagée, et une mesure prise sous contention ne mesure plus le jeu (consigne du 9 octobre).
+  { cle: 'test:visuel', script: 'test:visuel', propreRapport: true, apres: ['test:e2e'] },
+  // `tsc -b` de `partage` et `serveur` : jamais en même temps que l'étape `typescript`.
+  { cle: 'construire', script: 'construire', apres: ['typescript'] },
   {
     cle: 'test:qualite',
     script: 'test:qualite',
     natif: 'playwright',
     brut: 'tests/rapports/brut/test-qualite.playwright.json',
     // `test:qualite` enchaîne Playwright PUIS `verifier-bundle.mjs`, qui écrit l'étape
-    // `bundle` de son côté.
-    etapesFilles: ['bundle']
+    // `bundle` de son côté et lit `client/dist/`.
+    etapesFilles: ['bundle'],
+    apres: ['test:visuel', 'construire'],
+    travailleurs: 'qualite'
   },
   { cle: 'test:rejeu', script: 'test:rejeu', propreRapport: true },
   // ── Q8, le méta-garde — DERNIÈRE étape, et cette place est une contrainte ────────────────
@@ -101,11 +117,41 @@ const CHAINE = [
   // garde déclaré dans `Docs/specs-qa-des-promesses-v1.md` qu'un contrôle positif ait
   // RÉELLEMENT tourné ce tour-ci. Lancé avant elles, il ne verrait que des rapports périmés et
   // rougirait pour la mauvaise raison.
-  //
-  // Sans lui, les sept autres gardes sont des affirmations : rien ne vérifierait qu'ils savent
-  // encore échouer. Mesuré le 2026-08-07 — on retire le contrôle positif de Q4, Q8 sort en 1.
-  { cle: 'qa:controles', script: 'qa:controles' }
+  { cle: 'qa:controles', script: 'qa:controles', apres: 'tout' }
 ];
+
+/**
+ * Le palier : `verifier` (défaut, < 5 min) balaie un nœud par moteur, tournant d'une campagne
+ * à l'autre, sans couverture ; `complet` balaie tout et mesure la couverture par zone.
+ * Voir `Docs/boucle-tests-rapide-2026-09-02.md`, ajout du 9 octobre.
+ */
+const PALIER = (process.argv.find((a) => a.startsWith('--palier='))?.slice('--palier='.length)) ?? 'verifier';
+if (!['verifier', 'complet'].includes(PALIER)) {
+  console.error(`verifier : palier inconnu « ${PALIER} » (attendu : verifier ou complet).`);
+  process.exit(1);
+}
+
+/**
+ * Travailleurs Playwright et Vitest. Plafond de 4, plancher de 2 (consigne du 9 octobre : la
+ * machine est partagée avec d'autres projets). `--travailleurs=N` le règle pour toute la campagne.
+ */
+const TRAVAILLEURS_DEMANDES = Number(process.argv.find((a) => a.startsWith('--travailleurs='))?.slice('--travailleurs='.length) ?? 4);
+const NOMBRE_TRAVAILLEURS = String(Math.min(4, Math.max(2, Number.isInteger(TRAVAILLEURS_DEMANDES) ? TRAVAILLEURS_DEMANDES : 4)));
+const TRAVAILLEURS = { e2e: NOMBRE_TRAVAILLEURS, qualite: NOMBRE_TRAVAILLEURS };
+
+/** La rotation de l'échantillon : un compteur par campagne `verifier`, hors git. */
+function prochaineRotation() {
+  const chemin = join(DOSSIER_RAPPORTS, 'rotation-verifier.json');
+  let rotation = 0;
+  try {
+    rotation = Number(JSON.parse(readFileSync(chemin, 'utf8')).prochaine) || 0;
+  } catch {
+    rotation = 0;
+  }
+  writeFileSync(chemin, `${JSON.stringify({ prochaine: rotation + 1 }, null, 2)}
+`, 'utf8');
+  return rotation;
+}
 
 /**
  * Motifs qui trahissent un environnement incomplet, pas un défaut de code.
@@ -196,26 +242,24 @@ for (const etape of [...CHAINE.map((e) => e.cle), 'bundle']) {
 
 // ───────────────────────────────────────────────────────────── lancement d'une commande npm
 
-/** Lance `npm run <script>` sans passer par un shell quand c'est possible. */
+/** Lance `npm run <script>` sans passer par un shell quand c'est possible ; rend sa sortie. */
 function lancerNpm(script, argumentsSupplementaires = [], variables = {}) {
   const suffixe = argumentsSupplementaires.length > 0 ? ['--', ...argumentsSupplementaires] : [];
   const environnement = { ...process.env, ...variables, FORCE_COLOR: '0' };
   const npmExec = process.env['npm_execpath'];
-
-  if (npmExec && npmExec.endsWith('.js')) {
-    return spawnSync(process.execPath, [npmExec, 'run', script, ...suffixe], {
-      cwd: RACINE,
-      encoding: 'utf8',
-      env: environnement,
-      maxBuffer: 64 * 1024 * 1024
-    });
-  }
-  return spawnSync('npm', ['run', script, ...suffixe], {
-    cwd: RACINE,
-    encoding: 'utf8',
-    env: environnement,
-    shell: true,
-    maxBuffer: 64 * 1024 * 1024
+  const fils = npmExec && npmExec.endsWith('.js')
+    ? spawn(process.execPath, [npmExec, 'run', script, ...suffixe], { cwd: RACINE, env: environnement })
+    : spawn('npm', ['run', script, ...suffixe], { cwd: RACINE, env: environnement, shell: true });
+  return new Promise((resoudre) => {
+    let stdout = '';
+    let stderr = '';
+    fils.stdout.setEncoding('utf8');
+    fils.stderr.setEncoding('utf8');
+    fils.stdout.on('data', (morceau) => { stdout += morceau; });
+    fils.stderr.on('data', (morceau) => { stderr += morceau; });
+    fils.on('error', (erreur) => { resoudre({ status: 1, stdout, stderr: `${stderr}
+${String(erreur)}` }); });
+    fils.on('close', (code) => { resoudre({ status: code, stdout, stderr }); });
   });
 }
 
@@ -316,13 +360,26 @@ function evaluerCouverture() {
 // ─────────────────────────────────────────────────────────────────────── exécution
 
 const debutGlobal = Date.now();
-console.log('npm run verifier — chaîne complète, aucune étape n’interrompt les suivantes.\n');
+const ROTATION = PALIER === 'verifier' ? prochaineRotation() : null;
+console.log(
+  `npm run verifier — palier « ${PALIER} »` +
+    (ROTATION === null ? ', balayages exhaustifs' : `, un nœud par moteur (rotation ${String(ROTATION)})`) +
+    ' ; aucune étape n’interrompt les suivantes.\n'
+);
 
-for (const etape of CHAINE) {
+/** Variables communes à toutes les étapes du palier. */
+const VARIABLES_PALIER = {
+  PIERRE_PALIER: PALIER,
+  ...(ROTATION === null ? {} : { PIERRE_ROTATION: String(ROTATION) }),
+  PIERRE_CLIENT_TEST: 'tests/rapports/client-fige',
+  PIERRE_TRAVAILLEURS_VITEST: NOMBRE_TRAVAILLEURS
+};
+
+async function executerEtape(etape) {
   const debut = Date.now();
-  process.stdout.write(`→ ${etape.cle} … `);
 
-  const variables = {};
+  const variables = { ...VARIABLES_PALIER };
+  if (etape.travailleurs !== undefined) variables['PIERRE_TRAVAILLEURS'] = TRAVAILLEURS[etape.travailleurs];
   if (etape.natif === 'playwright' && etape.brut) {
     // `PIERRE_RAPPORT_JSON` et non `PLAYWRIGHT_JSON_OUTPUT_NAME` : cette dernière n'existe
     // plus dans Playwright 1.62 (vérifié par recherche dans `node_modules/`), et les trois
@@ -348,7 +405,11 @@ for (const etape of CHAINE) {
     variables['PIERRE_COURSE_DEBUT'] = String(debutGlobal);
   }
 
-  const resultat = lancerNpm(etape.script, etape.argumentsSupplementaires ?? [], variables);
+  const argumentsEtape = [
+    ...(etape.argumentsSupplementaires ?? []),
+    ...(PALIER === 'complet' ? (etape.argumentsComplet ?? []) : [])
+  ];
+  const resultat = await lancerNpm(etape.script, argumentsEtape, variables);
   const dureeMs = Date.now() - debut;
   const sortie = `${resultat.stdout ?? ''}\n${resultat.stderr ?? ''}`;
 
@@ -382,8 +443,8 @@ for (const etape of CHAINE) {
 
     const details = natif?.details ?? [];
 
-    // ── couverture par zone : mesurée pour la seule étape `test`, et seulement là
-    const couverture = etape.cle === 'test' ? evaluerCouverture() : null;
+    // ── couverture par zone : mesurée pour la seule étape `test`, au palier `complet`
+    const couverture = etape.cle === 'test' && PALIER === 'complet' ? evaluerCouverture() : null;
     // Une ABSENCE de mesure compte comme une faute, au même titre qu'un seuil manqué.
     // `test` est lancée avec `--coverage` : si aucun résumé n'en sort, les seuils de
     // l'annexe T § 7 n'ont rien vérifié — et un vert obtenu sans mesure est précisément le
@@ -540,11 +601,27 @@ for (const etape of CHAINE) {
           : relu?.statut === 'couverture'
             ? '📉'
             : '❌';
-  console.log(`${symbole}  ${(dureeMs / 1000).toFixed(1)} s`);
+  console.log(`→ ${etape.cle} … ${symbole}  ${(dureeMs / 1000).toFixed(1)} s`);
   // La cause s'affiche AUSSI au terminal : l'agent qui lance la chaîne la voit passer sans
   // avoir à ouvrir le rapport, et sait déjà s'il doit corriger du code ou écrire un test.
   if (relu?.cause) console.log(`    ${relu.cause.replace(/\*\*/g, '')}`);
 }
+
+// ── T6 : chaque étape part dès que ses prérequis sont finis (`apres`), les autres en même temps.
+const lancees = new Map();
+function prerequis(etape) {
+  if (etape.apres === 'tout') return CHAINE.filter((e) => e !== etape).map((e) => e.cle);
+  return etape.apres ?? [];
+}
+function lancer(etape) {
+  if (!lancees.has(etape.cle)) {
+    lancees.set(etape.cle, Promise.all(
+      prerequis(etape).map((cle) => lancer(CHAINE.find((e) => e.cle === cle)))
+    ).then(() => executerEtape(etape)));
+  }
+  return lancees.get(etape.cle);
+}
+await Promise.all(CHAINE.map(lancer));
 
 // ─────────────────────────────────────────────────────────────────────────── rapport
 
@@ -554,7 +631,10 @@ appendFileSync(
   'utf8'
 );
 
-const bilan = genererRapport({ commande: 'npm run verifier' });
+const bilan = genererRapport({
+  commande: PALIER === 'complet' ? 'npm run verifier:complet' : `npm run verifier (palier verifier, rotation ${String(ROTATION)})`,
+  entete: enteteDuPalier(PALIER, ROTATION)
+});
 
 console.log('');
 console.log(

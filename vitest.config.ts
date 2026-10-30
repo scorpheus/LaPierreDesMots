@@ -16,6 +16,7 @@
  * code de production ne doit les emprunter.
  */
 import { fileURLToPath } from 'node:url';
+import './scripts/priorite-basse.mjs';
 import { defineConfig } from 'vitest/config';
 
 // Source UNIQUE des seuils de l'annexe T § 7. Ils vivaient ici ; ils vivent désormais dans un
@@ -81,7 +82,9 @@ const preparation = racine('./tests/configuration/preparation.ts');
  * 28 délais dépassés sans défaut d'assertion, puis `Timeout calling onTaskUpdate`. Quatre ouvriers
  * gardent du parallélisme tout en laissant le serveur et Playwright respirer pendant `verifier`.
  */
-const PLAFOND_TRAVAILLEURS_VITEST = 4;
+// Plafond mesuré sous couverture v8 (au-delà, faux échecs par affamement). Sans couverture, le
+// palier `verifier` en demande davantage par `PIERRE_TRAVAILLEURS_VITEST`.
+const PLAFOND_TRAVAILLEURS_VITEST = Number(process.env['PIERRE_TRAVAILLEURS_VITEST'] ?? 4);
 
 /**
  * Seuils de couverture PAR ZONE — annexe T § 7.

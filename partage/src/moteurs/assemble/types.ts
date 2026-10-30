@@ -46,6 +46,7 @@ export type MotifRefusAssemble =
   | 'bloc-hors-ordre' // le bon bloc, mais pas à son rang — erreur de lecture
   | 'bloc-intrus'     // le bloc n'appartient à aucun mot de l'exercice
   | 'bloc-deja-pose'
+  | 'case-occupee'     // la case visée tient déjà son bloc — refus sans erreur
   | 'bloc-inconnu';
 
 export interface RefusAssemble {
@@ -93,6 +94,12 @@ export interface EtatEtapeAssemble {
    */
   readonly nbElements: number | null;
   readonly confusion: ConfusionObservee | null;
+  /**
+   * Les blocs de la solution, dans l'ordre : le bloc de la case de rang `i` est `solution[i]`.
+   * `restantes` perd ses blocs à mesure ; celui-ci, jamais — c'est lui que la pose par case
+   * interroge. Déclaré en DERNIER pour ne pas devancer `ordreAffichage` auprès du garde Q4.
+   */
+  readonly solution: readonly IdBloc[];
 }
 
 export interface EtatAssemble {
@@ -116,7 +123,16 @@ export interface EtatAssemble {
 }
 
 export type ActionAssemble =
-  | { readonly type: 'poser'; readonly bloc: IdBloc }
+  | {
+      readonly type: 'poser';
+      readonly bloc: IdBloc;
+      /**
+       * Rang de la case visée, base 0. Absent : comportement d'avant (le bloc doit être
+       * `restantes[0]`, la case suivante). Présent : le verdict porte sur CETTE case, et
+       * l'ordre de remplissage est libre (contrat assemble-pose-par-case, 12 oct. 2026).
+       */
+      readonly case?: number;
+    }
   | { readonly type: 'ecouterConsigne' }
   | { readonly type: 'demanderAide' }
   | { readonly type: 'battementHorloge' };

@@ -21,7 +21,7 @@
  * que R47/R52 ont remplacé pour `phrase` : « les cases prennent une position dans l'habillage,
  * comme `place` le fait avec ses centroïdes » — consigne du brief de ce lot. Les cases sont
  * donc placées par la MÊME dérivation que les mots de `phrase` et les options d'`eclair`
- * (`client/src/moteurs/eclair/mise-en-scene.ts`), en un seul appel qui couvre TOUTES les
+ * (`client/src/moteurs/commun/mise-en-scene.ts`), en un seul appel qui couvre TOUTES les
  * cases de l'exercice : le plateau est un objet stable, pas une révélation progressive comme
  * les étiquettes de `phrase`. `case.position` reste dans le contenu — le schéma ne bouge pas
  * sans validation — mais il n'est plus lu ici.
@@ -47,8 +47,12 @@
  */
 
 import { MessageStable } from '../../composants/MessageStable.js';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { CSSProperties, ReactElement } from 'react';
+import { DispositionMoteur } from '../../activite/DispositionMoteur.js';
+import { RepereEtape } from '../../activite/RepereEtape.js';
+import { CadreQuestion, ROLE_REPONSE } from '../../activite/Question.js';
+import { TexteColore } from '../../lecture/TexteColore.js';
 import type { ActionChemin, ContenuChemin, EtatChemin } from '@pierre/partage';
 import { preparerPlateauChemin } from '@pierre/partage';
 import { styleDeLecture, useReglagesLecture } from '../../lecture/ZoneDeLecture.js';
@@ -62,15 +66,15 @@ import {
   regionsColoriables,
   useDerniereAllumee,
   useMesureCadre,
-} from '../eclair/mise-en-scene.js';
-import type { Boite } from '../eclair/mise-en-scene.js';
-import { PorteurPose } from '../eclair/porteur-pose.js';
+} from '../commun/mise-en-scene.js';
+import { PorteurPose } from '../commun/porteur-pose.js';
+import { policesChargees } from '../commun/vagues.js';
+import './chemin.css';
 
 /** Cadence du `battementHorloge`. Le moteur ne connaît aucun `setTimeout` : c'est ici. */
 const PERIODE_BATTEMENT_MS = 1000;
-const CIBLE_MIN = 64;
-const MARGE_GRILLE = 14;
-const ECART_GRILLE = 16;
+/** Petit écran : largeur visée d'une colonne de cases, assez pour une phrase sur deux ou trois lignes. */
+const LARGEUR_COLONNE_PETIT_ECRAN = 176;
 
 /** Le repère désigne le groupe étudié, pas n'importe quel son du mot « fille ». */
 function RegleCourte({ texte, repere }: { texte: string; repere?: { mot: string; groupe: string } }): ReactElement {
@@ -80,24 +84,11 @@ function RegleCourte({ texte, repere }: { texte: string; repere?: { mot: string;
   const debut = lettre !== undefined ? texte.length - 1
     : debutMot < 0 || debutGroupe < 0 ? -1 : debutMot + debutGroupe;
   const longueur = lettre?.length ?? repere?.groupe.length ?? 0;
-  return <strong data-regle-courte="oui">{debut < 0 ? texte : <>
-    {texte.slice(0, debut)}<span data-grapheme-repere="oui" style={{
-      textDecorationLine: 'underline', textDecorationColor: 'var(--lagon)',
-      textDecorationThickness: '0.16em', textUnderlineOffset: '0.18em',
-    }}>{texte.slice(debut, debut + longueur)}</span>{texte.slice(debut + longueur)}
+  // T19 : lue en couleurs comme tout texte de lecture ; la lettre cible est marquée par un
+  // soulignement de TRAIT, jamais par le bleu de l'indice de Gobi (E08, point 4).
+  return <strong data-regle-courte="oui">{debut < 0 ? <TexteColore texte={texte} /> : <>
+    <TexteColore texte={texte.slice(0, debut)} /><span data-grapheme-repere="oui"><TexteColore texte={texte.slice(debut, debut + longueur)} /></span><TexteColore texte={texte.slice(debut + longueur)} />
   </>}</strong>;
-}
-
-export interface CaseDeGrilleChemin {
-  readonly x: number;
-  readonly y: number;
-  readonly largeur: number;
-  readonly hauteur: number;
-}
-
-export interface GrilleChemin {
-  readonly cases: readonly CaseDeGrilleChemin[];
-  readonly hauteur: number;
 }
 
 export interface DiagnosticDerivationChemin {
@@ -121,37 +112,6 @@ function useRepliDerivationStable(cleComposition: string, derivationImpossible: 
   }
   if (derivationImpossible) repliVerrouille.current = true;
   return repliVerrouille.current;
-}
-
-/**
- * Quand les centroïdes ne peuvent plus contenir les phrases, on les range dans une grille qui
- * GRANDIT verticalement. Les coordonnées servent aussi aux traits SVG : ils restent attachés à
- * leurs deux cases au lieu de survivre, faux, au-dessus d'un repli CSS.
- */
-export function composerGrilleCompacteChemin(boites: readonly Boite[], largeurCadre: number): GrilleChemin {
-  const colonnes = largeurCadre >= 560 ? 2 : 1;
-  const largeurUtile = Math.max(CIBLE_MIN, largeurCadre - 2 * MARGE_GRILLE);
-  const largeurCase = Math.max(CIBLE_MIN, (largeurUtile - (colonnes - 1) * ECART_GRILLE) / colonnes);
-  const hauteurs = boites.map((boite) =>
-    Math.max(boite.hauteur, boite.hauteur * Math.max(1, Math.ceil(boite.largeur / largeurCase))),
-  );
-  const cases: CaseDeGrilleChemin[] = [];
-  let y = MARGE_GRILLE;
-  for (let debut = 0; debut < boites.length; debut += colonnes) {
-    const fin = Math.min(boites.length, debut + colonnes);
-    const hauteurLigne = Math.max(...hauteurs.slice(debut, fin));
-    for (let index = debut; index < fin; index += 1) {
-      const colonne = index - debut;
-      cases.push({
-        x: MARGE_GRILLE + colonne * (largeurCase + ECART_GRILLE) + largeurCase / 2,
-        y: y + hauteurLigne / 2,
-        largeur: largeurCase,
-        hauteur: hauteurs[index]!,
-      });
-    }
-    y += hauteurLigne + ECART_GRILLE;
-  }
-  return { cases, hauteur: Math.max(CIBLE_MIN, y - ECART_GRILLE + MARGE_GRILLE) };
 }
 
 /**
@@ -225,20 +185,44 @@ export function MoteurChemin(
   const etape = etat.etapes[etat.indexEtape];
   const consigneCourante = contenu.consignes[etat.indexEtape] ?? null;
   const plateau = useMemo(() => preparerPlateauChemin(contenu, etat.indexEtape), [contenu, etat.indexEtape]);
-  const casesAffichees = plateau.cases;
 
   // --- la typographie de lecture ---------------------------------------------
   const reglages = useReglagesLecture();
-  const styleLecture = useMemo(() => styleDeLecture(reglages), [reglages]);
+  // Seules les variables de lecture descendent : la scène garde son décor, les mots prennent
+  // police, corps et interligne du profil par la feuille de style.
+  const variablesLecture = useMemo(
+    () => Object.fromEntries(Object.entries(styleDeLecture(reglages)).filter(([cle]) => cle.startsWith('--'))),
+    [reglages],
+  );
 
   // --- la mesure du cadre -----------------------------------------------------
   const { racine, bande, cadre, hauteurBande } = useMesureCadre();
-  // Sur mobile, un débordement transitoire agrandit innerWidth ET innerHeight :
-  // prendre cette hauteur réarmait le repli à chaque image (grille → plateau → grille).
-  // clientHeight décrit le viewport CSS, indépendant de ce débordement du contenu.
-  const hauteurViewport = typeof document === 'undefined'
-    ? cadre.hauteur : document.documentElement.clientHeight || window.innerHeight;
-  const regimeCompact = cadre.largeur <= 700 || hauteurViewport <= 520;
+  const regimeCompact = cadre.largeur <= 700 || cadre.hauteur <= 520;
+
+  // --- le plateau réduit (décision du parent du 30 oct., contrat du socle § 12) -------------
+  // Un plateau trop dense pour le corps de l'enfant se DÉCOUPE avant de défiler : on ne montre
+  // que le parcours de l'étape en cours et TOUTES les cases voisines de ce parcours. Chaque pas
+  // permis reste donc visible, et les voisines des autres parcours restent les leurres entre
+  // lesquels l'enfant choisit. Cliquet par cadre et par contenu, pour toutes les étapes.
+  const [hauteurSceneSocle, fixerHauteurSceneSocle] = useState(0);
+  const cleCadreSocle = [
+    habillage.id, contenu.cases.map((c) => c.id).join('|'), reglages.corpsPx, reglages.interligne,
+    cadre.largeur, hauteurSceneSocle,
+  ].join('|');
+  const [reduit, fixerReduit] = useState<string | null>(null);
+  const plateauReduit = reduit === cleCadreSocle;
+  const casesReduites = useMemo(() => {
+    const consigne = contenu.consignes[etat.indexEtape];
+    if (consigne === undefined) return plateau.cases;
+    const segment = new Set<string>([consigne.depart, ...consigne.parcours]);
+    const ids = new Set<string>(segment);
+    for (const c of plateau.cases) if (segment.has(c.id)) for (const voisine of c.voisines) ids.add(voisine);
+    return plateau.cases
+      .filter((c) => ids.has(c.id))
+      .map((c) => ({ ...c, voisines: c.voisines.filter((voisine) => ids.has(voisine)) }));
+  }, [contenu.consignes, etat.indexEtape, plateau.cases]);
+  const reductionPossible = casesReduites.length < plateau.cases.length;
+  const casesAffichees = plateauReduit ? casesReduites : plateau.cases;
 
   const panneau = useRef<HTMLDivElement | null>(null);
   const [hauteurPanneau, fixerHauteurPanneau] = useState(0);
@@ -257,17 +241,6 @@ export function MoteurChemin(
     () => cadreJeuEtBornes(cadre, hauteurBande + hauteurPanneau),
     [cadre, hauteurBande, hauteurPanneau],
   );
-  const stylePlateau = useMemo<CSSProperties>(
-    () => ({
-      position: 'absolute',
-      insetInlineStart: 0,
-      insetInlineEnd: 0,
-      insetBlockStart: `${String(hauteurPanneau)}px`,
-      insetBlockEnd: `${String(hauteurBande)}px`,
-    }),
-    [hauteurBande, hauteurPanneau],
-  );
-
   const regions = useMemo(() => regionsColoriables(habillage), [habillage]);
   const centroideParRegion = useMemo(
     () => new Map(regions.map((r) => [r.id, r.centroide] as const)),
@@ -311,24 +284,146 @@ export function MoteurChemin(
       reglages.interlettrageEm,
       reglages.interligne,
       cadre.largeur,
-      hauteurViewport,
+      cadre.hauteur,
     ].join('|'),
     derivationImpossible,
   );
-  const repliCompact = repliDerivation || (regimeCompact && casesAffichees.length * CIBLE_MIN > hauteurViewport);
-  const grilleCompacte = useMemo(
-    () => composerGrilleCompacteChemin(idsCases.map((id) => mesurer(id)), cadrePlateau.largeur),
-    [idsCases, mesurer, cadrePlateau.largeur],
+  // --- l'ajustement MESURÉ ------------------------------------------------------
+  // Aucune taille de case n'est estimée : on rend, on mesure les boîtes réelles, et si deux cases
+  // se touchent ou si l'une sort de la zone on passe à l'étage suivant — 0 positions dérivées du
+  // décor, 1 à 4 colonnes, 5 quatre colonnes serrées. Le corps et l'interligne de lecture ne
+  // bougent jamais : ce sont les réglages de l'enfant.
+  const ETAGE_MAX = 5;
+  const zoneCases = useRef<HTMLDivElement | null>(null);
+  const cleSituation = [
+    habillage.id, idsCases.join('|'), reglages.corpsPx, reglages.interlettrageEm, reglages.interligne,
+    cadre.largeur, cadre.hauteur, hauteurPanneau,
+  ].join('|');
+  const cleLargeur = [habillage.id, idsCases.join('|'), reglages.corpsPx, reglages.interligne, cadre.largeur].join('|');
+  const [progres, fixerProgres] = useState({ cle: '', etage: 0 });
+  const [centres, fixerCentres] = useState<ReadonlyMap<string, { x: number; y: number }>>(new Map());
+  // Petit écran (la page défile) : les colonnes se choisissent sur la largeur seule et la scène
+  // réclame la hauteur de ses cases. Sur tablette et PC, la hauteur est celle de l'écran.
+  const [petitEcran, fixerPetitEcran] = useState(false);
+  // LE FILET (même décision) : même le plateau réduit ne tient pas en quatre colonnes serrées —
+  // de longues phrases au corps de l'enfant. Le plateau prend sa hauteur naturelle, comme sur
+  // petit écran, et la scène défile. Aucun texte rogné. La clé ne tient qu'au contenu, à la
+  // largeur et à la hauteur de la scène du socle, que le plateau qui grandit ne change pas : la
+  // bascule ne peut pas osciller.
+  const [defilant, fixerDefilant] = useState<string | null>(null);
+  const plateauDefilant = !petitEcran && defilant === cleCadreSocle;
+  const hauteurLibre = petitEcran || plateauDefilant;
+  const [besoinHauteur, fixerBesoinHauteur] = useState({ cle: '', hauteur: 0 });
+  const colonnesPetitEcran = Math.max(1, Math.min(4, Math.floor(cadre.largeur / LARGEUR_COLONNE_PETIT_ECRAN)));
+  // Dans le filet, une colonne garde la place d'une quinzaine de caractères au corps de l'enfant
+  // (≈ 0,6 em par caractère, interlettrage compris, plus la marge de la case) : de longues
+  // phrases en colonnes de 176 px tombaient en lignes de dix caractères.
+  const largeurColonneFilet = Math.max(
+    LARGEUR_COLONNE_PETIT_ECRAN,
+    Math.ceil(15 * reglages.corpsPx * (0.6 + reglages.interlettrageEm) + 24),
   );
+  const colonnesFilet = Math.max(1, Math.min(4, Math.floor(cadre.largeur / largeurColonneFilet)));
+  const etage = plateauDefilant
+    ? colonnesFilet
+    : petitEcran
+    ? colonnesPetitEcran
+    : Math.min(ETAGE_MAX, Math.max(progres.cle === cleSituation ? progres.etage : 0, repliDerivation ? 1 : 0));
+  const colonnes = Math.min(4, etage);
+  const repliCompact = colonnes >= 1;
+  const serre = etage >= ETAGE_MAX;
+  const cleHauteur = `${cleLargeur}|${String(colonnes)}`;
+
+  useLayoutEffect(() => {
+    const zone = zoneCases.current;
+    if (zone === null) return undefined;
+    const mesurerZone = (): void => {
+      const cadreScene = zone.closest('.cadre-scene-activite');
+      const libre = cadreScene !== null && getComputedStyle(cadreScene).containerType !== 'size';
+      if (libre !== petitEcran) {
+        fixerPetitEcran(libre);
+        return;
+      }
+      const sceneSocle = zone.closest('.disposition-moteur__scene');
+      const hauteurSocle = sceneSocle === null ? 0 : Math.round(sceneSocle.clientHeight);
+      if (hauteurSocle !== hauteurSceneSocle) {
+        fixerHauteurSceneSocle(hauteurSocle);
+        return;
+      }
+      const rz = zone.getBoundingClientRect();
+      const boutons = Array.from(zone.querySelectorAll<HTMLElement>('button[data-case]'));
+      const boites = boutons.map((bouton) => bouton.getBoundingClientRect());
+      if (hauteurLibre) {
+        if (rz.width === 0 || boites.length === 0) return;
+        // Hauteur réclamée = celle de la grille posée à sa hauteur naturelle : elle ne dépend
+        // que de la largeur, jamais de la hauteur qu'elle provoque.
+        const hauteur = Math.ceil(rz.height) + 16;
+        fixerBesoinHauteur((precedent) =>
+          precedent.cle === cleHauteur && Math.abs(precedent.hauteur - hauteur) < 1 ? precedent : { cle: cleHauteur, hauteur });
+        fixerCentres(new Map(boutons.map((bouton, i) => {
+          const r = boites[i]!;
+          return [bouton.dataset.case ?? '', { x: r.left + r.width / 2 - rz.left, y: r.top + r.height / 2 - rz.top }] as const;
+        })));
+        return;
+      }
+      if (rz.width === 0 || rz.height === 0) return; // pas de mise en page (tests sans rendu)
+      const T = 1;
+      const hors = boites.some((r) => r.left < rz.left - T || r.right > rz.right + T
+        || r.top < rz.top - T || r.bottom > rz.bottom + T);
+      const touche = boites.some((r, i) => boites.slice(0, i).some((c) =>
+        r.left < c.right - T && c.left < r.right - T && r.top < c.bottom - T && c.top < r.bottom - T));
+      // Un texte plus haut ou plus large que sa case est rogné pour l'enfant, même si la case,
+      // elle, tient : la grille compresse ses rangées jusqu'à la hauteur minimale d'une cible.
+      // L'étiquette « Départ » est À CHEVAL sur le bord bas par construction : elle n'en est pas.
+      const texteDeborde = boutons.some((bouton, i) => {
+        const r = boites[i]!;
+        return Array.from(bouton.children).some((enfant) => {
+          if (enfant.classList.contains('chemin__depart')) return false;
+          const e = enfant.getBoundingClientRect();
+          return e.top < r.top - T || e.bottom > r.bottom + T || e.left < r.left - T || e.right > r.right + T;
+        });
+      });
+      // Même critère que la garde : le centre de la case doit recevoir le doigt.
+      const recouverte = boutons.some((bouton, i) => {
+        const r = boites[i]!;
+        const dessus = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+        return dessus !== null && dessus !== bouton && !bouton.contains(dessus) && !dessus.contains(bouton);
+      });
+      if ((hors || touche || recouverte || texteDeborde) && etage < ETAGE_MAX) {
+        fixerProgres({ cle: cleSituation, etage: etage + 1 });
+        return;
+      }
+      if (hors || touche || recouverte || texteDeborde) {
+        // D'abord découper (le plateau réduit rejoue toute la cascade), puis seulement défiler.
+        if (!policesChargees()) return;
+        if (!plateauReduit && reductionPossible) fixerReduit(cleCadreSocle);
+        else fixerDefilant(cleCadreSocle);
+        return;
+      }
+      if (colonnes >= 1) {
+        fixerCentres(new Map(boutons.map((bouton, i) => {
+          const r = boites[i]!;
+          return [bouton.dataset.case ?? '', { x: r.left + r.width / 2 - rz.left, y: r.top + r.height / 2 - rz.top }] as const;
+        })));
+      }
+    };
+    mesurerZone();
+    // Les polices et les retours à la ligne changent la taille des cases sans changer la zone.
+    void document.fonts?.ready.then(mesurerZone);
+    if (typeof ResizeObserver !== 'function') return undefined;
+    const observateur = new ResizeObserver(mesurerZone);
+    observateur.observe(zone);
+    zone.querySelectorAll('button[data-case]').forEach((bouton) => { observateur.observe(bouton); });
+    return () => { observateur.disconnect(); };
+  }, [
+    etage, colonnes, cleSituation, cleHauteur, casesAffichees, petitEcran, hauteurLibre, hauteurSceneSocle,
+    cleCadreSocle, plateauReduit, reductionPossible,
+  ]);
+
+  const hauteurMini = hauteurLibre && besoinHauteur.cle === cleHauteur ? besoinHauteur.hauteur : 0;
   const positionParCase = useMemo(() => {
-    if (repliCompact) {
-      return new Map(idsCases.map((id, index) => {
-        const caseGrille = grilleCompacte.cases[index];
-        return [id, { x: caseGrille?.x ?? MARGE_GRILLE, y: caseGrille?.y ?? MARGE_GRILLE }] as const;
-      }));
-    }
+    if (repliCompact) return centres;
     return new Map(emplacements.map((e) => [e.cle, { x: e.x, y: e.y }] as const));
-  }, [repliCompact, idsCases, grilleCompacte, emplacements]);
+  }, [repliCompact, centres, emplacements]);
 
   // La recoloration conserve le plan complet ; masquer un mot d'une ancienne étape
   // ne doit jamais reprendre la couleur déjà gagnée sur le décor.
@@ -402,7 +497,6 @@ export function MoteurChemin(
       ? ''
       : (MESSAGES_DE_REFUS[etat.dernierRefus.motif] ?? '');
 
-  const transitionPion = animationsDesactivees ? undefined : 'inset-inline-start 320ms ease-out, inset-block-start 320ms ease-out';
   const retourChemin =
     messageDeRefus !== ''
       ? messageDeRefus
@@ -410,29 +504,21 @@ export function MoteurChemin(
         ? ''
         : 'Indice : une case possible brille en bleu.';
 
-  return (
-    <div
-      ref={racine}
-      data-moteur="chemin"
-      data-habillage={habillage.id}
-      data-termine={etat.termineMs === null ? 'non' : 'oui'}
-      data-aide={etat.niveauAide}
-      data-etape={etape === undefined ? '' : etape.identifiant}
-      data-composition={regimeCompact ? 'compacte' : 'confort'}
-      data-plateau-defilant={repliCompact ? 'oui' : 'non'}
-      data-regions-allumees={String(allumees.length)}
-      style={{
-        position: 'relative',
-        blockSize: repliCompact
-          ? `${String(hauteurPanneau + grilleCompacte.hauteur + hauteurBande)}px`
-          : '100%',
-        minBlockSize: 0,
-        overflow: repliCompact ? 'visible' : 'hidden',
-        borderRadius: 'var(--rayon-carte)',
-      }}
-    >
+
+  // Les mesures du panneau et de la bande réservent le plateau ; la feuille de style les lit.
+  const styleScene = {
+    ...variablesLecture,
+    '--chemin-haut-panneau': `${String(hauteurPanneau)}px`,
+    '--chemin-haut-bande': `${String(hauteurBande)}px`,
+    // Petit écran : la scène réclame la hauteur de ses cases, la page défile au lieu de couper.
+    '--chemin-min': hauteurMini > 0 ? `${String(hauteurPanneau + hauteurMini + hauteurBande)}px` : '0px',
+    '--chemin-colonnes': String(Math.max(1, colonnes)),
+  } as CSSProperties;
+
+  const scene = (
+    <div ref={racine} className="chemin" style={styleScene} data-serre={serre ? "oui" : "non"} data-petit-ecran={hauteurLibre ? 'oui' : 'non'}>
       {/* ------------------------------------------------------------- le décor, en fond */}
-      <div style={stylePlateau}>
+      <div className="chemin__zone">
         <SceneDecor
           habillage={habillage}
           allumees={allumees}
@@ -443,12 +529,7 @@ export function MoteurChemin(
       </div>
 
       {/* ----------------------------------------------------- les voisinages, en traits */}
-      <svg
-        aria-hidden="true"
-        style={{ ...stylePlateau, zIndex: 1, pointerEvents: 'none' }}
-        width="100%"
-        height="100%"
-      >
+      <svg aria-hidden="true" className="chemin__zone chemin__traits" width="100%" height="100%">
         {traits.map((ligne) => {
           const reliePion = ligne.departId === etat.position || ligne.arriveeId === etat.position;
           const autreId = ligne.departId === etat.position ? ligne.arriveeId : ligne.departId;
@@ -491,14 +572,15 @@ export function MoteurChemin(
 
       {/* ------------------------------------------------------------- les cases, posées */}
       <div
+        ref={zoneCases}
         data-plateau="cases"
-        style={{ ...stylePlateau, zIndex: 2, pointerEvents: 'none' }}
+        data-disposition={repliCompact ? "grille" : "libre"}
+        className="chemin__zone chemin__cases"
+        data-mouvement={animationsDesactivees ? 'calme' : 'vif'}
       >
         {casesAffichees.map((caseChemin) => {
           const pos = positionParCase.get(caseChemin.id);
-          if (pos === undefined) return null;
-          const index = idsCases.indexOf(caseChemin.id);
-          const caseGrille = repliCompact ? (grilleCompacte.cases[index] ?? null) : null;
+          if (pos === undefined && !repliCompact) return null;
           const surPion = etat.position === caseChemin.id;
           const atteignable = casesAtteignables.has(caseChemin.id);
           const franchie = etat.visiteesEtape.includes(caseChemin.id) && caseChemin.id !== departEtape;
@@ -512,13 +594,13 @@ export function MoteurChemin(
               : atteignable
                 ? 'possible'
                 : 'libre';
-          const classes = ['cible'];
+          const classes = ['cible', 'chemin__case'];
           if (!animationsDesactivees && refusee) classes.push('oscillation');
-          return (
-            <PorteurPose key={caseChemin.id} x={pos.x} y={pos.y}>
+          const bouton = (
               <button
                 key={refusee ? `${caseChemin.id}-${String(marqueRefusCourante)}` : caseChemin.id}
                 type="button"
+                {...ROLE_REPONSE}
                 data-case={caseChemin.id}
                 data-pion={surPion ? 'oui' : 'non'}
                 data-atteignable={atteignable ? 'oui' : 'non'}
@@ -527,6 +609,7 @@ export function MoteurChemin(
                 data-aide-cible={aidee ? 'oui' : 'non'}
                 data-deja-fait={franchie || consommee ? 'oui' : 'non'}
                 data-statut-chemin={statut}
+                data-en-grille={repliCompact ? 'oui' : 'non'}
                 aria-label={`${caseChemin.libelle}, ${
                   statut === 'actuelle'
                     ? 'case actuelle'
@@ -538,186 +621,125 @@ export function MoteurChemin(
                 }`}
                 className={classes.join(' ')}
                 disabled={surPion || consommee}
-                style={
-                  {
-                    ...styleLecture,
-                    pointerEvents: 'auto',
-                    display: 'grid',
-                    justifyItems: 'center',
-                    alignContent: 'center',
-                    gap: '0.08rem',
-                    position: 'relative',
-                    minInlineSize: '4rem',
-                    minBlockSize: '4rem',
-                    inlineSize: caseGrille === null ? undefined : `${String(caseGrille.largeur)}px`,
-                    blockSize: caseGrille === null ? undefined : `${String(caseGrille.hauteur)}px`,
-                    boxSizing: caseGrille === null ? undefined : 'border-box',
-                    maxInlineSize: caseGrille === null ? (regimeCompact ? '8.5rem' : '12rem') : undefined,
-                    padding: regimeCompact ? '0.35rem 0.5rem' : undefined,
-                    whiteSpace: 'normal',
-                    // Atteignable : un halo STATIQUE (aucune image-clé), pour que les captures
-                    // T4 restent stables — seule la couleur de fond diffère, jamais l'ombre de
-                    // `.cible:active`.
-                    boxShadow: aidee
-                      ? '0 0 0 6px var(--lagon), 0 0 0 10px var(--parchemin), var(--ombre-bd)'
-                      : atteignable
-                        ? '0 0 0 4px var(--soleil), var(--ombre-bd)'
-                      : undefined,
-                    backgroundColor: surPion
-                      ? 'color-mix(in srgb, var(--lagon) 28%, var(--parchemin))'
-                      : franchie || consommee
-                        ? 'color-mix(in srgb, var(--menthe) 32%, var(--parchemin))'
-                        : undefined,
-                    opacity: consommee ? 0.82 : 1,
-                  } as CSSProperties
-                }
                 onClick={(evenement) => {
                   jouer({ type: 'avancer', caseVisee: caseChemin.id }, evenement);
                 }}
               >
                 {statut === 'parcourue' ? (
-                  <span
-                    aria-hidden="true"
-                    style={{
-                      position: 'absolute',
-                      insetInlineEnd: '0.2rem',
-                      insetBlockStart: '0.05rem',
-                      fontSize: '0.62em',
-                      fontWeight: 900,
-                    }}
-                  >
+                  <span aria-hidden="true" className="chemin__coche">
                     ✓
                   </span>
                 ) : null}
-                <span>{caseChemin.libelle}</span>
+                <span><TexteColore texte={caseChemin.libelle} /></span>
+                {/* E08, point 3 : la case de départ ne se grise plus, elle se NOMME. */}
+                {surPion && caseChemin.id === departEtape ? (
+                  <span aria-hidden="true" data-depart="oui" className="chemin__depart">Départ</span>
+                ) : null}
               </button>
-            </PorteurPose>
           );
+          return pos === undefined || repliCompact
+            ? bouton
+            : <PorteurPose key={caseChemin.id} x={pos.x} y={pos.y}>{bouton}</PorteurPose>;
         })}
 
-        {/* ── LE PION — un marqueur distinct de la case, qui glisse d'une case à l'autre.
-            Purement décoratif : `aria-hidden`, la position réelle est déjà portée par
-            `data-pion="oui"` sur la case elle-même, que les lecteurs d'écran et les tests
-            lisent. */}
+        {/* Le pion : décoratif, la position réelle est portée par `data-pion="oui"` sur la case. */}
         {positionPion === null ? null : (
           <div
             aria-hidden="true"
             data-pion-marqueur="oui"
-            style={{
-              position: 'absolute',
-              insetInlineStart: `${String(positionPion.x)}px`,
-              insetBlockStart: `${String(positionPion.y - 44)}px`,
-              transform: 'translate(-50%, -50%)',
-              transition: transitionPion,
-              fontSize: '1.75rem',
-              lineHeight: 1,
-              filter: 'drop-shadow(0 2px 0 var(--trait))',
-            }}
+            className="chemin__pion"
+            style={{ insetInlineStart: `${String(positionPion.x)}px`, insetBlockStart: `${String(positionPion.y - 44)}px` }}
           >
             📍
           </div>
         )}
       </div>
 
-      <div
-        ref={panneau}
+      {/* T19 / E08 : la notice est une QUESTION du socle — thème jaune, une seule taille, et le
+          même signal que le repère d'étape quand la lettre change (point 5). */}
+      <div ref={panneau} className="chemin__panneau-porteur">
+      <CadreQuestion
+        cle={etat.indexEtape}
+        animationsDesactivees={animationsDesactivees}
+        className="chemin__panneau"
         data-message-chemin="oui"
         data-critere-reconnu={plateau.critereReconnu ? 'oui' : 'non'}
         data-refus-texte={messageDeRefus === '' ? 'non' : 'oui'}
-        style={{
-          ...styleLecture,
-          position: 'absolute',
-          insetBlockStart: 0,
-          insetInlineStart: '0.5rem',
-          insetInlineEnd: '0.5rem',
-          zIndex: 4,
-          inlineSize: 'auto',
-          maxInlineSize: 'none',
-          margin: 0,
-          padding: '0.3rem 0.65rem',
-          border: '2px solid var(--trait)',
-          borderInlineStart: `8px solid var(--${etat.indexEtape % 2 === 0 ? 'soleil' : 'lagon'})`,
-          borderRadius: '0.8rem',
-          background: 'var(--parchemin)',
-          boxShadow: '0 3px 0 var(--trait)',
-          display: 'grid',
-          justifyItems: 'center',
-          gap: regimeCompact ? 0 : '0.15rem',
-          textAlign: 'center',
-          pointerEvents: 'none',
-        } as CSSProperties}
         data-fond-opaque="oui"
       >
+        {/* T10 — le repère commun (le rang du chemin) est affiché sous la consigne de l'écran ;
+            le changement de chemin est signalé par son cadre, plus par « Nouveau chemin ». La
+            règle courte, texte à déchiffrer et parfois longue, reste ICI, au-dessus des cases :
+            montée dans la barre, elle grandissait l'en-tête de 120 px et faisait recouvrir des
+            cases (mesuré, bac-a-sable/socle-etape/chemin07-diagnostic.spec.ts). */}
+        <RepereEtape
+          moteur="chemin"
+          rang={etat.indexEtape + 1}
+          total={contenu.consignes.length}
+          animationsDesactivees={animationsDesactivees}
+        />
         <div key={etape?.identifiant} data-annonce="chemin" role="status" aria-live="polite" aria-atomic="true"
-          style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'baseline', columnGap: '1rem' }}>
-          <span style={{ fontSize: '0.68em', fontWeight: 700 }}>
-            {etat.indexEtape === 0 ? 'Chemin' : 'Nouveau chemin'} {etat.indexEtape + 1} / {contenu.consignes.length}
-          </span>
+          className="chemin__annonce">
           <RegleCourte texte={plateau.regleCourte} {...(plateau.repere === undefined ? {} : { repere: plateau.repere })} />
         </div>
         <span data-regle-chemin="oui" className="sr-only">
           À chercher maintenant
         </span>
         <span className="sr-only">{consigneCourante?.texte}</span>
-        <span data-cible-chemin="oui" style={{ fontSize: regimeCompact ? '0.68em' : '0.82em', fontWeight: 700 }}>
-          {caseCourante === null
-            ? 'Choisis la première case du chemin.'
-            : `${etat.position === departEtape ? 'Départ' : 'Tu es sur'} : « ${caseCourante.libelle} ».`}
+        {/* Une seule ligne pour la position et le retour, à la même place : sans message, on lit
+            où l'on est ; avec un refus ou un indice, le message prend la ligne. Au corps de lecture
+            (E08 : une seule taille), deux lignes de plus faisaient déborder les plateaux denses
+            (mesuré : cite-des-histoires-07 en 1080 × 670, 54 px de trop). */}
+        <span className="chemin__ligne-etat" data-ligne-etat={retourChemin === '' ? 'position' : 'retour'}>
+          <span data-cible-chemin="oui" className="chemin__position">
+            <TexteColore texte={caseCourante === null
+              ? 'Choisis la première case du chemin.'
+              : `${etat.position === departEtape ? 'Départ' : 'Tu es sur'} : « ${caseCourante.libelle} ».`} />
+          </span>
+          <span data-retour-chemin="oui" className="chemin__retour">
+            <MessageStable messages={[...Object.values(MESSAGES_DE_REFUS), 'Indice : une case possible brille en bleu.']}>
+              <TexteColore texte={retourChemin} />
+            </MessageStable>
+          </span>
         </span>
-        <span data-retour-chemin="oui" style={{ fontSize: '0.68em', minBlockSize: '2lh' }}>
-          <MessageStable messages={[...Object.values(MESSAGES_DE_REFUS), 'Touche une case reliée en jaune.', 'Indice : une case possible brille en bleu.']}>
-            {retourChemin || 'Touche une case reliée en jaune.'}
-          </MessageStable>
-        </span>
+      </CadreQuestion>
       </div>
 
       {/* ------------------------------------------------------------ la bande statique */}
-      <div
-        ref={bande}
-        data-plateau="controles"
-        style={{
-          position: 'absolute',
-          insetInlineStart: 0,
-          insetInlineEnd: 0,
-          insetBlockEnd: 0,
-          zIndex: 3,
-          inlineSize: 1,
-          blockSize: 1,
-          overflow: 'hidden',
-          clip: 'rect(0 0 0 0)',
-          whiteSpace: 'nowrap',
-        }}
-      >
+      <div ref={bande} data-plateau="controles" className="chemin__bande">
         <p
           role="status"
           aria-live="polite"
           data-refus-texte={messageDeRefus === '' ? 'non' : 'oui'}
           data-animations={animationsDesactivees ? 'calmes' : 'vives'}
-          style={{ ...styleLecture, margin: 0, minBlockSize: '1.5em' } as CSSProperties}
         >
           {retourChemin}
         </p>
 
-        <p
-          role="status"
-          aria-live="polite"
-          data-annonce="coloriage"
-          style={{
-            position: 'absolute',
-            inlineSize: 1,
-            blockSize: 1,
-            overflow: 'hidden',
-            clip: 'rect(0 0 0 0)',
-            whiteSpace: 'nowrap',
-          }}
-        >
+        <p role="status" aria-live="polite" data-annonce="coloriage">
           {derniere === null
             ? ''
             : `${regions.find((r) => r.id === derniere.id)?.libelle ?? derniere.id} reprend ses couleurs.`}
         </p>
       </div>
-
-      {/* ── LES DEUX CONTRÔLES SONT PORTÉS PAR L'ÉCRAN, PAS PAR LE MOTEUR (R10) ────────────── */}
     </div>
+  );
+
+  // Les deux contrôles (écouter, aide) sont portés par l'écran, pas par le moteur (R10).
+  return (
+    <DispositionMoteur
+      moteur="chemin"
+      hauteurPetitEcran="contenu"
+      data-habillage={habillage.id}
+      data-termine={etat.termineMs === null ? 'non' : 'oui'}
+      data-aide={etat.niveauAide}
+      data-etape={etape === undefined ? '' : etape.identifiant}
+      data-composition={regimeCompact ? 'compacte' : 'confort'}
+      data-plateau-defilant={repliCompact ? 'oui' : 'non'}
+      data-filet-defilement={plateauDefilant ? 'oui' : 'non'}
+      data-plateau-reduit={plateauReduit ? 'oui' : 'non'}
+      data-regions-allumees={String(allumees.length)}
+      scene={scene}
+    />
   );
 }

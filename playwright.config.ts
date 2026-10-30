@@ -12,6 +12,7 @@
  * que `client/dist/`. Les deux dossiers ne se croisent jamais.
  */
 import { cpus } from "node:os";
+import "./scripts/priorite-basse.mjs";
 
 import { defineConfig, devices } from "@playwright/test";
 

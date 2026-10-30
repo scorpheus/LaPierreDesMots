@@ -16,106 +16,8 @@ import type { ReactElement, ReactNode } from 'react';
 import type { CouleurColoriage, NiveauAide } from '@pierre/partage';
 import { hexDeCouleur } from '@pierre/partage';
 import type { ConsigneColorie } from '@pierre/partage';
-
-/** Cibles tactiles ≥ 64 px (v2 § 8, R16). 72 px laisse de la marge au bord de l'écran. */
-const COTE_GODET_PX = 72;
-
-const STYLES_PALETTE = `
-.pierre-indice-colorie {
-  background: var(--parchemin, #FFF6E3);
-  color: var(--trait, #1B2440);
-  font-family: Andika, 'Atkinson Hyperlegible', system-ui, sans-serif;
-  font-size: 1.25rem;
-  line-height: 1.4;
-  border-radius: 14px;
-  padding: 0.55rem 0.8rem;
-  /* Aucune animation dans le champ de lecture. Règle non négociable. */
-  animation: none;
-  transition: none;
-}
-.pierre-indice-colorie mark {
-  background: var(--soleil, #FFC93C);
-  color: inherit;
-  border-radius: 6px;
-  padding: 0 0.15em;
-}
-.pierre-cible-colorie {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.45rem;
-  background: var(--parchemin, #FFF6E3);
-  color: var(--trait, #1B2440);
-  font-family: Andika, 'Atkinson Hyperlegible', system-ui, sans-serif;
-  font-size: 1.3rem;
-  font-weight: 700;
-  line-height: 1.35;
-  text-align: center;
-  border: 3px solid var(--soleil, #FFC93C);
-  border-radius: 14px;
-  padding: 0.55rem 0.8rem;
-  min-block-size: 3.25rem;
-  /* Cible de lecture stable : aucune animation du texte. */
-  animation: none;
-  transition: none;
-}
-.pierre-cible-colorie__couleur {
-  display: inline-block;
-  inline-size: 1.2em;
-  block-size: 1.2em;
-  border: 2px solid var(--trait, #1B2440);
-  border-radius: 50%;
-  flex: 0 0 auto;
-}
-.pierre-progression-consignes {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  min-block-size: 1.25rem;
-  font-family: Andika, 'Atkinson Hyperlegible', system-ui, sans-serif;
-  font-weight: 700;
-  color: var(--trait, #1B2440);
-}
-.pierre-progression-consignes__texte { margin-inline-start: 0.25rem; }
-.pierre-progression-consignes > span[data-etat] {
-  inline-size: 0.85rem;
-  block-size: 0.85rem;
-  border: 2px solid var(--trait, #1B2440);
-  border-radius: 50%;
-  background: transparent;
-}
-.pierre-progression-consignes > span[data-etat="faite"] { background: var(--vert, #2FB344); }
-.pierre-progression-consignes > span[data-etat="courante"] {
-  background: var(--soleil, #FFC93C);
-  box-shadow: 0 0 0 3px var(--parchemin, #FFF6E3), 0 0 0 5px var(--trait, #1B2440);
-}
-.pierre-godet {
-  inline-size: ${COTE_GODET_PX}px;
-  block-size: ${COTE_GODET_PX}px;
-  min-inline-size: ${COTE_GODET_PX}px;
-  min-block-size: ${COTE_GODET_PX}px;
-  border-radius: 50%;
-  border: 4px solid var(--trait, #1B2440);
-  padding: 0;
-  cursor: pointer;
-  transition: transform 400ms cubic-bezier(.34, 1.56, .64, 1), box-shadow 120ms linear;
-}
-.pierre-godet:active { transform: scale(.94); transition: transform 60ms ease-out; }
-.pierre-godet[data-choisie="oui"] {
-  box-shadow: 0 0 0 5px var(--parchemin, #FFF6E3), 0 0 0 9px var(--trait, #1B2440);
-}
-.pierre-godet--demonstration { animation: pierre-godet-halo 900ms ease-in-out infinite; }
-@keyframes pierre-godet-halo {
-  0%, 100% { filter: none; }
-  50%      { filter: drop-shadow(0 0 10px var(--soleil, #FFC93C)); }
-}
-.pierre-palette--calme .pierre-godet,
-.pierre-palette--calme .pierre-godet--demonstration { animation: none; transition: none; }
-@media (prefers-reduced-motion: reduce) {
-  .pierre-godet, .pierre-godet--demonstration { animation: none; transition: none; }
-}
-`;
+import { ROLE_QUESTION } from '../../activite/Question.js';
+import { TexteColore } from '../../lecture/TexteColore.js';
 
 /**
  * Les mots-clés de la consigne courante, SEULS — au palier `indice`.
@@ -189,11 +91,10 @@ export function PaletteConsigne(proprietes: ProprietesPaletteConsigne): ReactEle
       // `pierre-palette`, et les seuls sélecteurs `[data-moteur=…]` du dépôt visent une racine.
       className={`pierre-palette${animationsDesactivees ? ' pierre-palette--calme' : ''}`}
     >
-      <style>{STYLES_PALETTE}</style>
-
       {/* La phrase courante vit déjà, en grand, dans l'en-tête de `EcranNoeud`. Les phrases
           futures occupaient jusqu'à la moitié de l'écran et réduisaient le dessin à une
-          vignette. On conserve ici leur PROGRESSION, jamais leur texte. */}
+          vignette. On conserve ici leur PROGRESSION, jamais leur texte. Le libellé « Étape n
+          sur N » est dans le repère commun, sous la consigne de l'écran (T10). */}
       <div
         className="pierre-progression-consignes"
         data-progression-consignes
@@ -213,9 +114,6 @@ export function PaletteConsigne(proprietes: ProprietesPaletteConsigne): ReactEle
             aria-hidden="true"
           />
         ))}
-        <span className="pierre-progression-consignes__texte">
-          Étape {indexConsigne + 1} sur {consignes.length}
-        </span>
       </div>
 
       {consigneCourante === undefined ? null : niveauAide !== 'aucune' &&
@@ -231,10 +129,11 @@ export function PaletteConsigne(proprietes: ProprietesPaletteConsigne): ReactEle
       {cibleCourante === null ? null : (
         <div
           className="pierre-cible-colorie"
+          {...ROLE_QUESTION}
           data-cible-colorie
           aria-label={`Cible : ${cibleCourante.libelle}, en ${cibleCourante.couleur}`}
         >
-          <span>Colorie {cibleCourante.libelle} en {cibleCourante.couleur}</span>
+          <span><TexteColore texte={`Colorie ${cibleCourante.libelle} en ${cibleCourante.couleur}`} /></span>
           <span
             className="pierre-cible-colorie__couleur"
             aria-hidden="true"
@@ -246,13 +145,7 @@ export function PaletteConsigne(proprietes: ProprietesPaletteConsigne): ReactEle
       <div
         role="group"
         aria-label="Les couleurs"
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          justifyContent: 'center',
-          gap: '0.75rem',
-          marginBlockStart: '1rem'
-        }}
+        className="pierre-palette__godets"
       >
         {nuancier.map((couleur) => {
           const choisie = couleur === couleurChoisie;
